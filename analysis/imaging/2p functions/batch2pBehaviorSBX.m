@@ -328,20 +328,20 @@ files(n).ncells = [];  %%% optional - we could use this to adjust # of cells sel
 
 
 
-n=n+1;
-files(n).subj = ''; 
-files(n).expt = '';
-files(n).dir = '';
-files(n).compileData ='';  
-files(n).topoXpts = 'topoXsessionV2__allfiles_PTS_dF';
-files(n).topoYpts = 'topoYsessionV2__allfiles_PTS_dF';
-files(n).topoX = 'topoXsessionV2';
-files(n).topoY = 'topoYsessionV2';
-files(n).behavPts = 'behavSessionV2__allfiles_PTS_dF.mat';
-files(n).passive3xPts = 'passiveBehav3x8minV2__allfiles_PTS_dF';%or passiveBehav3x4orient__allfiles_PTS_dF
-files(n).passive2sfPts = 'passiveBehav2sf8min__allfiles_PTS_dF'; %or passiveBehav2sfSessionV2__allfiles_PTS_dF
-files(n).task = '';
-files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
-files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+% n=n+1;
+% files(n).subj = ''; 
+% files(n).expt = '';
+% files(n).dir = '';
+% files(n).compileData ='';  
+% files(n).topoXpts = 'topoXsessionV2__allfiles_PTS_dF';
+% files(n).topoYpts = 'topoYsessionV2__allfiles_PTS_dF';
+% files(n).topoX = 'topoXsessionV2';
+% files(n).topoY = 'topoYsessionV2';
+% files(n).behavPts = 'behavSessionV2__allfiles_PTS_dF.mat';
+% files(n).passive3xPts = 'passiveBehav3x8minV2__allfiles_PTS_dF';%or passiveBehav3x4orient__allfiles_PTS_dF
+% files(n).passive2sfPts = 'passiveBehav2sf8min__allfiles_PTS_dF'; %or passiveBehav2sfSessionV2__allfiles_PTS_dF
+% files(n).task = '';
+% files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good imaging session';
+% files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected

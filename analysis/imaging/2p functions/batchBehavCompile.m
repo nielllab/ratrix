@@ -1,11 +1,14 @@
+close all
+
 batch2pBehaviorSBX;
 
 
 %alluse = find(strcmp({files.task},'GTS') & strcmp({files.notes},'good imaging session'))
 alluse = find( strcmp({files.notes},'good imaging session'))
 
-gts = 1; naive=2;
-condLabel{1} = 'GTS'; condLabel{2}='naive'; condLabel{3}='naive experienced';
+gts = 1; naive=2; naiveTrained=3;
+condLabel{1} = ' GTS'; condLabel{2}=' naive'; condLabel{3}=' naive trained';
+
 rfAmpAll =[]; rfAll = []; trialDataAll=[]; xAll = []; yAll = []; data3xAll=[]; data2sfAll= [];
 n=0;
 for i = 1:length(alluse);
@@ -23,120 +26,293 @@ for i = 1:length(alluse);
     mapx = getMapPhase(map,cropx,cropy,usePts); close(gcf);
     mapx = mapx*128/(2*pi) - (0.05*128);  %%% (0.05 = 500msec/10sec, lag of raw calcium signals)
     
-     load([pathname files(alluse(i)).dir '\' files(alluse(i)).topoY],'map')
+    load([pathname files(alluse(i)).dir '\' files(alluse(i)).topoY],'map')
     mapy = getMapPhase(map,cropx,cropy,usePts); close(gcf);
     mapy = mapy*72/(2*pi) - (0.05 *72);   %%% (0.05 = 500msec/10sec, lag of raw calcium signals)
     
     xAll = [xAll mapx(1:cutoff)]; yAll = [yAll mapy(1:cutoff)];
     
-    if strcmp(files(alluse(i)).task,'GTS'), allCond(cellrange) = gts, end;        
-     if strcmp(files(alluse(i)).task,'Naive'), allCond(cellrange) = naive, end;
+    if strcmp(files(alluse(i)).task,'GTS'), allCond(cellrange) = gts; end;
+    if strcmp(files(alluse(i)).task,'Naive') & files(alluse(i)).learningDay<5, allCond(cellrange) = naive; end;
+    if strcmp(files(alluse(i)).task,'Naive') & files(alluse(i)).learningDay>=5, allCond(cellrange) = naiveTrained; end;
+    n=n+cutoff;
+end
+
+d1 = sqrt((xAll-42).^2 + (yAll-36).^2);
+d2 = sqrt((xAll-84).^2 + (yAll-36).^2);
+centeredTrialData = zeros(size(trialDataAll))+NaN;
+centered3x = zeros(size(data3xAll))+NaN;
+centered2sf = zeros(size(data2sfAll))+NaN;
+for i = 1:size(centeredTrialData,1);
+    if d1(i)<17.5
+        centeredTrialData(i,:,:) = trialDataAll(i,:,:);
+        centered3x(i,:,:) = data3xAll(i,:,:);
+        centered2sf(i,:,:) = data2sfAll(i,:,:);
+    elseif d2(i)<17.5
+        centeredTrialData(i,:,1:2) = trialDataAll(i,:,3:4);
+        centeredTrialData(i,:,3:4) = trialDataAll(i,:,1:2);
+        centeredTrialData(i,:,5:6) = trialDataAll(i,:,7:8);
+        centeredTrialData(i,:,7:8) = trialDataAll(i,:,5:6);
+        centered3x(i,:,1:4) = data3xAll(i,:,9:12);
+        centered3x(i,:,5:8) = data3xAll(i,:,5:8);
+        centered3x(i,:,9:12) = data3xAll(i,:,1:4);
+        centered2sf(i,:,1:4) = data2sfAll(i,:,5:8);
+        centered2sf(i,:,5:8) = data2sfAll(i,:,1:4);
+        
+    end
+end
+
+centered = (d1<17.5 | d2<17.5)';
+
+clear invariant
+invariant(:,:,2) = mean(centeredTrialData(:,:,3:4),3);
+invariant(:,:,1) = mean(centeredTrialData(:,:,1:2),3);
+
+clear epochData
+epochData(:,1,:) = squeeze(mean(invariant(:,5:10,:),2));
+epochData(:,2,:) = squeeze(mean(invariant(:,12:18,:),2));
+epochData(:,3,:) = squeeze(mean(invariant(:,25:35,:),2));
+%epochData(:,4,:) = squeeze(mean(invariant(:,50:60,:),2));
+
+
+%clustData = reshape(invariant(centered,:,:),sum(centered),size(invariant,2)*size(invariant,3));
+clustData = reshape(epochData(centered,:,:),sum(centered),size(epochData,2)*size(epochData,3));
+clustData= clustData(:,[1 2 3]);
+allData = reshape(centeredTrialData(centered,:,:),sum(centered),size(centeredTrialData,2)*size(centeredTrialData,3));
+
+
+
+figure
+plot(std(clustData'));
+figure
+hist(std(clustData'),0.01:0.02:1);
+active = std(clustData')>0.02;
+% clustData = clustData(active,:);
+% allData = allData(active,:);
+
+figure
+imagesc(clustData,[0 0.5]); drawnow
+
+   dist = pdist(clustData,'correlation');  %%% sort based on correct
+    display('doing cluster')
+    tic, Z = linkage(dist,'ward'); toc
+    % display('doing order')
+    % tic; leafOrder = optimalleaforder(Z,dist,'criteria','group'); toc
+    figure
+    subplot(3,4,[1 5 9 ])
+     display('doing dendrogram')
+    [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5);
+    axis off
+    subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
+    imagesc((allData(perm,:)),[0 0.5]); axis xy
+    hold on; for i= 1:8, plot([i*length(behavTimepts) i*length(behavTimepts)]+1,[1 size(allData,1)],'g'); end
+    title(['behav resp all']); drawnow
+    
+        figure
+    subplot(3,4,[1 5 9 ])
+    display('doing dendrogram')
+    tic,[h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5); toc
+    axis off
+    subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
+    imagesc((clustData(perm,:)),[0 0.5]); axis xy
+    hold on; for i= 1:8, plot([i*length(behavTimepts) i*length(behavTimepts)]+1,[1 size(allData,1)],'g'); end
+    title(['behav resp all'])
+    
+    clear orientInvariant
+    orientInvariant(:,:,4) = mean(centeredTrialData(:,1:42,7:8),3);
+    orientInvariant(:,:,2) = mean(centeredTrialData(:,1:42,5:6),3);
+    orientInvariant(:,:,3) = mean(centeredTrialData(:,1:42,3:4),3);
+    orientInvariant(:,:,1) = mean(centeredTrialData(:,1:42,1:2),3);
+    invariantAll = reshape(orientInvariant,n,size(orientInvariant,2)*size(orientInvariant,3));
+    
+    
+    
+    clust= zeros(1,n);
+    c= cluster(Z,'maxclust',3);
+    clust(centered) =c;
+    allActive = zeros(1,n);
+    allActive(centered) = active;
+    
+    trialType = {'correct pref','error pref','correct non-pref','error non-pref'};
+    for cond = 1:2
+        figure
+        for t = 1:4
+            subplot(2,2,t);
+            for i = 1:max(c)
+                d =mean(invariantAll(clust==i & allCond==cond & allActive,:),1); plot(d((t-1)*42 + (1:42))-min(d));hold on; ylim([ 0 0.3]); xlim([0.5 42.5])
+            end
+            title(trialType{t});
+        end
+        
+        legend;
+        set(gcf,'Name',condLabel{cond});
+    end
+
+      orientInvariant3x(:,:,4) = mean(centered3x(:,:,[10 12]),3);
+  orientInvariant3x(:,:,3) = mean(centered3x(:,:,[9 11]),3);
+        orientInvariant3x(:,:,2) = mean(centered3x(:,:,[2 4]),3);
+  orientInvariant3x(:,:,1) = mean(centered3x(:,:,[1 3]),3);
+    invariantAll3x = reshape(orientInvariant3x,n,size(orientInvariant3x,2)*size(orientInvariant3x,3));
+    
+ trialType = {'pref hv','pref oblique','non-pref hv','non-prev oblique'};
+    for cond = 1:2
+        figure
+        for t = 1:4
+            subplot(2,2,t);
+            for i = 1:max(c)
+                d =mean(invariantAll3x(clust==i & allCond==cond & allActive,:),1); plot(d((t-1)*29 + (1:29))-min(d));hold on; ylim([ 0 0.3]); xlim([0.5 42.5])
+            end
+            title(trialType{t});
+        end
+        
+        legend;
+        set(gcf,'Name',condLabel{cond});
+    end
+
+    
+    
+    orientInvariant2sf(:,:,4) = mean(centered2sf(:,:,[6 8]),3);
+    orientInvariant2sf(:,:,3) = mean(centered2sf(:,:,[5 7]),3);
+    orientInvariant2sf(:,:,2) = mean(centered2sf(:,:,[2 4]),3);
+    orientInvariant2sf(:,:,1) = mean(centered2sf(:,:,[1 3]),3);
+    invariantAll2sf = reshape(orientInvariant2sf,n,size(orientInvariant2sf,2)*size(orientInvariant2sf,3));
+    
+    trialType = {'pref ','pref hi sf','non pref','non pref hi sf'};
+    for cond = 1:2
+        figure
+        for t = 1:4
+            subplot(2,2,t);
+            for i = 1:max(c)
+                d =mean(invariantAll2sf(clust==i & allCond==cond & allActive,:),1); plot(d((t-1)*39 + (1:39))-min(d));hold on; ylim([ 0 0.3]); xlim([0.5 42.5])
+            end
+            title(trialType{t});
+        end
+        
+        legend;
+        set(gcf,'Name',condLabel{cond});
+    end
+    
+    
+    
+    
+    
+clear clustDist
+for cond =1:2
+    for i = 1:max(clust); clustDist(cond,i) = sum(allCond==cond & clust==i& allActive)/sum(allCond==cond & clust>0 ); end
+    clustDist(cond,i+1) = sum(allCond==cond & clust>0 &  ~allActive)/sum(allCond==cond & clust>0);
+    figure
+    pie(clustDist(cond,[4 1 2 3]),{'inactive','sustain','transient','suppresed'}); title(condLabel{cond});
+end
+clustDist
+
+
+for cond=1:3;
+    
+    use = allCond'==cond;
+    
+    goodtopo = rfAmpAll(:,1)>0.025 & rfAmpAll(:,2)>0.025;
+    
+    % figure
+    % plot(rfAll(goodtopo&use,2),rfAll(goodtopo&use,1),'.'); axis equal;  axis([0 72 0 128]); title('topo RFs');
+    % figure
+    % plot(rfAll(goodtopo&use,1),xAll(goodtopo&use),'.'); axis equal; axis([0 128 0 128]);hold on; plot([0 128],[0 128]); xlabel('rf position'); ylabel('cell body position')
+    % figure
+    % plot(rfAll(goodtopo&use,2),yAll(goodtopo&use),'.'); axis equal; axis([0 72 0 72]);hold on; plot([0 72],[0 72]);xlabel('rf position'); ylabel('cell body position')
+    %
+    % figure
+    % plot(yAll(use),xAll(use),'.');  axis equal;  axis([0 72 0 128]); title(['neuropil-based RFs ' condLabel{cond}])
+    
+    baseline = mean(mean(trialDataAll(:,1:10,:),3),2);
+    
+    top = mean(mean(trialDataAll(:,13:16,1:2),3),2)-baseline;
+    bottom = mean(mean(trialDataAll(:,13:16,3:4),3),2)-baseline;
+    
+    useCentered = use & (d1<17.5 | d2<17.5)';
+    
+    figure
+    d = (mean(mean(centeredTrialData(useCentered,:,1:2),3),1)); plot(d-min(d),'Color',[0 1 0]); hold on;
+    d = (mean(mean(centeredTrialData(useCentered,:,3:4),3),1)); plot(d-min(d),'Color',[0 0.5 0]); 
+     d = (mean(mean(centeredTrialData(useCentered,:,5:6),3),1)); plot(d-min(d),'Color',[1 0 0]); 
+    d = (mean(mean(centeredTrialData(useCentered,:,7:8),3),1)); plot(d-min(d),'Color',[0.5 0 0]);
+    title(['mean' condLabel{cond}]); legend('pref correct','non-pref correct','pref error','non-pref error'); ylim([0 0.1])
+    
+    figure
+     d = (mean(mean(centered3x(useCentered,:,[1 3]),3),1)); plot(d-min(d),'Color',[0 1 0]); hold on;
+    d = (mean(mean(centered3x(useCentered,:,[5 7]),3),1)); plot(d-min(d),'Color',[1 0 0]); hold on;
+    d = (mean(mean(centered3x(useCentered,:,[9 11]),3),1)); plot(d-min(d),'Color',[0 0 1]); hold on;
+     d = (mean(mean(centered3x(useCentered,:,[2 4]),3),1)); plot(d-min(d),'Color',[0 0.5 0]); hold on;
+    d = (mean(mean(centered3x(useCentered,:,[6 8]),3),1)); plot(d-min(d),'Color',[0.5 0 0]); hold on;
+    d = (mean(mean(centered3x(useCentered,:,[10 12]),3),1)); plot(d-min(d),'Color',[0 0.5 1]); hold on;
+    title(['passive 3x' condLabel{cond}]); legend('pref','middle','non-pref');ylim([0 0.1])
+    
+      figure
+     d = (mean(mean(centered2sf(useCentered,:,[1 3]),3),1)); plot(d-min(d),'Color',[0 1 0]); hold on;
+    d = (mean(mean(centered2sf(useCentered,:,[5 7]),3),1)); plot(d-min(d),'Color',[1 0 0]); hold on;
+     d = (mean(mean(centered2sf(useCentered,:,[2 4]),3),1)); plot(d-min(d),'Color',[0 0.5 0]); hold on;
+    d = (mean(mean(centered2sf(useCentered,:,[6 8]),3),1)); plot(d-min(d),'Color',[0.5 0 0]); hold on;
+    title(['passive 2sf' condLabel{cond}]); legend('pref','non-pref','pref hi SF','non-pref hi SF');ylim([0 0.1])
+    
+    
+    
+    figure
+    plot(top(useCentered),bottom(useCentered),'g.'); axis equal; hold on ; plot([0 1],[0 1]); xlabel('top'); ylabel('bottom');
+    plot(top(use & ~useCentered),bottom(use & ~useCentered),'b.'); axis equal; hold on ; plot([0 1],[0 1]); xlabel('top'); ylabel('bottom');
+    
+      
+    figure
+    plot(yAll(use),xAll(use),'.'); axis equal;  axis([0 72 0 128]); hold on
+    plot(yAll(use & top>0.25), xAll(use & top>0.25),'g*');
+    plot(yAll(use & top<-0.25), xAll(use & top<-0.25),'r*');
+    circle(36,0.66*128,17.5);circle(36,0.33*128,17.5); title(['top' condLabel{cond}]);
+    
+    figure
+    plot(yAll(use),xAll(use),'.'); axis equal;  axis([0 72 0 128]); hold on
+    plot(yAll(use & bottom>0.25), xAll(use & bottom>0.25),'g*');
+    plot(yAll(use & bottom<-0.25), xAll(use &bottom<-0.25),'r*');
+    circle(36,0.66*128,17.5);circle(36,0.33*128,17.5); title(['bottom' condLabel{cond}]);
+    
+    drawnow
+    
+    behavTimepts = -1:0.1:5;
+    data = reshape(centeredTrialData(useCentered,:,:),size(trialDataAll(useCentered,:,:),1),size(trialDataAll,2)*size(trialDataAll,3));
+    
+    dist = pdist(data(:,1:end/2),'correlation');  %%% sort based on correct
+    display('doing cluster')
+    Z = linkage(dist,'ward');
+    % display('doing order')
+    % tic; leafOrder = optimalleaforder(Z,dist,'criteria','group'); toc
+    figure
+    subplot(3,4,[1 5 9 ])
+    [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5);
+    axis off
+    subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
+    imagesc((data(perm,:)),[0 0.5]); axis xy
+    hold on; for i= 1:8, plot([i*length(behavTimepts) i*length(behavTimepts)]+1,[1 size(data,1)],'g'); end
+    title(['behav resp' condLabel{cond}])
+    
+    data3x = reshape(centered3x(useCentered,:,:),size(data3xAll(useCentered,:,:),1),size(data3xAll,2)*size(data3xAll,3));
+    figure
+    subplot(3,4,[1 5 9 ])
+    [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5);
+    axis off
+    subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
+    imagesc((data3x(perm,:)),[0 0.5]); axis xy
+    hold on; for i= 1:12, plot([i*29 i*29]+1,[1 size(data,1)],'g'); end
+    title(['passive 3x resp' condLabel{cond}])
+    
+    
+    data2sf = reshape(centered2sf(useCentered,:,:),size(centered2sf(useCentered,:,:),1),size(data2sfAll,2)*size(data2sfAll,3));
+    figure
+    subplot(3,4,[1 5 9 ])
+    [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5);
+    axis off
+    subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
+    imagesc((data2sf(perm,:)),[0 0.5]); axis xy
+    hold on; for i= 1:12, plot([i*39 i*39]+1,[1 size(data,1)],'g'); end
+    title(['passive 2sf resp' condLabel{cond}])
     
 end
 
 
-goodtopo = rfAmpAll(:,1)>0.025 & rfAmpAll(:,2)>0.025;
-figure
-plot(rfAll(goodtopo,2),rfAll(goodtopo,1),'.'); axis equal;  axis([0 72 0 128]); title('topo RFs');
-
-figure
-plot(rfAll(goodtopo,1),xAll(goodtopo),'.'); axis equal; axis([0 128 0 128]);hold on; plot([0 128],[0 128]); xlabel('rf position'); ylabel('cell body position')
-
-figure
-plot(rfAll(goodtopo,2),yAll(goodtopo),'.'); axis equal; axis([0 72 0 72]);hold on; plot([0 72],[0 72]);xlabel('rf position'); ylabel('cell body position')
-
-figure
-plot(yAll,xAll,'.');  axis equal;  axis([0 72 0 128]); title('neuropil-based RFs')
-
-d1 = sqrt((rfAll(:,1)-64).^2 + (rfAll(:,2)-36).^2);
-d2 = sqrt((mod(rfAll(:,1)+64,128)-64).^2 + (mod(rfAll(:,2)+36,72)-36).^2);
-sbc = d2<d1;
-
-% figure
-% plot(rfAll(goodtopo & ~sbc,2),rfAll(goodtopo& ~sbc,1),'.'); axis equal;  axis([0 72 0 128]);
-% hold on
-% plot(rfAll(goodtopo & sbc,2),rfAll(goodtopo& sbc,1),'r.'); axis equal;  axis([0 72 0 128]);
-
-figure
-plot(mean(mean(trialDataAll,3),1))
-
-baseline = mean(mean(trialDataAll(:,1:10,:),3),2);
-% figure
-% hist(baseline)
-
-top = mean(mean(trialDataAll(:,13:16,1:2),3),2)-baseline;
-bottom = mean(mean(trialDataAll(:,13:16,3:4),3),2)-baseline;
-
-figure
-plot(top,bottom,'o'); axis equal; hold on ; plot([0 1],[0 1])
-
-figure
-plot(rfAll(goodtopo ,2),rfAll(goodtopo,1),'.'); axis equal;  axis([0 72 0 128]); hold on
-plot(rfAll(goodtopo & top>0.25,2), rfAll(goodtopo&top>0.25,1),'g*');
-plot(rfAll(goodtopo & top<-0.25,2), rfAll(goodtopo&top<-0.25,1),'r*');
-
-figure
-plot(rfAll(goodtopo ,2),rfAll(goodtopo,1),'.'); axis equal;  axis([0 72 0 128]); hold on
-plot(rfAll(goodtopo & bottom>0.25,2), rfAll(goodtopo&bottom>0.25,1),'g*');
-plot(rfAll(goodtopo & top<-0.25,2), rfAll(goodtopo&top<-0.25,1),'r*');
-
-
-figure
-plot(yAll,xAll,'.'); axis equal;  axis([0 72 0 128]); hold on
-plot(yAll(top>0.25), xAll(top>0.25),'g*');
-plot(yAll( top<-0.25), xAll(top<-0.25),'r*');
-circle(36,0.66*128,17.5);circle(36,0.33*128,17.5);
-
-
-figure
-plot(yAll,xAll,'.'); axis equal;  axis([0 72 0 128]); hold on
-plot(yAll(bottom>0.25), xAll(bottom>0.25),'g*');
-plot(yAll( bottom<-0.25), xAll(bottom<-0.25),'r*');
-circle(36,0.66*128,17.5);circle(36,0.33*128,17.5);
-
-
-behavTimepts = -1:0.1:5;
-data = reshape(trialDataAll,size(trialDataAll,1),size(trialDataAll,2)*size(trialDataAll,3));
-figure
-imagesc(data,[0 0.5]); hold on; for i = 1:7; plot([i*61 i*61],[1 size(data,1)],'g'); end
-
-correctData = reshape(trialDataAll(:,:,1:4),size(trialDataAll,1),size(trialDataAll,2)*size(trialDataAll,3)/2);
-% figure
-% imagesc(correctData,[0 0.5]); hold on; for i = 1:3; plot([i*61 i*61],[1 size(data,1)],'g'); end
-
-dist = pdist(data(:,1:end/2),'correlation');  %%% sort based on correct
-display('doing cluster')
-Z = linkage(dist,'ward');
-% display('doing order')
-% tic; leafOrder = optimalleaforder(Z,dist,'criteria','group'); toc
-figure
-subplot(3,4,[1 5 9 ])
-[h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5);
-axis off
-subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-imagesc((data(perm,:)),[0 0.5]); axis xy
-hold on; for i= 1:8, plot([i*length(behavTimepts) i*length(behavTimepts)]+1,[1 size(data,1)],'g'); end
-title('behav resp')
-
-data3x = reshape(data3xAll,size(data3xAll,1),size(data3xAll,2)*size(data3xAll,3));
-figure
-subplot(3,4,[1 5 9 ])
-[h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5);
-axis off
-subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-imagesc((data3x(perm,:)),[0 0.5]); axis xy
-hold on; for i= 1:12, plot([i*29 i*29]+1,[1 size(data,1)],'g'); end
-title('passive 3x resp')
-
-
-data2sf = reshape(data2sfAll,size(data2sfAll,1),size(data2sfAll,2)*size(data2sfAll,3));
-figure
-subplot(3,4,[1 5 9 ])
-[h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5);
-axis off
-subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-imagesc((data2sf(perm,:)),[0 0.5]); axis xy
-hold on; for i= 1:12, plot([i*39 i*39]+1,[1 size(data,1)],'g'); end
-title('passive 2sf resp')
 
 

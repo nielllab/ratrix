@@ -214,7 +214,7 @@ files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
 files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
 
-%%g62ff8rt (naive)  %first naive session 071916
+%%g62ff8rt (naive)  %first naive session 071916  %%% started behav 070116
 n=n+1;
 files(n).subj = 'g62ff8rt'; 
 files(n).expt = '072116';
@@ -229,6 +229,8 @@ files(n).passive3xPts = 'passiveBehav3x8minV2__allfiles_PTS_dF';%or passiveBehav
 files(n).passive2sfPts = 'passiveBehav2sf8min__allfiles_PTS_dF'; %or passiveBehav2sfSessionV2__allfiles_PTS_dF
 files(n).task = 'Naive';
 files(n).learningDay = [3];   %%% can probably ignore for GTS, more important for naive
+files(n).totalDays = 20;
+files(n).totalSinceGratings = 2;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
 files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
@@ -247,6 +249,8 @@ files(n).passive3xPts = 'passiveBehav3x8minV2__allfiles_PTS_dF';%or passiveBehav
 files(n).passive2sfPts = 'passiveBehav2sf8min__allfiles_PTS_dF'; %or passiveBehav2sfSessionV2__allfiles_PTS_dF
 files(n).task = 'Naive';
 files(n).learningDay = [4];   %%% can probably ignore for GTS, more important for naive
+files(n).totalSinceGratings = 3;
+files(n).totalDays = 21;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
 files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
@@ -265,6 +269,8 @@ files(n).passive3xPts = 'passiveBehav3x8minV2__allfiles_PTS_dF';%or passiveBehav
 files(n).passive2sfPts = 'passiveBehav2sf8min__allfiles_PTS_dF'; %or passiveBehav2sfSessionV2__allfiles_PTS_dF
 files(n).task = 'Naive';
 files(n).learningDay = [6];   %%% can probably ignore for GTS, more important for naive
+files(n).totalSinceGratings = 8;
+files(n).totalDays = 26;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
 files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
@@ -283,12 +289,14 @@ files(n).passive3xPts = 'passiveBehav3x8minV2__allfiles_PTS_dF';%or passiveBehav
 files(n).passive2sfPts = 'passiveBehav2sf8min__allfiles_PTS_dF'; %or passiveBehav2sfSessionV2__allfiles_PTS_dF
 files(n).task = 'Naive';
 files(n).learningDay = [7];   %%% can probably ignore for GTS, more important for naive
+files(n).totalSinceGratings = 9;
+files(n).totalDays = 27;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
 files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
 
 
-%g62bb12lt (naive) %first naive session 060216
+%g62bb12lt (naive) %first naive session 060216 %%% started behav 051216
 n=n+1;
 files(n).subj = 'g62bb12lt'; 
 files(n).expt = '072116';
@@ -303,6 +311,8 @@ files(n).passive3xPts = 'passiveBehav3x8minV2__allfiles_PTS_dF';%or passiveBehav
 files(n).passive2sfPts = 'passiveBehav2sf8min__allfiles_PTS_dF'; %or passiveBehav2sfSessionV2__allfiles_PTS_dF
 files(n).task = 'Naive';
 files(n).learningDay = [7];   %%% can probably ignore for GTS, more important for naive
+files(n).totalSinceGratings = 49;
+files(n).totalDays = 70;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
 files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
@@ -321,6 +331,8 @@ files(n).passive3xPts = 'passiveBehav3x8minV2__allfiles_PTS_dF';%or passiveBehav
 files(n).passive2sfPts = 'passiveBehav2sf8min__allfiles_PTS_dF'; %or passiveBehav2sfSessionV2__allfiles_PTS_dF
 files(n).task = 'Naive';
 files(n).learningDay = [8];   %%% can probably ignore for GTS, more important for naive
+files(n).totalSinceGratings = 50;
+files(n).totalDays = 71;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
 files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected

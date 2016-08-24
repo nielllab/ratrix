@@ -13,7 +13,8 @@ rfAmpAll =[]; rfAll = []; trialDataAll=[]; xAll = []; yAll = []; data3xAll=[]; d
 n=0;
 for i = 1:length(alluse);
     i
-    load([pathname files(alluse(i)).dir '\' files(alluse(i)).compileData],'rfAmp','rf','behavTrialData','passiveData3x','passiveData2sf');
+    load([pathname files(alluse(i)).dir '\' files(alluse(i)).compileData],'rfAmp','rf','behavTrialData','passiveData3x','passiveData2sf','correctRate','resprate','stoprate');
+    figure; plot(resprate/2,'g'); hold on; plot(correctRate,'b');plot(stoprate/10,'r');ylim([0 1]); title([files(alluse(i)).subj files(alluse(i)).task]);legend('response','correct','stop')
     cutoff = size(behavTrialData,1);
     cellrange = (n+1):(n+cutoff);
     rfAmpAll = [rfAmpAll; rfAmp(1:cutoff,:)];
@@ -35,6 +36,9 @@ for i = 1:length(alluse);
     if strcmp(files(alluse(i)).task,'GTS'), allCond(cellrange) = gts; end;
     if strcmp(files(alluse(i)).task,'Naive') & files(alluse(i)).learningDay<5, allCond(cellrange) = naive; end;
     if strcmp(files(alluse(i)).task,'Naive') & files(alluse(i)).learningDay>=5, allCond(cellrange) = naiveTrained; end;
+    
+    load([pathname files(alluse(i)).dir '\' files(alluse(i)).passive3x],'spd',
+    
     n=n+cutoff;
 end
 
@@ -208,7 +212,7 @@ for cond =1:2
     clustDist(cond,i+1) = sum(allCond==cond & clust>0 &  ~allActive)/sum(allCond==cond & clust>0);
     figure
    % pie(clustDist(cond,[4 1 2 3]),{'inactive','sustain','transient','suppresed'}); title(condLabel{cond});
-   pie(clustDist(cond,:));title(condLabel{cond});
+   pie(clustDist(cond,:),{'','sustained','transient','transient behavior','','suppressed','inactive'});title(condLabel{cond})
 end
 clustDist
 

@@ -268,6 +268,63 @@ print('-dpsc',psfile,'-append');
 
 save(compiledFile,'dF3x','trialdF3x','xpos3x','theta3x','phase3x','passiveData3x','cellCutoff','-append')
 
+
+
+%%% passive 2sf data
+[f p] = uigetfile('*.mat','passive 2sf')
+load(fullfile(p,f));
+trialdF2sf = dfAlign;
+passiveData2sf = allTrialData;
+dF2sf= dFdecon; xpos2sf=xpos; theta2sf=xpos; phase2sf=phase; sf2sf = sf;
+x = unique(xpos);
+xpos(xpos==x(1))=-1; xpos(xpos==x(2))=1;
+th = unique(theta)
+theta(theta==th(1))=1; theta(theta==th(2))=2;  
+
+use2sf = 1:cellCutoff
+
+passData = reshape(passiveData2sf, size(passiveData2sf,1),size(passiveData2sf,2)*size(passiveData2sf,3));
+behavPass = passData(behavUse& use2sf,:);
+behavPass = downsamplebin(behavPass,2,2)/2;
+figure
+subplot(3,4,[1 5 9 ])
+[h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,5,'reorder',leafOrder);
+axis off
+subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
+imagesc((behavPass(perm,:)),[0 1]); axis xy
+title('passive 2sf clustered by behav resp type')
+hold on; for i= 1:8, plot([i*length(usepts)/2 i*length(usepts)/2]+1,[1 size(trialData,1)],'g'); end
+
+set(gcf, 'PaperPositionMode', 'auto');
+print('-dpsc',psfile,'-append');
+
+
+%%% summary of passive 3x (3x positions, 4 thetas, 1 sf (matched to behav), random phase
+
+%%% dF3x(cells,frame) = continuous deconvolved trace
+
+%%% data by trial
+%%% trialdF3x(cells,t,trial) = deconvolved timecourse for each individual trial
+%%% xpos3x(trial) = x position (-1, 0 , 1);
+%%% theta3x(trial) = orientation (1:4 =  0 pi/4, pi/2 3*pi/4)
+%%% phase3x(trial) = spatial phase (radians, 0-2*pi)
+
+%%% data by condition
+%%% passiveData3x(cell,t,cond) average trial timecourse for each position/orientation condition
+%%% cond defined by:
+%%% cond(1:4)  x==-1;
+%%% cond(5:8)   x==0;
+%%% cond(9:12) x==1;
+%%% cond ([1 5 9]) theta ==1;
+%%% cond([2 6 10]) theta ==2;
+%%% cond([3 7 11]) theta ==3;
+%%% cond(4 8 12]) theta ==4;
+
+save(compiledFile,'dF2sf','trialdF2sf','xpos2sf','theta2sf','phase2sf','passiveData2sf','sf2sf','cellCutoff','-append')
+
+
+
+
 try
     dos(['ps2pdf ' 'c:\temp.ps "' pdfFile '"'] )
 catch

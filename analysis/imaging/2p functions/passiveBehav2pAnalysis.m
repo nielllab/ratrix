@@ -12,6 +12,11 @@ if ~exist('moviefname','var')
     load(fullfile(p,f),'moviefname')
 end
 
+[f p] = uiputfile('*.pdf','pdf file');
+psfilenameFinal = fullfile(p,f);
+psfilename = 'c:\temp.ps';
+if exist(psfilename,'file')==2;delete(psfilename);end
+
 dt
 dFdecon = spikes*10;
 
@@ -27,6 +32,7 @@ save(ptsfname,'dfAlign','xpos','sf','theta','phase','timepts','moviefname','dFde
 
 figure
 imagesc(dFdecon,[0 1])
+if exist('psfilename','var'),    set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfilename,'-append'); end
 
 cellCutoff = input('cell cutoff : ');
 useCells =1:cellCutoff;
@@ -43,12 +49,15 @@ bottom = squeeze(mean(dfAlign(:,find(abs(timepts-0.5) <0.0001),xpos==x(end))-dfA
 figure
 plot(top,bottom,'o');axis equal;axis square;hold on; plot([0 1],[0 1]);
 xlabel('top?') ; ylabel('bottom?')
+if exist('psfilename','var'),    set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfilename,'-append'); end
+
 
 vert = squeeze(mean(dfAlign(:,find(abs(timepts-0.5) <0.0001),theta==0)-dfAlign(:,find(abs(timepts) <0.0001),theta==0),3));
 horiz = squeeze(mean(dfAlign(:,find(abs(timepts-0.5) <0.0001),theta==pi/2)-dfAlign(:,find(abs(timepts) <0.0001),theta==pi/2),3));
 figure
 plot(vert,horiz,'o'); axis equal;axis square;hold on; plot([0 1],[0 1])
 xlabel('vert?'); ylabel('horiz?')
+if exist('psfilename','var'),    set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfilename,'-append'); end
 
 % figure
 % subplot(2,2,1)
@@ -73,8 +82,8 @@ thetas = unique(theta); sfs = unique(sf); %thetas= circshift(thetas,[0 2]);
 
 
 
-if strcmp(moviefname,'C:\behavStim3sf4orient.mat')
-  usepts = find(timepts>=-1 & timepts<=2.5);
+if strcmp(moviefname,'C:\behavStim3sf4orient.mat') | strcmp(moviefname,'C:\behavStim3x8min.mat') 
+  usepts = find(timepts>=-1 & timepts<=2);
   for i = 1:size(dfAlign,1);
         for j = 1:3
             for k = 1:4
@@ -87,7 +96,7 @@ if strcmp(moviefname,'C:\behavStim3sf4orient.mat')
 end
 
 
-if strcmp(moviefname,'C:\behavStim2sfSmall3366.mat')
+if strcmp(moviefname,'C:\behavStim2sfSmall3366.mat') |strcmp(moviefname,'C:\behavStim2sf8min.mat')
     usepts = find(timepts>-1 & timepts<3.0)
     for i = 1:size(dfAlign,1)
         for j = 1:2
@@ -127,6 +136,8 @@ imagesc(flipud(goodTrialData(perm,:)),[0 1]);
 hold on; for i= 1:12, plot([i*length(usepts)/3 i*length(usepts)/3]+1,[1 size(dFalignfix,1)],'g'); end
 title('trials by conditions')
 drawnow
+if exist('psfilename','var'),    set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfilename,'-append'); end
+
 
 [Y e] = mdscale(dist,1);
 [y sortind] = sort(Y);
@@ -134,4 +145,23 @@ figure
 imagesc(goodTrialData(sortind,:),[0 1])
 hold on; for i= 1:12, plot([i*length(usepts)/3 i*length(usepts)/3]+1,[1 size(dFalignfix,1)],'g'); end
 title('mds')
+if exist('psfilename','var'),    set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfilename,'-append'); end
+
+
+
+dos(['ps2pdf ' psfilename ' "' psfilenameFinal(1:(end-3)) 'pdf"'])
+if exist([psfilenameFinal(1:(end-3)) 'pdf'],'file')
+    ['ps2pdf ' psfilename ' "' psfilenameFinal(1:(end-3)) 'pdf"']
+    display('generated pdf using dos ps2pdf')
+else
+    try
+        ps2pdf('psfile', psfilename, 'pdffile', [psfilenameFinal(1:(end-3)) 'pdf'])
+        [psfilenameFinal(1:(end-3)) 'pdf']
+        display('generated pdf using builtin matlab ps2pdf')
+    catch
+        display('couldnt generate pdf');
+        keyboard
+    end
+end
+
 

@@ -11,16 +11,16 @@ end
 
 %%Behavior trial records location:
 
-% behaviorPath = '\\lee\Users\nlab\Desktop\ballData2'; %lee (now 2p stim comp)
+%behaviorPath = '\\lee\Users\nlab\Desktop\ballData2'; %lee (now 2p stim comp)
   behaviorPath = '\\LANGEVIN\backup\ballData2'; %langevin data server
-% behaviorPath = 'F:\ballData2';
+%behaviorPath = 'F:\ballData2';
 
 
 %%Imaging data location:
 
-% imagingPath = '\\LANGEVIN\backup\widefield\behavior'; %\\langevin (accessing local via network path is slow)
-% imagingPath = 'F:\widefield\behavior\data to analyze'; %on maxwell backup drive (large)
-  imagingPath = 'D:'; %%on maxwell ssd drive (smaller/faster)
+imagingPath = '\\LANGEVIN\backup\widefield\behavior'; %\\langevin (accessing local via network path is slow)
+%imagingPath = 'F:\widefield\behavior\data to analyze'; %on maxwell backup drive (large)
+%  imagingPath = 'D:'; %%on maxwell ssd drive (smaller/faster)
 
 %%% my understanding of record formt (cmn)
 %%% record format - subject name (which suffices to find behavior data'
@@ -739,25 +739,31 @@ recs = {
 %   }    
    
   
-        {'g62dd2ln' {
-%     {[30 203],[],'062216 G62dd2ln GTS behavior\g62dd2ln_portrait_run2_GTSbehavior', 'g62dd2ln_portrait_run2_GTSbehavior'}
-     {[204 557],[],'063016 G62dd2ln GTS behavior\g62dd2ln_portrait_run1_GTSbehavior', 'g62dd2ln_portrait_run1_GTSbehavior'}
-  }
-  }
-  
+%         {'g62dd2ln' {
+% %     {[30 203],[],'062216 G62dd2ln GTS behavior\g62dd2ln_portrait_run2_GTSbehavior', 'g62dd2ln_portrait_run2_GTSbehavior'}
+% %     {[204 557],[],'063016 G62dd2ln GTS behavior\g62dd2ln_portrait_run1_GTSbehavior', 'g62dd2ln_portrait_run1_GTSbehavior'}
+%   }
+%   }
+%   
    
 %         {'g62y3lt' {
-%      {[1 366],[],'062316 G62y3lt GTS behavior\g62y3lt_portrait_run1_GTSbehavior', 'g62y3lt_portrait_run1_GTSbehavior'}
+%%      {[1 366],[],'062316 G62y3lt GTS behavior\g62y3lt_portrait_run1_GTSbehavior', 'g62y3lt_portrait_run1_GTSbehavior'}
 % 
 %   }
 %   } 
 %   
   
 %              {'g62tx15lt' {
-%      {[ ],[],'', ''}
+%      {[262 593],[],'072716 G62tx1.5lt GTS behavior\g62tx1.5lt_portrait_run2_GTSbehavior', 'g62tx1.5lt_portrait_run2_GTSbehavior'}
 % 
 %   }
 %   }  
+
+           {'g62gg5rt' {
+     {[27 280],[],'080416 G62gg5rt GTS behavior\g62gg5rt_portrait_run1_GTSbehavior', 'g62gg5rt_portrait_run1_GTSbehavior'}
+
+  }
+  } 
   
 %            {'' {
 %      {[ ],[],'', ''}

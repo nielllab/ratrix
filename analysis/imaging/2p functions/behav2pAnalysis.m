@@ -397,6 +397,8 @@ goodTrialData = allTrialData(useCells,:,1:8);
 goodTrialData = reshape(goodTrialData(:,:,1:4),size(goodTrialData(:,:,1:4),1),size(goodTrialData(:,:,1:4),2)*size(goodTrialData(:,:,1:4),3));
 figure
 imagesc(goodTrialData,[-1 1])
+goodTrialData = goodTrialData+rand(size(goodTrialData))*10^-6; %%%% add a tiny amount of noise so neurons with zero activity don't create nans in distance
+
 
 dist = pdist(imresize(goodTrialData, [size(goodTrialData,1),size(goodTrialData,2)*0.5]),'correlation');
 Z = linkage(dist,'ward');

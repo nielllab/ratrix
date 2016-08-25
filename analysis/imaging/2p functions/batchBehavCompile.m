@@ -11,6 +11,8 @@ condLabel{1} = ' GTS'; condLabel{2}=' naive'; condLabel{3}=' naive trained';
 
 rfAmpAll =[]; rfAll = []; trialDataAll=[]; xAll = []; yAll = []; data3xAll=[]; data2sfAll= [];
 n=0;
+
+
 for i = 1:length(alluse);
     i
     load([pathname files(alluse(i)).dir '\' files(alluse(i)).compileData],'rfAmp','rf','behavTrialData','passiveData3x','passiveData2sf','correctRate','resprate','stoprate');
@@ -41,15 +43,14 @@ for i = 1:length(alluse);
     load([pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xPts],'spd','dFdecon','moviefname');
     if ~exist('spd','var')
         load([pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xStimrec],'stimRec');
-        spd = get2pSpeed(stimRec,0.1,size(dFdecon,2));
-        figure
-        plot(spd/max(spd)); hold on; plot(mean(dFdecon,1));
-                figure
-        plot(spd/max(spd),mean(dFdecon,1),'.');
-        
+        spd = get2pSpeed(stimRec,0.1,size(dFdecon,2)); figure; hist(spd); xlabel('speed')
+%         figure
+%         plot(spd/max(spd)); hold on; plot(mean(dFdecon,1));
+%         
         load(moviefname,'isi','duration');
         dFdecon(dFdecon>5)=5;
-        if isi==2
+      clear sp_spont sp_ev spont ev
+      if isi==2
             for tr = 1:floor(size(dFdecon,2)/30);
                  sp_spont(tr) = mean(spd((tr-1)*30 + (11:20)));
                  sp_ev(tr) = mean(spd((tr-1)*30 + (22:28)));
@@ -58,18 +59,21 @@ for i = 1:length(alluse);
             end
         else
             for tr = 1:floor(size(dFdecon,2)/20);
-                sp_spont(tr) = mean(spd((tr-1)*30 + (6:10)));
-                 sp_ev(tr) = mean(spd((tr-1)*30 + (12:18)));
-                spont(:,tr) = mean(dFdecon(:,(tr-1)*30 + (6:10)),2);
-                ev(:,tr) = mean(dFdecon(:,(tr-1)*30 + (12:18)),2)- spont(:,tr);
+                sp_spont(tr) = mean(spd((tr-1)*20 + (6:10)));
+                 sp_ev(tr) = mean(spd((tr-1)*20 + (12:18)));
+                spont(:,tr) = mean(dFdecon(:,(tr-1)*20 + (6:10)),2);
+                ev(:,tr) = mean(dFdecon(:,(tr-1)*20 + (12:18)),2)- spont(:,tr);
             end
         end   
         d = corrcoef([spont; double(sp_spont>500)]'); 
-        spontCorr = d(1:end-1,end); figure; hist(spontCorr,[-0.95:0.1:1]);
+        spontCorr = d(1:end-1,end); %figure; hist(spontCorr,[-0.95:0.1:1]); title('spont corr')
+        deltaSpont = mean(spont(:,sp_spont>500),2)-mean(spont(:,sp_spont<500),2);
+        % figure; hist(deltaSpont,[-0.95:0.1:1]); title('delta spont')
         d = corrcoef([ev; double(sp_ev>500)]');
-        evCorr = d(1:end-1,end); figure; hist(evCorr,[-0.95:0.1:1]);
-        spontCorrAll(cellrange) = spontCorr;
-        evCorrAll(cellrange) = evCorr;       
+        evCorr = d(1:end-1,end); % figure; hist(evCorr,[-0.95:0.1:1]); title('evoked correlation')
+        spontCorrAll(cellrange) = spontCorr(1:cutoff);
+        evCorrAll(cellrange) = evCorr(1:cutoff);
+        deltaSpontAll(cellrange) =deltaSpont(1:cutoff);
         
     end
     
@@ -80,6 +84,8 @@ figure
 hist(spontCorrAll,[-0.95:0.1:1]); title('spont correlation');
 figure
 hist(evCorrAll,[-0.95:0.1:1]); title('evoked correlation');
+figure
+hist(deltaSpontAll,[-0.95:0.1:1]); title('evoked correlation');
 
 keyboard
 
@@ -123,17 +129,17 @@ epochData(:,3,:) = squeeze(mean(invariant(:,25:35,:),2));
 
 
 %clustData = reshape(invariant(centered,:,:),sum(centered),size(invariant,2)*size(invariant,3));
-clustData = reshape(epochData(centered,:,:),sum(centered),size(epochData,2)*size(epochData,3));
+clustData = reshape(epochData,size(epochData,1),size(epochData,2)*size(epochData,3));
 clustData= clustData(:,[1 2 3 ]);
-allData = reshape(centeredTrialData(centered,:,:),sum(centered),size(centeredTrialData,2)*size(centeredTrialData,3));
-
-
 
 figure
-plot(std(clustData'));
-figure
-hist(std(clustData'),0.01:0.02:1);
-active = std(clustData')>0.02;
+hist(std(clustData'),0.005:0.01:1);
+active = (std(clustData')>0.02)';
+
+clustData = clustData(centered & active,:);
+allData = reshape(centeredTrialData(centered & active,:,:),sum(centered & active),size(centeredTrialData,2)*size(centeredTrialData,3));
+
+
 % clustData = clustData(active,:);
 % allData = allData(active,:);
 
@@ -177,12 +183,13 @@ invariantAll = reshape(orientInvariant,n,size(orientInvariant,2)*size(orientInva
 clust= zeros(1,n);
 c= cluster(Z,'maxclust',6);
 figure
-hist(c)
+h = hist(c); h= h/sum(h); bar(h); xlabel('cluster');
+for i = 1:max(c);
+    if h(i)<0.05; c(i)=0; end;
+end
 
-c(c==1) = 0; c(c==5)=0;
-clust(centered) =c;
-allActive = zeros(1,n);
-allActive(centered) = active;
+clust(centered & active) =c;
+
 
 trialType = {'correct pref','error pref','correct non-pref','error non-pref'};
 for cond = 1:2
@@ -190,7 +197,7 @@ for cond = 1:2
     for t = 1:4
         subplot(2,2,t);
         for i = 1:max(c)
-            d =mean(invariantAll(clust==i & allCond==cond & allActive,:),1); plot(d((t-1)*42 + (1:42))-min(d));hold on; ylim([ 0 0.3]); xlim([0.5 42.5])
+            d =mean(invariantAll(clust==i & allCond==cond ,:),1); plot(d((t-1)*42 + (1:42))-min(d));hold on; ylim([ 0 0.3]); xlim([0.5 42.5])
         end
         title(trialType{t});
     end
@@ -211,7 +218,7 @@ for cond = 1:2
     for t = 1:4
         subplot(2,2,t);
         for i = 1:max(c)
-            d =mean(invariantAll3x(clust==i & allCond==cond & allActive,:),1); plot(d((t-1)*29 + (1:29))-min(d));hold on; ylim([ 0 0.3]); xlim([0.5 42.5])
+            d =mean(invariantAll3x(clust==i & allCond==cond ,:),1); plot(d((t-1)*29 + (1:29))-min(d));hold on; ylim([ 0 0.3]); xlim([0.5 42.5])
         end
         title(trialType{t});
     end
@@ -234,7 +241,7 @@ for cond = 1:2
     for t = 1:4
         subplot(2,2,t);
         for i = 1:max(c)
-            d =mean(invariantAll2sf(clust==i & allCond==cond & allActive,:),1); plot(d((t-1)*39 + (1:39))-min(d));hold on; ylim([ 0 0.3]); xlim([0.5 42.5])
+            d =mean(invariantAll2sf(clust==i & allCond==cond,:),1); plot(d((t-1)*39 + (1:39))-min(d));hold on; ylim([ 0 0.3]); xlim([0.5 42.5])
         end
         title(trialType{t});
     end
@@ -243,14 +250,18 @@ for cond = 1:2
     set(gcf,'Name',condLabel{cond});
 end
 
-
-
-
+for i= 1:max(c);
+    figure
+    hist(deltaSpontAll(clust==i),[-0.95:0.1:1]); title(sprintf('cluster %d',i));
+    spontMod(i) = mean(deltaSpontAll(clust==i));
+end
+figure
+bar(spontMod); ylabel('spontaneous modulation')
 
 clear clustDist
 for cond =1:2
-    for i = 1:max(clust); clustDist(cond,i) = sum(allCond==cond & clust==i& allActive)/sum(allCond==cond & clust>0 ); end
-    clustDist(cond,i+1) = sum(allCond==cond & clust>0 &  ~allActive)/sum(allCond==cond & clust>0);
+    for i = 1:max(clust); clustDist(cond,i) = sum(allCond==cond & clust==i )/sum(allCond==cond & clust>0 ); end
+    clustDist(cond,i+1) = sum(allCond'==cond & centered & ~active)/sum(allCond'==cond & centered);
     figure
    % pie(clustDist(cond,[4 1 2 3]),{'inactive','sustain','transient','suppresed'}); title(condLabel{cond});
    pie(clustDist(cond,:),{'','sustained','transient','transient behavior','','suppressed','inactive'});title(condLabel{cond})

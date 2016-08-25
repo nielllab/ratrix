@@ -37,10 +37,51 @@ for i = 1:length(alluse);
     if strcmp(files(alluse(i)).task,'Naive') & files(alluse(i)).learningDay<5, allCond(cellrange) = naive; end;
     if strcmp(files(alluse(i)).task,'Naive') & files(alluse(i)).learningDay>=5, allCond(cellrange) = naiveTrained; end;
     
-    load([pathname files(alluse(i)).dir '\' files(alluse(i)).passive3x],'spd',
+    clear spd
+    load([pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xPts],'spd','dFdecon','moviefname');
+    if ~exist('spd','var')
+        load([pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xStimrec],'stimRec');
+        spd = get2pSpeed(stimRec,0.1,size(dFdecon,2));
+        figure
+        plot(spd/max(spd)); hold on; plot(mean(dFdecon,1));
+                figure
+        plot(spd/max(spd),mean(dFdecon,1),'.');
+        
+        load(moviefname,'isi','duration');
+        dFdecon(dFdecon>5)=5;
+        if isi==2
+            for tr = 1:floor(size(dFdecon,2)/30);
+                 sp_spont(tr) = mean(spd((tr-1)*30 + (11:20)));
+                 sp_ev(tr) = mean(spd((tr-1)*30 + (22:28)));
+                spont(:,tr) = mean(dFdecon(:,(tr-1)*30 + (11:20)),2);
+                ev(:,tr) = mean(dFdecon(:,(tr-1)*30 + (22:28)),2)- spont(:,tr);
+            end
+        else
+            for tr = 1:floor(size(dFdecon,2)/20);
+                sp_spont(tr) = mean(spd((tr-1)*30 + (6:10)));
+                 sp_ev(tr) = mean(spd((tr-1)*30 + (12:18)));
+                spont(:,tr) = mean(dFdecon(:,(tr-1)*30 + (6:10)),2);
+                ev(:,tr) = mean(dFdecon(:,(tr-1)*30 + (12:18)),2)- spont(:,tr);
+            end
+        end   
+        d = corrcoef([spont; double(sp_spont>500)]'); 
+        spontCorr = d(1:end-1,end); figure; hist(spontCorr,[-0.95:0.1:1]);
+        d = corrcoef([ev; double(sp_ev>500)]');
+        evCorr = d(1:end-1,end); figure; hist(evCorr,[-0.95:0.1:1]);
+        spontCorrAll(cellrange) = spontCorr;
+        evCorrAll(cellrange) = evCorr;       
+        
+    end
     
     n=n+cutoff;
 end
+
+figure
+hist(spontCorrAll,[-0.95:0.1:1]); title('spont correlation');
+figure
+hist(evCorrAll,[-0.95:0.1:1]); title('evoked correlation');
+
+keyboard
 
     behavTimepts = -1:0.1:5;
 

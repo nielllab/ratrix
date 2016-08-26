@@ -524,6 +524,8 @@ files(n).totalSinceGratings = 1;
 files(n).totalDays = 14;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+files(n).ncells = 250;  %%% optional - we could use this to adjust # of cells selected
+
 
 n=n+1;
 files(n).subj = 'g62kk7lt'; 
@@ -548,7 +550,7 @@ files(n).totalSinceGratings = 3;
 files(n).totalDays = 16;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-
+files(n).ncells = 175;  %%% optional - we could use this to adjust # of cells selected
 
 
 % n=n+1;

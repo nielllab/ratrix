@@ -17,11 +17,15 @@ for i = 1:length(alluse);
     i
     load([pathname files(alluse(i)).dir '\' files(alluse(i)).compileData],'rfAmp','rf','behavTrialData','passiveData3x','passiveData2sf','correctRate','resprate','stoprate');
     figure; plot(resprate/2,'g'); hold on; plot(correctRate,'b');plot(stoprate/10,'r');ylim([0 1]); title([files(alluse(i)).subj files(alluse(i)).task]);legend('response','correct','stop')
-    cutoff = size(behavTrialData,1);
+    if ~isempty(files(alluse(i)).ncells)
+        cutoff = files(alluse(i)).ncells;
+    else
+        cutoff = size(behavTrialData,1);
+    end
     cellrange = (n+1):(n+cutoff);
     rfAmpAll = [rfAmpAll; rfAmp(1:cutoff,:)];
     rfAll = [rfAll; rf(1:cutoff,:)];
-    trialDataAll = [trialDataAll; behavTrialData];
+    trialDataAll = [trialDataAll; behavTrialData(1:cutoff,:,:)];
     data3xAll = [data3xAll; passiveData3x(1:cutoff,1:29,:)];
     data2sfAll = [data2sfAll; passiveData2sf(1:cutoff,:,:)];
     
@@ -39,33 +43,35 @@ for i = 1:length(alluse);
     if strcmp(files(alluse(i)).task,'Naive') & files(alluse(i)).learningDay<5, allCond(cellrange) = naive; end;
     if strcmp(files(alluse(i)).task,'Naive') & files(alluse(i)).learningDay>=5, allCond(cellrange) = naiveTrained; end;
     
+    sess(cellrange)=i;
+    
     clear spd
     load([pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xPts],'spd','dFdecon','moviefname');
     if ~exist('spd','var')
         load([pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xStimrec],'stimRec');
         spd = get2pSpeed(stimRec,0.1,size(dFdecon,2)); figure; hist(spd); xlabel('speed')
-%         figure
-%         plot(spd/max(spd)); hold on; plot(mean(dFdecon,1));
-%         
+        %         figure
+        %         plot(spd/max(spd)); hold on; plot(mean(dFdecon,1));
+        %
         load(moviefname,'isi','duration');
         dFdecon(dFdecon>5)=5;
-      clear sp_spont sp_ev spont ev
-      if isi==2
+        clear sp_spont sp_ev spont ev
+        if isi==2
             for tr = 1:floor(size(dFdecon,2)/30);
-                 sp_spont(tr) = mean(spd((tr-1)*30 + (11:20)));
-                 sp_ev(tr) = mean(spd((tr-1)*30 + (22:28)));
+                sp_spont(tr) = mean(spd((tr-1)*30 + (11:20)));
+                sp_ev(tr) = mean(spd((tr-1)*30 + (22:28)));
                 spont(:,tr) = mean(dFdecon(:,(tr-1)*30 + (11:20)),2);
                 ev(:,tr) = mean(dFdecon(:,(tr-1)*30 + (22:28)),2)- spont(:,tr);
             end
         else
             for tr = 1:floor(size(dFdecon,2)/20);
                 sp_spont(tr) = mean(spd((tr-1)*20 + (6:10)));
-                 sp_ev(tr) = mean(spd((tr-1)*20 + (12:18)));
+                sp_ev(tr) = mean(spd((tr-1)*20 + (12:18)));
                 spont(:,tr) = mean(dFdecon(:,(tr-1)*20 + (6:10)),2);
                 ev(:,tr) = mean(dFdecon(:,(tr-1)*20 + (12:18)),2)- spont(:,tr);
             end
-        end   
-        d = corrcoef([spont; double(sp_spont>500)]'); 
+        end
+        d = corrcoef([spont; double(sp_spont>500)]');
         spontCorr = d(1:end-1,end); %figure; hist(spontCorr,[-0.95:0.1:1]); title('spont corr')
         deltaSpont = mean(spont(:,sp_spont>500),2)-mean(spont(:,sp_spont<500),2);
         % figure; hist(deltaSpont,[-0.95:0.1:1]); title('delta spont')
@@ -87,9 +93,8 @@ hist(evCorrAll,[-0.95:0.1:1]); title('evoked correlation');
 figure
 hist(deltaSpontAll,[-0.95:0.1:1]); title('evoked correlation');
 
-keyboard
 
-    behavTimepts = -1:0.1:5;
+behavTimepts = -1:0.1:5;
 
 d1 = sqrt((xAll-42).^2 + (yAll-36).^2);
 d2 = sqrt((xAll-84).^2 + (yAll-36).^2);
@@ -180,16 +185,66 @@ invariantAll = reshape(orientInvariant,n,size(orientInvariant,2)*size(orientInva
 
 
 
+
 clust= zeros(1,n);
 c= cluster(Z,'maxclust',6);
 figure
-h = hist(c); h= h/sum(h); bar(h); xlabel('cluster');
+h = hist(c,1:max(c)); h= h/sum(h); bar(h); xlabel('cluster');
 for i = 1:max(c);
-    if h(i)<0.05; c(i)=0; end;
+    if h(i)<0.05; c(c==i)=0; end;
 end
 
 clust(centered & active) =c;
 
+[sortClust ind] = sort(clust);
+
+allData = reshape(centeredTrialData,size(centeredTrialData,1),size(centeredTrialData,2)*size(centeredTrialData,3));
+figure
+allData = allData(ind,:); sortCond = allCond(ind); sortActive = active(ind); sortCentered = centered(ind); sortSess=sess(ind);
+imagesc(allData,[0 0.5])
+
+mdInd(sortClust==0) = 1:sum(sortClust==0);
+for i = 1:max(clust);
+   i
+   sum(clust==i)
+   if sum(clust==i)>0
+        data = allData(sortClust==i,:);
+        start = min(find(sortClust==i));
+       tic; dist = pdist(imresize(data(:,1:end/4), [size(data,1),size(data,2)/8]),'correlation'); toc
+        tic; [Y e] = mdscale(dist,1); toc
+        [y sortind] = sort(Y);
+        mdInd(sortClust==i) = sortind+start-1;
+    end
+end
+
+
+allData = allData(mdInd,:); sortCond = sortCond(mdInd); sortActive = sortActive(mdInd); sortCentered = sortCentered(mdInd); sortSess=sortSess(mdInd);
+allData(sortClust==0,:) =0;
+
+
+
+
+for cond = 1:2
+    figure
+    imagesc(allData(sortCentered' & sortCond==cond,:),[0 0.5]); %%% fix
+    hold on; for j= 1:8, plot([j*length(behavTimepts) j*length(behavTimepts)]+1,[1 sum(sortCentered' & sortCond==cond)],'g'); end
+    title(condLabel{cond})
+end
+
+for i = 1:max(sess);
+    figure
+    subplot(1,3,1:2)
+    imagesc(allData(sortCentered' & sortSess==i,:),[0 0.5]);
+    hold on; for j= 1:8, plot([j*length(behavTimepts) j*length(behavTimepts)]+1,[1 sum(sortCentered' & sortSess==i)],'g'); end
+
+    title(sprintf('%s %s %s total=%d gratings=%d exposures=%d',files(alluse(i)).subj,files(alluse(i)).expt,files(alluse(i)).task,files(alluse(i)).totalDays,files(alluse(i)).totalSinceGratings,files(alluse(i)).learningDay));
+
+subplot(1,3,3);
+    plot(yAll(sess==i),xAll(sess==i),'.'); axis equal;  axis([0 72 0 128]); hold on
+    circle(36,0.66*128,17.5);circle(36,0.33*128,17.5);  set(gca,'Xtick',[]); set(gca,'Ytick',[]);
+end
+
+keyboard
 
 trialType = {'correct pref','error pref','correct non-pref','error non-pref'};
 for cond = 1:2
@@ -263,13 +318,13 @@ for cond =1:2
     for i = 1:max(clust); clustDist(cond,i) = sum(allCond==cond & clust==i )/sum(allCond==cond & clust>0 ); end
     clustDist(cond,i+1) = sum(allCond'==cond & centered & ~active)/sum(allCond'==cond & centered);
     figure
-   % pie(clustDist(cond,[4 1 2 3]),{'inactive','sustain','transient','suppresed'}); title(condLabel{cond});
-   pie(clustDist(cond,:),{'','sustained','transient','transient behavior','','suppressed','inactive'});title(condLabel{cond})
+    % pie(clustDist(cond,[4 1 2 3]),{'inactive','sustain','transient','suppresed'}); title(condLabel{cond});
+    pie(clustDist(cond,:));title(condLabel{cond})
 end
 clustDist
 
 
-keyboard 
+keyboard
 
 for cond=1:3;
     
@@ -338,7 +393,7 @@ for cond=1:3;
     
     drawnow
     
-
+    
     data = reshape(centeredTrialData(useCentered,:,:),size(trialDataAll(useCentered,:,:),1),size(trialDataAll,2)*size(trialDataAll,3));
     
     dist = pdist(data(:,1:end/2),'correlation');  %%% sort based on correct

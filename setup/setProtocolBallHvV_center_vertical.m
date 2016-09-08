@@ -32,7 +32,13 @@ end
 switch subjIDs{1}
     
     
-   case 'hvvtest' 
+    case 'pvchr3b11rt' % Started 9/8/16 
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 219;
+       msPenalty               =3500;
+       percentCorrectionTrials = .75;   
+    
+    case 'hvvtest' 
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 75;
        msPenalty               =5000;

@@ -27,6 +27,7 @@ end
 save(ptsfname,'eyes','-append');
 
 load([sbxfilename '_eye.mat'],'data');
+
 figure
 mx = max(eyes(:));
 for i = 1:20:size(data,4);

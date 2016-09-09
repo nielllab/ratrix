@@ -17,11 +17,22 @@
 %           'G62W7LN_SizeSelectPoints.mat',...
 %           'G62W7TT_SizeSelectPoints.mat'};
 % ptsfile = {'CALB25B5RT_SizeSelectPoints'};
+ptsdir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data';
+predir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data\saline_pre';
+postdir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data\saline_post';
 
-predir = '\\langevin\backup\widefield\DOI_experiments\PhilSizeSelect\PREdecon';
-postdir = '\\langevin\backup\widefield\DOI_experiments\PhilSizeSelect\POSTdecon';
-
-datafiles = {''};
+datafiles = {'072816_G62BB6RT_SALINE_RIG2_SizeSelectAnalysis.mat',...
+            '080116_G62AA3TT_SALINE_RIG2_SizeSelectAnalysis.mat',...
+            '082416_G62Y9RT_SALINE_RIG2_SizeSelectAnalysis.mat',...
+            '082516_G62EE6LT_SALINE_RIG2_SizeSelectAnalysis.mat',...
+            '082516_G62TX210_2_SALINE_RIG2_SizeSelectAnalysis.mat',...
+            '083116_G62TX19TT_SALINE_RIG2_SizeSelectAnalysis.mat'};
+ptsfile = {'G62BB6RT_points.mat',...
+          'G62AA3TT_points.mat',...
+          'G62Y9RT_points.mat',...
+          'G62EE6LT_points.mat',...
+          'G62TX210_points.mat',...
+          'G62TX19TT_points.mat'};
 
 psfilename = 'c:\temp.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
@@ -49,7 +60,7 @@ for i= 1:length(datafiles) %collates all conditions (numbered above)
     allgauParamspre(:,:,:,:,:,:,i) = gauParams;
     allhalfMaxpre(:,:,:,:,:,i) = halfMax;
     allareapeakspre(:,:,:,:,:,i) = areapeaks;
-    load(fullfile(predir,ptsfile{i}));
+    load(fullfile(ptsdir,ptsfile{i}));
     for j=1:length(x)
         alltracespre(j,:,:,:,:,:,i) = squeeze(trialcycavg(y(j),x(j),:,:,:,:,:));
     end
@@ -84,7 +95,7 @@ for i= 1:length(datafiles) %collates all conditions (numbered above)
     allgauParamspost(:,:,:,:,:,:,i) = gauParams;
     allhalfMaxpost(:,:,:,:,:,i) = halfMax;
     allareapeakspost(:,:,:,:,:,i) = areapeaks;
-    load(fullfile(predir,ptsfile{i}));
+    load(fullfile(ptsdir,ptsfile{i}));
     for j=1:length(x)
         alltracespost(j,:,:,:,:,:,i) = squeeze(trialcycavg(y(j),x(j),:,:,:,:,:));
     end
@@ -313,8 +324,8 @@ end
 
  
     
-filename = 'CALB25B5RTCompareSizeSelect';
-save(fullfile(predir,filename),'alltrialcycavgpre','allpeakspre','alltracespre','allgauParamspre','allhalfMaxpre','allareapeakspre','allmvpre',...
+filename = 'SalineCompareSizeSelect';
+save(fullfile(ptsdir,filename),'alltrialcycavgpre','allpeakspre','alltracespre','allgauParamspre','allhalfMaxpre','allareapeakspre','allmvpre',...
     'alltrialcycavgpost','allpeakspost','alltracespost','allgauParamspost','allhalfMaxpost','allareapeakspost','allmvpost');
     try
         dos(['ps2pdf ' 'c:\temp.ps "' fullfile(p,sprintf('%s.pdf',filename)) '"'] )

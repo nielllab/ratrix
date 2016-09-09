@@ -47,13 +47,13 @@ if exist(psfile,'file')==2;delete(psfile);end
 cellcnt = 1;
 grpdftuningPRE = nan(10000,15,2,6,4,8,2);
 grpsptuningPRE = nan(10000,15,2,6,4,8,2);
-grppeaksPRE = nan(length(dirs),8,2);
+% grppeaksPRE = nan(length(dirs),8,2);
 for i = 1:length(dirs)
     load(fullfile(dirs{i},'ssSummaryPRE.mat'))
     numcells = size(dftuning,1);
     grpdftuningPRE(cellcnt:cellcnt+numcells-1,:,:,:,:,:,:) = dftuning;
     grpsptuningPRE(cellcnt:cellcnt+numcells-1,:,:,:,:,:,:) = sptuning;
-    grppeaksPRE(i,:,:) = avgpeaks;
+%     grppeaksPRE(i,:,:) = avgpeaks;
     cellcnt = cellcnt + numcells;
 end
 
@@ -61,13 +61,13 @@ end
 cellcnt = 1;
 grpdftuningPOST = nan(1000,15,2,6,4,8,2);
 grpsptuningPOST = nan(1000,15,2,6,4,8,2);
-grppeaksPOST = nan(length(dirs),8,2);
+% grppeaksPOST = nan(length(dirs),8,2);
 for i = 1:length(dirs)
     load(fullfile(dirs{i},'ssSummaryPOST.mat'))
     numcells = size(dftuning,1);
     grpdftuningPOST(cellcnt:cellcnt+numcells-1,:,:,:,:,:,:) = dftuning;
     grpsptuningPOST(cellcnt:cellcnt+numcells-1,:,:,:,:,:,:) = sptuning;
-    grppeaksPOST(i,:,:) = avgpeaks;
+%     grppeaksPOST(i,:,:) = avgpeaks;
     cellcnt = cellcnt + numcells;
 end
 
@@ -451,7 +451,7 @@ if exist('psfile','var')
     print('-dpsc',psfile,'-append');
 end
 
-save('sizeSelectGroupAnalysis','grpdftuningPRE','grpdftuningPOST','grpsptuningPRE','grpsptuningPOST','grppeaksPRE','grppeaksPOST')
+save('sizeSelectGroupAnalysis','grpdftuningPRE','grpdftuningPOST','grpsptuningPRE','grpsptuningPOST')%,'grppeaksPRE','grppeaksPOST')
 
 try
     dos(['ps2pdf ' 'c:\temp.ps "' newpdfFile '"'] )

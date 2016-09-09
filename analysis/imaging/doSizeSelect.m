@@ -1,5 +1,5 @@
 %% code from doGratingsNew
-deconvplz = 1 %choose if you want deconvolution
+deconvplz = 0 %choose if you want deconvolution
 fully = 1 %choose if you want full frame (260x260), else scales down by 4
 % ptsdir = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\Trained Pre'; %directory for points file
 % ptsfile = {'G62TX2.6LT_SizeSelectPoints.mat',...
@@ -277,7 +277,7 @@ for f = 1:length(use)
         load(fullfile(pname, fname));
     else
         figure
-        imagesc(squeeze(nanmean(nanmean(nanmean(nanmean(trialcycavg(:,:,shift/2+1,:,:,:,4,:),4),5),6),8)))%,[-0.05 0.05])
+        imagesc(squeeze(nanmean(nanmean(nanmean(trialcycavg(:,:,shift-1,:,:,4,4,:),4),5),8)))
         colormap(jet)
         axis square
         hold on
@@ -729,7 +729,7 @@ for f = 1:length(use)
         print('-dpsc',psfilename,'-append');
     end
     %%
-    p = '\\langevin\backup\widefield\DOI_experiments';
+    p = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data';
         filename = fileparts(fileparts(files(use(f)).sizeselect));
         filename = sprintf('%s_SizeSelectAnalysis.mat',filename);
 

@@ -39,21 +39,21 @@ for f = 1:length(files)
         sprintf('skipping %s',files(f).topoy)
     end
     
-    
-if redo | isempty([pathname files(f).sizeselect]) | ~exist([pathname files(f).sizeselect],'file')
-        try
-            dfofMovie([datapathname files(f).sizeselectdata],rig);
-        catch exc
-            sprintf('couldnt do %s',files(f).sizeselectdata)
-            nerr=nerr+1;
-            errmsg{nerr}=sprintf('couldnt do %s',files(f).sizeselectdata)
-            errRpt{nerr}=getReport(exc,'extended')
-        end
-    else
-        sprintf('skipping %s',files(f).sizeselect)
-    end
-    
-    
+%     
+% if redo | isempty([pathname files(f).sizeselect]) | ~exist([pathname files(f).sizeselect],'file')
+%         try
+%             dfofMovie([datapathname files(f).sizeselectdata],rig);
+%         catch exc
+%             sprintf('couldnt do %s',files(f).sizeselectdata)
+%             nerr=nerr+1;
+%             errmsg{nerr}=sprintf('couldnt do %s',files(f).sizeselectdata)
+%             errRpt{nerr}=getReport(exc,'extended')
+%         end
+%     else
+%         sprintf('skipping %s',files(f).sizeselect)
+%     end
+%     
+%     
     
 %     if redo | isempty([pathname files(f).darkness]) | ~exist([pathname files(f).darkness],'file')
 %         try

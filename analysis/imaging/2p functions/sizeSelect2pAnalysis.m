@@ -179,7 +179,11 @@ sizeVals = [0 5 10 20 30 40 50 60];
 contrastRange = unique(contrasts); sfrange = unique(sf); phaserange = unique(phase);
 for i = 1:length(contrastRange);contrastlist{i} = num2str(contrastRange(i));end
 for i=1:length(sizeVals); sizes{i} = num2str(sizeVals(i)); end
-% sf=[sf sf];phase=[phase phase];radius=[radius radius];tf=[tf tf];theta=[theta theta];xpos=[xpos xpos];ypos=[ypos ypos];
+thetaQuad = zeros(1,length(theta)); %break orientation into quadrants, 1=top,2=right,3=bot,4=left
+thetaQuad(1,find((7*pi/4<theta&theta<=2*pi)|(0<=theta&theta<=pi/4)))=1;
+thetaQuad(1,find(pi/4<=theta&theta<=3*pi/4))=2;
+thetaQuad(1,find(3*pi/4<=theta&theta<=5*pi/4))=3;
+thetaQuad(1,find(5*pi/4<=theta&theta<=7*pi/4))=4;
 ntrials= min(dt*length(dF)/(isi+duration),length(sf));
 onsets = dt + (0:ntrials-1)*(isi+duration);
 timepts = 1:(2*isi+duration)/dt;
@@ -219,6 +223,8 @@ end
 %         end
 %     end
 % end
+
+%stopped here for thetaQuad revision
 
 dftuning = zeros(size(dFout,1),size(dFout,2),length(sfrange),length(phaserange),length(contrastRange),length(radiusRange),2);
 sptuning = zeros(size(spikesOut,1),size(spikesOut,2),length(sfrange),length(phaserange),length(contrastRange),length(radiusRange),2);
@@ -569,9 +575,9 @@ end
 
 
 if pre
-    save('ssSummaryPRE','avgpeaks','dftuning','sptuning')
+    save('ssSummaryPRE','dftuning','sptuning','cellCutoff')
 else
-    save('ssSummaryPOST','avgpeaks','dftuning','sptuning')
+    save('ssSummaryPOST','dftuning','sptuning','cellCutoff')
 end
 
 

@@ -1,8 +1,9 @@
-function [x y r] = get2pEyes(fname,syncToVid,dt);
+function [eyeAlign] = get2pEyes(fname,syncToVid,dt);
 %%% analyzes pupil position/size and syncs with 2p frames
 %%% syncToVid aligns with visual stim frames (for passive stim), 
 %%% otherwise leaves timing intact (for behavior stim)
 %%% dt is final frame interval (for syncToVid only)
+
 
 load(fname,'eye');
 if ~exist('eye','var')
@@ -13,7 +14,13 @@ if ~exist('eye','var')
 end
 load(fname,'Area','Centroid');
 
-load(fname(1:end-4),'info');
+%%% eyes are sampled at twice framerate
+n = 2*floor(size(Area,1)/2);
+Area = downsamplebin(Area(1:n,:),1,2)/2;
+Centroid = downsamplebin(Centroid(1:n,:),1,2)/2;
+
+fname(1:end-8)
+load(fname(1:end-8),'info');
 binsize=1;
 
 %%% perform same sync as get2pdata_sbx
@@ -35,17 +42,17 @@ if syncToVid
     fr=fr(fr<nframes);
     
     tic
-    x = interp1(1:nframes,Centroid(:,1),fr);
-    y = interp1(1:nframes,Centroid(:,2),fr);
+    eyeAlign(:,1) = interp1(1:nframes,Centroid(:,1),fr);
+    eyeAlign(:,2) = interp1(1:nframes,Centroid(:,2),fr);
     a = interp1(1:nframes,Area,fr);
-    r = sqrt(r)/pi;
+    eyeAlign(:,3) = sqrt(r)/pi;
     toc
     
     
 else %%% leave timing intact and adjust video stim times to acq rate
     
-    x = Centroid(:,1);
-    y = Centroid(:,2);
-    r= sqrt(Area)/pi;
+    eyeAlign(:,1) = Centroid(:,1);
+    eyeAlign(:,2) = Centroid(:,2);
+    eyeAlign(:,3) = sqrt(Area)/pi;
     
 end

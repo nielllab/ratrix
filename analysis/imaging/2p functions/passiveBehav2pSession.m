@@ -121,3 +121,5 @@ if exist('psfile','var')
     print('-dpsc',psfile,'-append');
 end
 
+sbxfilename = fileName;
+save(sessionName,'sbxfilename','-append')

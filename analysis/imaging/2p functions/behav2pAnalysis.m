@@ -24,37 +24,42 @@ if ~exist('eyes','var');
     display('calculating eyes')
     eyes = get2pEyes( [sbxfilename '_eye.mat'],0,dt);
 end
-save(ptsfname,'eyes','-append');
 
-load([sbxfilename '_eye.mat'],'data');
+
+%%% make movie of eye and extracted parameters
+% load([sbxfilename '_eye.mat'],'data');
+% d= squeeze(data(:,:,1,100:100:end));
+% range = [min(d(:)) max(d(:))];
+% figure
+% mx = max(eyes(:));
+% for i = 1:20:size(data,4);
+%     subplot(2,2,2);
+%     imagesc(data(:,:,1,i),range);
+%     subplot(2,2,3:4);
+%     hold off; plot(eyes); hold on; plot([i/2 i/2], [1 mx]);
+%     drawnow;
+% end
+
+
 figure
-mx = max(eyes(:));
-for i = 1:20:size(data,4);
-    subplot(2,2,2);
-    imagesc(data(:,:,1,i));
-    subplot(2,2,3:4);
-    hold off; plot(eyes); hold on; plot([i/2 i/2], [1 mx]);
-    drawnow;
-end
-
-
-figure
-plot(eyes);
+plot(eyes); legend('x','y','r');
+if exist('psfilename','var');    set(gcf, 'PaperPositionMode', 'auto');   print('-dpsc',psfilename,'-append'); end
 
 timepts = -1:0.25:5;
 eyeAlign = align2onsets(eyes',onsets,dt,timepts);
+save(ptsfname,'eyes','eyeAlign','-append');
 
 eyeNorm = eyeAlign - repmat(mean(eyeAlign(:,1:4,:),2),[1 size(eyeAlign,2) 1]);
 
+titles = {'x','y','r'};
+figure
 for i = 1:3
-figure
-imagesc(squeeze(eyeNorm(i,:,:))',[-5 5])
+    subplot(2,2,i)
+    imagesc(squeeze(eyeNorm(i,:,:))',[-5 5])
+    title(titles{i});
 end
+if exist('psfilename','var');    set(gcf, 'PaperPositionMode', 'auto');   print('-dpsc',psfilename,'-append'); end
 
-figure
-plot(timepts,squeeze(nanmean(eyeAlign,3))')
-
-keyboard
 
 %%% get target location, orientation, phase
 stim = [trialRecs.stimDetails];
@@ -73,44 +78,39 @@ if ~isempty(f) && f~=length(s)
 end
 correct = [s.correct] == 1;
 
+resptime = starts(:,3)-starts(:,2);
+stoptime = starts(:,2)-starts(:,1);
+
+titles = {'x','y','r'};
 figure
 for i = 1:3
-   subplot(2,2,i);
-plot(timepts,nanmean(eyeAlign(i,:,location<0),3)' - nanmedian(eyes(:,i)));
-hold on
-plot(timepts,nanmean(eyeAlign(i,:,location>0),3)'- nanmedian(eyes(:,i)));
-axis([-1 5 -2 2])
+    subplot(2,2,i);
+    plot(timepts,nanmean(eyeAlign(i,:,correct  & location<0),3)' - nanmedian(eyes(:,i)),'g');
+    hold on
+    plot(timepts,nanmean(eyeAlign(i,:,correct & location>0),3)' - nanmedian(eyes(:,i)),'c');
+    plot(timepts,nanmean(eyeAlign(i,:,~correct & location<0),3)' - nanmedian(eyes(:,i)),'r');
+    plot(timepts,nanmean(eyeAlign(i,:,~correct & location>0),3)' - nanmedian(eyes(:,i)),'m');
+    axis([-1 5 -2 2])
+
+    title(titles{i});
 end
+subplot(2,2,4); hold on; plot(1,1,'g'); plot(1,1,'c'); plot(1,1,'r'); plot(1,1,'m'); legend('correct top','correct bottom','error top','error bottom');
+if exist('psfilename','var');    set(gcf, 'PaperPositionMode', 'auto');   print('-dpsc',psfilename,'-append'); end
 
 figure
 for i = 1:3
-   subplot(2,2,i);
-plot(timepts,nanmean(eyeAlign(i,:,correct),3)' - nanmedian(eyes(:,i)),'g');
-hold on
-plot(timepts,nanmean(eyeAlign(i,:,~correct),3)'- nanmedian(eyes(:,i)),'r');
-axis([-1 5 -2 2])
-end
+    subplot(2,2,i);
+    plot(timepts,nanmean(eyeAlign(i,:,resptime<1),3)' - nanmedian(eyes(:,i)),'g');
+    hold on
+    plot(timepts,nanmean(eyeAlign(i,:,resptime>1),3)' - nanmedian(eyes(:,i)),'c');
+    plot(timepts,nanmean(eyeAlign(i,:,stoptime<2),3)' - nanmedian(eyes(:,i)),'r');
+    plot(timepts,nanmean(eyeAlign(i,:,stoptime>2),3)' - nanmedian(eyes(:,i)),'m');
+    axis([-1 5 -2 2])
 
-figure
-for i = 1:3
-   subplot(2,2,i);
-plot(timepts,nanmean(eyeAlign(i,:,correct  & location<0),3)' - nanmedian(eyes(:,i)),'g');
-hold on
-plot(timepts,nanmean(eyeAlign(i,:,correct & location>0),3)' - nanmedian(eyes(:,i)),'c');
-plot(timepts,nanmean(eyeAlign(i,:,~correct & location<0),3)' - nanmedian(eyes(:,i)),'r');
-plot(timepts,nanmean(eyeAlign(i,:,~correct & location>0),3)' - nanmedian(eyes(:,i)),'m');
-axis([-1 5 -2 2])
+    title(titles{i});
 end
-
-
-figure
-for i = 1:3
-   subplot(2,2,i);
-plot(timepts,nanmean(eyeAlign(i,:,resptime<1),3)' - nanmedian(eyes(:,i)),'g');
-hold on
-plot(timepts,nanmean(eyeAlign(i,:,resptime>1),3)'- nanmedian(eyes(:,i)),'r');
-axis([-1 5 -2 2])
-end
+subplot(2,2,4); hold on; plot(1,1,'g'); plot(1,1,'c'); plot(1,1,'r'); plot(1,1,'m'); legend('fast resp','slow resp','fast stop','slow stop');
+if exist('psfilename','var');    set(gcf, 'PaperPositionMode', 'auto');   print('-dpsc',psfilename,'-append'); end
 
 
 
@@ -231,9 +231,6 @@ subplot(5,1,1);title('orientation');
 
 figure
 plot(latent(1:10)/sum(latent))
-
-figure
-imagesc(coeff(:,1:100),[-0.5 0.5]); colormap jet
 
 for i = 1:size(coeff,2);
     if sum(coeff(:,i))<0;
@@ -378,7 +375,7 @@ for i = 1:size(dFdecon,1)
     dFmin(i,:) = dFdecon(i,:) - min(abs(dFdecon(i,:)));
     dFstd(i,:) = dFmin(i,:)/std(dFdecon(i,:));
 end
-
+dFstd(isnan(dFstd))=0;
 
 correctRate = conv(double(correct),ones(1,10),'same')/10;
 figure
@@ -388,6 +385,7 @@ stoprate = conv(stoptime,ones(3,1),'same')/3;
 
 dFlist= reshape(dFalign,size(dFalign,1),size(dFalign,2)*size(dFalign,3));
 dFlist = dFlist(useCells,:);
+dFlist = dFlist + rand(size(dFlist))*10^-6;
 for i = 1:size(dFlist,1)
     dFlist(i,:) = dFlist(i,:)/std(dFlist(i,:));
 end
@@ -427,6 +425,7 @@ idxall(useCells) = idx;
 figure
 subplot(6,6,7:36);
 dFlist= reshape(dFalign,size(dFalign,1),size(dFalign,2)*size(dFalign,3));
+dFlist = dFlist+rand(size(dFlist))*10^-6;
 imagesc(dFlist(useCells(sortind),:),[0 1]); xlabel('frame'); ylabel('frame')
 subplot(6,6,1:6); plot(correctRate,'Linewidth',2); set(gca,'Xtick',[]); set(gca,'Ytick',[]); ylabel('correct'); ylim([0 1.1]); xlim([1 length(correctRate)])
 hold on; %plot([1 length(correctRate)],[0.5 0.5],'r:');

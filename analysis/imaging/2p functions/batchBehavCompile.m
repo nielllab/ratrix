@@ -45,69 +45,103 @@ for i = 1:length(alluse);
     
     sess(cellrange)=i;
     
+    %%% get eye data for behavior
+    clear eyes
+    load([pathname files(alluse(i)).dir '\' files(alluse(i)).behavPts],'eyes','eyesAlign');
+    if ~exist('eyes','var');
+        
+        display('calculating eyes');
+        load([pathname files(alluse(i)).dir '\' files(alluse(i)).behavPts],'onsets','dt');
+        eyes = get2pEyes([pathname files(alluse(i)).dir '\' files(alluse(i)).behavEyes],0,dt);
+        figure
+        plot(eyes); legend('x','y','r');
+        
+        timepts = -1:0.25:5;
+        eyeAlign = align2onsets(eyes',onsets,dt,timepts);
+        save([pathname files(alluse(i)).dir '\' files(alluse(i)).behavPts],'eyes','eyeAlign','-append');
+    end
+    
+    behavRadius{i} = eyes(:,3);
+    
     %%% load in speed data from passive 3x
-    clear spd
-    load([pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xPts],'spd','dFdecon','moviefname');
+    clear spd eyes
+    load([pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xPts],'spd','dFdecon','moviefname','eyes');
     if ~exist('spd','var')
         load([pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xStimrec],'stimRec');
         spd = get2pSpeed(stimRec,0.1,size(dFdecon,2)); figure; hist(spd); xlabel('speed')
-       save( [pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xPts],'spd','-append');
+        save( [pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xPts],'spd','-append');
     end
-    
-    clear eyes
+
+    %%% get eye data from passive 3x
     if ~exist('eyes','var');
         eyes = get2pEyes([pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xEyes],1,0.1);
+        save([pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xPts],'eyes','-append');
     end
-   
+    
+%     load([pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xEyes],'data');
+%     d= squeeze(data(:,:,1,50:50:end));
+%     range = [min(d(:)) max(d(:))];
+%     figure
+%     mx = max(eyes(:));
+%     for j = 1:10:size(data,4);
+%         subplot(2,2,2);
+%         imagesc(data(:,:,1,j),range);
+%         subplot(2,2,3:4);
+%         hold off; plot(eyes); hold on; plot([j/2 j/2], [1 mx]);
+%         drawnow;
+%     end
+%     
+    filt = ones(1,5); filt = filt/sum(filt);
+    r = conv(eyes(:,3),filt,'same');
     
     figure
     plot(eyes)
-    
-    
-    figure
-    plot(spd,eyes(:,3),'o');
-    
-    figure
-    plot(spd/max(spd)); hold on;; plot(eyes(:,3)/max(eyes(:,3)));
-    
-     d = corrcoef([dFdecon; eyes(:,3)']');
-     eyeCorrAll(cellrange) = d(1:cutoff,end);
-     
-     keyboard
-     
-        %%% get speed and dF on each trial, for isi and stim intervals
-        load(moviefname,'isi','duration');
-        dFdecon(dFdecon>5)=5;
-        clear sp_spont sp_ev spont ev
-        if isi==2
-            for tr = 1:floor(size(dFdecon,2)/30);
-                sp_spont(tr) = mean(spd((tr-1)*30 + (11:20)));
-                sp_ev(tr) = mean(spd((tr-1)*30 + (22:28)));
-                spont(:,tr) = mean(dFdecon(:,(tr-1)*30 + (11:20)),2);
-                ev(:,tr) = mean(dFdecon(:,(tr-1)*30 + (22:28)),2)- spont(:,tr);
-            end
-        else
-            for tr = 1:floor(size(dFdecon,2)/20);
-                sp_spont(tr) = mean(spd((tr-1)*20 + (6:10)));
-                sp_ev(tr) = mean(spd((tr-1)*20 + (12:18)));
-                spont(:,tr) = mean(dFdecon(:,(tr-1)*20 + (6:10)),2);
-                ev(:,tr) = mean(dFdecon(:,(tr-1)*20 + (12:18)),2)- spont(:,tr);
-            end
-        end
-        
-        %%% calculate change in dF with stationary/moving (delta)
-        %%% and correlation between dF and speed
-        d = corrcoef([spont; double(sp_spont>250)]');
-        spontCorr = d(1:end-1,end); %figure; hist(spontCorr,[-0.95:0.1:1]); title('spont corr')
-        deltaSpont = mean(spont(:,sp_spont>250),2)-mean(spont(:,sp_spont<250),2);
-        % figure; hist(deltaSpont,[-0.95:0.1:1]); title('delta spont')
-        d = corrcoef([ev; double(sp_ev>250)]');
-        evCorr = d(1:end-1,end); % figure; hist(evCorr,[-0.95:0.1:1]); title('evoked correlation')
-        spontCorrAll(cellrange) = spontCorr(1:cutoff);
-        evCorrAll(cellrange) = evCorr(1:cutoff);
-        deltaSpontAll(cellrange) =deltaSpont(1:cutoff);
-        
 
+    figure
+  hold on; plot(spd(5:end-5),r(5:end-5),'o');  plot(spd(5:end-5),r(5:end-5)); 
+    
+    figure
+    plot(spd/max(spd)); hold on; plot((r-min(r))/(max(r)-min(r)));
+    
+    d = corrcoef([dFdecon; r']');
+    eyeCorrAll(cellrange) = d(1:cutoff,end);
+    
+    passive3xRadius{i} = r;
+
+    
+    %%% get speed and dF on each trial, for isi and stim intervals
+    load(moviefname,'isi','duration');
+    dFdecon(dFdecon>5)=5;
+    clear sp_spont sp_ev spont ev
+    if isi==2
+        for tr = 1:floor(size(dFdecon,2)/30);
+            sp_spont(tr) = mean(spd((tr-1)*30 + (11:20)));
+            sp_ev(tr) = mean(spd((tr-1)*30 + (22:28)));
+            spont(:,tr) = mean(dFdecon(:,(tr-1)*30 + (11:20)),2);
+            ev(:,tr) = mean(dFdecon(:,(tr-1)*30 + (22:28)),2)- spont(:,tr);
+        end
+    else
+        for tr = 1:floor(size(dFdecon,2)/20);
+            sp_spont(tr) = mean(spd((tr-1)*20 + (6:10)));
+            sp_ev(tr) = mean(spd((tr-1)*20 + (12:18)));
+            spont(:,tr) = mean(dFdecon(:,(tr-1)*20 + (6:10)),2);
+            ev(:,tr) = mean(dFdecon(:,(tr-1)*20 + (12:18)),2)- spont(:,tr);
+        end
+    end
+    
+    %%% calculate change in dF with stationary/moving (delta)
+    %%% and correlation between dF and speed
+    d = corrcoef([spont; double(sp_spont>250)]');
+    spontCorr = d(1:end-1,end); %figure; hist(spontCorr,[-0.95:0.1:1]); title('spont corr')
+    deltaSpont = mean(spont(:,sp_spont>250),2)-mean(spont(:,sp_spont<250),2);
+    % figure; hist(deltaSpont,[-0.95:0.1:1]); title('delta spont')
+    d = corrcoef([ev; double(sp_ev>250)]');
+    evCorr = d(1:end-1,end); % figure; hist(evCorr,[-0.95:0.1:1]); title('evoked correlation')
+    spontCorrAll(cellrange) = spontCorr(1:cutoff);
+    evCorrAll(cellrange) = evCorr(1:cutoff);
+    deltaSpontAll(cellrange) =deltaSpont(1:cutoff);
+    
+    
     
     n=n+cutoff;
 end
@@ -231,12 +265,12 @@ imagesc(allData,[0 0.5])
 
 mdInd(sortClust==0) = 1:sum(sortClust==0);
 for i = 1:max(clust);
-   i
-   sum(clust==i)
-   if sum(clust==i)>0
+    i
+    sum(clust==i)
+    if sum(clust==i)>0
         data = allData(sortClust==i,:);
         start = min(find(sortClust==i));
-       tic; dist = pdist(imresize(data(:,1:end/4), [size(data,1),size(data,2)/8]),'correlation'); toc
+        tic; dist = pdist(imresize(data(:,1:end/4), [size(data,1),size(data,2)/8]),'correlation'); toc
         tic; [Y e] = mdscale(dist,1); toc
         [y sortind] = sort(Y);
         mdInd(sortClust==i) = sortind+start-1;
@@ -262,10 +296,10 @@ for i = 1:max(sess);
     subplot(1,3,1:2)
     imagesc(allData(sortCentered' & sortSess==i,:),[0 0.5]);
     hold on; for j= 1:8, plot([j*length(behavTimepts) j*length(behavTimepts)]+1,[1 sum(sortCentered' & sortSess==i)],'g'); end
-
+    
     title(sprintf('%s %s %s total=%d gratings=%d exposures=%d',files(alluse(i)).subj,files(alluse(i)).expt,files(alluse(i)).task,files(alluse(i)).totalDays,files(alluse(i)).totalSinceGratings,files(alluse(i)).learningDay));
-
-subplot(1,3,3);
+    
+    subplot(1,3,3);
     plot(yAll(sess==i),xAll(sess==i),'.'); axis equal;  axis([0 72 0 128]); hold on
     circle(36,0.66*128,17.5);circle(36,0.33*128,17.5);  set(gca,'Xtick',[]); set(gca,'Ytick',[]);
 end

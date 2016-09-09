@@ -45,14 +45,37 @@ for i = 1:length(alluse);
     
     sess(cellrange)=i;
     
+    %%% load in speed data from passive 3x
     clear spd
     load([pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xPts],'spd','dFdecon','moviefname');
     if ~exist('spd','var')
         load([pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xStimrec],'stimRec');
         spd = get2pSpeed(stimRec,0.1,size(dFdecon,2)); figure; hist(spd); xlabel('speed')
-        %         figure
-        %         plot(spd/max(spd)); hold on; plot(mean(dFdecon,1));
-        %
+       save( [pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xPts],'spd','-append');
+    end
+    
+    clear eyes
+    if ~exist('eyes','var');
+        eyes = get2pEyes([pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xEyes],1,0.1);
+    end
+   
+    
+    figure
+    plot(eyes)
+    
+    
+    figure
+    plot(spd,eyes(:,3),'o');
+    
+    figure
+    plot(spd/max(spd)); hold on;; plot(eyes(:,3)/max(eyes(:,3)));
+    
+     d = corrcoef([dFdecon; eyes(:,3)']');
+     eyeCorrAll(cellrange) = d(1:cutoff,end);
+     
+     keyboard
+     
+        %%% get speed and dF on each trial, for isi and stim intervals
         load(moviefname,'isi','duration');
         dFdecon(dFdecon>5)=5;
         clear sp_spont sp_ev spont ev
@@ -71,17 +94,20 @@ for i = 1:length(alluse);
                 ev(:,tr) = mean(dFdecon(:,(tr-1)*20 + (12:18)),2)- spont(:,tr);
             end
         end
-        d = corrcoef([spont; double(sp_spont>500)]');
+        
+        %%% calculate change in dF with stationary/moving (delta)
+        %%% and correlation between dF and speed
+        d = corrcoef([spont; double(sp_spont>250)]');
         spontCorr = d(1:end-1,end); %figure; hist(spontCorr,[-0.95:0.1:1]); title('spont corr')
-        deltaSpont = mean(spont(:,sp_spont>500),2)-mean(spont(:,sp_spont<500),2);
+        deltaSpont = mean(spont(:,sp_spont>250),2)-mean(spont(:,sp_spont<250),2);
         % figure; hist(deltaSpont,[-0.95:0.1:1]); title('delta spont')
-        d = corrcoef([ev; double(sp_ev>500)]');
+        d = corrcoef([ev; double(sp_ev>250)]');
         evCorr = d(1:end-1,end); % figure; hist(evCorr,[-0.95:0.1:1]); title('evoked correlation')
         spontCorrAll(cellrange) = spontCorr(1:cutoff);
         evCorrAll(cellrange) = evCorr(1:cutoff);
         deltaSpontAll(cellrange) =deltaSpont(1:cutoff);
         
-    end
+
     
     n=n+cutoff;
 end

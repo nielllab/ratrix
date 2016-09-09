@@ -20,8 +20,12 @@ Area = downsamplebin(Area(1:n,:),1,2)/2;
 Centroid = downsamplebin(Centroid(1:n,:),1,2)/2;
 
 fname(1:end-8)
-load(fname(1:end-8),'info');
-binsize=1;
+try
+    load(fname(1:end-8),'info');
+catch
+     load(fname(1:end-4),'info');
+end
+     binsize=1;
 
 %%% perform same sync as get2pdata_sbx
 
@@ -42,10 +46,10 @@ if syncToVid
     fr=fr(fr<nframes);
     
     tic
-    eyeAlign(:,1) = interp1(1:nframes,Centroid(:,1),fr);
-    eyeAlign(:,2) = interp1(1:nframes,Centroid(:,2),fr);
-    a = interp1(1:nframes,Area,fr);
-    eyeAlign(:,3) = sqrt(r)/pi;
+    eyeAlign(:,1) = interp1(1:length(Centroid),Centroid(:,1),fr);
+    eyeAlign(:,2) = interp1(1:length(Centroid),Centroid(:,2),fr);
+    a = interp1(1:length(Centroid),Area,fr);
+    eyeAlign(:,3) = sqrt(a)/pi;
     toc
     
     

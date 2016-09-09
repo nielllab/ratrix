@@ -2,17 +2,59 @@ clear all
 
 %%% load pts file (contains cell locations and dF, along with analysis results
     ptsfname = uigetfile('*.mat','pts file');
-    load(ptsfname);
+   display('loading pts file');
+   load(ptsfname);
 
-if ~exist('pixResp','var') | ~exist('dt','var')
-    [f p ] = uigetfile('*.mat','session data')
-    load(fullfile(p,f),'onsets','starts','trialRecs','pixResp','dt');
+if ~exist('pixResp','var') | ~exist('dt','var') | ~exist('sbxfilename','var');
+    if ~exist('sessName','var')
+    [f p ] = uigetfile('*.mat','session data'); sessName = fullfile(p,f);
+    save(ptsfname,'sessName','-append');
+    end
+    display('loading from session data');
+    tic; load(sessName,'onsets','starts','trialRecs','pixResp','dt','sbxfilename'); toc
+    save(ptsfname,'onsets','starts','trialRecs','pixResp','dt','sbxfilename','-append')
 end
 
 [f p] = uiputfile('*.pdf','pdf file');
 psfilenameFinal = fullfile(p,f);
 psfilename = 'c:\temp.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
+
+if ~exist('eyes','var');
+    display('calculating eyes')
+    eyes = get2pEyes( [sbxfilename '_eye.mat'],0,dt);
+end
+save(ptsfname,'eyes','-append');
+
+load([sbxfilename '_eye.mat'],'data');
+figure
+mx = max(eyes(:));
+for i = 1:20:size(data,4);
+    subplot(2,2,2);
+    imagesc(data(:,:,1,i));
+    subplot(2,2,3:4);
+    hold off; plot(eyes); hold on; plot([i/2 i/2], [1 mx]);
+    drawnow;
+end
+
+
+figure
+plot(eyes);
+
+timepts = -1:0.25:5;
+eyeAlign = align2onsets(eyes',onsets,dt,timepts);
+
+eyeNorm = eyeAlign - repmat(mean(eyeAlign(:,1:4,:),2),[1 size(eyeAlign,2) 1]);
+
+for i = 1:3
+figure
+imagesc(squeeze(eyeNorm(i,:,:))',[-5 5])
+end
+
+figure
+plot(timepts,squeeze(nanmean(eyeAlign,3))')
+
+keyboard
 
 %%% get target location, orientation, phase
 stim = [trialRecs.stimDetails];
@@ -30,6 +72,47 @@ if ~isempty(f) && f~=length(s)
     error('bad corrects')
 end
 correct = [s.correct] == 1;
+
+figure
+for i = 1:3
+   subplot(2,2,i);
+plot(timepts,nanmean(eyeAlign(i,:,location<0),3)' - nanmedian(eyes(:,i)));
+hold on
+plot(timepts,nanmean(eyeAlign(i,:,location>0),3)'- nanmedian(eyes(:,i)));
+axis([-1 5 -2 2])
+end
+
+figure
+for i = 1:3
+   subplot(2,2,i);
+plot(timepts,nanmean(eyeAlign(i,:,correct),3)' - nanmedian(eyes(:,i)),'g');
+hold on
+plot(timepts,nanmean(eyeAlign(i,:,~correct),3)'- nanmedian(eyes(:,i)),'r');
+axis([-1 5 -2 2])
+end
+
+figure
+for i = 1:3
+   subplot(2,2,i);
+plot(timepts,nanmean(eyeAlign(i,:,correct  & location<0),3)' - nanmedian(eyes(:,i)),'g');
+hold on
+plot(timepts,nanmean(eyeAlign(i,:,correct & location>0),3)' - nanmedian(eyes(:,i)),'c');
+plot(timepts,nanmean(eyeAlign(i,:,~correct & location<0),3)' - nanmedian(eyes(:,i)),'r');
+plot(timepts,nanmean(eyeAlign(i,:,~correct & location>0),3)' - nanmedian(eyes(:,i)),'m');
+axis([-1 5 -2 2])
+end
+
+
+figure
+for i = 1:3
+   subplot(2,2,i);
+plot(timepts,nanmean(eyeAlign(i,:,resptime<1),3)' - nanmedian(eyes(:,i)),'g');
+hold on
+plot(timepts,nanmean(eyeAlign(i,:,resptime>1),3)'- nanmedian(eyes(:,i)),'r');
+axis([-1 5 -2 2])
+end
+
+
 
 dFdecon=spikes*10;
 %dFdecon = dF;
@@ -397,6 +480,8 @@ goodTrialData = allTrialData(useCells,:,1:8);
 goodTrialData = reshape(goodTrialData(:,:,1:4),size(goodTrialData(:,:,1:4),1),size(goodTrialData(:,:,1:4),2)*size(goodTrialData(:,:,1:4),3));
 figure
 imagesc(goodTrialData,[-1 1])
+goodTrialData = goodTrialData+rand(size(goodTrialData))*10^-6; %%%% add a tiny amount of noise so neurons with zero activity don't create nans in distance
+
 
 dist = pdist(imresize(goodTrialData, [size(goodTrialData,1),size(goodTrialData,2)*0.5]),'correlation');
 Z = linkage(dist,'ward');

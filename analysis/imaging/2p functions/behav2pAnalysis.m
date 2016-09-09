@@ -3,7 +3,7 @@ clear all
 %%% load pts file (contains cell locations and dF, along with analysis results
     ptsfname = uigetfile('*.mat','pts file');
    display('loading pts file');
-   load(ptsfname);
+ tic;  load(ptsfname); toc
 
 if ~exist('pixResp','var') | ~exist('dt','var') | ~exist('sbxfilename','var');
     if ~exist('sessName','var')
@@ -159,6 +159,7 @@ for i = 1:size(dFdecon,1);
       dFnorm(i,:) = conv(dFnorm(i,:),filt,'same');
 end
 
+dFnorm(isnan(dFnorm))=0;
 col = 'rgb';
 [coeff score latent] = pca(dFnorm(useCells,:)');
 

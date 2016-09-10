@@ -1,16 +1,17 @@
 function [dfofInterp im_dt greenframe] = get2pdata(fname,dt,cycLength);
-[img framerate] = readAlign2p(fname,1,1,0.5);
+[img framerate] = readAlign2p(fname,1,1,0.1);
 nframes = size(img,3);
 
 greenframe = mean(img,3);
 
-display('doing prctile')
+display('doing mean')
 tic
-m = prctile(img(:,:,40:40:end),10,3);
+%m = prctile(img(:,:,40:40:end),10,3);
+m= greenframe;
 toc
 figure
 imagesc(m);
-title('10th prctile')
+title('mean')
 colormap(gray)
 
 dfof=zeros(size(img));
@@ -44,7 +45,7 @@ open(vid);
 writeVideo(vid,mov(1:end));
 close(vid)
 
-fullMov= mat2im(imresize(img(25:end-25,25:end-25,150:550),2),gray,[prctile(m(:),2) 1.5*prctile(m(:),99)]);
+fullMov= mat2im(imresize(img(25:end-25,25:end-25,:),2),gray,[prctile(m(:),2) 1.5*prctile(m(:),99)]);
 %fullMov = squeeze(fullMov(:,:,:,1));
 mov = immovie(permute(fullMov,[1 2 4 3]));
 %mov = immovie(fullMov);

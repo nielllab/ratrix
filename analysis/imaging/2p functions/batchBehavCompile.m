@@ -61,6 +61,24 @@ for i = 1:length(alluse);
         save([pathname files(alluse(i)).dir '\' files(alluse(i)).behavPts],'eyes','eyeAlign','-append');
     end
     
+    load([pathname files(alluse(i)).dir '\' files(alluse(i)).behavEyes],'data');
+    %     d= squeeze(data(:,:,1,50:50:end));
+    %     range = [min(d(:)) max(d(:))];
+    %     figure
+    %     mx = max(eyes(:));
+    %     for j = 1:100:size(data,4);
+    %         subplot(2,2,2);
+    %         imagesc(data(:,:,1,j),range);
+    %         subplot(2,2,3:4);
+    %         hold off; plot(eyes); hold on; plot([j/2 j/2], [1 mx]);
+    %         drawnow;
+    %     end
+    
+    figure
+    subplot(2,2,1); imagesc(data(:,:,1,50)); subplot(2,2,2); imagesc(data(:,:,1,round(end/3)));
+    subplot(2,2,3); imagesc(data(:,:,1,round(2*end/3))); subplot(2,2,4); imagesc(data(:,:,1,end)); colormap gray
+    
+    
     behavRadius{i} = eyes(:,3);
     
     %%% load in speed data from passive 3x
@@ -71,34 +89,34 @@ for i = 1:length(alluse);
         spd = get2pSpeed(stimRec,0.1,size(dFdecon,2)); figure; hist(spd); xlabel('speed')
         save( [pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xPts],'spd','-append');
     end
-
+    
     %%% get eye data from passive 3x
     if ~exist('eyes','var');
         eyes = get2pEyes([pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xEyes],1,0.1);
         save([pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xPts],'eyes','-append');
     end
     
-%     load([pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xEyes],'data');
-%     d= squeeze(data(:,:,1,50:50:end));
-%     range = [min(d(:)) max(d(:))];
-%     figure
-%     mx = max(eyes(:));
-%     for j = 1:10:size(data,4);
-%         subplot(2,2,2);
-%         imagesc(data(:,:,1,j),range);
-%         subplot(2,2,3:4);
-%         hold off; plot(eyes); hold on; plot([j/2 j/2], [1 mx]);
-%         drawnow;
-%     end
-%     
+    %     load([pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xEyes],'data');
+    %     d= squeeze(data(:,:,1,50:50:end));
+    %     range = [min(d(:)) max(d(:))];
+    %     figure
+    %     mx = max(eyes(:));
+    %     for j = 1:10:size(data,4);
+    %         subplot(2,2,2);
+    %         imagesc(data(:,:,1,j),range);
+    %         subplot(2,2,3:4);
+    %         hold off; plot(eyes); hold on; plot([j/2 j/2], [1 mx]);
+    %         drawnow;
+    %     end
+    %
     filt = ones(1,5); filt = filt/sum(filt);
     r = conv(eyes(:,3),filt,'same');
     
     figure
     plot(eyes)
-
+    
     figure
-  hold on; plot(spd(5:end-5),r(5:end-5),'o');  plot(spd(5:end-5),r(5:end-5)); 
+    hold on; plot(spd(5:end-5),r(5:end-5),'o');  plot(spd(5:end-5),r(5:end-5));
     
     figure
     plot(spd/max(spd)); hold on; plot((r-min(r))/(max(r)-min(r)));
@@ -107,7 +125,7 @@ for i = 1:length(alluse);
     eyeCorrAll(cellrange) = d(1:cutoff,end);
     
     passive3xRadius{i} = r;
-
+    
     
     %%% get speed and dF on each trial, for isi and stim intervals
     load(moviefname,'isi','duration');
@@ -144,6 +162,8 @@ for i = 1:length(alluse);
     
     
     n=n+cutoff;
+    
+    drawnow
 end
 
 figure

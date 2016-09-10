@@ -244,6 +244,7 @@ files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
 files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
 
+%%%%%n=0;% debugging eye file was named wrong.  erase this after finish
 n=n+1;
 files(n).subj = 'g62tx15lt'; 
 files(n).expt = '060616';
@@ -256,7 +257,7 @@ files(n).topoY = 'topoYsessionV2';
 files(n).behavPts = 'behavSessionV2__allfiles_PTS_dF.mat';
 files(n).passive3xPts = 'passiveBehav3x4orientSessionV2__allfiles_PTS_dF';%or passiveBehav3x4orient__allfiles_PTS_dF
 files(n).passive2sfPts = 'passiveBehav2sfSessionV2__allfiles_PTS_dF'; %or passiveBehav2sfSessionV2__allfiles_PTS_dF
-files(n).behavEyes = 'g62tx15lt_001_000_eye';
+files(n).behavEyes = 'g62tx15lt_001_001_eye';
 files(n).passive3xStimrec = 'stim_obj_001_005';
 files(n).passive2sfStimrec = 'stim_obj_001_004';
 files(n).passive3xEyes = 'g62tx15lt_001_005_eye';

@@ -48,7 +48,7 @@ pts = find(maxStd);
 %%% show max points
 [x y] = ind2sub(size(maxStd),pts);
 figure
-imagesc(stdImg,[0 500]); hold on
+imagesc(stdImg,[0 500]); hold on; colormap gray
 plot(y,x,'o');
 
 %%% select the top N points in brightness
@@ -64,7 +64,7 @@ end
 
 %%% show selected points
 figure
-imagesc(stdImg,[0 500]); hold on
+imagesc(stdImg,[0 500]); hold on; colormap gray
 plot(y(order(1:n)),x(order(1:n)),'o');
 
 %%% plot all fluorescence traces
@@ -92,7 +92,7 @@ imagesc((dF(perm,:)),[-0.5 0.5]); axis xy   %%% show sorted data
 
 %%% plot correlation coefficients
 figure
-imagesc(corrcoef(dF));
+imagesc(corrcoef(dF'));
 
-[f p] = uigputfile('*.mat','save results');
+[f p] = uiputfile('*.mat','save results');
 save(fullfile(p,f),'dF','greenframe','x','y');

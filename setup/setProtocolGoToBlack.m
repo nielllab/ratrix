@@ -10,7 +10,7 @@ end
 
 sm=makeStandardSoundManager();
 
-rewardSizeULorMS          =120;
+rewardSizeULorMS          =171;
 requestRewardSizeULorMS   =0;
 requestMode               ='first';
 msPenalty                 =3500;       %consider changing this also in future
@@ -27,6 +27,12 @@ stim.gain = 0.7 * ones(2,1);
 
 switch subjIDs{1}
 
+     case 'test2' % Started 9/9/16 
+       requestRewardSizeULorMS = 43;
+       rewardSizeULorMS        = 219;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;     
+    
     case 'g62mm9ln' % Started 9/9/16 
        requestRewardSizeULorMS = 43;
        rewardSizeULorMS        = 219;
@@ -315,7 +321,7 @@ switch subjIDs{1}
 
     case 'testgotoblackstopime' % Started 6/25/15
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 107;
+       rewardSizeULorMS        = 171;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        stim.slowSecs = 1;

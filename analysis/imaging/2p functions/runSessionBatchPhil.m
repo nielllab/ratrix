@@ -78,9 +78,23 @@ tic
 % topo2pSession('g62tx1rt_001_008.sbx','topoXsessionPOST_V2.mat',psfile);
 % topo2pSession('g62tx1rt_001_009.sbx','topoYsessionPOST_V2.mat',psfile);
 
+% topo2pSession('G62TX210TT_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('G62TX210TT_001_002.sbx','topoYsession_V2.mat',psfilename);
+% topo2pSession('G62TX210TT_001_003.sbx','darkness_PRE_V2.mat',psfilename);
+% patchGrating2pSession('G62TX210TT_001_004.sbx','patchGratingsession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62TX210TT_001_005.sbx','sizeSession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62TX210TT_001_006.sbx','sizeSession_POST_V2.mat',psfilename);
+% patchGrating2pSession('G62TX210TT_001_007.sbx','patchGratingsession_POST_V2.mat',psfilename);
+% topo2pSession('G62TX210TT_001_008.sbx','darkness_POST_V2.mat',psfilename);
 
-% 
-
+topo2pSession('G62BB6RT_001_001.sbx','topoXsession_V2.mat',psfilename);
+topo2pSession('G62BB6RT_001_002.sbx','topoYsession_V2.mat',psfilename);
+topo2pSession('G62BB6RT_001_003.sbx','darkness_PRE_V2.mat',psfilename);
+patchGrating2pSession('G62BB6RT_001_004.sbx','patchGratingsession_PRE_V2.mat',psfilename);
+sizeSelect2pSession('G62BB6RT_001_005.sbx','sizeSession_PRE_V2.mat',psfilename);
+sizeSelect2pSession('G62BB6RT_001_006.sbx','sizeSession_POST_V2.mat',psfilename);
+patchGrating2pSession('G62BB6RT_001_007.sbx','patchGratingsession_POST_V2.mat',psfilename);
+topo2pSession('G62BB6RT_001_008.sbx','darkness_POST_V2.mat',psfilename);
 
 toc
 

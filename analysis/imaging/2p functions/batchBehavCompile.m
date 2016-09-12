@@ -47,7 +47,7 @@ for i = 1:length(alluse);
     
     %%% get eye data for behavior
     clear eyes
-    load([pathname files(alluse(i)).dir '\' files(alluse(i)).behavPts],'eyes','eyesAlign');
+    load([pathname files(alluse(i)).dir '\' files(alluse(i)).behavPts],'eyes','eyeAlign');
     if ~exist('eyes','var');
         
         display('calculating eyes');

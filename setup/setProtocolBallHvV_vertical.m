@@ -32,6 +32,15 @@ if ~isscalar(subjIDs)
 end
  switch subjIDs{1}
      
+   
+      case 'test' % Started 5/4/16 %started HvV 9/6/16
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 123;
+       msPenalty               =3500;
+       percentCorrectionTrials = .75;     
+       pixPerCycs              = [200];
+       normalizedPosition      = [0.42 0.58];
+       radius                 = .34;  
      
    case 'g62jj2lt' % Started 5/4/16 %started HvV 9/6/16
        requestRewardSizeULorMS = 0;

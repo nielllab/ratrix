@@ -37,6 +37,12 @@ switch subjIDs{1}
        msPenalty               =3500;
        percentCorrectionTrials = .75; 
     
+    case 'g62kk10ln' % Started 8/23/16 %%start hvv 9/19/16
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 219;
+       msPenalty               =3500;
+       percentCorrectionTrials = .75;         
+       
    case 'pvchr3b11nt' % Started 9/20/16 
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 219;

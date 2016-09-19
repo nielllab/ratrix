@@ -28,19 +28,19 @@ stim.gain = 0.7 * ones(2,1);
 switch subjIDs{1}
 
      case 'test2' % Started 9/9/16 
-       requestRewardSizeULorMS = 43;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 219;
        msPenalty               =3500;
        percentCorrectionTrials = .5;     
 
     case 'g62ss2rt' % Started 9/16/16 
-       requestRewardSizeULorMS = 43;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 219;
        msPenalty               =3500;
        percentCorrectionTrials = .5;              
        
     case 'g62ss1lt' % Started 9/16/16 
-       requestRewardSizeULorMS = 43;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 219;
        msPenalty               =3500;
        percentCorrectionTrials = .5;       

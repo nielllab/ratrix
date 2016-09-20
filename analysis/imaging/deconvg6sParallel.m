@@ -1,7 +1,7 @@
 function img = deconvg6s(frames, dt);
 %dt = 0.1
 t = (0:9)*dt;
-tau = [0.18 0.55];
+tau = [0.05 0.55];
 psf = (1-exp(-t/tau(1))).*exp(-t/tau(2));
 psf = psf/sum(psf);
 % figure

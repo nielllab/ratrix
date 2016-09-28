@@ -1,4 +1,5 @@
 close all
+dbstop if error
 
 [f p] = uiputfile('*.pdf','pdf file');
 newpdfFile = fullfile(p,f);
@@ -129,15 +130,54 @@ tic
 % topo2pSession('G62TX19LT_001_008.sbx','darkness_POST_V2.mat',psfilename);
 % % 
 % %%091216
-topo2pSession('G62MM3RN_001_001.sbx','topoXsession_V2.mat',psfilename);
-topo2pSession('G62MM3RN_001_002.sbx','topoYsession_V2.mat',psfilename);
-topo2pSession('G62MM3RN_001_003.sbx','darkness_PRE_V2.mat',psfilename);
-patchGrating2pSession('G62MM3RN_001_004.sbx','patchGratingsession_PRE_V2.mat',psfilename);
-sizeSelect2pSession('G62MM3RN_001_005.sbx','sizeSession_PRE_V2.mat',psfilename);
-sizeSelect2pSession('G62MM3RN_001_006.sbx','sizeSession_POST_V2.mat',psfilename);
-patchGrating2pSession('G62MM3RN_001_007.sbx','patchGratingsession_POST_V2.mat',psfilename);
-topo2pSession('G62MM3RN_001_008.sbx','darkness_POST_V2.mat',psfilename);
+% topo2pSession('G62MM3RN_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('G62MM3RN_001_002.sbx','topoYsession_V2.mat',psfilename);
+% topo2pSession('G62MM3RN_001_003.sbx','darkness_PRE_V2.mat',psfilename);
+% patchGrating2pSession('G62MM3RN_001_004.sbx','patchGratingsession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62MM3RN_001_005.sbx','sizeSession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62MM3RN_001_006.sbx','sizeSession_POST_V2.mat',psfilename);
+% patchGrating2pSession('G62MM3RN_001_007.sbx','patchGratingsession_POST_V2.mat',psfilename);
+% topo2pSession('G62MM3RN_001_008.sbx','darkness_POST_V2.mat',psfilename);
 
+% % %%091516
+% topo2pSession('G62BB7LT_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('G62BB7LT_001_002.sbx','topoYsession_V2.mat',psfilename);
+% topo2pSession('G62BB7LT_001_003.sbx','darkness_PRE_V2.mat',psfilename);
+% patchGrating2pSession('G62BB7LT_001_004.sbx','patchGratingsession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62BB7LT_001_005.sbx','sizeSession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62BB7LT_001_006.sbx','sizeSession_POST_V2.mat',psfilename);
+% patchGrating2pSession('G62BB7LT_001_007.sbx','patchGratingsession_POST_V2.mat',psfilename);
+% topo2pSession('G62BB7LT_001_008.sbx','darkness_POST_V2.mat',psfilename);
+
+%%%091616
+% topo2pSession('G62FF2RT_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('G62FF2RT_001_002.sbx','topoYsession_V2.mat',psfilename);
+% topo2pSession('G62FF2RT_001_003.sbx','darkness_PRE_V2.mat',psfilename);
+% patchGrating2pSession('G62FF2RT_001_004.sbx','patchGratingsession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62FF2RT_001_005.sbx','sizeSession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62FF2RT_001_006.sbx','sizeSession_POST_V2.mat',psfilename);
+% patchGrating2pSession('G62FF2RT_001_007.sbx','patchGratingsession_POST_V2.mat',psfilename);
+% topo2pSession('G62FF2RT_001_008.sbx','darkness_POST_V2.mat',psfilename);
+
+% % %%%091616
+% topo2pSession('G62Z5RT_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('G62Z5RT_001_002.sbx','topoYsession_V2.mat',psfilename);
+% topo2pSession('G62Z5RT_001_003.sbx','darkness_PRE_V2.mat',psfilename);
+% patchGrating2pSession('G62Z5RT_001_004.sbx','patchGratingsession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62Z5RT_001_005.sbx','sizeSession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62Z5RT_001_006.sbx','sizeSession_POST_V2.mat',psfilename);
+% patchGrating2pSession('G62Z5RT_001_007.sbx','patchGratingsession_POST_V2.mat',psfilename);
+% topo2pSession('G62Z5RT_001_008.sbx','darkness_POST_V2.mat',psfilename);
+
+%%%091716
+% topo2pSession('G62MM3RN_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('G62MM3RN_001_002.sbx','topoYsession_V2.mat',psfilename);
+% topo2pSession('G62MM3RN_001_003.sbx','darkness_PRE_V2.mat',psfilename);
+% patchGrating2pSession('G62MM3RN_001_004.sbx','patchGratingsession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62MM3RN_001_005.sbx','sizeSession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62MM3RN_001_006.sbx','sizeSession_POST_V2.mat',psfilename);
+% patchGrating2pSession('G62MM3RN_001_007.sbx','patchGratingsession_POST_V2.mat',psfilename);
+% topo2pSession('G62MM3RN_001_008.sbx','darkness_POST_V2.mat',psfilename);
 
 toc
 

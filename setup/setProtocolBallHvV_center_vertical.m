@@ -31,7 +31,37 @@ if ~isscalar(subjIDs)
 end
 switch subjIDs{1}
     
+    case 'hvvtest' 
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 219;
+       msPenalty               =3500;
+       percentCorrectionTrials = .75; 
     
+        case 'g62kk9rn' % Started 8/23/16 %moved to HvV_center 9/23/16
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 219;
+       msPenalty               =3500;
+       percentCorrectionTrials = .75;  
+    
+    
+    case 'g62kk10ln' % Started 8/23/16 %%start hvv 9/19/16
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 219;
+       msPenalty               =3500;
+       percentCorrectionTrials = .75;         
+       
+   case 'pvchr3b11nt' % Started 9/20/16 
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 219;
+       msPenalty               =3500;
+       percentCorrectionTrials = .75;  
+    
+    case 'pvchr3b11tt' % Started 9/16/16 
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 219;
+       msPenalty               =3500;
+       percentCorrectionTrials = .75; 
+       
     case 'pvchr3b11lt' % Started 9/8/16 
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 219;

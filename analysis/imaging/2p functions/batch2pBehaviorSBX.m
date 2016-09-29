@@ -831,7 +831,7 @@ files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
 files(n).ncells = 200;  %%% optional - we could use this to adjust # of cells selected
 
-%g62kk7lt (naive) %first naive session 060216 %%% started behav 080216
+%g62kk7lt (naive) %first naive session 081616 %%% started behav 080216
 
 n=n+1;
 files(n).subj = 'g62kk7lt'; 
@@ -908,6 +908,61 @@ files(n).totalDays = 17;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
 files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+
+
+%g62dd15rt (naive) %first naive session 091216 %%% started behav 082316
+
+n=n+1;
+files(n).subj = 'g62dd15rt'; 
+files(n).expt = '091216';
+files(n).dir = '091216 g62dd15rt Naive behavior\g62dd15rt';
+files(n).compileData ='compiled_g62dd15rt_091216.mat';  
+files(n).topoXpts = 'topoXsessionV2__allfiles_PTS_dF';
+files(n).topoYpts = 'topoYsessionV2__allfiles_PTS_dF';
+files(n).topoX = 'topoXsessionV2';
+files(n).topoY = 'topoYsessionV2';
+files(n).behavPts = 'behavSessionV2__allfiles_PTS_dF.mat';
+files(n).passive3xPts = 'passiveBehav3x8minV2__allfiles_PTS_dF';%or passiveBehav3x4orient__allfiles_PTS_dF
+files(n).passive2sfPts = 'passiveBehav2sf8min__allfiles_PTS_dF'; %or passiveBehav2sfSessionV2__allfiles_PTS_dF
+files(n).behavEyes = 'g62dd15rt_001_000_eye';
+files(n).passive3xStimrec = 'stim_obj_001_004';
+files(n).passive2sfStimrec = 'stim_obj_001_003';
+files(n).passive3xEyes = 'g62dd15rt_001_004_eye';
+files(n).passive2sfEyes = 'g62dd15rt_001_003_eye';
+files(n).task = 'Naive';
+files(n).learningDay = [1];   %%% can probably ignore for GTS, more important for naive
+files(n).totalSinceGratings = 1;
+files(n).totalDays = 21;
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+
+
+n=n+1;
+files(n).subj = 'g62dd15rt'; 
+files(n).expt = '091316';
+files(n).dir = '091316 g62dd15rt Naive behavior\g62dd15rt';
+files(n).compileData ='compiled_g62dd15rt_091316.mat';  
+files(n).topoXpts = 'topoXsessionV2__allfiles_PTS_dF';
+files(n).topoYpts = 'topoYsessionV2__allfiles_PTS_dF';
+files(n).topoX = 'topoXsessionV2';
+files(n).topoY = 'topoYsessionV2';
+files(n).behavPts = 'behavSessionV2__allfiles_PTS_dF.mat';
+files(n).passive3xPts = 'passiveBehav3x8minV2__allfiles_PTS_dF';%or passiveBehav3x4orient__allfiles_PTS_dF
+files(n).passive2sfPts = 'passiveBehav2sf8min__allfiles_PTS_dF'; %or passiveBehav2sfSessionV2__allfiles_PTS_dF
+files(n).behavEyes = 'g62dd15rt_001_000_eye';
+files(n).passive3xStimrec = 'stim_obj_001_004';
+files(n).passive2sfStimrec = 'stim_obj_001_003';
+files(n).passive3xEyes = 'g62dd15rt_001_004_eye';
+files(n).passive2sfEyes = 'g62dd15rt_001_003_eye';
+files(n).task = 'Naive';
+files(n).learningDay = [1];   %%% can probably ignore for GTS, more important for naive
+files(n).totalSinceGratings = 1;
+files(n).totalDays = 21;
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+
 
 
 % n=n+1;

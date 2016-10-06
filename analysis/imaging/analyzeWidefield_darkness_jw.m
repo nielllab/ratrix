@@ -13,7 +13,12 @@ close all
 psfilename = 'C:\tempPS.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
-   alluse = find( strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
+for i =1:length(files);
+    hasdarkness(i) = ~isempty(files(i).darkness);
+end
+
+
+   alluse = find( strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session') & hasdarkness  ) 
   
 length(alluse)
 %alluse=alluse(1:5)

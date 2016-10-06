@@ -1,3 +1,4 @@
+printfigs=0;
 
 %%% load in points for analysis
 [f p] = uigetfile('*.mat','pts file');
@@ -28,8 +29,11 @@ if exist(psfilename,'file')==2;delete(psfilename);end
 
 %newuse = find(strcmp({files.notes},'good imaging session')   & ~strcmp({files(use(f)).darkness},'') ); %
 
-
+clear  sigAll decorrSigAll    traceCorrAll  cc_imAll
+    
+    
 for f= 1:length(use)
+    f
     display('loading data')
     clear dfof_bg sp
      tic 
@@ -57,7 +61,8 @@ for f= 1:length(use)
         npts = input('number of points to select')
         figure
         imagesc(im(:,:,1),[-0.2 0.2]); colormap gray
-        hold on
+        hold on 
+        plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2)
         for i = 1:npts
             [y(i) x(i)] = ginput(1);
             plot(y,x,'g*')
@@ -75,16 +80,15 @@ for f= 1:length(use)
         plot(squeeze(im(x(i),y(i),:))+i*0.2,col(i))
     end
     title(sprintf('%s %s raw',files(use(f)).subj, files(use(f)).expt));   
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfilename,'-append');
+    if printfigs, set(gcf, 'PaperPositionMode', 'auto'), print('-dpsc',psfilename,'-append'),end
+    
     
     %%% correlation coefficient matrix for selected points
     figure
     imagesc(imresize(corrcoef(trace),10,'nearest'),[0.8 1]); colorbar
     title('corr pre-decor')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfilename,'-append');
-    
+    if printfigs, set(gcf, 'PaperPositionMode', 'auto'), print('-dpsc',psfilename,'-append'),end
+
     
     %%% plot rms value
     sig = std(im,[],3);
@@ -92,8 +96,8 @@ for f= 1:length(use)
     imagesc(sig,[0 0.075]); colorbar
     hold on; plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2)
     title('std dev')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfilename,'-append');
+    if printfigs, set(gcf, 'PaperPositionMode', 'auto'), print('-dpsc',psfilename,'-append'),end
+
     
     %
     %     imsmooth= imfilter(im,filt); %%% highpass filter
@@ -102,7 +106,7 @@ for f= 1:length(use)
     %%% reshape into a 2-d matrix for pca
     obs = reshape(im,size(im,1)*size(im,2),size(im,3));
     sigcol = reshape(sig,size(im,1)*size(im,2),1);
-    obs(sigcol<0.02,:)=0;  %%% remove pts with low variance to select brain from bkground
+    obs(sigcol<0.015,:)=0;  %%% remove pts with low variance to select brain from bkground
     
     %%% PCA
     [coeff score latent] = pca(obs');
@@ -117,10 +121,10 @@ for f= 1:length(use)
     for i = 1:12
         subplot(3,4,i);
         imagesc(reshape(coeff(:,i),size(im,1),size(im,2)),[-0.1 0.1])
-        hold on; plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2)
+        hold on; plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2); colormap jet
     end    
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfilename,'-append');
+    if printfigs, set(gcf, 'PaperPositionMode', 'auto'), print('-dpsc',psfilename,'-append'),end
+
     
     %%% plot timecourse of first 5 components
     figure
@@ -128,8 +132,8 @@ for f= 1:length(use)
         subplot(5,1,i);
         plot(score(:,i)); axis off
     end
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfilename,'-append');
+    if printfigs, set(gcf, 'PaperPositionMode', 'auto'), print('-dpsc',psfilename,'-append'),end
+
     
     %%% plot first component vs running speed (if available)
     if exist('sp','var') && sum(sp~=0)
@@ -150,13 +154,15 @@ for f= 1:length(use)
         figure
         plot(-120:0.1:120,xcorr(sp,score(:,1),1200,'coeff'));
         title('sp comp1 xcorr'); xlabel('secs'); ylim([-0.2 0.2])
-        set(gcf, 'PaperPositionMode', 'auto');     print('-dpsc',psfilename,'-append');
+    if printfigs, set(gcf, 'PaperPositionMode', 'auto'), print('-dpsc',psfilename,'-append'),end
+
         
     end
     
     %%% remove first component, which dominates
     %%% I call this decorrelation, though not exactly true
-    tcourse = coeff(:,1)*score(:,1)';
+    badcomps = input('components to remove: ');
+    tcourse = coeff(:,badcomps)*score(:,badcomps)';
     obs = obs-tcourse;
     obs_im = reshape(obs,size(im));
     
@@ -170,8 +176,8 @@ for f= 1:length(use)
         plot(decorrTrace(:,i)+0.1*i,col(i));
     end
     title(sprintf('%s %s decorr',files(use(f)).subj, files(use(f)).expt));
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfilename,'-append');
+    if printfigs, set(gcf, 'PaperPositionMode', 'auto'), print('-dpsc',psfilename,'-append'),end
+
     
     %%% correlation matrix for selected points
     figure
@@ -185,7 +191,7 @@ for f= 1:length(use)
     decorrSig = std(obs_im,[],3);
     
     %%% kmeans clustering
-    nclust = 7;
+    nclust = 3;
     tic
     idx = kmeans(decorrTrace',nclust,'distance','correlation');
     toc
@@ -210,9 +216,8 @@ for f= 1:length(use)
     plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
     axis ij
     axis equal
-    
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfilename,'-append');
+    if printfigs, set(gcf, 'PaperPositionMode', 'auto'), print('-dpsc',psfilename,'-append'),end
+
     
     %%% choose evenly spaced grid points for connectivity
 %     n=0;
@@ -252,46 +257,50 @@ for f= 1:length(use)
         axis equal;
         axis off;
     end
-    
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfilename,'-append');
+    if printfigs, set(gcf, 'PaperPositionMode', 'auto'), print('-dpsc',psfilename,'-append'),end
+
     
     %%% store results for this subject
-    decorrSigAll(:,:,f)=decorrSig;
-    traceCorrAll(:,:,f)=traceCorr;
-    cc_imAll(:,:,:,:,f) = cc_im;
+    sigAll(:,:,f) = sig;
+    decorrSigAll(:,:,f)=decorrSig;  %%% stdev
+    traceCorrAll(:,:,f)=traceCorr;  %%% correlation among selected pts
+    cc_imAll(:,:,:,:,f) = cc_im;    %%% correlation images for selected points
 end
 
 %%% take mean over subjects
 decorrSig = mean(decorrSigAll,3);
-cc_imMn = mean(cc_imAll,5);
+cc_imMn = nanmean(cc_imAll,5);
 traceCorr = nanmeanMW(traceCorrAll,3);
-
+meanSig = mean(sigAll,3);
 %%% figures for averaged data
 
 %%% mean correlation maps for first 7 pts
 figure
-subplot(2,4,1)
 imagesc(decorrSig,[0 0.025])
+
+figure
+imagesc(meanSig,[0.04 0.08]); colormap jet; hold on; plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2)
+
+figure
 hold on; plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
 axis equal;axis off;
-for i = 1:7
-    subplot(2,4,i+1)
-    imagesc(squeeze(cc_imMn(x(i),y(i),:,:))); hold on
+for i = 1:npts
+    subplot(3,4,i)
+    imagesc(squeeze(cc_imMn(x(i),y(i),:,:)),[ -0.5 1]); hold on; colormap jet
     plot(y(i),x(i),'g*');
     hold on; plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2)
-    axis equal;
+    axis equal; axis([10 55 10 55])
     axis off;
 end
-set(gcf, 'PaperPositionMode', 'auto');
-print('-dpsc',psfilename,'-append');
+    if printfigs, set(gcf, 'PaperPositionMode', 'auto'), print('-dpsc',psfilename,'-append'),end
+
 
 %%% correlation matrix for selected points
 figure
 imagesc(imresize(traceCorr,10,'nearest'),[-1 1]);
 title('avg corr post-decorr')
-set(gcf, 'PaperPositionMode', 'auto');
-print('-dpsc',psfilename,'-append');
+    if printfigs, set(gcf, 'PaperPositionMode', 'auto'), print('-dpsc',psfilename,'-append'),end
+
 
 
 %%% average connectivity map
@@ -301,7 +310,7 @@ hold on
 for i = 1:npts
     plot(y(i),x(i),[col(i) 'o'],'Markersize',8,'Linewidth',2)
     for j= 1:npts
-        if traceCorr(i,j)>0.02
+        if traceCorr(i,j)>0.1
             plot([y(i) y(j)],[x(i) x(j)],'Linewidth',8*traceCorr(i,j))
         end
     end

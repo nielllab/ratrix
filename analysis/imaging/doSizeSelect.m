@@ -92,7 +92,11 @@ for f = 1:length(use)
     legend('stim','acq')
     ylabel('slippage (secs)')
     xlabel('mins')
-
+    stimslip = (stimRec.ts' - stimRec.ts(1)) - (1/60)*(0:length(stimRec.ts)-1);
+    acqslip = (frameT' - frameT(1)) - 0.1*(0:length(frameT)-1);
+    slip(f) = median(stimslip) - median(acqslip);
+    title('slip = %f',slip(f));
+    
     imageT=(1:size(dfof_bg,3))/imagerate;
     img = imresize(double(dfof_bg),1,'method','box');
 

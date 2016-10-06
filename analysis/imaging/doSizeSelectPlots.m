@@ -2,7 +2,58 @@
 %It takes in the output files of analyzeSizeSelect
 %PRLP 02/01/2016 Niell Lab
 dbstop if error
-filename = 'SalineCompareSizeSelect'; %pdf name
+
+ptsdir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data';
+
+%%%saline naive data
+% filename = 'SalineNaiveSizeSelect'; %pdf name
+% predir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data\Pre_Saline';
+% postdir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data\Post_Saline';
+% datafiles = {'072816_G62BB6RT_SALINE_RIG2_SizeSelectAnalysis.mat',...
+%             '080116_G62AA3TT_SALINE_RIG2_SizeSelectAnalysis.mat',...
+%             '082416_G62Y9RT_SALINE_RIG2_SizeSelectAnalysis.mat',...
+%             '082516_G62TX210_2_SALINE_RIG2_SizeSelectAnalysis.mat'};
+% ptsfile = {'G62BB6RT_points.mat',...
+%           'G62AA3TT_points.mat',...
+%           'G62Y9RT_points.mat'...
+%           'G62TX210TT_points.mat'}; %specific point files for animals
+      
+% %%%saline trained data
+% filename = 'SalineTrainedSizeSelect'; %pdf name
+% predir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data\Pre_Saline';
+% postdir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data\Post_Saline';
+% datafiles = {'082516_G62EE6LT_SALINE_RIG2_SizeSelectAnalysis.mat',...
+%             '083116_G62TX19TT_SALINE_RIG2_SizeSelectAnalysis.mat'};
+% ptsfile = {'G62EE6LT_points.mat'...
+%           'G62TX19LT_points.mat'}; %specific point files for animals
+
+% %%doi naive data
+% filename = 'DOINaiveSizeSelect'; %pdf name
+% predir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data\Pre_DOI';
+% postdir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data\Post_DOI';
+% datafiles = {'071216_G62Y9RT_DOI_RIG2_SizeSelectAnalysis.mat',...
+%             '071316_G62AA3TT_DOI_RIG2_SizeSelectAnalysis.mat',...
+%             '071316_G62BB6RT_DOI_RIG2_SizeSelectAnalysis.mat',...
+%             '072816_G62TX210TT_DOI_RIG2_SizeSelectAnalysis.mat'};
+% ptsfile = {'G62Y9RT_DOIpoints.mat',...
+%           'G62AA3TT_DOIpoints.mat'...
+%           'G62BB6RT_DOIpoints.mat',...          
+%           'G62TX210TT_DOIpoints.mat'}; %specific point files for animals
+      
+% % % %%doi trained data
+filename = 'DOITrainedSizeSelect'; %pdf name
+predir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data\Pre_DOI';
+postdir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data\Post_DOI';
+datafiles = {'071216_G62TX19LT_DOI_RIG2_SizeSelectAnalysis.mat',...
+            '071216_G62EE6LT_DOI_RIG2_SizeSelectAnalysis.mat',...
+            '071316_G62EE8TT_DOI_RIG2_SizeSelectAnalysis.mat',...
+            '071316_G62BB8TT_DOI_RIG2_SizeSelectAnalysis.mat'};
+ptsfile = {'G62TX19LT_DOIpoints.mat',...
+          'G62EE6LT_DOIpoints.mat'...
+          'G62EE8TT_DOIpoints.mat'...
+          'G62BB8TT_DOIpoints.mat'}; %specific point files for animals
+ 
+          
 % predir = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\Trained Pre';
 % postdir = '\\langevin\backup\widefield\DOI_experiments\Masking_SizeSelect\Trained Post';
 % datafiles = {'021316_G62TX2.6LT_RIG2_DOI_SizeSelectAnalysis.mat',...
@@ -19,46 +70,7 @@ filename = 'SalineCompareSizeSelect'; %pdf name
 %           'G62W7LN_SizeSelectPoints.mat',...
 %           'G62W7TT_SizeSelectPoints.mat'};
 % ptsfile = {'CALB25B5RT_SizeSelectPoints'};
-
-ptsdir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data';
-
-%%%saline data
-predir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data\Pre_Saline';
-postdir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data\Post_Saline';
-datafiles = {'072816_G62BB6RT_SALINE_RIG2_SizeSelectAnalysis.mat',...
-            '080116_G62AA3TT_SALINE_RIG2_SizeSelectAnalysis.mat',...
-            '082416_G62Y9RT_SALINE_RIG2_SizeSelectAnalysis.mat',...
-            '082516_G62EE6LT_SALINE_RIG2_SizeSelectAnalysis.mat',...
-            '082516_G62TX210_2_SALINE_RIG2_SizeSelectAnalysis.mat',...
-            '083116_G62TX19TT_SALINE_RIG2_SizeSelectAnalysis.mat'};
-ptsfile = {'G62BB6RT_points.mat',...
-          'G62AA3TT_points.mat',...
-          'G62Y9RT_points.mat'...
-          'G62EE6LT_points.mat'...
-          'G62TX210TT_points.mat',...
-          'G62TX19LT_points.mat'}; %specific point files for animals
-
-%%%doi data
-% predir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data\Pre_DOI';
-% postdir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data\Post_DOI';
-% datafiles = {'071216_G62Y9RT_DOI_RIG2_SizeSelectAnalysis.mat',...
-%             '071216_G62TX19LT_DOI_RIG2_SizeSelectAnalysis.mat',...
-%             '071216_G62EE6LT_DOI_RIG2_SizeSelectAnalysis.mat',...
-%             '071316_G62EE8TT_DOI_RIG2_SizeSelectAnalysis.mat',...
-%             '071316_G62BB8TT_DOI_RIG2_SizeSelectAnalysis.mat',...
-%             '071316_G62AA3TT_DOI_RIG2_SizeSelectAnalysis.mat',...
-%             '071316_G62BB6RT_DOI_RIG2_SizeSelectAnalysis.mat',...
-%             '072816_G62TX210TT_DOI_RIG2_SizeSelectAnalysis.mat'};
-% ptsfile = {'G62Y9RT_DOIpoints.mat',...
-%           'G62TX19LT_DOIpoints.mat',...
-%           'G62EE6LT_DOIpoints.mat'...
-%           'G62EE8TT_DOIpoints.mat'...
-%           'G62BB8TT_DOIpoints.mat',...
-%           'G62AA3TT_DOIpoints.mat'...
-%           'G62BB6RT_DOIpoints.mat',...          
-%           'G62TX210TT_DOIpoints.mat'}; %specific point files for animals
-          
-
+load(filename)
 plotrange = 5:9;
 
 psfilename = 'c:\temp.ps';
@@ -85,26 +97,26 @@ contrastRange = unique(contrasts); sfrange = unique(sf); phaserange = unique(pha
 for i = 1:length(contrastRange);contrastlist{i} = num2str(contrastRange(i));end
 for i=1:length(sizeVals); sizes{i} = num2str(sizeVals(i)); end
 
-alltrialcycavgpre = zeros(260,260,acqdurframes+acqdurframes/2,length(sfrange),length(phaserange),length(contrastRange),length(radiusRange),2,length(datafiles));
-allpeakspre = zeros(length(sfrange),length(phaserange),length(contrastRange),length(radiusRange),2,length(areas),length(datafiles));
-alltracespre = zeros(length(areas),acqdurframes+acqdurframes/2,length(sfrange),length(phaserange),length(contrastRange),length(radiusRange),2,length(datafiles));
-allgauParamspre = zeros(length(contrastRange),length(radiusRange),2,length(areas),5,length(datafiles));
-allhalfMaxpre = zeros(length(contrastRange),length(radiusRange),2,length(areas),length(datafiles));
-allareapeakspre = zeros(length(contrastRange),length(radiusRange),2,length(areas),length(datafiles));
-for i= 1:length(datafiles) %collates all conditions (numbered above) 
-    load(fullfile(predir,datafiles{i}),'trialcycavg','peaks','mv','areapeaks','gauParams','halfMax')
-    alltrialcycavgpre(:,:,:,:,:,:,:,:,i) = trialcycavg;
-    allpeakspre(:,:,:,:,:,:,i) = peaks;
-    allmvpre(:,i) = mv;
-    allgauParamspre(:,:,:,:,:,i) = gauParams;
-    allhalfMaxpre(:,:,:,:,i) = halfMax;
-    allareapeakspre(:,:,:,:,i) = areapeaks;
-    load(fullfile(ptsdir,ptsfile{i}));
-    for j=1:length(x)
-        alltracespre(j,:,:,:,:,:,:,i) = squeeze(nanmean(nanmean(trialcycavg(y(j)-2:y(j)+2,x(j)-2:x(j)+2,:,:,:,:,:,:),1),2));
-    end
-end
-
+% alltrialcycavgpre = zeros(260,260,acqdurframes+acqdurframes/2,length(sfrange),length(phaserange),length(contrastRange),length(radiusRange),2,length(datafiles));
+% allpeakspre = zeros(length(sfrange),length(phaserange),length(contrastRange),length(radiusRange),2,length(areas),length(datafiles));
+% alltracespre = zeros(length(areas),acqdurframes+acqdurframes/2,length(sfrange),length(phaserange),length(contrastRange),length(radiusRange),2,length(datafiles));
+% allgauParamspre = zeros(length(contrastRange),length(radiusRange),2,length(areas),5,length(datafiles));
+% allhalfMaxpre = zeros(length(contrastRange),length(radiusRange),2,length(areas),length(datafiles));
+% allareapeakspre = zeros(length(contrastRange),length(radiusRange),2,length(areas),length(datafiles));
+% for i= 1:length(datafiles) %collates all conditions (numbered above) 
+%     load(fullfile(predir,datafiles{i}),'trialcycavg','peaks','mv','areapeaks','gauParams','halfMax')
+%     alltrialcycavgpre(:,:,:,:,:,:,:,:,i) = trialcycavg;
+%     allpeakspre(:,:,:,:,:,:,i) = peaks;
+%     allmvpre(:,i) = mv;
+%     allgauParamspre(:,:,:,:,:,i) = gauParams;
+%     allhalfMaxpre(:,:,:,:,i) = halfMax;
+%     allareapeakspre(:,:,:,:,i) = areapeaks;
+%     load(fullfile(ptsdir,ptsfile{i}));
+%     for j=1:length(x)
+%         alltracespre(j,:,:,:,:,:,:,i) = squeeze(nanmean(nanmean(trialcycavg(y(j)-2:y(j)+2,x(j)-2:x(j)+2,:,:,:,:,:,:),1),2));
+%     end
+% end
+% 
 avgtrialcycavgpre = nanmean(alltrialcycavgpre,9);%group mean frames by trial
 setrialcycavgpre = nanstd(alltrialcycavgpre,9)/sqrt(length(datafiles));%group standard error
 avgpeakspre = nanmean(allpeakspre,7);
@@ -119,27 +131,27 @@ avghalfMaxpre = nanmean(allhalfMaxpre,5);
 sehalfMaxpre = nanstd(allhalfMaxpre,5)/sqrt(length(datafiles));
 avgareapeakspre = nanmean(allareapeakspre,5);
 seareapeakspre = nanstd(allareapeakspre,5)/sqrt(length(datafiles));
-
-alltrialcycavgpost = zeros(260,260,acqdurframes+acqdurframes/2,length(sfrange),length(phaserange),length(contrastRange),length(radiusRange),2,length(datafiles));
-allpeakspost = zeros(length(sfrange),length(phaserange),length(contrastRange),length(radiusRange),2,length(areas),length(datafiles));
-alltracespost = zeros(length(areas),acqdurframes+acqdurframes/2,length(sfrange),length(phaserange),length(contrastRange),length(radiusRange),2,length(datafiles));
-allgauParamspost = zeros(length(contrastRange),length(radiusRange),2,length(areas),5,length(datafiles));
-allhalfMaxpost = zeros(length(contrastRange),length(radiusRange),2,length(areas),length(datafiles));
-allareapeakspost = zeros(length(contrastRange),length(radiusRange),2,length(areas),length(datafiles));
-for i= 1:length(datafiles) %collates all conditions (numbered above) 
-    load(fullfile(postdir,datafiles{i}),'trialcycavg','peaks','mv','areapeaks','gauParams','halfMax')
-    alltrialcycavgpost(:,:,:,:,:,:,:,:,i) = trialcycavg;
-    allpeakspost(:,:,:,:,:,:,i) = peaks;
-    allmvpost(:,i) = mv;
-    allgauParamspost(:,:,:,:,:,i) = gauParams;
-    allhalfMaxpost(:,:,:,:,i) = halfMax;
-    allareapeakspost(:,:,:,:,i) = areapeaks;
-    load(fullfile(ptsdir,ptsfile{i}));
-    for j=1:length(x)
-        alltracespost(j,:,:,:,:,:,:,i) = squeeze(nanmean(nanmean(trialcycavg(y(j)-2:y(j)+2,x(j)-2:x(j)+2,:,:,:,:,:,:),1),2));
-    end
-end
-
+% 
+% alltrialcycavgpost = zeros(260,260,acqdurframes+acqdurframes/2,length(sfrange),length(phaserange),length(contrastRange),length(radiusRange),2,length(datafiles));
+% allpeakspost = zeros(length(sfrange),length(phaserange),length(contrastRange),length(radiusRange),2,length(areas),length(datafiles));
+% alltracespost = zeros(length(areas),acqdurframes+acqdurframes/2,length(sfrange),length(phaserange),length(contrastRange),length(radiusRange),2,length(datafiles));
+% allgauParamspost = zeros(length(contrastRange),length(radiusRange),2,length(areas),5,length(datafiles));
+% allhalfMaxpost = zeros(length(contrastRange),length(radiusRange),2,length(areas),length(datafiles));
+% allareapeakspost = zeros(length(contrastRange),length(radiusRange),2,length(areas),length(datafiles));
+% for i= 1:length(datafiles) %collates all conditions (numbered above) 
+%     load(fullfile(postdir,datafiles{i}),'trialcycavg','peaks','mv','areapeaks','gauParams','halfMax')
+%     alltrialcycavgpost(:,:,:,:,:,:,:,:,i) = trialcycavg;
+%     allpeakspost(:,:,:,:,:,:,i) = peaks;
+%     allmvpost(:,i) = mv;
+%     allgauParamspost(:,:,:,:,:,i) = gauParams;
+%     allhalfMaxpost(:,:,:,:,i) = halfMax;
+%     allareapeakspost(:,:,:,:,i) = areapeaks;
+%     load(fullfile(ptsdir,ptsfile{i}));
+%     for j=1:length(x)
+%         alltracespost(j,:,:,:,:,:,:,i) = squeeze(nanmean(nanmean(trialcycavg(y(j)-2:y(j)+2,x(j)-2:x(j)+2,:,:,:,:,:,:),1),2));
+%     end
+% end
+% 
 avgtrialcycavgpost = nanmean(alltrialcycavgpost,9);%group mean frames by trial
 setrialcycavgpost = nanstd(alltrialcycavgpost,9)/sqrt(length(datafiles));%group standard error
 avgpeakspost = nanmean(allpeakspost,7);
@@ -345,11 +357,11 @@ ystim = [-0.1 0.5];
             for k=1:length(radiusRange)
                 subplot(2,4,cnt)
                 hold on
-                shadedErrorBar(timepts',squeeze(nanmean(nanmean(avgtracespre(1,:,:,:,j,k,i),3),4)),squeeze(nanmean(nanmean(setracespre(1,:,:,:,j,k,i),4),5)),'-k',1)
-                shadedErrorBar(timepts',squeeze(nanmean(nanmean(avgtracespost(1,:,:,:,j,k,i),3),4)),squeeze(nanmean(nanmean(setracespost(1,:,:,:,j,k,i),4),5)),'-r',1)
+                shadedErrorBar(timepts,squeeze(nanmean(nanmean(avgtracespre(1,:,:,:,j,k,i),3),4)),squeeze(nanmean(nanmean(setracespre(1,:,:,:,j,k,i),4),5)),'-k',1)
+                shadedErrorBar(timepts,squeeze(nanmean(nanmean(avgtracespost(1,:,:,:,j,k,i),3),4)),squeeze(nanmean(nanmean(setracespost(1,:,:,:,j,k,i),4),5)),'-r',1)
                 plot(xstim,ystim,'g-')
                 set(gca,'LooseInset',get(gca,'TightInset'))
-                axis([1 acqdurframes+acqdurframes/2 -0.05 0.2])
+                axis([0 max(timepts) -0.05 0.2])
                 legend(sprintf('%s deg',sizes{k}),'Location','northoutside')
                 hold off
                 cnt=cnt+1;
@@ -374,10 +386,8 @@ if exist('psfilename','var')
     print('-dpsc',psfilename,'-append');
 end
 
-% save(fullfile(ptsdir,filename),'alltrialcycavgpre','allpeakspre','alltracespre','allgauParamspre','allhalfMaxpre','allmvpre',...
-%     'alltrialcycavgpost','allpeakspost','alltracespost','allgauParamspost','allhalfMaxpost','allmvpost','-v7.3');
-save(fullfile(ptsdir,filename),'alltrialcycavgpre','allpeakspre','alltracespre','allgauParamspre','allhalfMaxpre','allareapeakspre','allmvpre',...
-    'alltrialcycavgpost','allpeakspost','alltracespost','allgauParamspost','allhalfMaxpost','allareapeakspost','allmvpost','-v7.3');
+% save(fullfile(ptsdir,filename),'alltrialcycavgpre','allpeakspre','alltracespre','allgauParamspre','allhalfMaxpre','allareapeakspre','allmvpre',...
+%     'alltrialcycavgpost','allpeakspost','alltracespost','allgauParamspost','allhalfMaxpost','allareapeakspost','allmvpost','-v7.3');
     try
         dos(['ps2pdf ' 'c:\temp.ps "' fullfile(ptsdir,sprintf('%s.pdf',filename)) '"'] )
 

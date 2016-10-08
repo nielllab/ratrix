@@ -1,4 +1,4 @@
-printfigs=0;
+printfigs=1;
 
 %%% load in points for analysis
 [f p] = uigetfile('*.mat','pts file');
@@ -17,8 +17,8 @@ end
 
 %%% factor to downsample images by
 %%% (reduces noise and computational demand)
-downsamp = 4;
-x= round(x/downsamp); y= round(y/downsamp);
+ downsamp = 4;
+% x= round(x/downsamp); y= round(y/downsamp);
 
 %%% create an empty ps file for pdf
 psfilename = 'C:\tempPS.ps';
@@ -68,12 +68,17 @@ for f= 1:length(use)
             plot(y,x,'g*')
         end
         x=round(x); y= round(y);
+        [fn p] = uiputfile('*.mat','save pts');
+        if fn~=0
+            save(fullfile(p,fn),'x','y','npts');
+        end
     end
      
     figure
     hold on
     col = repmat('bgrcmyk',[1 20]);  %%% color scheme
     
+    clear trace
     %%% plot trace of selected points
     for i = 1:npts
         trace(:,i) = squeeze(im(x(i),y(i),:));
@@ -87,7 +92,7 @@ for f= 1:length(use)
     figure
     imagesc(imresize(corrcoef(trace),10,'nearest'),[0.8 1]); colorbar
     title('corr pre-decor')
-    if printfigs, set(gcf, 'PaperPositionMode', 'auto'), print('-dpsc',psfilename,'-append'),end
+  %  if printfigs, set(gcf, 'PaperPositionMode', 'auto'), print('-dpsc',psfilename,'-append'),end
 
     
     %%% plot rms value
@@ -96,6 +101,7 @@ for f= 1:length(use)
     imagesc(sig,[0 0.075]); colorbar
     hold on; plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2)
     title('std dev')
+    title(sprintf('%s %s std dev',files(use(f)).subj, files(use(f)).expt));   
     if printfigs, set(gcf, 'PaperPositionMode', 'auto'), print('-dpsc',psfilename,'-append'),end
 
     
@@ -122,17 +128,18 @@ for f= 1:length(use)
         subplot(3,4,i);
         imagesc(reshape(coeff(:,i),size(im,1),size(im,2)),[-0.1 0.1])
         hold on; plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2); colormap jet
-    end    
+    end 
+    
     if printfigs, set(gcf, 'PaperPositionMode', 'auto'), print('-dpsc',psfilename,'-append'),end
 
     
     %%% plot timecourse of first 5 components
-    figure
-    for i = 1:5
-        subplot(5,1,i);
-        plot(score(:,i)); axis off
-    end
-    if printfigs, set(gcf, 'PaperPositionMode', 'auto'), print('-dpsc',psfilename,'-append'),end
+%     figure
+%     for i = 1:5
+%         subplot(5,1,i);
+%         plot(score(:,i)); axis off
+%     end
+%     if printfigs, set(gcf, 'PaperPositionMode', 'auto'), print('-dpsc',psfilename,'-append'),end
 
     
     %%% plot first component vs running speed (if available)
@@ -145,23 +152,25 @@ for f= 1:length(use)
         subplot(3,1,3)
         plot(sp/max(sp),'g'); hold on; plot(score(:,1)/max(score(:,1)));
         legend('speed','comp 1')
-        set(gcf, 'PaperPositionMode', 'auto');     print('-dpsc',psfilename,'-append');
-        
-        figure
-        plot(sp,score(:,1),'.')
-        xlabel('speed'); ylabel('score1')
-        sp(isnan(sp))=0;
-        figure
-        plot(-120:0.1:120,xcorr(sp,score(:,1),1200,'coeff'));
-        title('sp comp1 xcorr'); xlabel('secs'); ylim([-0.2 0.2])
     if printfigs, set(gcf, 'PaperPositionMode', 'auto'), print('-dpsc',psfilename,'-append'),end
+%         
+%         figure
+%         plot(sp,score(:,1),'.')
+%         xlabel('speed'); ylabel('score1')
+%         sp(isnan(sp))=0;
+%         figure
+%         plot(-120:0.1:120,xcorr(sp,score(:,1),1200,'coeff'));
+%         title('sp comp1 xcorr'); xlabel('secs'); ylim([-0.2 0.2])
+%     if printfigs, set(gcf, 'PaperPositionMode', 'auto'), print('-dpsc',psfilename,'-append'),end
 
         
     end
     
     %%% remove first component, which dominates
     %%% I call this decorrelation, though not exactly true
-    badcomps = input('components to remove: ');
+    
+   % badcomps = input('components to remove: ');
+    badcomps =1;
     tcourse = coeff(:,badcomps)*score(:,badcomps)';
     obs = obs-tcourse;
     obs_im = reshape(obs,size(im));
@@ -171,6 +180,7 @@ for f= 1:length(use)
     
     %%% plot timecourse for selected points after decorrelation
     figure; hold on
+    clear decorrTrace
     for i = 1:npts
         decorrTrace(:,i) = squeeze(obs_im(x(i),y(i),:));
         plot(decorrTrace(:,i)+0.1*i,col(i));
@@ -190,11 +200,7 @@ for f= 1:length(use)
     cc_im = reshape(cc,size(im,1),size(im,2),size(im,1),size(im,2));
     decorrSig = std(obs_im,[],3);
     
-    %%% kmeans clustering
-    nclust = 3;
-    tic
-    idx = kmeans(decorrTrace',nclust,'distance','correlation');
-    toc
+  
     
     maxim = prctile(im,95,3); %%% 95th percentile makes a good background image
     
@@ -211,11 +217,12 @@ for f= 1:length(use)
         end
     end
     for i = 1:npts
-        plot(y(i),x(i),[clustcol(idx(i)) 'o'],'Markersize',8,'Linewidth',2)
+        plot(y(i),x(i),'bo','Markersize',8,'Linewidth',2)
     end
     plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
     axis ij
     axis equal
+    title(sprintf('%s %s',files(use(f)).subj, files(use(f)).expt));   
     if printfigs, set(gcf, 'PaperPositionMode', 'auto'), print('-dpsc',psfilename,'-append'),end
 
     
@@ -245,12 +252,14 @@ for f= 1:length(use)
     
  %%% show correlation images for selected points   
     figure
-    subplot(ceil(sqrt(npts+1)),ceil(sqrt(npts+1)),1)
     imagesc(decorrSig,[0 0.025])
+   title(sprintf('%s %s',files(use(f)).subj, files(use(f)).expt));   
     hold on; plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
     axis equal;axis off;
+    
+    figure
     for i = 1:npts
-        subplot(ceil(sqrt(npts+1)),ceil(sqrt(npts+1)),i+1)
+        subplot(3,4,i)
         imagesc(squeeze(cc_im(x(i),y(i),:,:))); hold on
         plot(y(i),x(i),'g*');
         hold on; plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2)

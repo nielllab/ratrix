@@ -3,7 +3,8 @@ close all
 dbstop if error
 pathname = '\\langevin\backup\widefield\';
 datapathname = '\\langevin\backup\widefield\';  
-outpathname = 'C:\Users\nlab\Desktop\data test\';
+%outpathname = 'C:\Users\nlab\Desktop\data test\';
+outpathname = '\\langevin\backup\widefield\compiled behavior\behavior topos\';
 altpathname = '\\langevin\backup\widefield\behavior\';
 n=0;
 
@@ -113,7 +114,7 @@ files(n).topoy = 'behavior\101215 G62Tx1.1ln pre-behavior passive 1\G62Tx1.1ln_r
 files(n).darkness = 'behavior\101215 G62Tx1.1ln pre-behavior passive 1\G62Tx1.1ln_run6_landscape_Darkness_5min\G62Tx1.1ln_run6_landscape_Darkness_maps.mat';
 files(n).task = 'naive';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session'; 
+files(n).notes = 'good imaging session - strong blood vessel'; 
 files(n).monitor = 'vert'; 
 
 n=n+1;
@@ -135,7 +136,7 @@ files(n).topoy = 'behavior\101315 G62Tx1.1ln pre-behavior passive 2\g62Tx1.1ln_r
 files(n).darkness = 'behavior\101315 G62Tx1.1ln pre-behavior passive 2\g62Tx1.1ln_run6_landscape_Darkness_5min\g62Tx1.1ln_run6_landscape_Darkness_maps.mat';
 files(n).task = 'naive';
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session'; 
+files(n).notes = 'good imaging session - strong blood vessel'; 
 files(n).monitor = 'vert'; 
 
 n=n+1;
@@ -176,7 +177,7 @@ files(n).monitor = 'vert';
 n=n+1;
 files(n).subj = 'g62tx2.6lt';
 files(n).expt = '122315';
-files(n).topox =  'passive\122315 G62Tx2.6LT passive mapping and darkness learned\g62tx2.6lt_run1_portrait_topoX.mat';
+files(n).topox =  'passive\122315 G62Tx2.6LT passive mapping and darkness learned\g62tx2.6lt_run1_portrait_topoX\g62tx2.6lt_run1_portrait_topoX_maps.mat';
 files(n).topoy = 'passive\122315 G62Tx2.6LT passive mapping and darkness learned\g62tx2.6lt_run2_portrait_topoY\g62tx2.6lt_run2_portrait_topoY_maps.mat';
 files(n).darkness = 'passive\122315 G62Tx2.6LT passive mapping and darkness learned\g62tx2.6lt_run3_landscape_darkness_5min\g62tx2.6lt_run3_landscape_darkness_maps.mat';
 files(n).task = 'GTS';
@@ -308,9 +309,9 @@ files(n).monitor = 'vert';
 n=n+1;
 files(n).subj = 'g62tx2.11lt';
 files(n).expt = '051916';
-files(n).topox =  'passive\051916 G62Tx2.11-LT passive mapping and darkness learned\g62Tx2.11lt_run1_portrait_topoXg62Tx2.11lt_run1_portrait_topmaps.mat';
-files(n).topoy = 'passive\051916 G62Tx2.11-LT passive mapping and darkness learned\g62Tx2.11lt_run2_portrait_topoYg62Tx2.11lt_run2_portrait_topmaps.mat';
-files(n).darkness = 'passive\051916 G62Tx2.11-LT passive mapping and darkness learned\g62Tx2.11lt_run3_portrait_darkness_5ming62Tx2.11lt_run3_portrait_darknemaps.mat';
+files(n).topox =  'passive\051916 G62Tx2.11-LT passive mapping and darkness learned\g62Tx2.11lt_run1_portrait_topoX\g62Tx2.11lt_run1_portrait_topmaps.mat';
+files(n).topoy = 'passive\051916 G62Tx2.11-LT passive mapping and darkness learned\g62Tx2.11lt_run2_portrait_topoY\g62Tx2.11lt_run2_portrait_topmaps.mat';
+files(n).darkness = 'passive\051916 G62Tx2.11-LT passive mapping and darkness learned\g62Tx2.11lt_run3_portrait_darkness_5min\g62Tx2.11lt_run3_portrait_darknemaps.mat';
 files(n).task = 'HvV';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session'; 

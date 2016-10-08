@@ -2,7 +2,7 @@
 
 clear all;
 
-batchLearningBehav
+batch_darkness_learned
 %batch_darkness_learned;
 %batc_backgroundGrating_learned
 %batchTopoFrontiers
@@ -18,11 +18,12 @@ for i =1:length(files);
 end
 
 
-   alluse = find( strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session') & hasdarkness  ) 
+  % alluse = find(  strcmp({files.notes},'good imaging session') & hasdarkness & ( strcmp({files.task},'Naive') |  strcmp({files.task},'naive')) ) 
   
+      alluse = find(  strcmp({files.notes},'good imaging session') & hasdarkness & strcmp({files.task},'GTS') ) 
+        %alluse = find(  strcmp({files.notes},'good imaging session') & hasdarkness & strcmp({files.task},'HvV') ) 
+   
 length(alluse)
-%alluse=alluse(1:5)
-%alluse=alluse(end-5:end);
 allsubj = unique({files(alluse).subj})
 
 

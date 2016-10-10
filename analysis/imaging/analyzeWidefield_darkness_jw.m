@@ -3,7 +3,9 @@
 clear all;
 
 batch_darkness_learned
-%batch_darkness_learned;
+
+batchLearningBehav
+
 %batc_backgroundGrating_learned
 %batchTopoFrontiers
 %batchAcrylic_testing_jw
@@ -17,10 +19,10 @@ for i =1:length(files);
     hasdarkness(i) = ~isempty(files(i).darkness);
 end
 
+   alluse = find(  strcmp({files.notes},'good imaging session') & hasdarkness ) 
 
-  % alluse = find(  strcmp({files.notes},'good imaging session') & hasdarkness & ( strcmp({files.task},'Naive') |  strcmp({files.task},'naive')) ) 
-  
-      alluse = find(  strcmp({files.notes},'good imaging session') & hasdarkness & strcmp({files.task},'GTS') ) 
+    
+     % alluse = find(  strcmp({files.notes},'good imaging session') & hasdarkness & strcmp({files.task},'GTS') ) 
         %alluse = find(  strcmp({files.notes},'good imaging session') & hasdarkness & strcmp({files.task},'HvV') ) 
    
 length(alluse)

@@ -937,3 +937,8 @@ files(n).monitor = 'vert';
 % files(n).label = 'camk2 gc6';
 % files(n).notes = 'good imaging session'; 
 % files(n).monitor = 'vert'; 
+
+
+for i = 1:length(files);
+    files(i).pathname = pathname;
+end

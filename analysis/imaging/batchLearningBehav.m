@@ -1,7 +1,6 @@
 % batchLearningBehav    JW 3/4/15
 
-clear all
-close all
+
 dbstop if error
 
 % pathname = '/backup/data to analyze/compiled behavior\'; %for Maxwell (linux)
@@ -11,7 +10,7 @@ dbstop if error
 pathname = '\\langevin\backup\widefield\compiled behavior\'; %reading over network from langevin
 datapathname = '\\langevin\backup\widefield\behavior\';  %reading over network from langevin
 outpathname = '\\langevin\backup\widefield\compiled behavior\behavior topos\';
-n=0;
+
 
 %%%execute the shit above here first.
 
@@ -20,7 +19,9 @@ n=0;
 %then execute batchDfofMovie  (make sure the right set of stims are
 %commented/uncommented)
 
-n=1;
+nstart = n+1;
+
+n=n+1;
 files(n).subj = 'g62m9tt'; 
 files(n).expt = '021515';
 files(n).topox =  '021515 g62m9tt\G62M9TT_run1_portrait_topoX_50msexp_maps.mat';
@@ -3533,3 +3534,7 @@ files(n).notes = 'good imaging session';
 % files(n).spatialfreq = '200';
 % files(n).label = 'camk2 gc6';
 % files(n).notes = 'good imaging session';
+
+for i = nstart:length(files)
+    files(i).pathname = pathname;
+end

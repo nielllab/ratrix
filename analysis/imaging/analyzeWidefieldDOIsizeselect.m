@@ -1,4 +1,4 @@
-batchDOIphil120215
+% batchDOIphil120215
 
 psfilename = 'C:\tempPS.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
@@ -22,5 +22,5 @@ allsubj{s}
 clear map merge
 x0 =0; y0=0; sz = 128;
 doTopography;
-analyzeSizeSelect;
+% analyzeSizeSelect;
 end

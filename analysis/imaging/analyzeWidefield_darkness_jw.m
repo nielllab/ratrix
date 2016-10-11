@@ -2,8 +2,10 @@
 
 clear all;
 
+batch_darkness_learned
+
 batchLearningBehav
-%batch_darkness_learned;
+
 %batc_backgroundGrating_learned
 %batchTopoFrontiers
 %batchAcrylic_testing_jw
@@ -13,11 +15,17 @@ close all
 psfilename = 'C:\tempPS.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
-   alluse = find( strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-  
+for i =1:length(files);
+    hasdarkness(i) = ~isempty(files(i).darkness);
+end
+
+   alluse = find(  strcmp({files.notes},'good imaging session') & hasdarkness ) 
+
+    
+     % alluse = find(  strcmp({files.notes},'good imaging session') & hasdarkness & strcmp({files.task},'GTS') ) 
+        %alluse = find(  strcmp({files.notes},'good imaging session') & hasdarkness & strcmp({files.task},'HvV') ) 
+   
 length(alluse)
-%alluse=alluse(1:5)
-%alluse=alluse(end-5:end);
 allsubj = unique({files(alluse).subj})
 
 

@@ -208,8 +208,8 @@ invariant(:,:,1) = mean(centeredTrialData(:,:,1:2),3);
 
 clear epochData
 epochData(:,1,:) = squeeze(mean(invariant(:,5:10,:),2));
-epochData(:,2,:) = squeeze(mean(invariant(:,12:18,:),2));
-epochData(:,3,:) = squeeze(mean(invariant(:,25:35,:),2));
+epochData(:,2,:) = squeeze(mean(invariant(:,12:15,:),2));
+epochData(:,3,:) = squeeze(mean(invariant(:,20:30,:),2));
 %epochData(:,4,:) = squeeze(mean(invariant(:,50:60,:),2));
 
 
@@ -267,7 +267,7 @@ invariantAll = reshape(orientInvariant,n,size(orientInvariant,2)*size(orientInva
 
 
 clust= zeros(1,n);
-c= cluster(Z,'maxclust',6);
+c= cluster(Z,'maxclust',3);
 figure
 h = hist(c,1:max(c)); h= h/sum(h); bar(h); xlabel('cluster');
 for i = 1:max(c);
@@ -310,21 +310,20 @@ for cond = 1:2
     hold on; for j= 1:8, plot([j*length(behavTimepts) j*length(behavTimepts)]+1,[1 sum(sortCentered' & sortCond==cond)],'g'); end
     title(condLabel{cond})
 end
+% 
+% for i = 1:max(sess);
+%     figure
+%     subplot(1,3,1:2)
+%     imagesc(allData(sortCentered' & sortSess==i,:),[0 0.5]);
+%     hold on; for j= 1:8, plot([j*length(behavTimepts) j*length(behavTimepts)]+1,[1 sum(sortCentered' & sortSess==i)],'g'); end
+%     
+%     title(sprintf('%s %s %s total=%d gratings=%d exposures=%d',files(alluse(i)).subj,files(alluse(i)).expt,files(alluse(i)).task,files(alluse(i)).totalDays,files(alluse(i)).totalSinceGratings,files(alluse(i)).learningDay));
+%     
+%     subplot(1,3,3);
+%     plot(yAll(sess==i),xAll(sess==i),'.'); axis equal;  axis([0 72 0 128]); hold on
+%     circle(36,0.66*128,17.5);circle(36,0.33*128,17.5);  set(gca,'Xtick',[]); set(gca,'Ytick',[]);
+% end
 
-for i = 1:max(sess);
-    figure
-    subplot(1,3,1:2)
-    imagesc(allData(sortCentered' & sortSess==i,:),[0 0.5]);
-    hold on; for j= 1:8, plot([j*length(behavTimepts) j*length(behavTimepts)]+1,[1 sum(sortCentered' & sortSess==i)],'g'); end
-    
-    title(sprintf('%s %s %s total=%d gratings=%d exposures=%d',files(alluse(i)).subj,files(alluse(i)).expt,files(alluse(i)).task,files(alluse(i)).totalDays,files(alluse(i)).totalSinceGratings,files(alluse(i)).learningDay));
-    
-    subplot(1,3,3);
-    plot(yAll(sess==i),xAll(sess==i),'.'); axis equal;  axis([0 72 0 128]); hold on
-    circle(36,0.66*128,17.5);circle(36,0.33*128,17.5);  set(gca,'Xtick',[]); set(gca,'Ytick',[]);
-end
-
-keyboard
 
 trialType = {'correct pref','error pref','correct non-pref','error non-pref'};
 for cond = 1:2
@@ -332,7 +331,41 @@ for cond = 1:2
     for t = 1:4
         subplot(2,2,t);
         for i = 1:max(c)
-            d =mean(invariantAll(clust==i & allCond==cond ,:),1); plot(d((t-1)*42 + (1:42))-min(d));hold on; ylim([ 0 0.3]); xlim([0.5 42.5])
+            n = sum(clust==i & allCond==cond)/sum(allCond==cond)
+            d =nanmean(invariantAll(clust==i & allCond==cond ,:),1); plot(0.1*(0:41),n*(d((t-1)*42 + (1:42))-mean(d(1:10))));hold on; ylim([ -0.025 0.075]); xlim([0 4.15])
+        end
+        title([trialType{t} ' weighted']); xlabel('secs'); ylabel('weighted response'); set(gca,'Ytick',-0.025:0.025:0.075);
+    end
+    
+    legend;
+    set(gcf,'Name',condLabel{cond});
+end
+
+trialType = {'correct pref','error pref','correct non-pref','error non-pref'};
+for cond = 1:1
+    figure
+    for t = 1:4
+        subplot(2,2,t);
+        for i = 1:max(c)
+            n = sum(clust==i & allCond==cond)/sum(allCond==cond)
+            d =nanmean(invariantAll(clust==i  ,:),1); plot(0.1*(0:41),(d((t-1)*42 + (1:42))-mean(d(1:10))));hold on; ylim([ -0.15 0.25]); xlim([0 4.15])
+        end
+        title([trialType{t} ]); xlabel('secs'); ylabel('response'); % set(gca,'Ytick',-0.25:0.25:0.75);
+    end
+    
+    legend;
+    set(gcf,'Name',condLabel{cond});
+end
+
+
+
+trialType = {'correct pref','error pref','correct non-pref','error non-pref'};
+for cond = 1:2
+    figure
+    for t = 1:4
+        subplot(2,2,t);
+        for i = 1:max(c)
+            d =nanmean(invariantAll(clust==i & allCond==cond ,:),1); plot(d((t-1)*42 + (1:42))-min(d));hold on; ylim([ 0 0.3]); xlim([0.5 42.5])
         end
         title(trialType{t});
     end
@@ -340,6 +373,8 @@ for cond = 1:2
     legend;
     set(gcf,'Name',condLabel{cond});
 end
+
+
 
 orientInvariant3x(:,:,4) = mean(centered3x(:,:,[10 12]),3);
 orientInvariant3x(:,:,3) = mean(centered3x(:,:,[9 11]),3);
@@ -384,6 +419,7 @@ for cond = 1:2
     legend;
     set(gcf,'Name',condLabel{cond});
 end
+
 
 for i= 1:max(c);
     figure

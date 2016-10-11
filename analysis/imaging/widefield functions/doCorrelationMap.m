@@ -1,4 +1,4 @@
-printfigs=0;
+
 
 %%% load in points for analysis
 [f p] = uigetfile('*.mat','pts file');
@@ -34,15 +34,15 @@ clear  sigAll decorrSigAll    traceCorrAll  cc_imAll
 pre=1; naive =2; gts=3; hvv=4;
 for f= 1:length(use)
     
-    if strcmp(files(use(f)).learned,'pre');
-        task(f)=pre;
-    elseif strcmp(files(use(f)).task,'naive') |strcmp(files(use(f)).task,'Naive')
-        task(f) = naive;
-    elseif strcmp(files(use(f)).task,'GTS')
-        task(f) = gts;
-    elseif strcmp(files(use(f)).task,'HvV')
-        task(f) = hvv;
-    end
+%     if strcmp(files(use(f)).learned,'pre');
+%         task(f)=pre;
+%     elseif strcmp(files(use(f)).task,'naive') |strcmp(files(use(f)).task,'Naive')
+%         task(f) = naive;
+%     elseif strcmp(files(use(f)).task,'GTS')
+%         task(f) = gts;
+%     elseif strcmp(files(use(f)).task,'HvV')
+%         task(f) = hvv;
+%     end
     
     f
     display('loading data')
@@ -293,14 +293,13 @@ for f= 1:length(use)
     cc_imAll(:,:,:,:,f) = cc_im;    %%% correlation images for selected points
     rawTraceCorrAll(:,:,f) = rawTraceCorr;
     
-    close all
     
 end
 
 %%% take mean over subjects
 decorrSig = mean(decorrSigAll,3);
 cc_imMn = mean(cc_imAll,5);
-traceCorr = nanmeanMW(traceCorrAll,3);
+traceCorr = nanmean(traceCorrAll,3);
 meanSig = mean(sigAll,3);
 %%% figures for averaged data
 

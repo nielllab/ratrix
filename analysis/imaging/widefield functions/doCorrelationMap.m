@@ -290,7 +290,7 @@ for f= 1:length(use)
     sigAll(:,:,f) = sig;
     decorrSigAll(:,:,f)=decorrSig;  %%% stdev
     traceCorrAll(:,:,f)=traceCorr;  %%% correlation among selected pts
-    cc_imAll(:,:,:,:,f) = cc_im;    %%% correlation images for selected points
+    cc_imAll(:,:,:,:,f) = cc_im;    %%% correlation images for all points
     rawTraceCorrAll(:,:,f) = rawTraceCorr;
     
     close all
@@ -299,7 +299,7 @@ end
 
 %%% take mean over subjects
 decorrSig = mean(decorrSigAll,3);
-cc_imMn = mean(cc_imAll,5);
+cc_imMn = nanmean(cc_imAll,5);
 traceCorr = nanmeanMW(traceCorrAll,3);
 meanSig = mean(sigAll,3);
 %%% figures for averaged data
@@ -366,5 +366,71 @@ delete(psfilename);
 %%% save group data
 [f p ] = uiputfile('*.mat','save data?')
 if f~=0
-    save(fullfile(p,f),'decorrSigAll','traceCorrAll','cc_imAll','cc_imMn')
+    save(fullfile(p,f),'decorrSigAll','traceCorrAll','cc_imAll','cc_imMn','rawTraceCorrAll','task','-v7.3')
 end
+
+figure
+for t = 1:4
+   sess = find(task==t);
+   mnCorr(:,:,t) = nanmean(traceCorrAll(:,:,sess),3);
+   subplot(2,2,t)
+   imagesc(mnCorr(:,:,t),[-0.5 1]); colormap jet
+end
+
+titles = {'pre','naive','gts','hvv'};
+for t = 1:4
+    sess = find(task==t);
+    cc_imMn = nanmean(cc_imAll(:,:,:,:,sess),5);
+    figure; set(gcf,'Name',titles{t});
+    hold on; plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
+    axis equal;axis off;
+    for i = 1:npts
+        subplot(3,4,i)
+        imagesc(squeeze(cc_imMn(x(i),y(i),:,:)),[ -0.5 1]); hold on; colormap jet
+        plot(y(i),x(i),'g*');
+        hold on; plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2)
+        axis equal; axis([10 55 10 55])
+        axis off;
+    end
+end
+
+prePostCorr(:,:,1) = mean(mnCorr(:,:,1:2),3);prePostCorr(:,:,2) = mean(mnCorr(:,:,3:4),3);
+ 
+
+for prepost=1:2
+    figure
+    imagesc(im(:,:,1),[-0.2 0.2]) ; colormap gray; axis equal
+    hold on
+    for i = 1:npts
+        plot(y(i),x(i),[col(i) 'o'],'Markersize',8,'Linewidth',2)
+        for j= 1:npts
+            if prePostCorr(i,j,prepost)>0.1
+                plot([y(i) y(j)],[x(i) x(j)],'Linewidth',8*prePostCorr(i,j,prepost))
+            end
+        end
+    end
+    plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
+    axis ij
+    axis square; axis([10 50 10 50])
+end
+
+    figure
+    imagesc(im(:,:,1),[-0.2 0.2]) ; colormap gray; axis equal
+    hold on
+    for i = 1:npts
+        plot(y(i),x(i),[col(i) 'o'],'Markersize',8,'Linewidth',2)
+        for j= 1:npts
+            d = prePostCorr(i,j,2)- prePostCorr(i,j,1);
+            if d>0.05
+                plot([y(i) y(j)],[x(i) x(j)],'r','Linewidth',round(10*d))
+            end
+             if d<-0.2
+                plot([y(i) y(j)],[x(i) x(j)],'B','Linewidth',round(-5*d))
+            end
+        end
+    end
+    plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
+    axis ij
+    axis square; axis([10 50 10 50])
+
+

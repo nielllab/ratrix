@@ -2,17 +2,64 @@ clear all
 
 %%% load pts file (contains cell locations and dF, along with analysis results
     ptsfname = uigetfile('*.mat','pts file');
-    load(ptsfname);
+   display('loading pts file');
+ tic;  load(ptsfname); toc
 
-if ~exist('pixResp','var') | ~exist('dt','var')
-    [f p ] = uigetfile('*.mat','session data')
-    load(fullfile(p,f),'onsets','starts','trialRecs','pixResp','dt');
+if ~exist('pixResp','var') | ~exist('dt','var') | ~exist('sbxfilename','var');
+    if ~exist('sessName','var')
+    [f p ] = uigetfile('*.mat','session data'); sessName = fullfile(p,f);
+    save(ptsfname,'sessName','-append');
+    end
+    display('loading from session data');
+    tic; load(sessName,'onsets','starts','trialRecs','pixResp','dt','sbxfilename'); toc
+    save(ptsfname,'onsets','starts','trialRecs','pixResp','dt','sbxfilename','-append')
 end
 
 [f p] = uiputfile('*.pdf','pdf file');
 psfilenameFinal = fullfile(p,f);
 psfilename = 'c:\temp.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
+
+if ~exist('eyes','var');
+    display('calculating eyes')
+    eyes = get2pEyes( [sbxfilename '_eye.mat'],0,dt);
+end
+
+
+%%% make movie of eye and extracted parameters
+% load([sbxfilename '_eye.mat'],'data');
+% d= squeeze(data(:,:,1,100:100:end));
+% range = [min(d(:)) max(d(:))];
+% figure
+% mx = max(eyes(:));
+% for i = 1:20:size(data,4);
+%     subplot(2,2,2);
+%     imagesc(data(:,:,1,i),range);
+%     subplot(2,2,3:4);
+%     hold off; plot(eyes); hold on; plot([i/2 i/2], [1 mx]);
+%     drawnow;
+% end
+
+
+figure
+plot(eyes); legend('x','y','r');
+if exist('psfilename','var');    set(gcf, 'PaperPositionMode', 'auto');   print('-dpsc',psfilename,'-append'); end
+
+timepts = -1:0.25:5;
+eyeAlign = align2onsets(eyes',onsets,dt,timepts);
+save(ptsfname,'eyes','eyeAlign','-append');
+
+eyeNorm = eyeAlign - repmat(mean(eyeAlign(:,1:4,:),2),[1 size(eyeAlign,2) 1]);
+
+titles = {'x','y','r'};
+figure
+for i = 1:3
+    subplot(2,2,i)
+    imagesc(squeeze(eyeNorm(i,:,:))',[-5 5])
+    title(titles{i});
+end
+if exist('psfilename','var');    set(gcf, 'PaperPositionMode', 'auto');   print('-dpsc',psfilename,'-append'); end
+
 
 %%% get target location, orientation, phase
 stim = [trialRecs.stimDetails];
@@ -31,7 +78,44 @@ if ~isempty(f) && f~=length(s)
 end
 correct = [s.correct] == 1;
 
+resptime = starts(:,3)-starts(:,2);
+stoptime = starts(:,2)-starts(:,1);
+
+titles = {'x','y','r'};
+figure
+for i = 1:3
+    subplot(2,2,i);
+    plot(timepts,nanmean(eyeAlign(i,:,correct  & location<0),3)' - nanmedian(eyes(:,i)),'g');
+    hold on
+    plot(timepts,nanmean(eyeAlign(i,:,correct & location>0),3)' - nanmedian(eyes(:,i)),'c');
+    plot(timepts,nanmean(eyeAlign(i,:,~correct & location<0),3)' - nanmedian(eyes(:,i)),'r');
+    plot(timepts,nanmean(eyeAlign(i,:,~correct & location>0),3)' - nanmedian(eyes(:,i)),'m');
+    axis([-1 5 -2 2])
+
+    title(titles{i});
+end
+subplot(2,2,4); hold on; plot(1,1,'g'); plot(1,1,'c'); plot(1,1,'r'); plot(1,1,'m'); legend('correct top','correct bottom','error top','error bottom');
+if exist('psfilename','var');    set(gcf, 'PaperPositionMode', 'auto');   print('-dpsc',psfilename,'-append'); end
+
+figure
+for i = 1:3
+    subplot(2,2,i);
+    plot(timepts,nanmean(eyeAlign(i,:,resptime<1),3)' - nanmedian(eyes(:,i)),'g');
+    hold on
+    plot(timepts,nanmean(eyeAlign(i,:,resptime>1),3)' - nanmedian(eyes(:,i)),'c');
+    plot(timepts,nanmean(eyeAlign(i,:,stoptime<2),3)' - nanmedian(eyes(:,i)),'r');
+    plot(timepts,nanmean(eyeAlign(i,:,stoptime>2),3)' - nanmedian(eyes(:,i)),'m');
+    axis([-1 5 -2 2])
+
+    title(titles{i});
+end
+subplot(2,2,4); hold on; plot(1,1,'g'); plot(1,1,'c'); plot(1,1,'r'); plot(1,1,'m'); legend('fast resp','slow resp','fast stop','slow stop');
+if exist('psfilename','var');    set(gcf, 'PaperPositionMode', 'auto');   print('-dpsc',psfilename,'-append'); end
+
+
+
 dFdecon=spikes*10;
+%dFdecon = dF;
 
 figure
 imagesc(meanImg);
@@ -60,16 +144,6 @@ cellCutoff = input('cell cutoff : ');
 useCells= 1:cellCutoff;
 
 
-% for i = 1:size(dF,1);
-%     dFdecon(i,:) = dFdecon(i,:)-prctile(dFdecon(i,:),1);
-% end
-% 
-% figure
-% imagesc(dFdecon(useCells,:),[0 1])
-% 
-% dFdecon=deconvg6s(dFdecon,0.25);
-
-%dFdecon = dF*2;
 
 figure
 imagesc(dF(useCells,:),[0 1]); 
@@ -85,6 +159,7 @@ for i = 1:size(dFdecon,1);
       dFnorm(i,:) = conv(dFnorm(i,:),filt,'same');
 end
 
+dFnorm(isnan(dFnorm))=0;
 col = 'rgb';
 [coeff score latent] = pca(dFnorm(useCells,:)');
 
@@ -156,9 +231,6 @@ subplot(5,1,1);title('orientation');
 
 figure
 plot(latent(1:10)/sum(latent))
-
-figure
-imagesc(coeff(:,1:100),[-0.5 0.5]); colormap jet
 
 for i = 1:size(coeff,2);
     if sum(coeff(:,i))<0;
@@ -303,7 +375,7 @@ for i = 1:size(dFdecon,1)
     dFmin(i,:) = dFdecon(i,:) - min(abs(dFdecon(i,:)));
     dFstd(i,:) = dFmin(i,:)/std(dFdecon(i,:));
 end
-
+dFstd(isnan(dFstd))=0;
 
 correctRate = conv(double(correct),ones(1,10),'same')/10;
 figure
@@ -313,6 +385,7 @@ stoprate = conv(stoptime,ones(3,1),'same')/3;
 
 dFlist= reshape(dFalign,size(dFalign,1),size(dFalign,2)*size(dFalign,3));
 dFlist = dFlist(useCells,:);
+dFlist = dFlist + rand(size(dFlist))*10^-6;
 for i = 1:size(dFlist,1)
     dFlist(i,:) = dFlist(i,:)/std(dFlist(i,:));
 end
@@ -352,6 +425,7 @@ idxall(useCells) = idx;
 figure
 subplot(6,6,7:36);
 dFlist= reshape(dFalign,size(dFalign,1),size(dFalign,2)*size(dFalign,3));
+dFlist = dFlist+rand(size(dFlist))*10^-6;
 imagesc(dFlist(useCells(sortind),:),[0 1]); xlabel('frame'); ylabel('frame')
 subplot(6,6,1:6); plot(correctRate,'Linewidth',2); set(gca,'Xtick',[]); set(gca,'Ytick',[]); ylabel('correct'); ylim([0 1.1]); xlim([1 length(correctRate)])
 hold on; %plot([1 length(correctRate)],[0.5 0.5],'r:');
@@ -406,6 +480,8 @@ goodTrialData = allTrialData(useCells,:,1:8);
 goodTrialData = reshape(goodTrialData(:,:,1:4),size(goodTrialData(:,:,1:4),1),size(goodTrialData(:,:,1:4),2)*size(goodTrialData(:,:,1:4),3));
 figure
 imagesc(goodTrialData,[-1 1])
+goodTrialData = goodTrialData+rand(size(goodTrialData))*10^-6; %%%% add a tiny amount of noise so neurons with zero activity don't create nans in distance
+
 
 dist = pdist(imresize(goodTrialData, [size(goodTrialData,1),size(goodTrialData,2)*0.5]),'correlation');
 Z = linkage(dist,'ward');

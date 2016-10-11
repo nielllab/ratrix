@@ -1,8 +1,12 @@
 %%% doTopography
 
-
+%%% getRegions calculates gradients and other map properties based on
+%%% Fourier analysis performed by dfofMovie/readTifBlueGreen and stored in maps files
 for f = 1:length(use)
     f
+    if isfield(files(use(f)),'pathname')
+        pathname = files(use(f)).pathname;
+    end
     [grad{f} amp{f} map_all{f} map{f} merge{f}]= getRegions(files(use(f)),pathname,outpathname);
     
 end
@@ -10,6 +14,9 @@ end
 clear allamp
 for f = 1:length(use)
     f
+    if isfield(files(use(f)),'pathname')
+        pathname = files(use(f)).pathname;
+    end
     load(fullfile(pathname,files(use(f)).topox),'cycMap');
     df = max(cycMap,[],3) - min(cycMap,[],3);
     allamp(f) = max(df(:));
@@ -77,8 +84,8 @@ for f= 1:length(use) ;
             imgreen = imread([datapathname files(use(f)).topoxdata '_0004.tif']);
         catch
             try
-            imblue = imread([datapathname files(use(f)).topoxdata '_000001.tif']);
-            imgreen = imread([datapathname files(use(f)).topoxdata '_000004.tif']);
+                imblue = imread([datapathname files(use(f)).topoxdata '_000001.tif']);
+                imgreen = imread([datapathname files(use(f)).topoxdata '_000004.tif']);
             catch
                 display('cant find images')
             end
@@ -130,7 +137,7 @@ for f= 1:length(use) ;
             %          quiver( rangex,rangey,10*real(gradshift{ind}(rangex,rangey)),10*imag(gradshift{ind}(rangex,rangey)))
             
         end
-            if exist('psfilename','var')
+        if exist('psfilename','var')
             set(gcf, 'PaperPositionMode', 'auto');
             print('-dpsc',psfilename,'-append');
         end

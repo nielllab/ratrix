@@ -25,7 +25,7 @@ img = mat2im(mod(angle(map),2*pi),hsv,[pi/2  (2*pi -pi/4)]);
 img = img.*repmat(amp,[1 1 3]);
 mapimg= figure
 figure
-imshow(img)
+imshow(imresize(img,0.5))
 colormap(hsv); colorbar
 
 polarImg = img;

@@ -1,6 +1,6 @@
 %%% clear;
-% close all
-% clear all
+close all
+clear all
 
 addpath(genpath('utilities'));
 
@@ -205,6 +205,14 @@ for session = 0:length(shiftx)
         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfile,'-append');
     end
+    
+    figure
+    imagesc(corrcoef(dF'),[0 0.5]); colormap jet
+        if exist('psfile','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfile,'-append');
+        end
+    
     
     figure
     imagesc(spikes,[0 0.2]); colorbar

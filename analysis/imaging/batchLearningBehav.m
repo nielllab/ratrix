@@ -1,7 +1,6 @@
 % batchLearningBehav    JW 3/4/15
 
-clear all
-close all
+
 dbstop if error
 
 % pathname = '/backup/data to analyze/compiled behavior\'; %for Maxwell (linux)
@@ -11,7 +10,7 @@ dbstop if error
 pathname = '\\langevin\backup\widefield\compiled behavior\'; %reading over network from langevin
 datapathname = '\\langevin\backup\widefield\behavior\';  %reading over network from langevin
 outpathname = '\\langevin\backup\widefield\compiled behavior\behavior topos\';
-n=0;
+
 
 %%%execute the shit above here first.
 
@@ -20,7 +19,9 @@ n=0;
 %then execute batchDfofMovie  (make sure the right set of stims are
 %commented/uncommented)
 
-n=1;
+nstart = n+1;
+
+n=n+1;
 files(n).subj = 'g62m9tt'; 
 files(n).expt = '021515';
 files(n).topox =  '021515 g62m9tt\G62M9TT_run1_portrait_topoX_50msexp_maps.mat';
@@ -3420,22 +3421,69 @@ files(n).notes = 'good imaging session';
 n=n+1;
 files(n).subj = 'g62dd2ln'; 
 files(n).expt = '063016'; %greg
-files(n).topox =  '';
+files(n).topox =  '063016 G62dd2ln GTS behavior\g62dd2ln_portrait_run3_topoX\g62dd2ln_portrait_run3_topoXmaps.mat';
 files(n).topoxdata = '063016 G62dd2ln GTS behavior\g62dd2ln_portrait_run3_topoX\g62dd2ln_portrait_run3_topoX';
-files(n).topoy = '';
+files(n).topoy = '063016 G62dd2ln GTS behavior\g62dd2ln_portrait_run4_topoY\g62dd2ln_portrait_run4_topoYmaps.mat';
 files(n).topoydata = '063016 G62dd2ln GTS behavior\g62dd2ln_portrait_run4_topoY\g62dd2ln_portrait_run4_topoY';
-files(n).behav = '';
+files(n).behav = '063016 G62dd2ln GTS behavior\g62dd2ln_portrait_run1_GTSbehavior\g62dd2ln_portrait_rbehav data.mat';
 files(n).behavdata = '063016 G62dd2ln GTS behavior\g62dd2ln_portrait_run1_GTSbehavior\g62dd2ln_portrait_run1_GTSbehavior';
-files(n).grating4x3yLandscape = '';
+files(n).grating4x3yLandscape = '063016 G62dd2ln GTS behavior\g62dd2ln_portrait_run8_4x3yGratings\g62dd2ln_portrait_run8_4x3yGratingsmaps.mat';
 files(n).gratingdata4x3yLandscapedata = '063016 G62dd2ln GTS behavior\g62dd2ln_portrait_run8_4x3yGratings\g62dd2ln_portrait_run8_4x3yGratings';
-files(n).behavstim2sf = '';
+files(n).behavstim2sf = '063016 G62dd2ln GTS behavior\g62dd2ln_portrait_run6_behavstim2sf\g62dd2ln_portrait_run6_behavstim2sfmaps.mat';
 files(n).behavstim2sfdata = '063016 G62dd2ln GTS behavior\g62dd2ln_portrait_run6_behavstim2sf\g62dd2ln_portrait_run6_behavstim2sf';
-files(n).behavstim3x4orient = '';
+files(n).behavstim3x4orient = '063016 G62dd2ln GTS behavior\g62dd2ln_portrait_run5_behavstim3x4orient\g62dd2ln_portrait_run5_behavstim3x4orientmaps.mat';
 files(n).behavstim3x4orientdata = '063016 G62dd2ln GTS behavior\g62dd2ln_portrait_run5_behavstim3x4orient\g62dd2ln_portrait_run5_behavstim3x4orient';
 files(n).monitor = 'vert';
 files(n).task = 'GTS';
 files(n).learningDay = 'learned'; %learned;  this # not really correct
 files(n).spatialfreq = '200'; 
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+n=n+1;
+files(n).subj = 'g62tx1.5lt'; 
+files(n).expt = '072716'; %greg
+files(n).topox =  '072716 G62tx1.5lt GTS behavior\g62tx1.5lt_portrait_run3_topoX\g62tx1.5lt_portrait_run3_topoXmaps.mat';
+files(n).topoxdata = '072716 G62tx1.5lt GTS behavior\g62tx1.5lt_portrait_run3_topoX\g62tx1.5lt_portrait_run3_topoX';
+files(n).topoy = '072716 G62tx1.5lt GTS behavior\g62tx1.5lt_portrait_run4_topoY\g62tx1.5lt_portrait_run4_topoYmaps.mat';
+files(n).topoydata = '072716 G62tx1.5lt GTS behavior\g62tx1.5lt_portrait_run4_topoY\g62tx1.5lt_portrait_run4_topoY';
+files(n).darknessdata = '072716 G62tx1.5lt GTS behavior\g62tx1.5lt_portrait_run7_darkness_5min\g62tx1.5lt_portrait_run7_darkness';
+files(n).behav = '072716 G62tx1.5lt GTS behavior\g62tx1.5lt_portrait_run2_GTSbehavior\g62tx1.5lt_portrait_rbehav data.mat';
+files(n).behavdata = '072716 G62tx1.5lt GTS behavior\g62tx1.5lt_portrait_run2_GTSbehavior\g62tx1.5lt_portrait_run2_GTSbehavior';
+files(n).grating4x3yLandscape = '072716 G62tx1.5lt GTS behavior\g62tx1.5lt_portrait_run8_4x3yGratings\g62tx1.5lt_portrait_run8_4x3yGratingsmaps.mat';
+files(n).gratingdata4x3yLandscapedata = '072716 G62tx1.5lt GTS behavior\g62tx1.5lt_portrait_run8_4x3yGratings\g62tx1.5lt_portrait_run8_4x3yGratings';
+files(n).behavstim2sf = '072716 G62tx1.5lt GTS behavior\g62tx1.5lt_portrait_run6_behavstim2sf\g62tx1.5lt_portrait_run6_behavstim2sfmaps.mat';
+files(n).behavstim2sfdata = '072716 G62tx1.5lt GTS behavior\g62tx1.5lt_portrait_run6_behavstim2sf\g62tx1.5lt_portrait_run6_behavstim2sf';
+files(n).behavstim3x4orient = '072716 G62tx1.5lt GTS behavior\g62tx1.5lt_portrait_run5_behavstim3x4orient\g62tx1.5lt_portrait_run5_behavstim3x4orientmaps.mat';
+files(n).behavstim3x4orientdata = '072716 G62tx1.5lt GTS behavior\g62tx1.5lt_portrait_run5_behavstim3x4orient\g62tx1.5lt_portrait_run5_behavstim3x4orient';
+files(n).monitor = 'vert';
+files(n).task = 'GTS';
+files(n).learningDay = 'learned'; %learned;  this # not really correct
+files(n).spatialfreq = '200';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+
+
+n=n+1;
+files(n).subj = 'g62gg5rt'; 
+files(n).expt = '080416';
+files(n).topox =  '080416 G62gg5rt GTS behavior\g62gg5rt_portrait_run2_topoX\g62gg5rt_portrait_run2_topoXmaps.mat';
+files(n).topoxdata = '080416 G62gg5rt GTS behavior\g62gg5rt_portrait_run2_topoX\g62gg5rt_portrait_run2_topoX';
+files(n).topoy = '080416 G62gg5rt GTS behavior\g62gg5rt_portrait_run3_topoY\g62gg5rt_portrait_run3_topoYmaps.mat';
+files(n).topoydata = '080416 G62gg5rt GTS behavior\g62gg5rt_portrait_run3_topoY\g62gg5rt_portrait_run3_topoY';
+files(n).darknessdata = '080416 G62gg5rt GTS behavior\g62gg5rt_portrait_run6_darkness_5min\g62gg5rt_portrait_run6_darkness';
+files(n).behav = '080416 G62gg5rt GTS behavior\g62gg5rt_portrait_run1_GTSbehavior\g62gg5rt_portrait_rbehav data.mat';
+files(n).behavdata = '080416 G62gg5rt GTS behavior\g62gg5rt_portrait_run1_GTSbehavior\g62gg5rt_portrait_run1_GTSbehavior';
+files(n).grating4x3yLandscape = '080416 G62gg5rt GTS behavior\g62gg5rt_portrait_run7_4x3yGratings\g62gg5rt_portrait_run7_4x3yGratingsmaps.mat';
+files(n).gratingdata4x3yLandscapedata = '080416 G62gg5rt GTS behavior\g62gg5rt_portrait_run7_4x3yGratings\g62gg5rt_portrait_run7_4x3yGratings';
+files(n).behavstim2sf = '080416 G62gg5rt GTS behavior\g62gg5rt_portrait_run5_behavstim2sf\g62gg5rt_portrait_run5_behavstim2sfmaps.mat';
+files(n).behavstim2sfdata = '080416 G62gg5rt GTS behavior\g62gg5rt_portrait_run5_behavstim2sf\g62gg5rt_portrait_run5_behavstim2sf';
+files(n).behavstim3x4orient = '080416 G62gg5rt GTS behavior\g62gg5rt_portrait_run4_behavstim3x4orient\g62gg5rt_portrait_run4_behavstim3x4orientmaps.mat';
+files(n).behavstim3x4orientdata = '080416 G62gg5rt GTS behavior\g62gg5rt_portrait_run4_behavstim3x4orient\g62gg5rt_portrait_run4_behavstim3x4orient';
+files(n).monitor = 'vert';
+files(n).task = 'GTS';
+files(n).learningDay = 'learned'; %learned;  this # not really correct
+files(n).spatialfreq = '200';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
 
@@ -3446,28 +3494,7 @@ files(n).notes = 'good imaging session';
 % files(n).topoxdata = '';
 % files(n).topoy = '';
 % files(n).topoydata = '';
-% files(n).behav = '';
-% files(n).behavdata = '';
-% files(n).grating4x3yLandscape = '';
-% files(n).gratingdata4x3yLandscapedata = '';
-% files(n).behavstim2sf = '';
-% files(n).behavstim2sfdata = '';
-% files(n).behavstim3x4orient = '';
-% files(n).behavstim3x4orientdata = '';
-% files(n).monitor = 'vert';
-% files(n).task = 'GTS';
-% files(n).learningDay = '1';
-% files(n).spatialfreq = '200';
-% files(n).label = 'camk2 gc6';
-% files(n).notes = 'good imaging session';
-
-% n=n+1;
-% files(n).subj = ''; 
-% files(n).expt = '';
-% files(n).topox =  '';
-% files(n).topoxdata = '';
-% files(n).topoy = '';
-% files(n).topoydata = '';
+% files(n).darknessdata = '';
 % files(n).behav = '';
 % files(n).behavdata = '';
 % files(n).grating4x3yLandscape = '';
@@ -3492,6 +3519,7 @@ files(n).notes = 'good imaging session';
 % files(n).topoxdata = '';
 % files(n).topoy = '';
 % files(n).topoydata = '';
+% files(n).darknessdata = '';
 % files(n).behav = '';
 % files(n).behavdata = '';
 % files(n).grating4x3yLandscape = '';
@@ -3506,3 +3534,7 @@ files(n).notes = 'good imaging session';
 % files(n).spatialfreq = '200';
 % files(n).label = 'camk2 gc6';
 % files(n).notes = 'good imaging session';
+
+for i = nstart:length(files)
+    files(i).pathname = pathname;
+end

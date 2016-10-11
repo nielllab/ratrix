@@ -15,7 +15,7 @@ framerate = state.acq.frameRate
 if align
     display('doing alignement')
     tic
-    r = sbxalign(fname,1:nframes);
+    r = sbxalign_tif(fname,1:nframes);
     toc
     figure
     

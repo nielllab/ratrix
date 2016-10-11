@@ -128,6 +128,7 @@ epochData(:,2,:) = mean(behavTrialData(behavUse,13:16,:),2);
 epochData(:,3,:) = mean(behavTrialData(behavUse,20:30,:),2);
 eData = reshape(epochData,size(epochData,1),size(epochData,2)*size(epochData,3));
 
+eData = eData + rand(size(eData))*10^-6;  %%% add tiny amount of random noise so cells with zero activity don't make nans in correlation coeff
 dist = pdist(eData(:,1:end/2),'correlation');  %%% sort based on correct
 Z = linkage(dist,'ward');
 leafOrder = optimalleaforder(Z,dist);

@@ -4,7 +4,7 @@ clear all;
 
 batch_darkness_learned
 
-batchLearningBehav
+%batchLearningBehav
 
 %batc_backgroundGrating_learned
 %batchTopoFrontiers

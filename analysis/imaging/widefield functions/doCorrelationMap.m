@@ -20,29 +20,10 @@ end
 downsamp = 4;
 % x= round(x/downsamp); y= round(y/downsamp);
 
-%%% create an empty ps file for pdf
-psfilename = 'C:\tempPS.ps';
-if exist(psfilename,'file')==2;delete(psfilename);end
-
-%need way to make sure this can use subset of files that have correct stim
-%to load below
-
-%newuse = find(strcmp({files.notes},'good imaging session')   & ~strcmp({files(use(f)).darkness},'') ); %
-
 clear  sigAll decorrSigAll    traceCorrAll  cc_imAll
 
-pre=1; naive =2; gts=3; hvv=4;
+
 for f= 1:length(use)
-    
-%     if strcmp(files(use(f)).learned,'pre');
-%         task(f)=pre;
-%     elseif strcmp(files(use(f)).task,'naive') |strcmp(files(use(f)).task,'Naive')
-%         task(f) = naive;
-%     elseif strcmp(files(use(f)).task,'GTS')
-%         task(f) = gts;
-%     elseif strcmp(files(use(f)).task,'HvV')
-%         task(f) = hvv;
-%     end
     
     f
     display('loading data')
@@ -350,20 +331,6 @@ axis square; axis([10 50 10 50])
 set(gcf, 'PaperPositionMode', 'auto');
 print('-dpsc',psfilename,'-append');
 
-%%% save pdf
-[f p] = uiputfile('*.pdf','save pdf');
-psfilename = 'C:\tempPS.ps';
-if f~=0
-    try
-        ps2pdf('psfile', psfilename, 'pdffile', fullfile(p,f));
-    catch
-        display('couldnt generate pdf');
-    end
-end
-delete(psfilename);
 
-%%% save group data
-[f p ] = uiputfile('*.mat','save data?')
-if f~=0
-    save(fullfile(p,f),'decorrSigAll','traceCorrAll','cc_imAll','cc_imMn')
-end
+
+

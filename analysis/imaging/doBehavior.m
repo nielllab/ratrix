@@ -26,37 +26,7 @@ toc
 %keyboard
 sprintf('subj %s correct %f trials %f',allsubj{s},mean(correct),mean(ntrials))
 
-%%% try to subtract running from behavior
-for f = 1:0
-    %  %for f =1:1
-    %      f
-    %    % try
-    %          try
-    %         clear movemap
-    %     [pathname files(use(f)).topoy]
-    %     load([pathname files(use(f)).topoy],'movemap');
-    %     figure
-    %     imagesc(movemap,[-0.1 0.1])
-    %     movemap = movemap-mean(movemap(:));
-    %
-    %        norunbehav = behav{f};
-    %        zm = size(norunbehav,3)/size(movemap,2);
-    %        movemap = imresize(movemap,zm);
-    %        movemap = movemap/sqrt(sum(movemap(:).*movemap(:)));
-    %        for t = 1:size(norunbehav,1)
-    %            data = squeeze(norunbehav(t,:,:));
-    %            data = data-mean(data(:));
-    %            runcomponent = sum(sum(data.*movemap));
-    %            norunbehav(t,:,:) = squeeze(norunbehav(t,:,:)) - runcomponent * movemap;
-    %        end
-    %        behavNoRun{f} = norunbehav;
-    %     catch
-    %         display('no movemap')
-    %         close(gcf)
-    %     end
-    %
-end
-%behav=behavNoRun;
+
 allsubj{s}
 for cond = 1:4
 nb=0; avgbehav=0;
@@ -127,26 +97,26 @@ end
   
   for f= 1:length(behav);
       figure
-  if ~isempty (behav{f}{1})  
-      for t= 1:6
-  subplot(2,3,t)
-  imagesc(shiftBehav{f}{1}(:,:,t+7),[0 0.15]);
-  hold on
-  plot(ypts,xpts,'w.','Markersize',1);
-  axis off
+      if ~isempty (behav{f}{1})
+          for t= 1:6
+              subplot(2,3,t)
+              imagesc(shiftBehav{f}{1}(:,:,t+7),[0 0.15]);
+              hold on
+              plot(ypts,xpts,'w.','Markersize',1);
+              axis off
+          end
+          title(sprintf('%d %s %s',f,files(use(f)).subj,files(use(f)).expt))
+          subplot(2,3,1); title('avg correct');
+      elseif isempty (behav{f}{1})
+          sprintf('no correct trials')
+          sprintf('%d %s %s',f,files(use(f)).subj,files(use(f)).expt)
       end
-      title(sprintf('%d %s %s',f,files(use(f)).subj,files(use(f)).expt))
-  
-  elseif isempty (behav{f}{1})
-      sprintf('no correct trials')
-      sprintf('%d %s %s',f,files(use(f)).subj,files(use(f)).expt)
   end
-  end        
   
   figure
  imagesc(squeeze(avgbehavCond{1}(:,:,10)),[0 0.15])
   hold on
-   plot(ypts,xpts,'w.','Markersize',1);
+   plot(ypts,xpts,'w.','Markersize',1); title('average correct');
 %    
 %  clear data mnresp stdresp
 %  range = -2:2;

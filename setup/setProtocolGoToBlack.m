@@ -363,12 +363,12 @@ switch subjIDs{1}
        rewardSizeULorMS        = 139;
        msPenalty               =3500;
        percentCorrectionTrials = .5;    
-%     
-%     case 'g62y3lt' % Started 1/12/16 switch to GTS 1/29/16
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 59;
-%        msPenalty               =3500;
-%        percentCorrectionTrials = .5;  
+    
+    case 'g62y3lt' % Started 1/12/16 switch to GTS 1/29/16
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 59;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;  
 %     
 %     case 'g62tx1.5lt' % Started 1/12/16
 %        requestRewardSizeULorMS = 0;

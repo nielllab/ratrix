@@ -1,5 +1,9 @@
 %%% creates session data or reads previously generated session data
 
+if~isfield(cfg,'alignData')
+    cfg.alignData = 1;
+end
+
 if ~exist('fileName','var')
     
     [f p] = uigetfile({'*.mat;*.sbx'},'.mat or .tif file');

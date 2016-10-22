@@ -40,14 +40,14 @@ switch subjIDs{1}
        msPenalty               =3500;
        percentCorrectionTrials = .5;    
     
-%     
-%   case 'g62tx1.5lt' % Started 1/12/16
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 59;
-%        msPenalty               =3500;
-%        percentCorrectionTrials = .6;
-%        stim.gain = 0.55 * ones(2,1); %try this since has trouble fully stopping 4/25/16
-%     
+    
+  case 'g62tx1.5lt' % Started 1/12/16
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 59;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;
+      
+    
     
    case 'g62gg5rt' % Started 4/13/16 
        requestRewardSizeULorMS = 0;

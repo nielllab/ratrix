@@ -29,9 +29,7 @@ for t = 1:3
     nsub = nsub+length(subjs);
 end
 
-figure
-imagesc(reshape(subjCorr,144,33)');
-corrColumn = reshape(subjCorr,144,33);
+
 
 
 prePostMean(:,:,1) = nanmean(subjCorr(:,:,subjtask==pre),3); prePostMean(:,:,2) = nanmean(subjCorr(:,:,(subjtask==gts | subjtask == hvv)),3);
@@ -60,9 +58,9 @@ imagesc(zCorr,[-4 4]); colormap jet
 figure
 imagesc(im(:,:,1),[-0.2 0.2]) ; colormap gray; axis equal
 hold on
-for i = 1:npts
+for i = 1:npts-1
     plot(y(i),x(i),[col(i) 'o'],'Markersize',8,'Linewidth',2)
-    for j= 1:npts
+    for j= 1:npts-1
         d = prePostMean(i,j,2)- prePostMean(i,j,1);
         z = zCorr(i,j);
         if z>1

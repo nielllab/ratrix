@@ -38,6 +38,7 @@ for s=1:1
     
     x0 =0; y0=0; sz = 128;
     doTopography;
+    printfigs = 0;
     doCorrelationMap
     
 end

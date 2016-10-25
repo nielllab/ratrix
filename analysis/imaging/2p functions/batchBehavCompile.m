@@ -166,6 +166,9 @@ for i = 1:length(alluse);
     drawnow
 end
 
+save behavData101616
+close all
+
 figure
 hist(spontCorrAll,[-0.95:0.1:1]); title('spont correlation');
 figure

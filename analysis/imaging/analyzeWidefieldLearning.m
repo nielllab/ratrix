@@ -70,19 +70,91 @@ for s=1:1
     
 end
 
-for ind = 1:2
-    data = squeeze(meanPolarAll(:,:,:,ind));
-    data = reshape (data,size(data,1)*size(data,2),size(data,3));
-    xc = corrcoef(data);
-    figure
-    imagesc(abs(xc),[0.5 1]);
-    xc(xc==1)=NaN;
-    xclist = abs(xc(:)); xclist = xclist(~isnan(xclist));
-    subjXCAll(s,ind) = mean(xclist);
-    subjXCstd(s,ind) = std(xclist);
-    title(sprintf('map %d correlation across subjs',ind));
+
+for f= 1:length(behav);
+    for cond =3:4
+        figure
+        if ~isempty (behav{f}{cond})
+            for t= 1:6
+                subplot(2,3,t)
+                imagesc(shiftBehav{f}{cond}(:,:,t+7),[0 0.15]);
+                hold on
+                plot(ypts,xpts,'w.','Markersize',1);
+                axis off
+            end
+            title(sprintf('%d %s %s',f,files(use(f)).subj,files(use(f)).expt))
+            subplot(2,3,2); title([ files(use(f)).learned ' ' num2str(days(f));
+            subplot(2,3,1); if cond ==4,  title('avg top correct')
+            else title('avg bottom correct'); end
+        elseif isempty (behav{f}{cond})
+            sprintf('no correct trials')
+            sprintf('%d %s %s',f,files(use(f)).subj,files(use(f)).expt)
+        end
+    end
+end
+    
+ 
+clear learn days
+for i = 1:length(alluse)
+    if strcmp(files(alluse(i)).learned,'mid')
+        learn(i)=1;
+    elseif strcmp(files(alluse(i)).learned,'post')
+        learn(i)=2;
+    end
+    if ~isempty(files(alluse(i)).learningDay)
+        days(i) = str2num(files(alluse(i)).learningDay);
+    else
+        days(i) = 100;
+    end
 end
 
+clear data
+for i = 1:length(behav)
+    for c = 1:4
+        if ~isempty(shiftBehav{i}{c})
+            data(:,:,:,c,i) = shiftBehav{i}{c}(:,:,:);
+        else
+            data(:,:,:,c,i) = NaN;
+        end
+    end
+end
+
+clear avgLearned
+
+avgLearned(:,:,:,:,1) = nanmean(data(:,:,:,:,learn==1 & days<10),5);
+avgLearned(:,:,:,:,2) = nanmean(data(:,:,:,:,learn==2),5);
+
+errLearned(:,:,:,:,1) = nanstd(data(:,:,:,:,learn==1 & days<10),[],5)/sqrt(sum(learn==1 & days<10));
+errLearned(:,:,:,:,2) = nanstd(data(:,:,:,:,learn==2),[],5)/sqrt(sum(learn==2));
+
+
+
+learnTitle = {'pre','post'};
+condTitle = {'correct','incorrect','top','bottom'};
+for i = 1:2
+    for cond=1:4
+        figure
+        for t = 1:6
+            subplot(2,3,t)
+            imagesc(avgLearned(:,:,t+7,cond,i) - mean(mean(avgLearned(200:210,200:210,t+7,cond,i))),[ 0 0.15]); colormap jet
+           hold on
+              plot(ypts,xpts,'w.','Markersize',1);
+              axis off
+        end
+        subplot(2,3,1); title(learnTitle{i});
+        subplot(2,3,2); title(condTitle{cond});
+    end
+end
+
+figure
+imagesc(avgLearned(:,:,9,3,1));
+hold on;  plot(ypts,xpts,'w.','Markersize',1);
+for i = 1:12
+    [y(i) x(i)] = ginput(1);  plot(y(i),x(i),'g*');
+end
+x= round(x); y= round(y); npts=12;
+nullPt = [205 205];    
+        
 
 
 [f p] = uiputfile('*.mat','save data?');

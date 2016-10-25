@@ -50,7 +50,7 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0; 
        rewardSizeULorMS        = 219;
        msPenalty               =3500;
-       percentCorrectionTrials = .5;  
+       percentCorrectionTrials = .75;  
        
     case 'pvchr3b14rt' % Started 9/9/16 %%start gts 9/22/16
        requestRewardSizeULorMS = 0;
@@ -90,17 +90,17 @@ switch subjIDs{1}
        msPenalty               =3500;
        percentCorrectionTrials = .75; 
     
-%    case 'g62gg5rt' % Started 4/13/16 
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 59;
-%        msPenalty               =3500;
-%        percentCorrectionTrials = .8;
-%        
-%    case 'g62bb10lt' % Started 4/13/16
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 59;
-%        msPenalty               =3500;
-%        percentCorrectionTrials = .7;
+   case 'g62gg5rt' % Started 4/13/16 
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 59;
+       msPenalty               =3500;
+       percentCorrectionTrials = .8;
+       
+   case 'g62bb10lt' % Started 4/13/16
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 59;
+       msPenalty               =3500;
+       percentCorrectionTrials = .7;
    
     
    case 'g62ff4lt' % Started 4/13/16
@@ -160,8 +160,8 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 59;
        msPenalty               =3500;
-       percentCorrectionTrials = .6;
-       stim.gain = 0.55 * ones(2,1); %try this since has trouble fully stopping 4/25/16
+       percentCorrectionTrials = .5;
+      
 
 
 

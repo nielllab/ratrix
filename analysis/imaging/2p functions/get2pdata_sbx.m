@@ -4,7 +4,7 @@ function [dfofInterp im_dt greenframe framerate phasetimes m dt alignment] = get
 %%% read in sbx data and perform motion correction (if not already done)
 display('reading data')
 tic
-alignData=1; showImages=1;
+alignData=cfg.alignData; showImages=1;
 
 [img framerate] = readAlign2p_sbx(fname,alignData,showImages);
 toc

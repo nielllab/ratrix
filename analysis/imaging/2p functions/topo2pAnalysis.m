@@ -1,5 +1,6 @@
 %%% based on session data and generic points, does pointwise analysis
 %%% for topo (periodic spatial) stimuli
+close all
 clear all
 
 dt = 0.1;

@@ -37,7 +37,8 @@ if exist('psfile','var')
 end
 
 %%% generate cycle average movie
-movieFile = [fileName(1:end-4) '_cycAvg.avi'];
+% movieFile = [fileName(1:end-4) '_cycAvg.avi'];
+movieFile = [fileName '_cycAvg.avi'];
     
 clear cycAvg mov
 figure

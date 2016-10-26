@@ -14,11 +14,13 @@ rewardSizeULorMS          =100;
 requestRewardSizeULorMS   =0;
 requestMode               ='first';
 msPenalty                 =3500;          %consider changing this also in future
+pixPerCycs             = [200]; %*10^9;
+stim.gain = 0.7 * ones(2,1);
 fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
-msAirpuff                 =msPenalty;
-stim.stopHUD = false; %stop period heads up display... false = off
+msAirpuff                 =0;
+%stim.stopHUD = false; %stop period heads up display... false = off
 
 % sca
 % keyboard
@@ -61,7 +63,7 @@ svnCheckMode = 'session';
 
 interTrialLuminance = .5;
 
-stim.gain = 0.7 * ones(2,1);
+
 stim.targetDistance = 500 * ones(1,2);
 stim.timeoutSecs = 10;
 stim.slow = [40; 80]; % 10 * ones(2,1);
@@ -70,21 +72,21 @@ stim.positional = false;
 stim.cue = true;
 stim.soundClue = false;
 
-pixPerCycs             = [100]; %*10^9;
+
 targetOrientations     = [0 1]*pi/2;
 distractorOrientations = [0 1]*pi/2; 
 mean                   = .5;
-radius                 = .35;
+radius                 = .25;
 contrast               = 1;
 thresh                 = .00005;
-normalizedPosition      = [0.25 0.75];
+normalizedPosition      = [0.33 0.66];
 scaleFactor            = 0; %[1 1];
 axis                   = pi/2;
 stim.stim = orientedGabors(pixPerCycs,{distractorOrientations [] targetOrientations},'abstract',mean,radius,contrast,thresh,normalizedPosition,maxWidth,maxHeight,scaleFactor,interTrialLuminance,[],[],axis);
 
 
-%stim to stay on 1.5 sec after answer
-ballSM = setReinfAssocSecs(trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance),1.5);
+%stim to stay on 1 sec after answer
+ballSM = setReinfAssocSecs(trail(stim,maxWidth,maxHeight,zoom,interTrialLuminance),1);
 
 
 

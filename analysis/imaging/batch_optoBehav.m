@@ -150,3 +150,13 @@ files(n).geno = 'camk2 gc6';
 files(n).notes = 'good session'; 
 files(n).monitor = 'vert';
 
+n=1;
+files(n).subj = 'g62y3lt';
+files(n).expt = '102516';
+files(n).trialRec =  'trialRecords_947-1146_20161025T123248-20161025T125148';
+files(n).power = '45mw';
+files(n).task = 'GTS';
+files(n).geno = 'camk2 gc6';
+files(n).notes = 'good session'; 
+files(n).monitor = 'vert';
+

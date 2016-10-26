@@ -90,6 +90,9 @@ else %%% leave timing intact and adjust video stim times to acq rate
     dfofInterp = dfof;
     
     phasesync = info.frame(find( info.event_id ==2 | info.event_id==3))/binsize; %%% get phase trigger signals
+    if phasesync(1)==0  %%% something funny happens at start giving transition on first frame
+        phasesync = phasesync(2:end);
+    end
     phasesync=phasesync(1:2:end); %%% scanbox records rising and falling edge;
     phasetimes = phasesync*dt; %%% convert to frame time (dt)
     

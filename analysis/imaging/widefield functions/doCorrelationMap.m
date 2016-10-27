@@ -3,7 +3,7 @@
 %%% load in points for analysis
 [f p] = uigetfile('*.mat','pts file');
 if f~=0
-    load(fullfile(p,f),'x','y');
+    load(fullfile(p,f),'x','y'); x= round(x/4); y = round(y/4);
 else
     display('will select points later')
     x=[]; y=[];
@@ -24,7 +24,7 @@ clear  sigAll decorrSigAll    traceCorrAll  cc_imAll
 
 
 for f= 1:length(use)
-    
+    close all
     f
     display('loading data')
     clear dfof_bg sp

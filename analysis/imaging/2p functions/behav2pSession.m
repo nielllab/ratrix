@@ -17,7 +17,7 @@ if ~exist('onsets','var')
     
     [onsets starts trialRecs] = sync2pBehavior_sbx(behavfile ,phasetimes);
     use = find(onsets<size(dfofInterp,3)*dt-3 & onsets>5); %%%% get rid of trials right at beginning or end, that may be incomplete
-    %use = use(1:(length(use)-1))  %sometimes behavior session trial records has 1 xtra trial
+    use = use(1:(length(use)-1));  %sometimes behavior session trial records has 1 xtra trial
     onsets = onsets(use); starts=starts(use,:); trialRecs = trialRecs(use);
     save(sessionName,'onsets','starts','trialRecs','-append');
 end

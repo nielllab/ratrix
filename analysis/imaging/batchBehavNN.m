@@ -2795,7 +2795,7 @@ files(n).notes = 'no behavorial analysis: data in multi tiff format';
 % files(n).loomdata = '051614 G6w1LT Passive Viewing\g6w1lt_run4_looming_fstop11_exp50ms\g6w1lt_run4_looming_fstop11_exp50ms';
 % files(n).monitor = 'vert';
 % files(n).task = 'GTS';
-files(n).spatialfreq = '100';
+%files(n).spatialfreq = '100';
 % files(n).label = 'camk2 gc6';
 % files(n).notes = 'lightblock cone tipped during passive viewing';
 

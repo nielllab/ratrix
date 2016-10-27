@@ -6,5 +6,7 @@ dt = diff(phasetimes);
 stopTTL = dt(1:3:end);
 stopRatrix = abs(starts(:,1));
 
+err = mean(abs(stopTTL(1:length(stopRatrix))-stopRatrix));
+
 figure
-plot(stopTTL); hold on; plot(stopRatrix,'.'); title('stopping time'); legend({'TTL','Ratrix'}); xlabel('trial #'); ylabel('secs');
+plot(stopTTL); hold on; plot(stopRatrix,'.'); title(sprintf('err = %0.3f',err)); legend({'TTL','Ratrix'}); xlabel('trial #'); ylabel('secs');

@@ -20,7 +20,8 @@ files(n).power = '45mw';
 files(n).task = 'GTS';
 files(n).geno = 'camk2 gc6';
 files(n).notes = 'good session'; 
-files(n).monitor = 'vert'; 
+files(n).monitor = 'vert';
+files(n).SilenceArea = 'full window';
 
 n=1;
 files(n).subj = 'g62gg10lt';
@@ -30,7 +31,8 @@ files(n).power = '45mw';
 files(n).task = 'GTS';
 files(n).geno = 'camk2 gc6';
 files(n).notes = 'good session'; 
-files(n).monitor = 'vert'; 
+files(n).monitor = 'vert';
+files(n).SilenceArea = 'full window';
 
 n=1;
 files(n).subj = 'g62gg10lt';
@@ -41,7 +43,7 @@ files(n).task = 'GTS';
 files(n).geno = 'camk2 gc6';
 files(n).notes = 'good session'; 
 files(n).monitor = 'vert'; 
- 
+files(n).SilenceArea = 'full window'; 
 
 n=1;
 files(n).subj = 'g62gg10lt';
@@ -52,7 +54,7 @@ files(n).task = 'GTS';
 files(n).geno = 'camk2 gc6';
 files(n).notes = 'good session'; 
 files(n).monitor = 'vert'; 
-
+files(n).SilenceArea = 'full window';
 
 n=1;
 files(n).subj = 'g62gg10lt';
@@ -63,7 +65,7 @@ files(n).task = 'GTS';
 files(n).geno = 'camk2 gc6';
 files(n).notes = 'good session'; 
 files(n).monitor = 'vert';
-
+files(n).SilenceArea = 'full window';
 
 %Pvchr3b15rt
 
@@ -76,6 +78,8 @@ files(n).task = 'GTS';
 files(n).geno = 'Pv ChR2';
 files(n).notes = 'good session'; 
 files(n).monitor = 'vert';
+files(n).SilenceArea = 'full window';
+
 
 n=1;
 files(n).subj = 'pvchr3b15rt';
@@ -86,6 +90,7 @@ files(n).task = 'GTS';
 files(n).geno = 'Pv ChR2';
 files(n).notes = 'good session'; 
 files(n).monitor = 'vert';
+files(n).SilenceArea = 'full window';
 
 n=1;
 files(n).subj = 'pvchr3b15rt';
@@ -96,6 +101,7 @@ files(n).task = 'GTS';
 files(n).geno = 'Pv ChR2';
 files(n).notes = 'good session'; 
 files(n).monitor = 'vert';
+files(n).SilenceArea = 'full window';
 
 n=1;
 files(n).subj = 'pvchr3b15rt';
@@ -106,6 +112,7 @@ files(n).task = 'GTS';
 files(n).geno = 'Pv ChR2';
 files(n).notes = 'good session'; 
 files(n).monitor = 'vert';
+files(n).SilenceArea = 'full window';
 
 n=1;
 files(n).subj = 'pvchr3b15rt';
@@ -116,6 +123,7 @@ files(n).task = 'GTS';
 files(n).geno = 'Pv ChR2';
 files(n).notes = 'not good session'; %greg ran alone; bias - performance not diff from chance for bottom stim
 files(n).monitor = 'vert';
+files(n).SilenceArea = 'full window';
 
 n=1;
 files(n).subj = 'pvchr3b15rt';
@@ -126,6 +134,7 @@ files(n).task = 'GTS';
 files(n).geno = 'Pv ChR2';
 files(n).notes = 'good session'; 
 files(n).monitor = 'vert';
+files(n).SilenceArea = 'full window';
 
 n=1;
 files(n).subj = 'pvchr3b15rt';
@@ -136,7 +145,29 @@ files(n).task = 'GTS';
 files(n).geno = 'Pv ChR2';
 files(n).notes = 'good session'; 
 files(n).monitor = 'vert';
+files(n).SilenceArea = 'full window';
 
+n=1;
+files(n).subj = 'pvchr3b15rt';
+files(n).expt = '102616';
+files(n).trialRec =  'trialRecords_7612-7807_20161026T162244-20161026T164348';
+files(n).power = '45mw';
+files(n).task = 'GTS';
+files(n).geno = 'Pv ChR2';
+files(n).notes = 'good session'; 
+files(n).monitor = 'vert';
+files(n).SilenceArea = 'V1';
+
+n=1;
+files(n).subj = 'pvchr3b15rt';
+files(n).expt = '102716';
+files(n).trialRec =  'trialRecords_8223-8425_20161027T162211-20161027T164356';
+files(n).power = '45mw';
+files(n).task = 'GTS';
+files(n).geno = 'Pv ChR2';
+files(n).notes = 'good session'; 
+files(n).monitor = 'vert';
+files(n).SilenceArea = 'V1';
 
 
 %g62y3lt
@@ -149,6 +180,7 @@ files(n).task = 'GTS';
 files(n).geno = 'camk2 gc6';
 files(n).notes = 'good session'; 
 files(n).monitor = 'vert';
+files(n).SilenceArea = 'full window';
 
 n=1;
 files(n).subj = 'g62y3lt';
@@ -159,6 +191,7 @@ files(n).task = 'GTS';
 files(n).geno = 'camk2 gc6';
 files(n).notes = 'good session'; 
 files(n).monitor = 'vert';
+files(n).SilenceArea = 'full window';
 
 n=1;
 files(n).subj = 'g62y3lt';
@@ -169,6 +202,18 @@ files(n).task = 'GTS';
 files(n).geno = 'camk2 gc6';
 files(n).notes = 'good session'; 
 files(n).monitor = 'vert';
+files(n).SilenceArea = 'full window';
+
+n=1;
+files(n).subj = 'g62y3lt';
+files(n).expt = '102716';
+files(n).trialRec =  'trialRecords_1518-1710_20161027T131004-20161027T132725';
+files(n).power = '45mw';
+files(n).task = 'GTS';
+files(n).geno = 'camk2 gc6';
+files(n).notes = 'good session'; 
+files(n).monitor = 'vert';
+files(n).SilenceArea = 'full window';
 
 %g62gg5rt
 n=1;
@@ -180,8 +225,16 @@ files(n).task = 'GTS';
 files(n).geno = 'camk2 gc6';
 files(n).notes = 'good session'; 
 files(n).monitor = 'vert';
+files(n).SilenceArea = 'full window';
 
-
-
-
-
+%g62tx15
+n=1;
+files(n).subj = 'g62tx15lt';
+files(n).expt = '102716';
+files(n).trialRec =  'trialRecords_846-1065_20161027T180135-20161027T182241';
+files(n).power = '45mw';
+files(n).task = 'GTS';
+files(n).geno = 'camk2 gc6';
+files(n).notes = 'good session'; 
+files(n).monitor = 'vert';
+files(n).SilenceArea = 'full window';

@@ -35,7 +35,7 @@ switch subjIDs{1}
        rewardSizeULorMS        = 60;
        msPenalty               =3500;
        
-     case 'g62c6tt' % switched GoToBlack 5/21/14
+     case 'g62tt1lt' % start nieve 10/27/16
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 60;
        msPenalty               =3500;

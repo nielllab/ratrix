@@ -13,7 +13,7 @@ if exist(psfile,'file')==2;delete(psfile);end
 
 
 tic
-behav2pSession('g62qq1rt_001_000.sbx','behavSessionV2.mat','trialRecords_124-313_20161027T104229-20161027T110319.mat',psfile);
+behav2pSession('g62qq1rt_001_000.sbx','behavSessionV2.mat','trialRecords_314-465_20161028T105850-20161028T111905.mat',psfile);
 topo2pSession('g62qq1rt_001_001.sbx','topoXsessionV2.mat',psfile);
 topo2pSession('g62qq1rt_001_002.sbx','topoYsessionV2.mat',psfile);
 grating2pSession('g62qq1rt_001_005.sbx','gratingSessionV2.mat',psfile);
@@ -21,7 +21,7 @@ passiveBehav2pSession('g62qq1rt_001_004.sbx','passiveBehav3x8minV2.mat ','C:\beh
 passiveBehav2pSession('g62qq1rt_001_003.sbx','passiveBehav2sf8minSessionV2.mat','C:\behavStim2sf8min.mat',psfile);
 
 %%behav2pSession('g62qq1rt_001_000.sbx','behavSessionNOTGOODV2.mat','trialRecords_3377-3408_20160525T150056-20160525T151722.mat',psfile);
-%%topo2pSession('g62qq1rt_001_006.sbx','topoXsession2-V2.mat',psfile);
+%%topo2pSession('g62qq1rt_001_002.sbx','topoXsession2-V2.mat',psfile);
 %%topo2pSession('g62qq1rt_001_002.sbx','topoYsession2short-V2.mat',psfile);
 % passiveBehav2pSession('g62qq1rt_001_005.sbx','passiveBehav3x8minSessionV2_2.mat ','C:\behavStim3x8min.mat',psfile);
 %passiveBehav2pSession('g62qq1rt_001_003.sbx','passiveBehav2sfSessionEffV2noStimobj.mat','C:\behavStim2sf8min.mat',psfile);

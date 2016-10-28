@@ -1,4 +1,5 @@
 close all
+clear all
 
 [f p] = uiputfile('*.pdf','pdf file');
 newpdfFile = fullfile(p,f);

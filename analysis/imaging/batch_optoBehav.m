@@ -170,6 +170,20 @@ files(n).monitor = 'vert';
 files(n).SilenceArea = 'V1';
 
 
+n=1;
+files(n).subj = 'pvchr3b15rt';
+files(n).expt = '102716';
+files(n).trialRec =  'trialRecords_8578-8766_20161028T153323-20161028T155702';
+files(n).power = '45mw';
+files(n).task = 'GTS';
+files(n).geno = 'Pv ChR2';
+files(n).notes = 'good session'; %non-opto performance in 70s.. ok i think
+files(n).monitor = 'vert';
+files(n).SilenceArea = 'V1';
+
+
+
+
 %g62y3lt
 n=1;
 files(n).subj = 'g62y3lt';
@@ -216,6 +230,18 @@ files(n).monitor = 'vert';
 files(n).SilenceArea = 'full window';
 
 %g62gg5rt
+
+n=1;
+files(n).subj = 'g62gg5';
+files(n).expt = '102616';
+files(n).trialRec =  'trialRecords_1330-1499_20161025T151706-20161025T153740';
+files(n).power = '45mw';
+files(n).task = 'GTS';
+files(n).geno = 'camk2 gc6';
+files(n).notes = 'not good session'; %ryan ran alone 1st time, slacking toward end. long RT's
+files(n).monitor = 'vert';
+files(n).SilenceArea = 'full window';
+
 n=1;
 files(n).subj = 'g62gg5';
 files(n).expt = '102616';

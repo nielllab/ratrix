@@ -160,3 +160,28 @@ files(n).geno = 'camk2 gc6';
 files(n).notes = 'good session'; 
 files(n).monitor = 'vert';
 
+n=1;
+files(n).subj = 'g62y3lt';
+files(n).expt = '102616';
+files(n).trialRec =  'trialRecords_1228-1483_20161026T153936-20161026T160614';
+files(n).power = '45mw';
+files(n).task = 'GTS';
+files(n).geno = 'camk2 gc6';
+files(n).notes = 'good session'; 
+files(n).monitor = 'vert';
+
+%g62gg5rt
+n=1;
+files(n).subj = 'g62gg5';
+files(n).expt = '102616';
+files(n).trialRec =  'trialRecords_1552-1806_20161026T135130-20161026T141814';
+files(n).power = '45mw';
+files(n).task = 'GTS';
+files(n).geno = 'camk2 gc6';
+files(n).notes = 'good session'; 
+files(n).monitor = 'vert';
+
+
+
+
+

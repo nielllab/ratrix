@@ -22,6 +22,18 @@ if ~exist('onsets','var')
     save(sessionName,'onsets','starts','trialRecs','-append');
 end
 
+%%% diagnostic for timing alignment
+dt = diff(phasetimes);
+stopTTL = dt(1:3:end);
+stopRatrix = abs(starts(:,1));
+
+figure
+plot(stopTTL); hold on; plot(stopRatrix,'.'); title('stopping time'); legend({'TTL','Ratrix'}); xlabel('trial #'); ylabel('secs');
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
+
 figure
 plot(squeeze(mean(mean(dfofInterp,2),1)));
 ylabel('mean dF/F');

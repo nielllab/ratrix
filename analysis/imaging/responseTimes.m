@@ -1,4 +1,8 @@
+%%% analyzes performance and response times across the timecourse of learning
+%%% select the folder that contains the permanent trial records
 clear all
+d= uigetdir;
+cd(d);
 files = dir;
 dates = [files(3:end).datenum]
 [d ind] = sort(dates);

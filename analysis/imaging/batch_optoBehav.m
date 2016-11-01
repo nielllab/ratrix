@@ -264,3 +264,15 @@ files(n).geno = 'camk2 gc6';
 files(n).notes = 'good session'; 
 files(n).monitor = 'vert';
 files(n).SilenceArea = 'full window';
+
+
+n=1;
+files(n).subj = 'g62tx15lt';
+files(n).expt = '110116';
+files(n).trialRec =  'trialRecords_1468-1679_20161101T152656-20161101T154527';
+files(n).power = '45mw';
+files(n).task = 'GTS';
+files(n).geno = 'camk2 gc6';
+files(n).notes = 'good session'; 
+files(n).monitor = 'vert';
+

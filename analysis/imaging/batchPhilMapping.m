@@ -203,3 +203,17 @@
 % files(n).label = 'camk2 gc6';
 % files(n).notes = 'good imaging session';
 % files(n).timing = 'pre';   
+
+n=n+1;
+files(n).subj = 'CG42TT';
+files(n).expt = '110116';
+files(n).topox= '110116_CG42TT_2PMAP_RIG2\110116_CG42TT_2PMAP_RIG2_TOPOY\110116_CG42TT_2PMAP_RIG2_TOPOYmaps.mat';
+files(n).topoxdata = '110116_CG42TT_2PMAP_RIG2\110116_CG42TT_2PMAP_RIG2_TOPOY\110116_CG42TT_2PMAP_RIG2_TOPOY';
+files(n).topoy = '110116_CG42TT_2PMAP_RIG2\110116_CG42TT_2PMAP_RIG2_TOPOX\110116_CG42TT_2PMAP_RIG2_TOPOXmaps.mat';
+files(n).topoydata = '110116_CG42TT_2PMAP_RIG2\110116_CG42TT_2PMAP_RIG2_TOPOX\110116_CG42TT_2PMAP_RIG2_TOPOX';
+files(n).inject = 'none';
+files(n).rignum = 'rig2';
+files(n).monitor = 'portrait';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+files(n).timing = 'pre';   

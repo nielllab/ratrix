@@ -39,6 +39,7 @@ for i = 1:length(alluse);
     
     xAll = [xAll mapx(1:cutoff)]; yAll = [yAll mapy(1:cutoff)];
     
+    allCond(cellrange)=NaN;
     if strcmp(files(alluse(i)).task,'GTS'), allCond(cellrange) = gts; end;
     if strcmp(files(alluse(i)).task,'Naive') & files(alluse(i)).learningDay<5, allCond(cellrange) = naive; end;
     if strcmp(files(alluse(i)).task,'Naive') & files(alluse(i)).learningDay>=5, allCond(cellrange) = naiveTrained; end;
@@ -52,31 +53,35 @@ for i = 1:length(alluse);
         
         display('calculating eyes');
         load([pathname files(alluse(i)).dir '\' files(alluse(i)).behavPts],'onsets','dt');
-        eyes = get2pEyes([pathname files(alluse(i)).dir '\' files(alluse(i)).behavEyes],0,dt);
+        try 
+            eyes = get2pEyes([pathname files(alluse(i)).dir '\' files(alluse(i)).behavEyes],0,dt);
         figure
         plot(eyes); legend('x','y','r');
         
         timepts = -1:0.25:5;
         eyeAlign = align2onsets(eyes',onsets,dt,timepts);
         save([pathname files(alluse(i)).dir '\' files(alluse(i)).behavPts],'eyes','eyeAlign','-append');
+        catch
+            eyeAlign = NaN;
+        end
     end
     
-    load([pathname files(alluse(i)).dir '\' files(alluse(i)).behavEyes],'data');
-    %     d= squeeze(data(:,:,1,50:50:end));
-    %     range = [min(d(:)) max(d(:))];
-    %     figure
-    %     mx = max(eyes(:));
-    %     for j = 1:100:size(data,4);
-    %         subplot(2,2,2);
-    %         imagesc(data(:,:,1,j),range);
-    %         subplot(2,2,3:4);
-    %         hold off; plot(eyes); hold on; plot([j/2 j/2], [1 mx]);
-    %         drawnow;
-    %     end
-    
-    figure
-    subplot(2,2,1); imagesc(data(:,:,1,50)); subplot(2,2,2); imagesc(data(:,:,1,round(end/3)));
-    subplot(2,2,3); imagesc(data(:,:,1,round(2*end/3))); subplot(2,2,4); imagesc(data(:,:,1,end)); colormap gray
+%     load([pathname files(alluse(i)).dir '\' files(alluse(i)).behavEyes],'data');
+%     %     d= squeeze(data(:,:,1,50:50:end));
+%     %     range = [min(d(:)) max(d(:))];
+%     %     figure
+%     %     mx = max(eyes(:));
+%     %     for j = 1:100:size(data,4);
+%     %         subplot(2,2,2);
+%     %         imagesc(data(:,:,1,j),range);
+%     %         subplot(2,2,3:4);
+%     %         hold off; plot(eyes); hold on; plot([j/2 j/2], [1 mx]);
+%     %         drawnow;
+%     %     end
+%     
+%     figure
+%     subplot(2,2,1); imagesc(data(:,:,1,50)); subplot(2,2,2); imagesc(data(:,:,1,round(end/3)));
+%     subplot(2,2,3); imagesc(data(:,:,1,round(2*end/3))); subplot(2,2,4); imagesc(data(:,:,1,end)); colormap gray
     
     
     behavRadius{i} = eyes(:,3);
@@ -115,8 +120,8 @@ for i = 1:length(alluse);
     figure
     plot(eyes)
     
-    figure
-    hold on; plot(spd(5:end-5),r(5:end-5),'o');  plot(spd(5:end-5),r(5:end-5));
+%     figure
+%     hold on; plot(spd(5:end-5),r(5:end-5),'o');  plot(spd(5:end-5),r(5:end-5));
     
     figure
     plot(spd/max(spd)); hold on; plot((r-min(r))/(max(r)-min(r)));
@@ -383,7 +388,7 @@ orientInvariant3x(:,:,4) = mean(centered3x(:,:,[10 12]),3);
 orientInvariant3x(:,:,3) = mean(centered3x(:,:,[9 11]),3);
 orientInvariant3x(:,:,2) = mean(centered3x(:,:,[2 4]),3);
 orientInvariant3x(:,:,1) = mean(centered3x(:,:,[1 3]),3);
-invariantAll3x = reshape(orientInvariant3x,n,size(orientInvariant3x,2)*size(orientInvariant3x,3));
+invariantAll3x = reshape(orientInvariant3x,size(orientInvariant3x,1),size(orientInvariant3x,2)*size(orientInvariant3x,3));
 
 trialType = {'pref hv','pref oblique','non-pref hv','non-prev oblique'};
 for cond = 1:2
@@ -406,7 +411,7 @@ orientInvariant2sf(:,:,4) = mean(centered2sf(:,:,[6 8]),3);
 orientInvariant2sf(:,:,3) = mean(centered2sf(:,:,[5 7]),3);
 orientInvariant2sf(:,:,2) = mean(centered2sf(:,:,[2 4]),3);
 orientInvariant2sf(:,:,1) = mean(centered2sf(:,:,[1 3]),3);
-invariantAll2sf = reshape(orientInvariant2sf,n,size(orientInvariant2sf,2)*size(orientInvariant2sf,3));
+invariantAll2sf = reshape(orientInvariant2sf,size(orientInvariant2sf,1),size(orientInvariant2sf,2)*size(orientInvariant2sf,3));
 
 trialType = {'pref ','pref hi sf','non pref','non pref hi sf'};
 for cond = 1:2
@@ -427,14 +432,14 @@ end
 for i= 1:max(c);
     figure
     hist(deltaSpontAll(clust==i),[-0.95:0.1:1]); title(sprintf('cluster %d',i));
-    spontMod(i) = mean(deltaSpontAll(clust==i));
+    spontMod(i) = nanmean(abs(deltaSpontAll(clust==i)));
 end
 figure
 bar(spontMod); ylabel('spontaneous modulation')
 
 clear clustDist
 for cond =1:2
-    for i = 1:max(clust); clustDist(cond,i) = sum(allCond==cond & clust==i )/sum(allCond==cond & clust>0 ); end
+    for i = 1:max(clust); clustDist(cond,i) = sum(allCond==cond & clust==i )/sum(allCond==cond & centered'); end
     clustDist(cond,i+1) = sum(allCond'==cond & centered & ~active)/sum(allCond'==cond & centered);
     figure
     % pie(clustDist(cond,[4 1 2 3]),{'inactive','sustain','transient','suppresed'}); title(condLabel{cond});

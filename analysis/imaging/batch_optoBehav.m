@@ -128,7 +128,7 @@ files(n).SilenceArea = 'full window';
 n=n+1;
 files(n).subj = 'pvchr3b15rt';
 files(n).expt = '101816';
-files(n).trialRec =  'trialRecords_6388-6595_20161018T170423-20161018T172415 ';
+files(n).trialRec =  'trialRecords_6388-6595_20161018T170423-20161018T172415';
 files(n).power = '22mw';
 files(n).task = 'GTS';
 files(n).geno = 'Pv ChR2';
@@ -139,7 +139,7 @@ files(n).SilenceArea = 'full window';
 n=n+1;
 files(n).subj = 'pvchr3b15rt';
 files(n).expt = '102016';
-files(n).trialRec =  ' trialRecords_7228-7429_20161020T162302-20161020T164515';
+files(n).trialRec =  'trialRecords_7228-7429_20161020T162302-20161020T164515';
 files(n).power = '22mw';
 files(n).task = 'GTS';
 files(n).geno = 'Pv ChR2';
@@ -232,7 +232,7 @@ files(n).SilenceArea = 'full window';
 %g62gg5rt
 
 n=n+1;
-files(n).subj = 'g62gg5';
+files(n).subj = 'g62gg5rt';
 files(n).expt = '102616';
 files(n).trialRec =  'trialRecords_1330-1499_20161025T151706-20161025T153740';
 files(n).power = '45mw';
@@ -243,7 +243,7 @@ files(n).monitor = 'vert';
 files(n).SilenceArea = 'full window';
 
 n=n+1;
-files(n).subj = 'g62gg5';
+files(n).subj = 'g62gg5rt';
 files(n).expt = '102616';
 files(n).trialRec =  'trialRecords_1552-1806_20161026T135130-20161026T141814';
 files(n).power = '45mw';
@@ -253,7 +253,7 @@ files(n).notes = 'good session';
 files(n).monitor = 'vert';
 files(n).SilenceArea = 'full window';
 
-%g62tx15
+%g62tx15lt
 n=n+1;
 files(n).subj = 'g62tx15lt';
 files(n).expt = '102716';

@@ -276,3 +276,13 @@ files(n).geno = 'camk2 gc6';
 files(n).notes = 'good session'; 
 files(n).monitor = 'vert';
 
+n=1;
+files(n).subj = 'g62tx15lt';
+files(n).expt = '110216';
+files(n).trialRec =  'trialRecords_1691-1868_20161102T134554-20161102T140341';
+files(n).power = '45mw';
+files(n).task = 'GTS';
+files(n).geno = 'camk2 gc6';
+files(n).notes = 'good session'; 
+files(n).monitor = 'vert';
+

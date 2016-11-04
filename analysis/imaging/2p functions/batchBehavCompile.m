@@ -184,17 +184,17 @@ hist(deltaSpontAll,[-0.95:0.1:1]); title('evoked correlation');
 
 behavTimepts = -1:0.1:5;
 
-d1 = sqrt((xAll-42).^2 + (yAll-36).^2);
-d2 = sqrt((xAll-84).^2 + (yAll-36).^2);
+d1 = sqrt((xAll-46).^2 + (yAll-34).^2);
+d2 = sqrt((xAll-78).^2 + (yAll-34).^2);
 centeredTrialData = zeros(size(trialDataAll))+NaN;
 centered3x = zeros(size(data3xAll))+NaN;
 centered2sf = zeros(size(data2sfAll))+NaN;
 for i = 1:size(centeredTrialData,1);
-    if d1(i)<17.5
+    if d1(i)<12
         centeredTrialData(i,:,:) = trialDataAll(i,:,:);
         centered3x(i,:,:) = data3xAll(i,:,:);
         centered2sf(i,:,:) = data2sfAll(i,:,:);
-    elseif d2(i)<17.5
+    elseif d2(i)<12
         centeredTrialData(i,:,1:2) = trialDataAll(i,:,3:4);
         centeredTrialData(i,:,3:4) = trialDataAll(i,:,1:2);
         centeredTrialData(i,:,5:6) = trialDataAll(i,:,7:8);
@@ -208,7 +208,7 @@ for i = 1:size(centeredTrialData,1);
     end
 end
 
-centered = (d1<17.5 | d2<17.5)';
+centered = (d1<12| d2<12)';
 
 clear invariant
 invariant(:,:,2) = mean(centeredTrialData(:,:,3:4),3);
@@ -269,12 +269,12 @@ orientInvariant(:,:,4) = mean(centeredTrialData(:,1:42,7:8),3);
 orientInvariant(:,:,2) = mean(centeredTrialData(:,1:42,5:6),3);
 orientInvariant(:,:,3) = mean(centeredTrialData(:,1:42,3:4),3);
 orientInvariant(:,:,1) = mean(centeredTrialData(:,1:42,1:2),3);
-invariantAll = reshape(orientInvariant,n,size(orientInvariant,2)*size(orientInvariant,3));
+invariantAll = reshape(orientInvariant,size(orientInvariant,1),size(orientInvariant,2)*size(orientInvariant,3));
 
 
 
 
-clust= zeros(1,n);
+clust= zeros(1,size(orientInvariant,1));
 c= cluster(Z,'maxclust',3);
 figure
 h = hist(c,1:max(c)); h= h/sum(h); bar(h); xlabel('cluster');
@@ -318,20 +318,69 @@ for cond = 1:2
     hold on; for j= 1:8, plot([j*length(behavTimepts) j*length(behavTimepts)]+1,[1 sum(sortCentered' & sortCond==cond)],'g'); end
     title(condLabel{cond})
 end
-% 
-% for i = 1:max(sess);
-%     figure
-%     subplot(1,3,1:2)
-%     imagesc(allData(sortCentered' & sortSess==i,:),[0 0.5]);
-%     hold on; for j= 1:8, plot([j*length(behavTimepts) j*length(behavTimepts)]+1,[1 sum(sortCentered' & sortSess==i)],'g'); end
-%     
-%     title(sprintf('%s %s %s total=%d gratings=%d exposures=%d',files(alluse(i)).subj,files(alluse(i)).expt,files(alluse(i)).task,files(alluse(i)).totalDays,files(alluse(i)).totalSinceGratings,files(alluse(i)).learningDay));
-%     
-%     subplot(1,3,3);
-%     plot(yAll(sess==i),xAll(sess==i),'.'); axis equal;  axis([0 72 0 128]); hold on
-%     circle(36,0.66*128,17.5);circle(36,0.33*128,17.5);  set(gca,'Xtick',[]); set(gca,'Ytick',[]);
-% end
 
+for i = 1:max(sess);
+    load([pathname files(alluse(i)).dir '\' files(alluse(i)).behavPts],'greenframe');
+    figure
+    imagesc(greenframe,[0 1.2*prctile(greenframe(:),99)]); colormap gray;
+     title(sprintf('%s %s %s ',files(alluse(i)).subj,files(alluse(i)).expt,files(alluse(i)).task));
+     
+    figure
+    subplot(1,3,1:2)
+    imagesc(allData(sortCentered' & sortSess==i,:),[0 0.5]);
+    hold on; for j= 1:8, plot([j*length(behavTimepts) j*length(behavTimepts)]+1,[1 sum(sortCentered' & sortSess==i)],'g'); end
+    
+    title(sprintf('%s %s %s total=%d gratings=%d exposures=%d',files(alluse(i)).subj,files(alluse(i)).expt,files(alluse(i)).task,files(alluse(i)).totalDays,files(alluse(i)).totalSinceGratings,files(alluse(i)).learningDay));
+    
+    subplot(1,3,3); hold on
+    plot(yAll(sess==i & ~active'),xAll(sess==i & ~active'),'k.');
+    plot(yAll(sess==i & clust==1 ),xAll(sess==i & clust==1),'b.');
+    plot(yAll(sess==i& clust==2),xAll(sess==i & clust==2),'r.');
+    plot(yAll(sess==i& clust==3),xAll(sess==i & clust ==3),'g.');
+    
+    axis equal;  axis([0 72 0 128]); hold on
+    circle(34,0.625*128-2,12);circle(34,0.375*128-2,12); set(gca,'Xtick',[]); set(gca,'Ytick',[]);
+end
+
+figure
+for c = 1:4
+    subplot(1,4,c); hold on
+    if c<=3
+        plot(yAll(clust==c ),xAll(clust==c),'b.');
+
+    else
+       plot(yAll( ~active'),xAll(~active'),'k.');
+    end
+        
+    axis equal;  axis([0 72 0 128]); hold on
+    circle(36,0.66*128,17.5);circle(36,0.33*128,17.5);  set(gca,'Xtick',[]); set(gca,'Ytick',[]);
+
+  for x = 1:128;
+      for y = 1:72;
+          these = xAll>x-1 & xAll<=x+1 & yAll>y-1 & yAll<=y+1;
+          num(x,y) = sum(these); num(num<4)=0;
+          if c<=3
+              density(x,y,c) = sum(these & clust==c)/num(x,y);
+          else
+              density(x,y,c) = sum(these & ~active')/num(x,y);
+          end
+      end
+  end
+end
+
+density(~isfinite(density))=-0.1;
+
+figure
+imagesc(num);  axis equal;  axis([0 72 0 128]); axis xy; hold on;  circle(34,0.625*128-2,12);circle(34,0.375*128-2,12);
+
+figure
+for i = 1:4
+    subplot(1,4,i);
+    imagesc(density(:,:,i));
+    axis equal;  axis([0 72 0 128]); hold on;  axis xy; circle(34,0.625*128-2,12);circle(34,0.375*128-2,12);
+end
+
+c = clust;
 
 trialType = {'correct pref','error pref','correct non-pref','error non-pref'};
 for cond = 1:2

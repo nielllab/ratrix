@@ -28,7 +28,7 @@ files(n).passive2sfEyes = 'g62dd2ln_001_008_eye';
 files(n).task = 'GTS';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'drift';  %%% cmn 110416
 files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
@@ -52,7 +52,7 @@ files(n).task = 'GTS';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [250];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
 files(n).subj = 'g62dd2ln'; 
@@ -75,7 +75,7 @@ files(n).task = 'GTS';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [575];  %%% optional - we could use this to adjust # of cells selected
 
 
 n=n+1;
@@ -98,8 +98,8 @@ files(n).passive2sfEyes = 'g62dd2ln_001_006_eye';
 files(n).task = 'GTS';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).notes = 'good imaging session';   %%% funky black hole
+files(n).ncells = [120];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
 files(n).subj = 'g62dd2ln'; 
@@ -147,8 +147,8 @@ files(n).passive2sfEyes = 'g62y3lt_001_004_eye';
 files(n).task = 'GTS';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).notes = 'good imaging session';  %%% slight drift
+files(n).ncells = [350];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
 files(n).subj = 'g62y3lt'; 
@@ -170,8 +170,8 @@ files(n).passive2sfEyes = 'g62y3lt_001_004_eye';
 files(n).task = 'GTS';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).notes = 'good imaging session'; %%% slight movement
+files(n).ncells = [150];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
 files(n).subj = 'g62y3lt'; 
@@ -193,8 +193,8 @@ files(n).passive2sfEyes = 'g62y3lt_001_005_eye';
 files(n).task = 'GTS';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).notes = 'good imaging session'; %slight movement
+files(n).ncells = [285];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
 files(n).subj = 'g62y3lt'; 
@@ -216,7 +216,7 @@ files(n).passive2sfEyes = 'g62y3lt_001_004_eye';
 files(n).task = 'GTS';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'movement'; %%% cmn 110416
 files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
 
 
@@ -241,7 +241,7 @@ files(n).passive2sfEyes = 'g62tx15lt_001_002_eye';
 files(n).task = 'GTS';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'movement'; %%% cmn 110416
 files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
 
 
@@ -266,7 +266,7 @@ files(n).task = 'GTS';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [215];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
 files(n).subj = 'g62tx15lt'; 
@@ -289,7 +289,7 @@ files(n).task = 'GTS';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [250];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
 files(n).subj = 'g62tx15lt'; 
@@ -311,7 +311,7 @@ files(n).passive2sfEyes = 'g62tx15lt_001_003_eye';
 files(n).task = 'GTS';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'lots of drift'; %%% cmn 110416
 files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
 
 
@@ -337,7 +337,7 @@ files(n).task = 'GTS';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [275];  %%% optional - we could use this to adjust # of cells selected
 
 
 n=n+1;
@@ -361,7 +361,7 @@ files(n).task = 'GTS';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [250];  %%% optional - we could use this to adjust # of cells selected
 
 
 n=n+1;
@@ -385,7 +385,7 @@ files(n).task = 'GTS';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [120];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
 files(n).subj = 'g62bb10lt'; 
@@ -408,7 +408,7 @@ files(n).task = 'GTS';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [100];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
 files(n).subj = 'g62bb10lt'; 
@@ -431,7 +431,7 @@ files(n).task = 'GTS';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [350];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
 files(n).subj = 'g62bb10lt'; 
@@ -454,7 +454,7 @@ files(n).task = 'GTS';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [250];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
 files(n).subj = 'g62bb10lt'; 
@@ -477,7 +477,7 @@ files(n).task = 'GTS';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [150];  %%% optional - we could use this to adjust # of cells selected
 
 %g62gg5rt (GTS)
 
@@ -525,7 +525,7 @@ files(n).task = 'GTS';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [120];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
 files(n).subj = 'g62gg5rt'; 
@@ -548,7 +548,7 @@ files(n).task = 'GTS';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [80];  %%% optional - we could use this to adjust # of cells selected
 
 
 n=n+1;
@@ -572,7 +572,7 @@ files(n).task = 'GTS';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [300];  %%% optional - we could use this to adjust # of cells selected
 
 
 %g62gg10lt
@@ -596,7 +596,7 @@ files(n).passive2sfEyes = 'g62gg10lt_001_003_eye';
 files(n).task = 'GTS';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'large z drift';
 files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
@@ -620,7 +620,7 @@ files(n).task = 'GTS';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [300];  %%% optional - we could use this to adjust # of cells selected
 
 % n=n+1;
 % files(n).subj = 'g62gg10lt'; 
@@ -666,7 +666,7 @@ files(n).task = 'GTS';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [400];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
 files(n).subj = 'g62gg10lt'; 
@@ -689,7 +689,7 @@ files(n).task = 'GTS';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [200];  %%% optional - we could use this to adjust # of cells selected
 
 
 
@@ -1154,7 +1154,7 @@ files(n).totalSinceGratings = 1;
 files(n).totalDays = 20;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [230];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
 files(n).subj = 'g62mm9ln'; 
@@ -1179,7 +1179,7 @@ files(n).totalSinceGratings = 2;
 files(n).totalDays = 21;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [140];  %%% optional - we could use this to adjust # of cells selected
 
 
 n=n+1;
@@ -1205,7 +1205,7 @@ files(n).totalSinceGratings = 5;
 files(n).totalDays = 24;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [200];  %%% optional - we could use this to adjust # of cells selected
 
 
 %g62cc16lt  (naive) %first naive session 101716 %%% started behav 092816
@@ -1285,7 +1285,7 @@ files(n).totalSinceGratings = 1;
 files(n).totalDays = 14;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [300];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
 files(n).subj = 'g62qq2lt'; 
@@ -1310,7 +1310,7 @@ files(n).totalSinceGratings = 3;
 files(n).totalDays = 16;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [225];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
 files(n).subj = 'g62qq2lt'; 
@@ -1335,7 +1335,7 @@ files(n).totalSinceGratings = 4;
 files(n).totalDays = 17;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [300];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
 files(n).subj = 'g62qq2lt'; 
@@ -1360,7 +1360,7 @@ files(n).totalSinceGratings = 5;
 files(n).totalDays = 18;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [200];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
 files(n).subj = 'g62qq2lt'; 
@@ -1385,7 +1385,7 @@ files(n).totalSinceGratings = 8;
 files(n).totalDays = 21;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [120];  %%% optional - we could use this to adjust # of cells selected
 
 
 %g62tt1lt  (naive) %first naive session 101916 %%% started behav 100616
@@ -1413,7 +1413,7 @@ files(n).totalSinceGratings = 1;
 files(n).totalDays = 13;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [350];  %%% optional - we could use this to adjust # of cells selected
 
 
 n=n+1;
@@ -1439,7 +1439,7 @@ files(n).totalSinceGratings = 2;
 files(n).totalDays = 14;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [250];  %%% optional - we could use this to adjust # of cells selected
 
 
 n=n+1;
@@ -1465,7 +1465,7 @@ files(n).totalSinceGratings = 3;
 files(n).totalDays = 15;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [400];  %%% optional - we could use this to adjust # of cells selected
 
 
 n=n+1;
@@ -1491,7 +1491,7 @@ files(n).totalSinceGratings = 6;
 files(n).totalDays = 18;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [225];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
 files(n).subj = 'g62tt1lt'; 
@@ -1516,7 +1516,7 @@ files(n).totalSinceGratings = 7;
 files(n).totalDays = 19;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [450];  %%% optional - we could use this to adjust # of cells selected
 
 
 %g62qq1rt  (naive) %first naive session 102616 %%% started behav 100616
@@ -1545,7 +1545,7 @@ files(n).totalSinceGratings = 1;
 files(n).totalDays = 20;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [150];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
 files(n).subj = 'g62qq1rt'; 
@@ -1570,7 +1570,7 @@ files(n).totalSinceGratings = 2;
 files(n).totalDays = 21;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [250];  %%% optional - we could use this to adjust # of cells selected
 
 
 n=n+1;
@@ -1596,7 +1596,7 @@ files(n).totalSinceGratings = 3;
 files(n).totalDays = 22;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [300];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
 files(n).subj = 'g62qq1rt'; 
@@ -1621,7 +1621,7 @@ files(n).totalSinceGratings = 6;
 files(n).totalDays = 25;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [250];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
 files(n).subj = 'g62qq1rt'; 
@@ -1646,7 +1646,7 @@ files(n).totalSinceGratings = 7;
 files(n).totalDays = 26;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [300];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
 files(n).subj = 'g62qq1rt'; 
@@ -1671,7 +1671,7 @@ files(n).totalSinceGratings = 8;
 files(n).totalDays = 27;
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [250];  %%% optional - we could use this to adjust # of cells selected
 
 
 
@@ -1701,7 +1701,7 @@ files(n).task = 'HvV';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [350];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
 files(n).subj = 'g62jj2rt'; 
@@ -1724,7 +1724,7 @@ files(n).task = 'HvV';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [450];  %%% optional - we could use this to adjust # of cells selected
 
 n=n+1;
 files(n).subj = 'g62jj2rt'; 
@@ -1747,7 +1747,7 @@ files(n).task = 'HvV';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
+files(n).ncells = [250];  %%% optional - we could use this to adjust # of cells selected
 
 
 % n=n+1;

@@ -6,8 +6,8 @@ batch2pBehaviorSBX;
 %alluse = find(strcmp({files.task},'GTS') & strcmp({files.notes},'good imaging session'))
 alluse = find( strcmp({files.notes},'good imaging session'))
 
-gts = 1; naive=2; naiveTrained=3;
-condLabel{1} = ' GTS'; condLabel{2}=' naive'; condLabel{3}=' naive trained';
+gts = 1; naive=2; naiveTrained=3; hvv = 4;
+condLabel{1} = ' GTS'; condLabel{2}=' naive'; condLabel{3}=' naive trained'; condLabel{4} = ' HvV';
 
 rfAmpAll =[]; rfAll = []; trialDataAll=[]; xAll = []; yAll = []; data3xAll=[]; data2sfAll= [];
 n=0;
@@ -43,6 +43,8 @@ for i = 1:length(alluse);
     if strcmp(files(alluse(i)).task,'GTS'), allCond(cellrange) = gts; end;
     if strcmp(files(alluse(i)).task,'Naive') & files(alluse(i)).learningDay<5, allCond(cellrange) = naive; end;
     if strcmp(files(alluse(i)).task,'Naive') & files(alluse(i)).learningDay>=5, allCond(cellrange) = naiveTrained; end;
+    if strcmp(files(alluse(i)).task,'HvV'), allCond(cellrange) = hvv; end;
+    
     
     sess(cellrange)=i;
     
@@ -382,29 +384,13 @@ end
 
 c = clust;
 
-trialType = {'correct pref','error pref','correct non-pref','error non-pref'};
-for cond = 1:2
-    figure
-    for t = 1:4
-        subplot(2,2,t);
-        for i = 1:max(c)
-            n = sum(clust==i & allCond==cond)/sum(allCond==cond)
-            d =nanmean(invariantAll(clust==i & allCond==cond ,:),1); plot(0.1*(0:41),n*(d((t-1)*42 + (1:42))-mean(d(1:10))));hold on; ylim([ -0.025 0.075]); xlim([0 4.15])
-        end
-        title([trialType{t} ' weighted']); xlabel('secs'); ylabel('weighted response'); set(gca,'Ytick',-0.025:0.025:0.075);
-    end
-    
-    legend;
-    set(gcf,'Name',condLabel{cond});
-end
-
+%%% average across all conditions (trained, naive, etc)
 trialType = {'correct pref','error pref','correct non-pref','error non-pref'};
 for cond = 1:1
     figure
     for t = 1:4
         subplot(2,2,t);
         for i = 1:max(c)
-            n = sum(clust==i & allCond==cond)/sum(allCond==cond)
             d =nanmean(invariantAll(clust==i  ,:),1); plot(0.1*(0:41),(d((t-1)*42 + (1:42))-mean(d(1:10))));hold on; ylim([ -0.15 0.25]); xlim([0 4.15])
         end
         title([trialType{t} ]); xlabel('secs'); ylabel('response'); % set(gca,'Ytick',-0.25:0.25:0.75);
@@ -414,10 +400,28 @@ for cond = 1:1
     set(gcf,'Name',condLabel{cond});
 end
 
-
-
+%%% weighted mean (by fraction of cells)
 trialType = {'correct pref','error pref','correct non-pref','error non-pref'};
-for cond = 1:2
+for cond = 1:4
+    figure
+    for t = 1:4
+        subplot(2,2,t);
+        for i = 1:max(c)
+            n = sum(clust==i & allCond==cond)/sum(allCond==cond)
+            d =nanmean(invariantAll(clust==i & allCond==cond ,:),1); plot(0.1*(0:41),n*(d((t-1)*42 + (1:42))-mean(d(1:10))));hold on; ylim([ -0.025 0.065]); xlim([0 4.15])
+        end
+        title([trialType{t} ' weighted']); xlabel('secs'); ylabel('weighted response'); set(gca,'Ytick',-0.025:0.025:0.075);
+    end
+    
+    legend;
+    set(gcf,'Name',condLabel{cond});
+end
+
+
+
+%%% non-weighted (average of all units in this cluster)
+trialType = {'correct pref','error pref','correct non-pref','error non-pref'};
+for cond = 1:4
     figure
     for t = 1:4
         subplot(2,2,t);
@@ -439,15 +443,31 @@ orientInvariant3x(:,:,2) = mean(centered3x(:,:,[2 4]),3);
 orientInvariant3x(:,:,1) = mean(centered3x(:,:,[1 3]),3);
 invariantAll3x = reshape(orientInvariant3x,size(orientInvariant3x,1),size(orientInvariant3x,2)*size(orientInvariant3x,3));
 
+% trialType = {'pref hv','pref oblique','non-pref hv','non-prev oblique'};
+% for cond = 1:2
+%     figure
+%     for t = 1:4
+%         subplot(2,2,t);
+%         for i = 1:max(c)
+%             d =mean(invariantAll3x(clust==i & allCond==cond ,:),1); plot(d((t-1)*29 + (1:29))-min(d));hold on; ylim([ 0 0.3]); xlim([0.5 42.5])
+%         end
+%         title(trialType{t});
+%     end
+%     
+%     legend;
+%     set(gcf,'Name',condLabel{cond});
+% end
+
 trialType = {'pref hv','pref oblique','non-pref hv','non-prev oblique'};
-for cond = 1:2
+for cond = 1:4
     figure
     for t = 1:4
         subplot(2,2,t);
         for i = 1:max(c)
-            d =mean(invariantAll3x(clust==i & allCond==cond ,:),1); plot(d((t-1)*29 + (1:29))-min(d));hold on; ylim([ 0 0.3]); xlim([0.5 42.5])
+            n = sum(clust==i & allCond==cond)/sum(allCond==cond)
+            d =nanmean(invariantAll3x(clust==i & allCond==cond ,:),1); plot(0.1*(0:28),n*(d((t-1)*29 + (1:29))-mean(d(1:10))));hold on; ylim([ -0.025 0.065]); xlim([0 4.15])
         end
-        title(trialType{t});
+        title([trialType{t} ' weighted']); xlabel('secs'); ylabel('weighted response'); set(gca,'Ytick',-0.025:0.025:0.075);
     end
     
     legend;
@@ -462,20 +482,38 @@ orientInvariant2sf(:,:,2) = mean(centered2sf(:,:,[2 4]),3);
 orientInvariant2sf(:,:,1) = mean(centered2sf(:,:,[1 3]),3);
 invariantAll2sf = reshape(orientInvariant2sf,size(orientInvariant2sf,1),size(orientInvariant2sf,2)*size(orientInvariant2sf,3));
 
+% trialType = {'pref ','pref hi sf','non pref','non pref hi sf'};
+% for cond = 1:2
+%     figure
+%     for t = 1:4
+%         subplot(2,2,t);
+%         for i = 1:max(c)
+%             d =mean(invariantAll2sf(clust==i & allCond==cond,:),1); plot(d((t-1)*39 + (1:39))-min(d));hold on; ylim([ 0 0.3]); xlim([0.5 42.5])
+%         end
+%         title(trialType{t});
+%     end
+%     
+%     legend;
+%     set(gcf,'Name',condLabel{cond});
+% end
+
 trialType = {'pref ','pref hi sf','non pref','non pref hi sf'};
-for cond = 1:2
+for cond = 1:4
     figure
     for t = 1:4
         subplot(2,2,t);
         for i = 1:max(c)
-            d =mean(invariantAll2sf(clust==i & allCond==cond,:),1); plot(d((t-1)*39 + (1:39))-min(d));hold on; ylim([ 0 0.3]); xlim([0.5 42.5])
+            n = sum(clust==i & allCond==cond)/sum(allCond==cond)
+            d =nanmean(invariantAll2sf(clust==i & allCond==cond ,:),1); plot(0.1*(0:38),n*(d((t-1)*39 + (1:39))-mean(d(1:10))));hold on; ylim([ -0.025 0.065]); xlim([0 4.15])
         end
-        title(trialType{t});
+        title([trialType{t} ' weighted']); xlabel('secs'); ylabel('weighted response'); set(gca,'Ytick',-0.025:0.025:0.075);
     end
     
     legend;
     set(gcf,'Name',condLabel{cond});
 end
+
+
 
 
 for i= 1:max(c);
@@ -487,7 +525,7 @@ figure
 bar(spontMod); ylabel('spontaneous modulation')
 
 clear clustDist
-for cond =1:2
+for cond =1:4
     for i = 1:max(clust); clustDist(cond,i) = sum(allCond==cond & clust==i )/sum(allCond==cond & centered'); end
     clustDist(cond,i+1) = sum(allCond'==cond & centered & ~active)/sum(allCond'==cond & centered);
     figure

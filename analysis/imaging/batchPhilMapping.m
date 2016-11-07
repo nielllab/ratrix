@@ -3,6 +3,12 @@
 % datapathname = 'C:\Users\nlab\Desktop\Data\Mapping for 2p\';  
 % outpathname = 'C:\Users\nlab\Desktop\Data\Mapping for 2p\';
 % n = 0;
+
+dbstop if error
+pathname = '\\langevin\backup\widefield\Phil\Mapping_2p\';
+datapathname = '\\langevin\backup\widefield\Phil\Mapping_2p\';  
+outpathname = '\\langevin\backup\widefield\Phil\Mapping_2p\';
+n = 0;
 % 
 % n=n+1;
 % files(n).subj = '';
@@ -206,14 +212,42 @@
 
 n=n+1;
 files(n).subj = 'CG42TT';
-files(n).expt = '110116';
-files(n).topox= '110116_CG42TT_2PMAP_RIG2\110116_CG42TT_2PMAP_RIG2_TOPOY\110116_CG42TT_2PMAP_RIG2_TOPOYmaps.mat';
-files(n).topoxdata = '110116_CG42TT_2PMAP_RIG2\110116_CG42TT_2PMAP_RIG2_TOPOY\110116_CG42TT_2PMAP_RIG2_TOPOY';
-files(n).topoy = '110116_CG42TT_2PMAP_RIG2\110116_CG42TT_2PMAP_RIG2_TOPOX\110116_CG42TT_2PMAP_RIG2_TOPOXmaps.mat';
-files(n).topoydata = '110116_CG42TT_2PMAP_RIG2\110116_CG42TT_2PMAP_RIG2_TOPOX\110116_CG42TT_2PMAP_RIG2_TOPOX';
+files(n).expt = '110416';
+files(n).topox= '110416_CG42TT_2PMAP_RIG2\110416_CG42TT_2PMAP_RIG2_TOPOY\110416_CG42TT_2PMAP_RIG2_TOPOYmaps.mat';
+files(n).topoxdata = '110416_CG42TT_2PMAP_RIG2\110416_CG42TT_2PMAP_RIG2_TOPOY\110416_CG42TT_2PMAP_RIG2_TOPOY';
+files(n).topoy = '110416_CG42TT_2PMAP_RIG2\110416_CG42TT_2PMAP_RIG2_TOPOX\110416_CG42TT_2PMAP_RIG2_TOPOXmaps.mat';
+files(n).topoydata = '110416_CG42TT_2PMAP_RIG2\110416_CG42TT_2PMAP_RIG2_TOPOX\110416_CG42TT_2PMAP_RIG2_TOPOX';
 files(n).inject = 'none';
 files(n).rignum = 'rig2';
 files(n).monitor = 'portrait';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).timing = 'pre';   
+files(n).timing = 'pre';
+
+n=n+1;
+files(n).subj = 'CG43LN';
+files(n).expt = '110416';
+files(n).topox= '110416_CG43LN_2PMAP_RIG2\110416_CG43LN_2PMAP_RIG2_TOPOY\110416_CG43LN_2PMAP_RIG2_TOPOYmaps.mat';
+files(n).topoxdata = '110416_CG43LN_2PMAP_RIG2\110416_CG43LN_2PMAP_RIG2_TOPOY\110416_CG43LN_2PMAP_RIG2_TOPOY';
+files(n).topoy = '110416_CG43LN_2PMAP_RIG2\110416_CG43LN_2PMAP_RIG2_TOPOX\110416_CG43LN_2PMAP_RIG2_TOPOXmaps.mat';
+files(n).topoydata = '110416_CG43LN_2PMAP_RIG2\110416_CG43LN_2PMAP_RIG2_TOPOX\110416_CG43LN_2PMAP_RIG2_TOPOX';
+files(n).inject = 'none';
+files(n).rignum = 'rig2';
+files(n).monitor = 'portrait';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+files(n).timing = 'pre';
+
+n=n+1;
+files(n).subj = 'CG46RT';
+files(n).expt = '110416';
+files(n).topox= '110416_CG46RT_2PMAP_RIG2\110416_CG46RT_2PMAP_RIG2_TOPOY\110416_CG46RT_2PMAP_RIG2_TOPOYmaps.mat';
+files(n).topoxdata = '110416_CG46RT_2PMAP_RIG2\110416_CG46RT_2PMAP_RIG2_TOPOY\110416_CG46RT_2PMAP_RIG2_TOPOY';
+files(n).topoy = '110416_CG46RT_2PMAP_RIG2\110416_CG46RT_2PMAP_RIG2_TOPOX\110416_CG46RT_2PMAP_RIG2_TOPOXmaps.mat';
+files(n).topoydata = '110416_CG46RT_2PMAP_RIG2\110416_CG46RT_2PMAP_RIG2_TOPOX\110416_CG46RT_2PMAP_RIG2_TOPOX';
+files(n).inject = 'none';
+files(n).rignum = 'rig2';
+files(n).monitor = 'portrait';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+files(n).timing = 'pre';

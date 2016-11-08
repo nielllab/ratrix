@@ -173,7 +173,7 @@ for i = 1:length(alluse);
     drawnow
 end
 
-save behavData101616
+
 close all
 
 figure
@@ -309,8 +309,14 @@ end
 
 
 allData = allData(mdInd,:); sortCond = sortCond(mdInd); sortActive = sortActive(mdInd); sortCentered = sortCentered(mdInd); sortSess=sortSess(mdInd);
-allData(sortClust==0,:) =0;
+%allData(sortClust==0,:) =0;
 
+
+
+    figure
+    imagesc(allData(sortCentered' ,:),[0 0.5]); %%% fix
+    hold on; for j= 1:8, plot([j*length(behavTimepts) j*length(behavTimepts)]+1,[1 sum(sortCentered' )],'g'); end
+    title('all conds')
 
 
 
@@ -397,10 +403,11 @@ for cond = 1:1
     end
     
     legend;
-    set(gcf,'Name',condLabel{cond});
+    set(gcf,'Name','all conditions non-weighted');
 end
 
 %%% weighted mean (by fraction of cells)
+clear clustBehav clustBehavErr
 trialType = {'correct pref','error pref','correct non-pref','error non-pref'};
 for cond = 1:4
     figure
@@ -408,7 +415,10 @@ for cond = 1:4
         subplot(2,2,t);
         for i = 1:max(c)
             n = sum(clust==i & allCond==cond)/sum(allCond==cond)
-            d =nanmean(invariantAll(clust==i & allCond==cond ,:),1); plot(0.1*(0:41),n*(d((t-1)*42 + (1:42))-mean(d(1:10))));hold on; ylim([ -0.025 0.065]); xlim([0 4.15])
+            d =nanmean(invariantAll(clust==i & allCond==cond ,:),1); plot(0.1*(0:41),n*(d((t-1)*42 + (1:42))-mean(d(6:10))));hold on; ylim([ -0.025 0.065]); xlim([0 4.15])
+        
+        clustBehav(i,t,cond,:) = n*(d((t-1)*42 + (1:42))-mean(d(6:10)));
+        clustBehavErr(i,t,cond,:) = n*nanstd(invariantAll(clust==i & allCond==cond ,(t-1)*42 + (1:42)),[],1)/sqrt(sum(clust==i & allCond==cond));
         end
         title([trialType{t} ' weighted']); xlabel('secs'); ylabel('weighted response'); set(gca,'Ytick',-0.025:0.025:0.075);
     end
@@ -465,8 +475,10 @@ for cond = 1:4
         subplot(2,2,t);
         for i = 1:max(c)
             n = sum(clust==i & allCond==cond)/sum(allCond==cond)
-            d =nanmean(invariantAll3x(clust==i & allCond==cond ,:),1); plot(0.1*(0:28),n*(d((t-1)*29 + (1:29))-mean(d(1:10))));hold on; ylim([ -0.025 0.065]); xlim([0 4.15])
-        end
+            d =nanmean(invariantAll3x(clust==i & allCond==cond ,:),1); plot(0.1*(0:28),n*(d((t-1)*29 + (1:29))-mean(d(6:10))));hold on; ylim([ -0.025 0.065]); xlim([0 4.15])
+       clust3x(i,t,cond,:) = n*(d((t-1)*28 + (1:28))-mean(d(6:10)));
+        clust3xErr(i,t,cond,:) = n*nanstd(invariantAll3x(clust==i & allCond==cond ,(t-1)*28 + (1:28)),[],1)/sqrt(sum(clust==i & allCond==cond));
+           end
         title([trialType{t} ' weighted']); xlabel('secs'); ylabel('weighted response'); set(gca,'Ytick',-0.025:0.025:0.075);
     end
     
@@ -504,7 +516,11 @@ for cond = 1:4
         subplot(2,2,t);
         for i = 1:max(c)
             n = sum(clust==i & allCond==cond)/sum(allCond==cond)
-            d =nanmean(invariantAll2sf(clust==i & allCond==cond ,:),1); plot(0.1*(0:38),n*(d((t-1)*39 + (1:39))-mean(d(1:10))));hold on; ylim([ -0.025 0.065]); xlim([0 4.15])
+            d =nanmean(invariantAll2sf(clust==i & allCond==cond ,:),1); plot(0.1*(0:38),n*(d((t-1)*39 + (1:39))-mean(d(6:10))));hold on; ylim([ -0.025 0.065]); xlim([0 4.15])
+        
+       clust2sf(i,t,cond,:) = n*(d((t-1)*39 + (1:39))-mean(d(6:10)));
+        clust2sfErr(i,t,cond,:) = n*nanstd(invariantAll2sf(clust==i & allCond==cond ,(t-1)*39 + (1:39)),[],1)/sqrt(sum(clust==i & allCond==cond));
+    
         end
         title([trialType{t} ' weighted']); xlabel('secs'); ylabel('weighted response'); set(gca,'Ytick',-0.025:0.025:0.075);
     end
@@ -514,15 +530,138 @@ for cond = 1:4
 end
 
 
+%%% naive vs learned
+for c =1:3
+    if c==1
+        range = 13:14
+    else
+        range = 19:20
+    end
+    resp(c,:,:,1) = mean(clustBehav(c,:,:,range),4);
+    respErr(c,:,:,1) = mean(clustBehavErr(c,:,:,range),4);
+    resp(c,:,:,2) = mean(clust3x(c,:,:,range-1),4);
+    respErr(c,:,:,2) = mean(clust3xErr(c,:,:,range-1),4);
+    resp(c,:,:,3) = mean(clust2sf(c,:,:,range-1),4);
+    respErr(c,:,:,3) = mean(clust2sfErr(c,:,:,range-1),4);
+end
+
+figure
+for c = 1:3
+    subplot(2,2,c)
+    plot(squeeze(clustBehav(c,1,1:2,:))'); xlim([ 1 30])
+end
+
+figure; set(gcf,'Name','cardinal')
+for c = 1:3
+    subplot(2,2,c)
+    plot(squeeze(clust3x(c,1,1:2,:))'); xlim([ 1 30]);ylim([-0.002 0.05])
+end
+
+figure
+for c = 1:3
+    subplot(2,2,c)
+    plot(squeeze(clust2sf(c,1,1:2,:))'); xlim([ 1 30])
+end
+
+figure; set(gcf,'Name','oblique');
+for c = 1:3
+    subplot(2,2,c)
+    plot(squeeze(clust3x(c,2,1:2,:))'); xlim([ 1 30]); ylim([-0.002 0.05])
+end
+
+figure
+for c = 1:3
+    subplot(2,2,c)
+    plot(squeeze(clust2sf(c,2,1:2,:))'); xlim([ 1 30])
+end
+
+
+
+    
+%%% resp(clust,stim, training cond, session)
+
+figure
+barweb(squeeze(resp(:,1,[2 1],1)), squeeze(respErr(:,1,[2 1],1))); ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
+legend('naive','trained'); ylabel('weighted response'); title('behavior - preferred')
+
+figure
+barweb(squeeze(resp(:,1,[2 1],2)), squeeze(respErr(:,1,[2 1],2))); ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
+legend('naive','trained'); ylabel('weighted response'); title('passive 3x - cardinal')
+
+figure
+barweb(squeeze(resp(:,2,[2 1],2)), squeeze(respErr(:,2,[2 1],2))); ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
+legend('naive','trained'); ylabel('weighted response'); title('passive 3x - oblique')
+
+
+
+
+
+figure
+barweb(squeeze(resp(:,1,2,[1 3])), squeeze(respErr(:,1,1,[1 3]))); ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
+legend('task','passive 3x'); ylabel('weighted response');
+
 
 
 for i= 1:max(c);
     figure
-    hist(deltaSpontAll(clust==i),[-0.95:0.1:1]); title(sprintf('cluster %d',i));
-    spontMod(i) = nanmean(abs(deltaSpontAll(clust==i)));
+    [n b] =hist(deltaSpontAll(clust==i),[-0.5:0.1:0.5]); bar(b,n/sum(n)); title(sprintf('cluster %d',i)); xlim([-0.55 0.55]); ylim([0 0.85]); ylabel('fraction'); xlabel('running modulation (spont)'); 
+    set(gca,'Xtick',-0.5:0.25:0.5); set(gca,'Ytick',0:0.2:0.8); set(gca,'Fontsize',16);
+    spontMod(i) = nanmean(abs(deltaSpontAll(clust==i))); spontModErr(i) = nanstd(abs(deltaSpontAll(clust==i)))/sqrt(sum(clust==i));
 end
 figure
-bar(spontMod); ylabel('spontaneous modulation')
+bar(spontMod); hold on; errorbar(1:3,spontMod,spontModErr,'k.','markersize',8,'Linewidth',2);
+ylabel('mean absolute modulation'); set(gca,'FontSize',16); ylim([0 0.125]); set(gca,'Xtick',0:0.025:0.125);
+
+osifig = figure;
+for i = 1:max(c)
+    clustData = allData(sortClust==i ,:);
+    clear transResp sustResp
+    transResp(:,1) = mean(clustData(:,13:14),2) - mean(clustData(:,1:10),2);
+    transResp(:,2) = mean(clustData(:,74:75),2) - mean(clustData(:,62:71),2);
+    sustResp(:,1) = mean(clustData(:,20:40),2) - mean(clustData(:,1:10),2);
+    sustResp(:,2) = mean(clustData(:,81:101),2) - mean(clustData(:,62:71),2);
+    
+    sprintf('cluster %d trans %0.3f sust %0.3f',i,mean(transResp(:,1)),mean(sustResp(:,1)))
+    sprintf('cluster %d trans %0.3f sust %0.3f',i,mean(transResp(:,2)),mean(sustResp(:,2)))
+    
+    figure
+    subplot(2,2,1);
+    hist(transResp(:,1),-1:0.1:1); title([' trans resp ' num2str(i)]);  xlim([-1 1])
+        
+    subplot(2,2,2);
+    hist(sustResp(:,1),-1:0.1:1); title([ 'sust resp ' num2str(i)]); xlim([-1 1])
+    
+    if i==3
+        transResp = -transResp; sustResp = -sustResp;
+    end
+    transResp(transResp<0)=0; sustResp(sustResp<0)=0;
+    
+    transOSI = (transResp(:,2)- transResp(:,1))./(transResp(:,2) + transResp(:,1));
+    sustOSI = (sustResp(:,2)- sustResp(:,1))./(sustResp(:,2) + sustResp(:,1));
+       
+    peak = max(transResp,[],2);    
+    subplot(2,2,3)
+    [n b] = hist(abs(transOSI(peak>0.1))); bar(b,n/sum(n));title(['trans osi ' num2str(i)])
+    
+    peak = max(sustResp,[],2);  
+    subplot(2,2,4);
+    [n b] = hist(abs(sustOSI(peak>0.1))); bar(b,n/sum(n)); title(['sust osi ' num2str(i)])
+    
+    if i ==1
+        peak = max(transResp,[],2); 
+        clustOSI = abs(transOSI(peak>0.1));
+    else
+        clustOSI = abs(sustOSI(peak>0.1));
+    end
+    osi(i) = median(clustOSI); osi_err(i) = std(clustOSI)/sqrt(length(clustOSI));
+   figure(osifig);
+   subplot(2,2,i);
+    [n b] = hist(clustOSI); bar(b,n/sum(n)); title(sprintf('OSI clust %d',i)); ylim([0 0.4]); xlabel('OSI'); ylabel('fraction');
+        
+end
+figure
+bar(osi); hold on; errorbar(1:3,osi,osi_err,'k.','markersize',8,'Linewidth',2); ylabel('osi'); xlabel('cluster'); ylim([0 1])
+set(gca,'FontSize',16)
 
 clear clustDist
 for cond =1:4

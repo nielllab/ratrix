@@ -341,14 +341,20 @@ for i = 1:max(sess);
     title(sprintf('%s %s %s total=%d gratings=%d exposures=%d',files(alluse(i)).subj,files(alluse(i)).expt,files(alluse(i)).task,files(alluse(i)).totalDays,files(alluse(i)).totalSinceGratings,files(alluse(i)).learningDay));
     
     subplot(1,3,3); hold on
-    plot(yAll(sess==i & ~active'),xAll(sess==i & ~active'),'k.');
-    plot(yAll(sess==i & clust==1 ),xAll(sess==i & clust==1),'b.');
-    plot(yAll(sess==i& clust==2),xAll(sess==i & clust==2),'r.');
-    plot(yAll(sess==i& clust==3),xAll(sess==i & clust ==3),'g.');
+%     plot(yAll(sess==i & ~active'),xAll(sess==i & ~active'),'k.');
+%     plot(yAll(sess==i & clust==1 ),xAll(sess==i & clust==1),'b.');
+%     plot(yAll(sess==i& clust==2),xAll(sess==i & clust==2),'r.');
+%     plot(yAll(sess==i& clust==3),xAll(sess==i & clust ==3),'g.');
+    
+        plot(yAll(sess==i & ~centered'),xAll(sess==i & ~centered'),'k.');
+    plot(yAll(sess==i & centered' ),xAll(sess==i & centered'),'g.');
     
     axis equal;  axis([0 72 0 128]); hold on
     circle(34,0.625*128-2,12);circle(34,0.375*128-2,12); set(gca,'Xtick',[]); set(gca,'Ytick',[]);
 end
+
+
+
 
 figure
 for c = 1:4
@@ -675,6 +681,13 @@ for cond =1:4
 end
 clustDist
 
+
+for c = 1:4
+    cells = find(cond==c & centered);
+    sessions = unique(sess(cells));
+    subjs = unique({files(alluse(sessions)).subj});
+    sprintf('%s %d cells %d subjs %d sessions',condLabel{c},length(cells), lengths(subjs),length(sessions))
+end
 
 keyboard
 

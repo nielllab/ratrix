@@ -397,7 +397,7 @@ for cond = 1:1
     for t = 1:4
         subplot(2,2,t);
         for i = 1:max(c)
-            d =nanmean(invariantAll(clust==i  ,:),1); plot(0.1*(0:41),(d((t-1)*42 + (1:42))-mean(d(1:10))));hold on; ylim([ -0.15 0.25]); xlim([0 4.15])
+            d =nanmean(invariantAll(clust==i  ,:),1); plot(0.1*(0:41),(d((t-1)*42 + (1:42))-mean(d(6:10))));hold on; ylim([ -0.2 0.3]); xlim([0 4.15])
         end
         title([trialType{t} ]); xlabel('secs'); ylabel('response'); % set(gca,'Ytick',-0.25:0.25:0.75);
     end
@@ -530,6 +530,8 @@ for cond = 1:4
 end
 
 
+%%%clustBehav(clust,stimtype, training cond, t)
+
 %%% naive vs learned
 for c =1:3
     if c==1
@@ -585,20 +587,20 @@ barweb(squeeze(resp(:,1,[2 1],1)), squeeze(respErr(:,1,[2 1],1))); ylim([-0.025 
 legend('naive','trained'); ylabel('weighted response'); title('behavior - preferred')
 
 figure
-barweb(squeeze(resp(:,1,[2 1],2)), squeeze(respErr(:,1,[2 1],2))); ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
+barweb(squeeze(resp(:,1,[2 1],2)), squeeze(respErr(:,1,[2 1],2))); ylim([-0.01 0.04]); set(gca,'Ytick',-0.01:0.01:0.04);
 legend('naive','trained'); ylabel('weighted response'); title('passive 3x - cardinal')
 
 figure
-barweb(squeeze(resp(:,2,[2 1],2)), squeeze(respErr(:,2,[2 1],2))); ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
+barweb(squeeze(resp(:,2,[2 1],2)), squeeze(respErr(:,2,[2 1],2))); ylim([-0.01 0.04]); set(gca,'Ytick',-0.01:0.01:0.04);
 legend('naive','trained'); ylabel('weighted response'); title('passive 3x - oblique')
 
-
-
-
+figure
+barweb(squeeze(resp(:,1,2,[1 2])), squeeze(respErr(:,1,1,[1 3]))); ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
+legend('task','passive 3x'); ylabel('weighted response'); title('active vs passive naive')
 
 figure
-barweb(squeeze(resp(:,1,2,[1 3])), squeeze(respErr(:,1,1,[1 3]))); ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
-legend('task','passive 3x'); ylabel('weighted response');
+barweb(squeeze(resp(:,1,1,[1 2])), squeeze(respErr(:,1,1,[1 3]))); ylim([-0.025 0.05]); set(gca,'Ytick',-0.025:0.025:0.075);
+legend('task','passive 3x'); ylabel('weighted response'); title('active vs passive trained');
 
 
 

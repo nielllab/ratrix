@@ -3,7 +3,7 @@
 close all
 clear all
 
-plotallcells = 1;
+plotallcells = 0;
 dfWindow = 9:11;
 spWindow = 6:10;
 spWindows = {6:8;8:10;6:10};
@@ -12,11 +12,11 @@ dt = 0.1;
 cyclelength = 1/0.1;
 
 %%%where are the files
-% dirs = {'\\langevin\backup\twophoton\Phil\Compiled2p\071416 G62TX210TT size select2\G62TX210TT'...
-%     '\\langevin\backup\twophoton\Phil\Compiled2p\071016 G62EE8TT sizeselect\G62EE8TT'...
-%     '\\langevin\backup\twophoton\Phil\Compiled2p\070816 G62BB8RT sizeselect\G62BB8RT'...
-%     '\\langevin\backup\twophoton\Phil\Compiled2p\070516 G62Y9RT sizeselect\G62Y9RT'...
-%     '\\langevin\backup\twophoton\Phil\Compiled2p\062416 G62TX19LT size select\G62TX19LT'};
+dirs = {'\\langevin\backup\twophoton\Phil\Compiled2p\071416 G62TX210TT size select2\G62TX210TT'...
+    '\\langevin\backup\twophoton\Phil\Compiled2p\071016 G62EE8TT sizeselect\G62EE8TT'...
+    '\\langevin\backup\twophoton\Phil\Compiled2p\070816 G62BB8RT sizeselect\G62BB8RT'...
+    '\\langevin\backup\twophoton\Phil\Compiled2p\070516 G62Y9RT sizeselect\G62Y9RT'...
+    '\\langevin\backup\twophoton\Phil\Compiled2p\062416 G62TX19LT size select\G62TX19LT'};
 
 % dirs = {'\\langevin\backup\twophoton\Phil\Compiled2p\091016 G62Y9RT sizeselect saline\G62Y9RT'...
 %     '\\langevin\backup\twophoton\Phil\Compiled2p\091216 G62TX19LT sizeselect saline\G62TX19LT'...
@@ -118,6 +118,27 @@ for h = 1:cellcnt
     end
 end
 
+%only take cells with response >0.01 during pre period
+% goodcells = zeros(cellcnt,1);
+cnt=1;
+for i = 1:cellcnt
+    [peak, prefsize] = max(squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(i,dfWindow,:,:,end,:,1),4),3),2)));
+    if peak>=0.01
+        goodcells(cnt,1) = i;
+        cnt=cnt+1;
+    end
+end
+
+cellcnt = length(goodcells);
+a = grpdftuningPRE(goodcells,:,:,:,:,:,:);
+b = grpdftuningPOST(goodcells,:,:,:,:,:,:);
+c = grpsptuningPRE(goodcells,:,:,:,:,:,:);
+d = grpsptuningPOST(goodcells,:,:,:,:,:,:);
+clear grp*
+grpdftuningPRE = a;
+grpdftuningPOST = b;
+grpsptuningPRE = c;
+grpsptuningPOST = d;
 
 %%%dfof plotting
 %%%plot responses as a function of contrast/size
@@ -682,39 +703,51 @@ SIdf = nan(cellcnt,2,2,2); %cell, pre/post, sit/run, SI/pref size
 for i = 1:cellcnt
     for j = 1:2
         [peak, prefsize] = max(squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(i,dfWindow,:,:,end,:,j),4),3),2)));
-        SIdf(i,1,j,1) = (peak-squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(i,dfWindow,:,:,end,end,j),4),3),2)))/...
-            squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(i,dfWindow,:,:,end,end,j),4),3),2));
-        SIdf(i,1,j,2) = sizeVals(prefsize);
+%         SIdf(i,1,j,1) = (peak-squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(i,dfWindow,:,:,end,end,j),4),3),2)))/...
+%             squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(i,dfWindow,:,:,end,end,j),4),3),2));
+%         if peak>=0.01
+            SIdf(i,1,j,1) = (peak-squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(i,dfWindow,:,:,end,end,j),4),3),2)))/peak;
+            SIdf(i,1,j,2) = sizeVals(prefsize);
+%         else
+%             SIdf(i,1,j,1)=NaN;SIdf(i,1,j,2)=NaN;
+%         end
         [peak, prefsize] = max(squeeze(nanmean(nanmean(nanmean(grpdftuningPOST(i,dfWindow,:,:,end,:,j),4),3),2)));
-        SIdf(i,2,j,1) = (peak-squeeze(nanmean(nanmean(nanmean(grpdftuningPOST(i,dfWindow,:,:,end,end,j),4),3),2)))/...
-            squeeze(nanmean(nanmean(nanmean(grpdftuningPOST(i,dfWindow,:,:,end,end,j),4),3),2));
-        SIdf(i,2,j,2) = sizeVals(prefsize);
+%         SIdf(i,2,j,1) = (peak-squeeze(nanmean(nanmean(nanmean(grpdftuningPOST(i,dfWindow,:,:,end,end,j),4),3),2)))/...
+%             squeeze(nanmean(nanmean(nanmean(grpdftuningPOST(i,dfWindow,:,:,end,end,j),4),3),2));
+%         if peak>=0.01
+            SIdf(i,2,j,1) = (peak-squeeze(nanmean(nanmean(nanmean(grpdftuningPOST(i,dfWindow,:,:,end,end,j),4),3),2)))/peak;
+            SIdf(i,2,j,2) = sizeVals(prefsize);
+%         else
+%             SIdf(i,2,j,1)=NaN;SIdf(i,2,j,2)=NaN;
+%         end
     end
 end
+
+% SIdf = SIdf(SIdf(:,1,1,1)<=1&SIdf(:,1,1,1)>=-0.1,:,:,:);
 
 %%%plot suppression index vs preferred size
 figure
 subplot(2,2,1)
 plot(SIdf(:,1,1,2),SIdf(:,1,1,1),'k.')
-% axis([0 70 -0.2 1])
+axis([0 70 -0.2 1])
 xlabel('Preferred stim size')
 ylabel('Suppression Index')
 legend('pre sit','location','northoutside')
 subplot(2,2,2)
 plot(SIdf(:,2,1,2),SIdf(:,2,1,1),'k.')
-% axis([0 70 -0.2 1])
+axis([0 70 -0.2 1])
 xlabel('Preferred stim size')
 ylabel('Suppression Index')
 legend('post sit','location','northoutside')
 subplot(2,2,3)
 plot(SIdf(:,1,2,2),SIdf(:,1,2,1),'k.')
-% axis([0 70 -0.2 1])
+axis([0 70 -0.2 1])
 xlabel('Preferred stim size')
 ylabel('Suppression Index')
 legend('pre run','location','northoutside')
 subplot(2,2,4)
 plot(SIdf(:,2,2,2),SIdf(:,2,2,1),'k.')
-% axis([0 70 -0.2 1])
+axis([0 70 -0.2 1])
 xlabel('Preferred stim size')
 ylabel('Suppression Index')
 legend('post run','location','northoutside')
@@ -795,29 +828,31 @@ for i = 1:cellcnt
     end
 end
 
+% SIsp = SIsp(SIsp(:,1,1,1)<=1&SIsp(:,1,1,1)>=-0.1,:,:,:);
+
 %%%plot suppression index vs preferred size
 figure
 subplot(2,2,1)
 plot(SIsp(:,1,1,2),SIsp(:,1,1,1),'k.')
-% axis([0 70 -0.2 1])
+axis([0 70 -0.2 1])
 xlabel('Preferred stim size')
 ylabel('Suppression Index')
 legend('pre sit','location','northoutside')
 subplot(2,2,2)
 plot(SIsp(:,2,1,2),SIsp(:,2,1,1),'k.')
-% axis([0 70 -0.2 1])
+axis([0 70 -0.2 1])
 xlabel('Preferred stim size')
 ylabel('Suppression Index')
 legend('post sit','location','northoutside')
 subplot(2,2,3)
 plot(SIsp(:,1,2,2),SIsp(:,1,2,1),'k.')
-% axis([0 70 -0.2 1])
+axis([0 70 -0.2 1])
 xlabel('Preferred stim size')
 ylabel('Suppression Index')
 legend('pre run','location','northoutside')
 subplot(2,2,4)
 plot(SIsp(:,2,2,2),SIsp(:,2,2,1),'k.')
-% axis([0 70 -0.2 1])
+axis([0 70 -0.2 1])
 xlabel('Preferred stim size')
 ylabel('Suppression Index')
 legend('post run','location','northoutside')
@@ -884,7 +919,7 @@ if exist('psfile','var')
 end
 
 if plotallcells
-    for i = 1:cellcnt
+    for i = 1:10:cellcnt
         figure
         for j = 1:length(sizes)
             subplot(2,4,j)

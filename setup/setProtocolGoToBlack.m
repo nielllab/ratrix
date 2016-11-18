@@ -67,11 +67,11 @@ switch subjIDs{1}
        msPenalty               =3500;
        percentCorrectionTrials = .5;     
     
-    case 'g62qq1rt' % Started 10/6/16 
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 219;
-       msPenalty               =3500;
-       percentCorrectionTrials = .5;  
+%     case 'g62qq1rt' % Started 10/6/16 
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 219;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5;  
     
     case 'g62qq2lt' % Started 10/3/16 
        requestRewardSizeULorMS = 0;
@@ -177,11 +177,11 @@ switch subjIDs{1}
        msPenalty               =3500;
        percentCorrectionTrials = .5;     
     
-%     case 'g62kk10tt' % Started 8/23/16 %switched to HvV_center 9/8/16
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 219;
-%        msPenalty               =3500;
-%        percentCorrectionTrials = .5;     
+    case 'g62kk10tt' % Started 8/23/16 %switched to HvV_center 9/8/16
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 219;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;     
        
     case 'g62dd15rt' % Started 8/23/16 
        requestRewardSizeULorMS = 0;

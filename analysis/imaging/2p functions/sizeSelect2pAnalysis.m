@@ -4,7 +4,7 @@ clear all
 close all
 dbstop if error
 
-pre = 0; %1 if pre, 0 if post, determines naming of output file
+pre = 1; %1 if pre, 0 if post, determines naming of output file
 exclude = 0; %0 removes trials above threshold, 1 clips them to the threshold
 peakWindow = 9:12;
 dt = 0.1;

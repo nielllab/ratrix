@@ -36,7 +36,7 @@ end
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 219;
        msPenalty               =3500;
-       percentCorrectionTrials = .5;
+       percentCorrectionTrials = .75;
        pixPerCycs              = [200];
        normalizedPosition      = [0.48 0.52];
        radius                 = .34;
@@ -54,10 +54,10 @@ end
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
-       percentCorrectionTrials = .5;
+       percentCorrectionTrials = .75;
        pixPerCycs              = [200];
-       normalizedPosition      = [0.33 0.66];
-       radius                 = .25;
+       normalizedPosition      = [0.48 0.52];
+       radius                 = .34;
      
    case 'g62jj2lt' % Started 5/4/16 %started HvV 9/6/16
        requestRewardSizeULorMS = 0;

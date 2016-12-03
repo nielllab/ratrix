@@ -3,6 +3,12 @@
 close all
 clear all
 
+%%%for each cell make a figure where each plot is the individual data for
+%%%that cell (SS curve, RF location)
+
+%%plot all cells based on RF location, and by reponse criteria (e.g.>0.1)
+%%or all cells that respond to size 1 or 2 etc
+
 plotallcells = 0;
 dfWindow = 9:11;
 spWindow = 6:10;
@@ -828,6 +834,7 @@ for i = 1:cellcnt
         SIsp(i,2,j,2) = sizeVals(prefsize);
     end
 end
+%plot cells w/ pre post and suppression index
 
 % SIsp = SIsp(SIsp(:,1,1,1)<=1&SIsp(:,1,1,1)>=-0.1,:,:,:);
 
@@ -892,6 +899,7 @@ if exist('psfile','var')
 end
 
 %%%plot preferred stimulus size pre vs. post
+%use a 2d heatmap myHist2?
 figure
 subplot(1,2,1)
 hold on

@@ -1,8 +1,10 @@
 %% code from doGratingsNew
 deconvplz = 1 %choose if you want deconvolution
 fully = 1 %choose if you want full frame (260x260), else scales down by 4
-% ptsdir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data'; %directory for points file
-% ptsfile = {'G62BB6RT_points.mat',...
+ptsdir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data'; %directory for points file
+ptsfile = {'G62BB7LT_points.mat',...
+            'G62GG10LT_points.mat'};
+%           'G62BB6RT_points.mat',...
 %           'G62AA3TT_points.mat',...
 %           'G62Y9RT_points.mat'...
 %           'G62EE6LT_points.mat'...
@@ -25,7 +27,7 @@ areas = {'V1','P','LM','AL','RL','AM','PM'}; %list of all visual areas for point
 
 
 for f = 1:length(use)
-%     load(fullfile(ptsdir,ptsfile{f}));
+    load(fullfile(ptsdir,ptsfile{f}));
     load('C:\sizeSelect2sf8sz26min.mat')
     load('C:\mapoverlay.mat')
     load('C:\areamaps.mat')
@@ -294,24 +296,24 @@ for f = 1:length(use)
     
     %manual/loading point selection
     files(use(f)).subj
-    [fname pname] = uigetfile('*.mat','points file');
-    if fname~=0
-        load(fullfile(pname, fname));
-    else
-        figure
-        imagesc(squeeze(nanmean(nanmean(nanmean(trialcycavg(:,:,acqdurframes/2+2,:,:,4,3,:),4),5),8)))
-        colormap(jet)
-        axis square
-        hold on
-        plot(ypts,xpts,'k.','Markersize',2)
-        [x y] = ginput(7);
-        x=round(x); y=round(y);
-        close(gcf)
-        [fname pname] = uiputfile('*.mat','save points?');
-        if fname~=0
-            save(fullfile(pname,fname),'x','y');
-        end
-    end
+%     [fname pname] = uigetfile('*.mat','points file');
+%     if fname~=0
+%         load(fullfile(pname, fname));
+%     else
+%         figure
+%         imagesc(squeeze(nanmean(nanmean(nanmean(trialcycavg(:,:,acqdurframes/2+2,:,:,4,3,:),4),5),8)))
+%         colormap(jet)
+%         axis square
+%         hold on
+%         plot(ypts,xpts,'k.','Markersize',2)
+%         [x y] = ginput(7);
+%         x=round(x); y=round(y);
+%         close(gcf)
+%         [fname pname] = uiputfile('*.mat','save points?');
+%         if fname~=0
+%             save(fullfile(pname,fname),'x','y');
+%         end
+%     end
 
     %plot selected points over each radius size
     figure

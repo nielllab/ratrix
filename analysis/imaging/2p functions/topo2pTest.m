@@ -1,6 +1,8 @@
 % this script runs a quick test for topox or topoy to get cycavg and
 % fourier map
 
+%%add pixel-wise, thresholded histogram of phase
+
 % %%% reads raw images, calculates dfof, and aligns to stim sync
 close all; clear all
 fileName = uigetfile('*.sbx','topox file');

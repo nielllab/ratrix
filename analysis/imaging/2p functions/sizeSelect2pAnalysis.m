@@ -4,6 +4,8 @@ clear all
 close all
 dbstop if error
 
+%%%pull out preferences for each cell and use only those types of trials
+
 pre = 1; %1 if pre, 0 if post, determines naming of output file
 exclude = 0; %0 removes trials above threshold, 1 clips them to the threshold
 peakWindow = 9:12;

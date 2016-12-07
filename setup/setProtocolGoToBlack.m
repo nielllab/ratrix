@@ -40,7 +40,7 @@ switch subjIDs{1}
        msPenalty               =3500;
        percentCorrectionTrials = .5;     
     
-   case 'g62pp6lt' 
+   case 'g62pp6rt' 
        requestRewardSizeULorMS = 43;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;

@@ -2,12 +2,14 @@
 deconvplz = 1 %choose if you want deconvolution
 fully = 1 %choose if you want full frame (260x260), else scales down by 4
 ptsdir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data'; %directory for points file
-ptsfile = {'G62BB6RT_points.mat',...
-          'G62AA3TT_points.mat',...
-          'G62Y9RT_points.mat'...
-          'G62EE6LT_points.mat'...
-          'G62TX210TT_points.mat',...
-          'G62TX19LT_points.mat'}; %specific point files for animals
+ptsfile = {'G62BB7LT_points.mat',...
+            'G62GG10LT_points.mat'};
+%           'G62BB6RT_points.mat',...
+%           'G62AA3TT_points.mat',...
+%           'G62Y9RT_points.mat'...
+%           'G62EE6LT_points.mat'...
+%           'G62TX210TT_points.mat',...
+%           'G62TX19LT_points.mat'}; %specific point files for animals
 % 
 % ptsdir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data'; %directory for points file
 % ptsfile = {'G62Y9RT_DOIpoints.mat',...
@@ -95,7 +97,7 @@ for f = 1:length(use)
     stimslip = (stimRec.ts' - stimRec.ts(1)) - (1/60)*(0:length(stimRec.ts)-1);
     acqslip = (frameT' - frameT(1)) - 0.1*(0:length(frameT)-1);
     slip(f) = median(stimslip) - median(acqslip);
-    title('slip = %f',slip(f));
+    title(sprintf('slip = %f',slip(f)));
     
     imageT=(1:size(dfof_bg,3))/imagerate;
     img = imresize(double(dfof_bg),1,'method','box');
@@ -450,7 +452,8 @@ for f = 1:length(use)
     end
     
     
-    %%%calculate spread of response within each area
+    %%%calculate spread of response within each area only need this for
+    %%%making tif files
     %%draw boundaries and save image file to manually fill in areas
     % a = ones(size(deconvimg,1),size(deconvimg,2));
     % for i = 1:length(xpts)
@@ -559,7 +562,7 @@ for f = 1:length(use)
     toc
     
 %     %multiply binarized area matrices with average trial data to isolate each
-%     %area's response   
+%     %area's response   this is old code
 %     gauParams = nan(length(sfrange),length(phaserange),length(contrastRange),length(radiusRange),length(behavState),length(areas),5); %contains a1,x0,y0,sigmax,sigmay for spread fits
 %     halfMax = nan(length(sfrange),length(phaserange),length(contrastRange),length(radiusRange),length(behavState),length(areas)); %total # pixels above half the max amplitude, alternative spread measure
 %     areapeaks = halfMax; %automated peak finding

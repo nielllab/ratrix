@@ -13,7 +13,7 @@ if exist(psfile,'file')==2;delete(psfile);end
 
 
 tic
-behav2pSession('g62qq1rt_001_000.sbx','behavSessionV2.mat','trialRecords_792-952_20161102T100621-20161102T102424.mat',psfile);
+behav2pSession('g62qq1rt_001_000.sbx','behavSessionV2.mat','trialRecords_314-465_20161028T105850-20161028T111905.mat',psfile);
 topo2pSession('g62qq1rt_001_001.sbx','topoXsessionV2.mat',psfile);
 topo2pSession('g62qq1rt_001_002.sbx','topoYsessionV2.mat',psfile);
 grating2pSession('g62qq1rt_001_005.sbx','gratingSessionV2.mat',psfile);

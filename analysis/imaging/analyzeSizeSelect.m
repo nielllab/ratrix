@@ -1,11 +1,11 @@
 % function [cycavg tuning] = analyzeSizeSelect(dfof_bg,sp,moviename,useframes,base,xpts,ypts, label,stimRec,psfilename,frameT);
-% close all
-% clear all
+close all
+clear all
 %% code from analyzeWidefieldDOI
 % batchDOIphilMaskSizesel
 batchPhilSizeSelect
  
-   alluse = find(strcmp({files.inject},'doi')  & strcmp({files.timing},'post') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
+   alluse = find(strcmp({files.inject},'saline')  & strcmp({files.timing},'post') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
 %   
 length(alluse)
 % %alluse=alluse(1:5)

@@ -605,7 +605,7 @@ barweb(squeeze(resp(:,1,2,[1 2])), squeeze(respErr(:,1,1,[1 3]))); ylim([-0.025 
 legend('task','passive 3x'); ylabel('weighted response'); title('active vs passive naive')
 
 figure
-barweb(squeeze(resp(:,1,1,[1 2])), squeeze(respErr(:,1,1,[1 3]))); ylim([-0.025 0.05]); set(gca,'Ytick',-0.025:0.025:0.075);
+barweb(squeeze(resp(:,1,1,[1 2])), squeeze(respErr(:,1,1,[1 3]))); ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
 legend('task','passive 3x'); ylabel('weighted response'); title('active vs passive trained');
 
 
@@ -683,10 +683,10 @@ clustDist
 
 
 for c = 1:4
-    cells = find(cond==c & centered);
+    cells = find(allCond==c & centered');
     sessions = unique(sess(cells));
     subjs = unique({files(alluse(sessions)).subj});
-    sprintf('%s %d cells %d subjs %d sessions',condLabel{c},length(cells), lengths(subjs),length(sessions))
+    sprintf('%s %d cells %d subjs %d sessions',condLabel{c},length(cells), length(subjs),length(sessions))
 end
 
 keyboard

@@ -9,6 +9,8 @@ cycLength=10;
 cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  cfg.syncToVid = 0; cfg.saveDF=0;%%% configuration parameters
 get2pSession_sbx;
 
+%phasetimes = phasetimes(2:end)  %%% one session had an extra trigger, this removes it
+
 if ~exist('onsets','var')
     if ~exist('behavfile','var')
         [bf bp] = uigetfile('*.mat','behav permanent trial record');

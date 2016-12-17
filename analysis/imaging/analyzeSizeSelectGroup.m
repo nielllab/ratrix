@@ -15,23 +15,15 @@ group = input('which group? 1=saline naive, 2=saline trained, 3=DOI naive, 4=DOI
 if group==1
     use = find(strcmp({files.inject},'saline')  & strcmp({files.training},'naive') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
     filename = 'SalineNaiveSizeSelect'
-    predir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data\Pre_Saline';
-    postdir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data\Post_Saline';
 elseif group==2
     use = find(strcmp({files.inject},'saline')  & strcmp({files.training},'trained') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
     filename = 'SalineTrainedSizeSelect'
-    predir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data\Pre_Saline';
-    postdir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data\Post_Saline';
 elseif group==3
     use = find(strcmp({files.inject},'doi')  & strcmp({files.training},'naive') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
     filename = 'SalineNaiveSizeSelect'
-    predir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data\Pre_DOI';
-    postdir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data\Post_DOI';
 elseif group==4
     use = find(strcmp({files.inject},'doi')  & strcmp({files.training},'trained') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
     filename = 'SalineTrainedSizeSelect'
-    predir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data\Pre_DOI';
-    postdir = '\\langevin\backup\widefield\DOI_experiments\Phil_Size_Suppression_Data\Post_DOI';
 else
     sprintf('please restart and choose a number 1-4')
 end
@@ -39,6 +31,7 @@ end
 redo = input('redo group averaging? 1=reanalyze, 0=load existing data:');
 
 %%%dependencies and movie loading
+numAni = length(use);
 load('C:\mapoverlay.mat');
 moviename = 'C:\sizeSelect2sf8sz26min.mat';
 load(moviename);
@@ -47,7 +40,7 @@ acqdurframes = imagerate*(isi+duration);
 timepts = [1:acqdurframes+acqdurframes/2]*0.1;
 areas = {'V1','P','LM','AL','RL','AM','PM'};
 behavState = {'stationary','running'};
-ncut = 2;
+ncut = 3;
 trials = length(sf)-ncut;
 sizeVals = [0 5 10 20 30 40 50 60];
 sf=sf(1:trials);contrasts=contrasts(1:trials);phase=phase(1:trials);radius=radius(1:trials);
@@ -57,23 +50,25 @@ for i = 1:length(contrastRange);contrastlist{i} = num2str(contrastRange(i));end
 for i=1:length(sizeVals); sizes{i} = num2str(sizeVals(i)); end
 
 if redo
-    alltrialcycavgpre = zeros(260,260,acqdurframes+acqdurframes/2,length(sfrange),length(phaserange),length(contrastRange),length(radiusRange),2,length(datafiles));
-    allpeakspre = zeros(length(sfrange),length(phaserange),length(contrastRange),length(radiusRange),2,length(areas),length(datafiles));
-    alltracespre = zeros(length(areas),acqdurframes+acqdurframes/2,length(sfrange),length(phaserange),length(contrastRange),length(radiusRange),2,length(datafiles));
-    allgauParamspre = zeros(length(contrastRange),length(radiusRange),2,length(areas),5,length(datafiles));
-    allhalfMaxpre = zeros(length(contrastRange),length(radiusRange),2,length(areas),length(datafiles));
-    allareapeakspre = zeros(length(contrastRange),length(radiusRange),2,length(areas),length(datafiles));
+    alltrialcycavgpre = zeros(260,260,acqdurframes+acqdurframes/2,length(sfrange),length(contrastRange),length(radiusRange),2,numAni);
+    allpeakspre = zeros(length(sfrange),length(contrastRange),length(radiusRange),2,length(areas),numAni);
+    alltracespre = zeros(length(areas),acqdurframes+acqdurframes/2,length(sfrange),length(contrastRange),length(radiusRange),2,numAni);
+    allgauParamspre = zeros(length(contrastRange),length(radiusRange),2,length(areas),5,numAni);
+    allhalfMaxpre = zeros(length(contrastRange),length(radiusRange),2,length(areas),numAni);
+    allareameanspre = zeros(length(contrastRange),length(radiusRange),2,length(areas),numAni);
+    allareapeakspre = zeros(length(contrastRange),length(radiusRange),2,length(areas),numAni);
     for i= 1:length(use) %collates all conditions (numbered above) 
-        load(fullfile(predir,files(use(i)).datafile),'trialcycavg','peaks','mv','areapeaks','gauParams','halfMax')
-        alltrialcycavgpre(:,:,:,:,:,:,:,:,i) = squeeze(nanmean(nanmean(trialcycavg,4),5));
-        allpeakspre(:,:,:,:,:,:,i) = squeeze(nanmean(nanmean(peaks,4),5));
+        load(fullfile(predir,files(use(i)).datafile),'trialcycavg','peaks','mv','areapeaks','gauParams','halfMax','areameans')
+        alltrialcycavgpre(:,:,:,:,:,:,:,i) = squeeze(nanmean(nanmean(trialcycavg,4),5));
+        allpeakspre(:,:,:,:,:,i) = squeeze(nanmean(nanmean(peaks,4),5));
         allmvpre(:,i) = mv;
         allgauParamspre(:,:,:,:,:,i) = gauParams;
         allhalfMaxpre(:,:,:,:,i) = halfMax;
         allareapeakspre(:,:,:,:,i) = areapeaks;
+        allareameanspre(:,:,:,:,i) = areameans;
         load(files(use(i)).ptsfile);
         for j=1:length(x)
-            alltracespre(j,:,:,:,:,:,:,i) = squeeze(nanmean(nanmean(nanmean(nanmean(trialcycavg(y(j)-1:y(j)+1,x(j)-1:x(j)+1,:,:,:,:,:,:),4),5),1),2));
+            alltracespre(j,:,:,:,:,:,i) = squeeze(nanmean(nanmean(nanmean(trialcycavg(y(j)-1:y(j)+1,x(j)-1:x(j)+1,:,:,:,:,:),3),1),2));
         end
     end
 
@@ -92,23 +87,25 @@ if redo
 %     avgareapeakspre = nanmean(allareapeakspre,5);
 %     seareapeakspre = nanstd(allareapeakspre,5)/sqrt(length(datafiles));
 
-    alltrialcycavgpost = zeros(260,260,acqdurframes+acqdurframes/2,length(sfrange),length(phaserange),length(contrastRange),length(radiusRange),2,length(datafiles));
-    allpeakspost = zeros(length(sfrange),length(phaserange),length(contrastRange),length(radiusRange),2,length(areas),length(datafiles));
-    alltracespost = zeros(length(areas),acqdurframes+acqdurframes/2,length(sfrange),length(phaserange),length(contrastRange),length(radiusRange),2,length(datafiles));
-    allgauParamspost = zeros(length(contrastRange),length(radiusRange),2,length(areas),5,length(datafiles));
-    allhalfMaxpost = zeros(length(contrastRange),length(radiusRange),2,length(areas),length(datafiles));
-    allareapeakspost = zeros(length(contrastRange),length(radiusRange),2,length(areas),length(datafiles));
+    alltrialcycavgpost = zeros(260,260,acqdurframes+acqdurframes/2,length(sfrange),length(contrastRange),length(radiusRange),2,numAni);
+    allpeakspost = zeros(length(sfrange),length(contrastRange),length(radiusRange),2,length(areas),numAni);
+    alltracespost = zeros(length(areas),acqdurframes+acqdurframes/2,length(sfrange),length(contrastRange),length(radiusRange),2,numAni);
+    allgauParamspost = zeros(length(contrastRange),length(radiusRange),2,length(areas),5,numAni);
+    allhalfMaxpost = zeros(length(contrastRange),length(radiusRange),2,length(areas),numAni);
+    allareameanspost = zeros(length(contrastRange),length(radiusRange),2,length(areas),numAni);
+    allareapeakspost = zeros(length(contrastRange),length(radiusRange),2,length(areas),numAni);
     for i= 1:length(use) %collates all conditions (numbered above) 
-        load(fullfile(postdir,files(use(i)).datafile),'trialcycavg','peaks','mv','areapeaks','gauParams','halfMax')
-        alltrialcycavgpost(:,:,:,:,:,:,:,:,i) = trialcycavg;
-        allpeakspost(:,:,:,:,:,:,i) = peaks;
+        load(fullfile(postdir,files(use(i)).datafile),'trialcycavg','peaks','mv','areapeaks','gauParams','halfMax','areameans')
+        alltrialcycavgpost(:,:,:,:,:,:,:,i) = trialcycavg;
+        allpeakspost(:,:,:,:,:,i) = peaks;
         allmvpost(:,i) = mv;
         allgauParamspost(:,:,:,:,:,i) = gauParams;
         allhalfMaxpost(:,:,:,:,i) = halfMax;
         allareapeakspost(:,:,:,:,i) = areapeaks;
+        allareameanspost(:,:,:,:,i) = areameans;
         load(files(use(i)).ptsfile);
         for j=1:length(x)
-            alltracespost(j,:,:,:,:,:,:,i) = squeeze(nanmean(nanmean(trialcycavg(y(j)-2:y(j)+2,x(j)-2:x(j)+2,:,:,:,:,:,:),1),2));
+            alltracespost(j,:,:,:,:,:,i) = squeeze(nanmean(nanmean(nanmean(trialcycavg(y(j)-2:y(j)+2,x(j)-2:x(j)+2,:,:,:,:,:),3),1),2));
         end
     end
 
@@ -142,10 +139,8 @@ if redo
 %         end
 %     end
     
-    save(filename,'avgtrialcycavgpre','avgpeakspre','avgtracespre','avggauParamspre','avghalfMaxpre','avgareapeakspre','avgmvpre',...
-        'setrialcycavgpre','sepeakspre','setracespre','segauParamspre','sehalfMaxpre','seareapeakspre','semvpre',...
-        'avgtrialcycavgpost','avgpeakspost','avgtracespost','avggauParamspost','avghalfMaxpost','avgareapeakspost','avgmvpost',...
-        'setrialcycavgpost','sepeakspost','setracespost','segauParamspost','sehalfMaxpost','seareapeakspost','semvpost','-v7.3');
+    save(filename,'alltrialcycavgpre','allpeakspre','alltracespre','allgauParamspre','allhalfMaxpre','allareameanspre','allareapeakspre',...
+        'alltrialcycavgpost','allpeakspost','alltracespost','allgauParamspost','allhalfMaxpost','allareameanspost','allareapeakspost','-v7.3');
     doSizeSelectPlots
 else
     load(filename)

@@ -3,7 +3,7 @@
 %PRLP 02/01/2016 Niell Lab
 
 plotrange = 5:9;
-psfilename = 'c:\temp.ps';
+psfilename = 'c:\tempPhilWF.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
 % load('C:\mapoverlay.mat');
@@ -30,10 +30,11 @@ if exist(psfilename,'file')==2;delete(psfilename);end
 % % %plotting
 
 %%%individual animal plots
+cnt=1;
 for i=1:numAni
     figure
     subplot(2,2,1)
-    plot(1:length(sizes),squeeze(nanmean(allpeakspre(:,:,1,1,i),1)))
+    plot(1:length(sizes),squeeze(nanmean(allpeakspre(:,:,:,1,1,i),1)))
     legend(contrastlist,'location','northwest')
     axis([1 8 0 0.2])
     set(gca,'xtick',sizeVals,'xticklabel',sizes)
@@ -41,7 +42,7 @@ for i=1:numAni
     axis square
     
     subplot(2,2,2)
-    plot(1:length(sizes),squeeze(nanmean(allpeakspre(:,:,2,1,i),1)))
+    plot(1:length(sizes),squeeze(nanmean(allpeakspre(:,:,:,2,1,i),1)))
     legend(contrastlist,'location','northwest')
     axis([1 8 0 0.2])
     set(gca,'xtick',sizeVals,'xticklabel',sizes)
@@ -49,7 +50,7 @@ for i=1:numAni
     axis square
     
     subplot(2,2,3)
-    plot(1:length(sizes),squeeze(nanmean(allpeakspost(:,:,1,1,i),1)))
+    plot(1:length(sizes),squeeze(nanmean(allpeakspost(:,:,:,1,1,i),1)))
     legend(contrastlist,'location','northwest')
     axis([1 8 0 0.2])
     set(gca,'xtick',sizeVals,'xticklabel',sizes)
@@ -57,40 +58,37 @@ for i=1:numAni
     axis square
     
     subplot(2,2,4)
-    plot(1:length(sizes),squeeze(nanmean(allpeakspost(:,:,2,1,i),1)))
+    plot(1:length(sizes),squeeze(nanmean(allpeakspost(:,:,:,2,1,i),1)))
     legend(contrastlist,'location','northwest')
     axis([1 8 0 0.2])
     set(gca,'xtick',sizeVals,'xticklabel',sizes)
     ylabel('post run')
     axis square
     
-    mtit(sprintf('%s %s',files(use(i)).subj,files(use(i)).inject))
+    mtit(sprintf('%s %s V1 peaks',files(use(cnt)).subj,files(use(cnt)).inject))
     if exist('psfilename','var')
         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfilename,'-append');
-    end   
+    end
+    cnt=cnt+2;
 end
 
 %manual peaks
-for m = 1:length(areas)
+for j = 1:2
     figure
-    cnt=0;
-    for j = 1:2
-        for i = 1:length(contrastRange)
-            cnt = cnt+1;
-            subplot(2,length(contrastRange),cnt)
-            hold on
-            errorbar(1:length(radiusRange),squeeze(nanmean(nanmean(allpeakspre(:,i,:,j,m,1),1),2),6),squeeze(nanstd(nanmean(allpeakspre(:,i,:,j,m,1),1),2),6)/sqrt(numAni),'ko')
-            errorbar(1:length(radiusRange),squeeze(nanmean(nanmean(allpeakspost(:,i,:,j,m,1),1),2),6),squeeze(nanstd(nanmean(allpeakspost(:,i,:,j,m,1),1),2),6)/sqrt(numAni),'ro')
-            set(gca,'Xtick',1:length(radiusRange),'Xticklabel',sizes)
-            xlabel('radius (deg)')
-            ylabel('dfof')
-            axis square
-            axis([1 length(radiusRange) 0 0.25])
-            legend(sprintf('%s contrast %s',contrastlist{i},behavState{j}),'Location','northoutside')
-        end
+    for m = 1:length(areas)
+        subplot(2,length(areas)/2,m)
+        hold on
+        errorbar(1:length(radiusRange),squeeze(nanmean(nanmean(allpeakspre(:,end,:,j,m,:),1),6)),squeeze(nanstd(nanmean(allpeakspre(:,end,:,j,m,:),1),6))/sqrt(numAni),'ko')
+        errorbar(1:length(radiusRange),squeeze(nanmean(nanmean(allpeakspost(:,end,:,j,m,:),1),6)),squeeze(nanstd(nanmean(allpeakspost(:,end,:,j,m,:),1),6))/sqrt(numAni),'ro')
+        set(gca,'Xtick',1:length(radiusRange),'Xticklabel',sizes)
+        xlabel('radius (deg)')
+        ylabel(sprintf('%s',areas{m}))
+        axis square
+%         axis([1 length(radiusRange) 0 0.1])
+%         legend('pre','post')
     end
-    mtit(sprintf('%s Manual Peaks',areas{m}))
+    mtit(sprintf('%s Manual Peaks',behavState{j}))
     if exist('psfilename','var')
         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfilename,'-append');
@@ -98,25 +96,21 @@ for m = 1:length(areas)
 end
 
 % %peaks from autofind
-for m = 1:length(areas)
+for j = 1:2
     figure
-    cnt=0;
-    for j = 1:2
-        for i = 1:length(contrastRange)
-            cnt = cnt+1;
-            subplot(2,length(contrastRange),cnt)
-            hold on
-            errorbar(1:length(radiusRange),squeeze(nanmean(allareapeakspre(i,:,j,m,:),5)),squeeze(nanstd(allareapeakspre(i,:,j,m,:),5))/sqrt(numAni)),'ko')
-            errorbar(1:length(radiusRange),squeeze(nanmean(allareapeakspost(i,:,j,m,:),5)),squeeze(nanstd(allareapeakspost(i,:,j,m,:),5))/sqrt(numAni),'ro')
-            set(gca,'Xtick',1:length(radiusRange),'Xticklabel',sizes)
-            xlabel('radius (deg)')
-            ylabel('dfof')
-            axis square
-            axis([1 length(radiusRange) 0 0.25])
-            legend(sprintf('%s contrast %s',contrastlist{i},behavState{j}),'Location','northoutside')
-        end
+    for m = 1:length(areas)-1
+        subplot(2,length(areas)/2,m)
+        hold on
+        errorbar(1:length(radiusRange),squeeze(nanmean(allareapeakspre(end,:,j,m,:),5)),squeeze(nanstd(allareapeakspre(end,:,j,m,:),5))/sqrt(numAni),'ko')
+        errorbar(1:length(radiusRange),squeeze(nanmean(allareapeakspost(end,:,j,m,:),5)),squeeze(nanstd(allareapeakspost(end,:,j,m,:),5))/sqrt(numAni),'ro')
+        set(gca,'Xtick',1:length(radiusRange),'Xticklabel',sizes)
+        xlabel('radius (deg)')
+        ylabel(sprintf('%s',areas{m}))
+        axis square
+%         axis([1 length(radiusRange) 0 0.1])
+%         legend('pre','post')
     end
-    mtit(sprintf('%s Auto Peaks',areas{m}))
+    mtit(sprintf('%s Autofind Peaks',behavState{j}))
     if exist('psfilename','var')
         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfilename,'-append');
@@ -125,25 +119,21 @@ end
 
 
 %spread of points above half max
-for m = 1:length(areas)
+for j = 1:2
     figure
-    cnt=0;
-    for j = 1:2
-        for i = 1:length(contrastRange)
-            cnt = cnt+1;
-            subplot(2,length(contrastRange),cnt)
-            hold on
-            errorbar(1:length(radiusRange),squeeze(nanmean(allhalfMaxpre(i,:,j,m,:),5)),squeeze(nanstd(allhalfMaxpre(i,:,j,m,:),5))/sqrt(numAni),'ko')
-            errorbar(1:length(radiusRange),squeeze(nanmean(allhalfMaxpost(i,:,j,m,:),5)),squeeze(nanstd(allhalfMaxpost(i,:,j,m,:),5))/sqrt(numAni),'ro')
-            set(gca,'Xtick',1:length(radiusRange),'Xticklabel',sizes)
-            xlabel('radius (deg)')
-            ylabel('dfof')
-            axis square
-            axis([1 length(radiusRange) 0 25000])
-            legend(sprintf('%s contrast %s',contrastlist{i},behavState{j}),'Location','northoutside')
-        end
+    for m = 1:length(areas)-1
+        subplot(2,length(areas)/2,m)
+        hold on
+        errorbar(1:length(radiusRange),squeeze(nanmean(allhalfMaxpre(end,:,j,m,:),5)),squeeze(nanstd(allhalfMaxpre(end,:,j,m,:),5))/sqrt(numAni),'ko')
+        errorbar(1:length(radiusRange),squeeze(nanmean(allhalfMaxpost(end,:,j,m,:),5)),squeeze(nanstd(allhalfMaxpost(end,:,j,m,:),5))/sqrt(numAni),'ro')
+        set(gca,'Xtick',1:length(radiusRange),'Xticklabel',sizes)
+        xlabel('radius (deg)')
+        ylabel(sprintf('%s',areas{m}))
+        axis square
+%         axis([1 length(radiusRange) 0 2500])
+%         legend('pre','post')
     end
-    mtit(sprintf('%s Area Above Half Max',areas{m}))
+    mtit(sprintf('%s area above half max',behavState{j}))
     if exist('psfilename','var')
         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfilename,'-append');
@@ -151,25 +141,21 @@ for m = 1:length(areas)
 end
 
 %average mean dfof per area
-for m = 1:length(areas)
+for j = 1:2
     figure
-    cnt=0;
-    for j = 1:2
-        for i = 1:length(contrastRange)
-            cnt = cnt+1;
-            subplot(2,length(contrastRange),cnt)
-            hold on
-            errorbar(1:length(radiusRange),squeeze(nanmean(allareameanspre(i,:,j,m,:),5)),squeeze(nanstd(allareameanspre(i,:,j,m,:),5))/sqrt(numAni),'ko')
-            errorbar(1:length(radiusRange),squeeze(nanmean(allareameanspost(i,:,j,m,:),5)),squeeze(nanstd(allareameanspost(i,:,j,m,:),5))/sqrt(numAni),'ro')
-            set(gca,'Xtick',1:length(radiusRange),'Xticklabel',sizes)
-            xlabel('radius (deg)')
-            ylabel('dfof')
-            axis square
-            axis([1 length(radiusRange) 0 0.25])
-            legend(sprintf('%s contrast %s',contrastlist{i},behavState{j}),'Location','northoutside')
-        end
+    for m = 1:length(areas)-1
+        subplot(2,length(areas)/2,m)
+        hold on
+        errorbar(1:length(radiusRange),squeeze(nanmean(allareameanspre(end,:,j,m,:),5)),squeeze(nanstd(allareameanspre(end,:,j,m,:),5))/sqrt(numAni),'ko')
+        errorbar(1:length(radiusRange),squeeze(nanmean(allareameanspost(end,:,j,m,:),5)),squeeze(nanstd(allareameanspost(end,:,j,m,:),5))/sqrt(numAni),'ro')
+        set(gca,'Xtick',1:length(radiusRange),'Xticklabel',sizes)
+        xlabel('radius (deg)')
+        ylabel(sprintf('%s',areas{m}))
+        axis square
+%         axis([1 length(radiusRange) 0 2500])
+%         legend('pre','post')
     end
-    mtit(sprintf('%s Area Above Half Max',areas{m}))
+    mtit(sprintf('%s mean dfof per area',behavState{j}))
     if exist('psfilename','var')
         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfilename,'-append');
@@ -177,27 +163,24 @@ for m = 1:length(areas)
 end
 
 %average x/y sigma from gaussian
-for m = 1:length(areas)
+for j = 1:2
     figure
-    cnt=0;
-    for j = 1:2
-        for i = 1:length(contrastRange)
-            cnt = cnt+1;
-            subplot(2,length(contrastRange),cnt)
-            gaupremean = (squeeze(allgauParamspre(i,:,j,m,4,:))+squeeze(allgauParamspre(i,:,j,m,5,:)))/2;
-            gaupostmean = (squeeze(allgauParamspost(i,:,j,m,4,:))+squeeze(allgauParamspost(i,:,j,m,5,:)))/2;
-            hold on
-            errorbar(1:length(radiusRange),squeeze(nanmean(gaupremean,2)),squeeze(nanstd(gaupremean,2))/sqrt(numAni),'ko')
-            errorbar(1:length(radiusRange),squeeze(nanmean(gaupostmean,2)),squeeze(nanstd(gaupostmean,2))/sqrt(numAni),'ro')
-            set(gca,'Xtick',1:length(radiusRange),'Xticklabel',sizes)
-            xlabel('radius (deg)')
-            ylabel('dfof')
-            axis square
-            axis([1 length(radiusRange) 0 50])
-            legend(sprintf('%s contrast %s',contrastlist{i},behavState{j}),'Location','northoutside')
-        end
+    for m = 1:length(areas)-1
+        subplot(2,length(areas)/2,m)
+        hold on
+        gaupremean = (allgauParamspre(end,:,j,m,4,:)+allgauParamspre(end,:,j,m,5,:))/2;
+        gaupostmean = (allgauParamspost(end,:,j,m,4,:)+allgauParamspost(end,:,j,m,5,:))/2;
+        hold on
+        errorbar(1:length(radiusRange),squeeze(nanmean(gaupremean,6)),squeeze(nanstd(gaupremean,6))/sqrt(numAni),'ko')
+        errorbar(1:length(radiusRange),squeeze(nanmean(gaupostmean,6)),squeeze(nanstd(gaupostmean,6))/sqrt(numAni),'ro')
+        set(gca,'Xtick',1:length(radiusRange),'Xticklabel',sizes)
+        xlabel('radius (deg)')
+        ylabel(sprintf('%s',areas{m}))
+        axis square
+        axis([1 length(radiusRange) 0 20])
+%         legend('pre','post')
     end
-    mtit(sprintf('%s Sigma from Gaussian',areas{m}))
+    mtit(sprintf('%s Sigma from Gaussian',behavState{j}))
     if exist('psfilename','var')
         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfilename,'-append');
@@ -206,86 +189,80 @@ end
 
 
 %plot activity maps for the different contrasts/running, with rows=radius
-for i=1:2
-    for j=1:length(contrastRange)
-        figure
-        cnt=1;
-        for k=1:length(radiusRange)
-            for l=plotrange
-                subplot(length(radiusRange),length(plotrange),cnt)
-                    imagesc(squeeze(nanmean(nanmean(alltrialcycavgpre(:,:,l,:,j,k,i,:),4),8)),[0 0.15])
-                    colormap(jet)
-                    axis square
-                    axis off
-                    set(gca,'LooseInset',get(gca,'TightInset'))
-                    hold on; plot(ypts,xpts,'w.','Markersize',2)
-                    cnt=cnt+1;
-            end
-        end
-        mtit(sprintf('PRE %s %s contrast row=size',behavState{i},contrastlist{j}))
-        if exist('psfilename','var')
-            set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfilename,'-append');
+for j = 1:2
+    figure
+    cnt=1;
+    for k=1:length(radiusRange)
+        for l=plotrange
+            subplot(length(radiusRange),length(plotrange),cnt)
+            imagesc(squeeze(nanmean(nanmean(alltrialcycavgpre(:,:,l,:,end,k,j,:),4),8)),[0 0.1])
+            colormap(jet)
+            axis square
+            axis off
+            set(gca,'LooseInset',get(gca,'TightInset'))
+            hold on; plot(ypts,xpts,'w.','Markersize',2)
+            cnt=cnt+1;
         end
     end
+    mtit(sprintf('PRE %s %s contrast row=size',behavState{j}))
+    if exist('psfilename','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfilename,'-append');
+    end
 end
-
-for i=1:2
-    for j=1:length(contrastRange)
-        figure
-        cnt=1;
-        for k=1:length(radiusRange)
-            for l=plotrange
-                subplot(length(radiusRange),length(plotrange),cnt)
-                    imagesc(squeeze(nanmean(nanmean(alltrialcycavgpost(:,:,l,:,j,k,i),4),8)),[0 0.15])
-                    colormap(jet)
-                    axis square
-                    axis off
-                    set(gca,'LooseInset',get(gca,'TightInset'))
-                    hold on; plot(ypts,xpts,'w.','Markersize',2)
-                    cnt=cnt+1;
-            end
+for j = 1:2
+    figure
+    cnt=1;
+    for k=1:length(radiusRange)
+        for l=plotrange
+            subplot(length(radiusRange),length(plotrange),cnt)
+            imagesc(squeeze(nanmean(nanmean(alltrialcycavgpost(:,:,l,:,end,k,j,:),4),8)),[0 0.1])
+            colormap(jet)
+            axis square
+            axis off
+            set(gca,'LooseInset',get(gca,'TightInset'))
+            hold on; plot(ypts,xpts,'w.','Markersize',2)
+            cnt=cnt+1;
         end
-        mtit(sprintf('POST %s %s contrast row=size',behavState{i},contrastlist{j}))
-        if exist('psfilename','var')
-            set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfilename,'-append');
-        end
+    end
+    mtit(sprintf('POST %s %s contrast row=size',behavState{j}))
+    if exist('psfilename','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfilename,'-append');
     end
 end
 
 xstim = [acqdurframes/2-1 acqdurframes/2-1];
 ystim = [-0.1 0.5];
-
 % for m = 1:length(areas)
-    for i=1:2
-        for j=1:length(contrastRange)
-            figure
-            cnt=1;
-            for k=1:length(radiusRange)
-                subplot(2,4,cnt)
-                hold on
-                shadedErrorBar(timepts,squeeze(nanmean(nanmean(alltracespre(1,:,:,j,k,i,:),3),7)),squeeze(nanstd(nanmean(alltracespre(1,:,:,:,j,k,i),3),7)),'-k',1)
-                shadedErrorBar(timepts,squeeze(nanmean(nanmean(alltracespost(1,:,:,j,k,i,:),3),7)),squeeze(nanstd(nanmean(alltracespost(1,:,:,:,j,k,i),3),7)),'-r',1)
-                plot(xstim,ystim,'g-')
-                set(gca,'LooseInset',get(gca,'TightInset'))
-                axis([0 max(timepts) -0.05 0.2])
-                legend(sprintf('%s deg',sizes{k}),'Location','northoutside')
-                hold off
-                cnt=cnt+1;
-            end
-            mtit(sprintf('V1 %s %s contrast',behavState{i},contrastlist{j}))
-            if exist('psfilename','var')
-                set(gcf, 'PaperPositionMode', 'auto');
-                print('-dpsc',psfilename,'-append');
-            end
-        end
+for i=1:2
+    figure
+    cnt=1;
+    for k=1:length(radiusRange)
+        subplot(2,4,cnt)
+        hold on
+        shadedErrorBar(timepts,squeeze(nanmean(nanmean(alltracespre(1,:,:,end,k,i,:),3),7)),squeeze(nanstd(nanmean(alltracespre(1,:,:,end,k,i,:),3),7))/sqrt(numAni),'-k',1)
+        shadedErrorBar(timepts,squeeze(nanmean(nanmean(alltracespost(1,:,:,end,k,i,:),3),7)),squeeze(nanstd(nanmean(alltracespost(1,:,:,end,k,i,:),3),7))/sqrt(numAni),'-r',1)
+        plot(xstim,ystim,'g-')
+        set(gca,'LooseInset',get(gca,'TightInset'))
+        axis([0 max(timepts) -0.05 0.2])
+        legend(sprintf('%s deg',sizes{k}),'Location','northoutside')
+        hold off
+        cnt=cnt+1;
     end
+    mtit(sprintf('V1 %s',behavState{i}))
+    if exist('psfilename','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfilename,'-append');
+    end
+end
 % end
 
 %%get percent time running
 figure
-errorbar([1 2],[avgmvpre avgmvpost],[semvpre semvpost]);
+hold on
+plot([ones(1,length(allmvpre)) 2*ones(1,length(allmvpre))],[allmvpre allmvpost],'ko')
+errorbar([1 2],[nanmean(allmvpre,2) nanmean(allmvpost,2)],[nanstd(allmvpre,2)/sqrt(numAni) nanstd(allmvpost,2)/sqrt(numAni)]);
 ylabel('fraction running')
 ylim([0 1]);
 set(gca,'xtick',[1 2],'xticklabel',{'Pre','Post'})
@@ -295,7 +272,7 @@ if exist('psfilename','var')
 end
 
 try
-    dos(['ps2pdf ' 'c:\temp.ps "' fullfile(ptsdir,sprintf('%s.pdf',filename)) '"'] )
+    dos(['ps2pdf ' psfilename ' "' [filename '.pdf'] '"'])
 
 catch
     display('couldnt generate pdf');

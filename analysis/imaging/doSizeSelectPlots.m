@@ -73,19 +73,62 @@ for i=1:numAni
     cnt=cnt+2;
 end
 
+%%%plot of group data for response to sizes for contrast vs. dfof
+figure
+subplot(2,2,1)
+plot(1:length(sizes),squeeze(nanmean(allpeakspre(:,:,:,1,1,i),1)))
+legend(contrastlist,'location','northwest')
+axis([1 8 0 0.2])
+set(gca,'xtick',sizeVals,'xticklabel',sizes)
+ylabel('pre sit')
+axis square
+
+subplot(2,2,2)
+plot(1:length(sizes),squeeze(nanmean(allpeakspre(:,:,:,2,1,i),1)))
+legend(contrastlist,'location','northwest')
+axis([1 8 0 0.2])
+set(gca,'xtick',sizeVals,'xticklabel',sizes)
+ylabel('pre run')
+axis square
+
+subplot(2,2,3)
+plot(1:length(sizes),squeeze(nanmean(allpeakspost(:,:,:,1,1,i),1)))
+legend(contrastlist,'location','northwest')
+axis([1 8 0 0.2])
+set(gca,'xtick',sizeVals,'xticklabel',sizes)
+ylabel('post sit')
+axis square
+
+subplot(2,2,4)
+plot(1:length(sizes),squeeze(nanmean(allpeakspost(:,:,:,2,1,i),1)))
+legend(contrastlist,'location','northwest')
+axis([1 8 0 0.2])
+set(gca,'xtick',sizeVals,'xticklabel',sizes)
+ylabel('post run')
+axis square
+
+mtit('V1 Contrast Functions')
+if exist('psfilename','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfilename,'-append');
+end
+
 %manual peaks
+limits = [0.2,..];
 for j = 1:2
     figure
     for m = 1:length(areas)
         subplot(2,length(areas)/2,m)
         hold on
-        errorbar(1:length(radiusRange),squeeze(nanmean(nanmean(allpeakspre(:,end,:,j,m,:),1),6)),squeeze(nanstd(nanmean(allpeakspre(:,end,:,j,m,:),1),6))/sqrt(numAni),'ko')
-        errorbar(1:length(radiusRange),squeeze(nanmean(nanmean(allpeakspost(:,end,:,j,m,:),1),6)),squeeze(nanstd(nanmean(allpeakspost(:,end,:,j,m,:),1),6))/sqrt(numAni),'ro')
+        errorbar(1:length(radiusRange),squeeze(nanmean(nanmean(allpeakspre(:,end,:,j,m,:),1),6)),squeeze(nanstd(nanmean(allpeakspre(:,end,:,j,m,:),1),6))/sqrt(numAni),'k.-')
+        errorbar(1:length(radiusRange),squeeze(nanmean(nanmean(allpeakspost(:,end,:,j,m,:),1),6)),squeeze(nanstd(nanmean(allpeakspost(:,end,:,j,m,:),1),6))/sqrt(numAni),'r.-')
         set(gca,'Xtick',1:length(radiusRange),'Xticklabel',sizes)
         xlabel('radius (deg)')
         ylabel(sprintf('%s',areas{m}))
         axis square
-%         axis([1 length(radiusRange) 0 0.1])
+        set(gca,'LooseInset',get(gca,'TightInset'))
+        xlabel off
+        axis([1 length(radiusRange) -0.1*limits(m) limits(m)])
 %         legend('pre','post')
     end
     mtit(sprintf('%s Manual Peaks',behavState{j}))

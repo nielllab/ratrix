@@ -84,9 +84,9 @@ for i = 1:length(alluse);
 %     figure
 %     subplot(2,2,1); imagesc(data(:,:,1,50)); subplot(2,2,2); imagesc(data(:,:,1,round(end/3)));
 %     subplot(2,2,3); imagesc(data(:,:,1,round(2*end/3))); subplot(2,2,4); imagesc(data(:,:,1,end)); colormap gray
-    
-    
-    behavRadius{i} = eyes(:,3);
+%     
+%     
+%     behavRadius{i} = eyes(:,3);
     
     %%% load in speed data from passive 3x
     clear spd eyes

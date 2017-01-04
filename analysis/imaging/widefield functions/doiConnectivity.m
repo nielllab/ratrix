@@ -18,6 +18,11 @@ use = alluse;
 
 printfigs=0; %% save figs to pdf? turning off runs 2x as fast
 
+for i = 1:length(use);
+    figLabels{i} = [' ' files(use(i)).inject ' ' files(use(i)).timing];
+end
+
+
 for s= 1:1  %%% can loop over subjects
 %%% calculate gradients and regions
 clear map merge
@@ -28,3 +33,13 @@ doTopography;
 doCorrelationMap
 
 end
+
+[f p] = uiputfile('*.pdf','save pdf');
+if f~=0
+    try
+        ps2pdf('psfile', psfilename, 'pdffile', fullfile(p,f));
+    catch
+        display('couldnt generate pdf');
+    end
+end
+delete(psfilename);

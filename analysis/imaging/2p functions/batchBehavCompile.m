@@ -6,8 +6,8 @@ batch2pBehaviorSBX;
 %alluse = find(strcmp({files.task},'GTS') & strcmp({files.notes},'good imaging session'))
 alluse = find( strcmp({files.notes},'good imaging session'))
 
-gts = 1; naive=2; naiveTrained=3; hvv = 4;
-condLabel{1} = ' GTS'; condLabel{2}=' naive'; condLabel{3}=' naive trained'; condLabel{4} = ' HvV';
+gts = 1; naive=2; naiveTrained=3; hvv = 4; rand =5;
+condLabel{1} = ' GTS'; condLabel{2}=' naive'; condLabel{3}=' naive trained'; condLabel{4} = ' HvV'; condLabel{5} = ' rand';
 
 rfAmpAll =[]; rfAll = []; trialDataAll=[]; xAll = []; yAll = []; data3xAll=[]; data2sfAll= [];
 n=0;
@@ -44,6 +44,7 @@ for i = 1:length(alluse);
     if strcmp(files(alluse(i)).task,'Naive') & files(alluse(i)).learningDay<5, allCond(cellrange) = naive; end;
     if strcmp(files(alluse(i)).task,'Naive') & files(alluse(i)).learningDay>=5, allCond(cellrange) = naiveTrained; end;
     if strcmp(files(alluse(i)).task,'HvV'), allCond(cellrange) = hvv; end;
+        if strcmp(files(alluse(i)).task, 'RandReward'), allCond(cellrange) = rand; end;
     
     
     sess(cellrange)=i;

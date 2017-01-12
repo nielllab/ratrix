@@ -77,20 +77,6 @@ if redo
         cnt=cnt+1;
     end
 
-%     avgtrialcycavgpre = nanmean(alltrialcycavgpre,9);%group mean frames by trial
-%     setrialcycavgpre = nanstd(alltrialcycavgpre,9)/sqrt(length(datafiles));%group standard error
-%     avgpeakspre = nanmean(allpeakspre,7);
-%     sepeakspre = nanstd(allpeakspre,7)/sqrt(length(datafiles));
-%     avgtracespre = nanmean(alltracespre,8);
-%     setracespre = nanstd(alltracespre,8)/sqrt(length(datafiles));
-%     avgmvpre = nanmean(allmvpre,2);
-%     semvpre = nanstd(allmvpre,2)/sqrt(length(datafiles));
-%     avggauParamspre = nanmean(allgauParamspre,6);
-%     segauParamspre = nanstd(allgauParamspre,6)/sqrt(length(datafiles));
-%     avghalfMaxpre = nanmean(allhalfMaxpre,5);
-%     sehalfMaxpre = nanstd(allhalfMaxpre,5)/sqrt(length(datafiles));
-%     avgareapeakspre = nanmean(allareapeakspre,5);
-%     seareapeakspre = nanstd(allareapeakspre,5)/sqrt(length(datafiles));
     cnt=1;
     alltrialcycavgpost = zeros(260,260,acqdurframes+acqdurframes/2,length(sfrange),length(contrastRange),length(radiusRange),2,numAni);
     allpeakspost = zeros(length(sfrange),length(contrastRange),length(radiusRange),2,length(areas),numAni);
@@ -117,38 +103,9 @@ if redo
         cnt=cnt+1;
     end
 
-%     avgtrialcycavgpost = nanmean(alltrialcycavgpost,9);%group mean frames by trial
-%     setrialcycavgpost = nanstd(alltrialcycavgpost,9)/sqrt(length(datafiles));%group standard error
-%     avgpeakspost = nanmean(allpeakspost,7);
-%     sepeakspost = nanstd(allpeakspost,7)/sqrt(length(datafiles));
-%     avgtracespost = nanmean(alltracespost,8);
-%     setracespost = nanstd(alltracespost,8)/sqrt(length(datafiles));
-%     avgmvpost = nanmean(allmvpost,2);
-%     semvpost = nanstd(allmvpost,2)/sqrt(length(datafiles));
-%     avggauParamspost = nanmean(allgauParamspost,6);
-%     segauParamspost = nanstd(allgauParamspost,6)/sqrt(length(datafiles));
-%     avghalfMaxpost = nanmean(allhalfMaxpost,5);
-%     sehalfMaxpost = nanstd(allhalfMaxpost,5)/sqrt(length(datafiles));
-%     avgareapeakspost = nanmean(allareapeakspost,5);
-%     seareapeakspost = nanstd(allareapeakspost,5)/sqrt(length(datafiles));
-
-%     for i = 1:length(sfrange)
-%         for j = 1:length(phaserange)
-%             for k = 1:length(contrastRange)
-%                 for l = 1:length(radiusRange)
-%                     for m = 1:2
-%                         for fr=1:size(avgtrialcycavgpre,3)
-%                             avgtrialcycavgpre(:,:,fr,i,j,k,l,m) = avgtrialcycavgpre(:,:,fr,i,j,k,l,m) - nanmean(avgtrialcycavgpre(:,:,1:acqdurframes/2,i,j,k,l,m),3);
-%                             avgtrialcycavgpost(:,:,fr,i,j,k,l,m) = avgtrialcycavgpost(:,:,fr,i,j,k,l,m) - nanmean(avgtrialcycavgpost(:,:,1:acqdurframes/2,i,j,k,l,m),3);
-%                         end
-%                     end
-%                 end
-%             end
-%         end
-%     end
     sprintf('saving...')
-    save(filename,'alltrialcycavgpre','allpeakspre','alltracespre','allgauParamspre','allhalfMaxpre','allareameanspre','allareapeakspre',...
-        'alltrialcycavgpost','allpeakspost','alltracespost','allgauParamspost','allhalfMaxpost','allareameanspost','allareapeakspost','-v7.3');
+    save(filename,'alltrialcycavgpre','allpeakspre','alltracespre','allgauParamspre','allhalfMaxpre','allareameanspre','allareapeakspre','allmvpre',...
+        'alltrialcycavgpost','allpeakspost','alltracespost','allgauParamspost','allhalfMaxpost','allareameanspost','allareapeakspost','allmvpost','-v7.3');
     sprintf('making plots')
     doSizeSelectPlots
 else

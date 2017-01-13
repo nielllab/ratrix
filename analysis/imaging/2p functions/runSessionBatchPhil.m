@@ -1,4 +1,5 @@
 close all
+clear all
 dbstop if error
 
 [f p] = uiputfile('*.pdf','pdf file');
@@ -258,6 +259,36 @@ tic
 % sizeSelect2pSession('G62Y3LT_001_006.sbx','sizeSession_POST_V2.mat',psfilename);
 % patchGrating2pSession('G62Y3LT_001_007.sbx','patchGratingsession_POST_V2.mat',psfilename);
 % topo2pSession('G62Y3LT_001_008.sbx','darkness_POST_V2.mat',psfilename);
+
+% %%112916
+% topo2pSession('G62BB10LT_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('G62BB10LT_001_002.sbx','topoYsession_V2.mat',psfilename);
+% topo2pSession('G62BB10LT_001_003.sbx','darkness_PRE_V2.mat',psfilename);
+% patchGrating2pSession('G62BB10LT_001_004.sbx','patchGratingsession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62BB10LT_001_005.sbx','sizeSession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62BB10LT_001_006.sbx','sizeSession_POST_V2.mat',psfilename);
+% patchGrating2pSession('G62BB10LT_001_007.sbx','patchGratingsession_POST_V2.mat',psfilename);
+% topo2pSession('G62BB10LT_001_008.sbx','darkness_POST_V2.mat',psfilename);
+
+% %%011217
+% topo2pSession('G62DD2LN_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('G62DD2LN_001_002.sbx','topoYsession_V2.mat',psfilename);
+% topo2pSession('G62DD2LN_001_003.sbx','darkness_PRE_V2.mat',psfilename);
+% patchGrating2pSession('G62DD2LN_001_004.sbx','patchGratingsession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62DD2LN_001_005.sbx','sizeSession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62DD2LN_001_006.sbx','sizeSession_POST_V2.mat',psfilename);
+% patchGrating2pSession('G62DD2LN_001_007.sbx','patchGratingsession_POST_V2.mat',psfilename);
+% topo2pSession('G62DD2LN_001_008.sbx','darkness_POST_V2.mat',psfilename);
+
+%%011217
+topo2pSession('G62GG10LT_001_001.sbx','topoXsession_V2.mat',psfilename);
+topo2pSession('G62GG10LT_001_002.sbx','topoYsession_V2.mat',psfilename);
+topo2pSession('G62GG10LT_001_003.sbx','darkness_PRE_V2.mat',psfilename);
+patchGrating2pSession('G62GG10LT_001_004.sbx','patchGratingsession_PRE_V2.mat',psfilename);
+sizeSelect2pSession('G62GG10LT_001_005.sbx','sizeSession_PRE_V2.mat',psfilename);
+sizeSelect2pSession('G62GG10LT_001_006.sbx','sizeSession_POST_V2.mat',psfilename);
+patchGrating2pSession('G62GG10LT_001_007.sbx','patchGratingsession_POST_V2.mat',psfilename);
+topo2pSession('G62GG10LT_001_008.sbx','darkness_POST_V2.mat',psfilename);
 
 toc
 

@@ -4,14 +4,33 @@
 % close all
 % dbstop if error
 
-%%%pull out preferences for each cell and use only those types of trials
 
 % pre = 1; %1 if pre, 0 if post, determines naming of output file
 exclude = 0; %0 removes trials above threshold, 1 clips them to the threshold
 dfWindow = 9:11;
 spWindow = 6:10;
+
+%%%movie code
 dt = 0.1;
 cyclelength = 1/0.1;
+xpos=0;sf=0; isi=0; duration=0; theta=0; phase=0; radius=0;
+moviefname = 'C:\sizeSelect2sf8sz26min.mat';
+load(moviefname)
+sizeVals = [0 5 10 20 30 40 50 60];
+contrastRange = unique(contrasts); sfrange = unique(sf); phaserange = unique(phase);
+for i = 1:length(contrastRange);contrastlist{i} = num2str(contrastRange(i));end
+for i=1:length(sizeVals); sizes{i} = num2str(sizeVals(i)); end
+thetamod = mod(theta,pi)-pi/8;
+thetaQuad = zeros(1,length(theta)); %break orientation into quadrants, 1=top,2=right,3=bot,4=left, offset pi/8 CCW
+thetaQuad(1,find(-pi/8<thetamod&thetamod<=pi/8))=1;
+thetaQuad(1,find(pi/8<=thetamod&thetamod<=3*pi/8))=2;
+thetaQuad(1,find(3*pi/8<=thetamod&thetamod<=5*pi/8))=3;
+thetaQuad(1,find(5*pi/8<=thetamod&thetamod<=7*pi/8))=4;
+thetaRange = unique(thetaQuad);
+ntrials = min(dt*length(dF)/(isi+duration),length(sf));
+onsets = dt + (0:ntrials-1)*(isi+duration);
+timepts = 1:(2*isi+duration)/dt;
+timepts = (timepts-1)*dt;
 
 for f=1:length(use)
     filename = files(use(f)).sizeanalysis
@@ -72,63 +91,13 @@ for f=1:length(use)
             print('-dpsc',psfile,'-append');
         end
 
-        % load size select points file
+        % load size select points file and stim object
         load(files(use(f)).sizepts);
-        % load(ptsfname,'meandfofInterp'); %load meandfofInterp
-        % % if ~exist('polarImg','var')
-        % %     [f p] = uigetfile('*.mat','session data');
-        % %     load(fullfile(p,f),'polarImg')
-        % % end
-        % 
-        % figure
-        % hold on
-        % plot(meandfofInterp-median(meandfofInterp),'g')
-        % plot(mean(dF,1)-median(mean(dF,1)),'b')
-        % legend('dF','dfofInterp')
-        % hold off
-        % if exist('psfile','var')
-        %     set(gcf, 'PaperPositionMode', 'auto');
-        %     print('-dpsc',psfile,'-append');
-        % end
-
-        xpos=0;
-        sf=0; isi=0; duration=0; theta=0; phase=0; radius=0;
-        % moviefname = 'C:\sizeSelect2sf5sz14min.mat';
-        moviefname = 'C:\sizeSelect2sf8sz26min.mat';
-        load(moviefname)
-
         load(files(use(f)).sizestimObj);
         spInterp = get2pSpeed(stimRec,dt,size(dF,2));
 
-        % mouseT = stimRec.ts- stimRec.ts(2)+0.0001; %%% first is sometimes off
-        %     figure
-        %     plot(diff(mouseT));
-        %     
-        %     figure
-        %     plot(mouseT - stimRec.f/60)
-        %     ylim([-0.5 0.5])
-        %     
-        %     dt = diff(mouseT);
-        %     use = [1<0; dt>0];
-        %     mouseT=mouseT(use);
-        %     
-        %     posx = cumsum(stimRec.pos(use,1)-900);
-        %     posy = cumsum(stimRec.pos(use,2)-500);
-        %    if isnan(frameT)
-        %        frameT = 0.1*(1:size(dfof_bg,3))';
-        %    end
-        %    frameT = frameT - frameT(1)+0.02;
-        %     vx = diff(interp1(mouseT,posx,frameT));
-        %     vy = diff(interp1(mouseT,posy,frameT));
-        %     vx(end+1)=0; vy(end+1)=0;
-        % 
-        % figure
-        % imagesc(dF,[0 1]); title('dF')
-
         spikeBinned = imresize(spikes,[size(spikes,1) size(spikes,2)/10]);
-        % figure
-        % imagesc(spikeBinned,[ 0 0.1]); title('spikes binned')
-
+        
         figure
         imagesc(dF(goodTopo,:),[0 1]); ylabel('cell #'); xlabel('frame'); title('dF');
         if exist('psfile','var')
@@ -141,52 +110,7 @@ for f=1:length(use)
             set(gcf, 'PaperPositionMode', 'auto');
             print('-dpsc',psfile,'-append');
         end
-
-
-        % usenonzero = find(mean(spikes,2)~=0); %%% gets rid of generic points that were not identified in this session
-        % usenonzero = 1:size(dF,1);
-        % cellCutoff = input('cell cutoff : ');
-        % usenonzero=usenonzero(usenonzero<cellCutoff);
-
-
-
-        % 
-        % 
-        % useOld = input('auto select based on generic pts (1) or manually select points (2) or read in prev points (3) : ')
-        % if useOld ==1
-        % 
-        %     getAnalysisPts;
-        %     
-        % elseif useOld==2
-        %     [pts dF neuropil ptsfname] = get2pPtsManual(dfofInterp,greenframe);
-        % else
-        %     ptsfname = uigetfile('*.mat','pts file');
-        %     load(ptsfname);
-        % end
-        % 
-        % % usenonzero = find(mean(dF,2)~=0); %%% gets rid of generic points that were not identified in this session
-        % usenonzero = 1:size(dF,1);
-        % 
-        % figure
-        % % imagesc(dF(usenonzero,:),[0 1]); ylabel('cell #'); xlabel('frame'); colormap jet
-        % imagesc(dF(usenonzero,:),[0 1]); ylabel('cell #'); xlabel('frame'); colormap jet
-
-
-        sizeVals = [0 5 10 20 30 40 50 60];
-        contrastRange = unique(contrasts); sfrange = unique(sf); phaserange = unique(phase);
-        for i = 1:length(contrastRange);contrastlist{i} = num2str(contrastRange(i));end
-        for i=1:length(sizeVals); sizes{i} = num2str(sizeVals(i)); end
-        thetamod = mod(theta,pi)-pi/8;
-        thetaQuad = zeros(1,length(theta)); %break orientation into quadrants, 1=top,2=right,3=bot,4=left, offset pi/8 CCW
-        thetaQuad(1,find(-pi/8<thetamod&thetamod<=pi/8))=1;
-        thetaQuad(1,find(pi/8<=thetamod&thetamod<=3*pi/8))=2;
-        thetaQuad(1,find(3*pi/8<=thetamod&thetamod<=5*pi/8))=3;
-        thetaQuad(1,find(5*pi/8<=thetamod&thetamod<=7*pi/8))=4;
-        thetaRange = unique(thetaQuad);
-        ntrials= min(dt*length(dF)/(isi+duration),length(sf));
-        onsets = dt + (0:ntrials-1)*(isi+duration);
-        timepts = 1:(2*isi+duration)/dt;
-        timepts = (timepts-1)*dt;
+        
         dFout = align2onsets(dF,onsets,dt,timepts);
         dFout = dFout(1:end-1,:,:); %%%extra cell at end for some reason
     %     dFout = dFout(goodTopo,:,:);

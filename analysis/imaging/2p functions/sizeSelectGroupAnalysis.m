@@ -17,21 +17,22 @@ group = input('which group? 1=saline naive, 2=saline trained, 3=DOI naive, 4=DOI
 redo = input('reanalyze individual animal data? 0=no, 1=yes: ')
 if group==1
     use = find(strcmp({files.inject},'saline')  & strcmp({files.training},'naive') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-    filename = 'SalineNaive2pSizeSelect'
+    grpfilename = 'SalineNaive2pSizeSelect'
 elseif group==2
     use = find(strcmp({files.inject},'saline')  & strcmp({files.training},'trained') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-    filename = 'SalineTrained2pSizeSelect'
+    grpfilename = 'SalineTrained2pSizeSelect'
 elseif group==3
     use = find(strcmp({files.inject},'doi')  & strcmp({files.training},'naive') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-    filename = 'SalineNaive2pSizeSelect'
+    grpfilename = 'SalineNaive2pSizeSelect'
 elseif group==4
     use = find(strcmp({files.inject},'doi')  & strcmp({files.training},'trained') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-    filename = 'SalineTrained2pSizeSelect'
+    grpfilename = 'SalineTrained2pSizeSelect'
 else
     sprintf('please restart and choose a number 1-4')
 end
 
 if redo==1
+    patchOri2pAnalysis
     sizeSelect2pAnalysis
 end
 % % 

@@ -1,4 +1,4 @@
-%%%This code calculates group averages from individual size select data
+4%%%This code calculates group averages from individual size select data
 %%%Then feeds the averages to doSizeSelectPlots for group plotting
 dbstop if error
 close all

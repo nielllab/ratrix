@@ -21,9 +21,9 @@ for i = 1:length(contrastRange);contrastlist{i} = num2str(contrastRange(i));end
 for i=1:length(sizeVals); sizes{i} = num2str(sizeVals(i)); end
 thetamod = mod(theta,pi)-pi/8;
 thetaQuad = zeros(1,length(theta)); %break orientation into quadrants, 1=top,2=right,3=bot,4=left, offset pi/8 CCW
-thetaQuad(1,find(-pi/8<thetamod&thetamod<=pi/8))=1;
-thetaQuad(1,find(pi/8<=thetamod&thetamod<=3*pi/8))=2;
-thetaQuad(1,find(3*pi/8<=thetamod&thetamod<=5*pi/8))=3;
+thetaQuad(1,find(-pi/8<=thetamod&thetamod<pi/8))=1;
+thetaQuad(1,find(pi/8<=thetamod&thetamod<3*pi/8))=2;
+thetaQuad(1,find(3*pi/8<=thetamod&thetamod<5*pi/8))=3;
 thetaQuad(1,find(5*pi/8<=thetamod&thetamod<=7*pi/8))=4;
 thetaRange = unique(thetaQuad);
 
@@ -251,13 +251,14 @@ for f=1:length(use)
 
         %%%get sf and ori preference find any cells that respond well to size 20deg
         maxrespdf = nan(size(dFout,1),2); maxrespsp = maxrespdf; bestdf = maxrespdf; bestsp = maxrespdf;
-        [maxrespdf(:,1) bestdf(:,1)] = max(squeeze(nanmean(nanmean(nanmean(dftuningall(:,dfWindow,:,:,:,end,4,1),2),4),5)),[],2);
-        [maxrespdf(:,2) bestdf(:,2)] = max(squeeze(nanmean(nanmean(nanmean(dftuningall(:,dfWindow,:,:,:,end,4,1),2),3),5)),[],2);
+        [maxrespdf(:,1) bestdf(:,1)] = max(squeeze(nanmean(nanmean(nanmean(dftuningall(:,dfWindow,:,:,:,end,4,1),2),4),5)),[],2); %best sf
+        [maxrespdf(:,2) bestdf(:,2)] = max(squeeze(nanmean(nanmean(nanmean(dftuningall(:,dfWindow,:,:,:,end,4,1),2),3),5)),[],2); %best ori
         [maxrespsp(:,1) bestsp(:,1)] = max(squeeze(nanmean(nanmean(nanmean(sptuningall(:,spWindow,:,:,:,end,4,1),2),4),5)),[],2);
         [maxrespsp(:,2) bestsp(:,2)] = max(squeeze(nanmean(nanmean(nanmean(sptuningall(:,spWindow,:,:,:,end,4,1),2),3),5)),[],2);
 
-        dftuning = dftuningall;%(goodSize,:,:,:,:,:,:); %%only cells with good topo
-        sptuning = sptuningall;%(goodSize,:,:,:,:,:,:); %%only cells with good topo
+        dftuning = dftuningall;%(goodTopo,:,:,:,:,:,:); %%only cells with good topo
+        sptuning = sptuningall;%(goodTopo,:,:,:,:,:,:); %%only cells with good topo
+%         rf = rf(goodTopo,:)
         allCells = ~sbc; %starting group of cells %topoxUse(1:end-1)&topoyUse(1:end-1)&
         allCellsind = find(allCells==1);
         
@@ -279,45 +280,62 @@ for f=1:length(use)
             print('-dpsc',psfile,'-append');
         end
 
-        %%%plot for each cell the responses at preferred sf/ori for each size,
-        %%%and ori tuning curve at best sf
-        for i = 1:length(allCellsind)
-            figure
-            for j = 1:length(sizes)
-                subplot(2,4,j)
-                hold on
-    %             plot(timepts,squeeze(dtuningall(i,:,bestsp(i,1),bestsp(i,2),:,end,j,1)))
-                plot(timepts,squeeze(sptuning(allCellsind(i),:,bestsp(allCellsind(i),1),bestsp(allCellsind(i),2),:,end,j,1)))
-                axis([-0.5 1.5 -0.2 1.5])
-            end
-            mtit(sprintf('Best sf/ori responses Cell #%s',num2str(allCellsind(i))))
-            if exist('psfile','var')
-                set(gcf, 'PaperPositionMode', 'auto');
-                print('-dpsc',psfile,'-append');
-            end
-            figure
-            hold on
-            subplot(2,1,1)
-            plot(1:length(thetaRange),squeeze(nanmean(nanmean(sptuning(allCellsind(i),spWindow,bestsp(allCellsind(i),1),:,:,end,6,1),5),2)),'k')
-            plot(1:length(thetaRange),squeeze(nanmean(nanmean(sptuning(allCellsind(i),spWindow,bestsp(allCellsind(i),1),:,:,end,6,2),5),2)),'r')
-            axis([0 5 -0.2 1.5])
-            subplot(2,1,2)
-            resp = squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(nanmean(sptuning(allCellsind(i),:,:,:,:,:,2:end,:),3),4),5),6),7),8));
-            plot(timepts,resp,'k-')
-            axis([-0.5 0.9 min(resp)+0.1*min(resp) max(resp)+0.1*max(resp)])
-            mtit(sprintf('Ori tuning Cell #%s',num2str(allCellsind(i))))
-            if exist('psfile','var')
-                set(gcf, 'PaperPositionMode', 'auto');
-                print('-dpsc',psfile,'-append');
-            end
-        end
+% %         %%%plot for each cell the responses at preferred sf/ori for each size,
+% %         %%%and ori tuning curve at best sf       
+% %         for i = 1:length(allCellsind)
+% %             figure
+% %             for j = 1:length(sizes)
+% %                 subplot(2,4,j)
+% %                 hold on
+% %                 plot(timepts,squeeze(dftuning(allCellsind(i),:,bestdf(allCellsind(i),1),bestdf(allCellsind(i),2),:,end,j,1)))
+% %                 plot(timepts,squeeze(dftuning(allCellsind(i),:,bestdf(allCellsind(i),1),bestdf(allCellsind(i),2),:,end,j,2)))
+% %                 axis([-0.5 1.5 -0.2 1.5])
+% %             end
+% %             mtit(sprintf('Best sf/ori responses Cell #%s',num2str(allCellsind(i))))
+% %             if exist('psfile','var')
+% %                 set(gcf, 'PaperPositionMode', 'auto');
+% %                 print('-dpsc',psfile,'-append');
+% %             end
+% %             figure
+% %             subplot(2,2,1)
+% %             hold on
+% %             plot(1:length(thetaRange),squeeze(nanmean(nanmean(dftuning(allCellsind(i),dfWindow,bestdf(allCellsind(i),1),:,:,end,4,1),5),2)),'k') %plot runing
+% %             plot(1:length(thetaRange),squeeze(nanmean(nanmean(dftuning(allCellsind(i),dfWindow,bestdf(allCellsind(i),1),:,:,end,4,2),5),2)),'r')
+% %             xlabel('Ori Quadrant')
+% %             ylabel('dfof')
+% % %             axis([0 5 -0.2 1.5])
+% %             subplot(2,2,2)
+% %             resp = squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(nanmean(dftuning(allCellsind(i),:,:,:,:,:,3:end,:),3),4),5),6),7),8)); %%try plotting all to see if beggining=end 0.5sec
+% %             plot(timepts,resp,'k-')
+% %             axis([-0.5 0.9 min(resp)+0.1*min(resp) max(resp)+0.1*max(resp)])
+% %             xlabel('time(s)')
+% %             ylabel('dfof')
+% %             subplot(2,2,3)
+% %             hold on
+% %             plot(1:length(thetaRange),squeeze(nanmean(nanmean(sptuning(allCellsind(i),spWindow,bestsp(allCellsind(i),1),:,:,end,4,1),5),2)),'k') %plot runing
+% %             plot(1:length(thetaRange),squeeze(nanmean(nanmean(sptuning(allCellsind(i),spWindow,bestsp(allCellsind(i),1),:,:,end,4,2),5),2)),'r')
+% %             xlabel('Ori Quadrant')
+% %             ylabel('spikes')
+% % %             axis([0 5 -0.2 1.5])
+% %             subplot(2,2,4)
+% %             resp = squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(nanmean(sptuning(allCellsind(i),:,:,:,:,:,3:end,:),3),4),5),6),7),8)); %%try plotting all to see if beggining=end 0.5sec
+% %             plot(timepts,resp,'k-')
+% %             axis([-0.5 0.9 min(resp)+0.1*min(resp) max(resp)+0.1*max(resp)])
+% %             xlabel('time(s)')
+% %             ylabel('spikes')
+% %             mtit(sprintf('Ori tuning Cell #%s',num2str(allCellsind(i))))
+% %             if exist('psfile','var')
+% %                 set(gcf, 'PaperPositionMode', 'auto');
+% %                 print('-dpsc',psfile,'-append');
+% %             end
+% %         end
 
         %%%goodTopo cell plotting
         figure
         subplot(1,2,1)
         hold on
         for i=1:length(contrastRange)
-            plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(dftuning(:,dfWindow,:,:,:,i,:,1),5),4),3),2),1))-squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(dftuning(:,5,:,:,:,i,:,1),5),4),3),2),1)));
+            plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(dftuning(goodTopo,dfWindow,:,:,:,i,:,1),5),4),3),2),1))-squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(dftuning(:,5,:,:,:,i,:,1),5),4),3),2),1)));
         end
         axis([0 length(radiusRange)+1 -0.01 0.05])
         set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
@@ -327,7 +345,7 @@ for f=1:length(use)
         subplot(1,2,2)
         hold on
         for i=1:length(contrastRange)
-            plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(dftuning(:,dfWindow,:,:,:,i,:,2),5),4),3),2),1))-squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(dftuning(:,5,:,:,:,i,:,2),5),4),3),2),1)));
+            plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(dftuning(goodTopo,dfWindow,:,:,:,i,:,2),5),4),3),2),1))-squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(dftuning(:,5,:,:,:,i,:,2),5),4),3),2),1)));
         end
         axis([0 length(radiusRange)+1 -0.01 0.05])
         set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
@@ -343,7 +361,7 @@ for f=1:length(use)
         subplot(1,2,1)
         hold on
         for i=1:length(contrastRange)
-            plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(sptuning(:,dfWindow,:,:,:,i,:,1),5),4),3),2),1))-squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(sptuning(:,5,:,:,:,i,:,1),5),4),3),2),1)));
+            plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(sptuning(goodTopo,dfWindow,:,:,:,i,:,1),5),4),3),2),1))-squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(sptuning(:,5,:,:,:,i,:,1),5),4),3),2),1)));
         end
         axis([0 length(radiusRange)+1 -0.01 0.2])
         set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
@@ -353,7 +371,7 @@ for f=1:length(use)
         subplot(1,2,2)
         hold on
         for i=1:length(contrastRange)
-            plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(sptuning(:,dfWindow,:,:,:,i,:,2),5),4),3),2),1))-squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(sptuning(:,5,:,:,:,i,:,2),5),4),3),2),1)));
+            plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(sptuning(goodTopo,dfWindow,:,:,:,i,:,2),5),4),3),2),1))-squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(sptuning(:,5,:,:,:,i,:,2),5),4),3),2),1)));
         end
         axis([0 length(radiusRange)+1 -0.01 0.2])
         set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
@@ -370,8 +388,8 @@ for f=1:length(use)
         clear spcourse
         for i = 1:length(radiusRange)
             for j=1:2
-                tcourse(:,:,i,j) = median(dFout2(:,:,find(radius==i&contrasts==contrastRange(end)&running==(j-1))),3);
-                spcourse(:,:,i,j) = mean(spikesOut2(:,:,find(radius==i&contrasts==contrastRange(end)&running==(j-1))),3); %spikes/size average
+                tcourse(:,:,i,j) = median(dFout2(goodTopo,:,find(radius==i&contrasts==contrastRange(end)&running==(j-1))),3);
+                spcourse(:,:,i,j) = mean(spikesOut2(goodTopo,:,find(radius==i&contrasts==contrastRange(end)&running==(j-1))),3); %spikes/size average
             end
         end
         stimper = size(tcourse,2)/3; %epoch duration
@@ -396,7 +414,7 @@ for f=1:length(use)
         respPos = (nanmean(nanmean(tcourse(:,stimper+1:2*stimper,3,:),2),4)-nanmean(nanmean(tcourse(:,1:stimper,3,:),2),4)) > 0;
         tcourse = tcourse(respPos,:,:,:);
         spcourse = spcourse(respPos,:,:,:);
-        dFout = dFout(respPos,:,:);
+%         dFout = dFout(respPos,:,:);
 
         figure
         for i = 1:size(tcourse,3)
@@ -404,7 +422,7 @@ for f=1:length(use)
             hold on
             plot(timepts,squeeze(nanmean(tcourse(:,:,i,1),1)),'k')
             plot(timepts,squeeze(nanmean(tcourse(:,:,i,2),1)),'r')
-            axis([timepts(1) timepts(end) -0.01 0.05])
+            axis([timepts(1) timepts(end) -0.05 0.2])
         end
         mtit('Mean dfof per size')
         if exist('psfile','var')
@@ -415,7 +433,7 @@ for f=1:length(use)
         hold on
         plot(timepts,squeeze(nanmean(nanmean(tcourse(:,:,:,1),1),3)),'k')
         plot(timepts,squeeze(nanmean(nanmean(tcourse(:,:,:,2),1),3)),'r')
-        axis([timepts(1) timepts(end) -0.01 0.05])
+        axis([timepts(1) timepts(end) -0.05 0.2])
         legend('stationary','running')
         title('Total mean dfof')
         xlabel('Time (s)')
@@ -471,7 +489,7 @@ for f=1:length(use)
         legend('stationary','running')
         xlabel('Stim Size (deg)')
         ylabel('dfof')
-        axis([0 length(radiusRange)+1 -0.01 0.1])
+        axis([0 length(radiusRange)+1 -0.05 0.2])
         set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
         title('Peak response');
         if exist('psfile','var')
@@ -485,13 +503,13 @@ for f=1:length(use)
         legend(sizes)
         xlabel('Time (s)')
         ylabel('stationary dfof')
-        axis([timepts(1) timepts(end) -0.01 0.1])
+        axis([timepts(1) timepts(end) -0.05 0.2])
         subplot(1,2,2)
         plot(timepts,squeeze(nanmean(tcourse(:,:,:,2),1)))
         legend(sizes)
         xlabel('Time (s)')
         ylabel('running dfof')
-        axis([timepts(1) timepts(end) -0.01 0.1])
+        axis([timepts(1) timepts(end) -0.05 0.2])
         if exist('psfile','var')
             set(gcf, 'PaperPositionMode', 'auto');
             print('-dpsc',psfile,'-append');
@@ -507,7 +525,7 @@ for f=1:length(use)
         legend('stationary','running')
         xlabel('Stim Size (deg)')
         ylabel('dfof')
-        axis([0 length(radiusRange)+1 0 0.1])
+        axis([0 length(radiusRange)+1 -0.1 0.2])
         set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
         title('Group avg peak resp');
         if exist('psfile','var')
@@ -523,7 +541,7 @@ for f=1:length(use)
             hold on
             plot(timepts,squeeze(nanmean(spcourse(:,:,i,1),1)),'k')
             plot(timepts,squeeze(nanmean(spcourse(:,:,i,2),1)),'r')
-            axis([timepts(1) timepts(end) -0.05 0.1])
+            axis([timepts(1) timepts(end) -0.1 0.5])
         end
         mtit('Mean spikes per size')
         if exist('psfile','var')
@@ -535,7 +553,7 @@ for f=1:length(use)
         hold on
         plot(timepts,squeeze(nanmean(nanmean(spcourse(:,:,:,1),1),3)),'k')
         plot(timepts,squeeze(nanmean(nanmean(spcourse(:,:,:,2),1),3)),'r')
-        axis([timepts(1) timepts(end) -0.01 0.1])
+        axis([timepts(1) timepts(end) -0.1 0.5])
         legend('stationary','running')
         xlabel('Time (s)')
         ylabel('Total mean spikes')
@@ -607,8 +625,84 @@ for f=1:length(use)
             print('-dpsc',psfile,'-append');
         end
 
+        %%%use output from gratings analysis to pick cells
+        gratfile = files(use(f)).gratinganalysis;
+        load(gratfile,'prefthetaQuad','bestsftf','respcells')
+        bestsftf(find(bestsftf(:,1)==1),1)=2; %%set 0.01 pref to 0.04
+        
+        sizecurve = nan(size(dFout,1),length(radiusRange),2);
+        for i =1:size(dFout,1)
+            sizecurve(i,:,1) = squeeze(nanmean(nanmean(dftuning(i,dfWindow,bestsftf(i,1),prefthetaQuad(i),:,end,:,1),2),5));
+            sizecurve(i,:,2) = squeeze(nanmean(nanmean(dftuning(i,dfWindow,bestsftf(i,1),prefthetaQuad(i),:,end,:,2),2),5));
+        end
+        figure
+        hold on
+        errorbar(1:length(radiusRange),nanmean(sizecurve(respcells,:,1)),'k')
+        errorbar(1:length(radiusRange),nanmean(sizecurve(respcells,:,2)),'r')
+        legend('stationary','running')
+        xlabel('Stim Size (deg)')
+        ylabel('dfof')
+        axis([0 length(radiusRange)+1 -0.1 0.2])
+        set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
+        
+        
+        figure
+        subplot(1,2,1)
+        hold on
+        for i=1:length(contrastRange)
+            plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(dftuning(respcells,dfWindow,:,:,:,i,:,1),5),4),3),2),1))-squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(dftuning(:,5,:,:,:,i,:,1),5),4),3),2),1)));
+        end
+        axis([0 length(radiusRange)+1 -0.01 0.05])
+        set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
+        legend(contrastlist)
+        xlabel('Stim Size (deg)')
+        ylabel('peak stationary dfof')
+        subplot(1,2,2)
+        hold on
+        for i=1:length(contrastRange)
+            plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(dftuning(respcells,dfWindow,:,:,:,i,:,2),5),4),3),2),1))-squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(dftuning(:,5,:,:,:,i,:,2),5),4),3),2),1)));
+        end
+        axis([0 length(radiusRange)+1 -0.01 0.05])
+        set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
+        legend(contrastlist)
+        xlabel('Stim Size (deg)')
+        ylabel('peak running dfof')
+        if exist('psfile','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfile,'-append');
+        end
+
+        figure
+        subplot(1,2,1)
+        hold on
+        for i=1:length(contrastRange)
+            plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(sptuning(respcells,dfWindow,:,:,:,i,:,1),5),4),3),2),1))-squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(sptuning(:,5,:,:,:,i,:,1),5),4),3),2),1)));
+        end
+        axis([0 length(radiusRange)+1 -0.01 0.2])
+        set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
+        legend(contrastlist)
+        xlabel('Stim Size (deg)')
+        ylabel('peak stationary spikes')
+        subplot(1,2,2)
+        hold on
+        for i=1:length(contrastRange)
+            plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(sptuning(respcells,dfWindow,:,:,:,i,:,2),5),4),3),2),1))-squeeze(nanmean(nanmean(nanmean(nanmean(nanmean(sptuning(:,5,:,:,:,i,:,2),5),4),3),2),1)));
+        end
+        axis([0 length(radiusRange)+1 -0.01 0.2])
+        set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
+        legend(contrastlist)
+        xlabel('Stim Size (deg)')
+        ylabel('peak running spikes')
+        if exist('psfile','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfile,'-append');
+        end
+        
+        
+        
+        
         %%%saving
-        save(filename,'dftuning','sptuning','cellCutoff')
+        save(filename,'dftuning','sptuning','rf','goodTopo')
 
         try
             dos(['ps2pdf ' psfile ' "' [filename '.pdf'] '"'] )

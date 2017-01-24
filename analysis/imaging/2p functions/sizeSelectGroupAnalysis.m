@@ -14,7 +14,9 @@ if exist(psfile,'file')==2;delete(psfile);end
 cd(path);
 
 group = input('which group? 1=saline naive, 2=saline trained, 3=DOI naive, 4=DOI trained: ')
-redo = input('reanalyze individual animal data? 0=no, 1=yes: ')
+redoani = input('reanalyze individual animal data? 0=no, 1=yes: ')
+redogrp = input('reanalyze group data? 0=no, 1=yes: ')
+
 if group==1
     use = find(strcmp({files.inject},'saline')  & strcmp({files.training},'naive') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
     grpfilename = 'SalineNaive2pSizeSelect'
@@ -23,18 +25,92 @@ elseif group==2
     grpfilename = 'SalineTrained2pSizeSelect'
 elseif group==3
     use = find(strcmp({files.inject},'doi')  & strcmp({files.training},'naive') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-    grpfilename = 'SalineNaive2pSizeSelect'
+    grpfilename = 'DOINaive2pSizeSelect'
 elseif group==4
     use = find(strcmp({files.inject},'doi')  & strcmp({files.training},'trained') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-    grpfilename = 'SalineTrained2pSizeSelect'
+    grpfilename = 'DOITrained2pSizeSelect'
 else
     sprintf('please restart and choose a number 1-4')
 end
 
-if redo==1
+if redoani==1
     patchOri2pAnalysis
     sizeSelect2pAnalysis
 end
+% 
+% numAni = length(use)/2;
+% dfWindow = 9:11;
+% spWindow = 6:10;
+% dt = 0.1;
+% cyclelength = 1/0.1;
+% respthresh=0.025;
+% dpix = 0.8022; centrad = 10; ycent = 72/2; xcent = 128/2; %%deg/pix, radius of response size cutoff, x and y screen centers
+% moviefname = 'C:\sizeSelect2sf8sz26min.mat';
+% load(moviefname)
+% sizeVals = [0 5 10 20 30 40 50 60];
+% contrastRange = unique(contrasts); sfrange = unique(sf); phaserange = unique(phase);
+% for i = 1:length(contrastRange);contrastlist{i} = num2str(contrastRange(i));end
+% for i=1:length(sizeVals); sizes{i} = num2str(sizeVals(i)); end
+% thetamod = mod(theta,pi)-pi/8;
+% thetaQuad = zeros(1,length(theta)); %break orientation into quadrants, 1=top,2=right,3=bot,4=left, offset pi/8 CCW
+% thetaQuad(1,find(-pi/8<thetamod&thetamod<=pi/8))=1;
+% thetaQuad(1,find(pi/8<=thetamod&thetamod<=3*pi/8))=2;
+% thetaQuad(1,find(3*pi/8<=thetamod&thetamod<=5*pi/8))=3;
+% thetaQuad(1,find(5*pi/8<=thetamod&thetamod<=7*pi/8))=4;
+% thetaRange = unique(thetaQuad);
+% 
+% if redogrp
+%     cnt=1;
+%     cellcnt=1;
+%     grpdftuning=nan(10000,length(timepts),length(sfrange),length(thetarange),length(phaserange),length(contrastrange),length(radiusRange),2,2);
+%     grpdftuning=nan(10000,length(timepts),length(sfrange),length(thetarange),length(phaserange),length(contrastrange),length(radiusRange),2,2);
+%     grprf=nan(10000,2);
+%     goodTopo=nan(10000);
+%     session = nan(10000);%%%make an array for animal #/session
+%     for i= 1:length(use)
+%         sprintf('loading %s out of %s files',num2str(cnt),num2str(length(use)))
+%         aniFile = files(use(i)).sizeanalysis
+%         load(aniFile,'dftuning','sptuning',rf)
+%         evod = mod(i,2);
+%         if evod
+%             evod=1;
+%             grprf(cellcnt:cellcnt+size(rf,1)) = rf;
+%             grpgoodTopo(cellcnt:cellcnt+size(rf,1)) = goodTopo;
+%             session(cellcnt:cellcnt+size(rf,1)) = i/2;
+%         else
+%             evod=2;
+%         end
+%         grpdftuning(cellcnt:cellcnt+size(dftuning,1),:,:,:,:,:,:,:,evod) = dftuning;
+%         grpsptuning(cellcnt:cellcnt+size(sptuning,1),:,:,:,:,:,:,:,evod) = sptuning;
+%         grprf(cellcnt:cellcnt+size(rf,1)) = rf;
+%         cnt=cnt+1;
+%         cellcnt=cellcnt+size(dftuning,1)+1;
+%     end
+% else
+%     sprintf('loading data')
+%     load(grpfilename)
+% end
+% 
+% 
+% 
+% figure
+% hold on
+% for i=1:length(sizes)
+%     subplot(2,4,i)
+%     respCells = find(allCells&squeeze(nanmean(nanmean(nanmean(nanmean(grptuning(:,dfWindow,:,:,:,end,i,1,1),2),3),4),5))>respthresh); %%%respCells = respCells(respCells<=cellCutoff);
+%     hold on
+%     plot(rf(:,2),rf(:,1),'.','color',[0.5 0.5 0.5]); %%% the rfAmp criterion wasn't being applied here
+%     plot(rf(:,2),rf(:,1),'b.');
+%     circle(ycent,xcent,centrad/dpix)
+%     axis equal;
+%     axis([0 72 0 128]);
+% end
+% title('Responsive cells/size')
+% if exist('psfile','var')
+%     set(gcf, 'PaperPositionMode', 'auto');
+%     print('-dpsc',psfile,'-append');
+% end
+
 % % 
 % % numAni = length(use);
 % % 

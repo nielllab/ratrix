@@ -29,7 +29,7 @@ thetaRange = unique(thetaQuad);
 
 for f=1:length(use)
     filename = files(use(f)).sizeanalysis
-    if exist([filename '.mat'])==0
+    if exist(filename)==0
         files(use(f)).subj
         psfile = 'c:\tempPhil2p.ps';
         if exist(psfile,'file')==2;delete(psfile);end
@@ -628,10 +628,11 @@ for f=1:length(use)
         %%%use output from gratings analysis to pick cells
         gratfile = files(use(f)).gratinganalysis;
         load(gratfile,'prefthetaQuad','bestsftf','respcells')
-        bestsftf(find(bestsftf(:,1)==1),1)=2; %%set 0.01 pref to 0.04
+        bestsftf(find(bestsftf(:,1)==2),1)=1; %%combine 0.01 and 0.04 pref, set to index 1
+        bestsftf(find(bestsftf(:,1)==3),1)=2; %%0.16, change to index 2
         
         sizecurve = nan(size(dFout,1),length(radiusRange),2);
-        for i =1:size(dFout,1)
+        for i=1:size(dFout,1)
             sizecurve(i,:,1) = squeeze(nanmean(nanmean(dftuning(i,dfWindow,bestsftf(i,1),prefthetaQuad(i),:,end,:,1),2),5));
             sizecurve(i,:,2) = squeeze(nanmean(nanmean(dftuning(i,dfWindow,bestsftf(i,1),prefthetaQuad(i),:,end,:,2),2),5));
         end

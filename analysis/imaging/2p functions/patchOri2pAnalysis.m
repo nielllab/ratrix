@@ -24,7 +24,7 @@ orirange = unique(thetaQuad);
 %%for loop
 for f=1:length(use)
     filename = files(use(f)).gratinganalysis
-    if exist([filename '.mat'])==0
+    if exist(filename)==0
         files(use(f)).subj
         psfile = 'c:\tempPhil2p.ps';
         if exist(psfile,'file')==2;delete(psfile);end

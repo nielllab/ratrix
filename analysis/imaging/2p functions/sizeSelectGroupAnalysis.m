@@ -70,7 +70,7 @@ end
 %     for i= 1:length(use)
 %         sprintf('loading %s out of %s files',num2str(cnt),num2str(length(use)))
 %         aniFile = files(use(i)).sizeanalysis
-%         load(aniFile,'dftuning','sptuning',rf)
+%         load(aniFile,'dftuning','sptuning','rf','allgoodTopo','goodTopo','respcells','sizecurve')
 %         evod = mod(i,2);
 %         if evod
 %             evod=1;

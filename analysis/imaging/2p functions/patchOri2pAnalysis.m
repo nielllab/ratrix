@@ -30,7 +30,7 @@ for f=1:length(use)
 %         psfile = 'c:\tempPhil2p.ps';
 %         if exist(psfile,'file')==2;delete(psfile);end
         
-        respthresh=0.025; %%%set topox/topoy response threshold
+        respthresh=0.01; %%%set topox/topoy response threshold %%change to match sizeSelect
         clear xph yph phaseVal rfCyc cycAvg rfAmp rf
         load(files(use(f)).topoxpts);
         %%% extract phase and amplitude from complex fourier varlue at 0.1Hz
@@ -170,10 +170,18 @@ for f=1:length(use)
 %             print('-dpsc',psfile,'-append');
 %         end
         
+        %%%average response for every cell to their best stim params
+        dfgrat = nan(size(dFout,1),size(dFout,2),2);
+        for i = 1:size(dFout,1)
+            [respmax respmaxi] = max(dfori(i,:));
+            dfgrat(i,:,1) = squeeze(dfgratuning(i,:,bestsftf(i,1),bestsftf(i,2),respmaxi,1));
+            dfgrat(i,:,2) = squeeze(dfgratuning(i,:,bestsftf(i,1),bestsftf(i,2),respmaxi,2));
+        end        
+
         %%%pick a threshold here to use for responsive cells, plot all of
         %%%their tuning properties
         respcells = find(max(dfori,[],2)>=gratthreshlist(3)); respcells=intersect(respcells(respcells<cellCutoff),allgoodTopo);
-%         for i=1:length(respcells)
+        for i=1:length(respcells)
 %             figure
 %             subplot(2,2,1)
 %             curv = dfori(respcells(i),:);
@@ -191,16 +199,12 @@ for f=1:length(use)
 %             set(gca,'xtick',[1 2],'xticklabel',{'OSI','DSI'})
 %             axis square
 %             subplot(2,2,4)
-%             [mini ind] = min(abs(dirrange-prefdir(respcells(i))));
 %             hold on
-% %             resp = squeeze(dfgratuning(respcells(i),:,bestdf(respcells(i),1),bestdf(respcells(i),2),ind,1));
-%             [respmax respmaxi] = max(dfori(respcells(i),:));
-%             resp = squeeze(dfgratuning(respcells(i),:,bestsftf(respcells(i),1),bestsftf(respcells(i),2),respmaxi,1));
-%             plot(timepts,resp,'k')
-% %             plot(timepts,respmaxs,'r')
+%             plot(timepts,dfgrat(i,:,1),'k')
+%             plot(timepts,dfgrat(i,:,2),'r')
 %             xlabel('Time(s)')
 %             ylabel('dfof')
-%             axis([timepts(1) timepts(end) min(resp)+0.1*min(resp) max(resp)+0.1*max(resp)])
+%             axis([timepts(1) timepts(end) min(min(dfgrat(i,:,:)))+0.01 max(max(dfgrat(i,:,:)))+0.01])
 %             axis square
 %             set(gca,'LooseInset',get(gca,'TightInset'))
 %             mtit(sprintf('Cell #%d tuning',respcells(i)))
@@ -208,10 +212,10 @@ for f=1:length(use)
 %                 set(gcf, 'PaperPositionMode', 'auto');
 %                 print('-dpsc',psfile,'-append');
 %             end
-%         end
+        end
         
         %%%save out cell preferences for analysis with size select stim
-        save(filename,'dirrange','dfori','dfgratuning','spgratuning','osi','dsi','prefori','prefdir','bestsftf','preftheta','prefthetaQuad','respcells')
+        save(filename,'dfgrat','dirrange','dfori','osi','dsi','prefori','prefdir','bestsftf','preftheta','prefthetaQuad','respcells')
 
 %         try
 %             dos(['ps2pdf ' psfile ' "' [filename '.pdf'] '"'] )

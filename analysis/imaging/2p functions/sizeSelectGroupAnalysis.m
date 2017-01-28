@@ -33,63 +33,77 @@ else
     sprintf('please restart and choose a number 1-4')
 end
 
+if isempty(use)
+    sprintf('No animals in this group')
+    return
+end
+
 if redoani==1
     patchOri2pAnalysis
     sizeSelect2pAnalysis
 end
-% 
-% numAni = length(use)/2;
-% dfWindow = 9:11;
-% spWindow = 6:10;
-% dt = 0.1;
-% cyclelength = 1/0.1;
-% respthresh=0.025;
-% dpix = 0.8022; centrad = 10; ycent = 72/2; xcent = 128/2; %%deg/pix, radius of response size cutoff, x and y screen centers
-% moviefname = 'C:\sizeSelect2sf8sz26min.mat';
-% load(moviefname)
-% sizeVals = [0 5 10 20 30 40 50 60];
-% contrastRange = unique(contrasts); sfrange = unique(sf); phaserange = unique(phase);
-% for i = 1:length(contrastRange);contrastlist{i} = num2str(contrastRange(i));end
-% for i=1:length(sizeVals); sizes{i} = num2str(sizeVals(i)); end
-% thetamod = mod(theta,pi)-pi/8;
-% thetaQuad = zeros(1,length(theta)); %break orientation into quadrants, 1=top,2=right,3=bot,4=left, offset pi/8 CCW
-% thetaQuad(1,find(-pi/8<thetamod&thetamod<=pi/8))=1;
-% thetaQuad(1,find(pi/8<=thetamod&thetamod<=3*pi/8))=2;
-% thetaQuad(1,find(3*pi/8<=thetamod&thetamod<=5*pi/8))=3;
-% thetaQuad(1,find(5*pi/8<=thetamod&thetamod<=7*pi/8))=4;
-% thetaRange = unique(thetaQuad);
-% 
-% if redogrp
-%     cnt=1;
-%     cellcnt=1;
-%     grpdftuning=nan(10000,length(timepts),length(sfrange),length(thetarange),length(phaserange),length(contrastrange),length(radiusRange),2,2);
-%     grpdftuning=nan(10000,length(timepts),length(sfrange),length(thetarange),length(phaserange),length(contrastrange),length(radiusRange),2,2);
-%     grprf=nan(10000,2);
-%     goodTopo=nan(10000);
-%     session = nan(10000);%%%make an array for animal #/session
-%     for i= 1:length(use)
-%         sprintf('loading %s out of %s files',num2str(cnt),num2str(length(use)))
-%         aniFile = files(use(i)).sizeanalysis
-%         load(aniFile,'dftuning','sptuning','rf','allgoodTopo','goodTopo','respcells','sizecurve')
-%         evod = mod(i,2);
-%         if evod
-%             evod=1;
-%             grprf(cellcnt:cellcnt+size(rf,1)) = rf;
-%             grpgoodTopo(cellcnt:cellcnt+size(rf,1)) = goodTopo;
-%             session(cellcnt:cellcnt+size(rf,1)) = i/2;
-%         else
-%             evod=2;
-%         end
-%         grpdftuning(cellcnt:cellcnt+size(dftuning,1),:,:,:,:,:,:,:,evod) = dftuning;
-%         grpsptuning(cellcnt:cellcnt+size(sptuning,1),:,:,:,:,:,:,:,evod) = sptuning;
-%         grprf(cellcnt:cellcnt+size(rf,1)) = rf;
-%         cnt=cnt+1;
-%         cellcnt=cellcnt+size(dftuning,1)+1;
-%     end
-% else
-%     sprintf('loading data')
-%     load(grpfilename)
-% end
+
+numAni = length(use)/2;
+dfWindow = 9:11;
+spWindow = 6:10;
+dt = 0.1;
+cyclelength = 1/0.1;
+respthresh=0.025;
+dpix = 0.8022; centrad = 10; ycent = 72/2; xcent = 128/2; %%deg/pix, radius of response size cutoff, x and y screen centers
+moviefname = 'C:\sizeSelect2sf8sz26min.mat';
+load(moviefname)
+sizeVals = [0 5 10 20 30 40 50 60];
+contrastRange = unique(contrasts); sfrange = unique(sf); phaserange = unique(phase);
+for i = 1:length(contrastRange);contrastlist{i} = num2str(contrastRange(i));end
+for i=1:length(sizeVals); sizes{i} = num2str(sizeVals(i)); end
+thetamod = mod(theta,pi)-pi/8;
+thetaQuad = zeros(1,length(theta)); %break orientation into quadrants, 1=top,2=right,3=bot,4=left, offset pi/8 CCW
+thetaQuad(1,find(-pi/8<thetamod&thetamod<=pi/8))=1;
+thetaQuad(1,find(pi/8<=thetamod&thetamod<=3*pi/8))=2;
+thetaQuad(1,find(3*pi/8<=thetamod&thetamod<=5*pi/8))=3;
+thetaQuad(1,find(5*pi/8<=thetamod&thetamod<=7*pi/8))=4;
+thetaRange = unique(thetaQuad);
+dirrange = 0:pi/6:2*pi-pi/6;
+
+%%%load individual animal data intro group arrays for analysis/plotting
+if redogrp
+    cnt=1;
+    cellcnt=1;
+    grprf=nan(10000,2);
+    session = nan(10000);%%%make an array for animal #/session
+    grpdfsize = nan(10000,15,length(contrastlist),length(sizes),2,2);
+    grpdfgrat = nan(10000,15,2,2);
+    grposi = nan(10000);
+    grpdsi = nan(10000);
+    grpdfori = nan(10000,12,2);
+    for i= 1:2:length(use)
+        sprintf('loading %s out of %s files',num2str(i),num2str(length(use)))
+        aniFile = files(use(i)).sizeanalysis
+        load(aniFile,'dfgrat','dfsize','userf','sizecurve','useosi','usedsi','usedfori')
+        expcells = size(userf,1)-1;
+        grprf(cellcnt:cellcnt+expcells,:) = userf;
+        session(cellcnt:cellcnt+expcells) = i/2;
+        grpdfsize(cellcnt:cellcnt+expcells,:,:,:,:,1) = dfsize; %cell#,t,contr,size,run,pre/post
+        grpdfgrat(cellcnt:cellcnt+expcells,:,:,1) = dfgrat; %cell#,t,run,pre/post
+        grposi(cellcnt:cellcnt+expcells,1) = useosi; %osi,pre/post
+        grpdsi(cellcnt:cellcnt+expcells,1) = usedsi; %dsi,pre/post
+        grpdfori(cellcnt:cellcnt+expcells,:,1) = usedfori; %cell#,12 dirs, pre/post
+        sprintf('loading %s out of %s files',num2str(i+1),num2str(length(use)))
+        aniFile = files(use(i+1)).sizeanalysis
+        load(aniFile,'dfgrat','dfsize','userf','sizecurve','useosi','usedsi','usedfori')
+        grpdfsize(cellcnt:cellcnt+expcells,:,:,:,:,2) = dfsize; %cell#,t,contr,size,run,pre/post
+        grpdfgrat(cellcnt:cellcnt+expcells,:,:,2) = dfgrat; %cell#,t,run,pre/post
+        grposi(cellcnt:cellcnt+expcells,2) = useosi; %osi,pre/post
+        grpdsi(cellcnt:cellcnt+expcells,2) = usedsi; %dsi,pre/post
+        grpdfori(cellcnt:cellcnt+expcells,:,2) = usedfori; %cell#,12 dirs, pre/post
+        cellcnt=cellcnt+expcells;
+    end
+else
+    sprintf('loading data')
+    load(grpfilename)
+end
+
+
 % 
 % 
 % 

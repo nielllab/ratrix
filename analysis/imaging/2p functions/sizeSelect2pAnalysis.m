@@ -169,16 +169,16 @@ for f=1:length(use)
         else
             gratfile = files(use(f-1)).gratinganalysis;
         end
-        load(gratfile,'dirrange','prefdir','prefthetaQuad','bestsftf','respcells','dfgratuning','dfori','osi','dsi')
+        load(gratfile,'dfgrat','dirrange','prefdir','prefthetaQuad','bestsftf','respcells','dfori','osi','dsi')
         
         %%%find usable cells, change arrays to match/decrease file size
         usecells = intersect(goodTopo,respcells); %%%use only cells in center w/good resp to gratings
         sprintf('%d cells with good topo in center & good gratings response',length(usecells))
-        dfgratuning = dfgratuning(usecells,:,:,:,:,:);
         usedfori = dfori(usecells,:);
-        useosi=osi(usecells); usedsi=dsi(usecells); useprefdir=prefdir(usecells);
+        useosi=osi(usecells); usedsi=dsi(usecells);
         usebestsftf = bestsftf(usecells,:); useprefthetaQuad = prefthetaQuad(usecells);
         userf = rf(usecells,:);
+        dfgrat = dfgrat(usecells,:,:);
         
         %%%the two stimuli are different so adjust cell preferences to try
         %%%to match them from gratings->size select
@@ -231,7 +231,9 @@ for f=1:length(use)
         end
 
         %%%plot individual cell data
-        sizecurve = nan(length(usecells),length(sizeVals),length(contrastlist),2);
+%         sitcolor = [0.6 0.6 0.6;0.8 0.8 0.8;1 1 1];
+%         runcolor = [0.6 0 0;0.8 0 0;1 0 0];
+        dfsize = nan(length(usecells),size(dFout,2),length(contrastlist),length(sizeVals),2);
         for i=1:length(usecells)
             figure
             
@@ -261,31 +263,31 @@ for f=1:length(use)
             
             %%%avg resp to best grating stim
             subplot(2,3,4)
-            [mini ind] = min(abs(dirrange-useprefdir(i)));
             hold on
-%             resp = squeeze(dftuning(respcells(i),:,bestdf(respcells(i),1),bestdf(respcells(i),2),ind,1));
-            [respmax respmaxi] = max(usedfori(i,:));
-            resp = squeeze(dfgratuning(i,:,usebestsftf(i,1),usebestsftf(i,2),respmaxi,1));
-            plot(timepts,resp,'k')
-%             plot(timepts,respmaxs,'r')
+            plot(timepts,dfgrat(i,:,1),'k')
+            plot(timepts,dfgrat(i,:,2),'r')
             xlabel('Time(s)')
             ylabel('best grat dfof')
-            axis([timepts(1) timepts(end) min(resp)+0.1*min(resp) max(resp)+0.1*max(resp)])
+            axis([timepts(1) timepts(end) min(min(dfgrat(i,:,:)))+0.01 max(max(dfgrat(i,:,:)))+0.01])
             axis square
             set(gca,'LooseInset',get(gca,'TightInset'))
             
             %%%size curve
             subplot(2,3,5)
             for j = 1:length(contrastlist)
-                sizecurve(i,:,j,1) = squeeze(nanmean(nanmean(dftuning(i,dfWindow,usebestsftf(i,1),useprefthetaQuad(i),:,j,:,1),2),5));
-                sizecurve(i,:,j,2) = squeeze(nanmean(nanmean(dftuning(i,dfWindow,usebestsftf(i,1),useprefthetaQuad(i),:,j,:,2),2),5));
+                for k = 1:length(sizes)
+                    dfsize(i,:,j,k,1) = squeeze(nanmean(dftuning(i,:,usebestsftf(i,1),useprefthetaQuad(i),:,j,k,1),5));
+                    dfsize(i,:,j,k,2) = squeeze(nanmean(dftuning(i,:,usebestsftf(i,1),useprefthetaQuad(i),:,j,k,2),5));
+                end
             end
             hold on
-            plot(1:length(radiusRange),sizecurve(i,:,1,1),'k-')
-            plot(1:length(radiusRange),sizecurve(i,:,1,2),'r-')
+            splotsit = squeeze(nanmean(dfsize(i,dfWindow,end,:,1),2));
+            splotrun = squeeze(nanmean(dfsize(i,dfWindow,end,:,2),2));
+            plot(1:length(radiusRange),splotsit,'k-o','Markersize',5)
+            plot(1:length(radiusRange),splotrun,'r-o','Markersize',5)
             xlabel('Stim Size (deg)')
             ylabel('dfof')
-            axis([0 length(radiusRange)+1 min([sizecurve(i,:,1) sizecurve(i,:,2)])-0.01 max([sizecurve(i,:,1) sizecurve(i,:,2)]+0.01)])
+            axis([0 length(radiusRange)+1 min(min([splotsit splotrun]))-0.01 max(max([splotsit splotrun]))+0.01])
             set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
             axis square
             set(gca,'LooseInset',get(gca,'TightInset'))
@@ -293,12 +295,16 @@ for f=1:length(use)
             %%%contrast function
             subplot(2,3,6)
             hold on
-            plot(1:length(contrastlist),squeeze(sizecurve(i,[2 5 8],:,1)),'-')
-            set(gca,'ColorOrderIndex',1)
-            plot(1:length(contrastlist),squeeze(sizecurve(i,[2 5 8],:,2)),':')
+            splotsit = squeeze(nanmean(dfsize(i,dfWindow,:,[1 4 7],1),2));
+            splotrun = squeeze(nanmean(dfsize(i,dfWindow,:,[1 4 7],2),2));
+
+            plot(1:length(contrastlist),splotsit,'k-o','Markersize',5)
+%             set(groot,'defaultAxesColorOrder',sitcolor)
+            plot(1:length(contrastlist),splotrun,'r-o','Markersize',5)
+%             set(groot,'defaultAxesColorOrder',runcolor)
             xlabel('contrast')
             ylabel('dfof')
-            axis([0 length(contrastlist)+1 min(min(min(sizecurve(i,:,:,:),[],2),[],3),[],4)-0.01 max(max(max(sizecurve(i,:,:,:),[],2),[],3),[],4)+0.01])
+            axis([0 length(contrastlist)+1 min(min([splotsit splotrun]))-0.01 max(max([splotsit splotrun]))+0.01])
             set(gca,'xtick',1:length(contrastlist),'xticklabel',contrastlist)
             axis square
             set(gca,'LooseInset',get(gca,'TightInset'))
@@ -313,17 +319,25 @@ for f=1:length(use)
         %%%plot group data for size select
         figure
         hold on
-        sit = squeeze(nanmean(sizecurve(:,:,:,1)));
-        run = squeeze(nanmean(sizecurve(:,:,:,2)));
-        plot(1:length(radiusRange),sit,'-')
-        set(gca,'ColorOrderIndex',1)
-        plot(1:length(radiusRange),run,':')
+        sit = squeeze(nanmean(nanmean(dfsize(:,dfWindow,:,:,1),2),1));
+        run = squeeze(nanmean(nanmean(dfsize(:,dfWindow,:,:,2),2),1));
+        subplot(1,2,1)
+        plot(1:length(radiusRange),sit,'-o','Markersize',5)
+        xlabel('Stim Size (deg)')
+        ylabel('sitting dfof')
+        axis([0 length(radiusRange)+1 min(min([sit run]))-0.01 max(max([sit run]))+0.01])
+        axis square
+        set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+
+        subplot(1,2,2)
+        plot(1:length(radiusRange),run,'-o','Markersize',5)
         legend(contrastlist,'location','northwest')
         xlabel('Stim Size (deg)')
-        ylabel('dfof')
+        ylabel('running dfof')
         axis([0 length(radiusRange)+1 min(min([sit run]))-0.01 max(max([sit run]))+0.01])
-        set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
-        title('Size Suppression Curve')
+        axis square
+        set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+        mtit('Size Suppression Curve')
         if exist('psfile','var')
             set(gcf, 'PaperPositionMode', 'auto');
             print('-dpsc',psfile,'-append');
@@ -331,7 +345,7 @@ for f=1:length(use)
         
 
         %%%saving
-        save(filename,'dftuning','sptuning','rf','allgoodTopo','goodTopo','respcells','sizecurve')
+        save(filename,'dftuning','sptuning','userf','dfsize','dfgrat','useosi','usedsi','usedfori')
 
         try
             dos(['ps2pdf ' psfile ' "' [filename '.pdf'] '"'] )

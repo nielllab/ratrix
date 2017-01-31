@@ -217,8 +217,8 @@ for f=1:length(use)
                 end
             end
             hold on
-            plot(userf(:,2),userf(:,1),'.','color',[0.5 0.5 0.5],'MarkerSize',10); %%% the rfAmp criterion wasn't being applied here
-            plot(userf(sizerespcells,2),userf(sizerespcells,1),'b.','MarkerSize',10);
+            plot(userf(:,2),userf(:,1),'.','color',[0.5 0.5 0.5],'MarkerSize',5); %%% the rfAmp criterion wasn't being applied here
+            plot(userf(sizerespcells,2),userf(sizerespcells,1),'b.','MarkerSize',5);
             circle(ycent,xcent,sizeVals(i)/2/dpix)
             axis equal;
             axis([0 72 0 128]);
@@ -345,7 +345,7 @@ for f=1:length(use)
         
 
         %%%saving
-        save(filename,'dftuning','sptuning','userf','dfsize','dfgrat','useosi','usedsi','usedfori')
+        save(filename,'dftuning','sptuning','userf','dfsize','dfgrat','useosi','usedsi','usedfori','usecells')
 
         try
             dos(['ps2pdf ' psfile ' "' [filename '.pdf'] '"'] )

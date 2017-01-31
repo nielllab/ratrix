@@ -58,7 +58,7 @@ for f=1:length(use)
         goodTopo=goodTopo(goodTopo<=cellCutoff); %%%these are cells with good receptive fields in the center 20deg of the screen
         sprintf('%d cells in center with good topo under cutoff',length(goodTopo))
 
-        allgoodTopo = find(~sbc & rfAmp(:,1)>0.025 & rfAmp(:,2)>0.025); allgoodTopo = allgoodTopo(allgoodTopo<=cellCutoff);
+        allgoodTopo = find(~sbc & rfAmp(:,1)>0.01 & rfAmp(:,2)>0.01); allgoodTopo = allgoodTopo(allgoodTopo<=cellCutoff);
         sprintf('%d cells with good topo under cutoff',length(allgoodTopo)) %%%these are cells with good receptive fields
         
         %%%load patch gratings data
@@ -155,8 +155,8 @@ for f=1:length(use)
             %%%plot responsive cells on screen w/non-responsive
             subplot(2,3,i)
             hold on
-            plot(rf(allgoodTopo,2),rf(allgoodTopo,1),'.','color',[0.5 0.5 0.5],'MarkerSize',10); %%% the rfAmp criterion wasn't being applied here
-            plot(rf(respcells,2),rf(respcells,1),'b.','MarkerSize',10);
+            plot(rf(allgoodTopo,2),rf(allgoodTopo,1),'.','color',[0.5 0.5 0.5],'MarkerSize',5); %%% the rfAmp criterion wasn't being applied here
+            plot(rf(respcells,2),rf(respcells,1),'b.','MarkerSize',5);
             circle(ycent,xcent,centrad/dpix)
             axis equal;
             axis([0 72 0 128]);

@@ -122,35 +122,42 @@ for f=1:length(use)
         end
              
         %%%get best sf and tf for each cell
-        bestsftfresp = nan(size(dFout,1),2); bestsftf = bestsftfresp; 
-        [bestsftfresp(:,1) bestsftf(:,1)] = max(squeeze(nanmean(nanmean(nanmean(nanmean(dfgratuning(:,dfWindow,:,:,:,1),2),4),5),6)),[],2); %best sf
-        [bestsftfresp(:,2) bestsftf(:,2)] = max(squeeze(nanmean(nanmean(nanmean(nanmean(dfgratuning(:,dfWindow,:,:,:,1),2),3),5),6)),[],2); %best tf
-        dfori = nan(size(dFout2,1),12);
+        bestsftfresp = nan(size(dFout,1),2,2); bestsftf = bestsftfresp; 
+        [bestsftfresp(:,1,1) bestsftf(:,1,1)] = max(squeeze(nanmean(nanmean(nanmean(nanmean(dfgratuning(:,dfWindow,:,:,:,1),2),4),5),6)),[],2); %best sf
+        [bestsftfresp(:,2,1) bestsftf(:,2,1)] = max(squeeze(nanmean(nanmean(nanmean(nanmean(dfgratuning(:,dfWindow,:,:,:,1),2),3),5),6)),[],2); %best tf
+        [bestsftfresp(:,1,2) bestsftf(:,1,2)] = max(squeeze(nanmean(nanmean(nanmean(nanmean(dfgratuning(:,dfWindow,:,:,:,2),2),4),5),6)),[],2); %best sf
+        [bestsftfresp(:,2,2) bestsftf(:,2,2)] = max(squeeze(nanmean(nanmean(nanmean(nanmean(dfgratuning(:,dfWindow,:,:,:,2),2),3),5),6)),[],2); %best tf
+        dfori = nan(size(dFout2,1),12,2);
         for i=1:size(dFout2,1)
-            dfori(i,:) = squeeze(nanmean(dfgratuning(i,dfWindow,bestsftf(i,1),bestsftf(i,2),:,1),2));
-            [osi(i) prefori(i)] = calcOSI(dfori(i,:)',0);
-            [dsi(i) prefdir(i)] = calcOSI(dfori(i,:)',1);
+            dfori(i,:,1) = squeeze(nanmean(dfgratuning(i,dfWindow,bestsftf(i,1,1),bestsftf(i,2,1),:,1),2));
+            dfori(i,:,2) = squeeze(nanmean(dfgratuning(i,dfWindow,bestsftf(i,1,1),bestsftf(i,2,1),:,2),2));
+            [osi(i,1) prefori(i,1)] = calcOSI(dfori(i,:,1)',0);
+            [dsi(i,1) prefdir(i,1)] = calcOSI(dfori(i,:,1)',1);
+            [osi(i,2) prefori(i,2)] = calcOSI(dfori(i,:,2)',0);
+            [dsi(i,2) prefdir(i,2)] = calcOSI(dfori(i,:,2)',1);
         end
         %%%get preferred direction for each cell
-        [thetaresp preftheta] = max(dfori,[],2);
-        for i = 1:length(preftheta)
-            preftheta(i) = dirrange(preftheta(i));
+        [thetaresp(:,1) preftheta(:,1)] = max(dfori(:,:,1),[],2);
+        [thetaresp(:,2) preftheta(:,2)] = max(dfori(:,:,2),[],2);
+        for i = 1:size(preftheta,1)
+            preftheta(i,1) = dirrange(preftheta(i,1));
+            preftheta(i,2) = dirrange(preftheta(i,2));
         end
         %%%transform preferred direction into quadrants to match up with
         %%%size select stimulus
         preftheta = mod(preftheta,pi)-pi/8;
-        prefthetaQuad = zeros(1,length(preftheta)); %break orientation into quadrants, 1=top,2=right,3=bot,4=left, offset pi/8 CCW
-        prefthetaQuad(1,find(-pi/8<=preftheta&preftheta<pi/8))=1;
-        prefthetaQuad(1,find(pi/8<=preftheta&preftheta<3*pi/8))=2;
-        prefthetaQuad(1,find(3*pi/8<=preftheta&preftheta<5*pi/8))=3;
-        prefthetaQuad(1,find(5*pi/8<=preftheta&preftheta<=7*pi/8))=4;
+        prefthetaQuad = nan(length(preftheta),2); %break orientation into quadrants, 1=top,2=right,3=bot,4=left, offset pi/8 CCW
+        prefthetaQuad(find(-pi/8<=preftheta&preftheta<pi/8))=1;
+        prefthetaQuad(find(pi/8<=preftheta&preftheta<3*pi/8))=2;
+        prefthetaQuad(find(3*pi/8<=preftheta&preftheta<5*pi/8))=3;
+        prefthetaQuad(find(5*pi/8<=preftheta&preftheta<=7*pi/8))=4;
         
         %%%plot cells responsive at different thresholds to the gratings
         %%%compared to all cells with good topo and not sbc
         gratthreshlist = [0.025, 0.05, 0.1, 0.2, 0.5, 1.0];
         gratrespfig = figure;
         for i = 1:length(gratthreshlist)
-            respcells = find(max(dfori,[],2)>=gratthreshlist(i)); respcells=intersect(respcells(respcells<cellCutoff),allgoodTopo);
+            respcells = find(max(dfori(:,:,1),[],2)>=gratthreshlist(i)); respcells=intersect(respcells(respcells<cellCutoff),allgoodTopo);
     %         sprintf('%d responsive cells under cutoff',length(respcells))  
             %%%plot responsive cells on screen w/non-responsive
             subplot(2,3,i)
@@ -173,45 +180,57 @@ for f=1:length(use)
         %%%average response for every cell to their best stim params
         dfgrat = nan(size(dFout,1),size(dFout,2),2);
         for i = 1:size(dFout,1)
-            [respmax respmaxi] = max(dfori(i,:));
-            dfgrat(i,:,1) = squeeze(dfgratuning(i,:,bestsftf(i,1),bestsftf(i,2),respmaxi,1));
-            dfgrat(i,:,2) = squeeze(dfgratuning(i,:,bestsftf(i,1),bestsftf(i,2),respmaxi,2));
-        end        
+            [respmax respmaxi] = max(dfori(i,:,1));
+            dfgrat(i,:,1) = squeeze(dfgratuning(i,:,bestsftf(i,1,1),bestsftf(i,2,1),respmaxi,1));
+            dfgrat(i,:,2) = squeeze(dfgratuning(i,:,bestsftf(i,1,1),bestsftf(i,2,1),respmaxi,2));
+        end
 
         %%%pick a threshold here to use for responsive cells, plot all of
         %%%their tuning properties
         respcells = find(max(dfori,[],2)>=gratthreshlist(3)); respcells=intersect(respcells(respcells<cellCutoff),allgoodTopo);
         for i=1:length(respcells)
-%             figure
-%             subplot(2,2,1)
-%             curv = dfori(respcells(i),:);
-%             plot(1:12,curv,'k-')
-%             xlabel('Direction')
-%             ylabel('dfof')
-%             axis([1 12 min(curv)+0.1*min(curv) max(curv)+0.1*max(curv)])
-%             axis square
-%             subplot(2,2,2)
-%             pol = dfori(respcells(i),:);pol(pol<0)=0;
-%             polarplot([dirrange dirrange(1)],[pol pol(1)],'k-')
-%             subplot(2,2,3)
-%             plot([1 2],[osi(respcells(i)) dsi(respcells(i))],'k.','Markersize',20)
-%             axis([0 3 0 1])
-%             set(gca,'xtick',[1 2],'xticklabel',{'OSI','DSI'})
-%             axis square
-%             subplot(2,2,4)
-%             hold on
-%             plot(timepts,dfgrat(i,:,1),'k')
-%             plot(timepts,dfgrat(i,:,2),'r')
-%             xlabel('Time(s)')
-%             ylabel('dfof')
-%             axis([timepts(1) timepts(end) min(min(dfgrat(i,:,:)))+0.01 max(max(dfgrat(i,:,:)))+0.01])
-%             axis square
-%             set(gca,'LooseInset',get(gca,'TightInset'))
-%             mtit(sprintf('Cell #%d tuning',respcells(i)))
-%             if exist('psfile','var')
-%                 set(gcf, 'PaperPositionMode', 'auto');
-%                 print('-dpsc',psfile,'-append');
-%             end
+            figure
+            subplot(2,2,1)
+            hold on
+            sitcurv = dfori(respcells(i),:,1);
+            runcurv = dfori(respcells(i),:,2);          
+            plot(1:12,sitcurv,'k-')
+            plot(1:12,runcurv,'r-')
+            xlabel('Direction')
+            ylabel('dfof')
+            axis([1 12 min([sitcurv runcurv])-0.01 max([sitcurv runcurv])+0.01])
+            axis square
+            hold off
+            subplot(2,2,2)
+            sitpol = dfori(respcells(i),:,1);sitpol(sitpol<0)=0;
+            runpol = dfori(respcells(i),:,2);runpol(runpol<0)=0;
+            polarplot([dirrange dirrange(1)],[sitpol sitpol(1)],'k-')
+            hold on
+            polarplot([dirrange dirrange(1)],[runpol runpol(1)],'r-')
+            hold off
+            subplot(2,2,3)
+            hold on
+            plot([1 2],[osi(respcells(i),1) dsi(respcells(i),1)],'k.','Markersize',20)
+            plot([1 2],[osi(respcells(i),2) dsi(respcells(i),2)],'r.','Markersize',20)
+            axis([0 3 0 1])
+            set(gca,'xtick',[1 2],'xticklabel',{'OSI','DSI'})
+            axis square
+            hold off
+            subplot(2,2,4)
+            hold on
+            plot(timepts,dfgrat(i,:,1),'k')
+            plot(timepts,dfgrat(i,:,2),'r')
+            xlabel('Time(s)')
+            ylabel('pref dfof')
+            axis([timepts(1) timepts(end) min(min(dfgrat(i,:,:)))-0.01 max(max(dfgrat(i,:,:)))+0.01])
+            axis square
+            set(gca,'LooseInset',get(gca,'TightInset'))
+            hold off
+            mtit(sprintf('Cell #%d tuning',respcells(i)))
+            if exist('psfile','var')
+                set(gcf, 'PaperPositionMode', 'auto');
+                print('-dpsc',psfile,'-append');
+            end
         end
         
         %%%save out cell preferences for analysis with size select stim

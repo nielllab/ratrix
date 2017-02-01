@@ -157,10 +157,11 @@ for f=1:length(use)
                 spikesOut2(i,:,j) = spikesOut(i,:,j)-nanmean(spikesOut(i,1:4,j));
             end
         end
-        
-        %%%use output from PRE gratings analysis to pick cells
+              
+        %%%use output from PRE and POST gratings analysis to pick cells
         if mod(f,2)
             gratfile = files(use(f)).gratinganalysis;
+            gratfile2 = files(use(f+1)).gratinganalysis;
             openfig([gratfile '.fig'])
             if exist('psfile','var')
                 set(gcf, 'PaperPositionMode', 'auto');
@@ -168,22 +169,26 @@ for f=1:length(use)
             end
         else
             gratfile = files(use(f-1)).gratinganalysis;
+            gratfile2 = files(use(f)).gratinganalysis;
         end
         load(gratfile,'dfgrat','dirrange','prefdir','prefthetaQuad','bestsftf','respcells','dfori','osi','dsi')
         
         %%%find usable cells, change arrays to match/decrease file size
-        usecells = intersect(goodTopo,respcells); %%%use only cells in center w/good resp to gratings
+        usecells1 = intersect(goodTopo,respcells); %%%use only cells in center w/good resp to gratings
+        load(gratfile2,'respcells')
+        usecells2 = intersect(goodTopo,respcells);
+        usecells = union(usecells1,usecells2);
         sprintf('%d cells with good topo in center & good gratings response',length(usecells))
-        usedfori = dfori(usecells,:);
-        useosi=osi(usecells); usedsi=dsi(usecells);
-        usebestsftf = bestsftf(usecells,:); useprefthetaQuad = prefthetaQuad(usecells);
+        usedfori = dfori(usecells,:,:);
+        useosi=osi(usecells,:); usedsi=dsi(usecells,:);
+        usebestsftf = bestsftf(usecells,:,:); useprefthetaQuad = prefthetaQuad(usecells,:);
         userf = rf(usecells,:);
         dfgrat = dfgrat(usecells,:,:);
         
         %%%the two stimuli are different so adjust cell preferences to try
         %%%to match them from gratings->size select
-        usebestsftf(find(usebestsftf(:,1)==2),1)=1; %%combine 0.01 and 0.04 pref, set to index 1
-        usebestsftf(find(usebestsftf(:,1)==3),1)=2; %%0.16, change to index 2
+        usebestsftf(find(usebestsftf==2))=1; %%combine 0.01 and 0.04 pref, set to index 1
+        usebestsftf(find(usebestsftf==3))=2; %%0.16, change to index 2
 
         %create array w/average responses per stim type
         dftuning = zeros(length(usecells),size(dFout,2),length(sfrange),length(thetaRange),length(phaserange),length(contrastRange),length(radiusRange),2);
@@ -203,7 +208,20 @@ for f=1:length(use)
                     end
                 end
             end
-        end       
+        end
+        
+        
+        %%%get sf and ori pref for size stimuli
+        sizebestsf=nan(length(usecells),2);sizebestthetaQuad=sizebestsf;
+        sizebestsfresp=sizebestsf;sizebestthetaQuadresp=sizebestsf;
+        for i = 1:length(usecells)
+            [sizebestsfresp(i,1) sizebestsf(i,1)] = max(squeeze(nanmean(nanmean(nanmean(dftuning(i,dfWindow,:,:,:,end,4,1),2),4),5))); %index of best sf
+            [sizebestsfresp(i,2) sizebestsf(i,2)] = max(squeeze(nanmean(nanmean(nanmean(dftuning(i,dfWindow,:,:,:,end,4,2),2),4),5)));
+            [sizebestthetaQuadresp(i,1) sizebestthetaQuad(i,1)] = max(squeeze(nanmean(nanmean(dftuning(i,dfWindow,sizebestsf(i,1),:,:,end,4,1),2),5))); %index of best thetaQuad
+            [sizebestthetaQuadresp(i,2) sizebestthetaQuad(i,2)] = max(squeeze(nanmean(nanmean(dftuning(i,dfWindow,sizebestsf(i,1),:,:,end,4,2),2),5)));
+        end
+        
+        %%%pull out best traces here
                
         %%%plot screen for all six sizes w/threshold label for responsive
         figure
@@ -211,7 +229,7 @@ for f=1:length(use)
             subplot(2,4,i)
             sizerespcells=[];
             for j=1:length(usecells)
-                goodresp = squeeze(nanmean(nanmean(dftuning(j,dfWindow,usebestsftf(j,1),useprefthetaQuad(j),:,end,i,1),2),5))>=0.1;
+                goodresp = squeeze(nanmean(nanmean(dftuning(j,dfWindow,usebestsftf(j,1,1),useprefthetaQuad(j,1),:,end,i,1),2),5))>=0.1;
                 if goodresp
                     sizerespcells = [sizerespcells j];
                 end
@@ -238,42 +256,53 @@ for f=1:length(use)
             figure
             
             %%%direction tuning curve
-            subplot(2,3,1)
-            curv = usedfori(i,:);
-            plot(1:12,curv,'k-')
+            subplot(2,4,1)
+            hold on
+            sitcurv = usedfori(i,:,1);
+            runcurv = usedfori(i,:,2);
+            plot(1:12,sitcurv,'k-')
+            plot(1:12,runcurv,'r-')
             xlabel('Direction')
             ylabel('dfof')
-            axis([1 12 min(curv)+0.1*min(curv) max(curv)+0.1*max(curv)])
+            axis([1 12 min([sitcurv runcurv])-0.01 max([sitcurv runcurv])+0.01])
             axis square
             set(gca,'LooseInset',get(gca,'TightInset'))
+            hold off
             
             %%%polar direction tuning curve
-            subplot(2,3,2)
-            pol = usedfori(i,:);pol(pol<0)=0;
-            polarplot([dirrange dirrange(1)],[pol pol(1)],'k-')
+            subplot(2,4,2)
+            sitpol = usedfori(i,:,1);sitpol(sitpol<0)=0;
+            runpol = usedfori(i,:,2);runpol(runpol<0)=0;
+            polarplot([dirrange dirrange(1)],[sitpol sitpol(1)],'k-')
+            hold on
+            polarplot([dirrange dirrange(1)],[runpol runpol(1)],'r-')
             set(gca,'LooseInset',get(gca,'TightInset'))
+            hold off
             
             %%%osi/dsi
-            subplot(2,3,3)
-            plot([1 2],[useosi(i) usedsi(i)],'k.','Markersize',20)
+            subplot(2,4,3)
+            hold on
+            plot([1 2],[useosi(i,1) usedsi(i,1)],'k.','Markersize',20)
+            plot([1 2],[useosi(i,2) usedsi(i,2)],'r.','Markersize',20)
             axis([0 3 0 1])
             set(gca,'xtick',[1 2],'xticklabel',{'OSI','DSI'})
             axis square
             set(gca,'LooseInset',get(gca,'TightInset'))
+            hold off
             
             %%%avg resp to best grating stim
-            subplot(2,3,4)
+            subplot(2,4,4)
             hold on
             plot(timepts,dfgrat(i,:,1),'k')
             plot(timepts,dfgrat(i,:,2),'r')
             xlabel('Time(s)')
             ylabel('best grat dfof')
-            axis([timepts(1) timepts(end) min(min(dfgrat(i,:,:)))+0.01 max(max(dfgrat(i,:,:)))+0.01])
+            axis([timepts(1) timepts(end) min(min(dfgrat(i,:,:)))-0.01 max(max(dfgrat(i,:,:)))+0.01])
             axis square
             set(gca,'LooseInset',get(gca,'TightInset'))
             
             %%%size curve
-            subplot(2,3,5)
+            subplot(2,4,5)
             for j = 1:length(contrastlist)
                 for k = 1:length(sizes)
                     dfsize(i,:,j,k,1) = squeeze(nanmean(dftuning(i,:,usebestsftf(i,1),useprefthetaQuad(i),:,j,k,1),5));
@@ -293,7 +322,7 @@ for f=1:length(use)
             set(gca,'LooseInset',get(gca,'TightInset'))
             
             %%%contrast function
-            subplot(2,3,6)
+            subplot(2,4,6)
             hold on
             splotsit = squeeze(nanmean(dfsize(i,dfWindow,:,[1 4 7],1),2));
             splotrun = squeeze(nanmean(dfsize(i,dfWindow,:,[1 4 7],2),2));
@@ -308,6 +337,8 @@ for f=1:length(use)
             set(gca,'xtick',1:length(contrastlist),'xticklabel',contrastlist)
             axis square
             set(gca,'LooseInset',get(gca,'TightInset'))
+            
+            
             
             mtit(sprintf('Cell #%d tuning',usecells(i)))
             if exist('psfile','var')

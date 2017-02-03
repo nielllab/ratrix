@@ -1,5 +1,8 @@
 function dfofMovie_Blue(in,rig);
 
+dbstop if error
+
+
 if ~exist('rig','var')
     rig = input ('which rig? 1= old, 2=new : ')
 end
@@ -24,6 +27,7 @@ else
 end
 
 datadir = p;
+
 
 rigzoom
 fl
@@ -76,21 +80,23 @@ close(vid)
 
 
 
-% dfshort = (double(dfof_bg(:,:,:)));
-% dfshort = imresize(dfshort,0.5,'method','box');
-% baseline = prctile(dfshort,3,3);
-% cycle_mov = dfshort - repmat(baseline,[1 1 size(dfshort,3)]);
-% lowthresh= prctile(cycle_mov(:),2);
-% upperthresh = prctile(cycle_mov(:),98)*1.25;
-% cycMov= mat2im(cycle_mov,gray,[lowthresh upperthresh]);
-% mov = immovie(permute(cycMov,[1 2 4 3]));
-% vid = VideoWriter(fullfile(p,[f '_RAW']));
-% % mov = immovie(permute(shiftmov,[1 2 4 3]));
-% % vid = VideoWriter('bilateralS1.avi');
-% vid.FrameRate=25;
-% open(vid);
-% writeVideo(vid,mov);
-% close(vid)
+%Raw Movie no running marker (fast)
+
+dfshort = (double(dfof_bg(:,:,:)));
+dfshort = imresize(dfshort,0.5,'method','box');
+baseline = prctile(dfshort,3,3);
+cycle_mov = dfshort - repmat(baseline,[1 1 size(dfshort,3)]);
+lowthresh= prctile(cycle_mov(:),2);
+upperthresh = prctile(cycle_mov(:),98)*1.25;
+cycMov= mat2im(cycle_mov,gray,[lowthresh upperthresh]);
+mov = immovie(permute(cycMov,[1 2 4 3]));
+vid = VideoWriter(fullfile(p,[f '_RAW']));
+% mov = immovie(permute(shiftmov,[1 2 4 3]));
+% vid = VideoWriter('bilateralS1.avi');
+vid.FrameRate=25;
+open(vid);
+writeVideo(vid,mov);
+close(vid)
 
 
 % keyboard
@@ -203,51 +209,51 @@ end
 
 
 
-% keyboard
+%keyboard
+%keyboard
+%% raw movie
 
-%
-% keyboard
-% %% raw movie
-%
-%
-% [f,p] = uiputfile('*.avi','dfof movie file');
-% small_mov = dfof_bg(4:4:end,4:4:end,4:4:end);
-% lowthresh = prctile(small_mov(:),2);
-% upperthresh = 1.5*prctile(small_mov(:),98);
-%
-% clear mov
-% figure
-% mov_length = size(dfof_bg,3);
-% mov_length=400
-% for i = 1:mov_length;
-% i
-%     imagesc(imresize(dfof_bg(:,:,i+300),0.5,'box'),[lowthresh upperthresh]);
-%     colormap(gray);
-%    hold on
-%     if use_speed
-%         if sp(i)<500
-%             plot(15,15,'ro','Markersize',8,'Linewidth',8);
-%         else
-%             plot(15,15,'go','Markersize',8,'Linewidth',8);
-%         end
-%     end
-%     axis equal;
-%     if i==1;
-%         mov(mov_length) = getframe(gcf); %%%% initializes structure array
-%     end
-%     mov(i) = getframe(gcf);
-%
-% end
-%
-%
-% vid = VideoWriter(fullfile(p,f));
-% vid.FrameRate=25;
-% open(vid);
-% writeVideo(vid,mov(1:end));
-% close(vid)
-%
-% clear mov
-%
+
+%[f,p] = uiputfile('*.avi','dfof movie file');  %To write in own name
+small_mov = dfof_bg(4:4:end,4:4:end,4:4:end);
+lowthresh = prctile(small_mov(:),2);
+upperthresh = 1.5*prctile(small_mov(:),98);
+
+clear mov
+figure
+mov_length = (size(dfof_bg,3) - 300); %movlength - 200 because start frame?
+%mov_length=400
+for i = 1:(mov_length);
+i
+    imagesc(imresize(dfof_bg(:,:,i+300),0.5,'box'),[lowthresh upperthresh]);
+    colormap(gray);
+   hold on
+    if use_speed
+        if sp(i)<500
+            plot(15,15,'ro','Markersize',8,'Linewidth',8);
+        else
+            plot(15,15,'go','Markersize',8,'Linewidth',8);
+        end
+    end
+    axis equal;
+    if i==1;
+        mov(mov_length) = getframe(gcf); %%%% initializes structure array
+    end
+    mov(i) = getframe(gcf);
+
+end
+
+
+%vid = VideoWriter(fullfile(p,f));  %if writing own name
+vid = VideoWriter(fullfile(datadir,[f(1:end-11) '_RAW_Movie_w_running']));
+% vid = VideoWriter('RAW_Movie_w_running.avi');
+vid.FrameRate=25;
+open(vid);
+writeVideo(vid,mov(1:end));
+close(vid)
+
+clear mov
+
 %
 % % %%% use svd to get rid of artifacts
 % %

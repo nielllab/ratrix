@@ -14,7 +14,9 @@ if exist(psfile,'file')==2;delete(psfile);end
 cd(path);
 
 group = input('which group? 1=saline naive, 2=saline trained, 3=DOI naive, 4=DOI trained: ')
-redo = input('reanalyze individual animal data? 0=no, 1=yes: ')
+redoani = input('reanalyze individual animal data? 0=no, 1=yes: ')
+redogrp = input('reanalyze group data? 0=no, 1=yes: ')
+
 if group==1
     use = find(strcmp({files.inject},'saline')  & strcmp({files.training},'naive') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
     grpfilename = 'SalineNaive2pSizeSelect'
@@ -23,18 +25,380 @@ elseif group==2
     grpfilename = 'SalineTrained2pSizeSelect'
 elseif group==3
     use = find(strcmp({files.inject},'doi')  & strcmp({files.training},'naive') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-    grpfilename = 'SalineNaive2pSizeSelect'
+    grpfilename = 'DOINaive2pSizeSelect'
 elseif group==4
     use = find(strcmp({files.inject},'doi')  & strcmp({files.training},'trained') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-    grpfilename = 'SalineTrained2pSizeSelect'
+    grpfilename = 'DOITrained2pSizeSelect'
 else
     sprintf('please restart and choose a number 1-4')
 end
 
-if redo==1
+if isempty(use)
+    sprintf('No animals in this group')
+    return
+end
+
+if redoani==1
     patchOri2pAnalysis
     sizeSelect2pAnalysis
 end
+
+numAni = length(use)/2;
+dfWindow = 9:11;
+spWindow = 6:10;
+dt = 0.1;
+cyclelength = 1/0.1;
+respthresh=0.025;
+dpix = 0.8022; centrad = 10; ycent = 72/2; xcent = 128/2; %%deg/pix, radius of response size cutoff, x and y screen centers
+moviefname = 'C:\sizeSelect2sf8sz26min.mat';
+load(moviefname)
+sizeVals = [0 5 10 20 30 40 50 60];
+contrastRange = unique(contrasts); sfrange = unique(sf); phaserange = unique(phase);
+for i = 1:length(contrastRange);contrastlist{i} = num2str(contrastRange(i));end
+for i=1:length(sizeVals); sizes{i} = num2str(sizeVals(i)); end
+thetamod = mod(theta,pi)-pi/8;
+thetaQuad = zeros(1,length(theta)); %break orientation into quadrants, 1=top,2=right,3=bot,4=left, offset pi/8 CCW
+thetaQuad(1,find(-pi/8<thetamod&thetamod<=pi/8))=1;
+thetaQuad(1,find(pi/8<=thetamod&thetamod<=3*pi/8))=2;
+thetaQuad(1,find(3*pi/8<=thetamod&thetamod<=5*pi/8))=3;
+thetaQuad(1,find(5*pi/8<=thetamod&thetamod<=7*pi/8))=4;
+thetaRange = unique(thetaQuad);
+dirrange = 0:pi/6:2*pi-pi/6;
+timepts = 1:(2*isi+duration)/dt;
+timepts = (timepts-1)*dt;
+timepts = timepts - isi;
+
+%%%load individual animal data intro group arrays for analysis/plotting
+if redogrp
+    cnt=1;
+    cellcnt=1;
+    grprf=nan(10000,2);
+    session = nan(10000,1);%%%make an array for animal #/session
+    grpdfsize = nan(10000,15,length(contrastlist),length(sizes),2,2);
+    grpdfgrat = nan(10000,15,2,2);
+    grposi = nan(10000,2);
+    grpdsi = nan(10000,2);
+    grpdfori = nan(10000,12,2);
+    for i= 1:2:length(use)
+        sprintf('loading %s out of %s sessions',num2str(i),num2str(length(use)))
+        aniFile = files(use(i)).sizeanalysis
+        load(aniFile,'dfgrat','dfsize','userf','sizecurve','useosi','usedsi','usedfori')
+        expcells = size(userf,1)-1;
+        grprf(cellcnt:cellcnt+expcells,:) = userf;
+        session(cellcnt:cellcnt+expcells) = (i+1)/2;
+        grpdfsize(cellcnt:cellcnt+expcells,:,:,:,:,1) = dfsize; %cell#,t,contr,size,run,pre/post
+        grpdfgrat(cellcnt:cellcnt+expcells,:,:,1) = dfgrat; %cell#,t,run,pre/post
+        grposi(cellcnt:cellcnt+expcells,1) = useosi; %osi,pre/post
+        grpdsi(cellcnt:cellcnt+expcells,1) = usedsi; %dsi,pre/post
+        grpdfori(cellcnt:cellcnt+expcells,:,1) = usedfori; %cell#,12 dirs, pre/post
+        sprintf('loading %s out of %s files',num2str(i+1),num2str(length(use)))
+        aniFile = files(use(i+1)).sizeanalysis
+        load(aniFile,'dfsize','userf','sizecurve','usecells')
+        grpdfsize(cellcnt:cellcnt+expcells,:,:,:,:,2) = dfsize; %cell#,t,contr,size,run,pre/post
+        aniFile = files(use(i+1)).gratinganalysis
+        load(aniFile,'dfgrat','osi','dsi','dfori')
+        grposi(cellcnt:cellcnt+expcells,2) = osi(usecells); %osi,pre/post
+        grpdsi(cellcnt:cellcnt+expcells,2) = dsi(usecells); %dsi,pre/post
+        grpdfori(cellcnt:cellcnt+expcells,:,2) = dfori(usecells,:); %cell#,12 dirs, pre/post
+        grpdfgrat(cellcnt:cellcnt+expcells,:,:,2) = dfgrat(usecells,:,:);%cell#,t,run,pre/post
+        grpusecells(cellcnt:cellcnt+expcells) = usecells;
+        cellcnt=cellcnt+expcells;
+    end
+    
+    sprintf('saving group file...')
+    save(grpfilename,'grprf','session','grpdfsize','grpdfgrat','grposi','grpdsi','grpdfori')
+    sprintf('done')
+else
+    sprintf('loading data')
+    load(grpfilename)
+end
+
+%%%quantify fraction responsive to each size
+figure
+for i=1:length(sizes)
+    subplot(2,4,i)
+    preresp = find(squeeze(nanmean(grpdfsize(:,dfWindow,end,i,1,1),2))>=0.1);
+    postresp = find(squeeze(nanmean(grpdfsize(:,dfWindow,end,i,1,2),2))>=0.1);
+    bothresp = intersect(preresp,postresp);
+    totcells = sum(~isnan(grprf(:,1)));
+    fractions = [length(preresp)/totcells length(postresp)/totcells length(bothresp)/totcells];
+    hold on
+    bar(1,fractions(1),'g')
+    bar(2,fractions(2),'r')
+    bar(3,fractions(3),'b')
+    set(gca,'xtick',[1 2 3],'xticklabel',{'pre','post','both'},'fontsize',5)
+    axis([0 4 0 1])
+    ylabel('%responsive')
+    set(gca,'LooseInset',get(gca,'TightInset'))
+end
+mtit('Responsive cells for each size')
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
+
+%%%plot responsive cells for each size for group data
+figure
+for i=1:length(sizes)
+    subplot(2,4,i)
+    preresp = find(squeeze(nanmean(grpdfsize(:,dfWindow,end,i,1,1),2))>=0.1);
+    postresp = find(squeeze(nanmean(grpdfsize(:,dfWindow,end,i,1,2),2))>=0.1);
+    hold on
+    p1 = plot(grprf(:,2),grprf(:,1),'.','color',[0.5 0.5 0.5],'MarkerSize',8); %%% the rfAmp criterion wasn't being applied here
+    p2 = plot(grprf(preresp,2),grprf(preresp,1),'g.','MarkerSize',8);
+    p3 = plot(grprf(postresp,2),grprf(postresp,1),'r.','MarkerSize',8);
+    p4 = plot(grprf(intersect(preresp,postresp),2),grprf(intersect(preresp,postresp),1),'b.','MarkerSize',8);
+    circle(ycent,xcent,sizeVals(i)/2/dpix)
+    axis equal;
+    axis([0 72 0 128]);
+    set(gca,'xticklabel','','yticklabel','')
+    hold off
+    set(gca,'LooseInset',get(gca,'TightInset'))
+%     if i==8
+%         legend([p1 p2 p3 p4],'all cells','pre only','post only','both pre/post','Location','northoutside')
+%     end
+end
+mtit('Responsive cells for each size')
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
+
+figure
+subplot(1,2,1)
+hold on
+plot([1 2],[grposi(:,1) grposi(:,2)],'.','color',[0.8 0.8 0.8],'Markersize',5)
+errorbar([1 2],[nanmean(grposi(:,1)) nanmean(grposi(:,2))],...
+    [nanstd(grposi(:,1))/sqrt(numAni) nanstd(grposi(:,2))/sqrt(numAni)],'r')
+axis([0 3 0 1])
+set(gca,'xtick',[1 2],'xticklabel',{'pre','post'})
+ylabel('OSI')
+axis square
+set(gca,'LooseInset',get(gca,'TightInset'))
+hold off
+subplot(1,2,2)
+hold on
+plot([1 2],[grpdsi(:,1) grpdsi(:,2)],'.','color',[0.8 0.8 0.8],'Markersize',5)
+errorbar([1 2],[nanmean(grpdsi(:,1)) nanmean(grpdsi(:,2))],...
+    [nanstd(grpdsi(:,1))/sqrt(numAni) nanstd(grpdsi(:,2))/sqrt(numAni)],'r')
+axis([0 3 0 1])
+set(gca,'xtick',[1 2],'xticklabel',{'pre','post'})
+ylabel('DSI')
+axis square
+set(gca,'LooseInset',get(gca,'TightInset'))
+hold off
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
+
+%%%plot size suppression curves
+figure
+hold on
+pre = squeeze(nanmedian(nanmedian(grpdfsize(:,dfWindow,:,:,1,1),2),1));
+post = squeeze(nanmedian(nanmedian(grpdfsize(:,dfWindow,:,:,1,2),2),1));
+subplot(2,2,1)
+plot(1:length(radiusRange),pre,'-o','Markersize',5)
+xlabel('Stim Size (deg)')
+ylabel('pre sit dfof')
+axis([0 length(radiusRange)+1 min(min([pre post]))-0.01 max(max([pre post]))+0.01])
+axis square
+set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+subplot(2,2,2)
+plot(1:length(radiusRange),post,'-o','Markersize',5)
+xlabel('Stim Size (deg)')
+ylabel('post sit dfof')
+axis([0 length(radiusRange)+1 min(min([pre post]))-0.01 max(max([pre post]))+0.01])
+axis square
+set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+
+pre = squeeze(nanmedian(nanmedian(grpdfsize(:,dfWindow,:,:,2,1),2),1));
+post = squeeze(nanmedian(nanmedian(grpdfsize(:,dfWindow,:,:,2,2),2),1));
+subplot(2,2,3)
+plot(1:length(radiusRange),pre,'-o','Markersize',5)
+xlabel('Stim Size (deg)')
+ylabel('pre run dfof')
+axis([0 length(radiusRange)+1 min(min([pre post]))-0.01 max(max([pre post]))+0.01])
+axis square
+set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+subplot(2,2,4)
+plot(1:length(radiusRange),post,'-o','Markersize',5)
+xlabel('Stim Size (deg)')
+ylabel('post run dfof')
+axis([0 length(radiusRange)+1 min(min([pre post]))-0.01 max(max([pre post]))+0.01])
+axis square
+set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+mtit('Size Suppression Curve')
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
+
+%%%plot cycle averages
+figure
+for i = 1:length(sizes)
+    subplot(2,4,i)
+    hold on
+    shadedErrorBar(timepts,squeeze(nanmedian(grpdfsize(:,:,end,i,1,1),1)),...
+        squeeze(nanstd(grpdfsize(:,:,end,i,1,1),1))/sqrt(totcells),'k',1)
+    shadedErrorBar(timepts,squeeze(nanmedian(grpdfsize(:,:,end,i,1,2),1)),...
+        squeeze(nanstd(grpdfsize(:,:,end,i,1,2),1))/sqrt(totcells),'r',1)
+    axis square
+    axis([timepts(1) timepts(end) -0.01 0.2])
+    set(gca,'LooseInset',get(gca,'TightInset'))
+end
+mtit('Stationary response per size')
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
+
+figure
+for i = 1:length(sizes)
+    subplot(2,4,i)
+    hold on
+    shadedErrorBar(timepts,squeeze(nanmedian(grpdfsize(:,:,end,i,2,1),1)),...
+        squeeze(nanstd(grpdfsize(:,:,end,i,1,1),1))/sqrt(totcells),'k',1)
+    shadedErrorBar(timepts,squeeze(nanmedian(grpdfsize(:,:,end,i,2,2),1)),...
+        squeeze(nanstd(grpdfsize(:,:,end,i,1,2),1))/sqrt(totcells),'r',1)
+    axis square
+    axis([timepts(1) timepts(end) -0.01 0.2])
+    set(gca,'LooseInset',get(gca,'TightInset'))
+end
+mtit('Running response per size')
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
+
+%%%plot individual cell data
+for i=1:totcells
+    figure
+
+    %%%direction tuning curve
+    subplot(2,3,1)
+    precurv = grpdfori(i,:,1);
+    postcurv = grpdfori(i,:,2);
+    hold on
+    plot(1:12,precurv,'k-')
+    plot(1:12,postcurv,'r-')
+    xlabel('Direction')
+    ylabel('dfof')
+    axis([1 12 min([precurv postcurv])+0.01 max([precurv postcurv])+0.01])
+    axis square
+    set(gca,'LooseInset',get(gca,'TightInset'))
+    hold off
+
+    %%%polar direction tuning curve
+    subplot(2,3,2)
+    prepol = grpdfori(i,:,1);prepol(prepol<0)=0;
+    postpol = grpdfori(i,:,2);postpol(postpol<0)=0;
+    polarplot([dirrange dirrange(1)],[prepol prepol(1)],'k-')
+    hold on
+    polarplot([dirrange dirrange(1)],[postpol postpol(1)],'r-')
+    set(gca,'LooseInset',get(gca,'TightInset'))
+    hold off
+
+    %%%osi/dsi
+    subplot(2,3,3)
+    hold on
+    plot([1 2],[grposi(i,1) grpdsi(i,1)],'k.','Markersize',20)
+    plot([1 2],[grposi(i,2) grpdsi(i,2)],'r.','Markersize',20)
+    axis([0 3 0 1])
+    set(gca,'xtick',[1 2],'xticklabel',{'OSI','DSI'})
+    axis square
+    set(gca,'LooseInset',get(gca,'TightInset'))
+    hold off
+
+    %%%avg resp to best grating stim
+    subplot(2,3,4)
+    hold on
+    plot(timepts,grpdfgrat(i,:,1,1),'k')
+    plot(timepts,grpdfgrat(i,:,1,2),'r')
+    xlabel('Time(s)')
+    ylabel('best grat dfof')
+    axis([timepts(1) timepts(end) min(min(grpdfgrat(i,:,1,:)))-0.01 max(max(grpdfgrat(i,:,1,:)))+0.01])
+    axis square
+    set(gca,'LooseInset',get(gca,'TightInset'))
+    hold off
+
+    %%%size curve
+    subplot(2,3,5)
+    hold on
+    splotpre = squeeze(nanmean(grpdfsize(i,dfWindow,end,:,1,1),2));
+    splotpost = squeeze(nanmean(grpdfsize(i,dfWindow,end,:,1,2),2));
+    plot(1:length(radiusRange),splotpre,'k-o','Markersize',5)
+    plot(1:length(radiusRange),splotpost,'r-o','Markersize',5)
+    xlabel('Stim Size (deg)')
+    ylabel('dfof')
+    axis([0 length(radiusRange)+1 min(min([splotpre splotpost]))-0.01 max(max([splotpre splotpost]))+0.01])
+    set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
+    axis square
+    set(gca,'LooseInset',get(gca,'TightInset'))
+    hold off
+
+    %%%contrast function
+    subplot(2,3,6)
+    hold on
+    splotpre = squeeze(nanmean(grpdfsize(i,dfWindow,:,[1 4 7],1,1),2));
+    splotpost = squeeze(nanmean(grpdfsize(i,dfWindow,:,[1 4 7],1,2),2));
+
+    plot(1:length(contrastlist),splotpre,'k-o','Markersize',5)
+%             set(groot,'defaultAxesColorOrder',sitcolor)
+    plot(1:length(contrastlist),splotpost,'r-o','Markersize',5)
+%             set(groot,'defaultAxesColorOrder',runcolor)
+    xlabel('contrast')
+    ylabel('dfof')
+    axis([0 length(contrastlist)+1 min(min([splotpre splotpost]))-0.01 max(max([splotpre splotpost]))+0.01])
+    set(gca,'xtick',1:length(contrastlist),'xticklabel',contrastlist)
+    axis square
+    set(gca,'LooseInset',get(gca,'TightInset'))
+    hold off
+
+    mtit(sprintf('Cell #%d session #%d tuning',grpusecells(i),session(i)))
+    if exist('psfile','var')
+        set(gcf, 'PaperPositionMode', 'auto'); %%%figure out how to make this full page landscape
+        print('-dpsc',psfile,'-append');
+    end
+end
+
+
+
+try
+    dos(['ps2pdf ' psfile ' "' [grpfilename '.pdf'] '"'] )
+catch
+    display('couldnt generate pdf');
+end
+
+delete(psfile);
+
+    
+    
+    
+    
+    
+    
+% 
+% 
+% 
+% figure
+% hold on
+% for i=1:length(sizes)
+%     subplot(2,4,i)
+%     respCells = find(allCells&squeeze(nanmean(nanmean(nanmean(nanmean(grptuning(:,dfWindow,:,:,:,end,i,1,1),2),3),4),5))>respthresh); %%%respCells = respCells(respCells<=cellCutoff);
+%     hold on
+%     plot(rf(:,2),rf(:,1),'.','color',[0.5 0.5 0.5]); %%% the rfAmp criterion wasn't being applied here
+%     plot(rf(:,2),rf(:,1),'b.');
+%     circle(ycent,xcent,centrad/dpix)
+%     axis equal;
+%     axis([0 72 0 128]);
+% end
+% title('Responsive cells/size')
+% if exist('psfile','var')
+%     set(gcf, 'PaperPositionMode', 'auto');
+%     print('-dpsc',psfile,'-append');
+% end
+
 % % 
 % % numAni = length(use);
 % % 

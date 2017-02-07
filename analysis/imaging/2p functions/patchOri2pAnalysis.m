@@ -136,6 +136,7 @@ for f=1:length(use)
             [osi(i,2) prefori(i,2)] = calcOSI(dfori(i,:,2)',0);
             [dsi(i,2) prefdir(i,2)] = calcOSI(dfori(i,:,2)',1);
         end
+        thetaresp=nan(size(dFout,1),2);preftheta=thetaresp;
         %%%get preferred direction for each cell
         [thetaresp(:,1) preftheta(:,1)] = max(dfori(:,:,1),[],2);
         [thetaresp(:,2) preftheta(:,2)] = max(dfori(:,:,2),[],2);

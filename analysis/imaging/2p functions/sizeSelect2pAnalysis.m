@@ -222,6 +222,20 @@ for f=1:length(use)
         end
         
         %%%pull out best traces here
+        dfsize = nan(length(usecells),size(dFout,2),length(contrastlist),length(sizeVals),2);
+        dfsizebest = nan(length(usecells),size(dFout,2),length(contrastlist),length(sizes),2);
+        for i = 1:length(usecells)
+            for j = 1:length(contrastlist)
+                for k = 1:length(sizes)
+                    for l = 1:2
+                    dfsizebest(i,:,j,k,l) = squeeze(nanmean(dftuning(i,:,sizebestsf(i,1),...
+                        sizebestthetaQuad(i,1),:,j,k,l),5)); %%%this array uses
+                    dfsize(i,:,j,k,l) = squeeze(nanmean(dftuning(i,:,usebestsftf(i,1),...
+                        useprefthetaQuad(i,1),:,j,k,l),5));
+                    end
+                end
+            end
+        end
                
         %%%plot screen for all six sizes w/threshold label for responsive
         figure
@@ -251,7 +265,6 @@ for f=1:length(use)
         %%%plot individual cell data
 %         sitcolor = [0.6 0.6 0.6;0.8 0.8 0.8;1 1 1];
 %         runcolor = [0.6 0 0;0.8 0 0;1 0 0];
-        dfsize = nan(length(usecells),size(dFout,2),length(contrastlist),length(sizeVals),2);
         for i=1:length(usecells)
             figure
             
@@ -266,7 +279,7 @@ for f=1:length(use)
             ylabel('dfof')
             axis([1 12 min([sitcurv runcurv])-0.01 max([sitcurv runcurv])+0.01])
             axis square
-            set(gca,'LooseInset',get(gca,'TightInset'))
+            set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
             hold off
             
             %%%polar direction tuning curve
@@ -276,7 +289,7 @@ for f=1:length(use)
             polarplot([dirrange dirrange(1)],[sitpol sitpol(1)],'k-')
             hold on
             polarplot([dirrange dirrange(1)],[runpol runpol(1)],'r-')
-            set(gca,'LooseInset',get(gca,'TightInset'))
+            set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
             hold off
             
             %%%osi/dsi
@@ -287,7 +300,7 @@ for f=1:length(use)
             axis([0 3 0 1])
             set(gca,'xtick',[1 2],'xticklabel',{'OSI','DSI'})
             axis square
-            set(gca,'LooseInset',get(gca,'TightInset'))
+            set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
             hold off
             
             %%%avg resp to best grating stim
@@ -299,30 +312,38 @@ for f=1:length(use)
             ylabel('best grat dfof')
             axis([timepts(1) timepts(end) min(min(dfgrat(i,:,:)))-0.01 max(max(dfgrat(i,:,:)))+0.01])
             axis square
-            set(gca,'LooseInset',get(gca,'TightInset'))
+            set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
             
-            %%%size curve
+            %%%size curve based on gratings parameters
             subplot(2,4,5)
-            for j = 1:length(contrastlist)
-                for k = 1:length(sizes)
-                    dfsize(i,:,j,k,1) = squeeze(nanmean(dftuning(i,:,usebestsftf(i,1),useprefthetaQuad(i),:,j,k,1),5));
-                    dfsize(i,:,j,k,2) = squeeze(nanmean(dftuning(i,:,usebestsftf(i,1),useprefthetaQuad(i),:,j,k,2),5));
-                end
-            end
             hold on
             splotsit = squeeze(nanmean(dfsize(i,dfWindow,end,:,1),2));
             splotrun = squeeze(nanmean(dfsize(i,dfWindow,end,:,2),2));
             plot(1:length(radiusRange),splotsit,'k-o','Markersize',5)
             plot(1:length(radiusRange),splotrun,'r-o','Markersize',5)
             xlabel('Stim Size (deg)')
-            ylabel('dfof')
+            ylabel('grat params dfof')
             axis([0 length(radiusRange)+1 min(min([splotsit splotrun]))-0.01 max(max([splotsit splotrun]))+0.01])
             set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
             axis square
-            set(gca,'LooseInset',get(gca,'TightInset'))
+            set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
             
-            %%%contrast function
+            %%%size curve based on size parameters
             subplot(2,4,6)
+            hold on
+            splotsit = squeeze(nanmean(dfsizebest(i,dfWindow,end,:,1),2));
+            splotrun = squeeze(nanmean(dfsizebest(i,dfWindow,end,:,2),2));
+            plot(1:length(radiusRange),splotsit,'k-o','Markersize',5)
+            plot(1:length(radiusRange),splotrun,'r-o','Markersize',5)
+            xlabel('Stim Size (deg)')
+            ylabel('size params dfof')
+            axis([0 length(radiusRange)+1 min(min([splotsit splotrun]))-0.01 max(max([splotsit splotrun]))+0.01])
+            set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
+            axis square
+            set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+            
+            %%%contrast function based on gratings params
+            subplot(2,4,7)
             hold on
             splotsit = squeeze(nanmean(dfsize(i,dfWindow,:,[1 4 7],1),2));
             splotrun = squeeze(nanmean(dfsize(i,dfWindow,:,[1 4 7],2),2));
@@ -332,13 +353,28 @@ for f=1:length(use)
             plot(1:length(contrastlist),splotrun,'r-o','Markersize',5)
 %             set(groot,'defaultAxesColorOrder',runcolor)
             xlabel('contrast')
-            ylabel('dfof')
+            ylabel('grat params dfof')
             axis([0 length(contrastlist)+1 min(min([splotsit splotrun]))-0.01 max(max([splotsit splotrun]))+0.01])
             set(gca,'xtick',1:length(contrastlist),'xticklabel',contrastlist)
             axis square
-            set(gca,'LooseInset',get(gca,'TightInset'))
+            set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
             
-            
+            %%%contrast function based on size params
+            subplot(2,4,8)
+            hold on
+            splotsit = squeeze(nanmean(dfsizebest(i,dfWindow,:,[1 4 7],1),2));
+            splotrun = squeeze(nanmean(dfsizebest(i,dfWindow,:,[1 4 7],2),2));
+
+            plot(1:length(contrastlist),splotsit,'k-o','Markersize',5)
+%             set(groot,'defaultAxesColorOrder',sitcolor)
+            plot(1:length(contrastlist),splotrun,'r-o','Markersize',5)
+%             set(groot,'defaultAxesColorOrder',runcolor)
+            xlabel('contrast')
+            ylabel('size params dfof')
+            axis([0 length(contrastlist)+1 min(min([splotsit splotrun]))-0.01 max(max([splotsit splotrun]))+0.01])
+            set(gca,'xtick',1:length(contrastlist),'xticklabel',contrastlist)
+            axis square
+            set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
             
             mtit(sprintf('Cell #%d tuning',usecells(i)))
             if exist('psfile','var')
@@ -347,15 +383,15 @@ for f=1:length(use)
             end
         end
         
-        %%%plot group data for size select
+        %%%plot group data for size select w/gratings params
         figure
         hold on
-        sit = squeeze(nanmean(nanmean(dfsize(:,dfWindow,:,:,1),2),1));
-        run = squeeze(nanmean(nanmean(dfsize(:,dfWindow,:,:,2),2),1));
+        sit = squeeze(nanmean(nanmedian(dfsize(:,dfWindow,:,:,1),2),1));
+        run = squeeze(nanmean(nanmedian(dfsize(:,dfWindow,:,:,2),2),1));
         subplot(1,2,1)
         plot(1:length(radiusRange),sit,'-o','Markersize',5)
         xlabel('Stim Size (deg)')
-        ylabel('sitting dfof')
+        ylabel('sitting dfof grat params')
         axis([0 length(radiusRange)+1 min(min([sit run]))-0.01 max(max([sit run]))+0.01])
         axis square
         set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
@@ -364,7 +400,7 @@ for f=1:length(use)
         plot(1:length(radiusRange),run,'-o','Markersize',5)
         legend(contrastlist,'location','northwest')
         xlabel('Stim Size (deg)')
-        ylabel('running dfof')
+        ylabel('running dfof grat params')
         axis([0 length(radiusRange)+1 min(min([sit run]))-0.01 max(max([sit run]))+0.01])
         axis square
         set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
@@ -374,9 +410,35 @@ for f=1:length(use)
             print('-dpsc',psfile,'-append');
         end
         
+        %%%plot group data for size select
+        figure
+        hold on
+        sit = squeeze(nanmean(nanmedian(dfsizebest(:,dfWindow,:,:,1),2),1));
+        run = squeeze(nanmean(nanmedian(dfsizebest(:,dfWindow,:,:,2),2),1));
+        subplot(1,2,1)
+        plot(1:length(radiusRange),sit,'-o','Markersize',5)
+        xlabel('Stim Size (deg)')
+        ylabel('sitting dfof size params')
+        axis([0 length(radiusRange)+1 min(min([sit run]))-0.01 max(max([sit run]))+0.01])
+        axis square
+        set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+
+        subplot(1,2,2)
+        plot(1:length(radiusRange),run,'-o','Markersize',5)
+        legend(contrastlist,'location','northwest')
+        xlabel('Stim Size (deg)')
+        ylabel('running dfof size params')
+        axis([0 length(radiusRange)+1 min(min([sit run]))-0.01 max(max([sit run]))+0.01])
+        axis square
+        set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+        mtit('Size Suppression Curve')
+        if exist('psfile','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfile,'-append');
+        end
 
         %%%saving
-        save(filename,'dftuning','sptuning','userf','dfsize','dfgrat','useosi','usedsi','usedfori','usecells')
+        save(filename,'dftuning','sptuning','userf','dfsize','dfsizebest','dfgrat','useosi','usedsi','usedfori','usecells')
 
         try
             dos(['ps2pdf ' psfile ' "' [filename '.pdf'] '"'] )

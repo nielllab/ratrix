@@ -27,17 +27,17 @@ stim.gain = 0.7 * ones(2,1);
 
 switch subjIDs{1}
 
-   case 'g62aaa3rt' % Started 2/1/17
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 219;
-       msPenalty               =3500;
-       percentCorrectionTrials = .5;      
+%    case 'g62aaa3rt' % Started 2/1/17
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 219;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5;      
     
    case 'g62aaa3lt' % Started 2/1/17
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 219;
        msPenalty               =3500;
-       percentCorrectionTrials = .5;      
+       percentCorrectionTrials = .0;      
     
    case 'g62aaa2lt' % Started 2/1/17
        requestRewardSizeULorMS = 0;
@@ -81,17 +81,17 @@ switch subjIDs{1}
        msPenalty               =3500;
        percentCorrectionTrials = .5;      
        
-   case 'pvchr3b14rt' % Started 2/1/17
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 219;
-       msPenalty               =3500;
-       percentCorrectionTrials = .5;       
+%    case 'pvchr3b14rt' % Started 2/1/17
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 219;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5;       
     
    case 'g62rr1lt' % Started 2/1/17
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
-       percentCorrectionTrials = .5;      
+       percentCorrectionTrials = .0;      
     
    case 'g62pp6rt' % Started 2/1/17
        requestRewardSizeULorMS = 0;

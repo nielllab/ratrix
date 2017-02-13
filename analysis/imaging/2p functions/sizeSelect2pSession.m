@@ -54,15 +54,15 @@ end
 xpos=0;
 sf=0; isi=0; duration=0; theta=0; phase=0; radius=0;
 % moviefname = 'C:\sizeSelect2sf5sz14min.mat';
-moviefname = 'C:\sizeSelect2sf8sz26min.mat';
-load (moviefname)
+% moviefname = 'C:\sizeSelect2sf8sz26min.mat';
+moviefname = 'C:\sizeselectBinFullCntr19min.mat'
+load(moviefname)
 ntrials= min(dt*length(dfofInterp)/(isi+duration),length(sf))
 onsets = dt + (0:ntrials-1)*(isi+duration);
 timepts = 1:(2*isi+duration)/dt;
 timepts = (timepts-1)*dt;
 dFout = align2onsets(dfofInterp,onsets,dt,timepts);
 timepts = timepts - isi;
-
 timepts = round(timepts*1000)/1000;
 sbxfilename = fileName;
 meandfofInterp = squeeze(mean(mean(dfofInterp,1),2))';
@@ -74,7 +74,7 @@ save(sessionName,'meandfofInterp','xpos','sf','theta','phase','radius','radiusRa
 sz = unique(radius);
 freq = unique(sf);
 x=unique(xpos);
-for i=1:length(sizeVals); sizes{i} = num2str(sizeVals(i)); end
+for i=1:length(radiusRange); sizes{i} = num2str(radiusRange(i)); end
 
 % top = squeeze(mean(dFout(:,:,find(timepts==1),xpos==x(1))-dFout(:,:,find(timepts==0),xpos==x(1)),4));
 % bottom = squeeze(mean(dFout(:,:,find(timepts==1),xpos==x(end))-dFout(:,:,find(timepts==0),xpos==x(end)),4));

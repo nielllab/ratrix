@@ -29,13 +29,13 @@ switch subjIDs{1}
 
 
     case 'pvchr4b8lt' %started 2/16/17
-       requestRewardSizeULorMS = 43;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 219;
        msPenalty               =3500;
        percentCorrectionTrials = .5; 
     
     case 'pvchr4b8tt' %started 2/16/17
-       requestRewardSizeULorMS = 43;
+       requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 219;
        msPenalty               =3500;
        percentCorrectionTrials = .5; 
@@ -58,11 +58,11 @@ switch subjIDs{1}
 %        msPenalty               =3500;
 %        percentCorrectionTrials = .5;      
     
-   case 'g62uu4lt' % Started 2/1/17
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 219;
-       msPenalty               =3500;
-       percentCorrectionTrials = .5;      
+%    case 'g62uu4lt' % Started 2/1/17
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 219;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5;      
     
 %    case 'pvchr4b1rt' % Started 2/1/17
 %        requestRewardSizeULorMS = 0;
@@ -100,17 +100,17 @@ switch subjIDs{1}
 %        msPenalty               =3500;
 %        percentCorrectionTrials = .5;       
     
-   case 'g62rr1lt' % Started 2/1/17
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 123;
-       msPenalty               =3500;
-       percentCorrectionTrials = .5;      
-    
-   case 'g62pp6rt' % Started 2/1/17
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 123;
-       msPenalty               =3500;
-       percentCorrectionTrials = .5;      
+%    case 'g62rr1lt' % Started 2/1/17
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 123;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5;      
+%     
+%    case 'g62pp6rt' % Started 2/1/17
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 123;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5;      
     
 %    case 'g62pp4rt' % Started 2/1/17
 %        requestRewardSizeULorMS = 0;

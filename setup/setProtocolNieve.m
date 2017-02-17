@@ -29,8 +29,22 @@ if ~isscalar(subjIDs)
     error('expecting exactly one subject')
 end
 switch subjIDs{1}
+
+   case 'g62rr1lt' % Started 2/1/17  %%start random 2/17/17
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 123;
+       msPenalty               =3500;   
     
+   case 'g62pp6rt' % Started 2/1/17  %%start random 2/17/17
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 123;
+       msPenalty               =3500;   
     
+   case 'g62uu4lt' % Started 2/1/17  %%start random 2/17/17
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 219;
+       msPenalty               =3500;
+       
    case 'g62aaa2lt' % Started 2/1/17  %%start random 2/15/17
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 219;

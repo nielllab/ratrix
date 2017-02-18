@@ -88,11 +88,11 @@ switch subjIDs{1}
 %        msPenalty               =3500;
 %        percentCorrectionTrials = .5;  
     
-   case 'g62zz2tt' % Started 2/1/17
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 219;
-       msPenalty               =3500;
-       percentCorrectionTrials = .5;      
+%    case 'g62zz2tt' % Started 2/1/17
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 219;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5;      
        
 %    case 'pvchr3b14rt' % Started 2/1/17
 %        requestRewardSizeULorMS = 0;

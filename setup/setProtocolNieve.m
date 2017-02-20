@@ -30,6 +30,13 @@ if ~isscalar(subjIDs)
 end
 switch subjIDs{1}
 
+    case 'g62uu1lt' % Started 2/1/17  %%start nieve 2/20/17
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 123;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;       
+    
+    
    case 'g62rr1lt' % Started 2/1/17  %%start random 2/17/17
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;

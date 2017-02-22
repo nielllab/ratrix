@@ -6,7 +6,7 @@ dfWindow = 9:11;
 spWindow = 6:10;
 dt = 0.1;
 cyclelength = 1/0.1;
-moviefname = 'C:\sizeselectBinFullCntr19min';
+moviefname = 'C:\sizeselectBin22min';
 load(moviefname)
 contrastRange = unique(contrasts); sfrange = unique(sf); phaserange = unique(phase);
 for i = 1:length(contrastRange);contrastlist{i} = num2str(contrastRange(i));end
@@ -23,8 +23,8 @@ for f=1:length(use)
     filename = files(use(f)).sizeanalysis
 %     if exist(filename)==0 %%comment for redo
         files(use(f)).subj
-        psfile = 'c:\tempPhil2p.ps';
-        if exist(psfile,'file')==2;delete(psfile);end
+        psfilei = 'c:\tempPhil2pi.ps';
+        if exist(psfilei,'file')==2;delete(psfilei);end
 
         clear xph yph phaseVal rfCyc cycAvg rfAmp rf dftuning dftuningall sptuning sptuningall
 
@@ -76,7 +76,7 @@ for f=1:length(use)
         mtit('Good topo cells/threshold')
         if exist('psfile','var')
             set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfile,'-append');
+            print('-dpsc',psfilei,'-append');
         end
         
         %%%set actual topo threshold
@@ -98,13 +98,13 @@ for f=1:length(use)
         imagesc(dF(goodTopo,:),[0 1]); ylabel('cell #'); xlabel('frame'); title('dF');
         if exist('psfile','var')
             set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfile,'-append');
+            print('-dpsc',psfilei,'-append');
         end
         figure
         imagesc(spikeBinned(goodTopo,:),[0 0.1]); ylabel('cell #'); xlabel('frame'); title('spikes');
         if exist('psfile','var')
             set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfile,'-append');
+            print('-dpsc',psfilei,'-append');
         end
 
         ntrials= min(dt*length(dF)/(isi+duration),length(sf));
@@ -154,6 +154,7 @@ for f=1:length(use)
                 spikesOut2(i,:,j) = spikesOut(i,:,j)-nanmean(spikesOut(i,1:4,j));
             end
         end
+        
         
 %         %%%use output from PRE and POST gratings analysis to pick cells
 %         if mod(f,2)
@@ -245,7 +246,7 @@ for f=1:length(use)
         userf = rf(usecells,:);
         figure
         for i=1:length(sizes)
-            subplot(2,3,i)
+            subplot(2,ceil(length(sizes)/2),i)
             sizerespcells=[];
             for j=1:length(usecells)
                 goodresp = squeeze(nanmean(dftuning(j,dfWindow,sizebestsf(j,1),sizebesttheta(j,1),i,1),2))>=0.1;
@@ -264,12 +265,13 @@ for f=1:length(use)
         mtit('Responsive cells for each size')
         if exist('psfile','var')
             set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfile,'-append');
+            print('-dpsc',psfilei,'-append');
         end
 
         %%%plot individual cell data
 %         sitcolor = [0.6 0.6 0.6;0.8 0.8 0.8;1 1 1];
 %         runcolor = [0.6 0 0;0.8 0 0;1 0 0];
+        cellprint = {};
         for i=1:length(usecells)
             figure
             
@@ -309,7 +311,7 @@ for f=1:length(use)
 %             hold off
             
             %%%avg resp to best stim for each size stationary
-            subplot(1,3,1)
+            subplot(1,4,1)
             hold on
             traces = squeeze(dfsize(i,:,:,1));
             plot(timepts,traces)
@@ -324,7 +326,7 @@ for f=1:length(use)
             set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
             
             %%%avg resp to best stim for each size running
-            subplot(1,3,2)
+            subplot(1,4,2)
             hold on
             traces = squeeze(dfsize(i,:,:,2));
             plot(timepts,traces)
@@ -339,18 +341,31 @@ for f=1:length(use)
             set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
             
             %%%size curve based on gratings parameters
-            subplot(1,3,3)
+            subplot(1,4,3)
             hold on
             splotsit = squeeze(nanmean(dfsize(i,dfWindow,:,1),2));
             splotrun = squeeze(nanmean(dfsize(i,dfWindow,:,2),2));
             plot(1:length(radiusRange),splotsit,'k-o','Markersize',5)
             plot(1:length(radiusRange),splotrun,'r-o','Markersize',5)
             xlabel('Stim Size (deg)')
-            ylabel('grat params dfof')
+            ylabel('dfof')
             axis([0 length(radiusRange)+1 min(min([splotsit splotrun]))-0.01 max(max([splotsit splotrun]))+0.01])
             set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes)
             axis square
             set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+            
+            %%%size curve based on gratings parameters
+            subplot(1,4,4)
+            acell = usePts{usecells(i)};
+            cellpts = nan(length(acell),2);
+            for j = 1:length(acell)
+                [cellpts(j,1) cellpts(j,2)] = ind2sub(size(meanShiftImg),acell(j));
+            end
+            cellprint{i} = meanShiftImg(min(cellpts(:,1))-3:max(cellpts(:,1))+3,min(cellpts(:,2))-3:max(cellpts(:,2))+3,:);
+            cellprint{i} = cellprint{i}/max(max(max(cellprint{i})));
+            imagesc(cellprint{i},[0.5 1]);
+            axis square
+            axis off
             
 %             %%%size curve based on size parameters
 %             subplot(2,4,6)
@@ -403,7 +418,7 @@ for f=1:length(use)
             mtit(sprintf('Cell #%d tuning',usecells(i)))
             if exist('psfile','var')
                 set(gcf, 'PaperPositionMode', 'auto'); %%%figure out how to make this full page landscape
-                print('-dpsc',psfile,'-append');
+                print('-dpsc',psfilei,'-append');
             end
         end
         
@@ -422,40 +437,44 @@ for f=1:length(use)
         title('Median size suppression curve')
         if exist('psfile','var')
             set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfile,'-append');
+            print('-dpsc',psfilei,'-append');
         end
         
         %%%plot cycle averages
         figure
+        plotmax = max(max(max(nanmedian(dfsize,1)))) + 0.1;
+        plotmin = min(min(min(nanmedian(dfsize,1)))) - 0.05;
         for i = 1:length(sizes)
-            subplot(2,length(sizes)/2,i)
+            subplot(2,ceil(length(sizes)/2),i)
             hold on
-            shadedErrorBar(timepts,squeeze(nanmedian(dfsize(:,:,i,1),1)),...
-                squeeze(nanstd(dfsize(:,:,i,1),1))/sqrt(length(usecells)),'k',1)
-            shadedErrorBar(timepts,squeeze(nanmedian(dfsize(:,:,i,2),1)),...
-                squeeze(nanstd(dfsize(:,:,i,2),1))/sqrt(length(usecells)),'r',1)
+            sit = dfsize(:,:,i,1);
+            run = dfsize(:,:,i,2);
+            shadedErrorBar(timepts,squeeze(nanmedian(sit,1)),...
+                squeeze(nanstd(sit,1))/sqrt(length(usecells)),'k',1)
+            shadedErrorBar(timepts,squeeze(nanmedian(run,1)),...
+                squeeze(nanstd(run,1))/sqrt(length(usecells)),'r',1)
             axis square
-            axis([timepts(1) timepts(end) -0.05 0.25])
+            axis([timepts(1) timepts(end) plotmin plotmax])
             set(gca,'LooseInset',get(gca,'TightInset'))
         end
         mtit('Median cycle avg/size')
         if exist('psfile','var')
             set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfile,'-append');
+            print('-dpsc',psfilei,'-append');
         end
 
         
 
         %%%saving
-        save(fullfile(pathname,filename),'dftuning','sptuning','userf','dfsize','usecells')
+        save(fullfile(pathname,filename),'dftuning','sptuning','userf','dfsize','usecells','cellprint')
 
         try
-            dos(['ps2pdf ' psfile ' "' [fullfile(pathname,filename) '.pdf'] '"'] )
+            dos(['ps2pdf ' psfilei ' "' [fullfile(pathname,filename) '.pdf'] '"'] )
         catch
             display('couldnt generate pdf');
         end
 
-        delete(psfile);
+        delete(psfilei);
         close all
 %     else
 %         sprintf('skipping %s',filename)

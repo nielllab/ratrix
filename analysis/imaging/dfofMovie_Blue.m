@@ -209,19 +209,19 @@ end
 % keyboard
 % %% raw movie
 %
-%
-% % [f,p] = uiputfile('*.avi','dfof movie file');  %FOR USE INPUT
+
+% [f,p] = uiputfile('*.avi','dfof movie file');  %FOR USE INPUT
 % small_mov = dfof_bg(4:4:end,4:4:end,4:4:end);
 % lowthresh = prctile(small_mov(:),2);
 % upperthresh = 1.5*prctile(small_mov(:),98);
-%
+% 
 % clear mov
 % figure
-% mov_length = size(dfof_bg,3)- 300;  %BECAUSE START FRAME = 300
+% mov_length = size(dfof_bg,3);  %BECAUSE START FRAME = 300
 % % mov_length=400
 % for i = 1:mov_length;
 % i
-%     imagesc(imresize(dfof_bg(:,:,i+300),0.5,'box'),[lowthresh upperthresh]);
+%     imagesc(imresize(dfof_bg(:,:,i),0.5,'box'),[lowthresh upperthresh]);
 %     colormap(gray);
 %    hold on
 %     if use_speed
@@ -236,17 +236,17 @@ end
 %         mov(mov_length) = getframe(gcf); %%%% initializes structure array
 %     end
 %     mov(i) = getframe(gcf);
-%
+% 
 % end
-%
-%
+% 
+% 
 % % vid = VideoWriter(fullfile(p,f));%IF USING USER INPUT
 % vid = VideoWriter(fullfile(datadir,[f(1:end-11) 'Raw_w_running']))
 % vid.FrameRate=25;
 % open(vid);
 % writeVideo(vid,mov(1:end));
 % close(vid)
-%
+% 
 % clear mov
 %
 %

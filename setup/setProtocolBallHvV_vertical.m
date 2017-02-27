@@ -32,6 +32,24 @@ if ~isscalar(subjIDs)
 end
  switch subjIDs{1}
      
+    case 'g62mm11lt' % Started 2/1/17 %%switch 2/8/17 %%%switch full 2/27/17
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 123;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;     
+       pixPerCycs              = [200];
+       normalizedPosition      = [0.45 0.55];
+       radius                 = .34;
+       
+    case 'g62aaa3rt' % Started 2/1/17  %%switch 2/9/17 %%%switch full 2/27/17
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 219;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;
+       pixPerCycs              = [200];
+       normalizedPosition      = [0.45 0.55];
+       radius                 = .34;
+     
   case 'g62kk10tt' % Started 8/23/16 %%start hvv 9/19/16
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 219;

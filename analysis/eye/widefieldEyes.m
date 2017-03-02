@@ -13,6 +13,7 @@ contrast = contrast(1:end-5); %%% cut off last few in case imaging stopped early
 x = medfilt1(xEye,5); y= medfilt1(yEye,5);
 v = medfilt1(sp,9); r = medfilt1(rad,7);
 
+Xfilt = medfilt1(X,5); Yfilt = medfilt1(Y,5);
 %%% show raw and filtered data
 figure
 plot(xEye); hold on; plot(x); title('x'); legend('raw','filtered')
@@ -23,14 +24,47 @@ plot(sp); hold on; plot(v); title('v'); legend('raw','filtered')
 
 %%% normalize eye/speed data (custom function nrm)
 x = nrm(x); y = nrm(y); r= nrm(r); v = nrm(v);
-
+%X = nrm(Xfilt(:,60:180)); Y=nrm(Yfilt)
 figure
 hist(x,0.01:0.02:1); title('x position')
-
-
+% figure
+% hist(Xfilt,0.01:0.02:1)
 %%% plot a lot of comparisons!
+
+left=unique(xpos(3))
+right=unique(xpos(1))
+use01 = find(contrast==.01&xpos==right)
+use04 = find(contrast==.04&xpos==right)
+
+figure
+set(gcf,'Name','contrast= 0.04, Right Position')
+for i=1:length(use04)
+subplot(2,8,i)
+plot(R(use04(i),:)); axis square ; ylim([10 25]); xlim([0 180]); hold on;
+plot([60 60],[10 25],'g');  plot ([75 75],[10 25],'g');
+subplot(2,8,i+8)
+plot(Xfilt(use04(i),:),Yfilt(use04(i),:));hold on; axis square
+xlim([40 70]);ylim([105 120])
+plot(Xfilt(use04(i),:),Yfilt(use04(i),:),'.r');
+end
+
+figure
+set(gcf,'Name','contrast= 0.01, Right Position')
+for i=1:length(use01)
+subplot(2,8,i)
+plot(R(use01(i),:)); axis square ; ylim([10 25]); xlim([0 180]); hold on;
+plot([60 60],[10 25],'g');  plot ([75 75],[10 25],'g');
+subplot(2,8,i+8)
+plot(Xfilt(use01(i),:),Yfilt(use01(i),:));hold on; axis square
+xlim([40 70]);ylim([105 120])
+plot(Xfilt(use01(i),:),Yfilt(use01(i),:),'.r');
+end
+
+
 figure
 plot(x,y); title('eye position'); hold on; plot(x,y,'r.')
+figure
+plot(Xfilt(contrast==0.01,:));hold on; plot(Y(contrast==0.01,:))
 figure
 plot(frameT(1:length(x)),x/max(x)); title('X')
 hold on

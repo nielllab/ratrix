@@ -1,13 +1,15 @@
 close all; clear all;
 
-cfile = ('02_17_17_g62ss4-lt_darkness_eye')
+cfile = 'D:\Angie_analysis\widefield_data\022217_J317b_eyeonly_naive\J317b_detection_2lowcontrasts_eyeonly\022217_J317b_detection_2lowcontrasts_eye.mat'
+
 load(cfile)
 % movieFile = 'C:\Users\Angie Michaiel\Desktop\movie files\cortex\DetectionStim1contrast_7_25min.mat';
 %movieFile = 'C:\Users\Angie Michaiel\Desktop\movie files\cortex\DetectionStim3contrast10min.mat'
 movieFile = 'C:\Users\Angie Michaiel\Desktop\movie files\cortex\DetectionStim2contrast_LOW_7_25min.mat';
 load(movieFile);
 data = squeeze(data);
-mapsfile = ('g62ss4-lt_run3_darkness_premaps.mat')
+mapsfile = ('D:\Angie_analysis\widefield_data\022217_J317b_eyeonly_naive\J317b_detection_2lowcontrasts_eyeonly\J317_detection_2lowcontrasts_eyeonlymaps.mat')
+
 load(mapsfile,'dfof_bg','frameT','cycMap','sp', 'stimRec');
 
 timeStamps=stimRec.ts
@@ -119,12 +121,11 @@ dur =0.5+isi
 %needs to start at 0 
 fInterpR = interp1(frameT(1:length(rad)),rad,timeStamps) %camera/imaging times taken from dfof maps, rad, movie frame times
 fInterpV = interp1(frameT, sp, timeStamps)
-%fInterpC = interp1(dur,contrast,timeStamps)
 
-%need to match up contrast with frame numbers
-%dfof for rad (same length)
-%dfof w/movie
-%rad w/movie
+fInterpX = interp1(frameT(1:length(xEye)),xEye,timeStamps)
+fInterpY = interp1(frameT(1:length(yEye)),yEye,timeStamps)
+
+% fInterpC = interp1(frameT,contrast,timeStamps)
 
 figure
 plot(timeStamps,fInterpR); xlabel('secs');
@@ -139,13 +140,13 @@ for f = 1:75
 end
 
 figure
-plot(rAvg)
+plot(rAvg); title('cycle average');
 figure
 plot(frameT(1:1000),fInterpR(1:1000))
 
 clear R
 for tr = 1:floor(max(frameNum)/75)
-    for t = 1:120
+    for t = 1:180
         R(tr,t) = nanmean(fInterpR(frameNum == (tr-1)*75 + t));%
     end
 %     R(tr,:) = R(tr,:) - R(tr,1);
@@ -153,12 +154,25 @@ end
 
 clear tr t
 for tr = 1:floor(max(frameNum)/75)
-    for t = 1:120
+    for t = 1:180
         V(tr,t) = nanmean(fInterpV(frameNum == (tr-1)*75 + t));%
     end
 %     V(tr,:) = V(tr,:) - V(tr,1);
 end
 
+clear tr t
+for tr = 1:floor(max(frameNum)/75)
+    for t = 1:180
+        X(tr,t) = nanmean(fInterpX(frameNum == (tr-1)*75 + t));%
+    end
+end
+
+clear tr t
+for tr = 1:floor(max(frameNum)/75)
+    for t = 1:180
+        Y(tr,t) = nanmean(fInterpY(frameNum == (tr-1)*75 + t));%
+    end
+end
 
 
 figure
@@ -175,29 +189,30 @@ useTrials = timeStamps(contrast==1)
 figure
 plot(frameNum,fInterpR);hold on; plot(useTrials,'.')
 
+left=unique(xpos(3))
+right=unique(xpos(1))
 
-use = find(contrast>=.01)
+use = find(contrast==.04)
 
 figure
-for i = 1:20
-subplot(5,4,i)
+for i = 1:length(use)
+subplot(4,4,i)
 plot(R(use(i),:)); hold on;% plot(V(use(i),:)*.05)
-ylim([12 25]); 
-xlim([0 120])
- plot([60 60],[12 25],'g');  plot ([75 75],[12 25],'g');
-if find(contrast(use(i))==1), title('1')
-elseif find(contrast(use(i))==.01), title('0.01')
-else title('0.04')
+% hold on;
+% plot(R(use04(i),:),'r')
+ylim([12 26]); 
+xlim([0 180])
+ plot([60 60],[12 26],'g');  plot ([75 75],[12 26],'g');
+if find(contrast(use(i))==.01), title('.01')
+else find(contrast(use(i))==.04), title('0.04')
+%else title('0.04')
 end
 end
 
-figure
- for i=1:length(use)
-plot(i,max(R(use(i),60:120),'.')); hold on; % plot(V(use(i),:)*.05)
-end
+use = find(contrast==.01)
 
 figure
-plot(nanmean(R(contrast==1,:))); hold on; plot(nanmean(V(contrast==1,:)/5))
+plot(nanmean(R(contrast==.01,:))); hold on;% plot(nanmean(V(contrast==.01,:)/5))
 plot([60 60],[8 20],'g');  plot ([75 75],[8 20],'g');
 title ('mean of full contrast')
 
@@ -235,4 +250,4 @@ title ('mean of full contrast')
 % close(vidObj);
 
 
- save(mapsfile,'rad','fInterpR','fInterpV', 'R','V','xEye','yEye','contrast','-append')
+ save(mapsfile,'rad','fInterpR','fInterpV', 'R','V','xEye','yEye','contrast','xpos','ypos','X','Y','-append')

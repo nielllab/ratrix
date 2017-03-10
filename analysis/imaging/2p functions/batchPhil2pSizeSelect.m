@@ -1,7 +1,7 @@
-% dbstop if error
-% pathname = '\\langevin\backup\twophoton\Phil\Compiled2p\';
-% n = 0;
-% 
+dbstop if error
+pathname = '\\langevin\backup\twophoton\Phil\Compiled2p\';
+n = 0;
+
 % n=n+1;
 % files(n).subj = 'G62W9RT';
 % files(n).expt = '020817';

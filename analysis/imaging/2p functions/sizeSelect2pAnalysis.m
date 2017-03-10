@@ -21,7 +21,7 @@ thetaRange = unique(theta);
 
 for f=1:length(use)
     filename = files(use(f)).sizeanalysis
-%     if exist(filename)==0 %%comment for redo
+%     if exist([filename '.mat'])==0 %%comment for redo
         files(use(f)).subj
         psfilei = 'c:\tempPhil2pi.ps';
         if exist(psfilei,'file')==2;delete(psfilei);end
@@ -74,7 +74,7 @@ for f=1:length(use)
             xlabel(sprintf('%.2f dfof',toporespthreshlist(i)))
         end
         mtit('Good topo cells/threshold')
-        if exist('psfile','var')
+        if exist('psfilei','var')
             set(gcf, 'PaperPositionMode', 'auto');
             print('-dpsc',psfilei,'-append');
         end
@@ -96,13 +96,13 @@ for f=1:length(use)
         %%%plot rasters for dfof and spikes
         figure
         imagesc(dF(goodTopo,:),[0 1]); ylabel('cell #'); xlabel('frame'); title('dF');
-        if exist('psfile','var')
+        if exist('psfilei','var')
             set(gcf, 'PaperPositionMode', 'auto');
             print('-dpsc',psfilei,'-append');
         end
         figure
         imagesc(spikeBinned(goodTopo,:),[0 0.1]); ylabel('cell #'); xlabel('frame'); title('spikes');
-        if exist('psfile','var')
+        if exist('psfilei','var')
             set(gcf, 'PaperPositionMode', 'auto');
             print('-dpsc',psfilei,'-append');
         end
@@ -161,9 +161,9 @@ for f=1:length(use)
 %             gratfile = files(use(f)).gratinganalysis;
 %             gratfile2 = files(use(f+1)).gratinganalysis;
 %             openfig([gratfile '.fig'])
-%             if exist('psfile','var')
+%             if exist('psfilei','var')
 %                 set(gcf, 'PaperPositionMode', 'auto');
-%                 print('-dpsc',psfile,'-append');
+%                 print('-dpsc',psfilei,'-append');
 %             end
 %         else
 %             gratfile = files(use(f-1)).gratinganalysis;
@@ -205,19 +205,23 @@ for f=1:length(use)
             end
         end
         
+        dftuning2 = dftuning;
+        sptuning2 = sptuning;
         %%%subtract size zero trials
         for h = 1:length(usecells)
             for i = 1:length(sfrange)
                 for j = 1:length(thetaRange)
                     for k = 1:length(radiusRange)
                         for l = 1:2
-                            dftuning(h,:,i,j,k,l) = dftuning(h,:,i,j,k,l) - dftuning(h,:,i,j,1,l);
-                            sptuning(h,:,i,j,k,l) = sptuning(h,:,i,j,k,l) - sptuning(h,:,i,j,1,l);
+                            dftuning2(h,:,i,j,k,l) = dftuning(h,:,i,j,k,l) - dftuning(h,:,i,j,1,l);
+                            sptuning2(h,:,i,j,k,l) = sptuning(h,:,i,j,k,l) - sptuning(h,:,i,j,1,l);
                         end
                     end
                 end
             end
         end
+        dftuning = dftuning2;
+        sptuning = sptuning2;      
         
         
         %%%get sf and ori pref for size stimuli
@@ -263,7 +267,7 @@ for f=1:length(use)
             set(gca,'xticklabel','','yticklabel','')
         end
         mtit('Responsive cells for each size')
-        if exist('psfile','var')
+        if exist('psfilei','var')
             set(gcf, 'PaperPositionMode', 'auto');
             print('-dpsc',psfilei,'-append');
         end
@@ -361,7 +365,7 @@ for f=1:length(use)
             for j = 1:length(acell)
                 [cellpts(j,1) cellpts(j,2)] = ind2sub(size(meanShiftImg),acell(j));
             end
-            cellprint{i} = meanShiftImg(min(cellpts(:,1))-3:max(cellpts(:,1))+3,min(cellpts(:,2))-3:max(cellpts(:,2))+3,:);
+            cellprint{i} = meanShiftImg(min(cellpts(:,1)):max(cellpts(:,1)),min(cellpts(:,2)):max(cellpts(:,2)),:);
             cellprint{i} = cellprint{i}/max(max(max(cellprint{i})));
             imagesc(cellprint{i},[0.5 1]);
             axis square
@@ -416,7 +420,7 @@ for f=1:length(use)
 %             set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
             
             mtit(sprintf('Cell #%d tuning',usecells(i)))
-            if exist('psfile','var')
+            if exist('psfilei','var')
                 set(gcf, 'PaperPositionMode', 'auto'); %%%figure out how to make this full page landscape
                 print('-dpsc',psfilei,'-append');
             end
@@ -433,9 +437,9 @@ for f=1:length(use)
         ylabel('sitting dfof grat params')
         axis([0 length(radiusRange)+1 min(min([sit run]))-0.01 max(max([sit run]))+0.01])
         axis square
-        set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+        set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'Fontsize',8)
         title('Median size suppression curve')
-        if exist('psfile','var')
+        if exist('psfilei','var')
             set(gcf, 'PaperPositionMode', 'auto');
             print('-dpsc',psfilei,'-append');
         end
@@ -458,15 +462,42 @@ for f=1:length(use)
             set(gca,'LooseInset',get(gca,'TightInset'))
         end
         mtit('Median cycle avg/size')
-        if exist('psfile','var')
+        if exist('psfilei','var')
             set(gcf, 'PaperPositionMode', 'auto');
             print('-dpsc',psfilei,'-append');
         end
 
+        %%%calculate suppression index
+        SI = nan(size(dfsize,1),2);
+        for i = 1:size(dfsize,1)
+            scurve = squeeze(nanmean(dfsize(i,dfWindow,:,1)));
+            [val ind] = max(scurve);
+            if (ind~=length(sizes))&(val~=0)
+                SI(i,1) = (scurve(ind)-scurve(end))/scurve(ind);
+            end
+            scurve = squeeze(nanmean(dfsize(i,dfWindow,:,2)));
+            [val ind] = max(scurve);
+            if (ind~=length(sizes))&(val~=0)
+                SI(i,2) = (scurve(ind)-scurve(end))/scurve(ind);
+            end
+        end
         
+        SI(SI>1)=1;
+        
+        figure
+        hold on
+        plot([1 2],[SI(:,1) SI(:,2)],'k.','Markersize',5)
+        errorbar([1 2],[nanmean(SI(:,1)) nanmean(SI(:,2))],[nanstd(SI(:,1)) nanstd(SI(:,2))]/sqrt(size(dfsize,1)),'b','Markersize',20)
+        axis([0 3 0 2])
+        set(gca,'xtick',[1 2],'xticklabel',{'sit','run'})
+        ylabel('SI')
+        if exist('psfilei','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilei,'-append');
+        end    
 
         %%%saving
-        save(fullfile(pathname,filename),'dftuning','sptuning','userf','dfsize','usecells','cellprint')
+        save(fullfile(pathname,filename),'dftuning','sptuning','userf','dfsize','usecells','cellprint','SI')
 
         try
             dos(['ps2pdf ' psfilei ' "' [fullfile(pathname,filename) '.pdf'] '"'] )

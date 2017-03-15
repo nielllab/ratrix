@@ -6,8 +6,8 @@ batch2pBehaviorSBX;
 %alluse = find(strcmp({files.task},'GTS') & strcmp({files.notes},'good imaging session'))
 alluse = find( strcmp({files.notes},'good imaging session'))
 
-gts = 1; naive=2; naiveTrained=3; hvv = 4; rand =5;
-condLabel{1} = ' GTS'; condLabel{2}=' naive'; condLabel{3}=' naive trained'; condLabel{4} = ' HvV'; condLabel{5} = ' rand';
+gts = 1; naive=2; naiveTrained=3;  rand =4; hvv = 5;
+condLabel{1} = ' GTS'; condLabel{2}=' naive'; condLabel{3}=' naive trained'; condLabel{4} = ' rand'; condLabel{5} = ' HvV';
 
 rfAmpAll =[]; rfAll = []; trialDataAll=[]; xAll = []; yAll = []; data3xAll=[]; data2sfAll= [];
 n=0;
@@ -44,8 +44,10 @@ for i = 1:length(alluse);
     if strcmp(files(alluse(i)).task,'Naive') & files(alluse(i)).learningDay<5, allCond(cellrange) = naive; end;
     if strcmp(files(alluse(i)).task,'Naive') & files(alluse(i)).learningDay>=5, allCond(cellrange) = naiveTrained; end;
     if strcmp(files(alluse(i)).task,'HvV'), allCond(cellrange) = hvv; end;
-        if strcmp(files(alluse(i)).task, 'RandReward'), allCond(cellrange) = rand; end;
+    if strcmp(files(alluse(i)).task, 'RandReward'), allCond(cellrange) = rand; end;
     
+    sessionCond(i) = allCond(cellrange(1));
+    sessionSubj{i} = files(alluse(i)).subj;
     
     sess(cellrange)=i;
     
@@ -213,11 +215,11 @@ end
 
 centered = (d1<12| d2<12)';
 
-clear invariant
+clear invariant  %%% average over correct top (2 orientation) then correct bottom
 invariant(:,:,2) = mean(centeredTrialData(:,:,3:4),3);
 invariant(:,:,1) = mean(centeredTrialData(:,:,1:2),3);
 
-clear epochData
+clear epochData %%% choose time ranges to go into clustering
 epochData(:,1,:) = squeeze(mean(invariant(:,5:10,:),2));
 epochData(:,2,:) = squeeze(mean(invariant(:,12:15,:),2));
 epochData(:,3,:) = squeeze(mean(invariant(:,20:30,:),2));
@@ -302,8 +304,10 @@ for i = 1:max(clust);
         data = allData(sortClust==i,:);
         start = min(find(sortClust==i));
         tic; dist = pdist(imresize(data(:,1:end/4), [size(data,1),size(data,2)/8]),'correlation'); toc
-        tic; [Y e] = mdscale(dist,1); toc
-        [y sortind] = sort(Y);
+        dist = dist+randi(10^9,size(dist))/10^8;  %%% jitter points a bit to avoid errors in mdscale , can't use rand function though      
+        %tic; [Y e] = mdscale(dist,1); toc
+        %[y sortind] = sort(Y);
+        sortind = 1:size(data,1);
         mdInd(sortClust==i) = sortind+start-1;
     end
 end
@@ -328,6 +332,7 @@ for cond = 1:2
     title(condLabel{cond})
 end
 
+%%% plot cell summary for each session
 for i = 1:max(sess);
     load([pathname files(alluse(i)).dir '\' files(alluse(i)).behavPts],'greenframe');
     figure
@@ -388,6 +393,7 @@ density(~isfinite(density))=-0.1;
 figure
 imagesc(num);  axis equal;  axis([0 72 0 128]); axis xy; hold on;  circle(34,0.625*128-2,12);circle(34,0.375*128-2,12);
 
+%%% where are cells located?
 figure
 for i = 1:4
     subplot(1,4,i);
@@ -399,7 +405,6 @@ c = clust;
 
 %%% average across all conditions (trained, naive, etc)
 trialType = {'correct pref','error pref','correct non-pref','error non-pref'};
-for cond = 1:1
     figure
     for t = 1:4
         subplot(2,2,t);
@@ -411,14 +416,14 @@ for cond = 1:1
     
     legend;
     set(gcf,'Name','all conditions non-weighted');
-end
+
 
 %%% weighted mean (by fraction of cells)
 clear clustBehav clustBehavErr
 trialType = {'correct pref','error pref','correct non-pref','error non-pref'};
 for cond = 1:4
     figure
-    for t = 1:4
+    for t = 1:4 %%%  top/bottom, correct/incorrect
         subplot(2,2,t);
         for i = 1:max(c)
             n = sum(clust==i & allCond==cond)/sum(allCond==cond)
@@ -434,6 +439,74 @@ for cond = 1:4
     set(gcf,'Name',condLabel{cond});
 end
 
+%%% weighted mean (by fraction of cells) by session, and session plots
+clear clustBehav clustBehavErr
+trialType = {'correct pref','error pref','correct non-pref','error non-pref'};
+
+psfile = 'temp.ps';
+if exist(psfile,'file')==2;delete(psfile);end
+
+for s= 1:max(sess)
+    s
+    if strcmp(files(alluse(s)).task,'GTS'), sessCond(s) = gts; end;
+    if strcmp(files(alluse(s)).task,'Naive') & files(alluse(s)).learningDay<5, sessCond(s)  = naive; end;
+    if strcmp(files(alluse(s)).task,'Naive') & files(alluse(s)).learningDay>=5,sessCond(s)  = naiveTrained; end;
+    if strcmp(files(alluse(s)).task,'HvV'), sessCond(s)  = hvv; end;
+    if strcmp(files(alluse(s)).task, 'RandReward'), sessCond(s)  = rand; end;
+    sessSubj{s} = files(alluse(s)).subj;
+    figure
+    set(gcf,'Name',sprintf('%s %s %s',files(alluse(s)).subj, files(alluse(s)).expt, condLabel{sessCond(s)}));
+    for t = 1:4 %%%  top/bottom, correct/incorrect
+        subplot(2,2,t);
+        for i = 1:max(c)
+            n = sum(clust==i & sess==s)/sum(sess==s)
+            d =nanmean(invariantAll(clust==i & sess==s ,:),1); plot(0.1*(0:41),n*(d((t-1)*42 + (1:42))-mean(d(6:10))));hold on; ylim([ -0.025 0.065]); xlim([0 4.15])
+        
+        clustBehav(s,t,cond,:) = n*(d((t-1)*42 + (1:42))-mean(d(6:10)));
+        clustBehavErr(s,t,cond,:) = n*nanstd(invariantAll(clust==i & sess==s ,(t-1)*42 + (1:42)),[],1)/sqrt(sum(clust==i & sess==s));
+        end
+        title([trialType{t} ' weighted']); xlabel('secs'); ylabel('weighted response'); set(gca,'Ytick',-0.025:0.025:0.075);
+    end
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+    legend;
+    
+    %%% session figure
+       load([pathname files(alluse(s)).dir '\' files(alluse(s)).behavPts],'greenframe');
+    figure
+    imagesc(greenframe,[0 1.2*prctile(greenframe(:),99)]); colormap gray;
+     title(sprintf('%s %s %s ',files(alluse(s)).subj,files(alluse(s)).expt,files(alluse(s)).task));
+     
+    figure
+    subplot(1,3,1:2)
+    imagesc(allData(sortCentered' & sortSess==s,:),[0 0.5]);
+    hold on; for j= 1:8, plot([j*length(behavTimepts) j*length(behavTimepts)]+1,[1 sum(sortCentered' & sortSess==s)],'g'); end
+    
+    title(sprintf('%s %s %s total=%d gratings=%d exposures=%d',files(alluse(s)).subj,files(alluse(s)).expt,files(alluse(s)).task,files(alluse(s)).totalDays,files(alluse(s)).totalSinceGratings,files(alluse(s)).learningDay));
+    
+    subplot(1,3,3); hold on
+%     plot(yAll(sess==i & ~active'),xAll(sess==i & ~active'),'k.');
+%     plot(yAll(sess==i & clust==1 ),xAll(sess==i & clust==1),'b.');
+%     plot(yAll(sess==i& clust==2),xAll(sess==i & clust==2),'r.');
+%     plot(yAll(sess==i& clust==3),xAll(sess==i & clust ==3),'g.');
+    
+        plot(yAll(sess==s & ~centered'),xAll(sess==s & ~centered'),'k.');
+    plot(yAll(sess==s & centered' ),xAll(sess==s & centered'),'g.');
+    
+    axis equal;  axis([0 72 0 128]); hold on
+    circle(34,0.625*128-2,12);circle(34,0.375*128-2,12); set(gca,'Xtick',[]); set(gca,'Ytick',[]);
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+end
+
+[f p] = uiputfile('*.pdf');
+newpdfFile = fullfile(p,f)
+try
+    dos(['ps2pdf ' 'temp.ps "' newpdfFile '"'] )
+
+catch
+    display('couldnt generate pdf');
+end
 
 
 %%% non-weighted (average of all units in this cluster)
@@ -622,9 +695,12 @@ bar(spontMod); hold on; errorbar(1:3,spontMod,spontModErr,'k.','markersize',8,'L
 ylabel('mean absolute modulation'); set(gca,'FontSize',16); ylim([0 0.125]); set(gca,'Xtick',0:0.025:0.125);
 
 osifig = figure;
-for i = 1:max(c)
+%%% calculate response parameters (sustained, transient, OSI, running modulation) for each cluster; put each graph into one subpanel
+for i = 1:max(c)  
     clustData = allData(sortClust==i ,:);
     clear transResp sustResp
+ 
+    %%% calculate transient and sustained responses (relative to baseline)
     transResp(:,1) = mean(clustData(:,13:14),2) - mean(clustData(:,1:10),2);
     transResp(:,2) = mean(clustData(:,74:75),2) - mean(clustData(:,62:71),2);
     sustResp(:,1) = mean(clustData(:,20:40),2) - mean(clustData(:,1:10),2);
@@ -672,6 +748,7 @@ figure
 bar(osi); hold on; errorbar(1:3,osi,osi_err,'k.','markersize',8,'Linewidth',2); ylabel('osi'); xlabel('cluster'); ylim([0 1])
 set(gca,'FontSize',16)
 
+%%% calculate # of neurons in each cluster for each condition (pie chart)
 clear clustDist
 for cond =1:4
     for i = 1:max(clust); clustDist(cond,i) = sum(allCond==cond & clust==i )/sum(allCond==cond & centered'); end
@@ -682,13 +759,20 @@ for cond =1:4
 end
 clustDist
 
-
+%%% print out number of cells and subjects 
+in each condition
 for c = 1:4
     cells = find(allCond==c & centered');
     sessions = unique(sess(cells));
     subjs = unique({files(alluse(sessions)).subj});
     sprintf('%s %d cells %d subjs %d sessions',condLabel{c},length(cells), length(subjs),length(sessions))
 end
+
+
+
+%%%%% end of useful code
+
+
 
 keyboard
 

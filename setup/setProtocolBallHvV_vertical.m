@@ -41,6 +41,15 @@ end
        normalizedPosition      = [0.35 0.65];
        radius                 = .27;     
      
+   case 'g62uu1tt' % Started 2/1/17 %%switch 2/8/17
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 123;
+       msPenalty               =3500;
+       percentCorrectionTrials = .6;
+       pixPerCycs              = [200];
+       normalizedPosition      = [0.48 0.52];
+       radius                 = .34;  
+       
     case 'g62mm11lt' % Started 2/1/17 %%switch 2/8/17 %%%switch full 2/27/17
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;

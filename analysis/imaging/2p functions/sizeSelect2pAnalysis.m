@@ -21,7 +21,7 @@ thetaRange = unique(theta);
 
 for f=1:length(use)
     filename = files(use(f)).sizeanalysis
-%     if exist([filename '.mat'])==0 %%comment for redo
+    if exist([filename '.mat'])==0 %%comment for redo
         files(use(f)).subj
         psfilei = 'c:\tempPhil2pi.ps';
         if exist(psfilei,'file')==2;delete(psfilei);end
@@ -507,7 +507,7 @@ for f=1:length(use)
 
         delete(psfilei);
         close all
-%     else
-%         sprintf('skipping %s',filename)
-%     end
+    else
+        sprintf('skipping %s',filename)
+    end
 end

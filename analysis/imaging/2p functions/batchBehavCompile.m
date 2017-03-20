@@ -2,26 +2,37 @@ close all
 
 batch2pBehaviorSBX;
 
-
+%%% select files to analyze
 %alluse = find(strcmp({files.task},'GTS') & strcmp({files.notes},'good imaging session'))
 alluse = find( strcmp({files.notes},'good imaging session'))
 
+%%% labels for each condition
 gts = 1; naive=2; naiveTrained=3;  rand =4; hvv = 5;
 condLabel{1} = ' GTS'; condLabel{2}=' naive'; condLabel{3}=' naive trained'; condLabel{4} = ' rand'; condLabel{5} = ' HvV';
 
+%%% create empty variables for data appending
 rfAmpAll =[]; rfAll = []; trialDataAll=[]; xAll = []; yAll = []; data3xAll=[]; data2sfAll= [];
 n=0;
 
 
 for i = 1:length(alluse);
     i
+    
+    %%% load data
     load([pathname files(alluse(i)).dir '\' files(alluse(i)).compileData],'rfAmp','rf','behavTrialData','passiveData3x','passiveData2sf','correctRate','resprate','stoprate');
     figure; plot(resprate/2,'g'); hold on; plot(correctRate,'b');plot(stoprate/10,'r');ylim([0 1]); title([files(alluse(i)).subj files(alluse(i)).task]);legend('response','correct','stop')
+    
+    %%% store behavioral performance over time
+    respRateAll{i} = resprate; correctRateAll{i} = correctRate; stopRateAll{i} = stoprate;
+    
+    %%% apply manual cutoff for cell numbers if included
     if ~isempty(files(alluse(i)).ncells)
         cutoff = files(alluse(i)).ncells;
     else
         cutoff = size(behavTrialData,1);
     end
+    
+    %%% append this session's data
     cellrange = (n+1):(n+cutoff);
     rfAmpAll = [rfAmpAll; rfAmp(1:cutoff,:)];
     rfAll = [rfAll; rf(1:cutoff,:)];
@@ -29,16 +40,18 @@ for i = 1:length(alluse);
     data3xAll = [data3xAll; passiveData3x(1:cutoff,1:29,:)];
     data2sfAll = [data2sfAll; passiveData2sf(1:cutoff,:,:)];
     
+    %%% get topography data
     load([pathname files(alluse(i)).dir '\' files(alluse(i)).topoX],'map'); load([pathname files(alluse(i)).dir '\' files(alluse(i)).topoXpts],'cropx','cropy','usePts')
-    mapx = getMapPhase(map,cropx,cropy,usePts); close(gcf);
+    mapx = getMapPhase(map,cropx,cropy,usePts); close(gcf); %%% get topography based on neuropil
     mapx = mapx*128/(2*pi) - (0.05*128);  %%% (0.05 = 500msec/10sec, lag of raw calcium signals)
     
     load([pathname files(alluse(i)).dir '\' files(alluse(i)).topoY],'map')
-    mapy = getMapPhase(map,cropx,cropy,usePts); close(gcf);
+    mapy = getMapPhase(map,cropx,cropy,usePts); close(gcf); %%% get topography based on neuropil
     mapy = mapy*72/(2*pi) - (0.05 *72);   %%% (0.05 = 500msec/10sec, lag of raw calcium signals)
     
-    xAll = [xAll mapx(1:cutoff)]; yAll = [yAll mapy(1:cutoff)];
+    xAll = [xAll mapx(1:cutoff)]; yAll = [yAll mapy(1:cutoff)]; % append topography
     
+    %%% get task condition
     allCond(cellrange)=NaN;
     if strcmp(files(alluse(i)).task,'GTS'), allCond(cellrange) = gts; end;
     if strcmp(files(alluse(i)).task,'Naive') & files(alluse(i)).learningDay<5, allCond(cellrange) = naive; end;
@@ -46,16 +59,15 @@ for i = 1:length(alluse);
     if strcmp(files(alluse(i)).task,'HvV'), allCond(cellrange) = hvv; end;
     if strcmp(files(alluse(i)).task, 'RandReward'), allCond(cellrange) = rand; end;
     
+    %%% save out other session information
     sessionCond(i) = allCond(cellrange(1));
-    sessionSubj{i} = files(alluse(i)).subj;
-    
+    sessionSubj{i} = files(alluse(i)).subj;   
     sess(cellrange)=i;
     
     %%% get eye data for behavior
     clear eyes
     load([pathname files(alluse(i)).dir '\' files(alluse(i)).behavPts],'eyes','eyeAlign');
-    if ~exist('eyes','var');
-        
+    if ~exist('eyes','var');    %%% if it's not already done, get extract eye position and align to data    
         display('calculating eyes');
         load([pathname files(alluse(i)).dir '\' files(alluse(i)).behavPts],'onsets','dt');
         try 
@@ -105,35 +117,20 @@ for i = 1:length(alluse);
         eyes = get2pEyes([pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xEyes],1,0.1);
         save([pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xPts],'eyes','-append');
     end
-    
-    %     load([pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xEyes],'data');
-    %     d= squeeze(data(:,:,1,50:50:end));
-    %     range = [min(d(:)) max(d(:))];
-    %     figure
-    %     mx = max(eyes(:));
-    %     for j = 1:10:size(data,4);
-    %         subplot(2,2,2);
-    %         imagesc(data(:,:,1,j),range);
-    %         subplot(2,2,3:4);
-    %         hold off; plot(eyes); hold on; plot([j/2 j/2], [1 mx]);
-    %         drawnow;
-    %     end
-    %
+
     filt = ones(1,5); filt = filt/sum(filt);
-    r = conv(eyes(:,3),filt,'same');
-    
+    r = conv(eyes(:,3),filt,'same');    
     figure
-    plot(eyes)
+    plot(eyes); title('passive 3x eyes');
     
 %     figure
 %     hold on; plot(spd(5:end-5),r(5:end-5),'o');  plot(spd(5:end-5),r(5:end-5));
     
     figure
-    plot(spd/max(spd)); hold on; plot((r-min(r))/(max(r)-min(r)));
-    
+    plot(spd/max(spd)); hold on; plot((r-min(r))/(max(r)-min(r))); title('passive 3x'); legend('speed','eyes');
+   %%% correlate pupil radius with continous activity traces for passive 3x
     d = corrcoef([dFdecon; r']');
-    eyeCorrAll(cellrange) = d(1:cutoff,end);
-    
+    eyeCorrAll(cellrange) = d(1:cutoff,end);   
     passive3xRadius{i} = r;
     
     
@@ -446,6 +443,8 @@ trialType = {'correct pref','error pref','correct non-pref','error non-pref'};
 psfile = 'temp.ps';
 if exist(psfile,'file')==2;delete(psfile);end
 
+%%% plot data for clusters in each session, and neural responses
+
 for s= 1:max(sess)
     s
     if strcmp(files(alluse(s)).task,'GTS'), sessCond(s) = gts; end;
@@ -507,6 +506,8 @@ try
 catch
     display('couldnt generate pdf');
 end
+
+subjs = unique(sessSubj)
 
 
 %%% non-weighted (average of all units in this cluster)

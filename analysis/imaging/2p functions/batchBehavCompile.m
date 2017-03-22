@@ -1,6 +1,6 @@
 close all
 
-batch2pBehaviorSBX;
+batch2pBehaviorFix;
 
 %%% select files to analyze
 %alluse = find(strcmp({files.task},'GTS') & strcmp({files.notes},'good imaging session'))
@@ -19,9 +19,12 @@ for i = 1:length(alluse);
     i
     
     %%% load data
-    load([pathname files(alluse(i)).dir '\' files(alluse(i)).compileData],'rfAmp','rf','behavTrialData','passiveData3x','passiveData2sf','correctRate','resprate','stoprate');
+    load([pathname files(alluse(i)).dir '\' files(alluse(i)).compileData],'rfAmp','rf','behavTrialData','passiveData3x','passiveData2sf','correctRate','resprate','stoprate','behavdF');
     figure; plot(resprate/2,'g'); hold on; plot(correctRate,'b');plot(stoprate/10,'r');ylim([0 1]); title([files(alluse(i)).subj files(alluse(i)).task]);legend('response','correct','stop')
     
+        load([pathname files(alluse(i)).dir '\' files(alluse(i)).behavPts],'dF');
+    
+    behavDfAll{i} =dF;
     %%% store behavioral performance over time
     respRateAll{i} = resprate; correctRateAll{i} = correctRate; stopRateAll{i} = stoprate;
     
@@ -61,47 +64,45 @@ for i = 1:length(alluse);
     
     %%% save out other session information
     sessionCond(i) = allCond(cellrange(1));
-    sessionSubj{i} = files(alluse(i)).subj;   
+    sessionSubj{i} = files(alluse(i)).subj;
     sess(cellrange)=i;
     
     %%% get eye data for behavior
     clear eyes
     load([pathname files(alluse(i)).dir '\' files(alluse(i)).behavPts],'eyes','eyeAlign');
-    if ~exist('eyes','var');    %%% if it's not already done, get extract eye position and align to data    
+    if ~exist('eyes','var');    %%% if it's not already done, get extract eye position and align to data
         display('calculating eyes');
         load([pathname files(alluse(i)).dir '\' files(alluse(i)).behavPts],'onsets','dt');
-        try 
+        try
             eyes = get2pEyes([pathname files(alluse(i)).dir '\' files(alluse(i)).behavEyes],0,dt);
-        figure
-        plot(eyes); legend('x','y','r');
-        
-        timepts = -1:0.25:5;
-        eyeAlign = align2onsets(eyes',onsets,dt,timepts);
-        save([pathname files(alluse(i)).dir '\' files(alluse(i)).behavPts],'eyes','eyeAlign','-append');
+            figure
+            plot(eyes); legend('x','y','r');
+            
+            timepts = -1:0.25:5;
+            eyeAlign = align2onsets(eyes',onsets,dt,timepts);
+            save([pathname files(alluse(i)).dir '\' files(alluse(i)).behavPts],'eyes','eyeAlign','-append');
         catch
             eyeAlign = NaN;
         end
     end
     
-%     load([pathname files(alluse(i)).dir '\' files(alluse(i)).behavEyes],'data');
-%     %     d= squeeze(data(:,:,1,50:50:end));
-%     %     range = [min(d(:)) max(d(:))];
-%     %     figure
-%     %     mx = max(eyes(:));
-%     %     for j = 1:100:size(data,4);
-%     %         subplot(2,2,2);
-%     %         imagesc(data(:,:,1,j),range);
-%     %         subplot(2,2,3:4);
-%     %         hold off; plot(eyes); hold on; plot([j/2 j/2], [1 mx]);
-%     %         drawnow;
-%     %     end
-%     
-%     figure
-%     subplot(2,2,1); imagesc(data(:,:,1,50)); subplot(2,2,2); imagesc(data(:,:,1,round(end/3)));
-%     subplot(2,2,3); imagesc(data(:,:,1,round(2*end/3))); subplot(2,2,4); imagesc(data(:,:,1,end)); colormap gray
-%     
-%     
-%     behavRadius{i} = eyes(:,3);
+    %     load([pathname files(alluse(i)).dir '\' files(alluse(i)).behavEyes],'data');
+    %     %     d= squeeze(data(:,:,1,50:50:end));
+    %     %     range = [min(d(:)) max(d(:))];
+    %     %     figure
+    %     %     mx = max(eyes(:));
+    %     %     for j = 1:100:size(data,4);
+    %     %         subplot(2,2,2);
+    %     %         imagesc(data(:,:,1,j),range);
+    %     %         subplot(2,2,3:4);
+    %     %         hold off; plot(eyes); hold on; plot([j/2 j/2], [1 mx]);
+    %     %         drawnow;
+    %     %     end
+    %
+    %     figure
+    %     subplot(2,2,1); imagesc(data(:,:,1,50)); subplot(2,2,2); imagesc(data(:,:,1,round(end/3)));
+    %     subplot(2,2,3); imagesc(data(:,:,1,round(2*end/3))); subplot(2,2,4); imagesc(data(:,:,1,end)); colormap gray
+    %     behavRadius{i} = eyes(:,3);
     
     %%% load in speed data from passive 3x
     clear spd eyes
@@ -117,20 +118,20 @@ for i = 1:length(alluse);
         eyes = get2pEyes([pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xEyes],1,0.1);
         save([pathname files(alluse(i)).dir '\' files(alluse(i)).passive3xPts],'eyes','-append');
     end
-
+    
     filt = ones(1,5); filt = filt/sum(filt);
-    r = conv(eyes(:,3),filt,'same');    
+    r = conv(eyes(:,3),filt,'same');
     figure
     plot(eyes); title('passive 3x eyes');
     
-%     figure
-%     hold on; plot(spd(5:end-5),r(5:end-5),'o');  plot(spd(5:end-5),r(5:end-5));
+    %     figure
+    %     hold on; plot(spd(5:end-5),r(5:end-5),'o');  plot(spd(5:end-5),r(5:end-5));
     
     figure
     plot(spd/max(spd)); hold on; plot((r-min(r))/(max(r)-min(r))); title('passive 3x'); legend('speed','eyes');
-   %%% correlate pupil radius with continous activity traces for passive 3x
+    %%% correlate pupil radius with continous activity traces for passive 3x
     d = corrcoef([dFdecon; r']');
-    eyeCorrAll(cellrange) = d(1:cutoff,end);   
+    eyeCorrAll(cellrange) = d(1:cutoff,end);
     passive3xRadius{i} = r;
     
     
@@ -209,6 +210,10 @@ for i = 1:size(centeredTrialData,1);
         
     end
 end
+
+centeredTrialData(centeredTrialData>1)=1;
+centered3x(centeredTrialData>1)=1;
+centered2sf(centeredTrialData>1)=1;
 
 centered = (d1<12| d2<12)';
 
@@ -301,7 +306,7 @@ for i = 1:max(clust);
         data = allData(sortClust==i,:);
         start = min(find(sortClust==i));
         tic; dist = pdist(imresize(data(:,1:end/4), [size(data,1),size(data,2)/8]),'correlation'); toc
-        dist = dist+randi(10^9,size(dist))/10^8;  %%% jitter points a bit to avoid errors in mdscale , can't use rand function though      
+        dist = dist+randi(10^9,size(dist))/10^8;  %%% jitter points a bit to avoid errors in mdscale , can't use rand function though
         %tic; [Y e] = mdscale(dist,1); toc
         %[y sortind] = sort(Y);
         sortind = 1:size(data,1);
@@ -315,10 +320,10 @@ allData = allData(mdInd,:); sortCond = sortCond(mdInd); sortActive = sortActive(
 
 
 
-    figure
-    imagesc(allData(sortCentered' ,:),[0 0.5]); %%% fix
-    hold on; for j= 1:8, plot([j*length(behavTimepts) j*length(behavTimepts)]+1,[1 sum(sortCentered' )],'g'); end
-    title('all conds')
+figure
+imagesc(allData(sortCentered' ,:),[0 0.5]); %%% fix
+hold on; for j= 1:8, plot([j*length(behavTimepts) j*length(behavTimepts)]+1,[1 sum(sortCentered' )],'g'); end
+title('all conds')
 
 
 
@@ -334,8 +339,8 @@ for i = 1:max(sess);
     load([pathname files(alluse(i)).dir '\' files(alluse(i)).behavPts],'greenframe');
     figure
     imagesc(greenframe,[0 1.2*prctile(greenframe(:),99)]); colormap gray;
-     title(sprintf('%s %s %s ',files(alluse(i)).subj,files(alluse(i)).expt,files(alluse(i)).task));
-     
+    title(sprintf('%s %s %s ',files(alluse(i)).subj,files(alluse(i)).expt,files(alluse(i)).task));
+    
     figure
     subplot(1,3,1:2)
     imagesc(allData(sortCentered' & sortSess==i,:),[0 0.5]);
@@ -344,12 +349,12 @@ for i = 1:max(sess);
     title(sprintf('%s %s %s total=%d gratings=%d exposures=%d',files(alluse(i)).subj,files(alluse(i)).expt,files(alluse(i)).task,files(alluse(i)).totalDays,files(alluse(i)).totalSinceGratings,files(alluse(i)).learningDay));
     
     subplot(1,3,3); hold on
-%     plot(yAll(sess==i & ~active'),xAll(sess==i & ~active'),'k.');
-%     plot(yAll(sess==i & clust==1 ),xAll(sess==i & clust==1),'b.');
-%     plot(yAll(sess==i& clust==2),xAll(sess==i & clust==2),'r.');
-%     plot(yAll(sess==i& clust==3),xAll(sess==i & clust ==3),'g.');
+    %     plot(yAll(sess==i & ~active'),xAll(sess==i & ~active'),'k.');
+    %     plot(yAll(sess==i & clust==1 ),xAll(sess==i & clust==1),'b.');
+    %     plot(yAll(sess==i& clust==2),xAll(sess==i & clust==2),'r.');
+    %     plot(yAll(sess==i& clust==3),xAll(sess==i & clust ==3),'g.');
     
-        plot(yAll(sess==i & ~centered'),xAll(sess==i & ~centered'),'k.');
+    plot(yAll(sess==i & ~centered'),xAll(sess==i & ~centered'),'k.');
     plot(yAll(sess==i & centered' ),xAll(sess==i & centered'),'g.');
     
     axis equal;  axis([0 72 0 128]); hold on
@@ -364,25 +369,25 @@ for c = 1:4
     subplot(1,4,c); hold on
     if c<=3
         plot(yAll(clust==c ),xAll(clust==c),'b.');
-
-    else
-       plot(yAll( ~active'),xAll(~active'),'k.');
-    end
         
+    else
+        plot(yAll( ~active'),xAll(~active'),'k.');
+    end
+    
     axis equal;  axis([0 72 0 128]); hold on
     circle(36,0.66*128,17.5);circle(36,0.33*128,17.5);  set(gca,'Xtick',[]); set(gca,'Ytick',[]);
-
-  for x = 1:128;
-      for y = 1:72;
-          these = xAll>x-1 & xAll<=x+1 & yAll>y-1 & yAll<=y+1;
-          num(x,y) = sum(these); num(num<4)=0;
-          if c<=3
-              density(x,y,c) = sum(these & clust==c)/num(x,y);
-          else
-              density(x,y,c) = sum(these & ~active')/num(x,y);
-          end
-      end
-  end
+    
+    for x = 1:128;
+        for y = 1:72;
+            these = xAll>x-1 & xAll<=x+1 & yAll>y-1 & yAll<=y+1;
+            num(x,y) = sum(these); num(num<4)=0;
+            if c<=3
+                density(x,y,c) = sum(these & clust==c)/num(x,y);
+            else
+                density(x,y,c) = sum(these & ~active')/num(x,y);
+            end
+        end
+    end
 end
 
 density(~isfinite(density))=-0.1;
@@ -402,17 +407,17 @@ c = clust;
 
 %%% average across all conditions (trained, naive, etc)
 trialType = {'correct pref','error pref','correct non-pref','error non-pref'};
-    figure
-    for t = 1:4
-        subplot(2,2,t);
-        for i = 1:max(c)
-            d =nanmean(invariantAll(clust==i  ,:),1); plot(0.1*(0:41),(d((t-1)*42 + (1:42))-mean(d(6:10))));hold on; ylim([ -0.2 0.3]); xlim([0 4.15])
-        end
-        title([trialType{t} ]); xlabel('secs'); ylabel('response'); % set(gca,'Ytick',-0.25:0.25:0.75);
+figure
+for t = 1:4
+    subplot(2,2,t);
+    for i = 1:max(c)
+        d =nanmean(invariantAll(clust==i  ,:),1); plot(0.1*(0:41),(d((t-1)*42 + (1:42))-mean(d(6:10))));hold on; ylim([ -0.2 0.3]); xlim([0 4.15])
     end
-    
-    legend;
-    set(gcf,'Name','all conditions non-weighted');
+    title([trialType{t} ]); xlabel('secs'); ylabel('response'); % set(gca,'Ytick',-0.25:0.25:0.75);
+end
+
+legend;
+set(gcf,'Name','all conditions non-weighted');
 
 
 %%% weighted mean (by fraction of cells)
@@ -425,9 +430,9 @@ for cond = 1:4
         for i = 1:max(c)
             n = sum(clust==i & allCond==cond)/sum(allCond==cond)
             d =nanmean(invariantAll(clust==i & allCond==cond ,:),1); plot(0.1*(0:41),n*(d((t-1)*42 + (1:42))-mean(d(6:10))));hold on; ylim([ -0.025 0.065]); xlim([0 4.15])
-        
-        clustBehav(i,t,cond,:) = n*(d((t-1)*42 + (1:42))-mean(d(6:10)));
-        clustBehavErr(i,t,cond,:) = n*nanstd(invariantAll(clust==i & allCond==cond ,(t-1)*42 + (1:42)),[],1)/sqrt(sum(clust==i & allCond==cond));
+            
+            clustBehav(i,t,cond,:) = n*(d((t-1)*42 + (1:42))-mean(d(6:10)));
+            clustBehavErr(i,t,cond,:) = n*nanstd(invariantAll(clust==i & allCond==cond ,(t-1)*42 + (1:42)),[],1)/sqrt(sum(clust==i & allCond==cond));
         end
         title([trialType{t} ' weighted']); xlabel('secs'); ylabel('weighted response'); set(gca,'Ytick',-0.025:0.025:0.075);
     end
@@ -440,10 +445,13 @@ end
 clear clustBehav clustBehavErr
 trialType = {'correct pref','error pref','correct non-pref','error non-pref'};
 
+close all
+
 psfile = 'temp.ps';
 if exist(psfile,'file')==2;delete(psfile);end
 
 %%% plot data for clusters in each session, and neural responses
+
 
 for s= 1:max(sess)
     s
@@ -460,22 +468,32 @@ for s= 1:max(sess)
         for i = 1:max(c)
             n = sum(clust==i & sess==s)/sum(sess==s)
             d =nanmean(invariantAll(clust==i & sess==s ,:),1); plot(0.1*(0:41),n*(d((t-1)*42 + (1:42))-mean(d(6:10))));hold on; ylim([ -0.025 0.065]); xlim([0 4.15])
-        
-        clustBehav(s,t,cond,:) = n*(d((t-1)*42 + (1:42))-mean(d(6:10)));
-        clustBehavErr(s,t,cond,:) = n*nanstd(invariantAll(clust==i & sess==s ,(t-1)*42 + (1:42)),[],1)/sqrt(sum(clust==i & sess==s));
+            
+            clustBehav(s,t,cond,:) = n*(d((t-1)*42 + (1:42))-mean(d(6:10)));
+            clustBehavErr(s,t,cond,:) = n*nanstd(invariantAll(clust==i & sess==s ,(t-1)*42 + (1:42)),[],1)/sqrt(sum(clust==i & sess==s));
         end
         title([trialType{t} ' weighted']); xlabel('secs'); ylabel('weighted response'); set(gca,'Ytick',-0.025:0.025:0.075);
     end
-        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+     legend;
+     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-    legend;
+    figure; plot(respRateAll{s}/2,'g'); hold on; plot(correctRateAll{s},'b');plot(stopRateAll{s}/10,'r');ylim([0 1]); title([files(alluse(s)).subj ' ' files(alluse(s)).task]);legend('response','correct','stop')
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    
+    figure
+    imagesc(behavDfAll{s},[0 0.5]);
+    title(sprintf('cutoff = %d',sum(sess==s)));
+    
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
     
     %%% session figure
-       load([pathname files(alluse(s)).dir '\' files(alluse(s)).behavPts],'greenframe');
-    figure
-    imagesc(greenframe,[0 1.2*prctile(greenframe(:),99)]); colormap gray;
-     title(sprintf('%s %s %s ',files(alluse(s)).subj,files(alluse(s)).expt,files(alluse(s)).task));
-     
+%     load([pathname files(alluse(s)).dir '\' files(alluse(s)).behavPts],'greenframe');
+%     figure
+%     imagesc(greenframe,[0 1.2*prctile(greenframe(:),99)]); colormap gray;
+%     title(sprintf('%s %s %s ',files(alluse(s)).subj,files(alluse(s)).expt,files(alluse(s)).task));
+    
     figure
     subplot(1,3,1:2)
     imagesc(allData(sortCentered' & sortSess==s,:),[0 0.5]);
@@ -484,12 +502,12 @@ for s= 1:max(sess)
     title(sprintf('%s %s %s total=%d gratings=%d exposures=%d',files(alluse(s)).subj,files(alluse(s)).expt,files(alluse(s)).task,files(alluse(s)).totalDays,files(alluse(s)).totalSinceGratings,files(alluse(s)).learningDay));
     
     subplot(1,3,3); hold on
-%     plot(yAll(sess==i & ~active'),xAll(sess==i & ~active'),'k.');
-%     plot(yAll(sess==i & clust==1 ),xAll(sess==i & clust==1),'b.');
-%     plot(yAll(sess==i& clust==2),xAll(sess==i & clust==2),'r.');
-%     plot(yAll(sess==i& clust==3),xAll(sess==i & clust ==3),'g.');
+    %     plot(yAll(sess==i & ~active'),xAll(sess==i & ~active'),'k.');
+    %     plot(yAll(sess==i & clust==1 ),xAll(sess==i & clust==1),'b.');
+    %     plot(yAll(sess==i& clust==2),xAll(sess==i & clust==2),'r.');
+    %     plot(yAll(sess==i& clust==3),xAll(sess==i & clust ==3),'g.');
     
-        plot(yAll(sess==s & ~centered'),xAll(sess==s & ~centered'),'k.');
+    plot(yAll(sess==s & ~centered'),xAll(sess==s & ~centered'),'k.');
     plot(yAll(sess==s & centered' ),xAll(sess==s & centered'),'g.');
     
     axis equal;  axis([0 72 0 128]); hold on
@@ -498,14 +516,18 @@ for s= 1:max(sess)
     
 end
 
+keyboard
+
 [f p] = uiputfile('*.pdf');
 newpdfFile = fullfile(p,f)
 try
     dos(['ps2pdf ' 'temp.ps "' newpdfFile '"'] )
-
+    
 catch
     display('couldnt generate pdf');
 end
+
+close all
 
 subjs = unique(sessSubj)
 
@@ -544,7 +566,7 @@ invariantAll3x = reshape(orientInvariant3x,size(orientInvariant3x,1),size(orient
 %         end
 %         title(trialType{t});
 %     end
-%     
+%
 %     legend;
 %     set(gcf,'Name',condLabel{cond});
 % end
@@ -557,9 +579,9 @@ for cond = 1:4
         for i = 1:max(c)
             n = sum(clust==i & allCond==cond)/sum(allCond==cond)
             d =nanmean(invariantAll3x(clust==i & allCond==cond ,:),1); plot(0.1*(0:28),n*(d((t-1)*29 + (1:29))-mean(d(6:10))));hold on; ylim([ -0.025 0.065]); xlim([0 4.15])
-       clust3x(i,t,cond,:) = n*(d((t-1)*28 + (1:28))-mean(d(6:10)));
-        clust3xErr(i,t,cond,:) = n*nanstd(invariantAll3x(clust==i & allCond==cond ,(t-1)*28 + (1:28)),[],1)/sqrt(sum(clust==i & allCond==cond));
-           end
+            clust3x(i,t,cond,:) = n*(d((t-1)*28 + (1:28))-mean(d(6:10)));
+            clust3xErr(i,t,cond,:) = n*nanstd(invariantAll3x(clust==i & allCond==cond ,(t-1)*28 + (1:28)),[],1)/sqrt(sum(clust==i & allCond==cond));
+        end
         title([trialType{t} ' weighted']); xlabel('secs'); ylabel('weighted response'); set(gca,'Ytick',-0.025:0.025:0.075);
     end
     
@@ -585,7 +607,7 @@ invariantAll2sf = reshape(orientInvariant2sf,size(orientInvariant2sf,1),size(ori
 %         end
 %         title(trialType{t});
 %     end
-%     
+%
 %     legend;
 %     set(gcf,'Name',condLabel{cond});
 % end
@@ -598,10 +620,10 @@ for cond = 1:4
         for i = 1:max(c)
             n = sum(clust==i & allCond==cond)/sum(allCond==cond)
             d =nanmean(invariantAll2sf(clust==i & allCond==cond ,:),1); plot(0.1*(0:38),n*(d((t-1)*39 + (1:39))-mean(d(6:10))));hold on; ylim([ -0.025 0.065]); xlim([0 4.15])
-        
-       clust2sf(i,t,cond,:) = n*(d((t-1)*39 + (1:39))-mean(d(6:10)));
-        clust2sfErr(i,t,cond,:) = n*nanstd(invariantAll2sf(clust==i & allCond==cond ,(t-1)*39 + (1:39)),[],1)/sqrt(sum(clust==i & allCond==cond));
-    
+            
+            clust2sf(i,t,cond,:) = n*(d((t-1)*39 + (1:39))-mean(d(6:10)));
+            clust2sfErr(i,t,cond,:) = n*nanstd(invariantAll2sf(clust==i & allCond==cond ,(t-1)*39 + (1:39)),[],1)/sqrt(sum(clust==i & allCond==cond));
+            
         end
         title([trialType{t} ' weighted']); xlabel('secs'); ylabel('weighted response'); set(gca,'Ytick',-0.025:0.025:0.075);
     end
@@ -660,7 +682,7 @@ end
 
 
 
-    
+
 %%% resp(clust,stim, training cond, session)
 
 figure
@@ -687,7 +709,7 @@ legend('task','passive 3x'); ylabel('weighted response'); title('active vs passi
 
 for i= 1:max(c);
     figure
-    [n b] =hist(deltaSpontAll(clust==i),[-0.5:0.1:0.5]); bar(b,n/sum(n)); title(sprintf('cluster %d',i)); xlim([-0.55 0.55]); ylim([0 0.85]); ylabel('fraction'); xlabel('running modulation (spont)'); 
+    [n b] =hist(deltaSpontAll(clust==i),[-0.5:0.1:0.5]); bar(b,n/sum(n)); title(sprintf('cluster %d',i)); xlim([-0.55 0.55]); ylim([0 0.85]); ylabel('fraction'); xlabel('running modulation (spont)');
     set(gca,'Xtick',-0.5:0.25:0.5); set(gca,'Ytick',0:0.2:0.8); set(gca,'Fontsize',16);
     spontMod(i) = nanmean(abs(deltaSpontAll(clust==i))); spontModErr(i) = nanstd(abs(deltaSpontAll(clust==i)))/sqrt(sum(clust==i));
 end
@@ -697,10 +719,10 @@ ylabel('mean absolute modulation'); set(gca,'FontSize',16); ylim([0 0.125]); set
 
 osifig = figure;
 %%% calculate response parameters (sustained, transient, OSI, running modulation) for each cluster; put each graph into one subpanel
-for i = 1:max(c)  
+for i = 1:max(c)
     clustData = allData(sortClust==i ,:);
     clear transResp sustResp
- 
+    
     %%% calculate transient and sustained responses (relative to baseline)
     transResp(:,1) = mean(clustData(:,13:14),2) - mean(clustData(:,1:10),2);
     transResp(:,2) = mean(clustData(:,74:75),2) - mean(clustData(:,62:71),2);
@@ -713,7 +735,7 @@ for i = 1:max(c)
     figure
     subplot(2,2,1);
     hist(transResp(:,1),-1:0.1:1); title([' trans resp ' num2str(i)]);  xlim([-1 1])
-        
+    
     subplot(2,2,2);
     hist(sustResp(:,1),-1:0.1:1); title([ 'sust resp ' num2str(i)]); xlim([-1 1])
     
@@ -724,26 +746,26 @@ for i = 1:max(c)
     
     transOSI = (transResp(:,2)- transResp(:,1))./(transResp(:,2) + transResp(:,1));
     sustOSI = (sustResp(:,2)- sustResp(:,1))./(sustResp(:,2) + sustResp(:,1));
-       
-    peak = max(transResp,[],2);    
+    
+    peak = max(transResp,[],2);
     subplot(2,2,3)
     [n b] = hist(abs(transOSI(peak>0.1))); bar(b,n/sum(n));title(['trans osi ' num2str(i)])
     
-    peak = max(sustResp,[],2);  
+    peak = max(sustResp,[],2);
     subplot(2,2,4);
     [n b] = hist(abs(sustOSI(peak>0.1))); bar(b,n/sum(n)); title(['sust osi ' num2str(i)])
     
     if i ==1
-        peak = max(transResp,[],2); 
+        peak = max(transResp,[],2);
         clustOSI = abs(transOSI(peak>0.1));
     else
         clustOSI = abs(sustOSI(peak>0.1));
     end
     osi(i) = median(clustOSI); osi_err(i) = std(clustOSI)/sqrt(length(clustOSI));
-   figure(osifig);
-   subplot(2,2,i);
+    figure(osifig);
+    subplot(2,2,i);
     [n b] = hist(clustOSI); bar(b,n/sum(n)); title(sprintf('OSI clust %d',i)); ylim([0 0.4]); xlabel('OSI'); ylabel('fraction');
-        
+    
 end
 figure
 bar(osi); hold on; errorbar(1:3,osi,osi_err,'k.','markersize',8,'Linewidth',2); ylabel('osi'); xlabel('cluster'); ylim([0 1])
@@ -760,8 +782,7 @@ for cond =1:4
 end
 clustDist
 
-%%% print out number of cells and subjects 
-in each condition
+%%% print out number of cells and subjects in each condition
 for c = 1:4
     cells = find(allCond==c & centered');
     sessions = unique(sess(cells));

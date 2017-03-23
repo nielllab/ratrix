@@ -58,7 +58,7 @@ files(n).SilenceArea = 'full window';
 
 n=n+1;
 files(n).subj = 'g62gg10lt';
-files(n).expt = '101316';  %(2)
+files(n).expt = '101316_2';  %(2)
 files(n).trialRec =  'trialRecords_1443-1690_20161013T150201-20161013T152823';
 files(n).power = '45mw';
 files(n).task = 'GTS';
@@ -94,7 +94,7 @@ files(n).SilenceArea = 'full window';
 
 n=n+1;
 files(n).subj = 'pvchr3b15rt';
-files(n).expt = '101416';  %(2)
+files(n).expt = '101416_2';  %(2)
 files(n).trialRec =  'trialRecords_4970-5221_20161014T134019-20161014T140854';
 files(n).power = '11mw';
 files(n).task = 'GTS';
@@ -266,7 +266,7 @@ files(n).monitor = 'vert';
 files(n).SilenceArea = 'full window';
 
 
-n=1;
+n=n+1;
 files(n).subj = 'g62tx15lt';
 files(n).expt = '110116';
 files(n).trialRec =  'trialRecords_1468-1679_20161101T152656-20161101T154527';
@@ -276,7 +276,7 @@ files(n).geno = 'camk2 gc6';
 files(n).notes = 'good session'; 
 files(n).monitor = 'vert';
 
-n=1;
+n=n+1;
 files(n).subj = 'g62tx15lt';
 files(n).expt = '110216';
 files(n).trialRec =  'trialRecords_1691-1868_20161102T134554-20161102T140341';

@@ -25,7 +25,7 @@ orirange = unique(thetaQuad);
 %%%loop through individual animal files
 for f=1:length(use)
     filename = files(use(f)).gratinganalysis
-%     if exist(filename)==0 %%%only perform analysis if file doesn't already exist
+    if exist([filename '.mat'])==0 %%%only perform analysis if file doesn't already exist
         files(use(f)).subj
 %         psfile = 'c:\tempPhil2p.ps';
 %         if exist(psfile,'file')==2;delete(psfile);end
@@ -246,7 +246,7 @@ for f=1:length(use)
 %         delete(psfile);
         close all    
         
-%     else
-%         sprintf('skipping %s',filename)
-%     end
+    else
+        sprintf('skipping %s',filename)
+    end
 end

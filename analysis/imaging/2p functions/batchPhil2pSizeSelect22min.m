@@ -803,7 +803,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 500;
+files(n).cutoff = 400;
 
 n=n+1;
 files(n).subj = 'G62BB2RT';
@@ -832,4 +832,4 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 500;
+files(n).cutoff = 400;

@@ -19,16 +19,16 @@ redogrp = input('reanalyze group data? 0=no, 1=yes: ')
 
 if group==1
     use = find(strcmp({files.inject},'saline')  & strcmp({files.training},'naive') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-    grpfilename = 'SalineNaive2pSizeSelect'
+    grpfilename = 'SalineNaive2pSizeSelectGrats'
 elseif group==2
     use = find(strcmp({files.inject},'saline')  & strcmp({files.training},'trained') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-    grpfilename = 'SalineTrained2pSizeSelect'
+    grpfilename = 'SalineTrained2pSizeSelectGrats'
 elseif group==3
     use = find(strcmp({files.inject},'doi')  & strcmp({files.training},'naive') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-    grpfilename = 'DOINaive2pSizeSelect'
+    grpfilename = 'DOINaive2pSizeSelectGrats'
 elseif group==4
     use = find(strcmp({files.inject},'doi')  & strcmp({files.training},'trained') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-    grpfilename = 'DOITrained2pSizeSelect'
+    grpfilename = 'DOITrained2pSizeSelectGrats'
 else
     sprintf('please restart and choose a number 1-4')
 end
@@ -43,6 +43,7 @@ if redoani==1
     sizeSelect2pAnalysisGrats
 end
 
+%%%plotting
 numAni = length(use)/2;
 dfWindow = 9:11;
 spWindow = 6:10;
@@ -125,36 +126,12 @@ else
     load(grpfilename)
 end
 
-%%%quantify fraction responsive to each size based on grat params
-figure
-for i=1:length(sizes)
-    subplot(2,4,i)
-    preresp = find(squeeze(nanmean(grpdfsize(:,dfWindow,end,i,1,1),2))>=0.1);
-    postresp = find(squeeze(nanmean(grpdfsize(:,dfWindow,end,i,1,2),2))>=0.1);
-    bothresp = intersect(preresp,postresp);
-    totcells = sum(~isnan(grprf(:,1)));
-    fractions = [length(preresp)/totcells length(postresp)/totcells length(bothresp)/totcells];
-    hold on
-    bar(1,fractions(1),'g')
-    bar(2,fractions(2),'r')
-    bar(3,fractions(3),'b')
-    set(gca,'xtick',[1 2 3],'xticklabel',{'pre','post','both'},'fontsize',5)
-    axis([0 4 0 1])
-    ylabel('%responsive')
-    set(gca,'LooseInset',get(gca,'TightInset'))
-end
-mtit('Responsive cells/size (grat params)')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-% %%%quantify fraction responsive to each size based on size params
+% %%%quantify fraction responsive to each size based on grat params
 % figure
 % for i=1:length(sizes)
 %     subplot(2,4,i)
-%     preresp = find(squeeze(nanmean(grpdfsizebest(:,dfWindow,end,i,1,1),2))>=0.1);
-%     postresp = find(squeeze(nanmean(grpdfsizebest(:,dfWindow,end,i,1,2),2))>=0.1);
+%     preresp = find(squeeze(nanmean(grpdfsize(:,dfWindow,end,i,1,1),2))>=0.1);
+%     postresp = find(squeeze(nanmean(grpdfsize(:,dfWindow,end,i,1,2),2))>=0.1);
 %     bothresp = intersect(preresp,postresp);
 %     totcells = sum(~isnan(grprf(:,1)));
 %     fractions = [length(preresp)/totcells length(postresp)/totcells length(bothresp)/totcells];
@@ -167,45 +144,42 @@ end
 %     ylabel('%responsive')
 %     set(gca,'LooseInset',get(gca,'TightInset'))
 % end
-% mtit('Responsive cells for each size (size params)')
+% mtit('Responsive cells/size (grat params)')
 % if exist('psfile','var')
 %     set(gcf, 'PaperPositionMode', 'auto');
 %     print('-dpsc',psfile,'-append');
 % end
-
-%%%plot responsive cells for each size (grat params)
-figure
-for i=1:length(sizes)
-    subplot(2,4,i)
-    preresp = find(squeeze(nanmedian(grpdfsize(:,dfWindow,end,i,1,1),2))>=0.1);
-    postresp = find(squeeze(nanmedian(grpdfsize(:,dfWindow,end,i,1,2),2))>=0.1);
-    hold on
-    p1 = plot(grprf(:,2),grprf(:,1),'.','color',[0.5 0.5 0.5],'MarkerSize',8); %%% the rfAmp criterion wasn't being applied here
-    p2 = plot(grprf(preresp,2),grprf(preresp,1),'g.','MarkerSize',8);
-    p3 = plot(grprf(postresp,2),grprf(postresp,1),'r.','MarkerSize',8);
-    p4 = plot(grprf(intersect(preresp,postresp),2),grprf(intersect(preresp,postresp),1),'b.','MarkerSize',8);
-    circle(ycent,xcent,sizeVals(i)/2/dpix)
-    axis equal;
-    axis([0 72 0 128]);
-    set(gca,'xticklabel','','yticklabel','')
-    hold off
-    set(gca,'LooseInset',get(gca,'TightInset'))
-%     if i==8
-%         legend([p1 p2 p3 p4],'all cells','pre only','post only','both pre/post','Location','northoutside')
-%     end
-end
-mtit('Stationary responsive cells/size (grat params)')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-% %%%plot responsive cells for each size for group data
+% 
+% % %%%quantify fraction responsive to each size based on size params
+% % figure
+% % for i=1:length(sizes)
+% %     subplot(2,4,i)
+% %     preresp = find(squeeze(nanmean(grpdfsizebest(:,dfWindow,end,i,1,1),2))>=0.1);
+% %     postresp = find(squeeze(nanmean(grpdfsizebest(:,dfWindow,end,i,1,2),2))>=0.1);
+% %     bothresp = intersect(preresp,postresp);
+% %     totcells = sum(~isnan(grprf(:,1)));
+% %     fractions = [length(preresp)/totcells length(postresp)/totcells length(bothresp)/totcells];
+% %     hold on
+% %     bar(1,fractions(1),'g')
+% %     bar(2,fractions(2),'r')
+% %     bar(3,fractions(3),'b')
+% %     set(gca,'xtick',[1 2 3],'xticklabel',{'pre','post','both'},'fontsize',5)
+% %     axis([0 4 0 1])
+% %     ylabel('%responsive')
+% %     set(gca,'LooseInset',get(gca,'TightInset'))
+% % end
+% % mtit('Responsive cells for each size (size params)')
+% % if exist('psfile','var')
+% %     set(gcf, 'PaperPositionMode', 'auto');
+% %     print('-dpsc',psfile,'-append');
+% % end
+% 
+% %%%plot responsive cells for each size (grat params)
 % figure
 % for i=1:length(sizes)
 %     subplot(2,4,i)
-%     preresp = find(squeeze(nanmedian(grpdfsizebest(:,dfWindow,end,i,1,1),2))>=0.1);
-%     postresp = find(squeeze(nanmedian(grpdfsizebest(:,dfWindow,end,i,1,2),2))>=0.1);
+%     preresp = find(squeeze(nanmedian(grpdfsize(:,dfWindow,end,i,1,1),2))>=0.1);
+%     postresp = find(squeeze(nanmedian(grpdfsize(:,dfWindow,end,i,1,2),2))>=0.1);
 %     hold on
 %     p1 = plot(grprf(:,2),grprf(:,1),'.','color',[0.5 0.5 0.5],'MarkerSize',8); %%% the rfAmp criterion wasn't being applied here
 %     p2 = plot(grprf(preresp,2),grprf(preresp,1),'g.','MarkerSize',8);
@@ -221,89 +195,74 @@ end
 % %         legend([p1 p2 p3 p4],'all cells','pre only','post only','both pre/post','Location','northoutside')
 % %     end
 % end
-% mtit('Responsive cells for each size (size params)')
+% mtit('Stationary responsive cells/size (grat params)')
 % if exist('psfile','var')
 %     set(gcf, 'PaperPositionMode', 'auto');
 %     print('-dpsc',psfile,'-append');
 % end
-
-%%%%plots by cells across all animals
-%%%plot osi/dsi
-figure
-subplot(1,2,1)
-hold on
-plot([1 2],[grposi(:,1,1) grposi(:,1,2)],'.','color',[0.8 0.8 0.8],'Markersize',5)
-errorbar([1 2],[nanmean(grposi(:,1,1)) nanmean(grposi(:,1,2))],...
-    [nanstd(grposi(:,1,1))/sqrt(numAni) nanstd(grposi(:,1,2))/sqrt(numAni)],'r')
-axis([0 3 0 1])
-set(gca,'xtick',[1 2],'xticklabel',{'pre','post'})
-ylabel('OSI')
-axis square
-set(gca,'LooseInset',get(gca,'TightInset'))
-hold off
-subplot(1,2,2)
-hold on
-plot([1 2],[grpdsi(:,1,1) grpdsi(:,1,2)],'.','color',[0.8 0.8 0.8],'Markersize',5)
-errorbar([1 2],[nanmean(grpdsi(:,1,1)) nanmean(grpdsi(:,1,2))],...
-    [nanstd(grpdsi(:,1,1))/sqrt(numAni) nanstd(grpdsi(:,1,2))/sqrt(numAni)],'r')
-axis([0 3 0 1])
-set(gca,'xtick',[1 2],'xticklabel',{'pre','post'})
-ylabel('DSI')
-axis square
-set(gca,'LooseInset',get(gca,'TightInset'))
-hold off
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-%%%plot size suppression curves gratings params
-figure
-hold on
-pre = squeeze(nanmedian(nanmean(grpdfsize(:,dfWindow,:,:,1,1),2),1));
-post = squeeze(nanmedian(nanmean(grpdfsize(:,dfWindow,:,:,1,2),2),1));
-subplot(2,2,1)
-plot(1:length(radiusRange),pre,'-o','Markersize',5)
-xlabel('Stim Size (deg)')
-ylabel('pre sit dfof')
-axis([0 length(radiusRange)+1 min(min([pre post]))-0.01 max(max([pre post]))+0.01])
-axis square
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
-subplot(2,2,2)
-plot(1:length(radiusRange),post,'-o','Markersize',5)
-xlabel('Stim Size (deg)')
-ylabel('post sit dfof')
-axis([0 length(radiusRange)+1 min(min([pre post]))-0.01 max(max([pre post]))+0.01])
-axis square
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
-
-pre = squeeze(nanmedian(nanmean(grpdfsize(:,dfWindow,:,:,2,1),2),1));
-post = squeeze(nanmedian(nanmean(grpdfsize(:,dfWindow,:,:,2,2),2),1));
-subplot(2,2,3)
-plot(1:length(radiusRange),pre,'-o','Markersize',5)
-xlabel('Stim Size (deg)')
-ylabel('pre run dfof')
-axis([0 length(radiusRange)+1 min(min([pre post]))-0.01 max(max([pre post]))+0.01])
-axis square
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
-subplot(2,2,4)
-plot(1:length(radiusRange),post,'-o','Markersize',5)
-xlabel('Stim Size (deg)')
-ylabel('post run dfof')
-axis([0 length(radiusRange)+1 min(min([pre post]))-0.01 max(max([pre post]))+0.01])
-axis square
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
-mtit('Size Suppression Curve (grat params)')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-% %%%plot size suppression curves size params
+% 
+% % %%%plot responsive cells for each size for group data
+% % figure
+% % for i=1:length(sizes)
+% %     subplot(2,4,i)
+% %     preresp = find(squeeze(nanmedian(grpdfsizebest(:,dfWindow,end,i,1,1),2))>=0.1);
+% %     postresp = find(squeeze(nanmedian(grpdfsizebest(:,dfWindow,end,i,1,2),2))>=0.1);
+% %     hold on
+% %     p1 = plot(grprf(:,2),grprf(:,1),'.','color',[0.5 0.5 0.5],'MarkerSize',8); %%% the rfAmp criterion wasn't being applied here
+% %     p2 = plot(grprf(preresp,2),grprf(preresp,1),'g.','MarkerSize',8);
+% %     p3 = plot(grprf(postresp,2),grprf(postresp,1),'r.','MarkerSize',8);
+% %     p4 = plot(grprf(intersect(preresp,postresp),2),grprf(intersect(preresp,postresp),1),'b.','MarkerSize',8);
+% %     circle(ycent,xcent,sizeVals(i)/2/dpix)
+% %     axis equal;
+% %     axis([0 72 0 128]);
+% %     set(gca,'xticklabel','','yticklabel','')
+% %     hold off
+% %     set(gca,'LooseInset',get(gca,'TightInset'))
+% % %     if i==8
+% % %         legend([p1 p2 p3 p4],'all cells','pre only','post only','both pre/post','Location','northoutside')
+% % %     end
+% % end
+% % mtit('Responsive cells for each size (size params)')
+% % if exist('psfile','var')
+% %     set(gcf, 'PaperPositionMode', 'auto');
+% %     print('-dpsc',psfile,'-append');
+% % end
+% 
+% %%%%plots by cells across all animals
+% %%%plot osi/dsi
+% figure
+% subplot(1,2,1)
+% hold on
+% plot([1 2],[grposi(:,1,1) grposi(:,1,2)],'.','color',[0.8 0.8 0.8],'Markersize',5)
+% errorbar([1 2],[nanmean(grposi(:,1,1)) nanmean(grposi(:,1,2))],...
+%     [nanstd(grposi(:,1,1))/sqrt(numAni) nanstd(grposi(:,1,2))/sqrt(numAni)],'r')
+% axis([0 3 0 1])
+% set(gca,'xtick',[1 2],'xticklabel',{'pre','post'})
+% ylabel('OSI')
+% axis square
+% set(gca,'LooseInset',get(gca,'TightInset'))
+% hold off
+% subplot(1,2,2)
+% hold on
+% plot([1 2],[grpdsi(:,1,1) grpdsi(:,1,2)],'.','color',[0.8 0.8 0.8],'Markersize',5)
+% errorbar([1 2],[nanmean(grpdsi(:,1,1)) nanmean(grpdsi(:,1,2))],...
+%     [nanstd(grpdsi(:,1,1))/sqrt(numAni) nanstd(grpdsi(:,1,2))/sqrt(numAni)],'r')
+% axis([0 3 0 1])
+% set(gca,'xtick',[1 2],'xticklabel',{'pre','post'})
+% ylabel('DSI')
+% axis square
+% set(gca,'LooseInset',get(gca,'TightInset'))
+% hold off
+% if exist('psfile','var')
+%     set(gcf, 'PaperPositionMode', 'auto');
+%     print('-dpsc',psfile,'-append');
+% end
+% 
+% %%%plot size suppression curves gratings params
 % figure
 % hold on
-% pre = squeeze(nanmedian(nanmean(grpdfsizebest(:,dfWindow,:,:,1,1),2),1));
-% post = squeeze(nanmedian(nanmean(grpdfsizebest(:,dfWindow,:,:,1,2),2),1));
+% pre = squeeze(nanmedian(nanmean(grpdfsize(:,dfWindow,:,:,1,1),2),1));
+% post = squeeze(nanmedian(nanmean(grpdfsize(:,dfWindow,:,:,1,2),2),1));
 % subplot(2,2,1)
 % plot(1:length(radiusRange),pre,'-o','Markersize',5)
 % xlabel('Stim Size (deg)')
@@ -319,8 +278,8 @@ end
 % axis square
 % set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
 % 
-% pre = squeeze(nanmedian(nanmean(grpdfsizebest(:,dfWindow,:,:,2,1),2),1));
-% post = squeeze(nanmedian(nanmean(grpdfsizebest(:,dfWindow,:,:,2,2),2),1));
+% pre = squeeze(nanmedian(nanmean(grpdfsize(:,dfWindow,:,:,2,1),2),1));
+% post = squeeze(nanmedian(nanmean(grpdfsize(:,dfWindow,:,:,2,2),2),1));
 % subplot(2,2,3)
 % plot(1:length(radiusRange),pre,'-o','Markersize',5)
 % xlabel('Stim Size (deg)')
@@ -335,63 +294,68 @@ end
 % axis([0 length(radiusRange)+1 min(min([pre post]))-0.01 max(max([pre post]))+0.01])
 % axis square
 % set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
-% mtit('Size Suppression Curve (size params)')
+% mtit('Size Suppression Curve (grat params)')
 % if exist('psfile','var')
 %     set(gcf, 'PaperPositionMode', 'auto');
 %     print('-dpsc',psfile,'-append');
 % end
-
-%%%plot cycle averages (grat params)
-figure
-for i = 1:length(sizes)
-    subplot(2,4,i)
-    hold on
-    shadedErrorBar(timepts,squeeze(nanmedian(grpdfsize(:,:,end,i,1,1),1)),...
-        squeeze(nanstd(grpdfsize(:,:,end,i,1,1),1))/sqrt(totcells),'k',1)
-    shadedErrorBar(timepts,squeeze(nanmedian(grpdfsize(:,:,end,i,1,2),1)),...
-        squeeze(nanstd(grpdfsize(:,:,end,i,1,2),1))/sqrt(totcells),'r',1)
-    axis square
-    axis([timepts(1) timepts(end) -0.01 0.25])
-    set(gca,'LooseInset',get(gca,'TightInset'))
-end
-mtit('Stationary response/size (grat params)')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-figure
-for i = 1:length(sizes)
-    subplot(2,4,i)
-    hold on
-    shadedErrorBar(timepts,squeeze(nanmedian(grpdfsize(:,:,end,i,2,1),1)),...
-        squeeze(nanstd(grpdfsize(:,:,end,i,1,1),1))/sqrt(totcells),'k',1)
-    shadedErrorBar(timepts,squeeze(nanmedian(grpdfsize(:,:,end,i,2,2),1)),...
-        squeeze(nanstd(grpdfsize(:,:,end,i,1,2),1))/sqrt(totcells),'r',1)
-    axis square
-    axis([timepts(1) timepts(end) -0.01 0.25])
-    set(gca,'LooseInset',get(gca,'TightInset'))
-end
-mtit('Running response/size (grat params)')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-% %%%plot cycle averages (size params)
+% 
+% % %%%plot size suppression curves size params
+% % figure
+% % hold on
+% % pre = squeeze(nanmedian(nanmean(grpdfsizebest(:,dfWindow,:,:,1,1),2),1));
+% % post = squeeze(nanmedian(nanmean(grpdfsizebest(:,dfWindow,:,:,1,2),2),1));
+% % subplot(2,2,1)
+% % plot(1:length(radiusRange),pre,'-o','Markersize',5)
+% % xlabel('Stim Size (deg)')
+% % ylabel('pre sit dfof')
+% % axis([0 length(radiusRange)+1 min(min([pre post]))-0.01 max(max([pre post]))+0.01])
+% % axis square
+% % set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+% % subplot(2,2,2)
+% % plot(1:length(radiusRange),post,'-o','Markersize',5)
+% % xlabel('Stim Size (deg)')
+% % ylabel('post sit dfof')
+% % axis([0 length(radiusRange)+1 min(min([pre post]))-0.01 max(max([pre post]))+0.01])
+% % axis square
+% % set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+% % 
+% % pre = squeeze(nanmedian(nanmean(grpdfsizebest(:,dfWindow,:,:,2,1),2),1));
+% % post = squeeze(nanmedian(nanmean(grpdfsizebest(:,dfWindow,:,:,2,2),2),1));
+% % subplot(2,2,3)
+% % plot(1:length(radiusRange),pre,'-o','Markersize',5)
+% % xlabel('Stim Size (deg)')
+% % ylabel('pre run dfof')
+% % axis([0 length(radiusRange)+1 min(min([pre post]))-0.01 max(max([pre post]))+0.01])
+% % axis square
+% % set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+% % subplot(2,2,4)
+% % plot(1:length(radiusRange),post,'-o','Markersize',5)
+% % xlabel('Stim Size (deg)')
+% % ylabel('post run dfof')
+% % axis([0 length(radiusRange)+1 min(min([pre post]))-0.01 max(max([pre post]))+0.01])
+% % axis square
+% % set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+% % mtit('Size Suppression Curve (size params)')
+% % if exist('psfile','var')
+% %     set(gcf, 'PaperPositionMode', 'auto');
+% %     print('-dpsc',psfile,'-append');
+% % end
+% 
+% %%%plot cycle averages (grat params)
 % figure
 % for i = 1:length(sizes)
 %     subplot(2,4,i)
 %     hold on
-%     shadedErrorBar(timepts,squeeze(nanmedian(grpdfsizebest(:,:,end,i,1,1),1)),...
-%         squeeze(nanstd(grpdfsizebest(:,:,end,i,1,1),1))/sqrt(totcells),'k',1)
-%     shadedErrorBar(timepts,squeeze(nanmedian(grpdfsizebest(:,:,end,i,1,2),1)),...
-%         squeeze(nanstd(grpdfsizebest(:,:,end,i,1,2),1))/sqrt(totcells),'r',1)
+%     shadedErrorBar(timepts,squeeze(nanmedian(grpdfsize(:,:,end,i,1,1),1)),...
+%         squeeze(nanstd(grpdfsize(:,:,end,i,1,1),1))/sqrt(totcells),'k',1)
+%     shadedErrorBar(timepts,squeeze(nanmedian(grpdfsize(:,:,end,i,1,2),1)),...
+%         squeeze(nanstd(grpdfsize(:,:,end,i,1,2),1))/sqrt(totcells),'r',1)
 %     axis square
 %     axis([timepts(1) timepts(end) -0.01 0.25])
 %     set(gca,'LooseInset',get(gca,'TightInset'))
 % end
-% mtit('Stationary response per size (size params)')
+% mtit('Stationary response/size (grat params)')
 % if exist('psfile','var')
 %     set(gcf, 'PaperPositionMode', 'auto');
 %     print('-dpsc',psfile,'-append');
@@ -401,240 +365,483 @@ end
 % for i = 1:length(sizes)
 %     subplot(2,4,i)
 %     hold on
-%     shadedErrorBar(timepts,squeeze(nanmedian(grpdfsizebest(:,:,end,i,2,1),1)),...
-%         squeeze(nanstd(grpdfsizebest(:,:,end,i,1,1),1))/sqrt(totcells),'k',1)
-%     shadedErrorBar(timepts,squeeze(nanmedian(grpdfsizebest(:,:,end,i,2,2),1)),...
-%         squeeze(nanstd(grpdfsizebest(:,:,end,i,1,2),1))/sqrt(totcells),'r',1)
+%     shadedErrorBar(timepts,squeeze(nanmedian(grpdfsize(:,:,end,i,2,1),1)),...
+%         squeeze(nanstd(grpdfsize(:,:,end,i,1,1),1))/sqrt(totcells),'k',1)
+%     shadedErrorBar(timepts,squeeze(nanmedian(grpdfsize(:,:,end,i,2,2),1)),...
+%         squeeze(nanstd(grpdfsize(:,:,end,i,1,2),1))/sqrt(totcells),'r',1)
 %     axis square
 %     axis([timepts(1) timepts(end) -0.01 0.25])
 %     set(gca,'LooseInset',get(gca,'TightInset'))
 % end
-% mtit('Running response per size (size params)')
+% mtit('Running response/size (grat params)')
 % if exist('psfile','var')
 %     set(gcf, 'PaperPositionMode', 'auto');
 %     print('-dpsc',psfile,'-append');
 % end
-
-%%%%plot averages by animal
-%%%plot size suppression curves gratings params
-figure
-pre=nan(length(unique(session)),length(contrastlist),length(sizes));post=pre;
-for i = 1:length(unique(session))
-    pre(i,:,:) = squeeze(nanmedian(nanmean(grpdfsize(find(session==i),dfWindow,:,:,1,1),2),1));
-    post(i,:,:) = squeeze(nanmedian(nanmean(grpdfsize(find(session==i),dfWindow,:,:,1,2),2),1));
-end
-subplot(2,2,1)
-hold on
-if length(unique(session))==1
-    plot(1:length(radiusRange),squeeze(pre),'-o','Markersize',5)
-else
-    plot(1:length(radiusRange),squeeze(nanmedian(pre,1)),'-o','Markersize',5)
-end
-xlabel('Stim Size (deg)')
-ylabel('pre sit dfof')
-if length(unique(session))==1
-    axis([0 length(radiusRange)+1 min(min([pre post]))-0.01...
-        max(max([pre post]))+0.01])
-else
-    axis([0 length(radiusRange)+1 min(min([nanmedian(pre,1) nanmedian(post,1)]))-0.01...
-        max(max([nanmedian(pre,1) nanmedian(post,1)]))+0.01])
-end
-axis square
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
-hold off
-subplot(2,2,2)
-hold on
-if length(unique(session))==1
-    plot(1:length(radiusRange),squeeze(post),'-o','Markersize',5)
-else
-    plot(1:length(radiusRange),squeeze(nanmedian(post,1)),'-o','Markersize',5)
-end
-xlabel('Stim Size (deg)')
-ylabel('post sit dfof')
-if length(unique(session))==1
-    axis([0 length(radiusRange)+1 min(min([pre post]))-0.01...
-        max(max([pre post]))+0.01])
-else
-    axis([0 length(radiusRange)+1 min(min([nanmedian(pre,1) nanmedian(post,1)]))-0.01...
-        max(max([nanmedian(pre,1) nanmedian(post,1)]))+0.01])
-end
-axis square
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
-hold off
-pre=nan(length(unique(session)),length(contrastlist),length(sizes));post=pre;
-for i = 1:length(unique(session))
-    pre(i,:,:) = squeeze(nanmedian(nanmean(grpdfsize(find(session==i),dfWindow,:,:,2,1),2),1));
-    post(i,:,:) = squeeze(nanmedian(nanmean(grpdfsize(find(session==i),dfWindow,:,:,2,2),2),1));
-end
-subplot(2,2,3)
-hold on
-if length(unique(session))==1
-    plot(1:length(radiusRange),squeeze(pre),'-o','Markersize',5)
-else
-    plot(1:length(radiusRange),squeeze(nanmedian(pre,1)),'-o','Markersize',5)
-end
-xlabel('Stim Size (deg)')
-ylabel('pre run dfof')
-if length(unique(session))==1
-    axis([0 length(radiusRange)+1 min(min([pre post]))-0.01...
-        max(max([pre post]))+0.01])
-else
-    axis([0 length(radiusRange)+1 min(min([nanmedian(pre,1) nanmedian(post,1)]))-0.01...
-        max(max([nanmedian(pre,1) nanmedian(post,1)]))+0.01])
-end
-axis square
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
-hold off
-subplot(2,2,4)
-hold on
-if length(unique(session))==1
-    plot(1:length(radiusRange),squeeze(post),'-o','Markersize',5)
-else
-    plot(1:length(radiusRange),squeeze(nanmedian(post,1)),'-o','Markersize',5)
-end
-xlabel('Stim Size (deg)')
-ylabel('post run dfof')
-if length(unique(session))==1
-    axis([0 length(radiusRange)+1 min(min([pre post]))-0.01...
-        max(max([pre post]))+0.01])
-else
-    axis([0 length(radiusRange)+1 min(min([nanmedian(pre,1) nanmedian(post,1)]))-0.01...
-        max(max([nanmedian(pre,1) nanmedian(post,1)]))+0.01])
-end
-axis square
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
-hold off
-mtit('Size Suppression Curve (grat params, animal avg)')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-% %%%plot size suppression curves size params
+% 
+% % %%%plot cycle averages (size params)
+% % figure
+% % for i = 1:length(sizes)
+% %     subplot(2,4,i)
+% %     hold on
+% %     shadedErrorBar(timepts,squeeze(nanmedian(grpdfsizebest(:,:,end,i,1,1),1)),...
+% %         squeeze(nanstd(grpdfsizebest(:,:,end,i,1,1),1))/sqrt(totcells),'k',1)
+% %     shadedErrorBar(timepts,squeeze(nanmedian(grpdfsizebest(:,:,end,i,1,2),1)),...
+% %         squeeze(nanstd(grpdfsizebest(:,:,end,i,1,2),1))/sqrt(totcells),'r',1)
+% %     axis square
+% %     axis([timepts(1) timepts(end) -0.01 0.25])
+% %     set(gca,'LooseInset',get(gca,'TightInset'))
+% % end
+% % mtit('Stationary response per size (size params)')
+% % if exist('psfile','var')
+% %     set(gcf, 'PaperPositionMode', 'auto');
+% %     print('-dpsc',psfile,'-append');
+% % end
+% % 
+% % figure
+% % for i = 1:length(sizes)
+% %     subplot(2,4,i)
+% %     hold on
+% %     shadedErrorBar(timepts,squeeze(nanmedian(grpdfsizebest(:,:,end,i,2,1),1)),...
+% %         squeeze(nanstd(grpdfsizebest(:,:,end,i,1,1),1))/sqrt(totcells),'k',1)
+% %     shadedErrorBar(timepts,squeeze(nanmedian(grpdfsizebest(:,:,end,i,2,2),1)),...
+% %         squeeze(nanstd(grpdfsizebest(:,:,end,i,1,2),1))/sqrt(totcells),'r',1)
+% %     axis square
+% %     axis([timepts(1) timepts(end) -0.01 0.25])
+% %     set(gca,'LooseInset',get(gca,'TightInset'))
+% % end
+% % mtit('Running response per size (size params)')
+% % if exist('psfile','var')
+% %     set(gcf, 'PaperPositionMode', 'auto');
+% %     print('-dpsc',psfile,'-append');
+% % end
+% 
+% %%%%plot averages by animal
+% %%%plot size suppression curves gratings params
 % figure
 % pre=nan(length(unique(session)),length(contrastlist),length(sizes));post=pre;
 % for i = 1:length(unique(session))
-%     pre(i,:,:) = squeeze(nanmean(nanmean(grpdfsizebest(find(session==i),dfWindow,:,:,1,1),2),1));
-%     post(i,:,:) = squeeze(nanmean(nanmean(grpdfsizebest(find(session==i),dfWindow,:,:,1,2),2),1));
+%     pre(i,:,:) = squeeze(nanmedian(nanmean(grpdfsize(find(session==i),dfWindow,:,:,1,1),2),1));
+%     post(i,:,:) = squeeze(nanmedian(nanmean(grpdfsize(find(session==i),dfWindow,:,:,1,2),2),1));
 % end
 % subplot(2,2,1)
 % hold on
-% plot(1:length(radiusRange),squeeze(nanmedian(pre,1)),'-o','Markersize',5)
+% if length(unique(session))==1
+%     plot(1:length(radiusRange),squeeze(pre),'-o','Markersize',5)
+% else
+%     plot(1:length(radiusRange),squeeze(nanmedian(pre,1)),'-o','Markersize',5)
+% end
 % xlabel('Stim Size (deg)')
 % ylabel('pre sit dfof')
-% axis([0 length(radiusRange)+1 min(min([nanmedian(pre,1) nanmedian(post,1)]))-0.01...
-%     max(max([nanmedian(pre,1) nanmedian(post,1)]))+0.01])
+% if length(unique(session))==1
+%     axis([0 length(radiusRange)+1 min(min([pre post]))-0.01...
+%         max(max([pre post]))+0.01])
+% else
+%     axis([0 length(radiusRange)+1 min(min([nanmedian(pre,1) nanmedian(post,1)]))-0.01...
+%         max(max([nanmedian(pre,1) nanmedian(post,1)]))+0.01])
+% end
 % axis square
 % set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
 % hold off
 % subplot(2,2,2)
 % hold on
-% plot(1:length(radiusRange),squeeze(nanmedian(post,1)),'-o','Markersize',5)
+% if length(unique(session))==1
+%     plot(1:length(radiusRange),squeeze(post),'-o','Markersize',5)
+% else
+%     plot(1:length(radiusRange),squeeze(nanmedian(post,1)),'-o','Markersize',5)
+% end
 % xlabel('Stim Size (deg)')
 % ylabel('post sit dfof')
-% axis([0 length(radiusRange)+1 min(min([nanmedian(pre,1) nanmedian(post,1)]))-0.01...
-%     max(max([nanmedian(pre,1) nanmedian(post,1)]))+0.01])
+% if length(unique(session))==1
+%     axis([0 length(radiusRange)+1 min(min([pre post]))-0.01...
+%         max(max([pre post]))+0.01])
+% else
+%     axis([0 length(radiusRange)+1 min(min([nanmedian(pre,1) nanmedian(post,1)]))-0.01...
+%         max(max([nanmedian(pre,1) nanmedian(post,1)]))+0.01])
+% end
+% axis square
+% set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+% hold off
+% pre=nan(length(unique(session)),length(contrastlist),length(sizes));post=pre;
+% for i = 1:length(unique(session))
+%     pre(i,:,:) = squeeze(nanmedian(nanmean(grpdfsize(find(session==i),dfWindow,:,:,2,1),2),1));
+%     post(i,:,:) = squeeze(nanmedian(nanmean(grpdfsize(find(session==i),dfWindow,:,:,2,2),2),1));
+% end
+% subplot(2,2,3)
+% hold on
+% if length(unique(session))==1
+%     plot(1:length(radiusRange),squeeze(pre),'-o','Markersize',5)
+% else
+%     plot(1:length(radiusRange),squeeze(nanmedian(pre,1)),'-o','Markersize',5)
+% end
+% xlabel('Stim Size (deg)')
+% ylabel('pre run dfof')
+% if length(unique(session))==1
+%     axis([0 length(radiusRange)+1 min(min([pre post]))-0.01...
+%         max(max([pre post]))+0.01])
+% else
+%     axis([0 length(radiusRange)+1 min(min([nanmedian(pre,1) nanmedian(post,1)]))-0.01...
+%         max(max([nanmedian(pre,1) nanmedian(post,1)]))+0.01])
+% end
+% axis square
+% set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+% hold off
+% subplot(2,2,4)
+% hold on
+% if length(unique(session))==1
+%     plot(1:length(radiusRange),squeeze(post),'-o','Markersize',5)
+% else
+%     plot(1:length(radiusRange),squeeze(nanmedian(post,1)),'-o','Markersize',5)
+% end
+% xlabel('Stim Size (deg)')
+% ylabel('post run dfof')
+% if length(unique(session))==1
+%     axis([0 length(radiusRange)+1 min(min([pre post]))-0.01...
+%         max(max([pre post]))+0.01])
+% else
+%     axis([0 length(radiusRange)+1 min(min([nanmedian(pre,1) nanmedian(post,1)]))-0.01...
+%         max(max([nanmedian(pre,1) nanmedian(post,1)]))+0.01])
+% end
+% axis square
+% set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+% hold off
+% mtit('Size Suppression Curve (grat params, animal avg)')
+% if exist('psfile','var')
+%     set(gcf, 'PaperPositionMode', 'auto');
+%     print('-dpsc',psfile,'-append');
+% end
+% 
+% % %%%plot size suppression curves size params
+% % figure
+% % pre=nan(length(unique(session)),length(contrastlist),length(sizes));post=pre;
+% % for i = 1:length(unique(session))
+% %     pre(i,:,:) = squeeze(nanmean(nanmean(grpdfsizebest(find(session==i),dfWindow,:,:,1,1),2),1));
+% %     post(i,:,:) = squeeze(nanmean(nanmean(grpdfsizebest(find(session==i),dfWindow,:,:,1,2),2),1));
+% % end
+% % subplot(2,2,1)
+% % hold on
+% % plot(1:length(radiusRange),squeeze(nanmedian(pre,1)),'-o','Markersize',5)
+% % xlabel('Stim Size (deg)')
+% % ylabel('pre sit dfof')
+% % axis([0 length(radiusRange)+1 min(min([nanmedian(pre,1) nanmedian(post,1)]))-0.01...
+% %     max(max([nanmedian(pre,1) nanmedian(post,1)]))+0.01])
+% % axis square
+% % set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+% % hold off
+% % subplot(2,2,2)
+% % hold on
+% % plot(1:length(radiusRange),squeeze(nanmedian(post,1)),'-o','Markersize',5)
+% % xlabel('Stim Size (deg)')
+% % ylabel('post sit dfof')
+% % axis([0 length(radiusRange)+1 min(min([nanmedian(pre,1) nanmedian(post,1)]))-0.01...
+% %     max(max([nanmedian(pre,1) nanmedian(post,1)]))+0.01])
+% % axis square
+% % set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+% % hold off
+% % 
+% % pre=nan(length(unique(session)),length(contrastlist),length(sizes));post=pre;
+% % for i = 1:length(unique(session))
+% %     pre(i,:,:) = squeeze(nanmean(nanmean(grpdfsizebest(find(session==i),dfWindow,:,:,2,1),2),1));
+% %     post(i,:,:) = squeeze(nanmean(nanmean(grpdfsizebest(find(session==i),dfWindow,:,:,2,2),2),1));
+% % end
+% % subplot(2,2,3)
+% % plot(1:length(radiusRange),squeeze(nanmedian(pre,1)),'-o','Markersize',5)
+% % xlabel('Stim Size (deg)')
+% % ylabel('pre run dfof')
+% % axis([0 length(radiusRange)+1 min(min([nanmedian(pre,1) nanmedian(post,1)]))-0.01...
+% %     max(max([nanmedian(pre,1) nanmedian(post,1)]))+0.01])
+% % axis square
+% % set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+% % subplot(2,2,4)
+% % plot(1:length(radiusRange),squeeze(nanmedian(post,1)),'-o','Markersize',5)
+% % xlabel('Stim Size (deg)')
+% % ylabel('post run dfof')
+% % axis([0 length(radiusRange)+1 min(min([nanmedian(pre,1) nanmedian(post,1)]))-0.01...
+% %     max(max([nanmedian(pre,1) nanmedian(post,1)]))+0.01])
+% % axis square
+% % set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+% % mtit('Size Suppression Curve (size params, animal avg)')
+% % if exist('psfile','var')
+% %     set(gcf, 'PaperPositionMode', 'auto');
+% %     print('-dpsc',psfile,'-append');
+% % end
+% 
+% %%%plot cycle averages (grat params)
+% figure
+% for i = 1:length(sizes)
+%     subplot(2,4,i)
+%     hold on
+%     pre=nan(length(unique(session)),15);post=pre;
+%     for j = 1:length(unique(session))
+%             pre(j,:) = nanmedian(grpdfsize(find(session==j),:,end,i,1,1),1);
+%             post(j,:) = nanmedian(grpdfsize(find(session==j),:,end,i,1,2),1);
+%     end
+%     if length(unique(session))==1
+%         plot(timepts,pre,'k')
+%         plot(timepts,post,'r')
+%     else
+%         shadedErrorBar(timepts,nanmedian(pre,1),nanstd(pre,1)/sqrt(numAni),'k',1)
+%         shadedErrorBar(timepts,nanmedian(post,1),nanstd(post,1)/sqrt(numAni),'r',1)
+%     end
+%     axis square
+%     axis([timepts(1) timepts(end) -0.01 0.25])
+%     set(gca,'LooseInset',get(gca,'TightInset'))
+% end
+% mtit('Stationary response/size (grat params, animal avg)')
+% if exist('psfile','var')
+%     set(gcf, 'PaperPositionMode', 'auto');
+%     print('-dpsc',psfile,'-append');
+% end
+% 
+% figure
+% for i = 1:length(sizes)
+%     subplot(2,4,i)
+%     hold on
+%     pre=nan(length(unique(session)),15);post=pre;
+%     for j = 1:length(unique(session))
+%             pre(j,:) = nanmedian(grpdfsize(find(session==j),:,end,i,2,1),1);
+%             post(j,:) = nanmedian(grpdfsize(find(session==j),:,end,i,2,2),1);
+%     end
+%     if length(unique(session))==1
+%         plot(timepts,pre,'k')
+%         plot(timepts,post,'r')
+%     else
+%         shadedErrorBar(timepts,nanmedian(pre,1),nanstd(pre,1)/sqrt(numAni),'k',1)
+%         shadedErrorBar(timepts,nanmedian(post,1),nanstd(post,1)/sqrt(numAni),'r',1)
+%     end
+%     axis square
+%     axis([timepts(1) timepts(end) -0.01 0.25])
+%     set(gca,'LooseInset',get(gca,'TightInset'))
+% end
+% mtit('Running response/size (grat params, animal avg)')
+% if exist('psfile','var')
+%     set(gcf, 'PaperPositionMode', 'auto');
+%     print('-dpsc',psfile,'-append');
+% end
+% 
+% % %%%plot cycle averages (size params)
+% % figure
+% % for i = 1:length(sizes)
+% %     subplot(2,4,i)
+% %     hold on
+% %     pre=nan(length(unique(session)),15);post=pre;
+% %     for j = 1:length(unique(session))
+% %         pre(j,:) = nanmedian(grpdfsizebest(find(session==j),:,end,i,1,1),1);
+% %         post(j,:) = nanmedian(grpdfsizebest(find(session==j),:,end,i,1,2),1);
+% %     end
+% %     shadedErrorBar(timepts,nanmedian(pre,1),nanstd(pre,1)/sqrt(numAni),'k',1)
+% %     shadedErrorBar(timepts,nanmedian(post,1),nanstd(post,1)/sqrt(numAni),'r',1)
+% %     axis square
+% %     axis([timepts(1) timepts(end) -0.01 0.25])
+% %     set(gca,'LooseInset',get(gca,'TightInset'))
+% % end
+% % mtit('Stationary response per size (size params)')
+% % if exist('psfile','var')
+% %     set(gcf, 'PaperPositionMode', 'auto');
+% %     print('-dpsc',psfile,'-append');
+% % end
+% % 
+% % figure
+% % for i = 1:length(sizes)
+% %     subplot(2,4,i)
+% %     hold on
+% %     pre=nan(length(unique(session)),15);post=pre;
+% %     for j = 1:length(unique(session))
+% %         pre(j,:) = nanmedian(grpdfsizebest(find(session==j),:,end,i,2,1),1);
+% %         post(j,:) = nanmedian(grpdfsizebest(find(session==j),:,end,i,2,2),1);
+% %     end
+% %     shadedErrorBar(timepts,nanmedian(pre,1),nanstd(pre,1)/sqrt(numAni),'k',1)
+% %     shadedErrorBar(timepts,nanmedian(post,1),nanstd(post,1)/sqrt(numAni),'r',1)
+% %     axis square
+% %     axis([timepts(1) timepts(end) -0.01 0.25])
+% %     set(gca,'LooseInset',get(gca,'TightInset'))
+% % end
+% % mtit('Running response per size (size params)')
+% % if exist('psfile','var')
+% %     set(gcf, 'PaperPositionMode', 'auto');
+% %     print('-dpsc',psfile,'-append');
+% % end
+% 
+% 
+% %%%make cutoff to eliminate noisy cells - threshold for size response
+% sizethresh = 0.05;
+% sizeresp = find(max(nanmean(grpdfsize(:,dfWindow,end,:,1),2),[],4)>sizethresh);
+% 
+% figure
+% hold on
+% pre = squeeze(nanmedian(nanmean(grpdfsize(sizeresp,dfWindow,:,:,1,1),2),1));
+% post = squeeze(nanmedian(nanmean(grpdfsize(sizeresp,dfWindow,:,:,1,2),2),1));
+% subplot(2,2,1)
+% plot(1:length(radiusRange),pre,'-o','Markersize',5)
+% xlabel('Stim Size (deg)')
+% ylabel('pre sit dfof')
+% axis([0 length(radiusRange)+1 min(min([pre post]))-0.01 max(max([pre post]))+0.01])
+% axis square
+% set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+% subplot(2,2,2)
+% plot(1:length(radiusRange),post,'-o','Markersize',5)
+% xlabel('Stim Size (deg)')
+% ylabel('post sit dfof')
+% axis([0 length(radiusRange)+1 min(min([pre post]))-0.01 max(max([pre post]))+0.01])
+% axis square
+% set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+% 
+% pre = squeeze(nanmedian(nanmean(grpdfsize(sizeresp,dfWindow,:,:,2,1),2),1));
+% post = squeeze(nanmedian(nanmean(grpdfsize(sizeresp,dfWindow,:,:,2,2),2),1));
+% subplot(2,2,3)
+% plot(1:length(radiusRange),pre,'-o','Markersize',5)
+% xlabel('Stim Size (deg)')
+% ylabel('pre run dfof')
+% axis([0 length(radiusRange)+1 min(min([pre post]))-0.01 max(max([pre post]))+0.01])
+% axis square
+% set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+% subplot(2,2,4)
+% plot(1:length(radiusRange),post,'-o','Markersize',5)
+% xlabel('Stim Size (deg)')
+% ylabel('post run dfof')
+% axis([0 length(radiusRange)+1 min(min([pre post]))-0.01 max(max([pre post]))+0.01])
+% axis square
+% set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+% mtit('Size Suppression Curve (grat params, size thresh)')
+% if exist('psfile','var')
+%     set(gcf, 'PaperPositionMode', 'auto');
+%     print('-dpsc',psfile,'-append');
+% end
+% 
+% %%%%plot averages by animal
+% %%%plot size suppression curves gratings params
+% figure
+% pre=nan(length(unique(session)),length(contrastlist),length(sizes));post=pre;
+% for i = 1:length(unique(session))
+%     if length(intersect(find(session==i),sizeresp))==1
+%         pre(i,:,:) = squeeze(nanmean(grpdfsize(intersect(find(session==i),sizeresp),dfWindow,:,:,1,1),2));
+%         post(i,:,:) = squeeze(nanmean(grpdfsize(intersect(find(session==i),sizeresp),dfWindow,:,:,1,2),2));
+%     else
+%         pre(i,:,:) = squeeze(nanmedian(nanmean(grpdfsize(intersect(find(session==i),sizeresp),dfWindow,:,:,1,1),2),1));
+%         post(i,:,:) = squeeze(nanmedian(nanmean(grpdfsize(intersect(find(session==i),sizeresp),dfWindow,:,:,1,2),2),1));
+%     end
+% end
+% subplot(2,2,1)
+% hold on
+% if length(unique(session))==1
+%     plot(1:length(radiusRange),squeeze(pre),'-o','Markersize',5)
+% else
+%     plot(1:length(radiusRange),squeeze(nanmedian(pre,1)),'-o','Markersize',5)
+% end
+% xlabel('Stim Size (deg)')
+% ylabel('pre sit dfof')
+% if length(unique(session))==1
+%     axis([0 length(radiusRange)+1 min(min([pre post]))-0.01...
+%         max(max([pre post]))+0.01])
+% else
+%     axis([0 length(radiusRange)+1 min(min([nanmedian(pre,1) nanmedian(post,1)]))-0.01...
+%         max(max([nanmedian(pre,1) nanmedian(post,1)]))+0.01])
+% end
+% axis square
+% set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+% hold off
+% subplot(2,2,2)
+% hold on
+% if length(unique(session))==1
+%     plot(1:length(radiusRange),squeeze(post),'-o','Markersize',5)
+% else
+%     plot(1:length(radiusRange),squeeze(nanmedian(post,1)),'-o','Markersize',5)
+% end
+% xlabel('Stim Size (deg)')
+% ylabel('post sit dfof')
+% if length(unique(session))==1
+%     axis([0 length(radiusRange)+1 min(min([pre post]))-0.01...
+%         max(max([pre post]))+0.01])
+% else
+%     axis([0 length(radiusRange)+1 min(min([nanmedian(pre,1) nanmedian(post,1)]))-0.01...
+%         max(max([nanmedian(pre,1) nanmedian(post,1)]))+0.01])
+% end
 % axis square
 % set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
 % hold off
 % 
 % pre=nan(length(unique(session)),length(contrastlist),length(sizes));post=pre;
 % for i = 1:length(unique(session))
-%     pre(i,:,:) = squeeze(nanmean(nanmean(grpdfsizebest(find(session==i),dfWindow,:,:,2,1),2),1));
-%     post(i,:,:) = squeeze(nanmean(nanmean(grpdfsizebest(find(session==i),dfWindow,:,:,2,2),2),1));
+%     if length(intersect(find(session==i),sizeresp))==1
+%         pre(i,:,:) = squeeze(nanmean(grpdfsize(intersect(find(session==i),sizeresp),dfWindow,:,:,2,1),2));
+%         post(i,:,:) = squeeze(nanmean(grpdfsize(intersect(find(session==i),sizeresp),dfWindow,:,:,2,2),2));
+%     else
+%         pre(i,:,:) = squeeze(nanmedian(nanmean(grpdfsize(intersect(find(session==i),sizeresp),dfWindow,:,:,2,1),2),1));
+%         post(i,:,:) = squeeze(nanmedian(nanmean(grpdfsize(intersect(find(session==i),sizeresp),dfWindow,:,:,2,2),2),1));
+%     end
 % end
 % subplot(2,2,3)
-% plot(1:length(radiusRange),squeeze(nanmedian(pre,1)),'-o','Markersize',5)
+% hold on
+% if length(unique(session))==1
+%     plot(1:length(radiusRange),squeeze(pre),'-o','Markersize',5)
+% else
+%     plot(1:length(radiusRange),squeeze(nanmedian(pre,1)),'-o','Markersize',5)
+% end
 % xlabel('Stim Size (deg)')
 % ylabel('pre run dfof')
-% axis([0 length(radiusRange)+1 min(min([nanmedian(pre,1) nanmedian(post,1)]))-0.01...
-%     max(max([nanmedian(pre,1) nanmedian(post,1)]))+0.01])
+% if length(unique(session))==1
+%     axis([0 length(radiusRange)+1 min(min([pre post]))-0.01...
+%         max(max([pre post]))+0.01])
+% else
+%     axis([0 length(radiusRange)+1 min(min([nanmedian(pre,1) nanmedian(post,1)]))-0.01...
+%         max(max([nanmedian(pre,1) nanmedian(post,1)]))+0.01])
+% end
 % axis square
 % set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+% hold off
 % subplot(2,2,4)
-% plot(1:length(radiusRange),squeeze(nanmedian(post,1)),'-o','Markersize',5)
+% hold on
+% if length(unique(session))==1
+%     plot(1:length(radiusRange),squeeze(post),'-o','Markersize',5)
+% else
+%     plot(1:length(radiusRange),squeeze(nanmedian(post,1)),'-o','Markersize',5)
+% end
 % xlabel('Stim Size (deg)')
 % ylabel('post run dfof')
-% axis([0 length(radiusRange)+1 min(min([nanmedian(pre,1) nanmedian(post,1)]))-0.01...
-%     max(max([nanmedian(pre,1) nanmedian(post,1)]))+0.01])
+% if length(unique(session))==1
+%     axis([0 length(radiusRange)+1 min(min([pre post]))-0.01...
+%         max(max([pre post]))+0.01])
+% else
+%     axis([0 length(radiusRange)+1 min(min([nanmedian(pre,1) nanmedian(post,1)]))-0.01...
+%         max(max([nanmedian(pre,1) nanmedian(post,1)]))+0.01])
+% end
 % axis square
 % set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
-% mtit('Size Suppression Curve (size params, animal avg)')
+% hold off
+% mtit('Size Suppression Curve (grat params, size thresh, animal avg)')
 % if exist('psfile','var')
 %     set(gcf, 'PaperPositionMode', 'auto');
 %     print('-dpsc',psfile,'-append');
 % end
-
-%%%plot cycle averages (grat params)
-figure
-for i = 1:length(sizes)
-    subplot(2,4,i)
-    hold on
-    pre=nan(length(unique(session)),15);post=pre;
-    for j = 1:length(unique(session))
-            pre(j,:) = nanmedian(grpdfsize(find(session==j),:,end,i,1,1),1);
-            post(j,:) = nanmedian(grpdfsize(find(session==j),:,end,i,1,2),1);
-    end
-    if length(unique(session))==1
-        plot(timepts,pre,'k')
-        plot(timepts,post,'r')
-    else
-        shadedErrorBar(timepts,nanmedian(pre,1),nanstd(pre,1)/sqrt(numAni),'k',1)
-        shadedErrorBar(timepts,nanmedian(post,1),nanstd(post,1)/sqrt(numAni),'r',1)
-    end
-    axis square
-    axis([timepts(1) timepts(end) -0.01 0.25])
-    set(gca,'LooseInset',get(gca,'TightInset'))
-end
-mtit('Stationary response/size (grat params, animal avg)')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-figure
-for i = 1:length(sizes)
-    subplot(2,4,i)
-    hold on
-    pre=nan(length(unique(session)),15);post=pre;
-    for j = 1:length(unique(session))
-            pre(j,:) = nanmedian(grpdfsize(find(session==j),:,end,i,2,1),1);
-            post(j,:) = nanmedian(grpdfsize(find(session==j),:,end,i,2,2),1);
-    end
-    if length(unique(session))==1
-        plot(timepts,pre,'k')
-        plot(timepts,post,'r')
-    else
-        shadedErrorBar(timepts,nanmedian(pre,1),nanstd(pre,1)/sqrt(numAni),'k',1)
-        shadedErrorBar(timepts,nanmedian(post,1),nanstd(post,1)/sqrt(numAni),'r',1)
-    end
-    axis square
-    axis([timepts(1) timepts(end) -0.01 0.25])
-    set(gca,'LooseInset',get(gca,'TightInset'))
-end
-mtit('Running response/size (grat params, animal avg)')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-% %%%plot cycle averages (size params)
+% 
+% 
+% %%%plot cycle averages (grat params)
 % figure
 % for i = 1:length(sizes)
 %     subplot(2,4,i)
 %     hold on
 %     pre=nan(length(unique(session)),15);post=pre;
 %     for j = 1:length(unique(session))
-%         pre(j,:) = nanmedian(grpdfsizebest(find(session==j),:,end,i,1,1),1);
-%         post(j,:) = nanmedian(grpdfsizebest(find(session==j),:,end,i,1,2),1);
+%         if length(intersect(find(session==j),sizeresp))==1
+%             pre(j,:) = squeeze(grpdfsize(intersect(find(session==j),sizeresp),:,end,i,1,1));
+%             post(j,:) = squeeze(grpdfsize(intersect(find(session==j),sizeresp),:,end,i,1,2));
+%         else
+%             pre(j,:) = nanmedian(grpdfsize(intersect(find(session==j),sizeresp),:,end,i,1,1),1);
+%             post(j,:) = nanmedian(grpdfsize(intersect(find(session==j),sizeresp),:,end,i,1,2),1);
+%         end
 %     end
-%     shadedErrorBar(timepts,nanmedian(pre,1),nanstd(pre,1)/sqrt(numAni),'k',1)
-%     shadedErrorBar(timepts,nanmedian(post,1),nanstd(post,1)/sqrt(numAni),'r',1)
+%     if length(unique(session))==1
+%         plot(timepts,pre,'k')
+%         plot(timepts,post,'r')
+%     else
+%         shadedErrorBar(timepts,nanmedian(pre,1),nanstd(pre,1)/sqrt(numAni),'k',1)
+%         shadedErrorBar(timepts,nanmedian(post,1),nanstd(post,1)/sqrt(numAni),'r',1)
+%     end
 %     axis square
 %     axis([timepts(1) timepts(end) -0.01 0.25])
 %     set(gca,'LooseInset',get(gca,'TightInset'))
 % end
-% mtit('Stationary response per size (size params)')
+% mtit('Stationary response/size (grat params, size thresh, animal avg)')
 % if exist('psfile','var')
 %     set(gcf, 'PaperPositionMode', 'auto');
 %     print('-dpsc',psfile,'-append');
@@ -646,373 +853,167 @@ end
 %     hold on
 %     pre=nan(length(unique(session)),15);post=pre;
 %     for j = 1:length(unique(session))
-%         pre(j,:) = nanmedian(grpdfsizebest(find(session==j),:,end,i,2,1),1);
-%         post(j,:) = nanmedian(grpdfsizebest(find(session==j),:,end,i,2,2),1);
+%         if length(intersect(find(session==j),sizeresp))==1
+%             pre(j,:) = squeeze(grpdfsize(intersect(find(session==j),sizeresp),:,end,i,2,1));
+%             post(j,:) = squeeze(grpdfsize(intersect(find(session==j),sizeresp),:,end,i,2,2));
+%         else
+%             pre(j,:) = nanmedian(grpdfsize(intersect(find(session==j),sizeresp),:,end,i,2,1),1);
+%             post(j,:) = nanmedian(grpdfsize(intersect(find(session==j),sizeresp),:,end,i,2,2),1);
+%         end
 %     end
-%     shadedErrorBar(timepts,nanmedian(pre,1),nanstd(pre,1)/sqrt(numAni),'k',1)
-%     shadedErrorBar(timepts,nanmedian(post,1),nanstd(post,1)/sqrt(numAni),'r',1)
+%     if length(unique(session))==1
+%         plot(timepts,pre,'k')
+%         plot(timepts,post,'r')
+%     else
+%         shadedErrorBar(timepts,nanmedian(pre,1),nanstd(pre,1)/sqrt(numAni),'k',1)
+%         shadedErrorBar(timepts,nanmedian(post,1),nanstd(post,1)/sqrt(numAni),'r',1)
+%     end
 %     axis square
 %     axis([timepts(1) timepts(end) -0.01 0.25])
 %     set(gca,'LooseInset',get(gca,'TightInset'))
 % end
-% mtit('Running response per size (size params)')
+% mtit('Running response/size (grat params, size thresh, animal avg)')
 % if exist('psfile','var')
 %     set(gcf, 'PaperPositionMode', 'auto');
 %     print('-dpsc',psfile,'-append');
 % end
-
-
-%%%make cutoff to eliminate noisy cells - threshold for size response
-sizethresh = 0.05;
-sizeresp = find(max(nanmean(grpdfsize(:,dfWindow,end,:,1),2),[],4)>sizethresh);
-
-figure
-hold on
-pre = squeeze(nanmedian(nanmean(grpdfsize(sizeresp,dfWindow,:,:,1,1),2),1));
-post = squeeze(nanmedian(nanmean(grpdfsize(sizeresp,dfWindow,:,:,1,2),2),1));
-subplot(2,2,1)
-plot(1:length(radiusRange),pre,'-o','Markersize',5)
-xlabel('Stim Size (deg)')
-ylabel('pre sit dfof')
-axis([0 length(radiusRange)+1 min(min([pre post]))-0.01 max(max([pre post]))+0.01])
-axis square
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
-subplot(2,2,2)
-plot(1:length(radiusRange),post,'-o','Markersize',5)
-xlabel('Stim Size (deg)')
-ylabel('post sit dfof')
-axis([0 length(radiusRange)+1 min(min([pre post]))-0.01 max(max([pre post]))+0.01])
-axis square
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
-
-pre = squeeze(nanmedian(nanmean(grpdfsize(sizeresp,dfWindow,:,:,2,1),2),1));
-post = squeeze(nanmedian(nanmean(grpdfsize(sizeresp,dfWindow,:,:,2,2),2),1));
-subplot(2,2,3)
-plot(1:length(radiusRange),pre,'-o','Markersize',5)
-xlabel('Stim Size (deg)')
-ylabel('pre run dfof')
-axis([0 length(radiusRange)+1 min(min([pre post]))-0.01 max(max([pre post]))+0.01])
-axis square
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
-subplot(2,2,4)
-plot(1:length(radiusRange),post,'-o','Markersize',5)
-xlabel('Stim Size (deg)')
-ylabel('post run dfof')
-axis([0 length(radiusRange)+1 min(min([pre post]))-0.01 max(max([pre post]))+0.01])
-axis square
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
-mtit('Size Suppression Curve (grat params, size thresh)')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-%%%%plot averages by animal
-%%%plot size suppression curves gratings params
-figure
-pre=nan(length(unique(session)),length(contrastlist),length(sizes));post=pre;
-for i = 1:length(unique(session))
-    if length(intersect(find(session==i),sizeresp))==1
-        pre(i,:,:) = squeeze(nanmean(grpdfsize(intersect(find(session==i),sizeresp),dfWindow,:,:,1,1),2));
-        post(i,:,:) = squeeze(nanmean(grpdfsize(intersect(find(session==i),sizeresp),dfWindow,:,:,1,2),2));
-    else
-        pre(i,:,:) = squeeze(nanmedian(nanmean(grpdfsize(intersect(find(session==i),sizeresp),dfWindow,:,:,1,1),2),1));
-        post(i,:,:) = squeeze(nanmedian(nanmean(grpdfsize(intersect(find(session==i),sizeresp),dfWindow,:,:,1,2),2),1));
-    end
-end
-subplot(2,2,1)
-hold on
-if length(unique(session))==1
-    plot(1:length(radiusRange),squeeze(pre),'-o','Markersize',5)
-else
-    plot(1:length(radiusRange),squeeze(nanmedian(pre,1)),'-o','Markersize',5)
-end
-xlabel('Stim Size (deg)')
-ylabel('pre sit dfof')
-if length(unique(session))==1
-    axis([0 length(radiusRange)+1 min(min([pre post]))-0.01...
-        max(max([pre post]))+0.01])
-else
-    axis([0 length(radiusRange)+1 min(min([nanmedian(pre,1) nanmedian(post,1)]))-0.01...
-        max(max([nanmedian(pre,1) nanmedian(post,1)]))+0.01])
-end
-axis square
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
-hold off
-subplot(2,2,2)
-hold on
-if length(unique(session))==1
-    plot(1:length(radiusRange),squeeze(post),'-o','Markersize',5)
-else
-    plot(1:length(radiusRange),squeeze(nanmedian(post,1)),'-o','Markersize',5)
-end
-xlabel('Stim Size (deg)')
-ylabel('post sit dfof')
-if length(unique(session))==1
-    axis([0 length(radiusRange)+1 min(min([pre post]))-0.01...
-        max(max([pre post]))+0.01])
-else
-    axis([0 length(radiusRange)+1 min(min([nanmedian(pre,1) nanmedian(post,1)]))-0.01...
-        max(max([nanmedian(pre,1) nanmedian(post,1)]))+0.01])
-end
-axis square
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
-hold off
-
-pre=nan(length(unique(session)),length(contrastlist),length(sizes));post=pre;
-for i = 1:length(unique(session))
-    if length(intersect(find(session==i),sizeresp))==1
-        pre(i,:,:) = squeeze(nanmean(grpdfsize(intersect(find(session==i),sizeresp),dfWindow,:,:,2,1),2));
-        post(i,:,:) = squeeze(nanmean(grpdfsize(intersect(find(session==i),sizeresp),dfWindow,:,:,2,2),2));
-    else
-        pre(i,:,:) = squeeze(nanmedian(nanmean(grpdfsize(intersect(find(session==i),sizeresp),dfWindow,:,:,2,1),2),1));
-        post(i,:,:) = squeeze(nanmedian(nanmean(grpdfsize(intersect(find(session==i),sizeresp),dfWindow,:,:,2,2),2),1));
-    end
-end
-subplot(2,2,3)
-hold on
-if length(unique(session))==1
-    plot(1:length(radiusRange),squeeze(pre),'-o','Markersize',5)
-else
-    plot(1:length(radiusRange),squeeze(nanmedian(pre,1)),'-o','Markersize',5)
-end
-xlabel('Stim Size (deg)')
-ylabel('pre run dfof')
-if length(unique(session))==1
-    axis([0 length(radiusRange)+1 min(min([pre post]))-0.01...
-        max(max([pre post]))+0.01])
-else
-    axis([0 length(radiusRange)+1 min(min([nanmedian(pre,1) nanmedian(post,1)]))-0.01...
-        max(max([nanmedian(pre,1) nanmedian(post,1)]))+0.01])
-end
-axis square
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
-hold off
-subplot(2,2,4)
-hold on
-if length(unique(session))==1
-    plot(1:length(radiusRange),squeeze(post),'-o','Markersize',5)
-else
-    plot(1:length(radiusRange),squeeze(nanmedian(post,1)),'-o','Markersize',5)
-end
-xlabel('Stim Size (deg)')
-ylabel('post run dfof')
-if length(unique(session))==1
-    axis([0 length(radiusRange)+1 min(min([pre post]))-0.01...
-        max(max([pre post]))+0.01])
-else
-    axis([0 length(radiusRange)+1 min(min([nanmedian(pre,1) nanmedian(post,1)]))-0.01...
-        max(max([nanmedian(pre,1) nanmedian(post,1)]))+0.01])
-end
-axis square
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
-hold off
-mtit('Size Suppression Curve (grat params, size thresh, animal avg)')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-
-%%%plot cycle averages (grat params)
-figure
-for i = 1:length(sizes)
-    subplot(2,4,i)
-    hold on
-    pre=nan(length(unique(session)),15);post=pre;
-    for j = 1:length(unique(session))
-        if length(intersect(find(session==j),sizeresp))==1
-            pre(j,:) = squeeze(grpdfsize(intersect(find(session==j),sizeresp),:,end,i,1,1));
-            post(j,:) = squeeze(grpdfsize(intersect(find(session==j),sizeresp),:,end,i,1,2));
-        else
-            pre(j,:) = nanmedian(grpdfsize(intersect(find(session==j),sizeresp),:,end,i,1,1),1);
-            post(j,:) = nanmedian(grpdfsize(intersect(find(session==j),sizeresp),:,end,i,1,2),1);
-        end
-    end
-    if length(unique(session))==1
-        plot(timepts,pre,'k')
-        plot(timepts,post,'r')
-    else
-        shadedErrorBar(timepts,nanmedian(pre,1),nanstd(pre,1)/sqrt(numAni),'k',1)
-        shadedErrorBar(timepts,nanmedian(post,1),nanstd(post,1)/sqrt(numAni),'r',1)
-    end
-    axis square
-    axis([timepts(1) timepts(end) -0.01 0.25])
-    set(gca,'LooseInset',get(gca,'TightInset'))
-end
-mtit('Stationary response/size (grat params, size thresh, animal avg)')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-figure
-for i = 1:length(sizes)
-    subplot(2,4,i)
-    hold on
-    pre=nan(length(unique(session)),15);post=pre;
-    for j = 1:length(unique(session))
-        if length(intersect(find(session==j),sizeresp))==1
-            pre(j,:) = squeeze(grpdfsize(intersect(find(session==j),sizeresp),:,end,i,2,1));
-            post(j,:) = squeeze(grpdfsize(intersect(find(session==j),sizeresp),:,end,i,2,2));
-        else
-            pre(j,:) = nanmedian(grpdfsize(intersect(find(session==j),sizeresp),:,end,i,2,1),1);
-            post(j,:) = nanmedian(grpdfsize(intersect(find(session==j),sizeresp),:,end,i,2,2),1);
-        end
-    end
-    if length(unique(session))==1
-        plot(timepts,pre,'k')
-        plot(timepts,post,'r')
-    else
-        shadedErrorBar(timepts,nanmedian(pre,1),nanstd(pre,1)/sqrt(numAni),'k',1)
-        shadedErrorBar(timepts,nanmedian(post,1),nanstd(post,1)/sqrt(numAni),'r',1)
-    end
-    axis square
-    axis([timepts(1) timepts(end) -0.01 0.25])
-    set(gca,'LooseInset',get(gca,'TightInset'))
-end
-mtit('Running response/size (grat params, size thresh, animal avg)')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-%%%plot individual cell data
-for i=1:length(sizeresp)
-    figure
-
-    %%%direction tuning curve
-    subplot(2,4,1)
-    precurv = grpdfori(sizeresp(i),:,1,1);
-    postcurv = grpdfori(sizeresp(i),:,1,2);
-    hold on
-    plot(1:12,precurv,'k-')
-    plot(1:12,postcurv,'r-')
-    xlabel('Direction')
-    ylabel('dfof')
-    axis([1 12 min([precurv postcurv])+0.01 max([precurv postcurv])+0.01])
-    axis square
-    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
-    hold off
-
-    %%%polar direction tuning curve
-    subplot(2,4,2)
-    prepol = grpdfori(sizeresp(i),:,1,1);prepol(prepol<0)=0;
-    postpol = grpdfori(sizeresp(i),:,1,2);postpol(postpol<0)=0;
-    polarplot([dirrange dirrange(1)],[prepol prepol(1)],'k-')
-    hold on
-    polarplot([dirrange dirrange(1)],[postpol postpol(1)],'r-')
-    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
-    hold off
-
-    %%%osi/dsi
-    subplot(2,4,3)
-    hold on
-    plot([1 2],[grposi(sizeresp(i),1,1) grpdsi(sizeresp(i),1,1)],'k.','Markersize',20)
-    plot([1 2],[grposi(sizeresp(i),1,2) grpdsi(sizeresp(i),1,2)],'r.','Markersize',20)
-    axis([0 3 0 1])
-    set(gca,'xtick',[1 2],'xticklabel',{'OSI','DSI'})
-    axis square
-    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
-    hold off
-
-    %%%avg resp to best grating stim
-    subplot(2,4,4)
-    hold on
-    plot(timepts,grpdfgrat(sizeresp(i),:,1,1),'k')
-    plot(timepts,grpdfgrat(sizeresp(i),:,1,2),'r')
-    xlabel('Time(s)')
-    ylabel('best grat dfof')
-    axis([timepts(1) timepts(end) min(min(grpdfgrat(sizeresp(i),:,1,:)))-0.01 max(max(grpdfgrat(sizeresp(i),:,1,:)))+0.01])
-    axis square
-    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
-    hold off
-
-    %%%size curve (grat params)
-    subplot(2,4,5)
-    hold on
-    splotpre = squeeze(nanmean(grpdfsize(sizeresp(i),dfWindow,end,:,1,1),2));
-    splotpost = squeeze(nanmean(grpdfsize(sizeresp(i),dfWindow,end,:,1,2),2));
-    plot(1:length(radiusRange),splotpre,'k-o','Markersize',5)
-    plot(1:length(radiusRange),splotpost,'r-o','Markersize',5)
-    xlabel('Stim Size (deg)')
-    ylabel('grat param dfof')
-    axis([0 length(radiusRange)+1 min(min([splotpre splotpost]))-0.01 max(max([splotpre splotpost]))+0.01])
-    set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
-    axis square
-    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
-    hold off
-    
-    %%%size curve (size params)
-    subplot(2,4,6)
-    hold on
-    splotpre = squeeze(nanmean(grpdfsizebest(sizeresp(i),dfWindow,end,:,1,1),2));
-    splotpost = squeeze(nanmean(grpdfsizebest(sizeresp(i),dfWindow,end,:,1,2),2));
-    plot(1:length(radiusRange),splotpre,'k-o','Markersize',5)
-    plot(1:length(radiusRange),splotpost,'r-o','Markersize',5)
-    xlabel('Stim Size (deg)')
-    ylabel('size param dfof')
-    axis([0 length(radiusRange)+1 min(min([splotpre splotpost]))-0.01 max(max([splotpre splotpost]))+0.01])
-    set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
-    axis square
-    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
-    hold off
-
-    %%%contrast function (grat params)
-    subplot(2,4,7)
-    hold on
-    splotpre = squeeze(nanmean(grpdfsize(sizeresp(i),dfWindow,:,[1 4 7],1,1),2));
-    splotpost = squeeze(nanmean(grpdfsize(sizeresp(i),dfWindow,:,[1 4 7],1,2),2));
-
-    plot(1:length(contrastlist),splotpre,'k-o','Markersize',5)
-%             set(groot,'defaultAxesColorOrder',sitcolor)
-    plot(1:length(contrastlist),splotpost,'r-o','Markersize',5)
-%             set(groot,'defaultAxesColorOrder',runcolor)
-    xlabel('contrast')
-    ylabel('grat params dfof')
-    axis([0 length(contrastlist)+1 min(min([splotpre splotpost]))-0.01 max(max([splotpre splotpost]))+0.01])
-    set(gca,'xtick',1:length(contrastlist),'xticklabel',contrastlist)
-    axis square
-    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
-    hold off
-    
-    %%%contrast function (size params)
-    subplot(2,4,8)
-    hold on
-    splotpre = squeeze(nanmean(grpdfsizebest(sizeresp(i),dfWindow,:,[1 4 7],1,1),2));
-    splotpost = squeeze(nanmean(grpdfsizebest(sizeresp(i),dfWindow,:,[1 4 7],1,2),2));
-
-    plot(1:length(contrastlist),splotpre,'k-o','Markersize',5)
-%             set(groot,'defaultAxesColorOrder',sitcolor)
-    plot(1:length(contrastlist),splotpost,'r-o','Markersize',5)
-%             set(groot,'defaultAxesColorOrder',runcolor)
-    xlabel('contrast')
-    ylabel('size params dfof')
-    axis([0 length(contrastlist)+1 min(min([splotpre splotpost]))-0.01 max(max([splotpre splotpost]))+0.01])
-    set(gca,'xtick',1:length(contrastlist),'xticklabel',contrastlist)
-    axis square
-    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
-    hold off
-
-    mtit(sprintf('Cell #%d session #%d tuning',sizeresp(i),session(sizeresp(i))))
-    if exist('psfile','var')
-        set(gcf, 'PaperPositionMode', 'auto'); %%%figure out how to make this full page landscape
-        print('-dpsc',psfile,'-append');
-    end
-end
-
-
-try
-    dos(['ps2pdf ' psfile ' "' [grpfilename '.pdf'] '"'] )
-catch
-    display('couldnt generate pdf');
-end
-
-delete(psfile);
+% 
+% %%%plot individual cell data
+% for i=1:length(sizeresp)
+%     figure
+% 
+%     %%%direction tuning curve
+%     subplot(2,4,1)
+%     precurv = grpdfori(sizeresp(i),:,1,1);
+%     postcurv = grpdfori(sizeresp(i),:,1,2);
+%     hold on
+%     plot(1:12,precurv,'k-')
+%     plot(1:12,postcurv,'r-')
+%     xlabel('Direction')
+%     ylabel('dfof')
+%     axis([1 12 min([precurv postcurv])+0.01 max([precurv postcurv])+0.01])
+%     axis square
+%     set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+%     hold off
+% 
+%     %%%polar direction tuning curve
+%     subplot(2,4,2)
+%     prepol = grpdfori(sizeresp(i),:,1,1);prepol(prepol<0)=0;
+%     postpol = grpdfori(sizeresp(i),:,1,2);postpol(postpol<0)=0;
+%     polarplot([dirrange dirrange(1)],[prepol prepol(1)],'k-')
+%     hold on
+%     polarplot([dirrange dirrange(1)],[postpol postpol(1)],'r-')
+%     set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+%     hold off
+% 
+%     %%%osi/dsi
+%     subplot(2,4,3)
+%     hold on
+%     plot([1 2],[grposi(sizeresp(i),1,1) grpdsi(sizeresp(i),1,1)],'k.','Markersize',20)
+%     plot([1 2],[grposi(sizeresp(i),1,2) grpdsi(sizeresp(i),1,2)],'r.','Markersize',20)
+%     axis([0 3 0 1])
+%     set(gca,'xtick',[1 2],'xticklabel',{'OSI','DSI'})
+%     axis square
+%     set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+%     hold off
+% 
+%     %%%avg resp to best grating stim
+%     subplot(2,4,4)
+%     hold on
+%     plot(timepts,grpdfgrat(sizeresp(i),:,1,1),'k')
+%     plot(timepts,grpdfgrat(sizeresp(i),:,1,2),'r')
+%     xlabel('Time(s)')
+%     ylabel('best grat dfof')
+%     axis([timepts(1) timepts(end) min(min(grpdfgrat(sizeresp(i),:,1,:)))-0.01 max(max(grpdfgrat(sizeresp(i),:,1,:)))+0.01])
+%     axis square
+%     set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+%     hold off
+% 
+%     %%%size curve (grat params)
+%     subplot(2,4,5)
+%     hold on
+%     splotpre = squeeze(nanmean(grpdfsize(sizeresp(i),dfWindow,end,:,1,1),2));
+%     splotpost = squeeze(nanmean(grpdfsize(sizeresp(i),dfWindow,end,:,1,2),2));
+%     plot(1:length(radiusRange),splotpre,'k-o','Markersize',5)
+%     plot(1:length(radiusRange),splotpost,'r-o','Markersize',5)
+%     xlabel('Stim Size (deg)')
+%     ylabel('grat param dfof')
+%     axis([0 length(radiusRange)+1 min(min([splotpre splotpost]))-0.01 max(max([splotpre splotpost]))+0.01])
+%     set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
+%     axis square
+%     set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+%     hold off
+%     
+%     %%%size curve (size params)
+%     subplot(2,4,6)
+%     hold on
+%     splotpre = squeeze(nanmean(grpdfsizebest(sizeresp(i),dfWindow,end,:,1,1),2));
+%     splotpost = squeeze(nanmean(grpdfsizebest(sizeresp(i),dfWindow,end,:,1,2),2));
+%     plot(1:length(radiusRange),splotpre,'k-o','Markersize',5)
+%     plot(1:length(radiusRange),splotpost,'r-o','Markersize',5)
+%     xlabel('Stim Size (deg)')
+%     ylabel('size param dfof')
+%     axis([0 length(radiusRange)+1 min(min([splotpre splotpost]))-0.01 max(max([splotpre splotpost]))+0.01])
+%     set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
+%     axis square
+%     set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+%     hold off
+% 
+%     %%%contrast function (grat params)
+%     subplot(2,4,7)
+%     hold on
+%     splotpre = squeeze(nanmean(grpdfsize(sizeresp(i),dfWindow,:,[1 4 7],1,1),2));
+%     splotpost = squeeze(nanmean(grpdfsize(sizeresp(i),dfWindow,:,[1 4 7],1,2),2));
+% 
+%     plot(1:length(contrastlist),splotpre,'k-o','Markersize',5)
+% %             set(groot,'defaultAxesColorOrder',sitcolor)
+%     plot(1:length(contrastlist),splotpost,'r-o','Markersize',5)
+% %             set(groot,'defaultAxesColorOrder',runcolor)
+%     xlabel('contrast')
+%     ylabel('grat params dfof')
+%     axis([0 length(contrastlist)+1 min(min([splotpre splotpost]))-0.01 max(max([splotpre splotpost]))+0.01])
+%     set(gca,'xtick',1:length(contrastlist),'xticklabel',contrastlist)
+%     axis square
+%     set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+%     hold off
+%     
+%     %%%contrast function (size params)
+%     subplot(2,4,8)
+%     hold on
+%     splotpre = squeeze(nanmean(grpdfsizebest(sizeresp(i),dfWindow,:,[1 4 7],1,1),2));
+%     splotpost = squeeze(nanmean(grpdfsizebest(sizeresp(i),dfWindow,:,[1 4 7],1,2),2));
+% 
+%     plot(1:length(contrastlist),splotpre,'k-o','Markersize',5)
+% %             set(groot,'defaultAxesColorOrder',sitcolor)
+%     plot(1:length(contrastlist),splotpost,'r-o','Markersize',5)
+% %             set(groot,'defaultAxesColorOrder',runcolor)
+%     xlabel('contrast')
+%     ylabel('size params dfof')
+%     axis([0 length(contrastlist)+1 min(min([splotpre splotpost]))-0.01 max(max([splotpre splotpost]))+0.01])
+%     set(gca,'xtick',1:length(contrastlist),'xticklabel',contrastlist)
+%     axis square
+%     set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+%     hold off
+% 
+%     mtit(sprintf('Cell #%d session #%d tuning',sizeresp(i),session(sizeresp(i))))
+%     if exist('psfile','var')
+%         set(gcf, 'PaperPositionMode', 'auto'); %%%figure out how to make this full page landscape
+%         print('-dpsc',psfile,'-append');
+%     end
+% end
+% 
+% 
+% try
+%     dos(['ps2pdf ' psfile ' "' [grpfilename '.pdf'] '"'] )
+% catch
+%     display('couldnt generate pdf');
+% end
+% 
+% delete(psfile);
 
     
     
-    
+%%%old code    
     
     
     

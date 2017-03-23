@@ -25,7 +25,7 @@ thetaRange = unique(thetaQuad);
 
 for f=1:length(use)
     filename = files(use(f)).sizeanalysis
-%     if exist(filename)==0 %%comment for redo
+%     if exist([filename '.mat'])==0 %%comment for redo
         files(use(f)).subj
         psfile = 'c:\tempPhil2p.ps';
         if exist(psfile,'file')==2;delete(psfile);end
@@ -438,7 +438,7 @@ for f=1:length(use)
         end
 
         %%%saving
-        save(filename,'dftuning','sptuning','userf','dfsize','dfsizebest','dfgrat','useosi','usedsi','usedfori','usecells')
+        save(filename,'dftuning','sptuning','userf','dfsize','dfsizebest','dfgrat','useosi','usedsi','usedfori','usecells','usebestsftf','useprefthetaQuad','rf','allgoodTopo')
 
         try
             dos(['ps2pdf ' psfile ' "' [filename '.pdf'] '"'] )

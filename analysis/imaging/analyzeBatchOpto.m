@@ -70,5 +70,5 @@ figure
 errorbar([1 2 ; 1 2 ; 1 2; 1 2; 1 2]',rtAll',rtErr'); ylim([0 1]); legend({'11mW','22mW','45mW','V1','gcamp'}); ylabel('rt');
 
 figure
-errorbar([1 2 ; 1 2 ; 1 2; 1 2; 1 2]',bias',biasErr'); ylim([0 1]); legend({'11mW','22mW','45mW','V1','gcamp'}); ylabel('rt');
+errorbar([1 2 ; 1 2 ; 1 2; 1 2; 1 2]',bias',biasErr'); ylim([0 1]); legend({'11mW','22mW','45mW','V1','gcamp'}); ylabel('bias');
 

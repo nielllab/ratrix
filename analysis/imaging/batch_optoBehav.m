@@ -286,3 +286,102 @@ files(n).geno = 'camk2 gc6';
 files(n).notes = 'good session'; 
 files(n).monitor = 'vert';
 
+%Pvchr4b1lt
+
+n=n+1;
+files(n).subj = 'pvchr4b1lt';
+files(n).expt = '030917';
+files(n).trialRec =  'trialRecords_1164-1469_20170309T150141-20170309T154021';
+files(n).power = '45mw';
+files(n).task = 'GTS';
+files(n).geno = 'Pv ChR2';
+files(n).notes = 'good session'; 
+files(n).monitor = 'vert';
+files(n).SilenceArea = 'full window';
+
+n=n+1;
+files(n).subj = 'pvchr4b1lt';
+files(n).expt = '032017';
+files(n).trialRec =  'trialRecords_2853-3036_20170320T175950-20170320T182106';
+files(n).power = '45mw';
+files(n).task = 'GTS';
+files(n).geno = 'Pv ChR2';
+files(n).notes = 'good session'; 
+files(n).monitor = 'vert';
+files(n).SilenceArea = 'full window';
+
+
+n=n+1;
+files(n).subj = 'pvchr4b1lt';
+files(n).expt = '032217';
+files(n).trialRec =  'trialRecords_3846-4060_20170322T155333-20170322T161244';
+files(n).power = '45mw';
+files(n).task = 'GTS';
+files(n).geno = 'Pv ChR2';
+files(n).notes = 'good session'; 
+files(n).monitor = 'vert';
+files(n).SilenceArea = 'V1';  %only ok performance on tops but likely ok to use
+
+n=n+1;
+files(n).subj = 'pvchr4b1lt';
+files(n).expt = '032317';
+files(n).trialRec =  'trialRecords_4302-4491_20170323T114322-20170323T120224';
+files(n).power = '45mw';
+files(n).task = 'GTS';
+files(n).geno = 'Pv ChR2';
+files(n).notes = 'good session'; 
+files(n).monitor = 'vert';
+files(n).SilenceArea = 'V1';  %slightly less laser effect. ok
+
+%Pvchr4b2ln
+
+n=n+1;
+files(n).subj = 'pvchr4b2ln';
+files(n).expt = '031617';
+files(n).trialRec =  'trialRecords_2219-2406_20170316T164126-20170316T165919';
+files(n).power = '45mw';
+files(n).task = 'GTS';
+files(n).geno = 'Pv ChR2';
+files(n).notes = 'good session'; 
+files(n).monitor = 'vert';
+files(n).SilenceArea = 'full window';
+
+n=n+1;
+files(n).subj = 'pvchr4b2ln';
+files(n).expt = '032017';
+files(n).trialRec =  'trialRecords_2769-2960_20170320T171143-20170320T173123';
+files(n).power = '45mw';
+files(n).task = 'GTS';
+files(n).geno = 'Pv ChR2';
+files(n).notes = 'good session'; 
+files(n).monitor = 'vert';
+files(n).SilenceArea = 'full window';
+
+
+n=n+1;
+files(n).subj = 'pvchr4b2ln';
+files(n).expt = '032217';
+files(n).trialRec =  'trialRecords_3314-3475_20170322T170914-20170322T172801';
+files(n).power = '45mw';
+files(n).task = 'GTS';
+files(n).geno = 'Pv ChR2';
+files(n).notes = 'good session'; 
+files(n).monitor = 'vert';
+files(n).SilenceArea = 'V1';
+
+
+n=n+1;
+files(n).subj = 'pvchr4b2ln';
+files(n).expt = '032317';
+files(n).trialRec =  'trialRecords_3554-3705_20170323T111107-20170323T112702';
+files(n).power = '45mw';
+files(n).task = 'GTS';
+files(n).geno = 'Pv ChR2';
+files(n).notes = 'good session'; 
+files(n).monitor = 'vert';
+files(n).SilenceArea = 'V1';
+
+
+
+
+

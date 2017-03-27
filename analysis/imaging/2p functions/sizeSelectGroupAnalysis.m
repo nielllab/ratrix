@@ -435,7 +435,7 @@ for i=1:length(goodcc{end})
     axis off
     title(sprintf('rms %0.3f cc %0.3f',rmsdiff(goodcc{end}(i)),footcc(goodcc{end}(i))))
 
-    mtit(sprintf('session #%d cell #%d tuning',session(goodcc{end}(i)),grpcells(goodcc{end}(i))))
+    mtit(sprintf('session #%d cell #%d tuning',session(goodcc{1}(i)),grpcells(goodcc{1}(i))))
     if exist('psfile','var')
         set(gcf, 'PaperPositionMode', 'auto'); %%%figure out how to make this full page landscape
         print('-dpsc',psfile,'-append');

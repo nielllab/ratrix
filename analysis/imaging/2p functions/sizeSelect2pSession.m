@@ -8,8 +8,15 @@ framerate=1/dt;
 cycLength=1;
 blank =1;
 
-cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  %%% configuration parameters
-cfg.syncToVid=1; cfg.saveDF=0;
+global S2P
+
+if (exist('S2P','var')&S2P==1)
+    cfg.dt = dt; cfg.spatialBin=1; cfg.temporalBin=1;  %%% configuration parameters suite2p
+    cfg.syncToVid=1; cfg.saveDF=0; cfg.nodfof=1;
+else
+    cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  %%% configuration parameters
+    cfg.syncToVid=1; cfg.saveDF=0;
+end
 get2pSession_sbx;
 
 global info
@@ -45,7 +52,6 @@ mapimg= figure
 figure
 imshow(img)
 colormap(hsv); colorbar
-
 if exist('psfile','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfile,'-append');
@@ -53,9 +59,8 @@ end
 
 xpos=0;
 sf=0; isi=0; duration=0; theta=0; phase=0; radius=0;
-% moviefname = 'C:\sizeSelect2sf5sz14min.mat';
 % moviefname = 'C:\sizeSelect2sf8sz26min.mat';
-moviefname = 'C:\sizeselectBinFullCntr19min.mat'
+moviefname = 'C:\sizeselectBin22min.mat'
 load(moviefname)
 ntrials= min(dt*length(dfofInterp)/(isi+duration),length(sf))
 onsets = dt + (0:ntrials-1)*(isi+duration);

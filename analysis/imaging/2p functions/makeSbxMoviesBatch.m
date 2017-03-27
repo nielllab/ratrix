@@ -1,9 +1,10 @@
-
-spatialBin = input('avi spatial binning factor: ');
-temporalBin = input('avi temporal binning factor: ');
-movierate = input('avi framerate :');
-alignData=input('avi align data? 0/1 :');
-fullMovie = 1;
+if ~exist('spatialBin','var')
+    spatialBin = input('avi spatial binning factor: ');
+    temporalBin = input('avi temporal binning factor: ');
+    movierate = input('avi framerate :');
+    alignData=input('avi align data? 0/1 :');
+    fullMovie = 1;
+end
 
 d = dir('*.sbx');
 for i=1:length(d)

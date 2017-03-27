@@ -104,7 +104,7 @@ for location=1:length(x)
     set(gcf,'Name',sprintf('xpos = %d',x(location)))
     for s =1:length(sz)
         img =  squeeze(mean(dFout(:,:,find(timepts==duration),xpos==x(location) & radius == sz(s))-dFout(:,:,find(timepts==0),xpos==x(location) & radius==sz(s)),4));
-        subplot(2,length(sz)/2,s)
+        subplot(2,ceil(length(sz)/2),s)
         imagesc(img,[0 0.25]); axis equal; colormap jet; title(sprintf('size %d',sizes{s}));
         resp(s,:) = squeeze(mean(mean(mean(dFout(:,:,:,xpos==x(location)& radius==sz(s)),4),2),1))- squeeze(mean(mean(mean(dFout(:,:,find(timepts==0),xpos==x(location)& radius==sz(s)),4),2),1));
     end

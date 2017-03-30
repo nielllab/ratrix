@@ -105,10 +105,14 @@ else %%% leave timing intact and adjust video stim times to acq rate
 end
 
 if (exist('S2P','var')&S2P==1)
-    mkdir(fname)
+    sprintf('exporting to tif')
+    sess = fname(end);
+    mkdir(sess)
     for i = 1:size(dfofInterp,3)
-        q = uint16(round(dfofInterp(:,:,i)));
-        imwrite(q,fullfile(fname,sprintf('%s_%d.tif',fname,i)),'tif');
+        q = uint16(round(dfofInterp(:,50:750,i)));
+%         imwrite(q,fullfile(fname,sprintf('%s_%d.tif',fname,i)),'tif');
+        imwrite(q,fullfile(sess,sprintf('block%s.tif',sess)),'tif','writemode','append');
+        sprintf('session %s, frame %d',sess,i)
     end
 end
 

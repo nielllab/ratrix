@@ -106,13 +106,11 @@ end
 
 if (exist('S2P','var')&S2P==1)
     sprintf('exporting to tif')
-    sess = fname(end);
-    mkdir(sess)
+    sess = ['S2P\' fname(end)];
+    mkdir(sess);
     for i = 1:size(dfofInterp,3)
         q = uint16(round(dfofInterp(:,50:750,i)));
-%         imwrite(q,fullfile(fname,sprintf('%s_%d.tif',fname,i)),'tif');
-        imwrite(q,fullfile(sess,sprintf('block%s.tif',sess)),'tif','writemode','append');
-        sprintf('session %s, frame %d',sess,i)
+        imwrite(q,fullfile(sess,[fname sprintf('_%05d.tif',i)]),'tif');
     end
 end
 

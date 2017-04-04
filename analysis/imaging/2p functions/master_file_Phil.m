@@ -56,7 +56,7 @@ ops0.NavgFramesSVD          = 1000; % how many (binned) timepoints to do the SVD
 ops0.signalExtraction       = 'raw'; % how to extract ROI and neuropil signals: 'raw', 'regression'
 
 % spike deconvolution options
-ops0.imageRate              = 9.96;   % imaging rate (cumulative over planes!). Approximate, for initialization of deconvolution kernel.
+ops0.imageRate              = 10;   % imaging rate (cumulative over planes!). Approximate, for initialization of deconvolution kernel.
 ops0.sensorTau              = 2; % decay half-life (or timescale). Approximate, for initialization of deconvolution kernel.
 ops0.maxNeurop              = Inf; % for the neuropil contamination to be less than this (sometimes good, i.e. for interneurons)
 ops0.recomputeKernel        = 1; % whether to re-estimate kernel during optimization (default kernel is "reasonable", if you give good timescales)

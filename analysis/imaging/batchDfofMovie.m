@@ -1,7 +1,7 @@
 %batchDfofMovie
 errmsg= [];errRpt = {};
 nerr=0;
-redo=0;
+redo=1;
 for f = 1:length(files)
     f
     tic
@@ -40,18 +40,18 @@ for f = 1:length(files)
     end
     
     
-if redo | isempty([pathname files(f).sizeselect]) | ~exist([pathname files(f).sizeselect],'file')
-        try
-            dfofMovie([datapathname files(f).sizeselectdata],rig);
-        catch exc
-            sprintf('couldnt do %s',files(f).sizeselectdata)
-            nerr=nerr+1;
-            errmsg{nerr}=sprintf('couldnt do %s',files(f).sizeselectdata)
-            errRpt{nerr}=getReport(exc,'extended')
-        end
-    else
-        sprintf('skipping %s',files(f).sizeselect)
-    end
+% if redo | isempty([pathname files(f).sizeselect]) | ~exist([pathname files(f).sizeselect],'file')
+%         try
+%             dfofMovie([datapathname files(f).sizeselectdata],rig);
+%         catch exc
+%             sprintf('couldnt do %s',files(f).sizeselectdata)
+%             nerr=nerr+1;
+%             errmsg{nerr}=sprintf('couldnt do %s',files(f).sizeselectdata)
+%             errRpt{nerr}=getReport(exc,'extended')
+%         end
+%     else
+%         sprintf('skipping %s',files(f).sizeselect)
+%     end
     
     
 %     
@@ -69,7 +69,7 @@ if redo | isempty([pathname files(f).sizeselect]) | ~exist([pathname files(f).si
 %     end
 %     
 %     
-    
+%     
     if redo || isempty([pathname files(f).darkness]) || ~exist([pathname files(f).darkness],'file')
         try
             dfofMovie([datapathname files(f).darknessdata],rig);

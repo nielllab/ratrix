@@ -32,11 +32,11 @@ ops0.fig                    = 1; % turn off figure generation with 0
 % ops0.diameter               = 12; % most important parameter. Set here, or individually per experiment in make_db file
 
 % root paths for files and temporary storage (ideally an SSD drive. my SSD is C:/)
-ops0.RootStorage            = '\\langevin\backup\twophoton\Phil\test'; % Suite2P assumes a folder structure, check out README file
+ops0.RootStorage            = '\\langevin\backup\twophoton\Phil\Compiled2p\031717 G62BB2RT saline sizeselect22min'; % Suite2P assumes a folder structure, check out README file
 ops0.temp_tiff              = 'C:\Users\Phil\Desktop\S2P\temp.tif'; % copies each remote tiff locally first, into this file
 ops0.RegFileRoot            = 'C:\Users\Phil\Desktop\S2P';  % location for binary file
 ops0.DeleteBin              = 1; % set to 1 for batch processing on a limited hard drive
-ops0.ResultsSavePath        = '\\langevin\backup\twophoton\Phil\test'; % a folder structure is created inside
+ops0.ResultsSavePath        = '\\langevin\backup\twophoton\Phil\Compiled2p\031717 G62BB2RT saline sizeselect22min'; % a folder structure is created inside
 ops0.RegFileTiffLocation    = []; %'D:/DATA/'; % leave empty to NOT save registered tiffs (slow)
 
 % registration options

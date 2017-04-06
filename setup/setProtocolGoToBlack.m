@@ -148,12 +148,12 @@ yPosPct                = .5;
 stim.stim='flip';
 %stim.stim=nan;
 
-switch subjIDs{1}
+switch subjIDs{1}  %toswitchprogramtogotowhite use   stim.stim=nan;  
    case '2blindg6b9lt' % Started 3/29/17
     stim.stim=nan;  
     
-        case 'test' % Started 6/25/15
-       stim.stim=nan; 
+%         case 'test' % Started 6/25/15
+%        stim.stim=nan; 
 end      
 
 stim.dms.targetLatency = .5;

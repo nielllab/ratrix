@@ -51,7 +51,7 @@ switch subjIDs{1}
        rewardSizeULorMS        = 219;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
-       stim.stim='rand';
+    
   
    case 'g62ggg6tt' % Started 3/29/17
        requestRewardSizeULorMS = 0;

@@ -152,7 +152,7 @@ switch subjIDs{1}
    case '2blindg6b9lt' % Started 3/29/17
     stim.stim=nan;  
     
-        case 'testgotoblack' % Started 6/25/15
+        case 'test' % Started 6/25/15
        stim.stim=nan; 
 end      
 

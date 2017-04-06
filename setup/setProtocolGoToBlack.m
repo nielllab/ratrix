@@ -22,7 +22,8 @@ stim.slowSecs = 1;
 percentCorrectionTrials = .5;
 
 stim.gain = 0.7 * ones(2,1);
-
+stim.stim='flip';
+%stim.stim=nan;
 
 
 switch subjIDs{1}
@@ -49,7 +50,8 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 219;
        msPenalty               =3500;
-       percentCorrectionTrials = .5;        
+       percentCorrectionTrials = .5;
+       stim.stim=nan;
   
    case 'g62ggg6tt' % Started 3/29/17
        requestRewardSizeULorMS = 0;
@@ -145,8 +147,7 @@ stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,
 %stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,[-1 1]  ,thresh,yPosPct,maxWidth,maxHeight,zoom,interTrialLuminance,'none', 'normalizeDiagonal');
 
 
-stim.stim='flip';
-%stim.stim=nan;
+
 stim.dms.targetLatency = .5;
 stim.dms.cueLatency = 0;
 stim.dms.cueDuration = inf;

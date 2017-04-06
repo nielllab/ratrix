@@ -22,8 +22,7 @@ stim.slowSecs = 1;
 percentCorrectionTrials = .5;
 
 stim.gain = 0.7 * ones(2,1);
-stim.stim='flip';
-%stim.stim=nan;
+
 
 
 switch subjIDs{1}
@@ -143,9 +142,11 @@ radius                 = .085;
 contrast               = 1;
 thresh                 = .00005;
 yPosPct                = .5;
-stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,zoom,interTrialLuminance);
+%stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,contrast,thresh,yPosPct,maxWidth,maxHeight,zoom,interTrialLuminance);
 %stim.stim = orientedGabors(pixPerCycs,targetOrientations,distractorOrientations,mean,radius,[-1 1]  ,thresh,yPosPct,maxWidth,maxHeight,zoom,interTrialLuminance,'none', 'normalizeDiagonal');
 
+stim.stim='flip';
+%stim.stim=nan;
 
 
 stim.dms.targetLatency = .5;

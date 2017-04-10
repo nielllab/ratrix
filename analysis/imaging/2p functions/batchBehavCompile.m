@@ -22,11 +22,14 @@ for i = 1:length(alluse);
     load([pathname files(alluse(i)).dir '\' files(alluse(i)).compileData],'rfAmp','rf','behavTrialData','passiveData3x','passiveData2sf','correctRate','resprate','stoprate','behavdF');
     figure; plot(resprate/2,'g'); hold on; plot(correctRate,'b');plot(stoprate/10,'r');ylim([0 1]); title([files(alluse(i)).subj files(alluse(i)).task]);legend('response','correct','stop')
     
-        load([pathname files(alluse(i)).dir '\' files(alluse(i)).behavPts],'dF');
+    load([pathname files(alluse(i)).dir '\' files(alluse(i)).compileData],'targ','correct','location');
+    targAll{i} = targ; correctAll{i} = correct; locationAll{i} = location;
+    load([pathname files(alluse(i)).dir '\' files(alluse(i)).behavPts],'dF');
     
     behavDfAll{i} =dF;
     %%% store behavioral performance over time
     respRateAll{i} = resprate; correctRateAll{i} = correctRate; stopRateAll{i} = stoprate;
+    depth(i) = files(alluse(i)).depth;
     
     %%% apply manual cutoff for cell numbers if included
     if ~isempty(files(alluse(i)).ncells)
@@ -474,9 +477,9 @@ for s= 1:max(sess)
         end
         title([trialType{t} ' weighted']); xlabel('secs'); ylabel('weighted response'); set(gca,'Ytick',-0.025:0.025:0.075);
     end
-     legend;
-     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
+    legend;
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
     figure; plot(respRateAll{s}/2,'g'); hold on; plot(correctRateAll{s},'b');plot(stopRateAll{s}/10,'r');ylim([0 1]); title([files(alluse(s)).subj ' ' files(alluse(s)).task]);legend('response','correct','stop')
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
@@ -489,10 +492,22 @@ for s= 1:max(sess)
     
     
     %%% session figure
-%     load([pathname files(alluse(s)).dir '\' files(alluse(s)).behavPts],'greenframe');
-%     figure
-%     imagesc(greenframe,[0 1.2*prctile(greenframe(:),99)]); colormap gray;
-%     title(sprintf('%s %s %s ',files(alluse(s)).subj,files(alluse(s)).expt,files(alluse(s)).task));
+    load([pathname files(alluse(s)).dir '\' files(alluse(s)).behavPts],'greenframe');
+    figure
+    imagesc(greenframe,[0 1.2*prctile(greenframe(:),99)]); colormap gray;
+    title(sprintf('%s %s %s depth %d',files(alluse(s)).subj,files(alluse(s)).expt,files(alluse(s)).task,files(alluse(s)).depth));
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    loc = locationAll{s}; targ = targAll{s}; correct = correctAll{s};
+    resp = sign((correct-0.5).*targ);
+    topleft = sum(loc>0 & resp>0)/sum(loc>0);
+    topright = sum(loc>0 & resp<0)/sum(loc>0);
+    bottomleft = sum(loc<0 & resp>0)/sum(loc<0);
+    bottomright = sum(loc<0 & resp<0)/sum(loc<0);
+    figure
+    bar([topleft topright; bottomleft bottomright]);ylim([0 1]); set(gca,'Xticklabel',{'top?','bottom?'});
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
     
     figure
     subplot(1,3,1:2)
@@ -514,6 +529,7 @@ for s= 1:max(sess)
     circle(34,0.625*128-2,12);circle(34,0.375*128-2,12); set(gca,'Xtick',[]); set(gca,'Ytick',[]);
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
+    close all
 end
 
 keyboard

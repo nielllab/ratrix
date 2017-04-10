@@ -44,7 +44,7 @@ sbc = (d1>1.5*d2);
 %%% select cells responsive to both topoX and topoY
 goodTopo = find(rfAmp(:,1)>0.01 & rfAmp(:,2)>0.01);
 goodTopo=goodTopo(goodTopo<=cellCutoff);
-sprintf('%d cells with good topo under cutoff',length(goodTopo))
+sprintf('%d cells with good topo under cutoff (for display only)',length(goodTopo))
 
 %%% plot RF locations
 figure

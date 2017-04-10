@@ -53,6 +53,8 @@ if exist('psfilename','var')
     print('-dpsc',psfilename,'-append');
 end
 
+ dF = spikes*10;
+%dF = spikes/2;
 
 %%% get Fourier component and cycle averages
 phaseVal = 0;

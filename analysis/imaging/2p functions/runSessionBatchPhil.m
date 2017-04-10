@@ -457,13 +457,13 @@ tic
 % sizeSelect2pSession('G62QQ2LT_001_005.sbx','sizeSession_POST_V2.mat',psfilename);
 % topo2pSession('G62QQ2LT_001_006.sbx','darkness_POST_V2.mat',psfilename);
 
-% %%%0031417
-% topo2pSession('G62BB10LT_001_001.sbx','topoXsession_V2.mat',psfilename);
-% topo2pSession('G62BB10LT_001_002.sbx','topoYsession_V2.mat',psfilename);
-% topo2pSession('G62BB10LT_001_003.sbx','darkness_PRE_V2.mat',psfilename);
-% sizeSelect2pSession('G62BB10LT_001_004.sbx','sizeSession_PRE_V2.mat',psfilename);
-% sizeSelect2pSession('G62BB10LT_001_005.sbx','sizeSession_POST_V2.mat',psfilename);
-% topo2pSession('G62BB10LT_001_006.sbx','darkness_POST_V2.mat',psfilename);
+%%%0031417
+topo2pSession('G62BB10LT_001_001.sbx','topoXsession_V2.mat',psfilename);
+topo2pSession('G62BB10LT_001_002.sbx','topoYsession_V2.mat',psfilename);
+topo2pSession('G62BB10LT_001_003.sbx','darkness_PRE_V2.mat',psfilename);
+sizeSelect2pSession('G62BB10LT_001_004.sbx','sizeSession_PRE_V2.mat',psfilename);
+sizeSelect2pSession('G62BB10LT_001_005.sbx','sizeSession_POST_V2.mat',psfilename);
+topo2pSession('G62BB10LT_001_006.sbx','darkness_POST_V2.mat',psfilename);
 
 % %%%0031517
 % topo2pSession('G62BB2RT_001_001.sbx','topoXsession_V2.mat',psfilename);
@@ -482,12 +482,12 @@ tic
 % topo2pSession('G62BB10LT_001_006.sbx','darkness_POST_V2.mat',psfilename);
 
 % %%%0031717
-topo2pSession('G62BB2RT_001_001.sbx','topoXsession_V2.mat',psfilename);
-topo2pSession('G62BB2RT_001_002.sbx','topoYsession_V2.mat',psfilename);
-topo2pSession('G62BB2RT_001_003.sbx','darkness_PRE_V2.mat',psfilename);
-sizeSelect2pSession('G62BB2RT_001_004.sbx','sizeSession_PRE_V2.mat',psfilename);
-sizeSelect2pSession('G62BB2RT_001_005.sbx','sizeSession_POST_V2.mat',psfilename);
-topo2pSession('G62BB2RT_001_006.sbx','darkness_POST_V2.mat',psfilename);
+% topo2pSession('G62BB2RT_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('G62BB2RT_001_002.sbx','topoYsession_V2.mat',psfilename);
+% topo2pSession('G62BB2RT_001_003.sbx','darkness_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62BB2RT_001_004.sbx','sizeSession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62BB2RT_001_005.sbx','sizeSession_POST_V2.mat',psfilename);
+% topo2pSession('G62BB2RT_001_006.sbx','darkness_POST_V2.mat',psfilename);
 
 toc
 

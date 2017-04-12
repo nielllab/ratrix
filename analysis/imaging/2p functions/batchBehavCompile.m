@@ -16,6 +16,7 @@ n=0;
 
 
 for i = 1:length(alluse);
+%for i = 1:3
     i
     
     %%% load data
@@ -456,6 +457,8 @@ if exist(psfile,'file')==2;delete(psfile);end
 %%% plot data for clusters in each session, and neural responses
 
 
+
+
 for s= 1:max(sess)
     s
     if strcmp(files(alluse(s)).task,'GTS'), sessCond(s) = gts; end;
@@ -504,9 +507,18 @@ for s= 1:max(sess)
     topright = sum(loc>0 & resp<0)/sum(loc>0);
     bottomleft = sum(loc<0 & resp>0)/sum(loc<0);
     bottomright = sum(loc<0 & resp<0)/sum(loc<0);
+    
+    thisResp = resp(2:end); resp = resp(1:end-1); correct = correct(1:end-1); loc = loc(2:end);
+    results = [mean(thisResp(loc>0 & resp>0 & correct>0)) mean(thisResp(loc>0 & resp<0 & correct>0)) mean(thisResp(loc>0 & resp>0 & correct==0)) mean(thisResp(loc>0 & resp<0 & correct==0)); ...
+                mean(thisResp(loc<0 & resp<0 & correct>0)) mean(thisResp(loc<0 & resp>0 & correct>0)) mean(thisResp(loc<0 & resp<0 & correct==0)) mean(thisResp(loc<0 & resp>0 & correct==0))];
+            
+            figure
+            bar(results)
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        
     figure
     bar([topleft topright; bottomleft bottomright]);ylim([0 1]); set(gca,'Xticklabel',{'top?','bottom?'});
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
     
     
     figure

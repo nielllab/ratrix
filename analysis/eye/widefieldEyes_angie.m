@@ -1,16 +1,16 @@
 close all; clear all;
 warning off
-cfile = '030117_j317a_detection_2lowcontrasts_eye.mat'
+cfile = 'D:\Angie_analysis\widefield_data\032917_g62rr2_tt_blue_DOI\g62rr2_tt_run1_detection_doi\03_29_17_g62rr2-tt_detection_2lowcontrasts_DOI_eye.mat'
 load(cfile)
-% movieFile = 'C:\Users\Angie Michaiel\Desktop\movie files\cortex\DetectionStim1contrast_7_25min.mat';
+%movieFile = 'C:\Users\Angie Michaiel\Desktop\movie files\cortex\DetectionStim1contrast_7_25min.mat';
+movieFile = 'C:\Users\Angie Michaiel\Desktop\movie files\cortex\DetectionStim2contrast_LOW_7_25min';
 %movieFile = 'C:\Users\Angie Michaiel\Desktop\movie files\cortex\DetectionStim3contrast10min.mat'
-movieFile = 'C:\Users\Angie Michaiel\Desktop\movie files\cortex\DetectionStim2contrast_LOW_7_25min.mat';
 load(movieFile);
 data = squeeze(data);
-mapsfile = 'J303a_run1_detection_2lowcontrastsmaps.mat'
-load(mapsfile,'dfof_bg','frameT','cycMap','sp', 'stimRec');
+mapsfile = 'D:\Angie_analysis\widefield_data\032917_g62rr2_tt_blue_DOI\g62rr2_tt_run1_detection_doi\g62rr2_tt_run1_detection_dmaps.mat'
+load(mapsfile,'dfof_bg','frameT','cycMap','sp','stimRec');
 
-path = 'D:\Angie_analysis\widefield_data\030117_J303a_eyeonly_naive\J303a_run1_detection_2lowcontrasts'
+path = 'D:\Angie_analysis\widefield_data\032917_g62rr2_tt_blue_DOI\g62rr2_tt_run1_detection_doi'
 %myPDFfile=uiputfile('*.ps');
 grpfilename = uiputfile('*.ps');% myPDFfile;
 psfile = 'c:\tempAngie.ps';
@@ -18,15 +18,15 @@ if exist(psfile,'file')==2;delete(psfile);end
 
 timeStamps=stimRec.ts
 frameNum=stimRec.f
-thresh = 0.80; %.85 %pupil threshold for binarization
-        puprange = [8 40]; %[8 40] %set range of pupil radius
-        pupercent = 0.8; %set range pupil radius window
-        pupchange = 0.3; %acceptable percent change in radius per framerange
+thresh = 0.8 %pupil threshold for binarization
+        puprange = [8 50]; %[8 40] %set range of pupil radius
+        pupercent = 0.75; %set range pupil radius window
+        pupchange = 0.2; %acceptable percent change in radius per framerange
         framerange = 10; %number of frames to smooth over
        % user input to select center and right points
         sprintf('Please select pupil center and top, eyeball top and right points, darkest part of eyeball')
         h1 = figure('units','normalized','outerposition',[0 0 1 1])
-        imshow(data(:,:,1000))
+        imshow(data(:,:,200))
         [cent] = ginput(5);
         close(h1);
         yc = cent(1,2); %pupil center y val
@@ -186,63 +186,57 @@ plot(fInterpR); hold on; plot(fInterpV*.01,'g')
 set(gcf, 'PaperPositionMode', 'auto');
 print('-dpsc',psfile,'-append');
 
-figure
-subplot(1,2,1)
-plot(mean(R(contrast==.01))); hold on; axis square; %plot(nanmean(V(contrast==.01,:))./(2.5*median(R(contrast==.01,:))))
-ylim([min(mean(R(contrast==.01,:)))-.25 max(mean(R(contrast==.01,:)))+.25])
-plot([60 60],[14 20],'g');  plot ([75 75],[14 20],'g');
-title ('mean of .01 contrast')
-subplot(1,2,2)
-plot(nanmean(R(contrast==.04,:))); hold on; axis square;% plot(nanmean(V(contrast==.01,:)/5))
-ylim([min(mean(R(contrast==.04,:)))-.25 max(mean(R(contrast==.04,:)))+.25])
-plot([60 60],[14 20],'g');  plot ([75 75],[14 20],'g');
-title ('mean of .04 contrast')
-set(gcf, 'PaperPositionMode', 'auto');
-print('-dpsc',psfile,'-append');
-% useTrials = timeStamps(contrast==1)
-% figure
-% plot(frameNum,fInterpR);hold on; plot(useTrials,'.')
-% set(gcf, 'PaperPositionMode', 'auto');
-% print('-dpsc',psfile,'-append');
+
+    test = unique(contrast)
+    figure
+    for c=2:(length(test))
+        n= test(c)
+        use = find(contrast==test(c))
+        subplot(1,2,c-1)
+             plot(mean(R(use,:))); hold on; axis square;
+        %     plot(nanmean(V(use,:))./(3.5*(median(R(use,:)))))
+        %scalemin = min(V(use,:));
+    %     scalemax = max(V);
+    %     scaledv = 2 * (nanmean(V) - scalemin) ./ (scalemax - scalemin) - 1;
+    %     plot(scaledv(use,:))
+            ylim([min(mean(R(use,:)))-.25 max(mean(R(use,:)))+.25]);xlim([0 180])
+            plot([60 60],[10 max(mean(R(use,:)))+.25],'g');  plot ([75 75],[10 max(mean(R(use,:)))+.25],'g');
+        title(sprintf('mean of %.2g contrast',n))
+        % set(gcf, 'PaperPositionMode', 'auto');
+        % print('-dpsc',psfile,'-append');
+    end
+
+% % % useTrials = timeStamps(contrast==1)
+% % 
+% % figure
+% % plot(frameNum,fInterpR);hold on; plot(useTrials,'.')
+% % set(gcf, 'PaperPositionMode', 'auto');
+% % print('-dpsc',psfile,'-append');
 left=unique(xpos(3))
 right=unique(xpos(1))
 
 clear use
-use = find(contrast==.01)
+test = unique(contrast)
+for c= 2:length(test)
+use = find(contrast==test(c))
+ n= test(c)
 figure
-set(gcf,'Name','contrast=0.01')
+set(gcf,'Name',sprintf('contrast = %.2g',n))
 for i = 1:length(use)-1
 subplot(4,4,i)
 plot(R(use(i),:)); hold on;% plot(V(use(i),:)*.05)
 ylim([min(R(use(i),:))-.5 max(R(use(i),:))+.5]); 
 xlim([0 180])
-plot([60 60],[min(R(use(i),:)) max(R(use(i),:))],'g'); plot ([75 75],[min(R(use(i),:)) max(R(use(i),:))],'g');
-if find(use(i) & xpos(use(i))==left), title('left')
-else  title('right')
+plot([60 60],[min(R(use(i),:))-.5 max(R(use(i),:))+.5],'g'); plot ([75 75],[min(R(use(i),:))-.5 max(R(use(i),:))+.5],'g');
+set(gca,'xtick',1:30:180,'xticklabel',0:6,'LooseInset',get(gca,'TightInset'),'Fontsize',8); xlabel ('time(s)');
+if find(use(i) & xpos(use(i))==left), title(sprintf('left %.2g',n))
+else  title(sprintf('right %.2g',n))
 end
 end
 set(gcf, 'PaperPositionMode', 'auto');
 print('-dpsc',psfile,'-append');
-
-
-use = find(contrast==.04)
-figure
-set(gcf,'Name','contrast=0.04')
-for i = 1:length(use)
-subplot(4,4,i)
-plot(R(use(i),:)); hold on;% plot(V(use(i),:)*.05)
-% hold on;
-% plot(R(use04(i),:),'r')
-ylim([min(R(use(i),:))-.5 max(R(use(i),:))+.5]); 
-xlim([0 180])
-plot([60 60],[min(R(use(i),:)) max(R(use(i),:))],'g'); plot ([75 75],[min(R(use(i),:)) max(R(use(i),:))],'g');
-title('.04')
-if find(use(i) & xpos(use(i))==left), title('left')
-else  title('right')
 end
-end
-set(gcf, 'PaperPositionMode', 'auto');
-print('-dpsc',psfile,'-append');
+
 
 % dfof_bg= dfof_bg(15:160,50:190,:);
 % dfof_bg = imresize(dfof_bg,0.5);
@@ -283,67 +277,59 @@ left=unique(xpos(3))
 right=unique(xpos(1))
 test = unique(contrast)
 for c = 2:length(test)
- use = find(contrast==test(c) & xpos==left)
-if sum(contrast==.01)>0
-    figure
-    for i=1:length(use)
-        subplot(2,8,i)
-        plot(R(use(i),:)); axis square ; ylim([min(R(use(i),:))-.5 max(R(use(i),:))+.5]); xlim([0 180]);hold on;
-        plot([60 60],[10 max(R(use(i),:))+.5],'g');  plot ([75 75],[10 max(R(use(i),:))+.5],'g');
-        subplot(2,8,i+8)
-        plot(Xfilt(use(i),:),Yfilt(use(i),:));hold on; axis square
-        xlim([min(Xfilt(use)) max(Xfilt(use))]);
-        ylim([min(Yfilt(use)) max(Yfilt(use))]);
-        plot(Xfilt(use(i),:),Yfilt(use(i),:),'.r');
-    end
-    if c == 2 
-    title('contrast = .01, left position')
-    set(gcf,'Name','contrast= 0.01, Left Position')
-    else   title('contrast = .04, left position')
-    set(gcf,'Name','contrast= .04, Left Position'), end
-else display ('no contrast 01 trials')
-end
+    use = find(contrast==test(c) & xpos==left)
+    n= test(c)
+        figure
+        for i=1:length(use)
+            subplot(2,8,i)
+            plot(R(use(i),:)); axis square; ylim([min(R(use(i),:))-.5 max(R(use(i),:))+.5]); xlim([0 180]);hold on;
+            plot([60 60],[min(R(use(i),:))-.5 max(R(use(i),:))+.5],'g');  plot ([75 75],[min(R(use(i),:))-.5 max(R(use(i),:))+.5],'g');
+            subplot(2,8,i+8)
+            plot(Xfilt(use(i),:),Yfilt(use(i),:));hold on; axis square
+            xlim([min(Xfilt(use)) max(Xfilt(use))]);
+            ylim([min(Yfilt(use)) max(Yfilt(use))]);
+            plot(Xfilt(use(i),:),Yfilt(use(i),:),'.r');
+        end
+        title(sprintf('contrast = %.2g, Left position',n))
+
 set(gcf, 'PaperPositionMode', 'auto');
 print('-dpsc',psfile,'-append');
 end
-
 
 clear use
 right=unique(xpos(1))
 test = unique(contrast)
 for c = 2:length(test)
- use = find(contrast==test(c) & xpos==right)
-if sum(contrast==.01)>0
-    figure
+    use = find(contrast==test(c) & xpos==right)
+    n= test(c)
+    if sum(contrast==test(2))>0
+        figure
     for i=1:length(use)
         subplot(2,8,i)
         plot(R(use(i),:)); axis square ; ylim([min(R(use(i),:))-.5 max(R(use(i),:))+.5]); xlim([0 180]); hold on;
-        plot([60 60],[10 max(R(use(i),:))+.5],'g');  plot ([75 75],[10 max(R(use(i),:))+.5],'g');
+        plot([60 60],[min(R(use(i),:))-.5 max(R(use(i),:))+.5],'g');  plot ([75 75],[min(R(use(i),:))-.5 max(R(use(i),:))+.5],'g');
         subplot(2,8,i+8)
         plot(Xfilt(use(i),:),Yfilt(use(i),:));hold on; axis square
         xlim([min(Xfilt(use)) max(Xfilt(use))]);
         ylim([min(Yfilt(use)) max(Yfilt(use))]);
         plot(Xfilt(use(i),:),Yfilt(use(i),:),'.r');
     end
-    if c == 2 
-    title('contrast = .01, Right position')
-    set(gcf,'Name','contrast= 0.01, Right Position')
-    else   title('contrast = .04, Right position')
-    set(gcf,'Name','contrast= .04, Right Position'), end
+      title(sprintf('contrast = %.2g,Right position',n))
 else display ('no contrast 01 trials')
 end
 set(gcf, 'PaperPositionMode', 'auto');
 print('-dpsc',psfile,'-append');
 end
 
+
 figure
 plot(x,y); title('eye position'); hold on; plot(x,y,'r.')
 set(gcf, 'PaperPositionMode', 'auto');
 print('-dpsc',psfile,'-append');
-figure
-plot(Xfilt(contrast==0.01,:));hold on; plot(Y(contrast==0.01,:))
-set(gcf, 'PaperPositionMode', 'auto');
-print('-dpsc',psfile,'-append');
+% figure
+% plot(Xfilt(contrast==01,:));hold on; plot(Y(contrast==1,:))
+% set(gcf, 'PaperPositionMode', 'auto');
+% print('-dpsc',psfile,'-append');
 figure
 plot(frameT(1:length(x)),x/max(x)); title('X')
 hold on
@@ -419,8 +405,8 @@ isiFrames = 20; durFrames = 5;
 vis = zeros(size(r));
 nstim=0;
 for trial = 1:length(contrast);
-   trial
-   start=  (trial-1)*(durFrames+isiFrames) + isiFrames;
+    trial
+    start = (trial-1)*(durFrames+isiFrames) + isiFrames;
     stop = start + durFrames;
     vis(start:stop) = contrast(trial);
     range = (start-isiFrames+1):(stop + 30);
@@ -464,64 +450,64 @@ set(gcf, 'PaperPositionMode', 'auto');
 print('-dpsc',psfile,'-append');
 %%% perform regression on behavioral variables at multiple lags, and covert
 %%% to images
-clear vfit xcorr mx
-for lag = -20:2:10;
-    dfShift = circshift(dfof_bg,[0 0 lag]);
-    clear vfit vcorr
-    for i = 1:size(dfof_bg,1);
-        i
-        for j = 1:size(dfof_bg,2);
-            [vfit(i,j,:) nil resid]= regress(squeeze(dfShift(i,j,:)),[v r   dvis abs(dx) dx ones(size(r))]);
-            vcorr(i,j,:) = partialcorri(squeeze(dfShift(i,j,:)),[v r   dvis abs(dx) dx]);
-        end
-    end
-    
-    figure
-    for i = 1:5
-        subplot(2,3,i);
-        if i<4
-            im = mat2im(vfit(:,:,i),jet,[0 0.1]);
-        elseif i==4
-            im = mat2im(vfit(:,:,i),jet,[0 0.25]); 
-        elseif i==5
-            im = mat2im(vfit(:,:,i),jet,[-0.1 0.1]);
-        end
-        vc = vcorr(:,:,i);
-        range = max(0.05, prctile(abs(vc(:)),95));
-        im = im.*repmat(abs(squeeze(vcorr(:,:,i))),[1 1 3])/range;
-        timecourse(:,:,:,i,(lag+20)/2 +1) = im
-        imshow(imresize(im,5))
-        mx(i,(lag+20)/2 +1) = prctile(abs(vc(:)),95);
-        title(sprintf('r2 %0.2f',prctile(abs(vc(:)),95)));
-    end
-    set(gcf,'Name',sprintf('lag %d',lag));
-    drawnow
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-figure
-plot(-1:0.2:2,mx(:,end:-1:1)'); xlabel('secs'); ylabel('partial correlation')
-legend('v','r','vis','abs(dx)','dx')
-set(gcf, 'PaperPositionMode', 'auto');
-print('-dpsc',psfile,'-append');
-
-titles = {'V','R','vis stim','abs(dx)','dx'};
-for i = 1:5
-    figure
-    for j = 1:12
-    subplot(3,4,j)
-    imshow(imresize(squeeze(timecourse(:,:,:,i,16-j)),2))
-    end
-    set(gcf,'Name',titles{i});
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
+% clear vfit xcorr mx
+% for lag = -20:2:10;
+%     dfShift = circshift(dfof_bg,[0 0 lag]);
+%     clear vfit vcorr
+%     for i = 1:size(dfof_bg,1);
+%         i
+%         for j = 1:size(dfof_bg,2);
+%             [vfit(i,j,:) nil resid]= regress(squeeze(dfShift(i,j,:)),[v r   dvis abs(dx) dx ones(size(r))]);
+%             vcorr(i,j,:) = partialcorri(squeeze(dfShift(i,j,:)),[v r   dvis abs(dx) dx]); 
+%         end
+%     end
+%     
+%     figure
+%     for i = 1:5
+%         subplot(2,3,i);
+%         if i<4
+%             im = mat2im(vfit(:,:,i),jet,[0 0.1]);
+%         elseif i==4
+%             im = mat2im(vfit(:,:,i),jet,[0 0.25]); 
+%         elseif i==5
+%             im = mat2im(vfit(:,:,i),jet,[-0.1 0.1]);
+%         end
+%         vc = vcorr(:,:,i);
+%         range = max(0.05, prctile(abs(vc(:)),95));
+%         im = im.*repmat(abs(squeeze(vcorr(:,:,i))),[1 1 3])/range;
+%         timecourse(:,:,:,i,(lag+20)/2 +1) = im
+%         imshow(imresize(im,5))
+%         mx(i,(lag+20)/2 +1) = prctile(abs(vc(:)),95);
+%         title(sprintf('r2 %0.2f',prctile(abs(vc(:)),95)));
+%     end
+%     set(gcf,'Name',sprintf('lag %d',lag));
+%     drawnow
+%     set(gcf, 'PaperPositionMode', 'auto');
+%     print('-dpsc',psfile,'-append');
+% end
+% 
+% figure
+% plot(-1:0.2:2,mx(:,end:-1:1)'); xlabel('secs'); ylabel('partial correlation')
+% legend('v','r','vis','abs(dx)','dx')
+% set(gcf, 'PaperPositionMode', 'auto');
+% print('-dpsc',psfile,'-append');
+% 
+% titles = {'V','R','vis stim','abs(dx)','dx'};
+% for i = 1:5
+%     figure
+%     for j = 1:12
+%     subplot(3,4,j)
+%     imshow(imresize(squeeze(timecourse(:,:,:,i,16-j)),2))
+%     end
+%     set(gcf,'Name',titles{i});
+%     set(gcf, 'PaperPositionMode', 'auto');
+%     print('-dpsc',psfile,'-append');
+% end
+% 
+% if exist('psfile','var')
+%     set(gcf, 'PaperPositionMode', 'auto');
+%     print('-dpsc',psfile,'-append');
+% end
 
 try
     dos(['ps2pdf ' psfile ' "' [fullfile(path,grpfilename) '.pdf'] '"'] )
@@ -534,7 +520,7 @@ save(mapsfile,'rad','fInterpR','fInterpV', 'R','V','xEye','yEye','contrast','xpo
 % h4 = figure
 % 
 % vidObj = VideoWriter('eyetracking_withfit.avi');
-% %vidObj.FrameRate = 60;
+% vidObj.FrameRate = 60;
 % open(vidObj);
 % 
 % for i = 1:size(data,3)
@@ -559,45 +545,84 @@ save(mapsfile,'rad','fInterpR','fInterpV', 'R','V','xEye','yEye','contrast','xpo
 %     writeVideo(vidObj,currFrame);
 % end
 % close(vidObj);
+% % 
 % 
-% 
-% small_mov = dfof_bg(4:4:end,4:4:end,4:4:end);
-% lowthresh = prctile(small_mov(:),2);
-% upperthresh = 1.5*prctile(small_mov(:),98);
+small_mov = dfof_bg(4:4:end,4:4:end,4:4:end);
+lowthresh = prctile(small_mov(:),2);
+upperthresh = 1.5*prctile(small_mov(:),98);
 
 % 
-% h5 = figure
-% vidObj = VideoWriter('022717_g62rr2-tt_detection_2lowcontrasts_dfof_eye');
-% %vidObj.FrameRate = 60;
-% open(vidObj);
-% for i=1:size(data,3)
-%     subplot(3,2,[3,4,5,6])
-%     imagesc(imresize(dfof_bg(:,:,i),1.75,'box'),[lowthresh upperthresh]);axis square;
-%     %drawnow
-%     hold on
-%     if sp(i)<500
-%         plot(50,250,'ro','Markersize',8,'Linewidth',8); %stationary
-%     else
-%         plot(50,250,'go','Markersize',8,'Linewidth',8);
+h5 = figure
+vidObj = VideoWriter('detection_dfof_eye.avi');
+%vidObj.FrameRate = 60;
+open(vidObj);
+for i=1:size(data,3)
+    %subplot(3,2,[3,4,5,6])
+    subplot(2,2,2)
+    imagesc(imresize(dfof_bg(:,:,i),1.75,'box'),[lowthresh upperthresh]);axis square;
+    drawnow
+    hold on
+    if sp(i)<500
+        plot(50,250,'ro','Markersize',8,'Linewidth',8); %stationary
+    else
+        plot(50,250,'go','Markersize',8,'Linewidth',8);
+    end
+    %hold off
+   % h = axes('Position', [.05 .65 .4 .4], 'Layer','top');
+   subplot(2,2,1)
+    imshow(imresize(data(yc-vert:yc+vert,xc-horiz:xc+horiz,i),1.0,'box'));
+ %   axis(h, 'off', 'tight')
+    colormap gray;
+    hold on
+    circle(centroid(i,1),centroid(i,2),rad(i))
+    drawnow
+    hold off
+ % subplot(2,2,3)
+    subplot(2,2,[3,4])
+    plot(rad);%xlim([0 4350]);ylim([5 40]);
+    set(gca,'xtick',600:600:7.25*600,'xticklabel',1:7,'LooseInset',get(gca,'TightInset'),'Fontsize',8)
+    hold on; plot(sp*.01,'g')
+    plot(i,35,'ro','Markersize',4,'Linewidth',4)
+    xlabel ('time (min)')
+    ylabel ('a.u. pixels, cm/sec');
+    lgd = legend('radius','velocity');
+  lgd.FontSize = 10
+     lgd.FontWeight = 'bold';
+    %legend ('radius', 'velocity')
+     hold off
+% subplot(2,2,4)
+% plot(xEye(i),yEye(i),'.');hold on;
+    currFrame = getframe(gcf);
+    writeVideo(vidObj,currFrame);
+end
+close(vidObj);
+ 
+% figure
+% for c=1:length(use)
+%     for i=1:length(Xfilt)
+%         %plot(Xfilt(use(c),i),Yfilt(use(c),i));hold on; axis square
+%         xlim([min(Xfilt(use)) max(Xfilt(use))]);
+%         ylim([min(Yfilt(use)) max(Yfilt(use))]);
+%         plot(Xfilt(use(c),i),Yfilt(use(c),i),'.r','MarkerSize',20);axis square; hold on;
+%         plot(Xfilt(use(c),i),Yfilt(use(c),i))
+%         drawnow
+%         hold off
 %     end
-%     %hold off
-%     h = axes('Position', [.05 .65 .4 .4], 'Layer','top');
-%     imshow(imresize(data(yc-vert:yc+vert,xc-horiz:xc+horiz,i),1.0,'box'));
-%     axis(h, 'off', 'tight')
-%     colormap gray;
-%     hold on
-%     circle(centroid(i,1),centroid(i,2),rad(i))
-%     drawnow
-%     hold off
-%     subplot(3,2,2)
-%     plot(rad);xlim([0 4350]);ylim([5 40]);
-%     hold on; plot(sp*.01,'g')
-%     plot(i,35,'ro','Markersize',4,'Linewidth',4)
-%     hold off
-%     currFrame = getframe(gcf);
-%     writeVideo(vidObj,currFrame);
 % end
-% close(vidObj);
- 
-
- 
+% 
+%             
+%             plot(Xfilt(use(i),:),Yfilt(use(i),:));hold on; axis square
+%             hold on; plot(Yfilt(use(i),:))
+%             
+%             hLine = plot(nan);       %# Initialize a plot line (which isn't displayed yet
+%   figure   
+%   for c=1:length(use)%#   because the values are NaN)
+% for i = 1:length(Xfilt)             %# Loop N times
+% xpos=Xfilt(use(c),i)
+% ypos= Yfilt(use(c),i)
+%   %set(hLine,xpos,ypos);  %# Update the y data of the line
+%   plot(xpos,ypos,'.');hold on
+% 
+%   drawnow                %# Force the graphics to update immediately
+% end
+% end 

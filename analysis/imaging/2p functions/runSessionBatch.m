@@ -12,7 +12,7 @@ psfile = 'c:\temp.ps';
 if exist(psfile,'file')==2;delete(psfile);end
 
 
-behav2pSession('g62aaa3lt_001_000.sbx','behavSessionV2.mat','trialRecords_553-671_20170410T111110-20170410T112804.mat',psfile);
+behav2pSession('g62aaa3lt_001_000.sbx','behavSessionV2.mat','trialRecords_696-775_20170412T110811-20170412T112933.mat',psfile);
 topo2pSession('g62aaa3lt_001_001.sbx','topoXsessionV2.mat',psfile);
 topo2pSession('g62aaa3lt_001_002.sbx','topoYsessionV2.mat',psfile);
 grating2pSession('g62aaa3lt_001_005.sbx','gratingSessionV2.mat',psfile);

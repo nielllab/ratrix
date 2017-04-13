@@ -42,9 +42,14 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 59;
        msPenalty               =6300;
-        
        
-    case 'g62ww3rt' % Started 4/05/17
+   case 'g62ddd3tt' % Started 4/05/17 %%hvv start 4/14/17
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 219;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;         
+       
+    case 'g62ww3rt' % Started 4/05/17 %%hvv start 4/13/17
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 219;
        msPenalty               =3500;

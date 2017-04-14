@@ -21,7 +21,7 @@ thetaRange = unique(theta);
 
 for f=1:length(use)
     filename = files(use(f)).sizeanalysis
-    if exist([filename '.mat'])==0 %%comment for redo
+%     if exist([filename '.mat'])==0 %%comment for redo
         files(use(f)).subj
         psfilei = 'c:\tempPhil2pi.ps';
         if exist(psfilei,'file')==2;delete(psfilei);end
@@ -80,7 +80,7 @@ for f=1:length(use)
         end
         
         %%%set actual topo threshold
-        toporespthresh = toporespthreshlist(1);
+        toporespthresh = 0.025;
         allgoodTopo = find(~sbc & rfAmp(:,1)>toporespthresh & rfAmp(:,2)>toporespthresh); allgoodTopo = allgoodTopo(allgoodTopo<=cellCutoff);
         goodTopo = find(~sbc & rfAmp(:,1)>toporespthresh & rfAmp(:,2)>toporespthresh & d<centrad/dpix); goodTopo=goodTopo(goodTopo<=cellCutoff);
         sprintf('%d cells with good topo under cutoff',length(allgoodTopo))
@@ -221,17 +221,17 @@ for f=1:length(use)
             end
         end
         dftuning = dftuning2;
-        sptuning = sptuning2;      
+        sptuning = sptuning2/2;      
         
         
         %%%get sf and ori pref for size stimuli
         sizebestsf=nan(length(usecells),2);sizebesttheta=sizebestsf;
         sizebestsfresp=sizebestsf;sizebestthetaresp=sizebestsf;
         for i = 1:length(usecells)
-            [sizebestsfresp(i,1) sizebestsf(i,1)] = max(squeeze(nanmean(nanmean(dftuning(i,dfWindow,:,:,3,1),2),4))); %index of best sf
-            [sizebestsfresp(i,2) sizebestsf(i,2)] = max(squeeze(nanmean(nanmean(dftuning(i,dfWindow,:,:,3,2),2),4)));
-            [sizebestthetaresp(i,1) sizebesttheta(i,1)] = max(squeeze(nanmean(dftuning(i,dfWindow,sizebestsf(i,1),:,3,1),2))); %index of best thetaQuad
-            [sizebestthetaresp(i,2) sizebesttheta(i,2)] = max(squeeze(nanmean(dftuning(i,dfWindow,sizebestsf(i,1),:,3,2),2)));
+            [sizebestsfresp(i,1) sizebestsf(i,1)] = max(squeeze(nanmean(nanmean(sptuning(i,dfWindow,:,:,3,1),2),4))); %index of best sf
+            [sizebestsfresp(i,2) sizebestsf(i,2)] = max(squeeze(nanmean(nanmean(sptuning(i,dfWindow,:,:,3,2),2),4)));
+            [sizebestthetaresp(i,1) sizebesttheta(i,1)] = max(squeeze(nanmean(sptuning(i,dfWindow,sizebestsf(i,1),:,3,1),2))); %index of best thetaQuad
+            [sizebestthetaresp(i,2) sizebesttheta(i,2)] = max(squeeze(nanmean(sptuning(i,dfWindow,sizebestsf(i,1),:,3,2),2)));
         end
         
         %%%pull out best traces here
@@ -240,7 +240,7 @@ for f=1:length(use)
         for i = 1:length(usecells)
             for k = 1:length(sizes)
                 for l = 1:2
-                dfsize(i,:,k,l) = squeeze(nanmean(dftuning(i,:,sizebestsf(i,1),...
+                dfsize(i,:,k,l) = squeeze(nanmean(sptuning(i,:,sizebestsf(i,1),...
                     sizebesttheta(i,1),k,l),5));
                 end
             end
@@ -253,7 +253,7 @@ for f=1:length(use)
             subplot(2,ceil(length(sizes)/2),i)
             sizerespcells=[];
             for j=1:length(usecells)
-                goodresp = squeeze(nanmean(dftuning(j,dfWindow,sizebestsf(j,1),sizebesttheta(j,1),i,1),2))>=0.1;
+                goodresp = squeeze(nanmean(sptuning(j,dfWindow,sizebestsf(j,1),sizebesttheta(j,1),i,1),2))>=0.1;
                 if goodresp
                     sizerespcells = [sizerespcells j];
                 end
@@ -497,7 +497,7 @@ for f=1:length(use)
         end    
 
         %%%saving
-        save(fullfile(pathname,filename),'dftuning','sptuning','userf','dfsize','usecells','cellprint','SI')
+        save(fullfile(pathname,filename),'sptuning','sptuning','userf','dfsize','usecells','cellprint','SI')
 
         try
             dos(['ps2pdf ' psfilei ' "' [fullfile(pathname,filename) '.pdf'] '"'] )
@@ -507,7 +507,7 @@ for f=1:length(use)
 
         delete(psfilei);
         close all
-    else
-        sprintf('skipping %s',filename)
-    end
+%     else
+%         sprintf('skipping %s',filename)
+%     end
 end

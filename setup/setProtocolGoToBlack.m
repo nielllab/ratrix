@@ -95,11 +95,11 @@ switch subjIDs{1}
 %        percentCorrectionTrials = .5;         
     
 
-%    case 'g62aaa3lt' % Started 2/1/17 %%started nieve 2/21/17
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 219;
-%        msPenalty               =3500;
-%        percentCorrectionTrials = .0;        
+   case 'g62aaa3lt' % Started 2/1/17 %%started nieve 2/21/17
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 219;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;        
 %     
 %     
 %    case 'g62uu4lt' % Started 2/1/17  %%start random 2/17/17

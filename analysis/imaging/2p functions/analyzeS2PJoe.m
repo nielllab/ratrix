@@ -2,10 +2,10 @@
 close all
 clear all
 
-psfilename = 'C:\tempS2PPhil.ps';
+psfilename = 'C:\tempS2PJoe.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
-runS2PbatchPhil
+runS2PbatchJoe
 
 cd(procdir)
 load(procfile)

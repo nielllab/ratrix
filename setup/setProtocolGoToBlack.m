@@ -114,11 +114,11 @@ switch subjIDs{1}
 %        msPenalty               =3500; 
 %         percentCorrectionTrials = .0;  
         
-    case 'pvchr238'  %started 3/6/17
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 219;
-       msPenalty               =3500;
-       percentCorrectionTrials = .5; 
+%    case 'pvchr238'  %started 3/6/17
+%       requestRewardSizeULorMS = 0;
+%       rewardSizeULorMS        = 219;
+%       msPenalty               =3500;
+%       percentCorrectionTrials = .5; 
     
     case 'testgotoblackstopime' % Started 6/25/15
        requestRewardSizeULorMS = 0;

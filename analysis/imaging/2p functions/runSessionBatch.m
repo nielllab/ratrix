@@ -32,7 +32,7 @@ end
 
 
 
-behav2pSession('g62y3lt_001_000.sbx','behavSessionV2.mat','trialRecords_1853-2020_20160503T154535-20160503T160643.mat',psfile);
+behav2pSession('g62y3lt_001_000.sbx','behavSessionV2.mat','trialRecords_2261-2511_20160505T131650-20160505T135237.mat',psfile);
 topo2pSession('g62y3lt_001_001.sbx','topoXsessionV2.mat',psfile);
 topo2pSession('g62y3lt_001_002.sbx','topoYsessionV2.mat',psfile);
 grating2pSession('g62y3lt_001_005.sbx','gratingSessionV2.mat',psfile);

@@ -16,7 +16,7 @@ dbstop if error
 addpath('C:\Users\nlab\Desktop\GitHub\ratrix\analysis\imaging\2p functions') % add the path to your make_db file
 
 % overwrite any of these default options in your make_db file for individual experiments
-make_db_Phil; % RUN YOUR OWN MAKE_DB SCRIPT TO RUN HERE
+make_db_Joe; % RUN YOUR OWN MAKE_DB SCRIPT TO RUN HERE
 
 ops0.toolbox_path = 'C:\Users\nlab\Documents\MATLAB\Suite2P';
 if exist(ops0.toolbox_path, 'dir')
@@ -32,11 +32,11 @@ ops0.fig                    = 1; % turn off figure generation with 0
 % ops0.diameter               = 12; % most important parameter. Set here, or individually per experiment in make_db file
 
 % root paths for files and temporary storage (ideally an SSD drive. my SSD is C:/)
-ops0.RootStorage            = '\\langevin\backup\twophoton\Phil\Compiled2p\030817 G62W9RT DOI sizeselect22min'; % Suite2P assumes a folder structure, check out README file
-ops0.temp_tiff              = 'C:\Users\Phil\Desktop\S2P\temp.tif'; % copies each remote tiff locally first, into this file
-ops0.RegFileRoot            = 'C:\Users\Phil\Desktop\S2P';  % location for binary file
+ops0.RootStorage            = 'F:\'; % Suite2P assumes a folder structure, check out README file
+ops0.temp_tiff              = 'C:\Users\nlab\Desktop\S2P\tempJoe.tif'; % copies each remote tiff locally first, into this file
+ops0.RegFileRoot            = 'C:\Users\nlab\Desktop\S2P';  % location for binary file
 ops0.DeleteBin              = 1; % set to 1 for batch processing on a limited hard drive
-ops0.ResultsSavePath        = '\\langevin\backup\twophoton\Phil\Compiled2p\030817 G62W9RT DOI sizeselect22min'; % a folder structure is created inside
+ops0.ResultsSavePath        = 'F:\'; % a folder structure is created inside
 ops0.RegFileTiffLocation    = []; %'D:/DATA/'; % leave empty to NOT save registered tiffs (slow)
 
 % registration options
@@ -76,7 +76,7 @@ for iexp = 1 %[3:length(db) 1:2]
     run_pipeline(db(iexp), ops0);
     
     % deconvolved data into (dat.)cl.dcell, and neuropil subtraction coef
-    add_deconvolution_Phil(ops0, db0(iexp));
+    add_deconvolution(ops0, db0(iexp));
     
     % add red channel information (if it exists)
     if isfield(db0,'expred') && ~isempty(db0(iexp).expred)

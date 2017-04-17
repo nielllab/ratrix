@@ -162,7 +162,7 @@ stim.slow = [40; 80]; % 10 * ones(2,1);
 %stim.slowSecs = 1;  set above for case by case
 stim.positional = true;
 stim.cue = true;
-stim.soundClue = false;
+stim.soundClue = true;
 
 pixPerCycs             = [300]; %*10^9;
 targetOrientations     = [-1 1]*pi/4;

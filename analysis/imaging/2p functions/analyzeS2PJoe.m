@@ -13,11 +13,51 @@ load(procfile)
 newpdfFile = fullfile(procdir,[aniname '_' expdate '_S2P.pdf']);
 
 %%%figure out how many actual cells there are take out any with nan values
-baddies = find(isnan(dat.Fcell{1}));
-[i j] = ind2sub(size(dat.Fcell{1}),baddies);
-baddie = unique(i);
-for i=1:length(baddie)
-    stat(baddie(i)).iscell = 0;
+for h = 1:length(expname)
+    baddies = find(isnan(dat.Fcell{h}));
+    [idx val] = ind2sub(size(dat.Fcell{h}),baddies);
+    baddie = unique(idx);
+    if ~isempty(baddie)
+        sprintf('found %d bad cells in block %d',length(baddie),h)
+        for i=1:length(baddie)
+            dat.stat(baddie(i)).iscell = 0;
+        end
+        dat.Fcell{h}(baddies) = rand(length(baddies),1)/1000;
+        dat.FcellNeu{h}(baddies) = rand(length(baddies),1)/1000;
+    else
+        sprintf('no bad cells in block %d',h)
+    end
+end
+
+if ~isempty(baddie)
+    save(procfile,'dat','-append')
+    sprintf('rerunning deconvolution')
+    make_db_Joe
+    add_deconvolution(dat.ops,db);
+    clear dat
+    load(procfile)
+    dat = {};
+    dat.cl = cl;
+    dat.clustrules = clustrules;
+    dat.F = F;
+    dat.Fcell = Fcell;
+    dat.FcellNeu = FcellNeu;
+    dat.figure = figure;
+    dat.filename = filename;
+    dat.map = map;
+    dat.maxmap = maxmap;
+    dat.mimg = mimg;
+    dat.mimg_proc = mimg_proc;
+    dat.ops = ops;
+    dat.procmap = 0;
+    dat.res = res;
+    dat.stat = stat;
+    dat.xlim = xlim;
+    dat.ylim = ylim;
+    
+    save(procfile,'dat')
+    sprintf('please rerun this analysis')
+    return
 end
 
 iscell = zeros(size(dat.Fcell{1},1),1);
@@ -55,7 +95,7 @@ if exist('psfilename','var')
 end
 
 %%%save dF/F and spikes for each experiment only for real cells
-for j = 1:size(dat.Fcell,2)
+for j = 1:length(expname)
     spikes = zeros(length(cells),size(dat.Fcell{j},2));dF=spikes;
     for k = 1:length(cells)
         %%%make spike time/amp array

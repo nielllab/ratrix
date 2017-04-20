@@ -1,4 +1,5 @@
 %%%analyzeS2PPhil
+%%%MAKE SURE YOU HAVE THE CORRECT EXPERIMENT SELECTED IN make_db_Phil
 close all
 clear all
 
@@ -54,10 +55,10 @@ if ~isempty(baddie)
     dat.stat = stat;
     dat.xlim = xlim;
     dat.ylim = ylim;
-    
     save(procfile,'dat')
-    sprintf('please rerun this analysis')
-    return
+%     sprintf('please rerun this analysis')
+%     
+%     return
 end
 
 iscell = zeros(size(dat.Fcell{1},1),1);
@@ -74,7 +75,7 @@ cImage = squeeze(dat.mimg(:,:,5));
 cropx = 1:size(meanImg,1);
 cropy = 1:size(meanImg,2);
 for k = 1:length(cells)
-    usePts{k} = sub2ind(size(meanImg),dat.stat(k).ypix,dat.stat(k).xpix);
+    usePts{k} = sub2ind(size(meanImg),dat.stat(cells(k)).ypix,dat.stat(cells(k)).xpix);
 end
 
 figure;imagesc(meanImg)

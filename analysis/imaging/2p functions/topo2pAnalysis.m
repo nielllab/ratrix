@@ -4,6 +4,7 @@ close all
 clear all
 
 global S2P
+S2P = 1; %S2P analysis = 1, other = 0
 
 dt = 0.1;
 cycLength = 10 / dt;

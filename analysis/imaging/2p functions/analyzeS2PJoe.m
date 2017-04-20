@@ -1,11 +1,12 @@
-%%%analyzeS2PPhil
+%%%analyzeS2PJoe
+%%%MAKE SURE YOU HAVE THE CORRECT EXPERIMENT SELECTED IN make_db_Joe
 close all
 clear all
 
 psfilename = 'C:\tempS2PJoe.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
-runS2PbatchJoe
+make_db_Joe
 
 cd(procdir)
 load(procfile)
@@ -74,7 +75,7 @@ cImage = squeeze(dat.mimg(:,:,5));
 cropx = 1:size(meanImg,1);
 cropy = 1:size(meanImg,2);
 for k = 1:length(cells)
-    usePts{k} = sub2ind(size(meanImg),dat.stat(k).ypix,dat.stat(k).xpix);
+    usePts{k} = sub2ind(size(meanImg),dat.stat(cells(k)).ypix,dat.stat(cells(k)).xpix);
 end
 
 figure;imagesc(meanImg)

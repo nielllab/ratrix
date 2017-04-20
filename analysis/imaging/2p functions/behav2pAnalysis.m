@@ -1,5 +1,9 @@
 clear all
 
+global S2P
+S2P = 1; %S2P analysis = 1, other = 0
+
+
 %%% load pts file (contains cell locations and dF, along with analysis results
 ptsfname = uigetfile('*.mat','pts file');
 display('loading pts file');
@@ -114,8 +118,13 @@ if exist('psfilename','var');    set(gcf, 'PaperPositionMode', 'auto');   print(
 
 
 
-dFdecon=spikes*10;
+
 %dFdecon = dF;
+if (exist('S2P','var')&S2P==1)
+    dFdecon = spikes/2;
+else
+    dFdecon=spikes*10;
+end
 
 figure
 imagesc(meanImg);

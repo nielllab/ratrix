@@ -3,6 +3,9 @@ close all
 clear all
 
 
+global S2P
+S2P = 1; %S2P analysis = 1, other = 0
+
 dt = 0.1
 ptsfname = uigetfile('*.mat','pts file')
 load(ptsfname);
@@ -18,7 +21,14 @@ psfilename = 'c:\temp.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
 dt
-dFdecon = spikes*10;
+
+
+if (exist('S2P','var')&S2P==1)
+    dFdecon = spikes/2;
+else
+    dFdecon=spikes*10;
+end
+
 
 % dFdecon=dF;
 % for i = 1:size(dF,1);

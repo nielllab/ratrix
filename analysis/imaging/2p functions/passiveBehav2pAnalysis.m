@@ -22,7 +22,7 @@ if exist(psfilename,'file')==2;delete(psfilename);end
 
 dt
 
-
+dFdecon=[];
 if (exist('S2P','var')&S2P==1)
     dFdecon = spikes/2;
 else
@@ -30,7 +30,7 @@ else
 end
 
 
-% dFdecon=dF;
+
 % for i = 1:size(dF,1);
 %     dFdecon(i,:) = dFdecon(i,:)-prctile(dFdecon(i,:),1);
 % end

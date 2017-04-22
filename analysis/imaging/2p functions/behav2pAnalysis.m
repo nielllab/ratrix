@@ -67,6 +67,7 @@ if exist('psfilename','var');    set(gcf, 'PaperPositionMode', 'auto');   print(
 
 %%% get target location, orientation, phase
 stim = [trialRecs.stimDetails];
+orient=[];gratingPh=[];location=[];targ=[];  %reset variables to be written so matrix size agrees
 for i = 1:length(trialRecs);
     orient(i) = pi/2 - trialRecs(i).stimDetails.subDetails.orientations;
     gratingPh(i) = trialRecs(i).stimDetails.subDetails.phases;

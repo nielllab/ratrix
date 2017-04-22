@@ -72,8 +72,8 @@ cells = find(iscell);
 usePts = {};
 meanImg = squeeze(dat.mimg(:,:,2));meanShiftImg=meanImg;
 cImage = squeeze(dat.mimg(:,:,5));
-cropx = 1:size(meanImg,1);
-cropy = 1:size(meanImg,2);
+cropx = [1;size(meanImg,1)];
+cropy = [1;size(meanImg,2)];
 for k = 1:length(cells)
     usePts{k} = sub2ind(size(meanImg),dat.stat(cells(k)).ypix,dat.stat(cells(k)).xpix);
 end
@@ -129,9 +129,11 @@ for j = 1:length(expname)
         print('-dpsc',psfilename,'-append');
     end
     
-    thisSession = fullfile(expdir,[expname{j}(1:strfind(expname{j},'V2')+1) '.mat']);
+    %thisSession = fullfile(expdir,[expname{j}(1:strfind(expname{j},'V2')+1) '.mat']);
+    thisSession = fullfile(expdir,[expname{j}(1:strfind(expname{j},'S2P')+1) '.mat']); %ADJUST -3 VALUE
     load(thisSession,'greenframe');
-    save(expname{j},'dF','greenframe','meanImg','usePts','spikes','meanShiftImg','cropx','cropy','thisSession','cImage')
+    save((expname{j}),'dF','greenframe','meanImg','usePts','spikes','meanShiftImg','cropx','cropy','thisSession','cImage')
+    %save(fullfile(expdir,expname{j}),'dF','greenframe','meanImg','usePts','spikes','meanShiftImg','cropx','cropy','thisSession','cImage')
 end
 
 dos(['ps2pdf ' psfilename ' "' newpdfFile '"'] )

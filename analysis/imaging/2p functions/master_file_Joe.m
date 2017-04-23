@@ -72,7 +72,7 @@ ops0.redmax                 = 1; % the higher the max the more NON-red cells
 %% RUN THE PIPELINE HERE
 db0 = db;
 
-for iexp = 1 %[3:length(db) 1:2]
+for iexp = 1:length(db) %[3:length(db) 1:2]
     run_pipeline(db(iexp), ops0);
     
     % deconvolved data into (dat.)cl.dcell, and neuropil subtraction coef

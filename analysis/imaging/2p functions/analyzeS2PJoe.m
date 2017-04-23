@@ -8,20 +8,29 @@ if exist(psfilename,'file')==2;delete(psfilename);end
 
 make_db_Joe
 
-cd(procdir)
-load(procfile)
 
-newpdfFile = fullfile(procdir,[aniname '_' expdate '_S2P.pdf']);
+
+%%%loop through sessions in make_db_Joe
+for i = 1:length(db)
+
+
+
+cd(db(i).procdir)
+load(db(i).procfile)
+
+
+%newpdfFile = fullfile(procdir,[aniname '_' expdate '_S2P.pdf']);
+newpdfFile = fullfile(db(i).procdir,[db(i).aniname '_' db(i).expdate '_S2P.pdf']);
 
 %%%figure out how many actual cells there are take out any with nan values
-for h = 1:length(expname)
+for h = 1:length(db(i).expname)
     baddies = find(isnan(dat.Fcell{h}));
     [idx val] = ind2sub(size(dat.Fcell{h}),baddies);
     baddie = unique(idx);
     if ~isempty(baddie)
         sprintf('found %d bad cells in block %d',length(baddie),h)
-        for i=1:length(baddie)
-            dat.stat(baddie(i)).iscell = 0;
+        for k=1:length(baddie)
+            dat.stat(baddie(k)).iscell = 0;
         end
         dat.Fcell{h}(baddies) = rand(length(baddies),1)/1000;
         dat.FcellNeu{h}(baddies) = rand(length(baddies),1)/1000;
@@ -62,9 +71,9 @@ if ~isempty(baddie)
 end
 
 iscell = zeros(size(dat.Fcell{1},1),1);
-for i = 1:length(iscell)
-    if dat.stat(i).iscell
-        iscell(i) = 1;
+for k = 1:length(iscell)
+    if dat.stat(k).iscell
+        iscell(k) = 1;
     end
 end
 
@@ -130,10 +139,11 @@ for j = 1:length(expname)
     end
     
     %thisSession = fullfile(expdir,[expname{j}(1:strfind(expname{j},'V2')+1) '.mat']);
-    thisSession = fullfile(expdir,[expname{j}(1:strfind(expname{j},'S2P')+1) '.mat']); %ADJUST -3 VALUE
+    %thisSession = fullfile(expdir,[expname{j}(1:strfind(expname{j},'S2P')+2) '.mat']); %ADJUST -3 VALUE
+    thisSession = fullfile(db(i).expdir,[db(i).expname{j}(1:strfind(db(i).expname{j},'S2P')+2) '.mat']); %ADJUST -3 VALUE
     load(thisSession,'greenframe');
-    save((expname{j}),'dF','greenframe','meanImg','usePts','spikes','meanShiftImg','cropx','cropy','thisSession','cImage')
-    %save(fullfile(expdir,expname{j}),'dF','greenframe','meanImg','usePts','spikes','meanShiftImg','cropx','cropy','thisSession','cImage')
+    %save((expname{j}),'dF','greenframe','meanImg','usePts','spikes','meanShiftImg','cropx','cropy','thisSession','cImage')
+    save(fullfile(db(i).expdir,db(i).expname{j}),'dF','greenframe','meanImg','usePts','spikes','meanShiftImg','cropx','cropy','thisSession','cImage')
 end
 
 dos(['ps2pdf ' psfilename ' "' newpdfFile '"'] )
@@ -153,6 +163,7 @@ end
 
 delete(psfilename);
 
+end
 
 % for z = 1:10
 % figure

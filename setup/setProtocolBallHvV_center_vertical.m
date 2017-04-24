@@ -66,11 +66,11 @@ switch subjIDs{1}
        msPenalty               =3500;
        percentCorrectionTrials = .5; 
        
-   case 'g62ss4lt' % Started 4/07/17  %%hvv center 4/15/17
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 219;
-       msPenalty               =3500;
-       percentCorrectionTrials = .5;      
+%    case 'g62ss4lt' % Started 4/07/17  %%hvv center 4/15/17
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 219;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5;      
           
     
    case 'g62ddd3ln' % Started 4/05/17  %%hvv center 4/15/17
@@ -85,23 +85,23 @@ switch subjIDs{1}
        msPenalty               =3500;
        percentCorrectionTrials = .5;         
        
-    case 'g62ww3rt' % Started 4/05/17 %%hvv start 4/13/17
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 219;
-       msPenalty               =3500;
-       percentCorrectionTrials = .5;       
-
-    case 'g62aaa4tt' % Started 3/29/17 %%hvv start 4/8/17
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 219;
-       msPenalty               =3500;
-       percentCorrectionTrials = .5;    
-
-   case 'g62ggg6tt' % Started 3/29/17 %%hvv start 4/8/17
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 219;
-       msPenalty               =3500;
-       percentCorrectionTrials = .5;  
+%     case 'g62ww3rt' % Started 4/05/17 %%hvv start 4/13/17
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 219;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5;       
+% 
+%     case 'g62aaa4tt' % Started 3/29/17 %%hvv start 4/8/17
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 219;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5;    
+% 
+%    case 'g62ggg6tt' % Started 3/29/17 %%hvv start 4/8/17
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 219;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5;  
        
     otherwise
         warning('unrecognized mouse, using defaults')

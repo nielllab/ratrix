@@ -100,44 +100,147 @@ i = 0;
 % db(i).expname{6} = 'gratingSessionS2P__allfiles_PTS_dF.mat';
 
 %%%%%g62bb10lt 063016
-i = i+1;
-db(i).mouse_name    = 'g62bb10lt';
-db(i).date          = 'S2P';
+% i = i+1;
+% db(i).mouse_name    = 'g62bb10lt';
+% db(i).date          = 'S2P';
+% db(i).expts         = [0 1 2 3 4 5];
+% db(i).diameter      = 14;
+% db(i).RootStorage   = 'C:\063016 g62bb10lt GTS behavior';
+% db(i).ResultsSavePath   = 'C:\063016 g62bb10lt GTS behavior';
+% db(i).aniname = 'g62bb10lt';
+% db(i).expdate = '063016';
+% db(i).expdir = '\\Joze-monster\c\063016 g62bb10lt GTS behavior\g62bb10lt';
+% db(i).procdir = '\\Joze-monster\c\063016 g62bb10lt GTS behavior\g62bb10lt\S2P\1_2_3_4_5_6';
+% db(i).procfile = 'F_g62bb10lt_S2P_plane1_proc';
+% db(i).expname{1} = 'behavSessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{2} = 'passiveBehav2sf8minSessionV2__allfiles_PTS_dF.mat';
+% db(i).expname{3} = 'passiveBehav3x8minV2__allfiles_PTS_dF.mat';
+% db(i).expname{4} = 'topoXsessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{5} = 'topoYsessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{6} = 'gratingSessionS2P__allfiles_PTS_dF.mat';
+% 
+% i = i+1;
+% db(i).mouse_name    = 'g62bb10lt';
+% db(i).date          = 'S2P';
+% db(i).expts         = [0 1 2 3 4 5];
+% db(i).diameter      = 14;
+% db(i).RootStorage   = 'C:\072716 g62bb10lt gts behavior';
+% db(i).ResultsSavePath   = 'C:\072716 g62bb10lt gts behavior';
+% db(i).aniname = 'g62bb10lt';
+% db(i).expdate = '072716';
+% db(i).expdir = '\\Joze-monster\c\072716 g62bb10lt gts behavior\g62bb10lt';
+% db(i).procdir = '\\Joze-monster\c\072716 g62bb10lt gts behavior\g62bb10lt\S2P\0_1_2_3_4_5';
+% db(i).procfile = 'F_g62bb10lt_S2P_plane1_proc';
+% db(i).expname{1} = 'behavSessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{2} = 'topoXsessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{3} = 'topoYsessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{4} = 'passiveBehav2sfSessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{5} = 'passiveBehav3x4orientSessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{6} = 'gratingSessionS2P__allfiles_PTS_dF.mat';
+
+
+%%%%%g62gg5rt
+i = i+1;  
+db(i).mouse_name    = 'g62gg5rt';
+db(i).date          = '080916';
 db(i).expts         = [0 1 2 3 4 5];
 db(i).diameter      = 14;
-db(i).RootStorage   = 'C:\063016 g62bb10lt GTS behavior';
-db(i).ResultsSavePath   = 'C:\063016 g62bb10lt GTS behavior';
-db(i).aniname = 'g62bb10lt';
-db(i).expdate = '063016';
-db(i).expdir = '\\Joze-monster\c\063016 g62bb10lt GTS behavior\g62bb10lt';
-db(i).procdir = '\\Joze-monster\c\063016 g62bb10lt GTS behavior\g62bb10lt\S2P\1_2_3_4_5_6';
-db(i).procfile = 'F_g62bb10lt_S2P_plane1_proc';
-db(i).expname{1} = 'behavSessionS2P__allfiles_PTS_dF.mat';
-db(i).expname{2} = 'passiveBehav2sf8minSessionV2__allfiles_PTS_dF.mat';
-db(i).expname{3} = 'passiveBehav3x8minV2__allfiles_PTS_dF.mat';
-db(i).expname{4} = 'topoXsessionS2P__allfiles_PTS_dF.mat';
-db(i).expname{5} = 'topoYsessionS2P__allfiles_PTS_dF.mat';
-db(i).expname{6} = 'gratingSessionS2P__allfiles_PTS_dF.mat';
+db(i).RootStorage   = 'F:\080916 g62gg5rt GTS behavior';
+db(i).ResultsSavePath   = 'F:\080916 g62gg5rt GTS behavior';
+db(i).aniname = 'g62gg5rt';
+db(i).expdate = '080916';
+db(i).expdir = 'F:\080916 g62gg5rt GTS behavior\g62gg5rt';
+db(i).procdir = 'F:\080916 g62gg5rt GTS behavior\g62gg5rt\S2P\0_1_2_3_4_5';
+db(i).procfile = 'F_g62gg5rt_S2P_plane1_proc';
+db(i).expname{1} = 'behavSessionV2__allfiles_PTS_dF.mat';
+db(i).expname{2} = 'topoXsessionV2__allfiles_PTS_dF.mat';
+db(i).expname{3} = 'topoYsessionV2__allfiles_PTS_dF.mat';
+db(i).expname{4} = 'passiveBehav2sf8minSessionV2__allfiles_PTS_dF.mat';
+db(i).expname{5} = 'passiveBehav3x8minV2__allfiles_PTS_dF.mat';
+db(i).expname{6} = 'gratingSessionV2__allfiles_PTS_dF.mat';
 
-i = i+1;
-db(i).mouse_name    = 'g62bb10lt';
-db(i).date          = 'S2P';
+
+
+i = i+1;  
+db(i).mouse_name    = 'g62gg5rt';
+db(i).date          = '081216';
 db(i).expts         = [0 1 2 3 4 5];
 db(i).diameter      = 14;
-db(i).RootStorage   = 'C:\072716 g62bb10lt GTS behavior';
-db(i).ResultsSavePath   = 'C:\072716 g62bb10lt GTS behavior';
-db(i).aniname = 'g62bb10lt';
-db(i).expdate = '072716';
-db(i).expdir = '\\Joze-monster\c\072716 g62bb10lt GTS behavior\g62bb10lt';
-db(i).procdir = '\\Joze-monster\c\072716 g62bb10lt GTS behavior\g62bb10lt\S2P\0_1_2_3_4_5';
-db(i).procfile = 'F_g62bb10lt_S2P_plane1_proc';
-db(i).expname{1} = 'behavSessionS2P__allfiles_PTS_dF.mat';
-db(i).expname{2} = 'topoXsessionS2P__allfiles_PTS_dF.mat';
-db(i).expname{3} = 'topoYsessionS2P__allfiles_PTS_dF.mat';
-db(i).expname{4} = 'passiveBehav2sfSessionS2P__allfiles_PTS_dF.mat';
-db(i).expname{5} = 'passiveBehav3x4orientSessionS2P__allfiles_PTS_dF.mat';
-db(i).expname{6} = 'gratingSessionS2P__allfiles_PTS_dF.mat';
+db(i).RootStorage   = 'F:\081216 g62gg5rt GTS behavior';
+db(i).ResultsSavePath   = 'F:\081216 g62gg5rt GTS behavior';
+db(i).aniname = 'g62gg5rt';
+db(i).expdate = '081216';
+db(i).expdir = 'F:\081216 g62gg5rt GTS behavior\g62gg5rt';
+db(i).procdir = 'F:\081216 g62gg5rt GTS behavior\g62gg5rt\S2P\0_1_2_3_4_5';
+db(i).procfile = 'F_g62gg5rt_S2P_plane1_proc';
+db(i).expname{1} = 'behavSessionV2__allfiles_PTS_dF.mat';
+db(i).expname{2} = 'topoXsessionV2__allfiles_PTS_dF.mat';
+db(i).expname{3} = 'topoYsessionV2__allfiles_PTS_dF.mat';
+db(i).expname{4} = 'passiveBehav2sf8minSessionV2__allfiles_PTS_dF.mat';
+db(i).expname{5} = 'passiveBehav3x8minV2__allfiles_PTS_dF.mat';
+db(i).expname{6} = 'gratingSessionV2__allfiles_PTS_dF.mat';
 
+
+
+%%%%%g62gg10lt
+i = i+1;  
+db(i).mouse_name    = 'g62gg10lt';
+db(i).date          = '092216';
+db(i).expts         = [0 1 2 3 4 5];
+db(i).diameter      = 14;
+db(i).RootStorage   = 'F:\092216 g62gg10lt GTS behavior';
+db(i).ResultsSavePath   = 'F:\092216 g62gg10lt GTS behavior';
+db(i).aniname = 'g62gg10lt';
+db(i).expdate = '092216';
+db(i).expdir = 'F:\092216 g62gg10lt GTS behavior\g62gg10lt';
+db(i).procdir = 'F:\092216 g62gg10lt GTS behavior\g62gg10lt\S2P\0_1_2_3_4_5';
+db(i).procfile = 'F_g62gg10lt_S2P_plane1_proc';
+db(i).expname{1} = 'behavSessionV2__allfiles_PTS_dF.mat';
+db(i).expname{2} = 'topoXsessionV2__allfiles_PTS_dF.mat';
+db(i).expname{3} = 'topoYsessionV2__allfiles_PTS_dF.mat';
+db(i).expname{4} = 'passiveBehav2sf8minSessionV2__allfiles_PTS_dF.mat';
+db(i).expname{5} = 'passiveBehav3x8minV2__allfiles_PTS_dF.mat';
+db(i).expname{6} = 'gratingSessionV2__allfiles_PTS_dF.mat';
+
+
+i = i+1;  
+db(i).mouse_name    = 'g62gg10lt';
+db(i).date          = '092916';
+db(i).expts         = [0 1 2 3 4 5];
+db(i).diameter      = 14;
+db(i).RootStorage   = 'F:\092916 g62gg10lt GTS behavior';
+db(i).ResultsSavePath   = 'F:\092916 g62gg10lt GTS behavior';
+db(i).aniname = 'g62gg10lt';
+db(i).expdate = '092916';
+db(i).expdir = 'F:\092916 g62gg10lt GTS behavior\g62gg10lt';
+db(i).procdir = 'F:\092916 g62gg10lt GTS behavior\g62gg10lt\S2P\0_1_2_3_4_5';
+db(i).procfile = 'F_g62gg10lt_S2P_plane1_proc';
+db(i).expname{1} = 'behavSessionV2__allfiles_PTS_dF.mat';
+db(i).expname{2} = 'topoXsessionV2__allfiles_PTS_dF.mat';
+db(i).expname{3} = 'topoYsessionV2__allfiles_PTS_dF.mat';
+db(i).expname{4} = 'passiveBehav2sf8minSessionV2__allfiles_PTS_dF.mat';
+db(i).expname{5} = 'passiveBehav3x8minV2__allfiles_PTS_dF.mat';
+db(i).expname{6} = 'gratingSessionV2__allfiles_PTS_dF.mat';
+
+
+i = i+1;  
+db(i).mouse_name    = 'g62gg10lt';
+db(i).date          = '093016';
+db(i).expts         = [0 1 2 3 4 5];
+db(i).diameter      = 14;
+db(i).RootStorage   = 'F:\093016 g62gg10lt GTS behavior';
+db(i).ResultsSavePath   = 'F:\093016 g62gg10lt GTS behavior';
+db(i).aniname = 'g62gg10lt';
+db(i).expdate = '093016';
+db(i).expdir = 'F:\093016 g62gg10lt GTS behavior\g62gg10lt';
+db(i).procdir = 'F:\093016 g62gg10lt GTS behavior\g62gg10lt\S2P\0_1_2_3_4_5';
+db(i).procfile = 'F_g62gg10lt_S2P_plane1_proc';
+db(i).expname{1} = 'behavSessionV2__allfiles_PTS_dF.mat';
+db(i).expname{2} = 'topoXsessionV2__allfiles_PTS_dF.mat';
+db(i).expname{3} = 'topoYsessionV2__allfiles_PTS_dF.mat';
+db(i).expname{4} = 'passiveBehav2sf8minSessionV2__allfiles_PTS_dF.mat';
+db(i).expname{5} = 'passiveBehav3x8minV2__allfiles_PTS_dF.mat';
+db(i).expname{6} = 'gratingSessionV2__allfiles_PTS_dF.mat';
 
 %%%%%%Naive
 %%
@@ -150,7 +253,7 @@ db(i).expname{6} = 'gratingSessionS2P__allfiles_PTS_dF.mat';
 % db(i).RootStorage   = 'F:\072116 g62ff8rt Naive behavior';
 % db(i).ResultsSavePath   = 'F:\072116 g62ff8rt Naive behavior';
 % db(i).aniname = 'g62ff8rt';
-% db(i).expdate = '071216';
+% db(i).expdate = '072116';
 % db(i).expdir = 'F:\072116 g62ff8rt Naive behavior\g62ff8rt';
 % db(i).procdir = 'F:\072116 g62ff8rt Naive behavior\g62ff8rt\S2P\0_1_2_3_4_5';
 % db(i).procfile = 'F_g62ff8rt_S2P_plane1_proc';

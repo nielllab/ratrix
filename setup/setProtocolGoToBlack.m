@@ -27,6 +27,18 @@ stim.gain = 0.7 * ones(2,1);
 
 switch subjIDs{1}
 
+         case 'g62aaa11rt'  %started 4/25/17
+         requestRewardSizeULorMS = 43;
+         rewardSizeULorMS        = 219;
+         msPenalty               =3500;
+         percentCorrectionTrials = .5;      
+    
+         case 'g62aaa11lt'  %started 4/25/17
+         requestRewardSizeULorMS = 43;
+         rewardSizeULorMS        = 219;
+         msPenalty               =3500;
+         percentCorrectionTrials = .5;    
+    
          case 'pvchrrb14nt'  %started 4/26/17
          requestRewardSizeULorMS = 43;
          rewardSizeULorMS        = 219;

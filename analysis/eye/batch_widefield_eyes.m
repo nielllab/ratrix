@@ -1,6 +1,6 @@
 %% widefield Eyes batch
 
-pathname = '\\angie\Angie_analysis\widfield_data';
+pathname = '\\angie\Angie_analysis\widefield_data';
 n=0;
 
 
@@ -45,10 +45,10 @@ files(n).misc = '';
 
 n=n+1;
 files(n).expt = '022717_g62rr2_tt';
-files(n).dir = 'g62rr2_tt_blue';
+files(n).dir = '022717_g62rr2_tt_blue';
 %files(n).movieFile = 'C:\Users\Angie Michaiel\Desktop\movie files\cortex\DetectionStim2contrast_LOW_7_25min'
 files(n).cfile = 'g62rr2_tt_run1_detection_2low_contrasts\022717_g62rr2-tt_detection_2lowcontrasts_eye.mat'
-files(n).detection = 'g62rr2_tt_run1_detection_2low_contrastsmaps';
+files(n).detection = 'g62rr2_tt_run1_detection_2low_contrasts\g62rr2_tt_run1_detection_2low_contrastsmaps';
 % files(n).dark = 'g62rr2-tt_run4_darkness\g62rr2-tt_run4_darknessmaps';
 files(n).topox = 'g62rr2-tt_run2_topox\g62rr2-tt_run2_topoxmaps';
 files(n).topoy = 'g62rr2-tt_run3_topoy\g62rr2-tt_run3_topoymaps';  

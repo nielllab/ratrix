@@ -198,94 +198,134 @@ i = 0;
 % db(i).expname{4} = 'passiveBehav2sf8minSessionS2P__allfiles_PTS_dF.mat';
 % db(i).expname{5} = 'passiveBehav3x8minS2P__allfiles_PTS_dF.mat';
 % db(i).expname{6} = 'gratingSessionS2P__allfiles_PTS_dF.mat';
-
-
-
-i = i+1;  
-db(i).mouse_name    = 'g62gg5rt';
-db(i).date          = 'S2P';
-db(i).expts         = [0 1 2 3 4 5];
-db(i).diameter      = 14;
-db(i).RootStorage   = 'F:\081216 g62gg5rt GTS behavior';
-db(i).ResultsSavePath   = 'F:\081216 g62gg5rt GTS behavior';
-db(i).aniname = 'g62gg5rt';
-db(i).expdate = '081216';
-db(i).expdir = 'F:\081216 g62gg5rt GTS behavior\g62gg5rt';
-db(i).procdir = 'F:\081216 g62gg5rt GTS behavior\g62gg5rt\S2P\0_1_2_3_4_5';
-db(i).procfile = 'F_g62gg5rt_S2P_plane1_proc';
-db(i).expname{1} = 'behavSessionV2__allfiles_PTS_dF.mat';
-db(i).expname{2} = 'topoXsessionV2__allfiles_PTS_dF.mat';
-db(i).expname{3} = 'topoYsessionV2__allfiles_PTS_dF.mat';
-db(i).expname{4} = 'passiveBehav2sf8minSessionV2__allfiles_PTS_dF.mat';
-db(i).expname{5} = 'passiveBehav3x8minV2__allfiles_PTS_dF.mat';
-db(i).expname{6} = 'gratingSessionV2__allfiles_PTS_dF.mat';
-
-
-
-%%%%%g62gg10lt
-i = i+1;  
-db(i).mouse_name    = 'g62gg10lt';
-db(i).date          = 'S2P';
-db(i).expts         = [0 1 2 3 4 5];
-db(i).diameter      = 14;
-db(i).RootStorage   = 'F:\092216 g62gg10lt GTS behavior';
-db(i).ResultsSavePath   = 'F:\092216 g62gg10lt GTS behavior';
-db(i).aniname = 'g62gg10lt';
-db(i).expdate = '092216';
-db(i).expdir = 'F:\092216 g62gg10lt GTS behavior\g62gg10lt';
-db(i).procdir = 'F:\092216 g62gg10lt GTS behavior\g62gg10lt\S2P\0_1_2_3_4_5';
-db(i).procfile = 'F_g62gg10lt_S2P_plane1_proc';
-db(i).expname{1} = 'behavSessionS2P__allfiles_PTS_dF.mat';
-db(i).expname{2} = 'topoXsessionS2P__allfiles_PTS_dF.mat';
-db(i).expname{3} = 'topoYsessionS2P__allfiles_PTS_dF.mat';
-db(i).expname{4} = 'passiveBehav2sf8minSessionS2P__allfiles_PTS_dF.mat';
-db(i).expname{5} = 'passiveBehav3x8minS2P__allfiles_PTS_dF.mat';
-db(i).expname{6} = 'gratingSessionS2P__allfiles_PTS_dF.mat';
-
-
-i = i+1;  
-db(i).mouse_name    = 'g62gg10lt';
-db(i).date          = 'S2P';
-db(i).expts         = [0 1 2 3 4 5];
-db(i).diameter      = 14;
-db(i).RootStorage   = 'F:\092916 g62gg10lt GTS behavior';
-db(i).ResultsSavePath   = 'F:\092916 g62gg10lt GTS behavior';
-db(i).aniname = 'g62gg10lt';
-db(i).expdate = '092916';
-db(i).expdir = 'F:\092916 g62gg10lt GTS behavior\g62gg10lt';
-db(i).procdir = 'F:\092916 g62gg10lt GTS behavior\g62gg10lt\S2P\0_1_2_3_4_5';
-db(i).procfile = 'F_g62gg10lt_S2P_plane1_proc';
-db(i).expname{1} = 'behavSessionS2P__allfiles_PTS_dF.mat';
-db(i).expname{2} = 'topoXsessionS2P__allfiles_PTS_dF.mat';
-db(i).expname{3} = 'topoYsessionS2P__allfiles_PTS_dF.mat';
-db(i).expname{4} = 'passiveBehav2sf8minSessionS2P__allfiles_PTS_dF.mat';
-db(i).expname{5} = 'passiveBehav3x8minS2P__allfiles_PTS_dF.mat';
-db(i).expname{6} = 'gratingSessionS2P__allfiles_PTS_dF.mat';
-
-
-i = i+1;  
-db(i).mouse_name    = 'g62gg10lt';
-db(i).date          = 'S2P';
-db(i).expts         = [0 1 2 3 4 5];
-db(i).diameter      = 14;
-db(i).RootStorage   = 'F:\093016 g62gg10lt GTS behavior';
-db(i).ResultsSavePath   = 'F:\093016 g62gg10lt GTS behavior';
-db(i).aniname = 'g62gg10lt';
-db(i).expdate = '093016';
-db(i).expdir = 'F:\093016 g62gg10lt GTS behavior\g62gg10lt';
-db(i).procdir = 'F:\093016 g62gg10lt GTS behavior\g62gg10lt\S2P\0_1_2_3_4_5';
-db(i).procfile = 'F_g62gg10lt_S2P_plane1_proc';
-db(i).expname{1} = 'behavSessionS2P__allfiles_PTS_dF.mat';
-db(i).expname{2} = 'topoXsessionS2P__allfiles_PTS_dF.mat';
-db(i).expname{3} = 'topoYsessionS2P__allfiles_PTS_dF.mat';
-db(i).expname{4} = 'passiveBehav2sf8minSessionS2P__allfiles_PTS_dF.mat';
-db(i).expname{5} = 'passiveBehav3x8minS2P__allfiles_PTS_dF.mat';
-db(i).expname{6} = 'gratingSessionS2P__allfiles_PTS_dF.mat';
+% 
+% 
+% 
+% i = i+1;  
+% db(i).mouse_name    = 'g62gg5rt';
+% db(i).date          = 'S2P';
+% db(i).expts         = [0 1 2 3 4 5];
+% db(i).diameter      = 14;
+% db(i).RootStorage   = 'F:\081216 g62gg5rt GTS behavior';
+% db(i).ResultsSavePath   = 'F:\081216 g62gg5rt GTS behavior';
+% db(i).aniname = 'g62gg5rt';
+% db(i).expdate = '081216';
+% db(i).expdir = 'F:\081216 g62gg5rt GTS behavior\g62gg5rt';
+% db(i).procdir = 'F:\081216 g62gg5rt GTS behavior\g62gg5rt\S2P\0_1_2_3_4_5';
+% db(i).procfile = 'F_g62gg5rt_S2P_plane1_proc';
+% db(i).expname{1} = 'behavSessionV2__allfiles_PTS_dF.mat';
+% db(i).expname{2} = 'topoXsessionV2__allfiles_PTS_dF.mat';
+% db(i).expname{3} = 'topoYsessionV2__allfiles_PTS_dF.mat';
+% db(i).expname{4} = 'passiveBehav2sf8minSessionV2__allfiles_PTS_dF.mat';
+% db(i).expname{5} = 'passiveBehav3x8minV2__allfiles_PTS_dF.mat';
+% db(i).expname{6} = 'gratingSessionV2__allfiles_PTS_dF.mat';
+% 
+% 
+% 
+% %%%%%g62gg10lt
+% i = i+1;  
+% db(i).mouse_name    = 'g62gg10lt';
+% db(i).date          = 'S2P';
+% db(i).expts         = [0 1 2 3 4 5];
+% db(i).diameter      = 14;
+% db(i).RootStorage   = 'F:\092216 g62gg10lt GTS behavior';
+% db(i).ResultsSavePath   = 'F:\092216 g62gg10lt GTS behavior';
+% db(i).aniname = 'g62gg10lt';
+% db(i).expdate = '092216';
+% db(i).expdir = 'F:\092216 g62gg10lt GTS behavior\g62gg10lt';
+% db(i).procdir = 'F:\092216 g62gg10lt GTS behavior\g62gg10lt\S2P\0_1_2_3_4_5';
+% db(i).procfile = 'F_g62gg10lt_S2P_plane1_proc';
+% db(i).expname{1} = 'behavSessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{2} = 'topoXsessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{3} = 'topoYsessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{4} = 'passiveBehav2sf8minSessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{5} = 'passiveBehav3x8minS2P__allfiles_PTS_dF.mat';
+% db(i).expname{6} = 'gratingSessionS2P__allfiles_PTS_dF.mat';
+% 
+% 
+% i = i+1;  
+% db(i).mouse_name    = 'g62gg10lt';
+% db(i).date          = 'S2P';
+% db(i).expts         = [0 1 2 3 4 5];
+% db(i).diameter      = 14;
+% db(i).RootStorage   = 'F:\092916 g62gg10lt GTS behavior';
+% db(i).ResultsSavePath   = 'F:\092916 g62gg10lt GTS behavior';
+% db(i).aniname = 'g62gg10lt';
+% db(i).expdate = '092916';
+% db(i).expdir = 'F:\092916 g62gg10lt GTS behavior\g62gg10lt';
+% db(i).procdir = 'F:\092916 g62gg10lt GTS behavior\g62gg10lt\S2P\0_1_2_3_4_5';
+% db(i).procfile = 'F_g62gg10lt_S2P_plane1_proc';
+% db(i).expname{1} = 'behavSessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{2} = 'topoXsessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{3} = 'topoYsessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{4} = 'passiveBehav2sf8minSessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{5} = 'passiveBehav3x8minS2P__allfiles_PTS_dF.mat';
+% db(i).expname{6} = 'gratingSessionS2P__allfiles_PTS_dF.mat';
+% 
+% 
+% i = i+1;  
+% db(i).mouse_name    = 'g62gg10lt';
+% db(i).date          = 'S2P';
+% db(i).expts         = [0 1 2 3 4 5];
+% db(i).diameter      = 14;
+% db(i).RootStorage   = 'F:\093016 g62gg10lt GTS behavior';
+% db(i).ResultsSavePath   = 'F:\093016 g62gg10lt GTS behavior';
+% db(i).aniname = 'g62gg10lt';
+% db(i).expdate = '093016';
+% db(i).expdir = 'F:\093016 g62gg10lt GTS behavior\g62gg10lt';
+% db(i).procdir = 'F:\093016 g62gg10lt GTS behavior\g62gg10lt\S2P\0_1_2_3_4_5';
+% db(i).procfile = 'F_g62gg10lt_S2P_plane1_proc';
+% db(i).expname{1} = 'behavSessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{2} = 'topoXsessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{3} = 'topoYsessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{4} = 'passiveBehav2sf8minSessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{5} = 'passiveBehav3x8minS2P__allfiles_PTS_dF.mat';
+% db(i).expname{6} = 'gratingSessionS2P__allfiles_PTS_dF.mat';
 
 %%%%%%Naive
 %%
-%%%g62ff8rt
-% i = i+1;  %ran 4/18/17
+
+% %%%g62ff8rt   (has V2 session infor - S2P under)
+% % i = i+1;  %ran 4/18/17
+% % db(i).mouse_name    = 'g62ff8rt';
+% % db(i).date          = 'S2P';
+% % db(i).expts         = [0 1 2 3 4 5];
+% % db(i).diameter      = 14;
+% % db(i).RootStorage   = 'F:\072116 g62ff8rt Naive behavior';
+% % db(i).ResultsSavePath   = 'F:\072116 g62ff8rt Naive behavior';
+% % db(i).aniname = 'g62ff8rt';
+% % db(i).expdate = '072116';
+% % db(i).expdir = 'F:\072116 g62ff8rt Naive behavior\g62ff8rt';
+% % db(i).procdir = 'F:\072116 g62ff8rt Naive behavior\g62ff8rt\S2P\0_1_2_3_4_5';
+% % db(i).procfile = 'F_g62ff8rt_S2P_plane1_proc';
+% % db(i).expname{1} = 'behavSessionV2__allfiles_PTS_dF.mat';
+% % db(i).expname{2} = 'topoXsessionV2__allfiles_PTS_dF.mat';
+% % db(i).expname{3} = 'topoYsessionV2__allfiles_PTS_dF.mat';
+% % db(i).expname{4} = 'passiveBehav2sf8minSessionV2__allfiles_PTS_dF.mat';
+% % db(i).expname{5} = 'passiveBehav3x8minV2__allfiles_PTS_dF.mat';
+% % db(i).expname{6} = 'gratingSessionV2__allfiles_PTS_dF.mat';
+% 
+% % i = i+1;
+% % db(i).mouse_name    = 'g62ff8rt';
+% % db(i).date          = 'S2P';
+% % db(i).expts         = [0 1 2 3 4 5];
+% % db(i).diameter      = 14;
+% % db(i).RootStorage   = 'F:\072216 g62ff8rt Naive behavior';
+% % db(i).ResultsSavePath   = 'F:\072216 g62ff8rt Naive behavior';
+% % db(i).aniname = 'g62ff8rt';
+% % db(i).expdate = '072216';
+% % db(i).expdir = 'F:\072216 g62ff8rt Naive behavior\g62ff8rt';
+% % db(i).procdir = 'F:\072216 g62ff8rt Naive behavior\g62ff8rt\S2P\0_1_2_3_4_5';
+% % procfile = 'F_g62ff8rt_S2P_plane1_proc';
+% % db(i).expname{1} = 'behavSessionV2__allfiles_PTS_dF.mat'; %'behavSessionV2__allfiles_PTS_dF.mat';
+% % db(i).expname{2} = 'topoXsessionV2__allfiles_PTS_dF.mat';
+% % db(i).expname{3} = 'topoYsessionV2__allfiles_PTS_dF.mat';
+% % db(i).expname{4} = 'passiveBehav2sf8minSessionV2__allfiles_PTS_dF.mat';
+% % db(i).expname{5} = 'passiveBehav3x8minV2__allfiles_PTS_dF.mat';
+% % db(i).expname{6} = 'gratingSessionV2__allfiles_PTS_dF.mat';
+
+%%%g62ff8rt   
+% i = i+1;  %ran S2P 4/24/17
 % db(i).mouse_name    = 'g62ff8rt';
 % db(i).date          = 'S2P';
 % db(i).expts         = [0 1 2 3 4 5];
@@ -296,13 +336,13 @@ db(i).expname{6} = 'gratingSessionS2P__allfiles_PTS_dF.mat';
 % db(i).expdate = '072116';
 % db(i).expdir = 'F:\072116 g62ff8rt Naive behavior\g62ff8rt';
 % db(i).procdir = 'F:\072116 g62ff8rt Naive behavior\g62ff8rt\S2P\0_1_2_3_4_5';
-% db(i).procfile = 'F_g62ff8rt_S2P_plane1_proc';
-% db(i).expname{1} = 'behavSessionV2__allfiles_PTS_dF.mat';
-% db(i).expname{2} = 'topoXsessionV2__allfiles_PTS_dF.mat';
-% db(i).expname{3} = 'topoYsessionV2__allfiles_PTS_dF.mat';
-% db(i).expname{4} = 'passiveBehav2sf8minSessionV2__allfiles_PTS_dF.mat';
-% db(i).expname{5} = 'passiveBehav3x8minV2__allfiles_PTS_dF.mat';
-% db(i).expname{6} = 'gratingSessionV2__allfiles_PTS_dF.mat';
+% db(i).procfile = 'F_g62ff8rt_S2P_plane1_proc_new';
+% db(i).expname{1} = 'behavSessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{2} = 'topoXsessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{3} = 'topoYsessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{4} = 'passiveBehav2sf8minSessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{5} = 'passiveBehav3x8minS2P__allfiles_PTS_dF.mat';
+% db(i).expname{6} = 'gratingSessionS2P__allfiles_PTS_dF.mat';
 
 % i = i+1;
 % db(i).mouse_name    = 'g62ff8rt';
@@ -315,13 +355,13 @@ db(i).expname{6} = 'gratingSessionS2P__allfiles_PTS_dF.mat';
 % db(i).expdate = '072216';
 % db(i).expdir = 'F:\072216 g62ff8rt Naive behavior\g62ff8rt';
 % db(i).procdir = 'F:\072216 g62ff8rt Naive behavior\g62ff8rt\S2P\0_1_2_3_4_5';
-% procfile = 'F_g62ff8rt_S2P_plane1_proc';
-% db(i).expname{1} = 'behavSessionV2__allfiles_PTS_dF.mat'; %'behavSessionV2__allfiles_PTS_dF.mat';
-% db(i).expname{2} = 'topoXsessionV2__allfiles_PTS_dF.mat';
-% db(i).expname{3} = 'topoYsessionV2__allfiles_PTS_dF.mat';
-% db(i).expname{4} = 'passiveBehav2sf8minSessionV2__allfiles_PTS_dF.mat';
-% db(i).expname{5} = 'passiveBehav3x8minV2__allfiles_PTS_dF.mat';
-% db(i).expname{6} = 'gratingSessionV2__allfiles_PTS_dF.mat';
+% procfile = 'F_g62ff8rt_S2P_plane1_proc_new';
+% db(i).expname{1} = 'behavSessionS2P__allfiles_PTS_dF.mat'; %'behavSessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{2} = 'topoXsessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{3} = 'topoYsessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{4} = 'passiveBehav2sf8minSessionS2P__allfiles_PTS_dF.mat';
+% db(i).expname{5} = 'passiveBehav3x8minS2P__allfiles_PTS_dF.mat';
+% db(i).expname{6} = 'gratingSessionS2P__allfiles_PTS_dF.mat';
 
 % % i = i+1;  %not run yet
 % % db(i).mouse_name    = 'g62ff8rt';

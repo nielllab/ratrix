@@ -1,16 +1,16 @@
 close all; clear all;
 warning off
-cfile = 'D:\Angie_analysis\widefield_data\032917_g62ww2-tt_blue_DOI\g62ww2-tt_run1_detection\03_29_17_g62ww2-tt_detection_2lowcontrasts_DOI_eye'
+cfile = 'D:\Angie_analysis\widefield_data\021317_G62XX1-TT_blue\G62RR22-TT_run1_detection_1contrast\02_13_17_g62xx1-tt_detection_eye'
 load(cfile)
-%movieFile = 'C:\Users\Angie Michaiel\Desktop\movie files\cortex\DetectionStim1contrast_7_25min.mat';
+% movieFile = 'C:\Users\Angie Michaiel\Desktop\movie files\cortex\DetectionStim1contrast_7_25min.mat';
 movieFile = 'C:\Users\Angie Michaiel\Desktop\movie files\cortex\DetectionStim2contrast_LOW_7_25min';
-%movieFile = 'C:\Users\Angie Michaiel\Desktop\movie files\cortex\DetectionStim3contrast10min.mat'
+% movieFile = 'C:\Users\Angie Michaiel\Desktop\movie files\cortex\DetectionStim3contrast10min.mat'
 load(movieFile);
 data = squeeze(data);
-mapsfile = 'D:\Angie_analysis\widefield_data\032917_g62ww2-tt_blue_DOI\g62ww2-tt_run1_detection\g62ww2-tt_run1_detectimaps'
+mapsfile = 'D:\Angie_analysis\widefield_data\021317_G62XX1-TT_blue\G62RR22-TT_run1_detection_1contrast\G62RR22-TT_run1_detection_1contrastmaps'
 load(mapsfile,'dfof_bg','frameT','cycMap','sp','stimRec');
 
-path = 'D:\Angie_analysis\widefield_data\032917_g62ww2-tt_blue_DOI\g62ww2-tt_run1_detection'
+path = 'D:\Angie_analysis\widefield_data\021317_G62XX1-TT_blue\G62RR22-TT_run1_detection_1contrast'
 %myPDFfile=uiputfile('*.ps');
 grpfilename = uiputfile('*.ps');% myPDFfile;
 psfile = 'c:\tempAngie.ps';
@@ -18,15 +18,15 @@ if exist(psfile,'file')==2;delete(psfile);end
 
 timeStamps=stimRec.ts
 frameNum=stimRec.f
-thresh = 0.8 %pupil threshold for binarization
-        puprange = [8 50]; %[8 40] %set range of pupil radius
+thresh = 0.90 %pupil threshold for binarization
+        puprange = [8 40]; %[8 40] %set range of pupil radius
         pupercent = 0.75; %set range pupil radius window
-        pupchange = 0.2; %acceptable percent change in radius per framerange
-        framerange = 10; %number of frames to smooth over
+        pupchange = 0.3; %acceptable percent change in radius per framerange
+        framerange = 5; %number of frames to smooth over
        % user input to select center and right points
         sprintf('Please select pupil center and top, eyeball top and right points, darkest part of eyeball')
         h1 = figure('units','normalized','outerposition',[0 0 1 1])
-        imshow(data(:,:,2000))
+        imshow(data(:,:,1000))
         [cent] = ginput(5);
         close(h1);
         yc = cent(1,2); %pupil center y val
@@ -76,34 +76,34 @@ legend('rad','x pos','y pos')
 set(gcf, 'PaperPositionMode', 'auto');
 print('-dpsc',psfile,'-append');
 
-% h4 = figure
-% 
-% vidObj = VideoWriter('eyetracking_withfit.avi');
-% %vidObj.FrameRate = 60;
-% open(vidObj);
-% 
-% for i = 1:size(data,3)
-%     
-%     subplot(1,2,1)
-%     imshow(data(yc-vert:yc+vert,xc-horiz:xc+horiz,i));
-%     colormap gray
-%     hold on
-%     circle(centroid(i,1),centroid(i,2),rad(i))
-%     drawnow
-%     hold off
-%     
-%     subplot(1,2,2)
-%     imshow(bindata(:,:,i));
-%     colormap gray
-%     hold on
-%     circle(centroid(i,1),centroid(i,2),rad(i))
-%     drawnow
-%     hold off
-%     
-%     currFrame = getframe(gcf);
-%     writeVideo(vidObj,currFrame);
-% end
-% close(vidObj);
+h4 = figure
+
+vidObj = VideoWriter('eyetracking_withfit.avi');
+%vidObj.FrameRate = 60;
+open(vidObj);
+
+for i = 1:size(data,3)
+    
+    subplot(1,2,1)
+    imshow(data(yc-vert:yc+vert,xc-horiz:xc+horiz,i));
+    colormap gray
+    hold on
+    circle(centroid(i,1),centroid(i,2),rad(i))
+    drawnow
+    hold off
+    
+    subplot(1,2,2)
+    imshow(bindata(:,:,i));
+    colormap gray
+    hold on
+    circle(centroid(i,1),centroid(i,2),rad(i))
+    drawnow
+    hold off
+    
+    currFrame = getframe(gcf);
+    writeVideo(vidObj,currFrame);
+end
+close(vidObj);
 small_mov = dfof_bg(4:4:end,4:4:end,4:4:end);
 lowthresh = prctile(small_mov(:),2);
 upperthresh = 1.5*prctile(small_mov(:),98);
@@ -224,7 +224,7 @@ figure
 set(gcf,'Name',sprintf('contrast = %.2g',n))
 for i = 1:length(use)-1
 subplot(4,4,i)
-plot(R(use(i),:)); hold on;plot(V(use(i),:)*.05)
+plot(R(use(i),:)); hold on;%plot(V(use(i),:)*.05)
 ylim([min(R(use))-.5 max(R(use))+.5]); 
 xlim([0 180])
 plot([60 60],[min(R(use))-.5 max(R(use))+.5],'g'); plot ([75 75],[min(R(use))-.5 max(R(use))+.5],'g');
@@ -324,6 +324,30 @@ set(gcf, 'PaperPositionMode', 'auto');
 print('-dpsc',psfile,'-append');
 end
 
+clear use max h
+test = unique(contrast)
+figure
+for c = 2:length(test)
+%     figure
+    use = find(contrast==test(c))
+    n= test(c)
+    if sum(contrast==test(2))>0
+        
+        for i=1:length(use)
+            h(i)=max(R(use(i),60:180)); axis square ; %ylim([min(R(use(i),:))-.5 max(R(use(i),:))+.5]); xlim([0 180]); hold on;
+       
+        end
+        plot(h,'-'); hold on
+        plot(h,'k.','Markersize',12); xlim([0 16]);
+    %  title(sprintf('contrast = %.2g peak response/trial',n))
+title('peak response/trial')
+% legend(sprintf('%.2g contrast'))
+else display ('no contrast 01 trials')
+    end
+end
+legend('.01 contrast','','.04 contrast');
+set(gcf, 'PaperPositionMode', 'auto');
+print('-dpsc',psfile,'-append');
 
 figure
 plot(x,y); title('eye position'); hold on; plot(x,y,'r.')
@@ -518,8 +542,8 @@ catch
     display('couldnt generate pdf');
 end
 
-save(mapsfile,'rad','fInterpR','fInterpV', 'R','V','xEye','yEye','contrast','xpos','ypos','X','Y','v','r','dvis','dx','mx','vc','timecourse','vfit','vcorr','-append')
-
+save(mapsfile,'rad','fInterpR','fInterpV', 'R','V','xEye','yEye','contrast','xpos','ypos','X','Y','v','r','dvis','dx','-append')
+%'mx','vc','timecourse','vfit','vcorr'
 % h4 = figure
 % 
 % vidObj = VideoWriter('eyetracking_withfit.avi');
@@ -549,57 +573,58 @@ save(mapsfile,'rad','fInterpR','fInterpV', 'R','V','xEye','yEye','contrast','xpo
 % end
 % close(vidObj);
 % % 
-% 
+
 small_mov = dfof_bg(4:4:end,4:4:end,4:4:end);
 lowthresh = prctile(small_mov(:),2);
 upperthresh = 1.5*prctile(small_mov(:),98);
 
-% 
-% h5 = figure
-% vidObj = VideoWriter('detection_dfof_eye.avi');
-% %vidObj.FrameRate = 60;
-% open(vidObj);
-% for i=1:size(data,3)
-%     %subplot(3,2,[3,4,5,6])
-%     subplot(2,2,2)
-%     imagesc(imresize(dfof_bg(:,:,i),1.75,'box'),[lowthresh upperthresh]);axis square;
-%     drawnow
-%     hold on
-%     if sp(i)<500
-%         plot(50,250,'ro','Markersize',8,'Linewidth',8); %stationary
-%     else
-%         plot(50,250,'go','Markersize',8,'Linewidth',8);
-%     end
-%     %hold off
-%    % h = axes('Position', [.05 .65 .4 .4], 'Layer','top');
-%    subplot(2,2,1)
-%     imshow(imresize(data(yc-vert:yc+vert,xc-horiz:xc+horiz,i),1.0,'box'));
-%  %   axis(h, 'off', 'tight')
-%     colormap gray;
-%     hold on
-%     circle(centroid(i,1),centroid(i,2),rad(i))
-%     drawnow
-%     hold off
-%  % subplot(2,2,3)
-%     subplot(2,2,[3,4])
-%     plot(rad);%xlim([0 4350]);ylim([5 40]);
-%     set(gca,'xtick',600:600:7.25*600,'xticklabel',1:7,'LooseInset',get(gca,'TightInset'),'Fontsize',8)
-%     hold on; plot(sp*.01,'g')
-%     plot(i,35,'ro','Markersize',4,'Linewidth',4)
-%     xlabel ('time (min)')
-%     ylabel ('a.u. pixels, cm/sec');
+
+h5 = figure
+vidObj = VideoWriter('detection_dfof_eye.avi');
+%vidObj.FrameRate = 60;
+open(vidObj);
+for i=1:size(data,3)
+    %subplot(3,2,[3,4,5,6])
+    subplot(2,2,2)
+    imagesc(imresize(dfof_bg(:,:,i),1.75,'box'),[lowthresh upperthresh]);axis square;
+set(gca, 'XTick', [],'YTick',[]);
+    drawnow
+    hold on
+    if sp(i)<500
+        plot(50,250,'ro','Markersize',8,'Linewidth',8); %stationary
+    else
+        plot(50,250,'go','Markersize',8,'Linewidth',8);
+    end
+    %hold off
+    % h = axes('Position', [.05 .65 .4 .4], 'Layer','top');
+    subplot(2,2,1)
+    imshow(imresize(data(yc-vert:yc+vert,xc-horiz:xc+horiz,i),1.0,'box'));
+    %   axis(h, 'off', 'tight')
+    colormap gray;
+    hold on
+    circle(centroid(i,1),centroid(i,2),rad(i))
+    drawnow
+    hold off
+    % subplot(2,2,3)
+    subplot(2,2,[3,4])
+    plot(rad);%xlim([0 4350]);ylim([5 40]);
+    set(gca,'xtick',600:600:7.25*600,'xticklabel',1:7,'LooseInset',get(gca,'TightInset'),'Fontsize',14)
+    hold on; plot(sp*.01,'g')
+    plot(i,27,'ro','Markersize',4,'Linewidth',4)
+    xlabel ('time (min)');xlim([0 4350]);ylim([0 30])
+    ylabel ('a.u. pixels, cm/sec');
 %     lgd = legend('radius','velocity');
 %   lgd.FontSize = 10
 %      lgd.FontWeight = 'bold';
-%     %legend ('radius', 'velocity')
-%      hold off
-% % subplot(2,2,4)
-% % plot(xEye(i),yEye(i),'.');hold on;
-%     currFrame = getframe(gcf);
-%     writeVideo(vidObj,currFrame);
-% end
-% close(vidObj);
- 
+    %legend ('radius', 'velocity')
+     hold off
+% subplot(2,2,4)
+% plot(xEye(i),yEye(i),'.');hold on;
+    currFrame = getframe(gcf);
+    writeVideo(vidObj,currFrame);
+end
+close(vidObj);
+%  
 % figure
 % for c=1:length(use)
 %     for i=1:length(Xfilt)

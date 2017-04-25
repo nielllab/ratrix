@@ -817,7 +817,7 @@ passiveBehav2pSession('g62bb12lt_001_004.sbx','passiveBehav2sf8minSessionS2P.mat
 %                 if exist(psfile,'file')==2;delete(psfile);end
 %                 cd ([datadir sessiondir{n}])
 % 
-% behav2pSession('g62qq1rt_001_000.sbx','behavSessionS2P.mat','trialRecords_466-622_20161031T111645-20161031T113501.mat',psfile);
+% behav2pSession('g62qq1rt_001_000.sbx','behavSessionS2P.mat','trialRecords_624-790_20161101T104351-20161101T110328.mat',psfile);
 % topo2pSession('g62qq1rt_001_001.sbx','topoXsessionS2P.mat',psfile);
 % topo2pSession('g62qq1rt_001_002.sbx','topoYsessionS2P.mat',psfile);
 % grating2pSession('g62qq1rt_001_005.sbx','gratingSessionS2P.mat',psfile);
@@ -833,139 +833,110 @@ passiveBehav2pSession('g62bb12lt_001_004.sbx','passiveBehav2sf8minSessionS2P.mat
 %                 end                   
 % close all;clear all;;                
 % %
-
-% 
-% n=n+1;
-% files(n).subj = 'g62qq1rt'; 
-% files(n).expt = '110116';
-% files(n).dir = '110116 g62qq1rt Naive behavior\g62qq1rt';
-% files(n).compileData ='compiled_g62qq1rt_110116.mat';  
-% files(n).topoXpts = 'topoXsessionV2__allfiles_PTS_dF';
-% files(n).topoYpts = 'topoYsessionV2__allfiles_PTS_dF';
-% files(n).topoX = 'topoXsessionV2';
-% files(n).topoY = 'topoYsessionV2';
-% files(n).behavPts = 'behavSessionV2__allfiles_PTS_dF.mat';
-% files(n).passive3xPts = 'passiveBehav3x8minV2__allfiles_PTS_dF';%or passiveBehav3x4orient__allfiles_PTS_dF
-% files(n).passive2sfPts = 'passiveBehav2sf8min__allfiles_PTS_dF'; %or passiveBehav2sfSessionV2__allfiles_PTS_dF
-% files(n).behavEyes = 'g62qq1rt_001_000_eye';
-% files(n).passive3xStimrec = 'stim_obj_001_004';
-% files(n).passive2sfStimrec = 'stim_obj_001_003';
-% files(n).passive3xEyes = 'g62qq1rt_001_004_eye';
-% files(n).passive2sfEyes = 'g62qq1rt_001_003_eye';
-% files(n).task = 'Naive';
-% files(n).learningDay = [5];   %%% can probably ignore for GTS, more important for naive
-% files(n).totalSinceGratings = 7;
-% files(n).totalDays = 26;
-% files(n).label = 'camk2 gc6';
-% files(n).notes = 'good imaging session';
-% files(n).ncells = [300];  %%% optional - we could use this to adjust # of cells selected
-% files(n).depth = [150];
-% 
 % 
 % %%%%%%%%%%%%
-% g62qq2lt  (randreward) 
-% n=n+1;
-% files(n).subj = 'g62qq2lt'; 
-% files(n).expt = '120516';
-% files(n).dir = '120516 g62qq2lt RandReward behavior\g62qq2lt';
-% files(n).compileData ='compiled_g62qq2lt_120516.mat';  
-% files(n).topoXpts = 'topoXsessionV2__allfiles_PTS_dF';
-% files(n).topoYpts = 'topoYsessionV2__allfiles_PTS_dF';
-% files(n).topoX = 'topoXsessionV2';
-% files(n).topoY = 'topoYsessionV2';
-% files(n).behavPts = 'behavSessionV2__allfiles_PTS_dF.mat';
-% files(n).passive3xPts = 'passiveBehav3x8minV2__allfiles_PTS_dF';%or passiveBehav3x4orient__allfiles_PTS_dF
-% files(n).passive2sfPts = 'passiveBehav2sf8min__allfiles_PTS_dF'; %or passiveBehav2sfSessionV2__allfiles_PTS_dF
-% files(n).behavEyes = 'g62qq2lt_001_000_eye';
-% files(n).passive3xStimrec = 'stim_obj_001_004';
-% files(n).passive2sfStimrec = 'stim_obj_001_003';
-% files(n).passive3xEyes = 'g62qq2lt_001_004_eye';
-% files(n).passive2sfEyes = 'g62qq2lt_001_003_eye';
-% files(n).task = 'RandReward';
-% files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
-% files(n).totalSinceGratings = [];
-% files(n).totalDays = [];
-% files(n).label = 'camk2 gc6';
-% files(n).notes = 'good imaging session';
-% files(n).ncells = [300];  %%% optional - we could use this to adjust # of cells selected
-% files(n).depth = [160];
+% (randreward) 
+%%%%%%%%%%%%%%
+%n=n+1 %g62qq2lt 120516  
+%                 sessiondir{n}= '120516 g62qq2lt RandReward behavior\g62qq2lt\';
+%                 p{n}= [datadir sessiondir{n}];
+%                 f{n} = '120516_g62qq2lt_session_summary_S2P.pdf';  %pdf file name
+%                 newpdfFile{n} = fullfile(p{n},f{n});
+%                 if exist(psfile,'file')==2;delete(psfile);end
+%                 cd ([datadir sessiondir{n}])
 % 
-% n=n+1;
-% files(n).subj = 'g62qq2lt'; 
-% files(n).expt = '120616';
-% files(n).dir = '120616 g62qq2lt RandReward behavior\g62qq2lt';
-% files(n).compileData ='compiled_g62qq2lt_120616.mat';  
-% files(n).topoXpts = 'topoXsessionV2__allfiles_PTS_dF';
-% files(n).topoYpts = 'topoYsessionV2__allfiles_PTS_dF';
-% files(n).topoX = 'topoXsessionV2';
-% files(n).topoY = 'topoYsessionV2';
-% files(n).behavPts = 'behavSessionV2__allfiles_PTS_dF.mat';
-% files(n).passive3xPts = 'passiveBehav3x8minV2__allfiles_PTS_dF';%or passiveBehav3x4orient__allfiles_PTS_dF
-% files(n).passive2sfPts = 'passiveBehav2sf8min__allfiles_PTS_dF'; %or passiveBehav2sfSessionV2__allfiles_PTS_dF
-% files(n).behavEyes = 'g62qq2lt_001_000_eye';
-% files(n).passive3xStimrec = 'stim_obj_001_004';
-% files(n).passive2sfStimrec = 'stim_obj_001_003';
-% files(n).passive3xEyes = 'g62qq2lt_001_004_eye';
-% files(n).passive2sfEyes = 'g62qq2lt_001_003_eye';
-% files(n).task = 'RandReward';
-% files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
-% files(n).totalSinceGratings = [];
-% files(n).totalDays = [];
-% files(n).label = 'camk2 gc6';
-% files(n).notes = 'good imaging session';
-% files(n).ncells = [350];  %%% optional - we could use this to adjust # of cells selected
-% files(n).depth = [175];
+% behav2pSession('g62qq2lt_001_000.sbx','behavSessionS2P.mat','trialRecords_1261-1441_20161205T115150-20161205T120858.mat',psfile);
+% topo2pSession('g62qq2lt_001_001.sbx','topoXsessionS2P.mat',psfile);
+% topo2pSession('g62qq2lt_001_002.sbx','topoYsessionS2P.mat',psfile);
+% grating2pSession('g62qq2lt_001_005.sbx','gratingSessionS2P.mat',psfile);
+% passiveBehav2pSession('g62qq2lt_001_004.sbx','passiveBehav3x8minS2P.mat ','C:\behavStim3x8min.mat',psfile);
+% passiveBehav2pSession('g62qq2lt_001_003.sbx','passiveBehav2sf8minSessionS2P.mat','C:\behavStim2sf8min.mat',psfile);
 % 
-% n=n+1;
-% files(n).subj = 'g62qq2lt'; 
-% files(n).expt = '120716';
-% files(n).dir = '120716 g62qq2lt RandReward behavior\g62qq2lt';
-% files(n).compileData ='compiled_120716_g62qq2lt.mat';  
-% files(n).topoXpts = 'topoXsessionV2__allfiles_PTS_dF';
-% files(n).topoYpts = 'topoYsessionV2__allfiles_PTS_dF';
-% files(n).topoX = 'topoXsessionV2';
-% files(n).topoY = 'topoYsessionV2';
-% files(n).behavPts = 'behavSessionV2__allfiles_PTS_dF.mat';
-% files(n).passive3xPts = 'passiveBehav3x8minV2__allfiles_PTS_dF';%or passiveBehav3x4orient__allfiles_PTS_dF
-% files(n).passive2sfPts = 'passiveBehav2sf8min__allfiles_PTS_dF'; %or passiveBehav2sfSessionV2__allfiles_PTS_dF
-% files(n).behavEyes = 'g62qq2lt_001_000_eye';
-% files(n).passive3xStimrec = 'stim_obj_001_004';
-% files(n).passive2sfStimrec = 'stim_obj_001_003';
-% files(n).passive3xEyes = 'g62qq2lt_001_004_eye';
-% files(n).passive2sfEyes = 'g62qq2lt_001_003_eye';
-% files(n).task = 'RandReward';
-% files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
-% files(n).totalSinceGratings = [];
-% files(n).totalDays = [];
-% files(n).label = 'camk2 gc6';
-% files(n).notes = 'good imaging session - off target';  %%%032217
-% files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
 % 
-% n=n+1;
-% files(n).subj = 'g62qq2lt'; 
-% files(n).expt = '120816';
-% files(n).dir = '120816 g62qq2lt RandReward behavior\g62qq2lt';
-% files(n).compileData ='compiled_g62qq2lt_120816.mat';  
-% files(n).topoXpts = 'topoXsessionV2__allfiles_PTS_dF';
-% files(n).topoYpts = 'topoYsessionV2__allfiles_PTS_dF';
-% files(n).topoX = 'topoXsessionV2';
-% files(n).topoY = 'topoYsessionV2';
-% files(n).behavPts = 'behavSessionV2__allfiles_PTS_dF.mat';
-% files(n).passive3xPts = 'passiveBehav3x8minV2__allfiles_PTS_dF';%or passiveBehav3x4orient__allfiles_PTS_dF
-% files(n).passive2sfPts = 'passiveBehav2sf8min__allfiles_PTS_dF'; %or passiveBehav2sfSessionV2__allfiles_PTS_dF
-% files(n).behavEyes = 'g62qq2lt_001_000_eye';
-% files(n).passive3xStimrec = 'stim_obj_001_004';
-% files(n).passive2sfStimrec = 'stim_obj_001_003';
-% files(n).passive3xEyes = 'g62qq2lt_001_004_eye';
-% files(n).passive2sfEyes = 'g62qq2lt_001_003_eye';
-% files(n).task = 'RandReward';
-% files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
-% files(n).totalSinceGratings = [];
-% files(n).totalDays = [];
-% files(n).label = 'camk2 gc6';
-% files(n).notes = 'good imaging session';
-% files(n).ncells = [350];  %%% optional - we could use this to adjust # of cells selected
-% files(n).depth = [200];
+%                 try
+%                     dos(['ps2pdf ' 'c:\tempJW.ps "' newpdfFile{n} '"'] )
+% 
+%                 catch
+%                     display('couldnt generate pdf');
+%                 end                   
+% close all;clear all;;                
+% %
+
+%n=n+1 %g62qq2lt 120616  
+%                 sessiondir{n}= '120616 g62qq2lt RandReward behavior\g62qq2lt\';
+%                 p{n}= [datadir sessiondir{n}];
+%                 f{n} = '120616_g62qq2lt_session_summary_S2P.pdf';  %pdf file name
+%                 newpdfFile{n} = fullfile(p{n},f{n});
+%                 if exist(psfile,'file')==2;delete(psfile);end
+%                 cd ([datadir sessiondir{n}])
+% 
+% behav2pSession('g62qq2lt_001_000.sbx','behavSessionS2P.mat','trialRecords_1442-1618_20161206T124234-20161206T130006.mat',psfile);
+% topo2pSession('g62qq2lt_001_001.sbx','topoXsessionS2P.mat',psfile);
+% topo2pSession('g62qq2lt_001_002.sbx','topoYsessionS2P.mat',psfile);
+% grating2pSession('g62qq2lt_001_005.sbx','gratingSessionS2P.mat',psfile);
+% passiveBehav2pSession('g62qq2lt_001_004.sbx','passiveBehav3x8minS2P.mat ','C:\behavStim3x8min.mat',psfile);
+% passiveBehav2pSession('g62qq2lt_001_003.sbx','passiveBehav2sf8minSessionS2P.mat','C:\behavStim2sf8min.mat',psfile);
+% 
+% 
+%                 try
+%                     dos(['ps2pdf ' 'c:\tempJW.ps "' newpdfFile{n} '"'] )
+% 
+%                 catch
+%                     display('couldnt generate pdf');
+%                 end                   
+% close all;clear all;;                
+% %
+
+%n=n+1 %g62qq2lt 120716  
+%                 sessiondir{n}= '120716 g62qq2lt RandReward behavior\g62qq2lt\';
+%                 p{n}= [datadir sessiondir{n}];
+%                 f{n} = '120716_g62qq2lt_session_summary_S2P.pdf';  %pdf file name
+%                 newpdfFile{n} = fullfile(p{n},f{n});
+%                 if exist(psfile,'file')==2;delete(psfile);end
+%                 cd ([datadir sessiondir{n}])
+% 
+% behav2pSession('g62qq2lt_001_000.sbx','behavSessionS2P.mat','trialRecords_1619-1775_20161207T102058-20161207T104058.mat',psfile);
+% topo2pSession('g62qq2lt_001_001.sbx','topoXsessionS2P.mat',psfile);
+% topo2pSession('g62qq2lt_001_002.sbx','topoYsessionS2P.mat',psfile);
+% grating2pSession('g62qq2lt_001_005.sbx','gratingSessionS2P.mat',psfile);
+% passiveBehav2pSession('g62qq2lt_001_004.sbx','passiveBehav3x8minS2P.mat ','C:\behavStim3x8min.mat',psfile);
+% passiveBehav2pSession('g62qq2lt_001_003.sbx','passiveBehav2sf8minSessionS2P.mat','C:\behavStim2sf8min.mat',psfile);
+% 
+% 
+%                 try
+%                     dos(['ps2pdf ' 'c:\tempJW.ps "' newpdfFile{n} '"'] )
+% 
+%                 catch
+%                     display('couldnt generate pdf');
+%                 end                   
+% close all;clear all;;                
+% %
+
+%n=n+1 %g62qq2lt 120816  
+%                 sessiondir{n}= '120816 g62qq2lt RandReward behavior\g62qq2lt\';
+%                 p{n}= [datadir sessiondir{n}];
+%                 f{n} = '120816_g62qq2lt_session_summary_S2P.pdf';  %pdf file name
+%                 newpdfFile{n} = fullfile(p{n},f{n});
+%                 if exist(psfile,'file')==2;delete(psfile);end
+%                 cd ([datadir sessiondir{n}])
+% 
+% behav2pSession('g62qq2lt_001_000.sbx','behavSessionS2P.mat','trialRecords_1776-1896_20161208T101746-20161208T103652.mat',psfile);
+% topo2pSession('g62qq2lt_001_001.sbx','topoXsessionS2P.mat',psfile);
+% topo2pSession('g62qq2lt_001_002.sbx','topoYsessionS2P.mat',psfile);
+% grating2pSession('g62qq2lt_001_005.sbx','gratingSessionS2P.mat',psfile);
+% passiveBehav2pSession('g62qq2lt_001_004.sbx','passiveBehav3x8minS2P.mat ','C:\behavStim3x8min.mat',psfile);
+% passiveBehav2pSession('g62qq2lt_001_003.sbx','passiveBehav2sf8minSessionS2P.mat','C:\behavStim2sf8min.mat',psfile);
+% 
+% 
+%                 try
+%                     dos(['ps2pdf ' 'c:\tempJW.ps "' newpdfFile{n} '"'] )
+% 
+%                 catch
+%                     display('couldnt generate pdf');
+%                 end                   
+% close all;clear all;;                
+% %
+
 % 
 % g62tt1lt  (randreward) 
 % n=n+1;

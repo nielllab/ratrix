@@ -1,7 +1,7 @@
 close all
 clear all
 dbstop if error
-profile on
+% profile on
 
 [f p] = uiputfile('*.pdf','pdf file');
 newpdfFile = fullfile(p,f);
@@ -519,4 +519,4 @@ end
 
 delete(psfilename);
 %getCellsBatch;
-profile viewer
+% profile viewer

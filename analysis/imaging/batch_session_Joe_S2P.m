@@ -61,28 +61,28 @@ if exist(psfile,'file')==2;delete(psfile);end
 % 
 
 %%may need to rerun the y3 sessions because passive behavStim was different
-n=n+1 %g62y3lt 050516
-                sessiondir{n}= '050516 g62y3lt GTS behavior\g62y3lt\';
-                p{n}= [datadir sessiondir{n}];
-                f{n} = '050516_g62y3lt_session_summary_S2P.pdf';  %pdf file name
-                newpdfFile{n} = fullfile(p{n},f{n});
-                if exist(psfile,'file')==2;delete(psfile);end
-                cd ([datadir sessiondir{n}])
-
+% n=n+1 %g62y3lt 050516
+%                 sessiondir{n}= '050516 g62y3lt GTS behavior\g62y3lt\';
+%                 p{n}= [datadir sessiondir{n}];
+%                 f{n} = '050516_g62y3lt_session_summary_S2P.pdf';  %pdf file name
+%                 newpdfFile{n} = fullfile(p{n},f{n});
+%                 if exist(psfile,'file')==2;delete(psfile);end
+%                 cd ([datadir sessiondir{n}])
+%
 %behav2pSession('g62y3lt_001_000.sbx','behavSessionS2P.mat','trialRecords_2261-2511_20160505T131650-20160505T135237.mat',psfile);
-topo2pSession('g62y3lt_001_001.sbx','topoXsessionS2P.mat',psfile);
-topo2pSession('g62y3lt_001_002.sbx','topoYsessionS2P.mat',psfile);
-grating2pSession('g62y3lt_001_005.sbx','gratingSessionS2P.mat',psfile);
-passiveBehav2pSession('g62y3lt_001_003.sbx','passiveBehav3x4orientS2P.mat ','C:\behavStim3sf4orient.mat',psfile);
-passiveBehav2pSession('g62y3lt_001_004.sbx','passiveBehav2sfSessionS2P.mat','C:\behavStim2sfSmall3366.mat',psfile);
-
-                try
-                    dos(['ps2pdf ' 'c:\tempJW.ps "' newpdfFile{n} '"'] )
-
-                catch
-                    display('couldnt generate pdf');
-                end
-close all; 
+%topo2pSession('g62y3lt_001_001.sbx','topoXsessionS2P.mat',psfile);
+%topo2pSession('g62y3lt_001_002.sbx','topoYsessionS2P.mat',psfile);
+%grating2pSession('g62y3lt_001_005.sbx','gratingSessionS2P.mat',psfile);
+%passiveBehav2pSession('g62y3lt_001_003.sbx','passiveBehav3x4orientS2P.mat ','C:\behavStim3sf4orient.mat',psfile);
+% passiveBehav2pSession('g62y3lt_001_004.sbx','passiveBehav2sfSessionS2P.mat','C:\behavStim2sfSmall3366.mat',psfile);
+% 
+%                 try
+%                     dos(['ps2pdf ' 'c:\tempJW.ps "' newpdfFile{n} '"'] )
+% 
+%                 catch
+%                     display('couldnt generate pdf');
+%                 end
+% close all; 
 % % % 
 % n=n+1 %g62y3lt 050916
 %                 sessiondir{n}= '050916 g62y3lt GTS behavior\g62y3lt\';

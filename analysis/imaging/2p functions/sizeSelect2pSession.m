@@ -8,8 +8,15 @@ framerate=1/dt;
 cycLength=1;
 blank =1;
 
-cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  %%% configuration parameters
-cfg.syncToVid=1; cfg.saveDF=0;
+global S2P
+
+if (exist('S2P','var')&S2P==1)
+    cfg.dt = dt; cfg.spatialBin=1; cfg.temporalBin=1;  %%% configuration parameters suite2p
+    cfg.syncToVid=1; cfg.saveDF=0; cfg.nodfof=1;
+else
+    cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  %%% configuration parameters
+    cfg.syncToVid=1; cfg.saveDF=0;
+end
 get2pSession_sbx;
 
 global info
@@ -45,7 +52,6 @@ mapimg= figure
 figure
 imshow(img)
 colormap(hsv); colorbar
-
 if exist('psfile','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfile,'-append');
@@ -53,16 +59,15 @@ end
 
 xpos=0;
 sf=0; isi=0; duration=0; theta=0; phase=0; radius=0;
-% moviefname = 'C:\sizeSelect2sf5sz14min.mat';
-moviefname = 'C:\sizeSelect2sf8sz26min.mat';
-load (moviefname)
+% moviefname = 'C:\sizeSelect2sf8sz26min.mat';
+moviefname = 'C:\sizeselectBin22min.mat'
+load(moviefname)
 ntrials= min(dt*length(dfofInterp)/(isi+duration),length(sf))
 onsets = dt + (0:ntrials-1)*(isi+duration);
 timepts = 1:(2*isi+duration)/dt;
 timepts = (timepts-1)*dt;
 dFout = align2onsets(dfofInterp,onsets,dt,timepts);
 timepts = timepts - isi;
-
 timepts = round(timepts*1000)/1000;
 sbxfilename = fileName;
 meandfofInterp = squeeze(mean(mean(dfofInterp,1),2))';
@@ -74,7 +79,7 @@ save(sessionName,'meandfofInterp','xpos','sf','theta','phase','radius','radiusRa
 sz = unique(radius);
 freq = unique(sf);
 x=unique(xpos);
-for i=1:length(sizeVals); sizes{i} = num2str(sizeVals(i)); end
+for i=1:length(radiusRange); sizes{i} = num2str(radiusRange(i)); end
 
 % top = squeeze(mean(dFout(:,:,find(timepts==1),xpos==x(1))-dFout(:,:,find(timepts==0),xpos==x(1)),4));
 % bottom = squeeze(mean(dFout(:,:,find(timepts==1),xpos==x(end))-dFout(:,:,find(timepts==0),xpos==x(end)),4));
@@ -99,7 +104,7 @@ for location=1:length(x)
     set(gcf,'Name',sprintf('xpos = %d',x(location)))
     for s =1:length(sz)
         img =  squeeze(mean(dFout(:,:,find(timepts==duration),xpos==x(location) & radius == sz(s))-dFout(:,:,find(timepts==0),xpos==x(location) & radius==sz(s)),4));
-        subplot(2,length(sz)/2,s)
+        subplot(2,ceil(length(sz)/2),s)
         imagesc(img,[0 0.25]); axis equal; colormap jet; title(sprintf('size %d',sizes{s}));
         resp(s,:) = squeeze(mean(mean(mean(dFout(:,:,:,xpos==x(location)& radius==sz(s)),4),2),1))- squeeze(mean(mean(mean(dFout(:,:,find(timepts==0),xpos==x(location)& radius==sz(s)),4),2),1));
     end

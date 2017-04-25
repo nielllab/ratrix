@@ -36,15 +36,15 @@ end
 for p = 1:5
 
     if p==1
-        use = geno == chr & region==full & pwr==11;
+        use = geno == chr & region==full & pwr==11;   use11=use;
     elseif p==2
-        use = geno == chr & region==full& pwr == 22;
+        use = geno == chr & region==full& pwr == 22;  use22=use;
     elseif p==3
-        use = geno == chr & region==full & pwr == 45;
+        use = geno == chr & region==full & pwr == 45; use45=use;
     elseif p ==4
-        use = geno==chr & region ==v1;
+        use = geno==chr & region ==v1; V1use=use;
     elseif p==5
-        use = geno==gc;
+        use = geno==gc; gcuse=use;
     end
     
     for laser = 1:2
@@ -70,5 +70,5 @@ figure
 errorbar([1 2 ; 1 2 ; 1 2; 1 2; 1 2]',rtAll',rtErr'); ylim([0 1]); legend({'11mW','22mW','45mW','V1','gcamp'}); ylabel('rt');
 
 figure
-errorbar([1 2 ; 1 2 ; 1 2; 1 2; 1 2]',bias',biasErr'); ylim([0 1]); legend({'11mW','22mW','45mW','V1','gcamp'}); ylabel('rt');
+errorbar([1 2 ; 1 2 ; 1 2; 1 2; 1 2]',bias',biasErr'); ylim([0 1]); legend({'11mW','22mW','45mW','V1','gcamp'}); ylabel('bias');
 

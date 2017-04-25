@@ -3,6 +3,9 @@
 close all
 clear all
 
+global S2P
+S2P = 1; %S2P analysis = 1, other = 0
+
 dt = 0.1;
 cycLength = 10 / dt;
 
@@ -53,7 +56,11 @@ if exist('psfilename','var')
     print('-dpsc',psfilename,'-append');
 end
 
-dF = spikes*10;
+if (exist('S2P','var')&S2P==1)
+    dF = spikes/2;
+else
+    dF = spikes*10;
+end
 
 %%% get Fourier component and cycle averages
 phaseVal = 0;

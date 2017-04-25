@@ -1,14 +1,18 @@
 clear all
 
+global S2P
+S2P = 1; %S2P analysis = 1, other = 0
+
+
 %%% load pts file (contains cell locations and dF, along with analysis results
-    ptsfname = uigetfile('*.mat','pts file');
-   display('loading pts file');
- tic;  load(ptsfname); toc
+ptsfname = uigetfile('*.mat','pts file');
+display('loading pts file');
+tic;  load(ptsfname); toc
 
 if ~exist('pixResp','var') | ~exist('dt','var') | ~exist('sbxfilename','var');
     if ~exist('sessName','var')
-    [f p ] = uigetfile('*.mat','session data'); sessName = fullfile(p,f);
-    save(ptsfname,'sessName','-append');
+        [f p ] = uigetfile('*.mat','session data'); sessName = fullfile(p,f);
+        save(ptsfname,'sessName','-append');
     end
     display('loading from session data');
     tic; load(sessName,'onsets','starts','trialRecs','pixResp','dt','sbxfilename'); toc
@@ -63,6 +67,7 @@ if exist('psfilename','var');    set(gcf, 'PaperPositionMode', 'auto');   print(
 
 %%% get target location, orientation, phase
 stim = [trialRecs.stimDetails];
+orient=[];gratingPh=[];location=[];targ=[];  %reset variables to be written so matrix size agrees
 for i = 1:length(trialRecs);
     orient(i) = pi/2 - trialRecs(i).stimDetails.subDetails.orientations;
     gratingPh(i) = trialRecs(i).stimDetails.subDetails.phases;
@@ -91,7 +96,7 @@ for i = 1:3
     plot(timepts,nanmean(eyeAlign(i,:,~correct & location<0),3)' - nanmedian(eyes(:,i)),'r');
     plot(timepts,nanmean(eyeAlign(i,:,~correct & location>0),3)' - nanmedian(eyes(:,i)),'m');
     axis([-1 5 -2 2])
-
+    
     title(titles{i});
 end
 subplot(2,2,4); hold on; plot(1,1,'g'); plot(1,1,'c'); plot(1,1,'r'); plot(1,1,'m'); legend('correct top','correct bottom','error top','error bottom');
@@ -106,7 +111,7 @@ for i = 1:3
     plot(timepts,nanmean(eyeAlign(i,:,stoptime<2),3)' - nanmedian(eyes(:,i)),'r');
     plot(timepts,nanmean(eyeAlign(i,:,stoptime>2),3)' - nanmedian(eyes(:,i)),'m');
     axis([-1 5 -2 2])
-
+    
     title(titles{i});
 end
 subplot(2,2,4); hold on; plot(1,1,'g'); plot(1,1,'c'); plot(1,1,'r'); plot(1,1,'m'); legend('fast resp','slow resp','fast stop','slow stop');
@@ -114,8 +119,13 @@ if exist('psfilename','var');    set(gcf, 'PaperPositionMode', 'auto');   print(
 
 
 
-dFdecon=spikes*10;
+
 %dFdecon = dF;
+if (exist('S2P','var')&S2P==1)
+    dFdecon = spikes/2;
+else
+    dFdecon=spikes*10;
+end
 
 figure
 imagesc(meanImg);
@@ -146,7 +156,7 @@ useCells= 1:cellCutoff;
 
 
 figure
-imagesc(dF(useCells,:),[0 1]); 
+imagesc(dF(useCells,:),[0 1]);
 
 figure
 imagesc(dFdecon(useCells,:),[0 1]);
@@ -155,8 +165,8 @@ filt = ones(3,1); filt = filt/sum(filt);
 clear dFnorm
 for i = 1:size(dFdecon,1);
     dFnorm(i,:) = dFdecon(i,:)/std(dFdecon(i,:));
-     % dFnorm(i,:) = dFdecon(i,:);
-      dFnorm(i,:) = conv(dFnorm(i,:),filt,'same');
+    % dFnorm(i,:) = dFdecon(i,:);
+    dFnorm(i,:) = conv(dFnorm(i,:),filt,'same');
 end
 
 dFnorm(isnan(dFnorm))=0;
@@ -195,7 +205,7 @@ for j = 1:5
         else
             plot([onsets(i)/dt onsets(i)/dt],[-5 5],'g');
         end
-    end   
+    end
 end
 subplot(5,1,1);title('correct');
 
@@ -210,7 +220,7 @@ for j = 1:5
         else
             plot([onsets(i)/dt onsets(i)/dt],[-5 5],'m');
         end
-    end  
+    end
 end
 subplot(5,1,1);title('location');
 
@@ -224,7 +234,7 @@ for j = 1:5
         else
             plot([onsets(i)/dt onsets(i)/dt],[-5 5],'r');
         end
-    end  
+    end
 end
 subplot(5,1,1);title('orientation');
 
@@ -265,7 +275,7 @@ for c = 0:1;
             for k = 1:length(respmean);
                 respmean(k,:) = respmean(k,:) - min(respmean(k,timepts<=0));
             end
-          
+            
             for k = 1:25
                 subplot(5,5,k)
                 plot(timepts,conv(respmean(k,:),filt,'same'),col(i,j)); hold on;ylim([-2 5]);xlim([-1 5])

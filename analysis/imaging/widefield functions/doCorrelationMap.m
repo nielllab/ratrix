@@ -3,7 +3,7 @@
 %%% load in points for analysis
 [f p] = uigetfile('*.mat','pts file');
 if f~=0
-    load(fullfile(p,f),'x','y'); x= round(x/4); y = round(y/4);
+    load(fullfile(p,f),'x','y'); %x= round(x/4); y = round(y/4);
 else
     display('will select points later')
     x=[]; y=[];
@@ -24,7 +24,7 @@ clear  sigAll decorrSigAll    traceCorrAll  cc_imAll
 
 
 for f= 1:length(use)
-    close all
+  
     f
     display('loading data')
     clear dfof_bg sp
@@ -80,15 +80,15 @@ for f= 1:length(use)
         trace(:,i) = squeeze(im(x(i),y(i),:));
         plot(squeeze(im(x(i),y(i),:))+i*0.2,col(i))
     end
-    title(sprintf('%s %s raw',files(use(f)).subj, files(use(f)).expt));
+    title(sprintf('%s %s %s raw',files(use(f)).subj, files(use(f)).expt, figLabels{f}));
     if printfigs, set(gcf, 'PaperPositionMode', 'auto'), print('-dpsc',psfilename,'-append'),end
     
     
     %%% correlation coefficient matrix for selected points
-    figure
-    imagesc(imresize(corrcoef(trace),10,'nearest'),[0.8 1]); colorbar
-    title('corr pre-decor')
-    rawTraceCorr = corrcoef(trace);
+%     figure
+%     imagesc(imresize(corrcoef(trace),10,'nearest'),[0.8 1]); colorbar
+%     title('corr pre-decor')
+     rawTraceCorr = corrcoef(trace);
     
     %  if printfigs, set(gcf, 'PaperPositionMode', 'auto'), print('-dpsc',psfilename,'-append'),end
     
@@ -99,7 +99,7 @@ for f= 1:length(use)
     imagesc(sig,[0 0.075]); colorbar
     hold on; plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2)
     title('std dev')
-    title(sprintf('%s %s std dev',files(use(f)).subj, files(use(f)).expt));
+    title(sprintf('%s %s %s std dev',files(use(f)).subj, files(use(f)).expt, figLabels{f}));
     if printfigs, set(gcf, 'PaperPositionMode', 'auto'), print('-dpsc',psfilename,'-append'),end
     
     
@@ -116,9 +116,9 @@ for f= 1:length(use)
     [coeff score latent] = pca(obs');
     
     %%% show loading of PCA components
-    figure
-    plot(1:10,latent(1:10))
-    xlabel('component'); ylabel('latent')
+%     figure
+%     plot(1:10,latent(1:10))
+%     xlabel('component'); ylabel('latent')
     
     %%% show first 12 spatial components
     figure
@@ -145,6 +145,7 @@ for f= 1:length(use)
         figure
         subplot(3,1,1)
         plot(sp); ylabel('speed')
+        title(sprintf('%s %s %s ',files(use(f)).subj, files(use(f)).expt, figLabels{f}));
         subplot(3,1,2);
         plot(score(:,1)); ylabel('component1')
         subplot(3,1,3)
@@ -184,13 +185,14 @@ for f= 1:length(use)
         plot(decorrTrace(:,i)+0.1*i,col(i));
     end
     title(sprintf('%s %s decorr',files(use(f)).subj, files(use(f)).expt));
+    close(gcf);
     %if printfigs, set(gcf, 'PaperPositionMode', 'auto'), print('-dpsc',psfilename,'-append'),end
     
     
     %%% correlation matrix for selected points
-    figure
-    imagesc(imresize(corrcoef(decorrTrace),10,'nearest'),[-1 1]); colorbar
-    title('area decorrelated')
+%     figure
+%     imagesc(imresize(corrcoef(decorrTrace),10,'nearest'),[-1 1]); colorbar
+%     title('area decorrelated')
     traceCorr = corrcoef(decorrTrace);
     % traceCorr(traceCorr<=0)=0.01;
     
@@ -220,7 +222,7 @@ for f= 1:length(use)
     plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
     axis ij
     axis equal
-    title(sprintf('%s %s',files(use(f)).subj, files(use(f)).expt));
+    title(sprintf('%s %s %s',files(use(f)).subj, files(use(f)).expt, figLabels{f}));
     %   if printfigs, set(gcf, 'PaperPositionMode', 'auto'), print('-dpsc',psfilename,'-append'),end
     
     
@@ -249,11 +251,11 @@ for f= 1:length(use)
     %
     
     %%% show correlation images for selected points
-    figure
-    imagesc(decorrSig,[0 0.025])
-    title(sprintf('%s %s',files(use(f)).subj, files(use(f)).expt));
-    hold on; plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
-    axis equal;axis off;
+%     figure
+%     imagesc(decorrSig,[0 0.025])
+%     title(sprintf('%s %s',files(use(f)).subj, files(use(f)).expt));
+%     hold on; plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
+%     axis equal;axis off;
     
     figure
     for i = 1:npts
@@ -265,7 +267,7 @@ for f= 1:length(use)
         axis off;
     end
     if printfigs, set(gcf, 'PaperPositionMode', 'auto'), print('-dpsc',psfilename,'-append'),end
-    
+    set(gcf,'Name',sprintf('%s %s %s',files(use(f)).subj, files(use(f)).expt, figLabels{f}));
     
     %%% store results for this subject
     sigAll(:,:,f) = sig;
@@ -274,7 +276,7 @@ for f= 1:length(use)
     cc_imAll(:,:,:,:,f) = cc_im;    %%% correlation images for selected points
     rawTraceCorrAll(:,:,f) = rawTraceCorr;
     
-    
+   drawnow 
 end
 
 %%% take mean over subjects

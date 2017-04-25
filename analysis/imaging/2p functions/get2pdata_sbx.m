@@ -1,6 +1,8 @@
 function [dfofInterp im_dt greenframe framerate phasetimes m dt alignment] = get2pdata_sbx(fname,dt,cycLength,cfg);
 %%% reads in 2p data and syncs with stimulus signals
 
+global S2P
+
 %%% read in sbx data and perform motion correction (if not already done)
 display('reading data')
 tic
@@ -44,13 +46,17 @@ m = m-dcOffset;
 img = img-dcOffset;
 greenframe=greenframe-dcOffset;
 
-display('doing dfof')
-tic
-dfof=zeros(size(img));
-for f = 1:size(img,3)
-    dfof(:,:,f)=(double(img(:,:,f))-m)./m;
+if (exist('S2P','var')&S2P==1)
+    dfof = double(img);
+else
+    display('doing dfof')
+    tic
+    dfof=zeros(size(img));
+    for f = 1:size(img,3)
+        dfof(:,:,f)=(double(img(:,:,f))-m)./m;
+    end
+    toc
 end
-toc
 
 %%% get sync triggers
 global info
@@ -96,6 +102,16 @@ else %%% leave timing intact and adjust video stim times to acq rate
     phasesync=phasesync(1:2:end); %%% scanbox records rising and falling edge;
     phasetimes = phasesync*dt; %%% convert to frame time (dt)
     
+end
+
+if (exist('S2P','var')&S2P==1)
+    sprintf('exporting to tif')
+    sess = ['S2P\' fname(end)];
+    mkdir(sess);
+    for i = 1:size(dfofInterp,3)
+        q = uint16(round(dfofInterp(:,50:750,i)));
+        imwrite(q,fullfile(sess,[fname sprintf('_%05d.tif',i)]),'tif');
+    end
 end
 
 

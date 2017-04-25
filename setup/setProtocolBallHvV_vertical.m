@@ -32,42 +32,89 @@ if ~isscalar(subjIDs)
 end
  switch subjIDs{1}
      
-   
-      case 'test' % Started 5/4/16 %started HvV 9/6/16
+    case 'test' 
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
-       percentCorrectionTrials = .75;     
+       percentCorrectionTrials = .5;     
        pixPerCycs              = [200];
-       normalizedPosition      = [0.40 0.60];
-       radius                 = .34;
+       normalizedPosition      = [0.50 0.66];
+       radius                 = .27;  
        
-  case 'g62jj2rt' % Started 5/4/16  %started HvV_center 5/15/16  %started HvV 9/18/16
+   case 'g62ww3rt' % Started 4/05/17 %%hvv start 4/13/17 %%full 4/24/17
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 123;
+       rewardSizeULorMS        = 219;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        pixPerCycs              = [200];
-       normalizedPosition      = [0.33 0.66];
-       radius                 = .25;
+       normalizedPosition      = [0.46 0.54];
+       radius                 = .35;         
+
+   case 'g62aaa4tt' % Started 3/29/17 %%hvv start 4/8/17 %%full 4/24/17
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 219;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;
+       pixPerCycs              = [200];
+       normalizedPosition      = [0.46 0.54];
+       radius                 = .35;  
+
+   case 'g62ggg6tt' % Started 3/29/17 %%hvv start 4/8/17 %%full 4/24/17
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 219;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;
+       pixPerCycs              = [200];
+       normalizedPosition      = [0.46 0.54];
+       radius                 = .33;         
+       
+   case 'g62ss4lt' % Started 4/07/17  %%hvv center 4/15/17 %%full 4/24/17
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 219;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;
+       pixPerCycs              = [200];
+       normalizedPosition      = [0.46 0.54];
+       radius                 = .35;  
      
-   case 'g62jj2lt' % Started 5/4/16 %started HvV 9/6/16
+   case 'g62uu1tt' % Started 2/1/17 %%switch 2/8/17
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
-       percentCorrectionTrials = .75;     
+       percentCorrectionTrials = .6;
        pixPerCycs              = [200];
-       normalizedPosition      = [0.40 0.60];
-       radius                 = .33;
-
-%    case 'g62bb8rt' % Started 2/9/16  %started HvV_center 2/20/16 %started HvV_vertical 3/11/16
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 59;
-%        msPenalty               =3500;
-%        percentCorrectionTrials = .75;
-%        pixPerCycs              = [200];
-%        normalizedPosition      = [0.45 0.55];
-%        radius                 = .35;
+       normalizedPosition      = [0.37 0.63];
+       radius                 = .25;  
+       
+    case 'g62mm11lt' % Started 2/1/17 %%switch 2/8/17 %%%switch full 2/27/17
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 123;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;     
+       pixPerCycs              = [200];
+       normalizedPosition      = [0.33 0.66];
+       radius                 = .25;
+       
+    case 'g62aaa3rt' % Started 2/1/17  %%switch 2/9/17 %%%switch full 2/27/17
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 219;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;
+       pixPerCycs              = [200];
+       normalizedPosition      = [0.43 0.57];
+       radius                 = .25;
+     
+   
+  case 'test' % Started 5/4/16 %started HvV 9/6/16
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 123;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;     
+       pixPerCycs              = [200];
+       normalizedPosition      = [0.48 0.52];
+       radius                 = .34;
+       
+  
 
   
      case 'testpixhvv' % Started 5/18/15

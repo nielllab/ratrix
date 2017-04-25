@@ -4,8 +4,16 @@ function topo2pSession(fileName,sessionName,psfile)%%% create session file for t
 dt = 0.1; %%% resampled time frame
 framerate=1/dt;
 cycLength=10;
-cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  %%% configuration parameters
-cfg.syncToVid=1; cfg.saveDF=0;
+
+global S2P
+
+if (exist('S2P','var')&S2P==1)
+    cfg.dt = dt; cfg.spatialBin=1; cfg.temporalBin=1;  %%% configuration parameters suite2p
+    cfg.syncToVid=1; cfg.saveDF=0; cfg.nodfof=1;
+else
+    cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  %%% configuration parameters eff
+    cfg.syncToVid=1; cfg.saveDF=0;
+end
 get2pSession_sbx;
 
 nframes = min(size(dfofInterp,3),3000);  %%% limit topoY data to 5mins to avoid movie boundaries

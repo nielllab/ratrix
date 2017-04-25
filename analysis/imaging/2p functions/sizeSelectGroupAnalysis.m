@@ -1,955 +1,454 @@
-%%%loads in individual animal 2p size select data and performs group
-%%%analysis
+%%%use this code to analyze the full contrast, 24 rep size select data
+
 close all
 clear all
 
-plotallcells = 0;
-dfWindow = 9:11;
-spWindow = 6:10;
-spWindows = {6:8;8:10;6:10};
-spWindowsNames = {'First Half','Second Half','Stim Window'};
-dt = 0.1;
-cyclelength = 1/0.1;
+%%choose dataset
+% batchPhil2pSizeSelect
+% batchPhil2pSizeSelect22min
+batchPhil2pSizeSelect22minS2P
 
-%%%where are the files
-dirs = {'\\langevin\backup\twophoton\Phil\Compiled2p\071416 G62TX210TT size select2\G62TX210TT'...
-    '\\langevin\backup\twophoton\Phil\Compiled2p\071016 G62EE8TT sizeselect\G62EE8TT'...
-    '\\langevin\backup\twophoton\Phil\Compiled2p\070816 G62BB8RT sizeselect\G62BB8RT'...
-    '\\langevin\backup\twophoton\Phil\Compiled2p\070516 G62Y9RT sizeselect\G62Y9RT'...
-    '\\langevin\backup\twophoton\Phil\Compiled2p\062416 G62TX19LT size select\G62TX19LT'...
-    '\\langevin\backup\twophoton\Phil\Compiled2p\111216 G62BB2RT DOI sizeselect\G62BB2RT'};
+path = '\\langevin\backup\twophoton\Phil\Compiled2p\'
+savepath = '\\langevin\backup\twophoton\Phil\Compiled2p\S2P analysis'
 
-% dirs = {'\\langevin\backup\twophoton\Phil\Compiled2p\091016 G62Y9RT sizeselect saline\G62Y9RT'...
-%     '\\langevin\backup\twophoton\Phil\Compiled2p\091216 G62TX19LT sizeselect saline\G62TX19LT'...
-%     '\\langevin\backup\twophoton\Phil\Compiled2p\101516 G62BB2RT sizeselect saline\G62BB2RT'...
-%     '\\langevin\backup\twophoton\Phil\Compiled2p\102816 G62MM3RN sizeselect saline\G62MM3RN'};
-
-%stimulus file
-moviename = 'C:\sizeSelect2sf8sz26min.mat';
-load(moviename);
-sizeVals = [0 5 10 20 30 40 50 60];
-contrastRange = unique(contrasts); sfrange = unique(sf); phaserange = unique(phase);
-for i = 1:length(contrastRange);contrastlist{i} = num2str(contrastRange(i));end
-for i=1:length(sizeVals); sizes{i} = num2str(sizeVals(i)); end
-% sf=[sf sf];phase=[phase phase];radius=[radius radius];tf=[tf tf];theta=[theta theta];xpos=[xpos xpos];ypos=[ypos ypos];
-ntrials= length(contrasts);
-onsets = dt + (0:ntrials-1)*(isi+duration);
-timepts = 1:(2*isi+duration)/dt;
-timepts = (timepts-1)*dt;
-
-[f p] = uiputfile('*.pdf','pdf file');
-newpdfFile = fullfile(p,f);
-
-psfile = 'c:\temp.ps';
+psfile = 'c:\tempPhil2pSize.ps';
 if exist(psfile,'file')==2;delete(psfile);end
 
-%load pre data
-cellcnt = 1;
-grpdftuningPRE = nan(10000,15,2,6,4,8,2);
-grpsptuningPRE = nan(10000,15,2,6,4,8,2);
-% grppeaksPRE = nan(length(dirs),8,2);
-for i = 1:length(dirs)
-    load(fullfile(dirs{i},'ssSummaryPRE.mat'))
-    numcells = size(dftuning,1);
-    grpdftuningPRE(cellcnt:cellcnt+numcells-1,:,:,:,:,:,:) = dftuning;
-    grpsptuningPRE(cellcnt:cellcnt+numcells-1,:,:,:,:,:,:) = sptuning;
-%     grppeaksPRE(i,:,:) = avgpeaks;
-    cellcnt = cellcnt + numcells;
+cd(path);
+
+group = input('which group? 1=saline naive, 2=saline trained, 3=DOI naive, 4=DOI trained: ')
+redoani = input('reanalyze individual animal data? 0=no, 1=yes: ')
+redogrp = input('reanalyze group data? 0=no, 1=yes: ')
+
+if group==1
+    use = find(strcmp({files.inject},'saline')  & strcmp({files.training},'naive') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
+    grpfilename = 'SalineNaive2pSizeSelectS2P'
+elseif group==2
+    use = find(strcmp({files.inject},'saline')  & strcmp({files.training},'trained') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
+    grpfilename = 'SalineTrained2pSizeSelectS2P'
+elseif group==3
+    use = find(strcmp({files.inject},'doi')  & strcmp({files.training},'naive') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
+    grpfilename = 'DOINaive2pSizeSelectS2P'
+elseif group==4
+    use = find(strcmp({files.inject},'doi')  & strcmp({files.training},'trained') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
+    grpfilename = 'DOITrained2pSizeSelectS2P'
+else
+    sprintf('please restart and choose a number 1-4')
 end
 
-%load post data
-cellcnt = 1;
-grpdftuningPOST = nan(1000,15,2,6,4,8,2);
-grpsptuningPOST = nan(1000,15,2,6,4,8,2);
-% grppeaksPOST = nan(length(dirs),8,2);
-for i = 1:length(dirs)
-    load(fullfile(dirs{i},'ssSummaryPOST.mat'))
-    numcells = size(dftuning,1);
-    grpdftuningPOST(cellcnt:cellcnt+numcells-1,:,:,:,:,:,:) = dftuning;
-    grpsptuningPOST(cellcnt:cellcnt+numcells-1,:,:,:,:,:,:) = sptuning;
-%     grppeaksPOST(i,:,:) = avgpeaks;
-    cellcnt = cellcnt + numcells;
+if isempty(use)
+    sprintf('No animals in this group')
+    return
 end
 
-%baseline all traces
-for h = 1:cellcnt
-    for i = 1:length(sfrange)
-        for j = 1:length(phaserange)
-            for k = 1:length(contrastRange)
-                for l = 1:length(radiusRange)
-                    grpdftuningPRE(h,:,i,j,k,l,1) = grpdftuningPRE(h,:,i,j,k,l,1)-grpdftuningPRE(h,5,i,j,k,l,1);%-squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPRE(h,:,i,j,k,1,1),1),3),4),5));
-                    grpdftuningPRE(h,:,i,j,k,l,2) = grpdftuningPRE(h,:,i,j,k,l,2)-grpdftuningPRE(h,5,i,j,k,l,2);%-squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPRE(h,:,i,j,k,1,2),1),3),4),5));
-                    grpsptuningPRE(h,:,i,j,k,l,1) = grpsptuningPRE(h,:,i,j,k,l,1)-grpsptuningPRE(h,5,i,j,k,l,1);%-squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPRE(h,:,i,j,k,1,1),1),3),4),5));
-                    grpsptuningPRE(h,:,i,j,k,l,2) = grpsptuningPRE(h,:,i,j,k,l,2)-grpsptuningPRE(h,5,i,j,k,l,2);%-squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPRE(h,:,i,j,k,1,2),1),3),4),5));
-                    grpdftuningPOST(h,:,i,j,k,l,1) = grpdftuningPOST(h,:,i,j,k,l,1)-grpdftuningPOST(h,5,i,j,k,l,1);%-squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPOST(h,:,i,j,k,1,1),1),3),4),5));
-                    grpdftuningPOST(h,:,i,j,k,l,2) = grpdftuningPOST(h,:,i,j,k,l,2)-grpdftuningPOST(h,5,i,j,k,l,2);%-squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPOST(h,:,i,j,k,1,2),1),3),4),5));
-                    grpsptuningPOST(h,:,i,j,k,l,1) = grpsptuningPOST(h,:,i,j,k,l,1)-grpsptuningPOST(h,5,i,j,k,l,1);%-squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPOST(h,:,i,j,k,1,1),1),3),4),5));
-                    grpsptuningPOST(h,:,i,j,k,l,2) = grpsptuningPOST(h,:,i,j,k,l,2)-grpsptuningPOST(h,5,i,j,k,l,2);%-squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPOST(h,:,i,j,k,1,2),1),3),4),5));                    
-                end
-            end
+if redoani==1
+    sizeSelect2pAnalysis
+end
+
+moviefname = 'C:\sizeselectBin22min';
+load(moviefname)
+dfWindow = 9:11;
+spWindow = 6:10;
+dt = 0.1;
+cyclelength = 1/0.1;
+contrastRange = unique(contrasts); sfrange = unique(sf); phaserange = unique(phase);
+for i = 1:length(contrastRange);contrastlist{i} = num2str(contrastRange(i));end
+for i=1:length(radiusRange); sizes{i} = num2str(radiusRange(i)*2); end
+thetaRange = unique(theta);
+timepts = 1:(2*isi+duration)/dt; timepts = (timepts-1)*dt; timepts = timepts - isi;
+
+if redogrp
+    grpdfsize = nan(10000,15,length(sizes),2,2);
+    grprf=nan(10000,2);
+    session = nan(10000,1);%%%make an array for animal #/session
+    grpcells = nan(10000,1);
+    grpSI = nan(10000,2,2);
+    cellcnt=1;
+    for i = 1:2:length(use)
+        aniFile = files(use(i)).sizeanalysis; load(aniFile);
+        expcells = size(userf,1)-1;
+        grpcells(cellcnt:cellcnt+expcells) = usecells;
+        grprf(cellcnt:cellcnt+expcells,:) = userf;
+        session(cellcnt:cellcnt+expcells) = (i+1)/2;
+        grpdfsize(cellcnt:cellcnt+expcells,:,:,:,1) = dfsize;
+        grpSI(cellcnt:cellcnt+expcells,:,1) = SI;
+        for j = 1:length(cellprint)
+            cellprintpre{cellcnt+j-1} = cellprint{j};
         end
-    end
-end
-
-%subtract off zero size, separately for stationary/running trials
-for h = 1:cellcnt
-    dfZeroPreSta = squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(h,:,:,:,:,1,1),3),4),5));
-    dfZeroPreRun = squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(h,:,:,:,:,1,2),3),4),5));
-    spZeroPreSta = squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(h,:,:,:,:,1,1),3),4),5));
-    spZeroPreRun = squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(h,:,:,:,:,1,2),3),4),5));
-    dfZeroPostSta = squeeze(nanmean(nanmean(nanmean(grpdftuningPOST(h,:,:,:,:,1,1),3),4),5));
-    dfZeroPostRun = squeeze(nanmean(nanmean(nanmean(grpdftuningPOST(h,:,:,:,:,1,2),3),4),5));
-    spZeroPostSta = squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(h,:,:,:,:,1,1),3),4),5));
-    spZeroPostRun = squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(h,:,:,:,:,1,2),3),4),5));
-    for i = 1:length(sfrange)
-        for j = 1:length(phaserange)
-            for k = 1:length(contrastRange)
-                for l = 1:length(radiusRange)
-                    grpdftuningPRE(h,:,i,j,k,l,1) = grpdftuningPRE(h,:,i,j,k,l,1)-dfZeroPreSta;
-                    grpdftuningPRE(h,:,i,j,k,l,2) = grpdftuningPRE(h,:,i,j,k,l,2)-dfZeroPreRun;
-                    grpsptuningPRE(h,:,i,j,k,l,1) = grpsptuningPRE(h,:,i,j,k,l,1)-spZeroPreSta;
-                    grpsptuningPRE(h,:,i,j,k,l,2) = grpsptuningPRE(h,:,i,j,k,l,2)-spZeroPreRun;
-                    grpdftuningPOST(h,:,i,j,k,l,1) = grpdftuningPOST(h,:,i,j,k,l,1)-dfZeroPostSta;
-                    grpdftuningPOST(h,:,i,j,k,l,2) = grpdftuningPOST(h,:,i,j,k,l,2)-dfZeroPostRun;
-                    grpsptuningPOST(h,:,i,j,k,l,1) = grpsptuningPOST(h,:,i,j,k,l,1)-spZeroPostSta;
-                    grpsptuningPOST(h,:,i,j,k,l,2) = grpsptuningPOST(h,:,i,j,k,l,2)-spZeroPostRun;                    
-                end
-            end
+        aniFile = files(use(i+1)).sizeanalysis; load(aniFile);
+        grpdfsize(cellcnt:cellcnt+expcells,:,:,:,2) = dfsize;
+        grpSI(cellcnt:cellcnt+expcells,:,2) = SI;
+        for j = 1:length(cellprint)
+            cellprintpost{cellcnt+j-1} = cellprint{j};
         end
+        cellcnt = cellcnt+expcells;
     end
-end
 
-%only take cells with response >0.01 during pre period
-% goodcells = zeros(cellcnt,1);
-cnt=1;
-for i = 1:cellcnt
-    [peak, prefsize] = max(squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(i,dfWindow,:,:,end,:,1),4),3),2)));
-    if peak>=0.01
-        goodcells(cnt,1) = i;
-        cnt=cnt+1;
+    grprf = grprf(1:cellcnt,:);
+    session = session(1:cellcnt);
+    grpdfsize = grpdfsize(1:cellcnt,:,:,:,:,:); %cell#,t,contr,size,run,pre/post
+    grpSI = grpSI(1:cellcnt,:,:);
+    grpcells = grpcells(1:cellcnt);
+    
+    rmsdiff = nan(cellcnt,1);
+    footcc = nan(cellcnt,1);
+    for i = 1:cellcnt
+        rmsdiff(i) = sqrt(mean(mean((cellprintpre{i}-cellprintpost{i}).^2)));
+        cc = corrcoef(cellprintpre{i},cellprintpost{i}); footcc(i)=cc(1,2);
     end
+
+    sprintf('saving group file...')
+    save(fullfile(savepath,grpfilename),'grprf','session','grpdfsize','grpcells','cellprintpre','cellprintpost','grpSI','rmsdiff','footcc','cellcnt')
+    sprintf('done')
+else
+    sprintf('loading data')
+    load(fullfile(savepath,grpfilename))
 end
 
-cellcnt = length(goodcells);
-a = grpdftuningPRE(goodcells,:,:,:,:,:,:);
-b = grpdftuningPOST(goodcells,:,:,:,:,:,:);
-c = grpsptuningPRE(goodcells,:,:,:,:,:,:);
-d = grpsptuningPOST(goodcells,:,:,:,:,:,:);
-clear grp*
-grpdftuningPRE = a;
-grpdftuningPOST = b;
-grpsptuningPRE = c;
-grpsptuningPOST = d;
+%%%%%%plotting code
+% SI = nan(size(grpdfsize,1),2,2);
+% for i = 1:size(grpdfsize,1)
+%     for j = 1:2
+%         for k = 1:2
+%             [val ind] = max(nanmean(grpdfsize(i,dfWindow,:,j,k)));
+%             if ind==length(sizes)
+%                 SI(i,j,k) = 0;
+%             else
+%                 SI(i,j,k) = val; %%%calc suppression index
+%             end
+%         end
+%     end
+% end
 
-%%%dfof plotting
-%%%plot responses as a function of contrast/size
-figure
-subplot(2,2,1)
-hold on
-for i=1:length(contrastRange)
-    plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPRE(:,dfWindow,:,:,i,:,1),4),3),1),2)));%-squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(:,5,:,:,i,:,1),4),3),1)));
-end
-axis([0 length(radiusRange)+1 -0.01 0.1])
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
-legend(contrastlist,'location','northwest')
-xlabel('Stim Size (deg)')
-ylabel('PRE stationary dfof')
-subplot(2,2,2)
-hold on
-for i=1:length(contrastRange)
-    plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPRE(:,dfWindow,:,:,i,:,2),4),3),1),2)));%-squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(:,5,:,:,i,:,2),4),3),1)));
-end
-axis([0 length(radiusRange)+1 -0.01 0.1])
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
-legend(contrastlist,'location','northwest')
-xlabel('Stim Size (deg)')
-ylabel('PRE running dfof')
-subplot(2,2,3)
-hold on
-for i=1:length(contrastRange)
-    plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPOST(:,dfWindow,:,:,i,:,1),4),3),1),2)));%-squeeze(nanmean(nanmean(nanmean(grpdftuningPOST(:,5,:,:,i,:,1),4),3),1)));
-end
-axis([0 length(radiusRange)+1 -0.01 0.1])
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
-legend(contrastlist,'location','northwest')
-xlabel('Stim Size (deg)')
-ylabel('POST stationary dfof')
-subplot(2,2,4)
-hold on
-for i=1:length(contrastRange)
-    plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPOST(:,dfWindow,:,:,i,:,2),4),3),1),2)));%-squeeze(nanmean(nanmean(nanmean(grpdftuningPOST(:,5,:,:,i,:,2),4),3),1)));
-end
-axis([0 length(radiusRange)+1 -0.01 0.1])
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
-legend(contrastlist,'location','northwest')
-xlabel('Stim Size (deg)')
-ylabel('POST running dfof')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-mtit('dfof peak as function of contrast')
 
-%%%plot full contrast response peaks across sizes 
-figure
-subplot(1,2,1)
-hold on
-errorbar(1:length(radiusRange),...
-    squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPRE(:,dfWindow,:,:,end,:,1),4),3),1),2)),...
-    squeeze(nanstd(nanstd(nanstd(nanstd(grpdftuningPRE(:,dfWindow,:,:,end,:,1),4),3),1),2))/sqrt(cellcnt),'k');
-errorbar(1:length(radiusRange),...
-    squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPOST(:,dfWindow,:,:,end,:,1),4),3),1),2)),...
-    squeeze(nanstd(nanstd(nanstd(nanstd(grpdftuningPOST(:,dfWindow,:,:,end,:,1),4),3),1),2))/sqrt(cellcnt),'r');
-axis([0 length(radiusRange)+1 -0.01 0.15])
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
-legend('PRE','POST','location','northwest')
-xlabel('Stim Size (deg)')
-ylabel('stationary dfof')
-subplot(1,2,2)
-hold on
-errorbar(1:length(radiusRange),...
-    squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPRE(:,dfWindow,:,:,end,:,2),4),3),1),2)),...
-    squeeze(nanstd(nanstd(nanstd(nanstd(grpdftuningPRE(:,dfWindow,:,:,end,:,2),4),3),1),2))/sqrt(cellcnt),'k');
-errorbar(1:length(radiusRange),...
-    squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPOST(:,dfWindow,:,:,end,:,2),4),3),1),2)),...
-    squeeze(nanstd(nanstd(nanstd(nanstd(grpdftuningPOST(:,dfWindow,:,:,end,:,2),4),3),1),2))/sqrt(cellcnt),'r');
-axis([0 length(radiusRange)+1 -0.01 0.15])
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
-legend('PRE','POST','location','northwest')
-xlabel('Stim Size (deg)')
-ylabel('running dfof')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-mtit('full contrast dfof peaks')
 
-%%%plot cycle averages for all sizes
-figure
-for i = 1:length(sizes)
-    subplot(2,ceil(length(sizes)/2),i)
+
+%%%plot group data for size select averaging over cells
+numAni = length(unique(session));
+% ccvals = [0.7 0.8 0.9];
+ccvals = [0];
+for i = 1:length(ccvals)
+    goodcc{i} = find(footcc>ccvals(i));
+end
+
+for z=1%:length(ccvals)
+    figure
+    subplot(1,2,1)
     hold on
-    shadedErrorBar(timepts,squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(:,:,:,:,end,i,1),4),3),1)),...
-        squeeze(nanstd(nanstd(nanstd(grpdftuningPRE(:,:,:,:,end,i,1),4),3),1))/sqrt(cellcnt),'k',1);
-    shadedErrorBar(timepts,squeeze(nanmean(nanmean(nanmean(grpdftuningPOST(:,:,:,:,end,i,1),4),3),1)),...
-        squeeze(nanstd(nanstd(nanstd(grpdftuningPOST(:,:,:,:,end,i,1),4),3),1))/sqrt(cellcnt),'r');
-    axis([timepts(1) timepts(end) -0.01 0.15])
-end
-mtit('Stationary dfof per size')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-figure
-for i = 1:length(sizes)
-    subplot(2,ceil(length(sizes)/2),i)
-    hold on
-    shadedErrorBar(timepts,squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(:,:,:,:,end,i,2),4),3),1)),...
-        squeeze(nanstd(nanstd(nanstd(grpdftuningPRE(:,:,:,:,end,i,2),4),3),1))/sqrt(cellcnt),'k',1);
-    shadedErrorBar(timepts,squeeze(nanmean(nanmean(nanmean(grpdftuningPOST(:,:,:,:,end,i,2),4),3),1)),...
-        squeeze(nanstd(nanstd(nanstd(grpdftuningPOST(:,:,:,:,end,i,2),4),3),1))/sqrt(cellcnt),'r',1);
-    axis([timepts(1) timepts(end) -0.01 0.15])
-end
-mtit('Running dfof per size')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-%%%plot cycle averages with sizes on same plot
-figure
-subplot(1,2,1)
-hold on
-for i = 1:length(sizes)
-    plot(timepts,squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(:,:,:,:,end,i,1),4),3),1)));%-squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(:,5,:,:,end,i,1),4),3),1)))
-end
-legend(sizes,'location','northwest')
-xlabel('Time (s)')
-ylabel('Stationary dfof')
-axis([timepts(1) timepts(end) -0.01 0.15])
-subplot(1,2,2)
-hold on
-for i = 1:length(sizes)
-    plot(timepts,squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(:,:,:,:,end,i,2),4),3),1)));%-squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(:,5,:,:,end,i,2),4),3),1)))
-end
-legend(sizes,'location','northwest')
-xlabel('Time (s)')
-ylabel('Running dfof')
-axis([timepts(1) timepts(end) -0.01 0.15])
-mtit('PRE')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-figure
-subplot(1,2,1)
-hold on
-for i = 1:length(sizes)
-    plot(timepts,squeeze(nanmean(nanmean(nanmean(grpdftuningPOST(:,:,:,:,end,i,1),4),3),1)));%-squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(:,5,:,:,end,i,1),4),3),1)))
-end
-legend(sizes,'location','northwest')
-xlabel('Time (s)')
-ylabel('Stationary dfof')
-axis([timepts(1) timepts(end) -0.01 0.15])
-subplot(1,2,2)
-hold on
-for i = 1:length(sizes)
-    plot(timepts,squeeze(nanmean(nanmean(nanmean(grpdftuningPOST(:,:,:,:,end,i,2),4),3),1)));%-squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(:,5,:,:,end,i,2),4),3),1)))
-end
-legend(sizes,'location','northwest')
-xlabel('Time (s)')
-ylabel('Running dfof')
-axis([timepts(1) timepts(end) -0.01 0.15])
-mtit('POST')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-%%%same plotting for spikes
-%%%plot responses as a function of contrast/size
-figure
-subplot(2,2,1)
-hold on
-for i=1:length(contrastRange)
-    plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPRE(:,spWindow,:,:,i,:,1),4),3),1),2)));%-squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,5,:,:,i,:,1),4),3),1)));
-end
-axis([0 length(radiusRange)+1 -0.01 0.3])
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
-legend(contrastlist,'location','northwest')
-xlabel('Stim Size (deg)')
-ylabel('PRE stationary spikes')
-subplot(2,2,2)
-hold on
-for i=1:length(contrastRange)
-    plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPRE(:,spWindow,:,:,i,:,2),4),3),1),2)));%-squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,5,:,:,i,:,2),4),3),1)));
-end
-axis([0 length(radiusRange)+1 -0.01 0.3])
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
-legend(contrastlist,'location','northwest')
-xlabel('Stim Size (deg)')
-ylabel('PRE running spikes')
-subplot(2,2,3)
-hold on
-for i=1:length(contrastRange)
-    plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPOST(:,spWindow,:,:,i,:,1),4),3),1),2)));%-squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(:,5,:,:,i,:,1),4),3),1)));
-end
-axis([0 length(radiusRange)+1 -0.01 0.3])
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
-legend(contrastlist,'location','northwest')
-xlabel('Stim Size (deg)')
-ylabel('POST stationary spikes')
-subplot(2,2,4)
-hold on
-for i=1:length(contrastRange)
-    plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPOST(:,spWindow,:,:,i,:,2),4),3),1),2)));%-squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(:,5,:,:,i,:,2),4),3),1)));
-end
-axis([0 length(radiusRange)+1 -0.01 0.3])
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
-legend(contrastlist,'location','northwest')
-xlabel('Stim Size (deg)')
-ylabel('POST running spikes')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-mtit('spike peak as function of contrast')
-
-%%%plot full contrast response peaks across sizes 
-figure
-subplot(1,2,1)
-hold on
-% plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPRE(:,spWindow,:,:,end,:,1),4),3),1),2)),'k');%-squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,5,:,:,end,:,1),4),3),1)),'k');
-% plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPOST(:,spWindow,:,:,end,:,1),4),3),1),2)),'r');%-squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(:,5,:,:,end,:,1),4),3),1)),'r');
-errorbar(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPRE(:,spWindow,:,:,end,:,1),4),3),1),2)),squeeze(nanstd(nanstd(nanstd(nanstd(grpsptuningPRE(:,spWindow,:,:,end,:,1),4),3),1),2))/sqrt(cellcnt),'k');
-errorbar(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPOST(:,spWindow,:,:,end,:,1),4),3),1),2)),squeeze(nanstd(nanstd(nanstd(nanstd(grpsptuningPOST(:,spWindow,:,:,end,:,1),4),3),1),2))/sqrt(cellcnt),'r');
-axis([0 length(radiusRange)+1 -0.01 0.2])
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
-legend('PRE','POST','location','northwest')
-xlabel('Stim Size (deg)')
-ylabel('stationary spikes')
-subplot(1,2,2)
-hold on
-% plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPRE(:,spWindow,:,:,end,:,2),4),3),1),2)),'k');%-squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,5,:,:,end,:,2),4),3),1)),'k');
-% plot(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPOST(:,spWindow,:,:,end,:,2),4),3),1),2)),'r');%-squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(:,5,:,:,end,:,2),4),3),1)),'r');
-errorbar(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPRE(:,spWindow,:,:,end,:,2),4),3),1),2)),squeeze(nanstd(nanstd(nanstd(nanstd(grpsptuningPRE(:,spWindow,:,:,end,:,2),4),3),1),2))/sqrt(cellcnt),'k');
-errorbar(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPOST(:,spWindow,:,:,end,:,2),4),3),1),2)),squeeze(nanstd(nanstd(nanstd(nanstd(grpsptuningPOST(:,spWindow,:,:,end,:,2),4),3),1),2))/sqrt(cellcnt),'r');
-axis([0 length(radiusRange)+1 -0.01 0.2])
-set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
-legend('PRE','POST','location','northwest')
-xlabel('Stim Size (deg)')
-ylabel('running spikes')
-mtit('full contrast spike peaks')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-%%%plot full contrast response peaks across sizes for stationary using
-%%%different windows
-figure
-for i = 1:size(spWindows,1)
-    subplot(1,size(spWindows,1),i)
-    hold on
-    errorbar(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPRE(:,spWindows{i},:,:,end,:,1),4),3),1),2)),squeeze(nanstd(nanstd(nanstd(nanstd(grpsptuningPRE(:,spWindows{i},:,:,end,:,1),4),3),1),2))/sqrt(cellcnt),'k');
-    errorbar(1:length(radiusRange),squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPOST(:,spWindows{i},:,:,end,:,1),4),3),1),2)),squeeze(nanstd(nanstd(nanstd(nanstd(grpsptuningPOST(:,spWindows{i},:,:,end,:,1),4),3),1),2))/sqrt(cellcnt),'r');
-    axis([0 length(radiusRange)+1 -0.01 0.2])
-    set(gca,'xtick',1:length(sizeVals),'xticklabel',sizes)
-    legend('PRE','POST','location','northwest')
+    pre = squeeze(nanmean(grpdfsize(goodcc{z},dfWindow,:,1,1),2));
+    post = squeeze(nanmean(grpdfsize(goodcc{z},dfWindow,:,1,2),2));
+    errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(length(goodcc{z})),'k-o','Markersize',5)
+    errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(length(goodcc{z})),'r-o','Markersize',5)
     xlabel('Stim Size (deg)')
-    ylabel(sprintf('stationary spikes %s', spWindowsNames{i}))
-end
-mtit('spike peaks across diff windows')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-%%%plot cycle averages for all sizes
-figure
-for i = 1:length(sizes)
-    subplot(2,ceil(length(sizes)/2),i)
-    hold on
-%     plot(timepts,squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,:,:,:,end,i,1),4),3),1)),'k');%-squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,5,:,:,end,i,1),4),3),1)),'k')
-%     plot(timepts,squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(:,:,:,:,end,i,1),4),3),1)),'r');%-squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(:,5,:,:,end,i,1),4),3),1)),'r')
-    shadedErrorBar(timepts,squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,:,:,:,end,i,1),4),3),1)),squeeze(nanstd(nanstd(nanstd(grpsptuningPRE(:,:,:,:,end,i,1),4),3),1))/sqrt(cellcnt),'k');
-    shadedErrorBar(timepts,squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(:,:,:,:,end,i,1),4),3),1)),squeeze(nanstd(nanstd(nanstd(grpsptuningPOST(:,:,:,:,end,i,1),4),3),1))/sqrt(cellcnt),'r');
-    axis([timepts(1) timepts(end) -0.01 0.3])
-end
-mtit('Stationary spikes per size')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-figure
-for i = 1:length(sizes)
-    subplot(2,ceil(length(sizes)/2),i)
-    hold on
-%     plot(timepts,squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,:,:,:,end,i,2),4),3),1)),'k');%-squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,5,:,:,end,i,2),4),3),1)),'k')
-%     plot(timepts,squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(:,:,:,:,end,i,2),4),3),1)),'r');%-squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(:,5,:,:,end,i,2),4),3),1)),'r')
-    shadedErrorBar(timepts,squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,:,:,:,end,i,2),4),3),1)),squeeze(nanstd(nanstd(nanstd(grpsptuningPRE(:,:,:,:,end,i,2),4),3),1))/sqrt(cellcnt),'k');
-    shadedErrorBar(timepts,squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(:,:,:,:,end,i,2),4),3),1)),squeeze(nanstd(nanstd(nanstd(grpsptuningPOST(:,:,:,:,end,i,2),4),3),1))/sqrt(cellcnt),'r');
-    axis([timepts(1) timepts(end) -0.01 0.3])
-end
-mtit('Running spikes per size')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-%%%plot cycle averages with sizes on same plot
-figure
-subplot(1,2,1)
-hold on
-for i = 1:length(sizes)
-    plot(timepts,squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,:,:,:,end,i,1),4),3),1)));%-squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,5,:,:,end,i,1),4),3),1)))
-end
-legend(sizes,'location','northwest')
-xlabel('Time (s)')
-ylabel('Stationary spikes')
-axis([timepts(1) timepts(end) -0.01 0.3])
-subplot(1,2,2)
-hold on
-for i = 1:length(sizes)
-    plot(timepts,squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,:,:,:,end,i,2),4),3),1)));%-squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,5,:,:,end,i,2),4),3),1)))
-end
-legend(sizes,'location','northwest')
-xlabel('Time (s)')
-ylabel('Running spikes')
-axis([timepts(1) timepts(end) -0.01 0.3])
-mtit('PRE')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-figure
-subplot(1,2,1)
-hold on
-for i = 1:length(sizes)
-    plot(timepts,squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(:,:,:,:,end,i,1),4),3),1)));%-squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,5,:,:,end,i,1),4),3),1)))
-end
-legend(sizes,'location','northwest')
-xlabel('Time (s)')
-ylabel('Stationary spikes')
-axis([timepts(1) timepts(end) -0.01 0.3])
-subplot(1,2,2)
-hold on
-for i = 1:length(sizes)
-    plot(timepts,squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(:,:,:,:,end,i,2),4),3),1)));%-squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(:,5,:,:,end,i,2),4),3),1)))
-end
-legend(sizes,'location','northwest')
-xlabel('Time (s)')
-ylabel('Running spikes')
-axis([timepts(1) timepts(end) -0.01 0.3])
-mtit('POST')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-%%%plot response as a function of contrast for each size
-figure
-for i=1:length(sizes)
-    subplot(2,4,i)
-    hold on
-    shadedErrorBar(1:length(contrastlist),...
-        squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPRE(:,dfWindow,:,:,:,i,1),1),2),3),4)),...
-        squeeze(nanstd(nanstd(nanstd(nanstd(grpdftuningPRE(:,dfWindow,:,:,:,i,1),1),2),3),4)),'k',1)
-    shadedErrorBar(1:length(contrastlist),...
-        squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPOST(:,dfWindow,:,:,:,i,1),1),2),3),4)),...
-        squeeze(nanstd(nanstd(nanstd(nanstd(grpdftuningPOST(:,dfWindow,:,:,:,i,1),1),2),3),4)),'r',1)
-    axis([0 length(contrastlist)+1 -0.01 0.1])
+    ylabel('sit spikes')
+    axis([0 length(radiusRange)+1 0 10])
     axis square
-    set(gca,'xtick',1:length(contrastlist),'xticklabel',contrastlist)
-end
-mtit('stationary contrast vs. df peak per size')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
+    set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
 
-figure
-for i=1:length(sizes)
-    subplot(2,4,i)
+    subplot(1,2,2)
     hold on
-    shadedErrorBar(1:length(contrastlist),...
-        squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPRE(:,dfWindow,:,:,:,i,2),1),2),3),4)),...
-        squeeze(nanstd(nanstd(nanstd(nanstd(grpdftuningPRE(:,dfWindow,:,:,:,i,2),1),2),3),4)),'k',1)
-    shadedErrorBar(1:length(contrastlist),...
-        squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPOST(:,dfWindow,:,:,:,i,2),1),2),3),4)),...
-        squeeze(nanstd(nanstd(nanstd(nanstd(grpdftuningPOST(:,dfWindow,:,:,:,i,2),1),2),3),4)),'r',1)
-    axis([0 length(contrastlist)+1 -0.01 0.1])
+    pre = squeeze(nanmean(grpdfsize(goodcc{z},dfWindow,:,2,1),2));
+    post = squeeze(nanmean(grpdfsize(goodcc{z},dfWindow,:,2,2),2));
+    errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(length(goodcc{z})),'k-o','Markersize',5)
+    errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(length(goodcc{z})),'r-o','Markersize',5)
+    xlabel('Stim Size (deg)')
+    ylabel('run spikes')
+    axis([0 length(radiusRange)+1 0 10])
     axis square
-    set(gca,'xtick',1:length(contrastlist),'xticklabel',contrastlist)
-end
-mtit('running contrast vs. df peak per size')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
+    set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+    mtit(sprintf('Mean cell (n=%d) size suppression curve (cc>%0.2f)',length(goodcc{z}),ccvals(z)))
+    if exist('psfile','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfile,'-append');
+    end
 
-figure
-for i=1:length(sizes)
-    subplot(2,4,i)
-    hold on
-    shadedErrorBar(1:length(contrastlist),...
-        squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPRE(:,dfWindow,:,:,:,i,1),1),2),3),4)),...
-        squeeze(nanstd(nanstd(nanstd(nanstd(grpsptuningPRE(:,dfWindow,:,:,:,i,1),1),2),3),4)),'k',1)
-    shadedErrorBar(1:length(contrastlist),...
-        squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPOST(:,dfWindow,:,:,:,i,1),1),2),3),4)),...
-        squeeze(nanstd(nanstd(nanstd(nanstd(grpsptuningPOST(:,dfWindow,:,:,:,i,1),1),2),3),4)),'r',1)
-    axis([0 length(contrastlist)+1 -0.01 0.2])
-    axis square
-    set(gca,'xtick',1:length(contrastlist),'xticklabel',contrastlist)
-end
-mtit('stationary contrast vs. spike peak per size')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
+    %%%plot cycle averages
+    figure
+    plotmin = min(min([nanmean(grpdfsize(goodcc{z},:,:,1,1),1) nanmean(grpdfsize(goodcc{z},:,:,1,2),1)])) - 0.05;
+    plotmax = max(max([nanmean(grpdfsize(goodcc{z},:,:,1,1),1) nanmean(grpdfsize(goodcc{z},:,:,1,2),1)])) + 0.1;
+    for i = 2:length(sizes)
+        subplot(2,3,i-1)
+        pre = grpdfsize(goodcc{z},:,i,1,1);
+        post = grpdfsize(goodcc{z},:,i,1,2);
+        hold on
+        shadedErrorBar(timepts,squeeze(nanmean(pre,1)),...
+            squeeze(nanstd(pre,1))/sqrt(length(goodcc{z})),'k',1)
+        shadedErrorBar(timepts,squeeze(nanmean(post,1)),...
+            squeeze(nanstd(post,1))/sqrt(length(goodcc{z})),'r',1)
+        plot([0 0],[plotmin plotmax],'b-')
+        axis square
+        axis([timepts(1) timepts(end) plotmin plotmax])
+        set(gca,'LooseInset',get(gca,'TightInset'))
+    end
+    mtit('Mean cell cycle avg/size sit')
+    if exist('psfile','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfile,'-append');
+    end
 
-figure
-for i=1:length(sizes)
-    subplot(2,4,i)
-    hold on
-    shadedErrorBar(1:length(contrastlist),...
-        squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPRE(:,dfWindow,:,:,:,i,2),1),2),3),4)),...
-        squeeze(nanstd(nanstd(nanstd(nanstd(grpsptuningPRE(:,dfWindow,:,:,:,i,2),1),2),3),4)),'k',1)
-    shadedErrorBar(1:length(contrastlist),...
-        squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuningPOST(:,dfWindow,:,:,:,i,2),1),2),3),4)),...
-        squeeze(nanstd(nanstd(nanstd(nanstd(grpsptuningPOST(:,dfWindow,:,:,:,i,2),1),2),3),4)),'r',1)
-    axis([0 length(contrastlist)+1 -0.01 0.2])
-    axis square
-    set(gca,'xtick',1:length(contrastlist),'xticklabel',contrastlist)
-end
-mtit('running contrast vs. spike peak per size')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-
-%%%pull out unconstrained peaks, peak times
-peakdf = nan(cellcnt,2,2,8);peaktdf = zeros(cellcnt,2,2,8); %%peak and time: cell,pre/post,sit/run,size
-peaksp = nan(cellcnt,2,2,8);peaktsp = zeros(cellcnt,2,2,8);
-for i = 1:cellcnt
-    for j = 1:length(sizes)
-        for k = 1:2
-            [peakdf(i,1,k,j),t] = max(nanmean(nanmean(grpdftuningPRE(i,5:15,:,:,end,j,k),3),4));
-            peaktdf(i,1,k,j) = timepts(t+4);
-            [peakdf(i,2,k,j),t] = max(nanmean(nanmean(grpdftuningPOST(i,5:15,:,:,end,j,k),3),4));
-            peaktdf(i,2,k,j) = timepts(t+4);
-            [peaksp(i,1,k,j),t] = max(nanmean(nanmean(grpsptuningPRE(i,5:15,:,:,end,j,k),3),4));
-            peaktsp(i,1,k,j) = timepts(t+4);
-            [peaksp(i,2,k,j),t] = max(nanmean(nanmean(grpsptuningPOST(i,5:15,:,:,end,j,k),3),4));
-            peaktsp(i,2,k,j) = timepts(t+4);
+    figure
+    plotmin = min(min([nanmean(grpdfsize(goodcc{z},:,:,2,1),1) nanmean(grpdfsize(goodcc{z},:,:,2,2),1)])) - 0.05;
+    plotmax = max(max([nanmean(grpdfsize(goodcc{z},:,:,2,1),1) nanmean(grpdfsize(goodcc{z},:,:,2,2),1)])) + 0.1;
+    for i = 2:length(sizes)
+        subplot(2,3,i-1)
+        pre = grpdfsize(goodcc{z},:,i,2,1);
+        post = grpdfsize(goodcc{z},:,i,2,2);
+        hold on
+        shadedErrorBar(timepts,squeeze(nanmean(pre,1)),...
+            squeeze(nanstd(pre,1))/sqrt(length(goodcc{z})),'k',1)
+        shadedErrorBar(timepts,squeeze(nanmean(post,1)),...
+            squeeze(nanstd(post,1))/sqrt(length(goodcc{z})),'r',1)
+        plot([0 0],[plotmin plotmax],'b-')
+        axis square
+        if i>1
+            axis([timepts(1) timepts(end) plotmin plotmax])
         end
+        set(gca,'LooseInset',get(gca,'TightInset'))
     end
-end
-
-%%%plot peaks for pre vs. post for each cell, w/mean + sd
-figure
-for i = 1:length(sizes)
-    subplot(2,4,i)
-    hold on
-    plot(peakdf(:,1,1,i),peakdf(:,2,1,i),'k.')
-    errorbar(nanmean(peakdf(:,1,1,i),1),nanmean(peakdf(:,2,1,i),1),...
-        nanstd(peakdf(:,1,1,i),1),nanstd(peakdf(:,2,1,i),1),'r.','MarkerSize',15)
-    plot([0,0.4],[0,0.4],'k-')
-    axis square
-    axis([0 0.4 0 0.4])
-end
-mtit('stationary pre vs. post peak df')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-figure
-for i = 1:length(sizes)
-    subplot(2,4,i)
-    hold on
-    plot(peaktdf(:,1,2,i),peaktdf(:,2,2,i),'k.')
-    errorbar(nanmean(peaktdf(:,1,1,i),1),nanmean(peaktdf(:,2,1,i),1),...
-        nanstd(peaktdf(:,1,1,i),1),nanstd(peaktdf(:,2,1,i),1),'r.','MarkerSize',15)
-    plot([0,1.6],[0,1.6],'k-')
-    axis square
-    axis([0 1.6 0 1.6])
-end
-mtit('running pre vs. post peak df time')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-figure
-for i = 1:length(sizes)
-    subplot(2,4,i)
-    hold on
-    plot(peaksp(:,1,1,i),peaksp(:,2,1,i),'k.')
-    errorbar(nanmean(peaksp(:,1,1,i),1),nanmean(peaksp(:,2,1,i),1),...
-        nanstd(peaksp(:,1,1,i),1),nanstd(peaksp(:,2,1,i),1),'r.','MarkerSize',15)
-    plot([0,0.5],[0,0.5],'k-')
-    axis square
-    axis([0 0.5 0 0.5])
-end
-mtit('stationary pre vs. post peak spike')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-figure
-for i = 1:length(sizes)
-    subplot(2,4,i)
-    hold on
-    plot(peaktsp(:,1,2,i),peaktsp(:,2,2,i),'k.')
-    errorbar(nanmean(peaktsp(:,1,1,i),1),nanmean(peaktsp(:,2,1,i),1),...
-        nanstd(peaktsp(:,1,1,i),1),nanstd(peaktsp(:,2,1,i),1),'r.','MarkerSize',15)
-    plot([0,1.6],[0,1.6],'k-')
-    axis square
-    axis([0 1.6 0 1.6])
-end
-mtit('running pre vs. post peak spike time')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-%%%instead of peak, use average over window
-figure
-for i = 1:length(sizes)
-    subplot(2,4,i)
-    hold on
-    plot(squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(1:cellcnt,dfWindow,:,:,end,i,1),4),3),2)),...
-        squeeze(nanmean(nanmean(nanmean(grpdftuningPOST(1:cellcnt,dfWindow,:,:,end,i,1),4),3),2)),'k.')
-    errorbar(squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPRE(:,dfWindow,:,:,end,i,1),4),3),2),1)),...
-        squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPOST(:,dfWindow,:,:,end,i,1),4),3),2),1)),...
-        squeeze(nanstd(nanstd(nanstd(nanstd(grpdftuningPRE(:,dfWindow,:,:,end,i,1),4),3),2),1)),...
-        squeeze(nanstd(nanstd(nanstd(nanstd(grpdftuningPOST(:,dfWindow,:,:,end,i,1),4),3),2),1)),'r.','MarkerSize',15)
-    plot([0,0.4],[0,0.4],'k-')
-    axis square
-    axis([0 0.4 0 0.4])
-end
-mtit('stationary pre vs. post window df')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-figure
-for i = 1:length(sizes)
-    subplot(2,4,i)
-    hold on
-    plot(squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(1:cellcnt,dfWindow,:,:,end,i,2),4),3),2)),...
-        squeeze(nanmean(nanmean(nanmean(grpdftuningPOST(1:cellcnt,dfWindow,:,:,end,i,2),4),3),2)),'k.')
-    errorbar(squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPRE(:,dfWindow,:,:,end,i,2),4),3),2),1)),...
-        squeeze(nanmean(nanmean(nanmean(nanmean(grpdftuningPOST(:,dfWindow,:,:,end,i,2),4),3),2),1)),...
-        squeeze(nanstd(nanstd(nanstd(nanstd(grpdftuningPRE(:,dfWindow,:,:,end,i,2),4),3),2),1)),...
-        squeeze(nanstd(nanstd(nanstd(nanstd(grpdftuningPOST(:,dfWindow,:,:,end,i,2),4),3),2),1)),'r.','MarkerSize',15)
-    plot([0,0.4],[0,0.4],'k-')
-    axis square
-    axis([0 0.4 0 0.4])
-end
-mtit('running pre vs. post window df')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-%%%calculate suppression index for df
-SIdf = nan(cellcnt,2,2,2); %cell, pre/post, sit/run, SI/pref size
-for i = 1:cellcnt
-    for j = 1:2
-        [peak, prefsize] = max(squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(i,dfWindow,:,:,end,:,j),4),3),2)));
-%         SIdf(i,1,j,1) = (peak-squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(i,dfWindow,:,:,end,end,j),4),3),2)))/...
-%             squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(i,dfWindow,:,:,end,end,j),4),3),2));
-%         if peak>=0.01
-            SIdf(i,1,j,1) = (peak-squeeze(nanmean(nanmean(nanmean(grpdftuningPRE(i,dfWindow,:,:,end,end,j),4),3),2)))/peak;
-            SIdf(i,1,j,2) = sizeVals(prefsize);
-%         else
-%             SIdf(i,1,j,1)=NaN;SIdf(i,1,j,2)=NaN;
-%         end
-        [peak, prefsize] = max(squeeze(nanmean(nanmean(nanmean(grpdftuningPOST(i,dfWindow,:,:,end,:,j),4),3),2)));
-%         SIdf(i,2,j,1) = (peak-squeeze(nanmean(nanmean(nanmean(grpdftuningPOST(i,dfWindow,:,:,end,end,j),4),3),2)))/...
-%             squeeze(nanmean(nanmean(nanmean(grpdftuningPOST(i,dfWindow,:,:,end,end,j),4),3),2));
-%         if peak>=0.01
-            SIdf(i,2,j,1) = (peak-squeeze(nanmean(nanmean(nanmean(grpdftuningPOST(i,dfWindow,:,:,end,end,j),4),3),2)))/peak;
-            SIdf(i,2,j,2) = sizeVals(prefsize);
-%         else
-%             SIdf(i,2,j,1)=NaN;SIdf(i,2,j,2)=NaN;
-%         end
+    mtit('Mean cell cycle avg/size run')
+    if exist('psfile','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfile,'-append');
     end
-end
 
-% SIdf = SIdf(SIdf(:,1,1,1)<=1&SIdf(:,1,1,1)>=-0.1,:,:,:);
-
-%%%plot suppression index vs preferred size
-figure
-subplot(2,2,1)
-plot(SIdf(:,1,1,2),SIdf(:,1,1,1),'k.')
-axis([0 70 -0.2 1])
-xlabel('Preferred stim size')
-ylabel('Suppression Index')
-legend('pre sit','location','northoutside')
-subplot(2,2,2)
-plot(SIdf(:,2,1,2),SIdf(:,2,1,1),'k.')
-axis([0 70 -0.2 1])
-xlabel('Preferred stim size')
-ylabel('Suppression Index')
-legend('post sit','location','northoutside')
-subplot(2,2,3)
-plot(SIdf(:,1,2,2),SIdf(:,1,2,1),'k.')
-axis([0 70 -0.2 1])
-xlabel('Preferred stim size')
-ylabel('Suppression Index')
-legend('pre run','location','northoutside')
-subplot(2,2,4)
-plot(SIdf(:,2,2,2),SIdf(:,2,2,1),'k.')
-axis([0 70 -0.2 1])
-xlabel('Preferred stim size')
-ylabel('Suppression Index')
-legend('post run','location','northoutside')
-mtit('df Suppression Index vs. Preferred Size')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-%%%plot suppression index pre vs. post
-figure
-subplot(1,2,1)
-hold on
-plot(SIdf(:,1,1,1),SIdf(:,2,1,1),'k.')
-plot(squeeze(nanmedian(SIdf(:,1,1,1),1)),squeeze(nanmedian(SIdf(:,2,1,1),1)),'r.','MarkerSize',25)%,...
-%     squeeze(nanstd(SI(:,1,1,1),1)),squeeze(nanstd(SI(:,2,1,1),1)),'r','MarkerSize',25)
-plot([-0.2,1],[-0.2,1],'k-')
-axis([-0.2 1 -0.2 1])
-axis square
-xlabel('Pre Sit SI')
-ylabel('Post Sit SI')
-subplot(1,2,2)
-hold on
-plot(SIdf(:,1,2,1),SIdf(:,2,2,1),'k.')
-plot(squeeze(nanmedian(SIdf(:,1,2,1),1)),squeeze(nanmedian(SIdf(:,2,2,1),1)),'r.','MarkerSize',25)%,...
-%     squeeze(nanstd(SI(:,1,1,1),1)),squeeze(nanstd(SI(:,2,1,1),1)),'r','MarkerSize',25)
-plot([-0.2,1],[-0.2,1],'k-')
-axis([-0.2 1 -0.2 1])
-axis square
-xlabel('Pre Run SI')
-ylabel('Post Run SI')
-mtit('df Suppression Index (SI)')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-%%%plot preferred stimulus size pre vs. post
-figure
-subplot(1,2,1)
-hold on
-plot(SIdf(:,1,1,2),SIdf(:,2,1,2),'k.')
-plot(squeeze(nanmedian(SIdf(:,1,1,2),1)),squeeze(nanmedian(SIdf(:,2,1,2),1)),'r.','MarkerSize',25)%,...
-%     squeeze(nanstd(SI(:,1,1,1),1)),squeeze(nanstd(SI(:,2,1,1),1)),'r','MarkerSize',25)
-plot([0,70],[0,70],'k-')
-axis([0 70 0 70])
-axis square
-xlabel('Pre Sit Degrees')
-ylabel('Post Sit Degrees')
-subplot(1,2,2)
-hold on
-plot(SIdf(:,1,2,2),SIdf(:,2,2,2),'k.')
-plot(squeeze(nanmedian(SIdf(:,1,2,2),1)),squeeze(nanmedian(SIdf(:,2,2,2),1)),'r.','MarkerSize',25)%,...
-%     squeeze(nanstd(SI(:,1,1,1),1)),squeeze(nanstd(SI(:,2,1,1),1)),'r','MarkerSize',25)
-plot([0,70],[0,70],'k-')
-axis([0 70 0 70])
-axis square
-xlabel('Pre Run Degrees')
-ylabel('Post Run Degrees')
-mtit('df Preferred Size')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
-
-%%%calculate suppression index for spikes
-SIsp = nan(cellcnt,2,2,2); %cell, pre/post, sit/run, SI/pref size
-for i = 1:cellcnt
-    for j = 1:2
-        [peak, prefsize] = max(squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(i,spWindows{3},:,:,end,:,j),4),3),2)));
-        SIsp(i,1,j,1) = (peak-squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(i,spWindows{3},:,:,end,end,j),4),3),2)))/peak;%...
-%             squeeze(nanmean(nanmean(nanmean(grpsptuningPRE(i,spWindows{1},:,:,end,end,j),4),3),2));
-        SIsp(i,1,j,2) = sizeVals(prefsize);
-        [peak, prefsize] = max(squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(i,spWindows{3},:,:,end,:,j),4),3),2)));
-        SIsp(i,2,j,1) = (peak-squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(i,spWindows{3},:,:,end,end,j),4),3),2)))/peak;%...
-%             squeeze(nanmean(nanmean(nanmean(grpsptuningPOST(i,spWindows{1},:,:,end,end,j),4),3),2));
-        SIsp(i,2,j,2) = sizeVals(prefsize);
+    figure
+    subplot(1,2,1)
+    hold on
+    plot([0 1],[0 1],'k--')
+    plot(grpSI(goodcc{z},1,1),grpSI(goodcc{z},1,2),'k.','Markersize',20)
+    errorbarxy(nanmean(grpSI(goodcc{z},1,1)),nanmean(grpSI(goodcc{z},1,2)),...
+        nanstd(grpSI(goodcc{z},1,1))/sqrt(length(goodcc{z})),nanstd(grpSI(goodcc{z},1,2))/sqrt(length(goodcc{z})))
+    axis([0 1 0 1])
+    xlabel('sit pre SI')
+    ylabel('sit post SI')
+    axis square
+    subplot(1,2,2)
+    hold on
+    plot([0 1],[0 1],'k--')
+    plot(grpSI(goodcc{z},2,1),grpSI(goodcc{z},2,2),'k.','Markersize',20)
+    errorbarxy(nanmean(grpSI(goodcc{z},2,1)),nanmean(grpSI(goodcc{z},2,2)),...
+        nanstd(grpSI(goodcc{z},2,1))/sqrt(length(goodcc{z})),nanstd(grpSI(goodcc{z},2,2))/sqrt(length(goodcc{z})))
+    axis([0 1 0 1])
+    xlabel('sit pre SI')
+    ylabel('sit post SI')
+    axis square
+    mtit('Cell Suppression Index')
+    if exist('psfile','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfile,'-append');
     end
-end
 
-% SIsp = SIsp(SIsp(:,1,1,1)<=1&SIsp(:,1,1,1)>=-0.1,:,:,:);
 
-%%%plot suppression index vs preferred size
-figure
-subplot(2,2,1)
-plot(SIsp(:,1,1,2),SIsp(:,1,1,1),'k.')
-axis([0 70 -0.2 1])
-xlabel('Preferred stim size')
-ylabel('Suppression Index')
-legend('pre sit','location','northoutside')
-subplot(2,2,2)
-plot(SIsp(:,2,1,2),SIsp(:,2,1,1),'k.')
-axis([0 70 -0.2 1])
-xlabel('Preferred stim size')
-ylabel('Suppression Index')
-legend('post sit','location','northoutside')
-subplot(2,2,3)
-plot(SIsp(:,1,2,2),SIsp(:,1,2,1),'k.')
-axis([0 70 -0.2 1])
-xlabel('Preferred stim size')
-ylabel('Suppression Index')
-legend('pre run','location','northoutside')
-subplot(2,2,4)
-plot(SIsp(:,2,2,2),SIsp(:,2,2,1),'k.')
-axis([0 70 -0.2 1])
-xlabel('Preferred stim size')
-ylabel('Suppression Index')
-legend('post run','location','northoutside')
-mtit('spike Suppression Index vs. Preferred Size')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
 
-%%%plot suppression index pre vs. post
-figure
-subplot(1,2,1)
-hold on
-plot(SIsp(:,1,1,1),SIsp(:,2,1,1),'k.')
-plot(squeeze(nanmedian(SIsp(:,1,1,1),1)),squeeze(nanmedian(SIsp(:,2,1,1),1)),'r.','MarkerSize',25)%,...
-%     squeeze(nanstd(SI(:,1,1,1),1)),squeeze(nanstd(SI(:,2,1,1),1)),'r','MarkerSize',25)
-plot([-0.2,1],[-0.2,1],'k-')
-axis([-0.2 1 -0.2 1])
-axis square
-xlabel('Pre Sit SI')
-ylabel('Post Sit SI')
-subplot(1,2,2)
-hold on
-plot(SIsp(:,1,2,1),SIsp(:,2,2,1),'k.')
-plot(squeeze(nanmedian(SIsp(:,1,2,1),1)),squeeze(nanmedian(SIsp(:,2,2,1),1)),'r.','MarkerSize',25)%,...
-%     squeeze(nanstd(SI(:,1,1,1),1)),squeeze(nanstd(SI(:,2,1,1),1)),'r','MarkerSize',25)
-plot([-0.2,1],[-0.2,1],'k-')
-axis([-0.2 1 -0.2 1])
-axis square
-xlabel('Pre Run SI')
-ylabel('Post Run SI')
-mtit('spike Suppression Index (SI)')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
+    %%%plot group data for size select averaging over animals
+    %%size suppression curves
+    figure
+    subplot(1,2,1)
+    hold on
+    pre=nan(length(unique(session)),length(sizes));post=pre;
+    for j = 1:length(unique(session))
+        pre(j,:) = squeeze(nanmean(nanmean(grpdfsize(intersect(find(session==j),goodcc{z}),dfWindow,:,1,1),2),1)); pre(1)=0; %median of 0 = nan
+        post(j,:) = squeeze(nanmean(nanmean(grpdfsize(intersect(find(session==j),goodcc{z}),dfWindow,:,1,2),2),1)); post(1)=0;
+    end
+    errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
+    errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
+    % plot(1:length(radiusRange),pre,'k--.')
+    % plot(1:length(radiusRange),post,'r--.')
+    xlabel('Stim Size (deg)')
+    ylabel('sit spikes')
+    axis([0 length(radiusRange)+1 0 10])
+    axis square
+    set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
 
-%%%plot preferred stimulus size pre vs. post
-figure
-subplot(1,2,1)
-hold on
-plot(SIsp(:,1,1,2),SIsp(:,2,1,2),'k.')
-plot(squeeze(nanmedian(SIsp(:,1,1,2),1)),squeeze(nanmedian(SIsp(:,2,1,2),1)),'r.','MarkerSize',25)%,...
-%     squeeze(nanstd(SI(:,1,1,1),1)),squeeze(nanstd(SI(:,2,1,1),1)),'r','MarkerSize',25)
-plot([0,70],[0,70],'k-')
-axis([0 70 0 70])
-axis square
-xlabel('Pre Sit Degrees')
-ylabel('Post Sit Degrees')
-subplot(1,2,2)
-hold on
-plot(SIsp(:,1,2,2),SIsp(:,2,2,2),'k.')
-plot(squeeze(nanmedian(SIsp(:,1,2,2),1)),squeeze(nanmedian(SIsp(:,2,2,2),1)),'r.','MarkerSize',25)%,...
-%     squeeze(nanstd(SI(:,1,1,1),1)),squeeze(nanstd(SI(:,2,1,1),1)),'r','MarkerSize',25)
-plot([0,70],[0,70],'k-')
-axis([0 70 0 70])
-axis square
-xlabel('Pre Run Degrees')
-ylabel('Post Run Degrees')
-mtit('spike Preferred Size')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
+    subplot(1,2,2)
+    hold on
+    pre=nan(length(unique(session)),length(sizes));post=pre;
+    for j = 1:length(unique(session))
+        pre(j,:) = squeeze(nanmean(nanmean(grpdfsize(intersect(find(session==j),goodcc{z}),dfWindow,:,2,1),2),1)); pre(1)=0; %median of 0 = nan
+        post(j,:) = squeeze(nanmean(nanmean(grpdfsize(intersect(find(session==j),goodcc{z}),dfWindow,:,2,2),2),1)); post(1)=0;
+    end
+    errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
+    errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
+    % plot(1:length(radiusRange),pre,'k--.')
+    % plot(1:length(radiusRange),post,'r--.')
+    xlabel('Stim Size (deg)')
+    ylabel('run spikes')
+    axis([0 length(radiusRange)+1 0 10])
+    axis square
+    set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+    mtit(sprintf('Mean animal (n=%d) size suppression curve (cc>%0.2f)',numAni,ccvals(z)))
+    if exist('psfile','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfile,'-append');
+    end
 
-if plotallcells
-    for i = 1:10:cellcnt
-        figure
-        for j = 1:length(sizes)
-            subplot(2,4,j)
-            hold on
-            plot(timepts,squeeze(nanmean(nanmean(grpdftuningPRE(i,:,:,end,end,j,1),4),3)),'k-')
-            plot(timepts,squeeze(nanmean(nanmean(grpdftuningPOST(i,:,:,end,end,j,2),4),3)),'r-')
-            axis square
-            axis([timepts(1) timepts(end) -0.05 0.5])
+    figure
+    for i = 2:length(sizes)
+        subplot(2,3,i-1)
+        hold on
+        pre=nan(length(unique(session)),15);post=pre;
+        for j = 1:length(unique(session))
+                pre(j,:) = nanmean(grpdfsize(intersect(find(session==j),goodcc{z}),:,i,1,1),1);
+                post(j,:) = nanmean(grpdfsize(intersect(find(session==j),goodcc{z}),:,i,1,2),1);
         end
-        mtit(sprintf('cell %d df',i))
-        figure
-        for j = 1:length(sizes)
-            subplot(2,4,j)
-            hold on
-            plot(timepts,squeeze(nanmean(nanmean(grpsptuningPRE(i,:,:,end,end,j,1),4),3)),'k-')
-            plot(timepts,squeeze(nanmean(nanmean(grpsptuningPOST(i,:,:,end,end,j,2),4),3)),'r-')
-            axis square
-            axis([timepts(1) timepts(end) -0.05 0.5])
+        if length(unique(session))==1
+            plot(timepts,pre,'k')
+            plot(timepts,post,'r')
+        else
+            shadedErrorBar(timepts,nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k',1)
+            shadedErrorBar(timepts,nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r',1)
         end
-        mtit(sprintf('cell %d spikes',i))
+        axis square
+        axis([timepts(1) timepts(end) 0 10])
+        set(gca,'LooseInset',get(gca,'TightInset'))
+    end
+    mtit('Animal response/size sit')
+    if exist('psfile','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfile,'-append');
+    end
+
+    figure
+    for i = 2:length(sizes)
+        subplot(2,3,i-1)
+        hold on
+        pre=nan(length(unique(session)),15);post=pre;
+        for j = 1:length(unique(session))
+                pre(j,:) = nanmean(grpdfsize(intersect(find(session==j),goodcc{z}),:,i,2,1),1);
+                post(j,:) = nanmean(grpdfsize(intersect(find(session==j),goodcc{z}),:,i,2,2),1);
+        end
+        if length(unique(session))==1
+            plot(timepts,pre,'k')
+            plot(timepts,post,'r')
+        else
+            shadedErrorBar(timepts,nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k',1)
+            shadedErrorBar(timepts,nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r',1)
+        end
+        axis square
+        axis([timepts(1) timepts(end) 0 10])
+        set(gca,'LooseInset',get(gca,'TightInset'))
+    end
+    mtit('Animal response/size run')
+    if exist('psfile','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfile,'-append');
+    end
+
+    %%%plot suppression index
+    figure
+    subplot(1,2,1)
+    hold on
+    pre=nan(length(unique(session)),1,1);post=pre;
+    for j = 1:length(unique(session))
+        pre(j,:) = nanmean(grpSI(intersect(find(session==j),goodcc{z}),1,1),1);
+        post(j,:) = nanmean(grpSI(intersect(find(session==j),goodcc{z}),1,2),1);
+    end
+    plot([0 1],[0 1],'k--')
+    plot(pre,post,'k.','Markersize',20)
+    errorbarxy(nanmean(pre,1),nanmean(post,1),nanstd(pre,1)/sqrt(numAni),nanstd(post,1)/sqrt(numAni))
+    axis([0 1 0 1])
+    xlabel('sit pre SI')
+    ylabel('sit post SI')
+    axis square
+    subplot(1,2,2)
+    hold on
+    pre=nan(length(unique(session)),1,1);post=pre;
+    for j = 1:length(unique(session))
+        pre(j,:) = nanmean(grpSI(intersect(find(session==j),goodcc{z}),2,1),1);
+        post(j,:) = nanmean(grpSI(intersect(find(session==j),goodcc{z}),2,2),1);
+    end
+    plot([0 1],[0 1],'k--')
+    plot(pre,post,'k.','Markersize',20)
+    errorbarxy(nanmean(pre,1),nanmean(post,1),nanstd(pre,1)/sqrt(numAni),nanstd(post,1)/sqrt(numAni))
+    axis([0 1 0 1])
+    xlabel('sit pre SI')
+    ylabel('sit post SI')
+    axis square
+    mtit('Animal Suppression Index')
+    if exist('psfile','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfile,'-append');
     end
 end
 
-save(newpdfFile(1:end-4),'grpdftuningPRE','grpdftuningPOST','grpsptuningPRE','grpsptuningPOST')%,'grppeaksPRE','grppeaksPOST')
+
+%%%individual cell plotting
+for i=1:length(goodcc{end})
+    figure
+
+    %%%avg resp to best stim for each size stationary
+    subplot(2,3,1)
+    hold on
+    traces = squeeze(grpdfsize(goodcc{end}(i),:,:,1,1));
+    plot(timepts,traces)
+    xlabel('Time(s)')
+    ylabel('pre spikes')
+    if isnan(min(min(traces)))
+        axis([0 1 0 1])
+    else
+        axis([timepts(1) timepts(end) min(min(traces))-0.01 max(max(traces))+0.01])
+    end
+    axis square
+    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+
+    %%%avg resp to best stim for each size running
+    subplot(2,3,2)
+    hold on
+    traces = squeeze(grpdfsize(goodcc{end}(i),:,:,1,2));
+    plot(timepts,traces)
+    xlabel('Time(s)')
+    ylabel('post spikes')
+    if isnan(min(min(traces)))
+        axis([0 1 0 1])
+    else
+        axis([timepts(1) timepts(end) min(min(traces))-0.01 max(max(traces))+0.01])
+    end
+    axis square
+    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+
+    %%%size curve based on gratings parameters
+    subplot(2,3,3)
+    hold on
+    splotsit = squeeze(nanmean(grpdfsize(goodcc{end}(i),dfWindow,:,1,1),2));
+    splotrun = squeeze(nanmean(grpdfsize(goodcc{end}(i),dfWindow,:,1,2),2));
+    plot(1:length(radiusRange),splotsit,'k-o','Markersize',5)
+    plot(1:length(radiusRange),splotrun,'r-o','Markersize',5)
+    xlabel('Stim Size (deg)')
+    ylabel('spikes')
+    axis([0 length(radiusRange)+1 min(min([splotsit splotrun]))-0.01 max(max([splotsit splotrun]))+0.01])
+    set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes)
+    axis square
+    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+    
+    subplot(2,3,4)
+    imagesc(cellprintpre{goodcc{end}(i)},[0.5 1]);
+    axis square
+    axis off
+    title('pre')
+    
+    subplot(2,3,5)
+    imagesc(cellprintpost{goodcc{end}(i)},[0.5 1]);
+    axis square
+    axis off
+    title('post')
+    
+    subplot(2,3,6)
+    imagesc(cellprintpost{i} - cellprintpre{i},[-0.5 0.5]);
+    axis square
+    axis off
+    title(sprintf('rms %0.3f cc %0.3f',rmsdiff(goodcc{end}(i)),footcc(goodcc{end}(i))))
+
+    mtit(sprintf('session #%d cell #%d tuning',session(goodcc{1}(i)),grpcells(goodcc{1}(i))))
+    if exist('psfile','var')
+        set(gcf, 'PaperPositionMode', 'auto'); %%%figure out how to make this full page landscape
+        print('-dpsc',psfile,'-append');
+    end
+end
 
 try
-    dos(['ps2pdf ' 'c:\temp.ps "' newpdfFile '"'] )
-
+    dos(['ps2pdf ' psfile ' "' [fullfile(savepath,grpfilename) '.pdf'] '"'] )
 catch
     display('couldnt generate pdf');
 end
 
+delete(psfile);

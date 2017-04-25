@@ -2,12 +2,22 @@ function behav2pSession( fileName, sessionName,behavfile,psfile)%%% create sessi
 %%% reads raw images, calculates dfof, and aligns to stim sync
 
 dt = 0.1; %%% resampled time frame
-
-
 framerate=1/dt;
 cycLength=10;
-cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  cfg.syncToVid = 0; cfg.saveDF=0;%%% configuration parameters
+
+global S2P
+
+if (exist('S2P','var')&S2P==1)
+    cfg.dt = dt; cfg.spatialBin=1; cfg.temporalBin=1;  %%% configuration parameters suite2p
+    cfg.syncToVid=1; cfg.saveDF=0; cfg.nodfof=1;
+else
+    cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  %%% configuration parameters eff
+    cfg.syncToVid=1; cfg.saveDF=0;
+end
+
 get2pSession_sbx;
+
+%phasetimes = phasetimes(2:end)  %%% one session had an extra trigger, this removes it
 
 if ~exist('onsets','var')
     if ~exist('behavfile','var')
@@ -18,6 +28,7 @@ if ~exist('onsets','var')
     [onsets starts trialRecs] = sync2pBehavior_sbx(behavfile ,phasetimes);
     use = find(onsets<size(dfofInterp,3)*dt-3 & onsets>5); %%%% get rid of trials right at beginning or end, that may be incomplete
     use = use(1:(length(use)-1));  %sometimes behavior session trial records has 1 xtra trial
+%     use = use(1:104);  %can use this for selecting subsets of trials
     onsets = onsets(use); starts=starts(use,:); trialRecs = trialRecs(use);
     save(sessionName,'onsets','starts','trialRecs','-append');
 end
@@ -27,8 +38,12 @@ behavdt = diff(phasetimes);
 stopTTL = behavdt(1:3:end);
 stopRatrix = abs(starts(:,1));
 
+try
+err = mean(abs(stopTTL(1:length(stopRatrix))-stopRatrix'));
+catch
+    err = mean(abs(stopTTL(1:length(stopRatrix))-stopRatrix));
+end;    
 
-err = mean(abs(stopTTL(1:length(stopRatrix))-stopRatrix));
 figure
 plot(stopTTL); hold on; plot(stopRatrix,'.'); title(sprintf('err = %0.3f',err)); legend({'TTL','Ratrix'}); xlabel('trial #'); ylabel('secs');
  

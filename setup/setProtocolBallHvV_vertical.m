@@ -40,6 +40,15 @@ end
        pixPerCycs              = [200];
        normalizedPosition      = [0.50 0.66];
        radius                 = .27;  
+
+   case 'g62ddd3ln' % Started 4/05/17  %%hvv center 4/15/17 %%%full 4/26/17
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 219;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;       
+       pixPerCycs              = [200];
+       normalizedPosition      = [0.48 0.52];
+       radius                 = .35;  
        
    case 'g62ww3rt' % Started 4/05/17 %%hvv start 4/13/17 %%full 4/24/17
        requestRewardSizeULorMS = 0;
@@ -47,7 +56,7 @@ end
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        pixPerCycs              = [200];
-       normalizedPosition      = [0.42 0.58];
+       normalizedPosition      = [0.40 0.60];
        radius                 = .35;         
 
    case 'g62aaa4tt' % Started 3/29/17 %%hvv start 4/8/17 %%full 4/24/17
@@ -56,7 +65,7 @@ end
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        pixPerCycs              = [200];
-       normalizedPosition      = [0.40 0.60];
+       normalizedPosition      = [0.38 0.62];
        radius                 = .35;  
 
    case 'g62ggg6tt' % Started 3/29/17 %%hvv start 4/8/17 %%full 4/24/17
@@ -65,8 +74,8 @@ end
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        pixPerCycs              = [200];
-       normalizedPosition      = [0.42 0.58];
-       radius                 = .30;         
+       normalizedPosition      = [0.40 0.60];
+       radius                 = .29;         
        
    case 'g62ss4lt' % Started 4/07/17  %%hvv center 4/15/17 %%full 4/24/17
        requestRewardSizeULorMS = 0;
@@ -74,7 +83,7 @@ end
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        pixPerCycs              = [200];
-       normalizedPosition      = [0.40 0.60];
+       normalizedPosition      = [0.38 0.62];
        radius                 = .35;  
      
    case 'g62uu1tt' % Started 2/1/17 %%switch 2/8/17

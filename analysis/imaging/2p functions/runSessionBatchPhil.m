@@ -488,7 +488,7 @@ topo2pSession('G62BB10LT_001_006.sbx','darkness_POST_V2.mat',psfilename);
 % sizeSelect2pSession('G62BB2RT_001_004.sbx','sizeSession_PRE_V2.mat',psfilename);
 % sizeSelect2pSession('G62BB2RT_001_005.sbx','sizeSession_POST_V2.mat',psfilename);
 % topo2pSession('G62BB2RT_001_006.sbx','darkness_POST_V2.mat',psfilename);
->>>>>>> origin/trunk
+
 
 toc
 

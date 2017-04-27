@@ -6,7 +6,7 @@ clear all
 psfilename = 'C:\tempS2PPhil.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
-runS2PbatchPhil
+make_db_Phil
 
 cd(procdir)
 load(procfile)
@@ -72,8 +72,8 @@ cells = find(iscell);
 usePts = {};
 meanImg = squeeze(dat.mimg(:,:,2));meanShiftImg=meanImg;
 cImage = squeeze(dat.mimg(:,:,5));
-cropx = 1:size(meanImg,1);
-cropy = 1:size(meanImg,2);
+cropx = [1;size(meanImg,1)];
+cropy = [1;size(meanImg,2)];
 for k = 1:length(cells)
     usePts{k} = sub2ind(size(meanImg),dat.stat(cells(k)).ypix,dat.stat(cells(k)).xpix);
 end

@@ -78,22 +78,22 @@ for sess = 1:length(useSess);
     % contrast = contrast(1:end-5); %%% cut off last few in case imaging stopped early
     
     %%% median filter eye and speed data to remove transients
-    x = medfilt1(xEye,5); y= medfilt1(yEye,5);
-    v = medfilt1(sp,9); r = medfilt1(rad,7);
-    
-    Xfilt = medfilt1(X,5); Yfilt = medfilt1(Y,5);
-    %%% show raw and filtered data
-    figure
-    plot(xEye); hold on; plot(x); title('x'); legend('raw','filtered')
-    figure
-    plot(rad); hold on; plot(r); title('r'); legend('raw','filtered')
-    figure
-    plot(sp); hold on; plot(v); title('v'); legend('raw','filtered')
-    
-    %%% normalize eye/speed data (custom function nrm)
-    %x = nrm(x); y = nrm(y); r= nrm(r); v = nrm(v);
-    x = x/100; y = y/100; r = r/40; v =v/3000;
-    
+ %   x = medfilt1(xEye,5); y= medfilt1(yEye,5);
+%     v = medfilt1(sp,9); r = medfilt1(rad,7);
+%     
+%     Xfilt = medfilt1(X,5); Yfilt = medfilt1(Y,5);
+%     %%% show raw and filtered data
+%     figure
+%     plot(xEye); hold on; plot(x); title('x'); legend('raw','filtered')
+%     figure
+%     plot(rad); hold on; plot(r); title('r'); legend('raw','filtered')
+%     figure
+%     plot(sp); hold on; plot(v); title('v'); legend('raw','filtered')
+%     
+%     %%% normalize eye/speed data (custom function nrm)
+%     %x = nrm(x); y = nrm(y); r= nrm(r); v = nrm(v);
+%     x = x/100; y = y/100; r = r/40; v =v/3000;
+%     
    im = dfof_bg;
    clear dfof_bg;
    
@@ -251,7 +251,7 @@ for sess = 1:length(useSess);
     %%% kmeans clustering
     nclust = 6;
     tic
-    idx = kmeans(decorrTrace',nclust,'distance','correlation');
+    idx = kmeans(decorrTrace'+rand(size(decorrTrace'))*10^-4,nclust,'distance','correlation');
     toc
     
     maxim = prctile(im,95,3); %%% 95th percentile makes a good background image
@@ -330,9 +330,82 @@ for sess = 1:length(useSess);
     xlabel('distance'); ylabel('correlation')
     legend('contra','ipsi');
       
-    corrAll(:,:,sess) = corr;
+    corrAll(:,:,sess) = traceCorr;
 end
 
+traceCorr = mean(corrAll,3);
 
-
+        ypts = [];
+        xpts = [];
+    clustcol = 'wgrcmyk'; %%% color scheme for clusters
+    figure
+    imagesc(maxim) ; colormap gray; axis equal
+    hold on
+    clear dist contra 
+    for i = 1:npts
+        for j= 1:npts
+            dist(i,j) = sqrt((x(i)-x(j))^2 + (y(i)-y(j))^2);
+            contra(i,j) = (x(i)-size(im,2)/2) * (x(j)-size(im,2)/2) <0 & ~(x(i)==33) & ~(x(j)==33) ; %%% does it cross the midline
+            if traceCorr(i,j)>0.6 && contra(i,j)
+                plot([y(i) y(j)],[x(i) x(j)],'Linewidth',8*(traceCorr(i,j)-0.6),'Color','b')
+            end
+        end
+    end
+  
+    for i = 1:npts
+        plot(y(i),x(i),[clustcol(idx(i)) 'o'],'Markersize',8,'Linewidth',2)
+        plot(y(i),x(i),[clustcol(idx(i)) '*'],'Markersize',8,'Linewidth',2)
+    end
+    plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
+    axis ij
+    axis equal
+    title('average')
+    
+    %%% plot clustered points with connectivity
+    clustcol = 'wgrcmyk'; %%% color scheme for clusters
+    figure
+    imagesc(maxim) ; colormap gray; axis equal
+    hold on
+  
+    for i = 1:npts
+        for j= 1:npts
+            
+            if traceCorr(i,j)>0.5 && dist(i,j) > gridspace*2 &&~contra(i,j)
+                plot([y(i) y(j)],[x(i) x(j)],'Linewidth',8*(traceCorr(i,j)-0.5),'Color','b')
+            end
+        end
+    end  
+    for i = 1:npts
+        plot(y(i),x(i),[clustcol(idx(i)) 'o'],'Markersize',8,'Linewidth',2)
+        plot(y(i),x(i),[clustcol(idx(i)) '*'],'Markersize',8,'Linewidth',2)
+    end
+    plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
+    axis ij
+    axis equal
+     title('average')
+     
+     
+    dist = dist(:);
+    traceCorr = traceCorr(:);
+    contra = contra(:);
+    
+    distbins = gridspace/2:gridspace:60;
+    for i = 1:length(distbins)-1;
+        meanC(i) = mean(traceCorr(dist>distbins(i) & dist<=distbins(i+1) & ~contra));
+    end
+    meanC(i+1) = mean(traceCorr(contra & dist>2*gridspace));
+    
+    figure
+    bar(meanC)
+    xlabel('distance'); ylabel('correlation')
+     title('average')
+     
+     
+    figure
+     hold on
+    plot(dist(contra),traceCorr(contra),'r*')
+    plot(dist(~contra),traceCorr(~contra),'o');
+    xlabel('distance'); ylabel('correlation')
+    legend('contra','ipsi');
+ title('average')
 

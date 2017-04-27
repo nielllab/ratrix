@@ -10,8 +10,8 @@ for sess = 1:length(useSess);
     
     %load([pathname '\' files(i).dir '\' files(i).moviename]);
     clear alignTheta
-    load([pathname '\' files(sess).dir '\' files(sess).detection],'dfof_bg','frameT','cycMap','sp','stimRec','xEye','yEye','xFilt','yFilt','sp','rad','X','Y','R');
-    load([pathname '\' files(sess).dir '\' files(sess).detection],'alignTheta','alignZoom','alignLambda');
+    load([pathname '\' files(useSess(sess)).dir '\' files(useSess(sess)).detection],'dfof_bg','frameT','cycMap','sp','stimRec','xEye','yEye','xFilt','yFilt','sp','rad','X','Y','R');
+    load([pathname '\' files(useSess(sess)).dir '\' files(useSess(sess)).detection],'alignTheta','alignZoom','alignLambda');
     
     %%% align data
     redoAlign=0;
@@ -52,7 +52,7 @@ for sess = 1:length(useSess);
         zm = size(dfof_bg,1)/size(blueImg,1);
         ringRadiusZm = zm*ringRadius;
         alignZoom = 128/ringRadiusZm
-        save([pathname '\' files(sess).dir '\' files(sess).detection],'alignTheta','alignZoom','alignLambda','-append');
+        save([pathname '\' files(useSess(sess)).dir '\' files(useSess(sess)).detection],'alignTheta','alignZoom','alignLambda','-append');
     end
     
     dfof_bgAlign = imrotate(dfof_bg,alignTheta);
@@ -308,7 +308,13 @@ for sess = 1:length(useSess);
     plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
     axis ij
     axis equal
+    if sess==1
+        decorrTraceAll=decorrTrace;
+    else
+        decorrTraceAll=[decorrTraceAll; decorrTrace];
+    end
     
+      corrAll(:,:,sess) = traceCorr;
     dist = dist(:);
     traceCorr = traceCorr(:);
     contra = contra(:);
@@ -330,11 +336,14 @@ for sess = 1:length(useSess);
     xlabel('distance'); ylabel('correlation')
     legend('contra','ipsi');
       
-    corrAll(:,:,sess) = traceCorr;
+  
 end
 
 traceCorr = mean(corrAll,3);
-
+decorrTrace =  decorrTraceAll;
+  tic
+    idx = kmeans(decorrTrace'+rand(size(decorrTrace'))*10^-4,nclust,'distance','correlation');
+    toc
         ypts = [];
         xpts = [];
     clustcol = 'wgrcmyk'; %%% color scheme for clusters

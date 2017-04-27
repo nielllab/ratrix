@@ -1,22 +1,19 @@
 close all; clear all;
 
 batch_widefield_eyes;
-%useSess = 1:length(files);
-% useSess =  find(strcmp({files.notes},'good data'))
-useSess =  find( strcmp({files.treatment},'DOI') & strcmp({files.notes},'good data'))
-%useSess =  find(strcmp({files.notes},'good data') & strcmp({files.expt},'032017_g62ww3-rt'))
 
-% useSess = 1:length(files);
+useSess = 1:length(files);
 
 load('\\angie\Angie_analysis\DetectionStim2contrast_LOW_7_25min.mat')
 contrast = contrast(1:end-5); xpos = xpos(1:end-5); ypos=ypos(1:end-5);
 
 for sess = 1:length(useSess);
     
-    %load([pathname '\' files(i).dir '\' files(i).moviename]);
+   %load([pathname '\' files(i).dir '\' files(i).moviename]);
     clear alignTheta
-    load([pathname '\' files(sess).dir '\' files(sess).detection],'dfof_bg','frameT','cycMap','sp','stimRec','xEye','yEye','xFilt','yFilt','sp','rad','X','Y','R');
-    load([pathname '\' files(sess).dir '\' files(sess).detection],'alignTheta','alignZoom','alignLambda');
+    load([pathname '\' files(useSess(sess)).dir '\' files(useSess(sess)).detection],'dfof_bg','frameT','cycMap','sp','stimRec','xEye','yEye','xFilt','yFilt','sp','rad','X','Y','R');
+    load([pathname '\' files(useSess(sess)).dir '\' files(useSess(sess)).detection],'alignTheta','alignZoom','alignLambda');
+    
     
     %%% align data
     redoAlign=0;
@@ -340,19 +337,19 @@ end
 
 traceCorr = mean(corrAll,3);
 
-        ypts = [];
-        xpts = [];
-    clustcol = 'wgrcmyk'; %%% color scheme for clusters
-    figure
-    imagesc(maxim) ; colormap gray; axis equal
-    hold on
-    clear dist contra 
+ypts = [];
+xpts = [];
+clustcol = 'wgrcmyk'; %%% color scheme for clusters
+figure
+imagesc(maxim) ; colormap gray; axis equal
+hold on
+clear dist contra
     for i = 1:npts
         for j= 1:npts
             dist(i,j) = sqrt((x(i)-x(j))^2 + (y(i)-y(j))^2);
             contra(i,j) = (x(i)-size(im,2)/2) * (x(j)-size(im,2)/2) <0 & ~(x(i)==33) & ~(x(j)==33) ; %%% does it cross the midline
-            if traceCorr(i,j)>0.6 && contra(i,j)
-                plot([y(i) y(j)],[x(i) x(j)],'Linewidth',8*(traceCorr(i,j)-0.6),'Color','b')
+            if traceCorr(i,j)>0.6 & contra(i,j)
+                plot([y(i) y(j)],[x(i) x(j)],'Linewidth',6*(traceCorr(i,j)-0.6),'Color','b')
             end
         end
     end
@@ -361,6 +358,7 @@ traceCorr = mean(corrAll,3);
         plot(y(i),x(i),[clustcol(idx(i)) 'o'],'Markersize',8,'Linewidth',2)
         plot(y(i),x(i),[clustcol(idx(i)) '*'],'Markersize',8,'Linewidth',2)
     end
+    figure
     plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
     axis ij
     axis equal

@@ -18,7 +18,7 @@ if exist(psfile,'file')==2;delete(psfile);end
 
 timeStamps=stimRec.ts
 frameNum=stimRec.f
-thresh = 0.90 %pupil threshold for binarization
+thresh = 0.85 %pupil threshold for binarization
         puprange = [8 40]; %[8 40] %set range of pupil radius
         pupercent = 0.75; %set range pupil radius window
         pupchange = 0.3; %acceptable percent change in radius per framerange
@@ -26,7 +26,8 @@ thresh = 0.90 %pupil threshold for binarization
        % user input to select center and right points
         sprintf('Please select pupil center and top, eyeball top and right points, darkest part of eyeball')
         h1 = figure('units','normalized','outerposition',[0 0 1 1])
-        imshow(data(:,:,1000))
+% data=squeeze(data);     
+   imshow(data(:,:,1000))
         [cent] = ginput(5);
         close(h1);
         yc = cent(1,2); %pupil center y val
@@ -73,17 +74,16 @@ plot(rad)
 hold on;
 plot(xEye);hold on; plot(yEye);
 legend('rad','x pos','y pos')
-set(gcf, 'PaperPositionMode', 'auto');
-print('-dpsc',psfile,'-append');
+% set(gcf, 'PaperPositionMode', 'auto');
+% print('-dpsc',psfile,'-append');
 
 h4 = figure
-
 vidObj = VideoWriter('eyetracking_withfit.avi');
 %vidObj.FrameRate = 60;
 open(vidObj);
 
-for i = 1:size(data,3)
-    
+% for i = 1:size(data,3)
+    for i = 1:length(data)/7
     subplot(1,2,1)
     imshow(data(yc-vert:yc+vert,xc-horiz:xc+horiz,i));
     colormap gray
@@ -97,6 +97,7 @@ for i = 1:size(data,3)
     colormap gray
     hold on
     circle(centroid(i,1),centroid(i,2),rad(i))
+set(gca,'LineWidth',20)
     drawnow
     hold off
     
@@ -328,24 +329,25 @@ clear use max h
 test = unique(contrast)
 figure
 for c = 2:length(test)
-%     figure
+    %     figure
     use = find(contrast==test(c))
     n= test(c)
     if sum(contrast==test(2))>0
         
         for i=1:length(use)
-            h(i)=max(R(use(i),60:180)); axis square ; %ylim([min(R(use(i),:))-.5 max(R(use(i),:))+.5]); xlim([0 180]); hold on;
-       
+            h(i)=max(R(use(i),60:120)); axis square ; %ylim([min(R(use(i),:))-.5 max(R(use(i),:))+.5]); xlim([0 180]); hold on;
+            
         end
         plot(h,'-'); hold on
         plot(h,'k.','Markersize',12); xlim([0 16]);
-    %  title(sprintf('contrast = %.2g peak response/trial',n))
-title('peak response/trial')
-% legend(sprintf('%.2g contrast'))
-else display ('no contrast 01 trials')
+        set(gca,'FontSize',20)
+        %  title(sprintf('contrast = %.2g peak response/trial',n))
+        %title('peak response/trial')
+        % legend(sprintf('%.2g contrast'))
+    else display ('no contrast 01 trials')
     end
 end
-legend('.01 contrast','','.04 contrast');
+% legend('.01 contrast','','.04 contrast');
 set(gcf, 'PaperPositionMode', 'auto');
 print('-dpsc',psfile,'-append');
 

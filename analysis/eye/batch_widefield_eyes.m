@@ -5,6 +5,20 @@ n=0;
 
 
 n=n+1;
+files(n).expt = '032917_g62xx1-tt';
+files(n).dir = '032917_g62xx1-tt_blue_DOI';
+%files(n).movieFile = 'C:\Users\Angie Michaiel\Desktop\movie files\cortex\DetectionStim2contrast_LOW_7_25min'
+files(n).cfile = 'g62xx1-tt_run1_detection_2lowcontrasts_doi\03_29_17_g62xx1-tt_detection_2lowcontrasts_DOI_eye'
+files(n).detection = 'g62xx1-tt_run1_detection_2lowcontrasts_doi\g62xx1-tt_run1_detection_2lowcontrasts_dmaps';
+files(n).dark = '';
+files(n).topox = 'g62xx1-tt_run2_topox_doi\g62xx1-tt_run2_topox_dmaps';
+files(n).topoy = 'g62xx1-tt_run2_topoy\g62xx1-tt_run2_topoy_dmaps';  
+files(n).treatment = 'DOI'; 
+files(n).notes = 'good data'; 
+files(n).misc = ''; 
+
+
+n=n+1;
 files(n).expt = '032917_g62ww2-tt';
 files(n).dir = '032917_g62ww2-tt_blue_DOI';
 %files(n).movieFile = 'C:\Users\Angie Michaiel\Desktop\movie files\cortex\DetectionStim2contrast_LOW_7_25min'
@@ -42,6 +56,20 @@ files(n).topoy = 'g62aaa4-tt_run3_topoy\g62aaa4-tt_run3_topmaps';
 files(n).treatment = 'Saline'; 
 files(n).notes = 'good data'; 
 files(n).misc = ''; 
+
+
+n=n+1;
+files(n).expt = '032017_g62ww3-rt';
+files(n).dir = '032017_g62ww3-rt_blue';
+%files(n).movieFile = 'C:\Users\Angie Michaiel\Desktop\movie files\cortex\DetectionStim2contrast_LOW_7_25min'
+files(n).cfile = 'g62ww3-rt_run1_dectection_2contrasts\03_20_17_g62ww3-rt_detection_2contrasts_eye'
+files(n).detection = 'g62ww3-rt_run1_dectection_2contrasts\g62ww3-rt_run1_dectection_2contrasmaps';
+files(n).topox = 'g62ww3-rt_run2_topox\g62aaa4-tt_run2_topmaps';
+files(n).topoy = 'g62ww3-rt_run3_topoy\g62aaa4-tt_run3_topmaps';  
+files(n).treatment = 'Saline'; 
+files(n).notes = 'good data'; 
+files(n).misc = ''; 
+
 
 n=n+1;
 files(n).expt = '022717_g62rr2_tt';

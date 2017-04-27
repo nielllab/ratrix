@@ -1,7 +1,10 @@
 close all; clear all;
 
 batch_widefield_eyes;
-useSess = 1:length(files);
+%useSess = 1:length(files);
+% useSess =  find(strcmp({files.notes},'good data'))
+useSess =  find( strcmp({files.treatment},'DOI') & strcmp({files.notes},'good data'))
+%useSess =  find(strcmp({files.notes},'good data') & strcmp({files.expt},'032017_g62ww3-rt'))
 
 load('\\angie\Angie_analysis\DetectionStim2contrast_LOW_7_25min.mat')
 contrast = contrast(1:end-5); xpos = xpos(1:end-5); ypos=ypos(1:end-5);
@@ -10,8 +13,8 @@ for sess = 1:length(useSess);
     
     %load([pathname '\' files(i).dir '\' files(i).moviename]);
     clear alignTheta
-    load([pathname '\' files(sess).dir '\' files(sess).detection],'dfof_bg','frameT','cycMap','sp','stimRec','xEye','yEye','xFilt','yFilt','sp','rad','X','Y','R');
-    load([pathname '\' files(sess).dir '\' files(sess).detection],'alignTheta','alignZoom','alignLambda');
+    load([pathname '\' files(useSess(sess)).dir '\' files(useSess(sess)).detection],'dfof_bg','frameT','cycMap','sp','stimRec','xEye','yEye','xFilt','yFilt','sp','rad','X','Y','R');
+    load([pathname '\' files(useSess(sess)).dir '\' files(useSess(sess)).detection],'alignTheta','alignZoom','alignLambda');
     
     %%% align data
     redoAlign=0;
@@ -52,7 +55,7 @@ for sess = 1:length(useSess);
         zm = size(dfof_bg,1)/size(blueImg,1);
         ringRadiusZm = zm*ringRadius;
         alignZoom = 128/ringRadiusZm
-        save([pathname '\' files(sess).dir '\' files(sess).detection],'alignTheta','alignZoom','alignLambda','-append');
+        save([pathname '\' files(useSess(sess)).dir '\' files(useSess(sess)).detection],'alignTheta','alignZoom','alignLambda','-append');
     end
     
     dfof_bgAlign = imrotate(dfof_bg,alignTheta);
@@ -263,10 +266,10 @@ for sess = 1:length(useSess);
         for i = 1:size(dfof_bg,1);
             i
             for j = 1:size(dfof_bg,2);
-%                 [vfit(i,j,:) nil resid]= regress(squeeze(dfShift(i,j,:)),[v r   vis abs(dx) dx ones(size(r))]);
-%                 vcorr(i,j,:) = partialcorri(squeeze(dfShift(i,j,:)),[v r   vis abs(dx) dx]);
+                %                 [vfit(i,j,:) nil resid]= regress(squeeze(dfShift(i,j,:)),[v r   vis abs(dx) dx ones(size(r))]);
+                %                 vcorr(i,j,:) = partialcorri(squeeze(dfShift(i,j,:)),[v r   vis abs(dx) dx]);
                 
-                    [vfit(i,j,:) nil resid]= regress(squeeze(dfShift(i,j,:)),[v r   vis ldx rdx ones(size(r))]);
+                [vfit(i,j,:) nil resid]= regress(squeeze(dfShift(i,j,:)),[v r   vis ldx rdx ones(size(r))]);
                 vcorr(i,j,:) = partialcorri(squeeze(dfShift(i,j,:)),[v r   vis ldx rdx]);
             end
         end
@@ -318,57 +321,58 @@ end
 
 
 figure
-for i = 1:4
+for i = 1:length(useSess)
     subplot(2,2,i)
-    imshow(squeeze(timecourseAll(:,:,:,5,5,i)));
+    imshow(squeeze(timecourseAll(:,:,:,2,5,i))); %abs eye mvmt
 end
 
 
-figure
-for i = 1:4
-    subplot(2,2,i)
-    imagesc(squeeze(vcorrAll(:,:,2,5,i)))
-    colorbar
-end
 
 
 figure
-for i = 1:4
+for i = 1:length(useSess)
     subplot(2,2,i)
-    imagesc(squeeze(vfitAll(:,:,2,5,i)))
+    imagesc(squeeze(vfitAll(:,:,2,5,i))) % regression variable + time point
     colorbar
+    set(gca,'xTickLabels',[],'yTickLabels',[]);
 end
 
 labels = {'V','R','vis','abs(dx)','dx'};
 ranges = [0 0.25; 0 0.35; 0 0.05; 0 0.25; -0.05 0.05];
 for d = 1:5
-  figure
-  for i = 1:11
-    subplot(3,4,i)
-    imagesc(squeeze(mean(vfitAll(:,:,d,i,:),5)),ranges(d,:))
-  end
-  set(gcf,'Name',[labels{d} ' fit']);  
+    figure
+    for i = 1:11
+        subplot(3,4,i)
+        imagesc(squeeze(mean(vfitAll(:,:,d,i,:),5)),ranges(d,:))
+        set(gca,'xTickLabels',[],'yTickLabels',[]);
+        
+    end
+    set(gcf,'Name',[labels{d} ' fit']);
 end
 
 %%% plot correlation coeff avg across sessions
-ranges = [0 0.5; 0 0.5; 0 0.05; 0 0.25; -0.05 0.05];
+ranges = [0 0.5; 0 0.5; 0 0.05; 0 0.25; 0 0.25];
 for d = 1:5
-  figure
-  for i = 1:11
-    subplot(3,4,i)
-    imagesc(squeeze(mean(vcorrAll(:,:,d,i,:),5)),ranges(d,:))
-  end
+    figure
+    for i = 1:11
+        subplot(3,4,i)
+        imagesc(squeeze(mean(vcorrAll(:,:,d,i,:),5)),ranges(d,:))
+        set(gca,'xTickLabels',[],'yTickLabels',[]);
+        
+    end
     set(gcf,'Name',[labels{d} ' corr']);
 end
 
 
 variable=5;
 ranges = [0 0.5; 0 0.5; 0 0.05; 0 0.25; 0 0.25];
-for d = 1:4
-  figure
-  for i = 1:11
-    subplot(3,4,i)
-    imagesc(squeeze(vcorrAll(:,:,variable,i,d)),[-0.1 0.1])
+for d = 1:length(useSess)
+    figure
+    for i = 1:11
+        subplot(3,4,i)
+        imagesc(squeeze(vcorrAll(:,:,variable,i,d)),[-0.1 0.1])
+        set(gca,'xTickLabels',[],'yTickLabels',[]);
+        
     end
 end
 

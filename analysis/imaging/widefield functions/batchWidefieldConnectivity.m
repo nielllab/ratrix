@@ -1,8 +1,10 @@
 close all; clear all;
 
 batch_widefield_eyes;
-
-useSess = 1:length(files);
+%useSess = 1:length(files);
+% useSess =  find(strcmp({files.notes},'good data'))
+useSess =  find( strcmp({files.treatment},'DOI') & strcmp({files.notes},'good data'))
+%useSess =  find(strcmp({files.notes},'good data') & strcmp({files.expt},'032017_g62ww3-rt'))
 
 load('\\angie\Angie_analysis\DetectionStim2contrast_LOW_7_25min.mat')
 contrast = contrast(1:end-5); xpos = xpos(1:end-5); ypos=ypos(1:end-5);
@@ -11,8 +13,8 @@ for sess = 1:length(useSess);
     
    %load([pathname '\' files(i).dir '\' files(i).moviename]);
     clear alignTheta
-    load([pathname '\' files(sess).dir '\' files(sess).detection],'dfof_bg','frameT','cycMap','sp','stimRec','xEye','yEye','xFilt','yFilt','sp','rad','X','Y','R');
-    load([pathname '\' files(sess).dir '\' files(sess).detection],'alignTheta','alignZoom','alignLambda');
+    load([pathname '\' files(useSess(sess)).dir '\' files(useSess(sess)).detection],'dfof_bg','frameT','cycMap','sp','stimRec','xEye','yEye','xFilt','yFilt','sp','rad','X','Y','R');
+    load([pathname '\' files(useSess(sess)).dir '\' files(useSess(sess)).detection],'alignTheta','alignZoom','alignLambda');
     
     %%% align data
     redoAlign=0;
@@ -53,7 +55,7 @@ for sess = 1:length(useSess);
         zm = size(dfof_bg,1)/size(blueImg,1);
         ringRadiusZm = zm*ringRadius;
         alignZoom = 128/ringRadiusZm
-        save([pathname '\' files(sess).dir '\' files(useSess(sess)).detection],'alignTheta','alignZoom','alignLambda','-append');
+        save([pathname '\' files(useSess(sess)).dir '\' files(useSess(sess)).detection],'alignTheta','alignZoom','alignLambda','-append');
     end
     
     dfof_bgAlign = imrotate(dfof_bg,alignTheta);
@@ -331,12 +333,12 @@ for sess = 1:length(useSess);
     xlabel('distance'); ylabel('correlation')
     
     figure
-     hold on
+    hold on
     plot(dist(contra),traceCorr(contra),'r*')
     plot(dist(~contra),traceCorr(~contra),'o');
     xlabel('distance'); ylabel('correlation')
     legend('contra','ipsi');
-      
+    
   
 end
 
@@ -346,7 +348,7 @@ ypts = [];
 xpts = [];
 clustcol = 'wgrcmyk'; %%% color scheme for clusters
 figure
-imagesc(maxim) ; colormap gray; axis equal
+%imagesc(maxim) ; colormap gray; axis equal
 hold on
 clear dist contra
 decorrTrace =  decorrTraceAll;
@@ -357,7 +359,8 @@ decorrTrace =  decorrTraceAll;
         xpts = [];
     clustcol = 'wgrcmyk'; %%% color scheme for clusters
     figure
-    imagesc(maxim) ; colormap gray; axis equal
+   % imagesc(maxim) ; colormap gray; 
+ axis equal
     hold on
     clear dist contra 
     for i = 1:npts
@@ -371,8 +374,8 @@ decorrTrace =  decorrTraceAll;
     end
   
     for i = 1:npts
-        plot(y(i),x(i),[clustcol(idx(i)) 'o'],'Markersize',8,'Linewidth',2)
-        plot(y(i),x(i),[clustcol(idx(i)) '*'],'Markersize',8,'Linewidth',2)
+        plot(y(i),x(i),[clustcol(idx(i)) 'o'],'Markersize',6,'Linewidth',2)
+        plot(y(i),x(i),[clustcol(idx(i)) '*'],'Markersize',6,'Linewidth',2)
     end
     figure
     plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
@@ -383,7 +386,8 @@ decorrTrace =  decorrTraceAll;
     %%% plot clustered points with connectivity
     clustcol = 'wgrcmyk'; %%% color scheme for clusters
     figure
-    imagesc(maxim) ; colormap gray; axis equal
+    %imagesc(maxim) ; colormap gray; 
+    axis equal
     hold on
   
     for i = 1:npts
@@ -395,8 +399,8 @@ decorrTrace =  decorrTraceAll;
         end
     end  
     for i = 1:npts
-        plot(y(i),x(i),[clustcol(idx(i)) 'o'],'Markersize',8,'Linewidth',2)
-        plot(y(i),x(i),[clustcol(idx(i)) '*'],'Markersize',8,'Linewidth',2)
+        plot(y(i),x(i),[clustcol(idx(i)) 'o'],'Markersize',6,'Linewidth',2)
+        plot(y(i),x(i),[clustcol(idx(i)) '*'],'Markersize',6,'Linewidth',2)
     end
     plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
     axis ij

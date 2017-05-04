@@ -43,12 +43,18 @@ switch subjIDs{1}
        rewardSizeULorMS        = 59;
        msPenalty               =6300;
        
-%    case 'g62pp9lt' % Started 4/07/17  %%start hvv 4/18/17
-%        requestRewardSizeULorMS = 0;
-%        rewardSizeULorMS        = 219;
-%        msPenalty               =3500;
-%        percentCorrectionTrials = .5;    
+   case 'g62pp9lt' % Started 4/07/17  %%start hvv 4/18/17
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 219;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;    
     
+   case 'g62aaa11lt'  %started 4/25/17 %%start center 5/4/17
+         requestRewardSizeULorMS = 0;
+         rewardSizeULorMS        = 219;
+         msPenalty               =3500;
+         percentCorrectionTrials = .5;  
+
    case 'g62ddd2tt' % Started 4/07/17  %%start hvv 4/18/17
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 219;

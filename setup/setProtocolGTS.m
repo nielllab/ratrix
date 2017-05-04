@@ -51,7 +51,7 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 219;
        msPenalty               =3500;
-       percentCorrectionTrials = .5; 
+       percentCorrectionTrials = .75; 
   
    case 'pvchr4b4rt' %started 1/23/17  started gts 2/15/17
        requestRewardSizeULorMS = 0;

@@ -84,7 +84,7 @@ end
        percentCorrectionTrials = .5;
        pixPerCycs              = [200];
        normalizedPosition      = [0.33 0.66];
-       radius                 = .30;  
+       radius                 = .29;  
      
    case 'g62uu1tt' % Started 2/1/17 %%switch 2/8/17
        requestRewardSizeULorMS = 0;

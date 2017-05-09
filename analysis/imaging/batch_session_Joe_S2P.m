@@ -44,19 +44,19 @@ psfile = 'c:\tempJW.ps';
 % 
 % %GTS
 
-% n=n+1 %g62y3lt 050316  %(re-run 4/24/17 _S2P)
-%                 sessiondir{n}= '050316 g62y3lt GTS behavior\g62y3lt\';
-%                 p{n}= [datadir sessiondir{n}];
-%                 f{n} = '050316_g62y3lt_session_summary_S2P.pdf';  %pdf file name
-%                 newpdfFile{n} = fullfile(p{n},f{n});
-%                 if exist(psfile,'file')==2;delete(psfile);end
-%                 cd ([datadir sessiondir{n}])
+n=n+1 %g62y3lt 050316  %(re-run 4/24/17 _S2P)
+                sessiondir{n}= '050316 g62y3lt GTS behavior\g62y3lt\';
+                p{n}= [datadir sessiondir{n}];
+                f{n} = '050316_g62y3lt_session_summary_S2P.pdf';  %pdf file name
+                newpdfFile{n} = fullfile(p{n},f{n});
+                if exist(psfile,'file')==2;delete(psfile);end
+                cd ([datadir sessiondir{n}])
 % 
 % behav2pSession('g62y3lt_001_000.sbx','behavSessionS2P.mat','trialRecords_1853-2020_20160503T154535-20160503T160643.mat',psfile);
 % topo2pSession('g62y3lt_001_001.sbx','topoXsessionS2P.mat',psfile);
 % topo2pSession('g62y3lt_001_002.sbx','topoYsessionS2P.mat',psfile);
 % grating2pSession('g62y3lt_001_005.sbx','gratingSessionS2P.mat',psfile);
-% passiveBehav2pSession('g62y3lt_001_003.sbx','passiveBehav3x4orientS2P.mat ','C:\behavStim3sf4orient.mat',psfile);
+ passiveBehav2pSession('g62y3lt_001_003.sbx','passiveBehav3x4orientS2P.mat ','C:\behavStim3sf4orient.mat',psfile);
 % passiveBehav2pSession('g62y3lt_001_004.sbx','passiveBehav2sfSessionS2P.mat','C:\behavStim2sfSmall3366.mat',psfile);
 % 
 

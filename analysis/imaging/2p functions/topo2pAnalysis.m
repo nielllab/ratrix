@@ -37,23 +37,27 @@ if exist('psfilename','var')
     print('-dpsc',psfilename,'-append');
 end
 
-
-
 usenonzero = find(mean(spikes,2)~=0); %%% gets rid of generic points that were not identified in this session
-cellCutoff = input('cell cutoff : ');
-usenonzero=usenonzero(usenonzero<cellCutoff);
 
-figure
-imagesc(dF(usenonzero,:),[0 1]); ylabel('cell #'); xlabel('frame'); title('dF');
-if exist('psfilename','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfilename,'-append');
-end
-figure
-imagesc(spikeBinned(usenonzero,:),[0 0.1]); ylabel('cell #'); xlabel('frame'); title('spikes');
-if exist('psfilename','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfilename,'-append');
+if (exist('S2P','var')&S2P==1)
+    cellCutoff = size(spikes,1);
+    usenonzero=usenonzero(usenonzero<cellCutoff);
+else
+    cellCutoff = input('cell cutoff : ');
+    usenonzero=usenonzero(usenonzero<cellCutoff);
+    
+    figure
+    imagesc(dF(usenonzero,:),[0 1]); ylabel('cell #'); xlabel('frame'); title('dF');
+    if exist('psfilename','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfilename,'-append');
+    end
+    figure
+    imagesc(spikeBinned(usenonzero,:),[0 0.1]); ylabel('cell #'); xlabel('frame'); title('spikes');
+    if exist('psfilename','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfilename,'-append');
+    end
 end
 
 if (exist('S2P','var')&S2P==1)

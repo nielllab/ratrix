@@ -2,7 +2,10 @@ close all; clear all;
 
 batch_widefield_eyes;
 
-useSess = 1:length(files);
+%%% create 
+psfile = 'c:\connectivity.ps'; if exist(psfile,'file')==2;delete(psfile);end
+
+useSess = 1:length(files); %%% use all files, and select treatments afterwards
 
 load('\\angie\Angie_analysis\DetectionStim2contrast_LOW_7_25min.mat')
 contrast = contrast(1:end-5); xpos = xpos(1:end-5); ypos=ypos(1:end-5);
@@ -72,7 +75,9 @@ for sess = 1:length(useSess);
     hold on
     plot([1 128],[64 64],'r'); plot(109, 64,'g*')
     drawnow
-    
+    title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        
     %%% crop and downsize dF data to make it run faster
     %dfof_bg= dfof_bg(15:160,50:190,:);
     dfof_bg = imresize(dfof_bg,0.25);
@@ -137,8 +142,12 @@ for sess = 1:length(useSess);
                     done=1;
                 else
                     ind = find(x==round(xi)&y==round(yi));
-                    
-                    x=x(setdiff(1:length(x),ind)); y = y(setdiff(1:length(y),ind));
+                    if ~isempty(ind)
+                        x=x(setdiff(1:length(x),ind)); y = y(setdiff(1:length(y),ind));
+                    else
+                        x = [x round(xi)]
+                        y= [y round(yi)]
+                    end
                     hold off
                     imagesc(stdImg,[0 0.1]); colormap gray; hold on
                     plot(y,x,'g*')
@@ -147,6 +156,12 @@ for sess = 1:length(useSess);
             npts = length(y);
         end
     end
+    
+    figure
+       imagesc(stdImg,[0 0.1]); colormap gray; hold on
+       plot(y,x,'g*')
+      title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     col = repmat('bgrcmyk',[1 200]);  %%% color scheme
     clear trace
@@ -159,7 +174,7 @@ for sess = 1:length(useSess);
     obs = reshape(im,size(im,1)*size(im,2),size(im,3));
     sigcol = reshape(stdImg,size(im,1)*size(im,2),1);
     obs(sigcol<0.01,:)=0;  %%% remove pts with low variance to select brain from bkground
-    useTime = sp>=0; %%% sp<10
+    useTime = sp<10; %%% sp<10
     obs = obs(:,useTime);
     
     %%% PCA
@@ -177,7 +192,9 @@ for sess = 1:length(useSess);
         imagesc(reshape(coeff(:,i),size(im,1),size(im,2)),[-range range])
         % hold on; plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2)
     end
-    
+          title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        
     figure
     for i = 1:5
         subplot(5,1,i);
@@ -192,7 +209,9 @@ for sess = 1:length(useSess);
         plot(score(:,1)); ylabel('component1')
         subplot(3,1,3)
         plot(sp(useTime)/max(sp(useTime)),'g'); hold on; plot(score(:,1)/max(score(:,1)));
-        
+    
+          title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
         for i = 1:3
             figure
             plot(-120:0.1:120,xcorr(sp(useTime),score(:,i),1200,'coeff'));
@@ -286,8 +305,9 @@ for sess = 1:length(useSess);
     plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
     axis ij
     axis equal
-    
-    
+  title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        
     %%% plot clustered points with connectivity
     clustcol = 'wgrcmyk'; %%% color scheme for clusters
     figure
@@ -309,6 +329,8 @@ for sess = 1:length(useSess);
     plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
     axis ij
     axis equal
+  title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     decorrTraceAll{sess} =  decorrTrace;
     
@@ -320,13 +342,116 @@ for sess = 1:length(useSess);
     
     distbins = gridspace/2:gridspace:60;
     for i = 1:length(distbins)-1;
-        meanC(i) = mean(traceCorr(dist>distbins(i) & dist<=distbins(i+1) & ~contra));
+        meanC(i) = nanmean(traceCorr(dist>distbins(i) & dist<=distbins(i+1) & ~contra));
     end
-    meanC(i+1) = mean(traceCorr(contra & dist>2*gridspace));
+    meanC(i+1) = nanmean(traceCorr(contra & dist>2*gridspace));
     
     figure
     bar(meanC)
     xlabel('distance'); ylabel('correlation')
+      title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        
+    figure
+    hold on
+    plot(dist(contra),traceCorr(contra),'r*')
+    plot(dist(~contra),traceCorr(~contra),'o');
+    xlabel('distance'); ylabel('correlation')
+    legend('contra','ipsi');
+    title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+end
+
+treatment = {'Saline','DOI'};
+for treat = 1:2
+    
+    
+    useSess =  find( strcmp({files.treatment},treatment{treat}))
+    traceCorr = mean(corrAll(:,:,useSess),3);
+    decorrTrace = [];
+    for i = 1:length(useSess)
+        decorrTrace = [decorrTrace; decorrTraceAll{useSess(i)}];
+    end
+    
+    ypts = [];
+    xpts = [];
+    clustcol = 'wgrcmyk'; %%% color scheme for clusters
+    figure
+    imagesc(maxim) ; colormap gray; axis equal
+    hold on
+    clear dist contra
+    
+    tic
+    idx = kmeans(decorrTrace'+rand(size(decorrTrace'))*10^-4,nclust,'distance','correlation');
+    toc
+    ypts = [];
+    xpts = [];
+    clustcol = 'wgrcmyk'; %%% color scheme for clusters
+    figure
+    imagesc(maxim) ; colormap gray; axis equal
+    hold on
+    clear dist contra
+    for i = 1:npts
+        for j= 1:npts
+            dist(i,j) = sqrt((x(i)-x(j))^2 + (y(i)-y(j))^2);
+            contra(i,j) = (x(i)-size(im,2)/2) * (x(j)-size(im,2)/2) <0 & ~(x(i)==33) & ~(x(j)==33) ; %%% does it cross the midline
+            if traceCorr(i,j)>0.6 & contra(i,j)
+                plot([y(i) y(j)],[x(i) x(j)],'Linewidth',6*(traceCorr(i,j)-0.6),'Color','b')
+            end
+        end
+    end
+    
+    for i = 1:npts
+        plot(y(i),x(i),[clustcol(idx(i)) 'o'],'Markersize',8,'Linewidth',2)
+        plot(y(i),x(i),[clustcol(idx(i)) '*'],'Markersize',8,'Linewidth',2)
+    end
+
+    axis ij
+    axis equal
+    title([treatment{treat} ' average'])
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        
+        
+    %%% plot clustered points with connectivity
+    clustcol = 'wgrcmyk'; %%% color scheme for clusters
+    figure
+    imagesc(maxim) ; colormap gray; axis equal
+    hold on
+    
+    for i = 1:npts
+        for j= 1:npts
+            
+            if traceCorr(i,j)>0.5 && dist(i,j) > gridspace*2 &&~contra(i,j)
+                plot([y(i) y(j)],[x(i) x(j)],'Linewidth',8*(traceCorr(i,j)-0.5),'Color','b')
+            end
+        end
+    end
+    for i = 1:npts
+        plot(y(i),x(i),[clustcol(idx(i)) 'o'],'Markersize',8,'Linewidth',2)
+        plot(y(i),x(i),[clustcol(idx(i)) '*'],'Markersize',8,'Linewidth',2)
+    end
+    plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
+    axis ij
+    axis equal
+    title([treatment{treat} ' average'])
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    dist = dist(:);
+    traceCorr = traceCorr(:);
+    contra = contra(:);
+    
+    clear meanC
+    distbins = gridspace/2:gridspace:30;
+    for i = 1:length(distbins)-1;
+        meanC(i) = nanmean(traceCorr(dist>distbins(i) & dist<=distbins(i+1) & ~contra));
+    end
+    meanC(i+1) = nanmean(traceCorr(contra & dist>2*gridspace));
+    
+    figure
+    bar(distbins,meanC)
+    xlabel('distance'); ylabel('correlation')
+    title([treatment{treat} ' average'])
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     figure
     hold on
@@ -334,100 +459,17 @@ for sess = 1:length(useSess);
     plot(dist(~contra),traceCorr(~contra),'o');
     xlabel('distance'); ylabel('correlation')
     legend('contra','ipsi');
-    
-    
-end
-useSess =  find( strcmp({files.treatment},'Saline'))
-traceCorr = mean(corrAll(:,:,useSess),3);
-decorrTrace = [];
-for i = 1:length(useSess)
-    decorrTrace = [decorrTrace; decorrTraceAll{useSess(i)}];
-end
-
-ypts = [];
-xpts = [];
-clustcol = 'wgrcmyk'; %%% color scheme for clusters
-figure
-imagesc(maxim) ; colormap gray; axis equal
-hold on
-clear dist contra
-
-tic
-idx = kmeans(decorrTrace'+rand(size(decorrTrace'))*10^-4,nclust,'distance','correlation');
-toc
-ypts = [];
-xpts = [];
-clustcol = 'wgrcmyk'; %%% color scheme for clusters
-figure
-imagesc(maxim) ; colormap gray; axis equal
-hold on
-clear dist contra
-for i = 1:npts
-    for j= 1:npts
-        dist(i,j) = sqrt((x(i)-x(j))^2 + (y(i)-y(j))^2);
-        contra(i,j) = (x(i)-size(im,2)/2) * (x(j)-size(im,2)/2) <0 & ~(x(i)==33) & ~(x(j)==33) ; %%% does it cross the midline
-        if traceCorr(i,j)>0.6 & contra(i,j)
-            plot([y(i) y(j)],[x(i) x(j)],'Linewidth',6*(traceCorr(i,j)-0.6),'Color','b')
-        end
-    end
-end
-
-for i = 1:npts
-    plot(y(i),x(i),[clustcol(idx(i)) 'o'],'Markersize',8,'Linewidth',2)
-    plot(y(i),x(i),[clustcol(idx(i)) '*'],'Markersize',8,'Linewidth',2)
-end
-figure
-plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
-axis ij
-axis equal
-title('average')
-
-%%% plot clustered points with connectivity
-clustcol = 'wgrcmyk'; %%% color scheme for clusters
-figure
-imagesc(maxim) ; colormap gray; axis equal
-hold on
-
-for i = 1:npts
-    for j= 1:npts
+    title([treatment{treat} ' average'])
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
         
-        if traceCorr(i,j)>0.5 && dist(i,j) > gridspace*2 &&~contra(i,j)
-            plot([y(i) y(j)],[x(i) x(j)],'Linewidth',8*(traceCorr(i,j)-0.5),'Color','b')
-        end
-    end
 end
-for i = 1:npts
-    plot(y(i),x(i),[clustcol(idx(i)) 'o'],'Markersize',8,'Linewidth',2)
-    plot(y(i),x(i),[clustcol(idx(i)) '*'],'Markersize',8,'Linewidth',2)
+
+
+[f p] = uiputfile('*.pdf');
+newpdfFile = fullfile(p,f)
+try
+    dos(['ps2pdf ' psfile ' "' newpdfFile '"'] )
+    
+catch
+    display('couldnt generate pdf');
 end
-plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
-axis ij
-axis equal
-title('average')
-
-
-dist = dist(:);
-traceCorr = traceCorr(:);
-contra = contra(:);
-
-clear meanC
-distbins = gridspace/2:gridspace:30;
-for i = 1:length(distbins)-1;
-    meanC(i) = nanmean(traceCorr(dist>distbins(i) & dist<=distbins(i+1) & ~contra));
-end
-meanC(i+1) = nanmean(traceCorr(contra & dist>2*gridspace));
-
-figure
-bar(distbins,meanC)
-xlabel('distance'); ylabel('correlation')
-title('average')
-
-
-figure
-hold on
-plot(dist(contra),traceCorr(contra),'r*')
-plot(dist(~contra),traceCorr(~contra),'o');
-xlabel('distance'); ylabel('correlation')
-legend('contra','ipsi');
-title('average')
-

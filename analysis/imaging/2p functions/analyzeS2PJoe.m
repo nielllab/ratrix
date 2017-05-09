@@ -3,8 +3,7 @@
 close all
 clear all
 
-psfilename = 'C:\tempS2PJoe.ps';
-if exist(psfilename,'file')==2;delete(psfilename);end
+
 
 make_db_Joe
 
@@ -14,13 +13,45 @@ make_db_Joe
 for i = 1:length(db)
 
 
+    psfilename = 'C:\tempS2PJoe.ps';
+if exist(psfilename,'file')==2;delete(psfilename);end
+    
 
 cd(db(i).procdir)
 load(db(i).procfile)
+procfile = db(i).procfile;
+%dat.Fcell = Fcell; %work aroundError in analyzeS2PJoe (line 27):  baddies = find(isnan(dat.Fcell{h}));
+
+
+if ~exist('dat')
+    sprintf('dat was empty')
+    dat = {};
+    dat.cl = cl;
+    dat.clustrules = clustrules;
+    dat.F = F;
+    dat.Fcell = Fcell;
+    dat.FcellNeu = FcellNeu;
+    dat.figure = figure;
+    dat.filename = filename;
+    dat.map = map;
+    dat.maxmap = maxmap;
+    dat.mimg = mimg;
+    dat.mimg_proc = mimg_proc;
+    dat.ops = ops;
+    dat.procmap = 0;
+    dat.res = res;
+    dat.stat = stat;
+    dat.xlim = xlim;
+    dat.ylim = ylim;
+    save(db(i).procfile,'dat')
+    sprintf('dat exist now')
+end
+
 
 
 %newpdfFile = fullfile(procdir,[aniname '_' expdate '_S2P.pdf']);
-newpdfFile = fullfile(db(i).procdir,[db(i).aniname '_' db(i).expdate '_S2P.pdf']);
+%newpdfFile = fullfile(db(i).procdir,[db(i).aniname '_' db(i).expdate '_S2P.pdf']);
+newpdfFile = fullfile(db(i).expdir,[db(i).aniname '_' db(i).expdate '_S2P.pdf']);
 
 %%%figure out how many actual cells there are take out any with nan values
 for h = 1:length(db(i).expname)
@@ -39,11 +70,11 @@ for h = 1:length(db(i).expname)
     end
 end
 
-if ~isempty(baddie)
+if ~isempty(baddie) 
     save(procfile,'dat','-append')
     sprintf('rerunning deconvolution')
     make_db_Joe
-    add_deconvolution(dat.ops,db);
+    add_deconvolution(dat.ops,db(i));
     clear dat
     load(procfile)
     dat = {};
@@ -65,7 +96,7 @@ if ~isempty(baddie)
     dat.xlim = xlim;
     dat.ylim = ylim;
     
-    save(procfile,'dat')
+    save(db(i).procfile,'dat')
     sprintf('please rerun this analysis')
     return
 end
@@ -105,7 +136,7 @@ if exist('psfilename','var')
 end
 
 %%%save dF/F and spikes for each experiment only for real cells
-for j = 1:length(expname)
+for j = 1:length(db(i).expname)
     spikes = zeros(length(cells),size(dat.Fcell{j},2));dF=spikes;
     for k = 1:length(cells)
         %%%make spike time/amp array
@@ -124,7 +155,7 @@ for j = 1:length(expname)
     
     figure
     imagesc(spikes,[0 10])
-    title(sprintf('spikes %s',expname{j}))
+    title(sprintf('spikes %s',db(i).expname{j}))
     if exist('psfilename','var')
         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfilename,'-append');
@@ -132,7 +163,7 @@ for j = 1:length(expname)
     
     figure
     imagesc(dF,[0 1])
-    title(sprintf('dF/F %s',expname{j}))
+    title(sprintf('dF/F %s',db(i).expname{j}))
     if exist('psfilename','var')
         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfilename,'-append');
@@ -148,7 +179,7 @@ end
 
 dos(['ps2pdf ' psfilename ' "' newpdfFile '"'] )
 if exist(newpdfFile,'file')
-%     ['ps2pdf ' psfilename ' "' psfilenameFinal(1:(end-2)) 'pdf"']
+ %   ['ps2pdf ' psfilename ' "' psfilenameFinal(1:(end-2)) 'pdf"']
     display('generated pdf using dos ps2pdf')
 else
     try

@@ -130,7 +130,7 @@ if exist('psfile','var')
     print('-dpsc',psfile,'-append');
 end
 
-keyboard
+%keyboard
 
 sbxfilename = fileName;
 save(sessionName,'sbxfilename','-append')

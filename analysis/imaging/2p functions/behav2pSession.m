@@ -9,7 +9,8 @@ global S2P
 
 if (exist('S2P','var')&S2P==1)
     cfg.dt = dt; cfg.spatialBin=1; cfg.temporalBin=1;  %%% configuration parameters suite2p
-    cfg.syncToVid=1; cfg.saveDF=0; cfg.nodfof=1;
+    cfg.syncToVid=0; cfg.saveDF=0; cfg.nodfof=1;
+    %was getting funny phasetimes when syncToVid was on
 else
     cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  %%% configuration parameters eff
     cfg.syncToVid=1; cfg.saveDF=0;
@@ -28,7 +29,7 @@ if ~exist('onsets','var')
     [onsets starts trialRecs] = sync2pBehavior_sbx(behavfile ,phasetimes);
     use = find(onsets<size(dfofInterp,3)*dt-3 & onsets>5); %%%% get rid of trials right at beginning or end, that may be incomplete
     use = use(1:(length(use)-1));  %sometimes behavior session trial records has 1 xtra trial
-%     use = use(1:104);  %can use this for selecting subsets of trials
+%     use = use(2:201);  %can use this for selecting subsets of trials
     onsets = onsets(use); starts=starts(use,:); trialRecs = trialRecs(use);
     save(sessionName,'onsets','starts','trialRecs','-append');
 end

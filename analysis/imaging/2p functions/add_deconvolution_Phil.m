@@ -36,6 +36,7 @@ for i = 1:length(ops.planesToProcess)
     ops.sameKernel   = getOr(ops0, {'sameKernel'}, 1);
     ops.maxNeurop    = getOr(ops0, {'maxNeurop'}, Inf); % maximum neuropil coefficient (default no max)
     ops.recomputeKernel    = getOr(ops0, {'recomputeKernel'}, 0);
+    ops.deconvType  = 'L0'; %type of deconvolution; OASIS or L0
     
     
     fprintf('Spike deconvolution, plane %d... \n', iplane)

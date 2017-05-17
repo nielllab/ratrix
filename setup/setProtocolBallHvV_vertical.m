@@ -82,7 +82,7 @@ end
        percentCorrectionTrials = .5;
        pixPerCycs              = [200];
        normalizedPosition      = [0.33 0.66];
-       radius                 = .27;  
+       radius                 = .26;  
 
    case 'g62ggg6tt' % Started 3/29/17 %%hvv start 4/8/17 %%full 4/24/17
        requestRewardSizeULorMS = 0;
@@ -127,7 +127,7 @@ end
        percentCorrectionTrials = .5;
        pixPerCycs              = [200];
        normalizedPosition      = [0.33 0.66];
-       radius                 = .28;
+       radius                 = .30;
      
    
   case 'test' % Started 5/4/16 %started HvV 9/6/16

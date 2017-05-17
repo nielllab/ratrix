@@ -22,16 +22,16 @@ redogrp = input('reanalyze group data? 0=no, 1=yes: ')
 
 if group==1
     use = find(strcmp({files.inject},'saline')  & strcmp({files.training},'naive') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-    grpfilename = 'SalineNaive2pSizeSelectS2P'
+    grpfilename = 'SalineNaive2pSizeSelectS2PdF'
 elseif group==2
     use = find(strcmp({files.inject},'saline')  & strcmp({files.training},'trained') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-    grpfilename = 'SalineTrained2pSizeSelectS2P'
+    grpfilename = 'SalineTrained2pSizeSelectS2PdF'
 elseif group==3
     use = find(strcmp({files.inject},'doi')  & strcmp({files.training},'naive') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-    grpfilename = 'DOINaive2pSizeSelectS2P'
+    grpfilename = 'DOINaive2pSizeSelectS2PdF'
 elseif group==4
     use = find(strcmp({files.inject},'doi')  & strcmp({files.training},'trained') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-    grpfilename = 'DOITrained2pSizeSelectS2P'
+    grpfilename = 'DOITrained2pSizeSelectS2PdF'
 else
     sprintf('please restart and choose a number 1-4')
 end
@@ -141,7 +141,7 @@ for z=1%:length(ccvals)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(length(goodcc{z})),'r-o','Markersize',5)
     xlabel('Stim Size (deg)')
     ylabel('sit spikes')
-    axis([0 length(radiusRange)+1 0 10])
+    axis([0 length(radiusRange)+1 0 0.2])
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
 
@@ -153,7 +153,7 @@ for z=1%:length(ccvals)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(length(goodcc{z})),'r-o','Markersize',5)
     xlabel('Stim Size (deg)')
     ylabel('run spikes')
-    axis([0 length(radiusRange)+1 0 10])
+    axis([0 length(radiusRange)+1 0 0.2])
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
     mtit(sprintf('Mean cell (n=%d) size suppression curve (cc>%0.2f)',length(goodcc{z}),ccvals(z)))
@@ -229,8 +229,8 @@ for z=1%:length(ccvals)
     errorbarxy(nanmean(grpSI(goodcc{z},2,1)),nanmean(grpSI(goodcc{z},2,2)),...
         nanstd(grpSI(goodcc{z},2,1))/sqrt(length(goodcc{z})),nanstd(grpSI(goodcc{z},2,2))/sqrt(length(goodcc{z})))
     axis([0 1 0 1])
-    xlabel('sit pre SI')
-    ylabel('sit post SI')
+    xlabel('run pre SI')
+    ylabel('run post SI')
     axis square
     mtit('Cell Suppression Index')
     if exist('psfile','var')
@@ -256,7 +256,7 @@ for z=1%:length(ccvals)
     % plot(1:length(radiusRange),post,'r--.')
     xlabel('Stim Size (deg)')
     ylabel('sit spikes')
-    axis([0 length(radiusRange)+1 0 10])
+    axis([0 length(radiusRange)+1 0 0.2])
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
 
@@ -273,7 +273,7 @@ for z=1%:length(ccvals)
     % plot(1:length(radiusRange),post,'r--.')
     xlabel('Stim Size (deg)')
     ylabel('run spikes')
-    axis([0 length(radiusRange)+1 0 10])
+    axis([0 length(radiusRange)+1 0 0.2])
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
     mtit(sprintf('Mean animal (n=%d) size suppression curve (cc>%0.2f)',numAni,ccvals(z)))
@@ -361,8 +361,8 @@ for z=1%:length(ccvals)
     plot(pre,post,'k.','Markersize',20)
     errorbarxy(nanmean(pre,1),nanmean(post,1),nanstd(pre,1)/sqrt(numAni),nanstd(post,1)/sqrt(numAni))
     axis([0 1 0 1])
-    xlabel('sit pre SI')
-    ylabel('sit post SI')
+    xlabel('run pre SI')
+    ylabel('run post SI')
     axis square
     mtit('Animal Suppression Index')
     if exist('psfile','var')

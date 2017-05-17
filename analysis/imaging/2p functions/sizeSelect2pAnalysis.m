@@ -46,7 +46,7 @@ for f=1:length(use)
         rf(:,2) = mod(angle(yph)-(2*pi*0.25/10),2*pi)*72/(2*pi); rfAmp(:,2) = abs(yph);
         topoyUse = mean(dF,2)~=0;
 
-        cellCutoff = files(use(f)).cutoff
+        cellCutoff = size(spikes,1)
 
         %%% find sbc? use distance from center?
         d1 = sqrt((mod(angle(xph),2*pi)-pi).^2 + (mod(angle(yph),2*pi)-pi).^2);
@@ -111,9 +111,59 @@ for f=1:length(use)
         onsets = dt + (0:ntrials-1)*(isi+duration);
         timepts = 1:(2*isi+duration)/dt;
         timepts = (timepts-1)*dt;
+        
+        %%%PCA%%% add in first 10 components to end of dF variable
+        %%coeff, score, latent
+        
+        spikes=spikes/2; %%%spikes scaling factor
+
+        [Cdf,Sdf,Ldf] = pca(dF');
+        [Csp,Ssp,Lsp] = pca(spikes');
+
+        figure
+        subplot(1,2,1)
+        plot(Ldf/sum(Ldf))
+        xlim([1 10])
+        xlabel('Principle Component')
+        ylabel('dF Explained Variance')
+        axis square
+        subplot(1,2,2)
+        plot(Lsp/sum(Lsp))
+        xlim([1 10])
+        xlabel('Principle Component')
+        ylabel('spikes Explained Variance')
+        axis square
+        if exist('psfilei','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilei,'-append');
+        end
+
+        % figure
+        % hold on
+        % for i = 2:size(S,1)
+        %     col = cmapVar(i,1,size(S,1),jet);
+        %     plot(S(i-1:i,1),S(i-1:i,2),'.-','color',col)
+        % end
+
+        pcdf = Sdf(:,1:10)';
+        pcsp = Ssp(:,1:10)';
+        
+%         exvar = L/sum(L); exvar = exvar(1:10);
+        cells=1:size(dF,1);
+        pci = max(cells)+1:max(cells)+10;
+        dF(pci,:) = pcdf; %%%add PCs to dF
+        spikes(pci,:) = pcsp; %%%add PCs to spikes
+        
         dFout = align2onsets(dF,onsets,dt,timepts);
-        dFout = dFout(1:end-1,:,:); %%%extra cell at end for some reason
-        spikesOut = align2onsets(spikes*10,onsets,dt,timepts);
+%         dFout = dFout(1:end-1,:,:); %%%extra cell at end for some reason
+        pcdfOut = dFout(pci,:,:);
+        dFout = dFout(cells,:,:);
+
+        spikesOut = align2onsets(spikes,onsets,dt,timepts);
+        pcspOut = spikesOut(pci,:,:);
+        spikesOut = spikesOut(cells,:,:);
+        
+        
         timepts = timepts - isi;
         running = zeros(1,ntrials);
         for i = 1:ntrials
@@ -148,14 +198,24 @@ for f=1:length(use)
         %%%subtract baseline period
         dFout2 = dFout;
         spikesOut2 = spikesOut;
+        pcdfOut2 = pcdfOut;
+        pcspOut2 = pcspOut;
+        
         for i = 1:size(dFout,1)
             for j = 1:size(dFout,3)
                 dFout2(i,:,j) = dFout(i,:,j)-nanmean(dFout(i,1:4,j));
                 spikesOut2(i,:,j) = spikesOut(i,:,j)-nanmean(spikesOut(i,1:4,j));
+%                 pcaOut2(i,:,j) = pcaOut(i,:,j)-nanmean(pcaOut(i,1:4,j));
+%                 %% subtract baseline for pcs???
             end
         end
         
-        
+        for i = 1:size(pcdfOut2,1)
+            for j = 1:size(pcdfOut2,3)
+                pcdfOut2(i,:,j) = pcdfOut(i,:,j)-nanmean(pcdfOut(i,1:4,j));
+                pcspOut2(i,:,j) = pcspOut(i,:,j)-nanmean(pcspOut(i,1:4,j));
+            end
+        end        
 %         %%%use output from PRE and POST gratings analysis to pick cells
 %         if mod(f,2)
 %             gratfile = files(use(f)).gratinganalysis;
@@ -204,7 +264,8 @@ for f=1:length(use)
                 end
             end
         end
-        
+       
+        %%%avg across all zeros instead of by trials
         dftuning2 = dftuning;
         sptuning2 = sptuning;
         %%%subtract size zero trials
@@ -220,10 +281,88 @@ for f=1:length(use)
                 end
             end
         end
+        
         dftuning = dftuning2;
-        sptuning = sptuning2/2;      
+        sptuning = sptuning2;
         
+                
+        pcdftuning = zeros(size(pcdfOut,1),size(pcdfOut,2),length(sfrange),length(thetaRange),length(radiusRange),2); pcsptuning = pcdftuning;
+        for h = 1:size(pcdfOut,1)
+            for i = 1:length(sfrange)
+                for j = 1:length(thetaRange)
+                    for k = 1:length(radiusRange)
+                        for l = 1:2
+                            pcdftuning(h,1:size(pcdfOut,2),i,j,k,l) = nanmean(pcdfOut2(h,:,find(sf==sfrange(i)&theta==thetaRange(j)&radius==k&running==(l-1))),3);
+                            pcsptuning(h,1:size(pcdfOut,2),i,j,k,l) = nanmean(pcspOut2(h,:,find(sf==sfrange(i)&theta==thetaRange(j)&radius==k&running==(l-1))),3);
+                        end
+                    end
+                end
+            end
+        end
         
+        pcdftuning2 = pcdftuning; pcsptuning2 = pcsptuning;
+        %%%subtract size zero trials
+        for h = 1:size(pcdftuning2,1)
+            for i = 1:length(sfrange)
+                for j = 1:length(thetaRange)
+                    for k = 1:length(radiusRange)
+                        for l = 1:2
+                            pcdftuning2(h,:,i,j,k,l) = pcdftuning(h,:,i,j,k,l) - pcdftuning(h,:,i,j,1,l);
+                            pcsptuning2(h,:,i,j,k,l) = pcsptuning(h,:,i,j,k,l) - pcsptuning(h,:,i,j,1,l);
+                        end
+                    end
+                end
+            end
+        end
+        pcdftuning = pcdftuning2; pcsptuning = pcsptuning2;
+        
+        %%%plot first two pca components for dF
+        cnt=1;
+        figure
+        for i = 1:size(pcdftuning,4)
+            for j = 2:size(pcdftuning,5)
+                pc1 = squeeze(nanmean(pcdftuning(1,:,:,i,j,1),3));
+                pc2 = squeeze(nanmean(pcdftuning(2,:,:,i,j,1),3));
+                subplot(size(pcdftuning,4),size(pcdftuning,5)-1,cnt)
+                hold on
+                for k = 2:length(pc1)
+                    col = cmapVar(k,1,length(pc1),jet);
+                    plot(pc1(k-1:k),pc2(k-1:k),'.-','color',col)
+                end
+                axis square
+                cnt=cnt+1;
+            end
+        end
+        mtit('dfPC1 vs dfPC2 by orientation/size')
+        if exist('psfilei','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilei,'-append');
+        end
+        
+        %%%plot first two pca components for spikes
+        cnt=1;
+        figure
+        for i = 1:size(pcsptuning,4)
+            for j = 2:size(pcsptuning,5)
+                pc1 = squeeze(nanmean(pcsptuning(1,:,:,i,j,1),3));
+                pc2 = squeeze(nanmean(pcsptuning(2,:,:,i,j,1),3));
+                subplot(size(pcsptuning,4),size(pcsptuning,5)-1,cnt)
+                hold on
+                for k = 2:length(pc1)
+                    col = cmapVar(k,1,length(pc1),jet);
+                    plot(pc1(k-1:k),pc2(k-1:k),'.-','color',col)
+                end
+                axis square
+                cnt=cnt+1;
+            end
+        end
+        mtit('spPC1 vs spPC2 by orientation/size')
+        if exist('psfilei','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilei,'-append');
+        end
+        
+        %%%%%cell-wise analysis
         %%%get sf and ori pref for size stimuli
         sizebestsf=nan(length(usecells),2);sizebesttheta=sizebestsf;
         sizebestsfresp=sizebestsf;sizebestthetaresp=sizebestsf;
@@ -271,7 +410,219 @@ for f=1:length(use)
             set(gcf, 'PaperPositionMode', 'auto');
             print('-dpsc',psfilei,'-append');
         end
+        
+        
+        %%%redo pca for cells in center vs outside
+        allcells = 1:size(dF,1);
+        nusecells = setdiff(allcells,usecells);
+        
+        [Cusedf,Susedf,Lusedf] = pca(dF(usecells,:)');
+        [Cusesp,Susesp,Lusesp] = pca(spikes(usecells,:)');
+        [Cnusedf,Snusedf,Lnusedf] = pca(dF(nusecells,:)');
+        [Cnusesp,Snusesp,Lnusesp] = pca(spikes(nusecells,:)');
 
+        figure
+        subplot(1,2,1)
+        plot(Lusedf/sum(Lusedf))
+        xlim([1 10])
+        xlabel('Principle Component')
+        ylabel('dF Explained Variance')
+        axis square
+        subplot(1,2,2)
+        plot(Lusesp/sum(Lusesp))
+        xlim([1 10])
+        xlabel('Principle Component')
+        ylabel('spikes Explained Variance')
+        axis square
+        mtit('PCA center cells')
+        if exist('psfilei','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilei,'-append');
+        end
+        
+        figure
+        subplot(1,2,1)
+        plot(Lnusedf/sum(Lnusedf))
+        xlim([1 10])
+        xlabel('Principle Component')
+        ylabel('dF Explained Variance')
+        axis square
+        subplot(1,2,2)
+        plot(Lnusesp/sum(Lnusesp))
+        xlim([1 10])
+        xlabel('Principle Component')
+        ylabel('spikes Explained Variance')
+        axis square
+        mtit('PCA surround cells')
+        if exist('psfilei','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilei,'-append');
+        end
+
+        % figure
+        % hold on
+        % for i = 2:size(S,1)
+        %     col = cmapVar(i,1,size(S,1),jet);
+        %     plot(S(i-1:i,1),S(i-1:i,2),'.-','color',col)
+        % end
+
+        pCusedf = Susedf(:,1:10)';
+        pCusesp = Susesp(:,1:10)';
+        pCnusedf = Snusedf(:,1:10)';
+        pCnusesp = Snusesp(:,1:10)';
+        
+        pcAlign = [pCusedf;pCusesp;pCnusedf;pCnusesp];
+        
+        pcAlignout = align2onsets(pcAlign,onsets,dt,timepts);
+        pCusedfout = pcAlignout(1:10,:,:);
+        pCusespout = pcAlignout(11:20,:,:);
+        pCnusedfout = pcAlignout(21:30,:,:);
+        pCnusespout = pcAlignout(31:40,:,:);
+        
+        %%%subtract baseline period
+        pCusedfout2 = pCusedfout;
+        pCusespout2 = pCusespout;
+        pCnusedfout2 = pCnusedfout;
+        pCnusespout2 = pCnusespout;
+        for i = 1:size(pCusedfout2,1)
+            for j = 1:size(pCusedfout2,3)
+                pCusedfout2(i,:,j) = pCusedfout(i,:,j)-nanmean(pCusedfout(i,1:4,j));
+                pCusespout2(i,:,j) = pCusespout(i,:,j)-nanmean(pCusespout(i,1:4,j));
+                pCnusedfout2(i,:,j) = pCnusedfout(i,:,j)-nanmean(pCnusedfout(i,1:4,j));
+                pCnusespout2(i,:,j) = pCnusespout(i,:,j)-nanmean(pCnusespout(i,1:4,j));
+            end
+        end        
+        
+        pCusedftuning = zeros(size(pCusedfout2,1),size(pCusedfout2,2),length(sfrange),length(thetaRange),length(radiusRange),2);
+        pCusesptuning = pCusedftuning; pCnusedftuning = pCusedftuning; pCnusesptuning = pCusedftuning;
+        for h = 1:size(pCusedftuning,1)
+            for i = 1:length(sfrange)
+                for j = 1:length(thetaRange)
+                    for k = 1:length(radiusRange)
+                        for l = 1:2
+                            pCusedftuning(h,1:size(pcdfOut,2),i,j,k,l) = nanmean(pCusedfout2(h,:,find(sf==sfrange(i)&theta==thetaRange(j)&radius==k&running==(l-1))),3);
+                            pCusesptuning(h,1:size(pcdfOut,2),i,j,k,l) = nanmean(pCusespout2(h,:,find(sf==sfrange(i)&theta==thetaRange(j)&radius==k&running==(l-1))),3);
+                            pCnusedftuning(h,1:size(pcdfOut,2),i,j,k,l) = nanmean(pCnusedfout2(h,:,find(sf==sfrange(i)&theta==thetaRange(j)&radius==k&running==(l-1))),3);
+                            pCnusesptuning(h,1:size(pcdfOut,2),i,j,k,l) = nanmean(pCnusespout2(h,:,find(sf==sfrange(i)&theta==thetaRange(j)&radius==k&running==(l-1))),3);
+                        end
+                    end
+                end
+            end
+        end
+        
+        pCusedftuning2 = pCusedftuning; pCusesptuning2 = pCusesptuning; pCnusedftuning2 = pCnusedftuning; pCnusesptuning2 = pCnusesptuning;
+        %%%subtract size zero trials
+        for h = 1:size(pCusedftuning2,1)
+            for i = 1:length(sfrange)
+                for j = 1:length(thetaRange)
+                    for k = 1:length(radiusRange)
+                        for l = 1:2
+                            pCusedftuning2(h,:,i,j,k,l) = pCusedftuning(h,:,i,j,k,l) - pCusedftuning(h,:,i,j,1,l);
+                            pCusesptuning2(h,:,i,j,k,l) = pCusesptuning(h,:,i,j,k,l) - pCusesptuning(h,:,i,j,1,l);
+                            pCnusedftuning2(h,:,i,j,k,l) = pCnusedftuning(h,:,i,j,k,l) - pCnusedftuning(h,:,i,j,1,l);
+                            pCnusesptuning2(h,:,i,j,k,l) = pCnusesptuning(h,:,i,j,k,l) - pCnusesptuning(h,:,i,j,1,l);
+                        end
+                    end
+                end
+            end
+        end
+        pCusedftuning = pCusedftuning2; pCusesptuning = pCusesptuning2; pCnusedftuning = pCnusedftuning2; pCnusesptuning = pCnusesptuning2;
+        
+        %%%plot first two pca components for usedF
+        cnt=1;
+        figure
+        for i = 1:size(pCusedftuning,4)
+            for j = 2:size(pCusedftuning,5)
+                pc1 = squeeze(nanmean(pCusedftuning(1,:,:,i,j,1),3));
+                pc2 = squeeze(nanmean(pCusedftuning(2,:,:,i,j,1),3));
+                subplot(size(pCusedftuning,4),size(pCusedftuning,5)-1,cnt)
+                hold on
+                for k = 2:length(pc1)
+                    col = cmapVar(k,1,length(pc1),jet);
+                    plot(pc1(k-1:k),pc2(k-1:k),'.-','color',col)
+                end
+                axis square
+                cnt=cnt+1;
+            end
+        end
+        mtit('center dfPC1 vs dfPC2 orientation/size')
+        if exist('psfilei','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilei,'-append');
+        end
+        
+        %%%plot first two pca components for usespikes
+        cnt=1;
+        figure
+        for i = 1:size(pCusesptuning,4)
+            for j = 2:size(pCusesptuning,5)
+                pc1 = squeeze(nanmean(pCusesptuning(1,:,:,i,j,1),3));
+                pc2 = squeeze(nanmean(pCusesptuning(2,:,:,i,j,1),3));
+                subplot(size(pCusesptuning,4),size(pCusesptuning,5)-1,cnt)
+                hold on
+                for k = 2:length(pc1)
+                    col = cmapVar(k,1,length(pc1),jet);
+                    plot(pc1(k-1:k),pc2(k-1:k),'.-','color',col)
+                end
+                axis square
+                cnt=cnt+1;
+            end
+        end
+        mtit('center spPC1 vs spPC2 orientation/size')
+        if exist('psfilei','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilei,'-append');
+        end
+        
+        %%%plot first two pca components for nusedF
+        cnt=1;
+        figure
+        for i = 1:size(pCnusedftuning,4)
+            for j = 2:size(pCnusedftuning,5)
+                pc1 = squeeze(nanmean(pCnusedftuning(1,:,:,i,j,1),3));
+                pc2 = squeeze(nanmean(pCnusedftuning(2,:,:,i,j,1),3));
+                subplot(size(pCnusedftuning,4),size(pCnusedftuning,5)-1,cnt)
+                hold on
+                for k = 2:length(pc1)
+                    col = cmapVar(k,1,length(pc1),jet);
+                    plot(pc1(k-1:k),pc2(k-1:k),'.-','color',col)
+                end
+                axis square
+                cnt=cnt+1;
+            end
+        end
+        mtit('surround dfPC1 vs dfPC2 orientation/size')
+        if exist('psfilei','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilei,'-append');
+        end
+        
+        %%%plot first two pca components for nusespikes
+        cnt=1;
+        figure
+        for i = 1:size(pCnusesptuning,4)
+            for j = 2:size(pCnusesptuning,5)
+                pc1 = squeeze(nanmean(pCnusesptuning(1,:,:,i,j,1),3));
+                pc2 = squeeze(nanmean(pCnusesptuning(2,:,:,i,j,1),3));
+                subplot(size(pCnusesptuning,4),size(pCnusesptuning,5)-1,cnt)
+                hold on
+                for k = 2:length(pc1)
+                    col = cmapVar(k,1,length(pc1),jet);
+                    plot(pc1(k-1:k),pc2(k-1:k),'.-','color',col)
+                end
+                axis square
+                cnt=cnt+1;
+            end
+        end
+        mtit('surround spPC1 vs spPC2 orientation/size')
+        if exist('psfilei','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilei,'-append');
+        end
+        
+        
+        
+        
         %%%plot individual cell data
 %         sitcolor = [0.6 0.6 0.6;0.8 0.8 0.8;1 1 1];
 %         runcolor = [0.6 0 0;0.8 0 0;1 0 0];

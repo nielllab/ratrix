@@ -62,6 +62,11 @@ for z=1:length(db)
         dat.xlim = xlim;
         dat.ylim = ylim;
         save(db(z).procfile,'dat')
+        
+        clearvars -except z
+        close all
+        make_db_Phil
+        load(db(z).procfile)
     end
 
     %%%make pdf file

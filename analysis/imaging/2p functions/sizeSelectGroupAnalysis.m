@@ -5,11 +5,11 @@ clear all
 
 %%choose dataset
 % batchPhil2pSizeSelect
-% batchPhil2pSizeSelect22min
-batchPhil2pSizeSelect22minS2P
+batchPhil2pSizeSelect22min
+% batchPhil2pSizeSelect22minS2P
 
 path = '\\langevin\backup\twophoton\Phil\Compiled2p\'
-savepath = '\\langevin\backup\twophoton\Phil\Compiled2p\S2P analysis'
+savepath = '\\langevin\backup\twophoton\Phil\Compiled2p\eff analysis'
 
 psfile = 'c:\tempPhil2pSize.ps';
 if exist(psfile,'file')==2;delete(psfile);end
@@ -22,16 +22,16 @@ redogrp = input('reanalyze group data? 0=no, 1=yes: ')
 
 if group==1
     use = find(strcmp({files.inject},'saline')  & strcmp({files.training},'naive') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-    grpfilename = 'SalineNaive2pSizeSelectS2PdF'
+    grpfilename = 'SalineNaive2pSizeSelectEff'
 elseif group==2
     use = find(strcmp({files.inject},'saline')  & strcmp({files.training},'trained') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-    grpfilename = 'SalineTrained2pSizeSelectS2PdF'
+    grpfilename = 'SalineTrained2pSizeSelect'
 elseif group==3
     use = find(strcmp({files.inject},'doi')  & strcmp({files.training},'naive') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-    grpfilename = 'DOINaive2pSizeSelectS2PdF'
+    grpfilename = 'DOINaive2pSizeSelect'
 elseif group==4
     use = find(strcmp({files.inject},'doi')  & strcmp({files.training},'trained') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-    grpfilename = 'DOITrained2pSizeSelectS2PdF'
+    grpfilename = 'DOITrained2pSizeSelect'
 else
     sprintf('please restart and choose a number 1-4')
 end

@@ -40,6 +40,15 @@ end
        pixPerCycs              = [200];
        normalizedPosition      = [0.50 0.66];
        radius                 = .27;  
+       
+    case 'g62aaa10lt' % Started 4/07/17 %%start hvv 4/15/17
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 219;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;          
+       pixPerCycs              = [200];
+       normalizedPosition      = [0.48 0.52];
+       radius                 = .35;        
 
     case 'g62ddd3tt' % Started 4/05/17 %%hvv start 4/14/17 %%%full 5/17/17
        requestRewardSizeULorMS = 0;

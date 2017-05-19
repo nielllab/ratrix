@@ -22,9 +22,10 @@ for i = 1:length(ops.planesToProcess)
         dat = load(fpath);
     end
     
-    if isfield(dat, 'dat')
-        dat = dat.dat; % just in case...
-    end
+%     if isfield(dat, 'dat') %dat.dat not a field on my guy 5/19/17??? is
+%%%%     this necessary?
+%         dat = dat.dat; % just in case...
+%     end
     
     % overwrite fields of ops with those saved to file
     ops = addfields(ops, dat.ops);

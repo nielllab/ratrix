@@ -3,6 +3,8 @@ clear all
 dbstop if error
 % profile on
 
+batchPhil2pSizeSelect22min
+
 % [f p] = uiputfile('*.pdf','pdf file');
 % newpdfFile = fullfile(p,f);
 
@@ -37,7 +39,7 @@ if exist(psfilename,'file')==2;delete(psfilename);end
 
 tic
 
-sizeSelect2pSession(files(z).sizedata,files(z).sizesession,files(z).sizestimObj,psfilename);
+sizeSelect2pSession([files(z).sizedata ',sbx'],[files(z).sizesession '.mat'],files(z).sizestimObj,psfilename);
 
 % topo2pSession('G62BB6RT_001_001.sbx','topoXsession_V2.mat',psfilename);
 % topo2pSession('G62BB6RT_001_002.sbx','topoYsession_V2.mat',psfilename);
@@ -518,15 +520,15 @@ dos(['ps2pdf ' psfilename ' "' newpdfFile '"'] )
 if exist(newpdfFile,'file')
 %     ['ps2pdf ' psfilename ' "' psfilenameFinal(1:(end-2)) 'pdf"']
     display('generated pdf using dos ps2pdf')
-else
-    try
-        ps2pdf('psfile', psfilename, 'pdffile', newpdfFile)
-        newpdfFile
-        display('generated pdf using builtin matlab ps2pdf')
-    catch
-        display('couldnt generate pdf');
-        keyboard
-    end
+% else
+%     try
+%         ps2pdf('psfile', psfilename, 'pdffile', newpdfFile)
+%         newpdfFile
+%         display('generated pdf using builtin matlab ps2pdf')
+%     catch
+%         display('couldnt generate pdf');
+%         keyboard
+%     end
 end
 
 delete(psfilename);

@@ -63,7 +63,7 @@ end
          rewardSizeULorMS        = 219;
          msPenalty               =3500;
          percentCorrectionTrials = .5;
-         normalizedPosition      = [0.48 0.52];
+         normalizedPosition      = [0.46 0.54];
          radius                 = .35; 
        
    case 'g62ddd3ln' % Started 4/05/17  %%hvv center 4/15/17 %%%full 4/26/17
@@ -99,7 +99,7 @@ end
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        pixPerCycs              = [200];
-       normalizedPosition      = [0.38 0.64];
+       normalizedPosition      = [0.36 0.64];
        radius                 = .35;         
        
    case 'g62ss4lt' % Started 4/07/17  %%hvv center 4/15/17 %%full 4/24/17

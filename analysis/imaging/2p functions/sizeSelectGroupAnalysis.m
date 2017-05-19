@@ -3,10 +3,19 @@
 close all
 clear all
 
+global S2P
+
 %%choose dataset
-% batchPhil2pSizeSelect
+
+S2P = 0; %S2P analysis = 1, other = 0
 batchPhil2pSizeSelect22min
+% batchPhil2pSizeSelect %this is the old movie (26min)
+
+% S2P = 1; %S2P analysis = 1, other = 0
 % batchPhil2pSizeSelect22minS2P
+
+
+
 
 path = '\\langevin\backup\twophoton\Phil\Compiled2p\'
 savepath = '\\langevin\backup\twophoton\Phil\Compiled2p\eff analysis'
@@ -25,13 +34,13 @@ if group==1
     grpfilename = 'SalineNaive2pSizeSelectEff'
 elseif group==2
     use = find(strcmp({files.inject},'saline')  & strcmp({files.training},'trained') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-    grpfilename = 'SalineTrained2pSizeSelect'
+    grpfilename = 'SalineTrained2pSizeSelectEff'
 elseif group==3
     use = find(strcmp({files.inject},'doi')  & strcmp({files.training},'naive') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-    grpfilename = 'DOINaive2pSizeSelect'
+    grpfilename = 'DOINaive2pSizeSelectEff'
 elseif group==4
     use = find(strcmp({files.inject},'doi')  & strcmp({files.training},'trained') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-    grpfilename = 'DOITrained2pSizeSelect'
+    grpfilename = 'DOITrained2pSizeSelectEff'
 else
     sprintf('please restart and choose a number 1-4')
 end
@@ -44,6 +53,9 @@ end
 if redoani==1
     sizeSelect2pAnalysis
 end
+
+%%%%%%%%%%debug
+keyboard
 
 moviefname = 'C:\sizeselectBin22min';
 load(moviefname)

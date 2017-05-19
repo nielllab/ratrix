@@ -3,11 +3,11 @@ clear all
 dbstop if error
 % profile on
 
-[f p] = uiputfile('*.pdf','pdf file');
-newpdfFile = fullfile(p,f);
+% [f p] = uiputfile('*.pdf','pdf file');
+% newpdfFile = fullfile(p,f);
 
 global S2P
-S2P=1
+S2P=0
 
 % params to use: spatial 2, temporal 4, frmrate 25, yes to align
 spatialBin = 2;
@@ -16,16 +16,28 @@ movierate = 25;
 alignData = 1;
 fullMovie = 1;
 
+cd(pathname)
+
+for z=1:length(files)
+    
+    sprintf('analyzing %d of %d',z,length(files))
+    
+%     cd(fullfile(pathname,files(z).dir))
+
 if S2P==0
     sbxaligndir
 end
 
 % makeSbxMoviesBatch
 
+newpdfFile = [files(z).sizesession '.pdf']
+
 psfilename = 'c:\tempPhil.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
 tic
+
+sizeSelect2pSession(files(z).sizedata,files(z).sizesession,files(z).sizestimObj,psfilename);
 
 % topo2pSession('G62BB6RT_001_001.sbx','topoXsession_V2.mat',psfilename);
 % topo2pSession('G62BB6RT_001_002.sbx','topoYsession_V2.mat',psfilename);
@@ -377,7 +389,7 @@ tic
 % topo2pSession('G62W9RT_001_005.sbx','topoYsession_POST_V2.mat',psfilename);
 % topo2pSession('G62W9RT_001_006.sbx','topoXsession_POST_V2.mat',psfilename);
 
-% %%%022017
+%%%022017
 % topo2pSession('G62BB6RT_001_001.sbx','topoXsession_V2.mat',psfilename);
 % topo2pSession('G62BB6RT_001_002.sbx','topoYsession_V2.mat',psfilename);
 % topo2pSession('G62BB6RT_001_003.sbx','darkness_PRE_V2.mat',psfilename);
@@ -457,13 +469,13 @@ tic
 % sizeSelect2pSession('G62QQ2LT_001_005.sbx','sizeSession_POST_V2.mat',psfilename);
 % topo2pSession('G62QQ2LT_001_006.sbx','darkness_POST_V2.mat',psfilename);
 
-%%%0031417
-topo2pSession('G62BB10LT_001_001.sbx','topoXsession_V2.mat',psfilename);
-topo2pSession('G62BB10LT_001_002.sbx','topoYsession_V2.mat',psfilename);
-topo2pSession('G62BB10LT_001_003.sbx','darkness_PRE_V2.mat',psfilename);
-sizeSelect2pSession('G62BB10LT_001_004.sbx','sizeSession_PRE_V2.mat',psfilename);
-sizeSelect2pSession('G62BB10LT_001_005.sbx','sizeSession_POST_V2.mat',psfilename);
-topo2pSession('G62BB10LT_001_006.sbx','darkness_POST_V2.mat',psfilename);
+% %%%0031417
+% topo2pSession('G62BB10LT_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('G62BB10LT_001_002.sbx','topoYsession_V2.mat',psfilename);
+% topo2pSession('G62BB10LT_001_003.sbx','darkness_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62BB10LT_001_004.sbx','sizeSession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62BB10LT_001_005.sbx','sizeSession_POST_V2.mat',psfilename);
+% topo2pSession('G62BB10LT_001_006.sbx','darkness_POST_V2.mat',psfilename);
 
 % %%%0031517
 % topo2pSession('G62BB2RT_001_001.sbx','topoXsession_V2.mat',psfilename);
@@ -518,5 +530,6 @@ else
 end
 
 delete(psfilename);
+end
 %getCellsBatch;
 % profile viewer

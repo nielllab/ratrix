@@ -1,4 +1,4 @@
-function sizeSelect2pSession( fileName, sessionName,psfile)
+function sizeSelect2pSession(fileName,sessionName,stimobj,psfile)
 dbstop if error
 %%% create session file for passive presentation of behavior (grating patch) stim
 %%% reads raw images, calculates dfof, and aligns to stim sync
@@ -71,15 +71,19 @@ timepts = timepts - isi;
 timepts = round(timepts*1000)/1000;
 sbxfilename = fileName;
 meandfofInterp = squeeze(mean(mean(dfofInterp,1),2))';
-display('saving')
-save(sessionName,'meandfofInterp','xpos','sf','theta','phase','radius','radiusRange','timepts','moviefname','sbxfilename','-append')
-
-%keyboard
-
+        
 sz = unique(radius);
 freq = unique(sf);
 x=unique(xpos);
 for i=1:length(radiusRange); sizes{i} = num2str(radiusRange(i)); end
+
+% load(['stim_obj' fileName(end-7:end)]);
+load(stimobj)
+spInterp = get2pSpeed(stimRec,dt,size(dfofInterp,3));
+running = zeros(1,ntrials);
+for i = 1:ntrials
+    running(i) = mean(spInterp(1,1+cycLength*(i-1):cycLength+cycLength*(i-1)),2)>20;
+end
 
 % top = squeeze(mean(dFout(:,:,find(timepts==1),xpos==x(1))-dFout(:,:,find(timepts==0),xpos==x(1)),4));
 % bottom = squeeze(mean(dFout(:,:,find(timepts==1),xpos==x(end))-dFout(:,:,find(timepts==0),xpos==x(end)),4));
@@ -124,16 +128,75 @@ for location=1:length(x)
     
 end
 
-
-data = zeros(size(dFout,1),size(dFout,2),size(dFout,3),length(sz),length(x),2);
+%%get rid of temporal info and have first, second half and whole
+frmdata = nan(size(dFout,1),size(dFout,2),length(sz),2);frmdata1=frmdata;frmdata2=frmdata;
 for s = 1:length(sz);
-    for loc = 1:length(x);
-        for f = 1:length(freq);
-            data(:,:,:,s,loc,f) = mean(dFout(:,:,:,xpos == x(loc) & radius ==sz(s) & sf ==freq(f)),4);
-        end
+    for r = 1:2
+        frmdata(:,:,s,r) = nanmean(nanmean(dFout(:,:,9:11,radius==sz(s)&running==(r-1)),4),3)-...
+            nanmean(nanmean(dFout(:,:,1:4,radius==sz(s)&running==(r-1)),4),3);
+        frmdata1(:,:,s,r) = nanmean(nanmean(dFout(:,:,9:11,radius(1:end/2)==sz(s)&running(1:end/2)==(r-1)),4),3)-...
+            nanmean(nanmean(dFout(:,:,1:4,radius(1:end/2)==sz(s)&running(1:end/2)==(r-1)),4),3);
+        frmdata2(:,:,s,r) = nanmean(nanmean(dFout(:,:,9:11,radius(end/2+1:end)==sz(s)&running(end/2+1:end)==(r-1)),4),3)-...
+            nanmean(nanmean(dFout(:,:,1:4,radius(end/2+1:end)==sz(s)&running(end/2+1:end)==(r-1)),4),3);
+%     for loc = 1:length(x);
+%         for f = 1:length(freq);
+%             data(:,:,:,s,loc,f) = mean(dFout(:,:,:,xpos == x(loc) & radius ==sz(s) & sf ==freq(f)),4);
+%         end
+%     end
     end
 end
 
+figure;
+colormap jet
+subplot(2,3,1)
+imagesc(frmdata1(:,:,4,1),[-0.01 0.1])
+set(gca,'ytick',[],'xtick',[])
+axis square
+xlabel('1st half 20deg')
+subplot(2,3,2)
+imagesc(frmdata2(:,:,4,1),[-0.01 0.1])
+set(gca,'ytick',[],'xtick',[])
+axis square
+xlabel('2nd half 20deg')
+subplot(2,3,3)
+imagesc(frmdata(:,:,4,1),[-0.01 0.1])
+set(gca,'ytick',[],'xtick',[])
+axis square
+xlabel('Total 20deg')
+subplot(2,3,4)
+imagesc(frmdata1(:,:,end,1),[-0.01 0.1])
+set(gca,'ytick',[],'xtick',[])
+axis square
+xlabel('1st half 50deg')
+subplot(2,3,5)
+imagesc(frmdata2(:,:,end,1),[-0.01 0.1])
+set(gca,'ytick',[],'xtick',[])
+axis square
+xlabel('2nd half 50deg')
+subplot(2,3,6)
+imagesc(frmdata(:,:,end,1),[-0.01 0.1])
+set(gca,'ytick',[],'xtick',[])
+axis square
+xlabel('Total 50deg')
+mtit('sit dF across experiment')
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
+
+figure
+cwdth=size(dfofInterp,1)/2;
+swdth=ceil(cwdth/4);
+hold on
+plot(squeeze(nanmean(nanmean(dfofInterp(cwdth-5:cwdth+5,cwdth-5:cwdth+5,:),2),1)),'g-')
+plot(squeeze(nanmean(nanmean(dfofInterp(swdth/4-5:swdth/4+5,swdth/4-5:swdth/4+5,:),2),1)),'r-')
+legend('center','surround','location','northwest')
+xlabel('frames')
+ylabel('dfof')
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
 
 mainfig = figure
 location =1; s = 4;
@@ -143,6 +206,10 @@ if exist('psfile','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfile,'-append');
 end
+
+display('saving')
+save(sessionName,'frmdata','frmdata1','frmdata2','meandfofInterp','xpos','sf','theta','phase','radius','radiusRange','timepts','moviefname','sbxfilename','-append')
+
 
 % for i = 1:10;
 %     figure(mainfig)

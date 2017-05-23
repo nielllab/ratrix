@@ -39,7 +39,15 @@ end
        percentCorrectionTrials = .5;     
        pixPerCycs              = [200];
        normalizedPosition      = [0.50 0.66];
-       radius                 = .27;  
+       radius                 = .27; 
+       
+   case 'g62aaa10tt' % Started 4/07/17 %%start hvv center 4/15/17 %%%full 5/23/17
+       requestRewardSizeULorMS = 0;
+       rewardSizeULorMS        = 219;
+       msPenalty               =3500;
+       percentCorrectionTrials = .5;
+       normalizedPosition      = [0.48 0.52];
+       radius                 = .35;
        
     case 'g62aaa10lt' % Started 4/07/17 %%start hvv 4/15/17
        requestRewardSizeULorMS = 0;
@@ -55,7 +63,7 @@ end
        rewardSizeULorMS        = 219;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
-       normalizedPosition      = [0.48 0.52];
+       normalizedPosition      = [0.46 0.54];
        radius                 = .35;        
        
    case 'g62aaa11rt'  %started 4/25/17 %%hvv center 5/10/17 %%%full 5/17/17
@@ -63,7 +71,7 @@ end
          rewardSizeULorMS        = 219;
          msPenalty               =3500;
          percentCorrectionTrials = .5;
-         normalizedPosition      = [0.46 0.54];
+         normalizedPosition      = [0.44 0.56];
          radius                 = .35; 
        
    case 'g62ddd3ln' % Started 4/05/17  %%hvv center 4/15/17 %%%full 4/26/17
@@ -99,7 +107,7 @@ end
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        pixPerCycs              = [200];
-       normalizedPosition      = [0.36 0.64];
+       normalizedPosition      = [0.34 0.64];
        radius                 = .35;         
        
    case 'g62ss4lt' % Started 4/07/17  %%hvv center 4/15/17 %%full 4/24/17
@@ -117,7 +125,7 @@ end
        msPenalty               =3500;
        percentCorrectionTrials = .6;
        pixPerCycs              = [200];
-       normalizedPosition      = [0.33 0.66];
+       normalizedPosition      = [0.42 0.58];
        radius                 = .35;  
        
     case 'g62mm11lt' % Started 2/1/17 %%switch 2/8/17 %%%switch full 2/27/17
@@ -126,7 +134,7 @@ end
        msPenalty               =3500;
        percentCorrectionTrials = .5;     
        pixPerCycs              = [200];
-       normalizedPosition      = [0.33 0.66];
+       normalizedPosition      = [0.40 0.59];
        radius                 = .35;
        
     case 'g62aaa3rt' % Started 2/1/17  %%switch 2/9/17 %%%switch full 2/27/17

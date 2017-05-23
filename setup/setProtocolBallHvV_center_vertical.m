@@ -79,11 +79,11 @@ switch subjIDs{1}
 %        msPenalty               =3500;
 %        percentCorrectionTrials = .5;    
     
-   case 'g62aaa10tt' % Started 4/07/17 %%start hvv center 4/15/17
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 219;
-       msPenalty               =3500;
-       percentCorrectionTrials = .5; 
+%    case 'g62aaa10tt' % Started 4/07/17 %%start hvv center 4/15/17
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 219;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5; 
        
 %    case 'g62ss4lt' % Started 4/07/17  %%hvv center 4/15/17
 %        requestRewardSizeULorMS = 0;

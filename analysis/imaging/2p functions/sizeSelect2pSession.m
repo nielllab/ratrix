@@ -130,14 +130,15 @@ end
 
 %%get rid of temporal info and have first, second half and whole
 frmdata = nan(size(dFout,1),size(dFout,2),length(sz),2);frmdata1=frmdata;frmdata2=frmdata;
+starttrial = ceil(length(radius)/2);
 for s = 1:length(sz);
     for r = 1:2
         frmdata(:,:,s,r) = nanmean(nanmean(dFout(:,:,9:11,radius==sz(s)&running==(r-1)),4),3)-...
             nanmean(nanmean(dFout(:,:,1:4,radius==sz(s)&running==(r-1)),4),3);
-        frmdata1(:,:,s,r) = nanmean(nanmean(dFout(:,:,9:11,find(radius(1:end/2)==sz(s)&running(1:end/2)==(r-1))),4),3)-...
-            nanmean(nanmean(dFout(:,:,1:4,find(radius(1:end/2)==sz(s)&running(1:end/2)==(r-1))),4),3);
-        frmdata2(:,:,s,r) = nanmean(nanmean(dFout(:,:,9:11,find(radius(end/2+1:end)==sz(s)&running(end/2+1:end)==(r-1))),4),3)-...
-            nanmean(nanmean(dFout(:,:,1:4,find(radius(end/2+1:end)==sz(s)&running(end/2+1:end)==(r-1))),4),3);
+        frmdata1(:,:,s,r) = nanmean(nanmean(dFout(:,:,9:11,find(radius(1:starttrial)==sz(s)&running(1:starttrial)==(r-1))),4),3)-...
+            nanmean(nanmean(dFout(:,:,1:4,find(radius(1:starttrial)==sz(s)&running(1:starttrial)==(r-1))),4),3);
+        frmdata2(:,:,s,r) = nanmean(nanmean(dFout(:,:,9:11,find(radius(starttrial+1:end)==sz(s)&running(starttrial+1:end)==(r-1))+starttrial),4),3)-...
+            nanmean(nanmean(dFout(:,:,1:4,find(radius(starttrial+1:end)==sz(s)&running(starttrial+1:end)==(r-1))+starttrial),4),3);
 %     for loc = 1:length(x);
 %         for f = 1:length(freq);
 %             data(:,:,:,s,loc,f) = mean(dFout(:,:,:,xpos == x(loc) & radius ==sz(s) & sf ==freq(f)),4);

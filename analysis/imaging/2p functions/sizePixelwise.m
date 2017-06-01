@@ -77,8 +77,7 @@ xrange = 30:50; yrange = 60:80;
 trace = squeeze(mean(mean(tcourse(yrange,xrange,:,:),2),1));
 figure
 plot(trace)
-hold on
-plot(mean(trace,2),'LineWidth',2);
+legend
 
 %%% calculate peak response within a window centered on stim
 stimpeak=9; prestim=5;

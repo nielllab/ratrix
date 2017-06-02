@@ -48,17 +48,17 @@ end
 figure;
 colormap jet
 subplot(1,3,1)
-imagesc(frmdata(:,:,1),[-0.01 0.2])
+imagesc(frmdata(:,:,1),[-0.01 0.1])
 set(gca,'ytick',[],'xtick',[])
 axis square
 xlabel('5deg')
 subplot(1,3,2)
-imagesc(frmdata(:,:,2),[-0.01 0.2])
+imagesc(frmdata(:,:,2),[-0.01 0.1])
 set(gca,'ytick',[],'xtick',[])
 axis square
 xlabel('10deg')
 subplot(1,3,3)
-imagesc(frmdata(:,:,3),[-0.01 0.2])
+imagesc(frmdata(:,:,3),[-0.01 0.1])
 set(gca,'ytick',[],'xtick',[])
 axis square
 xlabel('50deg')

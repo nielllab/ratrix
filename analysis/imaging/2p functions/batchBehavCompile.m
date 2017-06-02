@@ -89,7 +89,7 @@ for i = 1:length(alluse);
             eyeAlign = NaN;
         end
     end
-    
+    %%% make eye movies
     %     load([pathname files(alluse(i)).dir '\' files(alluse(i)).behavEyes],'data');
     %     %     d= squeeze(data(:,:,1,50:50:end));
     %     %     range = [min(d(:)) max(d(:))];
@@ -191,6 +191,8 @@ hist(deltaSpontAll,[-0.95:0.1:1]); title('evoked correlation');
 
 behavTimepts = -1:0.1:5;
 
+%%% get rf locations for all cells
+%%% flip data so that centered on preferred location (top vs bottom)
 d1 = sqrt((xAll-46).^2 + (yAll-34).^2);
 d2 = sqrt((xAll-78).^2 + (yAll-34).^2);
 centeredTrialData = zeros(size(trialDataAll))+NaN;
@@ -215,31 +217,44 @@ for i = 1:size(centeredTrialData,1);
     end
 end
 
+%%% get rid of extreme values
 centeredTrialData(centeredTrialData>1)=1;
 centered3x(centeredTrialData>1)=1;
 centered2sf(centeredTrialData>1)=1;
 
+%%% choose the ones within 12 deg of center
 centered = (d1<12| d2<12)';
 
-clear invariant  %%% average over correct top (2 orientation) then correct bottom
+%%% choose data for clustering! This section currently chooses only
+%%% corrects and specific timepoints
+%%% centeredTrialData(cells,time,condition)
+%%% conditions are 1-4=correct, 5-8 = incorrect; preferred h/v, then non-pref h/v
+%%% get rid of orientation (i.e. invariant) by averaging over both
+clear invariant  %%% average over correct pref (2 orientation) then correct non-pref
 invariant(:,:,2) = mean(centeredTrialData(:,:,3:4),3);
 invariant(:,:,1) = mean(centeredTrialData(:,:,1:2),3);
 
+
+%%% epoch data has cells by timepoints by top/bottom
 clear epochData %%% choose time ranges to go into clustering
 epochData(:,1,:) = squeeze(mean(invariant(:,5:10,:),2));
 epochData(:,2,:) = squeeze(mean(invariant(:,12:15,:),2));
 epochData(:,3,:) = squeeze(mean(invariant(:,20:30,:),2));
 %epochData(:,4,:) = squeeze(mean(invariant(:,50:60,:),2));
 
-
+%%% reshape the epochData to be cells by measurement
 %clustData = reshape(invariant(centered,:,:),sum(centered),size(invariant,2)*size(invariant,3));
 clustData = reshape(epochData,size(epochData,1),size(epochData,2)*size(epochData,3));
-clustData= clustData(:,[1 2 3 ]);
+clustData= clustData(:,[1 2 3 ]);  %%% choose only preferred (1-3) not non-preferred (3-6)
+%%% as long has you have clustdata (cells, measurements) you can cluster!
 
+
+%%% choose active cells based on std
 figure
 hist(std(clustData'),0.005:0.01:1);
 active = (std(clustData')>0.02)';
 
+%%% only use cells that are centered and have activity in clustering (don't cluster noise!!!)
 clustData = clustData(centered & active,:);
 allData = reshape(centeredTrialData(centered & active,:,:),sum(centered & active),size(centeredTrialData,2)*size(centeredTrialData,3));
 
@@ -250,6 +265,7 @@ allData = reshape(centeredTrialData(centered & active,:,:),sum(centered & active
 figure
 imagesc(clustData,[0 0.5]); drawnow
 
+%%% dendrogram/cluster plot for all data
 dist = pdist(clustData,'correlation');  %%% sort based on correct
 display('doing cluster')
 tic, Z = linkage(dist,'ward'); toc
@@ -275,6 +291,7 @@ imagesc((clustData(perm,:)),[0 0.5]); axis xy
 hold on; for i= 1:8, plot([i*length(behavTimepts) i*length(behavTimepts)]+1,[1 size(allData,1)],'g'); end
 title(['behav resp all'])
 
+%%% calculation orientation invariant (again) but for both correct and incorrect
 clear orientInvariant
 orientInvariant(:,:,4) = mean(centeredTrialData(:,1:42,7:8),3);
 orientInvariant(:,:,2) = mean(centeredTrialData(:,1:42,5:6),3);
@@ -282,14 +299,12 @@ orientInvariant(:,:,3) = mean(centeredTrialData(:,1:42,3:4),3);
 orientInvariant(:,:,1) = mean(centeredTrialData(:,1:42,1:2),3);
 invariantAll = reshape(orientInvariant,size(orientInvariant,1),size(orientInvariant,2)*size(orientInvariant,3));
 
-
-
-
+%%% choose N clusters (usually 3)
 clust= zeros(1,size(orientInvariant,1));
-c= cluster(Z,'maxclust',3);
+c= cluster(Z,'maxclust',3);  %%% set number of clusters here
 figure
 h = hist(c,1:max(c)); h= h/sum(h); bar(h); xlabel('cluster');
-for i = 1:max(c);
+for i = 1:max(c);   %%% get ride of tiny clusters
     if h(i)<0.05; c(c==i)=0; end;
 end
 
@@ -297,12 +312,17 @@ clust(centered & active) =c;
 
 [sortClust ind] = sort(clust);
 
+%%% concatenate all 8 trial types for display
 allData = reshape(centeredTrialData,size(centeredTrialData,1),size(centeredTrialData,2)*size(centeredTrialData,3));
-figure
+
+
+%%% sort data based on cluster indices
 allData = allData(ind,:); sortCond = allCond(ind); sortActive = active(ind); sortCentered = centered(ind); sortSess=sess(ind);
+figure
 imagesc(allData,[0 0.5])
 
-mdInd(sortClust==0) = 1:sum(sortClust==0);
+%%% put all data (including non resp) back into matrix
+mdInd(sortClust==0) = 1:sum(sortClust==0);  % put all non-clustered into one group
 for i = 1:max(clust);
     i
     sum(clust==i)
@@ -311,19 +331,19 @@ for i = 1:max(clust);
         start = min(find(sortClust==i));
         tic; dist = pdist(imresize(data(:,1:end/4), [size(data,1),size(data,2)/8]),'correlation'); toc
         dist = dist+randi(10^9,size(dist))/10^8;  %%% jitter points a bit to avoid errors in mdscale , can't use rand function though
-        %tic; [Y e] = mdscale(dist,1); toc
+        %tic; [Y e] = mdscale(dist,1); toc  %%% mdscale to make smooth progression within each cluster
         %[y sortind] = sort(Y);
         sortind = 1:size(data,1);
         mdInd(sortClust==i) = sortind+start-1;
     end
 end
 
-
+%%% full dataset, sorted!
 allData = allData(mdInd,:); sortCond = sortCond(mdInd); sortActive = sortActive(mdInd); sortCentered = sortCentered(mdInd); sortSess=sortSess(mdInd);
 %allData(sortClust==0,:) =0;
 
 
-
+%%% show all the data
 figure
 imagesc(allData(sortCentered' ,:),[0 0.5]); %%% fix
 hold on; for j= 1:8, plot([j*length(behavTimepts) j*length(behavTimepts)]+1,[1 sum(sortCentered' )],'g'); end
@@ -338,36 +358,34 @@ for cond = 1:2
     title(condLabel{cond})
 end
 
-%%% plot cell summary for each session
+%%% plot cell summary for each session (redundant with below)
 for i = 1:max(sess);
-    load([pathname files(alluse(i)).dir '\' files(alluse(i)).behavPts],'greenframe');
-    figure
-    imagesc(greenframe,[0 1.2*prctile(greenframe(:),99)]); colormap gray;
-    title(sprintf('%s %s %s ',files(alluse(i)).subj,files(alluse(i)).expt,files(alluse(i)).task));
-    
-    figure
-    subplot(1,3,1:2)
-    imagesc(allData(sortCentered' & sortSess==i,:),[0 0.5]);
-    hold on; for j= 1:8, plot([j*length(behavTimepts) j*length(behavTimepts)]+1,[1 sum(sortCentered' & sortSess==i)],'g'); end
-    
-    title(sprintf('%s %s %s total=%d gratings=%d exposures=%d',files(alluse(i)).subj,files(alluse(i)).expt,files(alluse(i)).task,files(alluse(i)).totalDays,files(alluse(i)).totalSinceGratings,files(alluse(i)).learningDay));
-    
-    subplot(1,3,3); hold on
-    %     plot(yAll(sess==i & ~active'),xAll(sess==i & ~active'),'k.');
-    %     plot(yAll(sess==i & clust==1 ),xAll(sess==i & clust==1),'b.');
-    %     plot(yAll(sess==i& clust==2),xAll(sess==i & clust==2),'r.');
-    %     plot(yAll(sess==i& clust==3),xAll(sess==i & clust ==3),'g.');
-    
-    plot(yAll(sess==i & ~centered'),xAll(sess==i & ~centered'),'k.');
-    plot(yAll(sess==i & centered' ),xAll(sess==i & centered'),'g.');
-    
-    axis equal;  axis([0 72 0 128]); hold on
-    circle(34,0.625*128-2,12);circle(34,0.375*128-2,12); set(gca,'Xtick',[]); set(gca,'Ytick',[]);
+%     load([pathname files(alluse(i)).dir '\' files(alluse(i)).behavPts],'greenframe');
+%     figure
+%     imagesc(greenframe,[0 1.2*prctile(greenframe(:),99)]); colormap gray;
+%     title(sprintf('%s %s %s ',files(alluse(i)).subj,files(alluse(i)).expt,files(alluse(i)).task));
+%     
+%     figure
+%     subplot(1,3,1:2)
+%     imagesc(allData(sortCentered' & sortSess==i,:),[0 0.5]);
+%     hold on; for j= 1:8, plot([j*length(behavTimepts) j*length(behavTimepts)]+1,[1 sum(sortCentered' & sortSess==i)],'g'); end
+%     
+%     title(sprintf('%s %s %s total=%d gratings=%d exposures=%d',files(alluse(i)).subj,files(alluse(i)).expt,files(alluse(i)).task,files(alluse(i)).totalDays,files(alluse(i)).totalSinceGratings,files(alluse(i)).learningDay));
+%     
+%     subplot(1,3,3); hold on
+%     %     plot(yAll(sess==i & ~active'),xAll(sess==i & ~active'),'k.');
+%     %     plot(yAll(sess==i & clust==1 ),xAll(sess==i & clust==1),'b.');
+%     %     plot(yAll(sess==i& clust==2),xAll(sess==i & clust==2),'r.');
+%     %     plot(yAll(sess==i& clust==3),xAll(sess==i & clust ==3),'g.');
+%     
+%     plot(yAll(sess==i & ~centered'),xAll(sess==i & ~centered'),'k.');
+%     plot(yAll(sess==i & centered' ),xAll(sess==i & centered'),'g.');
+%     
+%     axis equal;  axis([0 72 0 128]); hold on
+%     circle(34,0.625*128-2,12);circle(34,0.375*128-2,12); set(gca,'Xtick',[]); set(gca,'Ytick',[]);
 end
 
-
-
-
+%%% where were each of the clusters? (plot them all)
 figure
 for c = 1:4
     subplot(1,4,c); hold on
@@ -399,7 +417,7 @@ density(~isfinite(density))=-0.1;
 figure
 imagesc(num);  axis equal;  axis([0 72 0 128]); axis xy; hold on;  circle(34,0.625*128-2,12);circle(34,0.375*128-2,12);
 
-%%% where are cells located?
+%%% where are cells located? plot by density
 figure
 for i = 1:4
     subplot(1,4,i);
@@ -455,10 +473,7 @@ psfile = 'temp.ps';
 if exist(psfile,'file')==2;delete(psfile);end
 
 %%% plot data for clusters in each session, and neural responses
-
-
-
-
+%%% generates the main figures for pdf
 for s= 1:max(sess)
     s
     if strcmp(files(alluse(s)).task,'GTS'), sessCond(s) = gts; end;
@@ -467,6 +482,8 @@ for s= 1:max(sess)
     if strcmp(files(alluse(s)).task,'HvV'), sessCond(s)  = hvv; end;
     if strcmp(files(alluse(s)).task, 'RandReward'), sessCond(s)  = rand; end;
     sessSubj{s} = files(alluse(s)).subj;
+
+    %%% mean weighted timecourse of clusters
     figure
     set(gcf,'Name',sprintf('%s %s %s',files(alluse(s)).subj, files(alluse(s)).expt, condLabel{sessCond(s)}));
     for t = 1:4 %%%  top/bottom, correct/incorrect
@@ -483,24 +500,27 @@ for s= 1:max(sess)
     legend;
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
+    
+    %%% performance (correct, stopping, etc)
     figure; plot(respRateAll{s}/2,'g'); hold on; plot(correctRateAll{s},'b');plot(stopRateAll{s}/10,'r');ylim([0 1]); title([files(alluse(s)).subj ' ' files(alluse(s)).task]);legend('response','correct','stop')
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
-    
+    %%% total fluorescence timecourse for all cells
     figure
     imagesc(behavDfAll{s},[0 0.5]);
-    title(sprintf('cutoff = %d',sum(sess==s)));
-    
+    title(sprintf('cutoff = %d',sum(sess==s)));   
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     
-    %%% session figure
+    %%% raw fluorescence image
     load([pathname files(alluse(s)).dir '\' files(alluse(s)).behavPts],'greenframe');
     figure
     imagesc(greenframe,[0 1.2*prctile(greenframe(:),99)]); colormap gray;
     title(sprintf('%s %s %s depth %d',files(alluse(s)).subj,files(alluse(s)).expt,files(alluse(s)).task,files(alluse(s)).depth));
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
+    
+    %%% check for dependencies in behavior (bias, correction trial, etc)
     loc = locationAll{s}; targ = targAll{s}; correct = correctAll{s};
     resp = sign((correct-0.5).*targ);
     topleft = sum(loc>0 & resp>0)/sum(loc>0);
@@ -520,7 +540,7 @@ for s= 1:max(sess)
     bar([topleft topright; bottomleft bottomright]);ylim([0 1]); set(gca,'Xticklabel',{'top?','bottom?'});
 
     
-    
+    %%% sorted responses
     figure
     subplot(1,3,1:2)
     imagesc(allData(sortCentered' & sortSess==s,:),[0 0.5]);
@@ -528,6 +548,7 @@ for s= 1:max(sess)
     
     title(sprintf('%s %s %s total=%d gratings=%d exposures=%d',files(alluse(s)).subj,files(alluse(s)).expt,files(alluse(s)).task,files(alluse(s)).totalDays,files(alluse(s)).totalSinceGratings,files(alluse(s)).learningDay));
     
+    %%% location of cells
     subplot(1,3,3); hold on
     %     plot(yAll(sess==i & ~active'),xAll(sess==i & ~active'),'k.');
     %     plot(yAll(sess==i & clust==1 ),xAll(sess==i & clust==1),'b.');
@@ -544,7 +565,7 @@ for s= 1:max(sess)
     close all
 end
 
-keyboard
+%keyboard
 
 [f p] = uiputfile('*.pdf');
 newpdfFile = fullfile(p,f)
@@ -663,6 +684,7 @@ end
 
 %%%clustBehav(clust,stimtype, training cond, t)
 
+%%% bar graphs of changes
 %%% naive vs learned
 for c =1:3
     if c==1
@@ -733,7 +755,7 @@ figure
 barweb(squeeze(resp(:,1,1,[1 2])), squeeze(respErr(:,1,1,[1 3]))); ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
 legend('task','passive 3x'); ylabel('weighted response'); title('active vs passive trained');
 
-
+%%% plot modulation by running
 
 for i= 1:max(c);
     figure

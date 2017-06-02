@@ -3,8 +3,6 @@ clear all
 dbstop if error
 % profile on
 
-batchPhil2pSizeSelect22min
-
 % [f p] = uiputfile('*.pdf','pdf file');
 % newpdfFile = fullfile(p,f);
 
@@ -18,13 +16,41 @@ movierate = 25;
 alignData = 1;
 fullMovie = 1;
 
-cd(pathname)
+% %%%%for batch analysis
+% 
+% batchPhil2pSizeSelect22min
+% cd(pathname)
+% 
+% for z=1:length(files)
+%     
+%     sprintf('analyzing %d of %d',z,length(files))
+%     
+% %     cd(fullfile(pathname,files(z).dir))
+% 
+% if S2P==0
+%     sbxaligndir
+% end
+% 
+% % makeSbxMoviesBatch
+% 
+% newpdfFile = [files(z).sizesession '.pdf']
+% 
+% psfilename = 'c:\tempPhil.ps';
+% if exist(psfilename,'file')==2;delete(psfilename);end
+% 
+% tic
+% 
+% % sizeSelect2pSession([files(z).sizedata ',sbx'],[files(z).sizesession '.mat'],files(z).sizestimObj,psfilename);
+% 
+% end
 
-for z=1:length(files)
-    
-    sprintf('analyzing %d of %d',z,length(files))
-    
-%     cd(fullfile(pathname,files(z).dir))
+
+%%%%for manual analysis
+[f p] = uiputfile('*.pdf','pdf file');
+newpdfFile = fullfile(p,f);
+
+psfilename = 'c:\tempPhil.ps';
+if exist(psfilename,'file')==2;delete(psfilename);end
 
 if S2P==0
     sbxaligndir
@@ -32,14 +58,6 @@ end
 
 % makeSbxMoviesBatch
 
-newpdfFile = [files(z).sizesession '.pdf']
-
-psfilename = 'c:\tempPhil.ps';
-if exist(psfilename,'file')==2;delete(psfilename);end
-
-tic
-
-sizeSelect2pSession([files(z).sizedata ',sbx'],[files(z).sizesession '.mat'],files(z).sizestimObj,psfilename);
 
 % topo2pSession('G62BB6RT_001_001.sbx','topoXsession_V2.mat',psfilename);
 % topo2pSession('G62BB6RT_001_002.sbx','topoYsession_V2.mat',psfilename);
@@ -503,6 +521,11 @@ sizeSelect2pSession([files(z).sizedata ',sbx'],[files(z).sizesession '.mat'],fil
 % sizeSelect2pSession('G62BB2RT_001_005.sbx','sizeSession_POST_V2.mat',psfilename);
 % topo2pSession('G62BB2RT_001_006.sbx','darkness_POST_V2.mat',psfilename);
 
+%%%0031717
+topo2pSession('G62W9RT_001_004.sbx','topoXsession_V2.mat',psfilename);
+topo2pSession('G62W9RT_001_005.sbx','topoYsession_V2.mat',psfilename);
+sizeSelect2pSession('G62W9RT_001_006.sbx','sizeSession_PRE_V2.mat',psfilename);
+
 
 toc
 
@@ -532,6 +555,6 @@ if exist(newpdfFile,'file')
 end
 
 delete(psfilename);
-end
+
 %getCellsBatch;
 % profile viewer

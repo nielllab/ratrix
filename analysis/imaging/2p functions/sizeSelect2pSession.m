@@ -60,7 +60,8 @@ cycLength = cycLength/dt;
 xpos=0;
 sf=0; isi=0; duration=0; theta=0; phase=0; radius=0;
 % moviefname = 'C:\sizeSelect2sf8sz26min.mat';
-moviefname = 'C:\sizeselectBin22min.mat'
+% moviefname = 'C:\sizeselectBin22min.mat'
+moviefname = 'C:\sizeselectLongISI22min.mat'
 load(moviefname)
 ntrials= min(dt*length(dfofInterp)/(isi+duration),length(sf))
 onsets = dt + (0:ntrials-1)*(isi+duration);
@@ -77,8 +78,8 @@ freq = unique(sf);
 x=unique(xpos);
 for i=1:length(radiusRange); sizes{i} = num2str(radiusRange(i)); end
 
-% load(['stim_obj' fileName(end-7:end)]);
-load(stimobj)
+load(['stim_obj' fileName(end-7:end)]);
+% load(stimobj)
 spInterp = get2pSpeed(stimRec,dt,size(dfofInterp,3));
 running = zeros(1,ntrials);
 for i = 1:ntrials
@@ -128,64 +129,6 @@ for location=1:length(x)
     
 end
 
-%%get rid of temporal info and have first, second half and whole
-frmdata = nan(size(dFout,1),size(dFout,2),length(sz),2);frmdata1=frmdata;frmdata2=frmdata;
-starttrial = ceil(length(radius)/2);
-for s = 1:length(sz);
-    for r = 1:2
-        frmdata(:,:,s,r) = nanmean(nanmean(dFout(:,:,9:11,radius==sz(s)&running==(r-1)),4),3)-...
-            nanmean(nanmean(dFout(:,:,1:4,radius==sz(s)&running==(r-1)),4),3);
-        frmdata1(:,:,s,r) = nanmean(nanmean(dFout(:,:,9:11,find(radius(1:starttrial)==sz(s)&running(1:starttrial)==(r-1))),4),3)-...
-            nanmean(nanmean(dFout(:,:,1:4,find(radius(1:starttrial)==sz(s)&running(1:starttrial)==(r-1))),4),3);
-        frmdata2(:,:,s,r) = nanmean(nanmean(dFout(:,:,9:11,find(radius(starttrial+1:end)==sz(s)&running(starttrial+1:end)==(r-1))+starttrial),4),3)-...
-            nanmean(nanmean(dFout(:,:,1:4,find(radius(starttrial+1:end)==sz(s)&running(starttrial+1:end)==(r-1))+starttrial),4),3);
-%     for loc = 1:length(x);
-%         for f = 1:length(freq);
-%             data(:,:,:,s,loc,f) = mean(dFout(:,:,:,xpos == x(loc) & radius ==sz(s) & sf ==freq(f)),4);
-%         end
-%     end
-    end
-end
-
-plotmin=0;
-plotmax=0.15*max(max(max(frmdata(:,:,:,1))));
-figure;
-colormap jet
-subplot(2,3,1)
-imagesc(frmdata1(:,:,4,1),[plotmin plotmax])
-set(gca,'ytick',[],'xtick',[])
-axis square
-xlabel('1st half 20deg')
-subplot(2,3,2)
-imagesc(frmdata2(:,:,4,1),[plotmin plotmax])
-set(gca,'ytick',[],'xtick',[])
-axis square
-xlabel('2nd half 20deg')
-subplot(2,3,3)
-imagesc(frmdata(:,:,4,1),[plotmin plotmax])
-set(gca,'ytick',[],'xtick',[])
-axis square
-xlabel('Total 20deg')
-subplot(2,3,4)
-imagesc(frmdata1(:,:,end,1),[plotmin plotmax])
-set(gca,'ytick',[],'xtick',[])
-axis square
-xlabel('1st half 50deg')
-subplot(2,3,5)
-imagesc(frmdata2(:,:,end,1),[plotmin plotmax])
-set(gca,'ytick',[],'xtick',[])
-axis square
-xlabel('2nd half 50deg')
-subplot(2,3,6)
-imagesc(frmdata(:,:,end,1),[plotmin plotmax])
-set(gca,'ytick',[],'xtick',[])
-axis square
-xlabel('Total 50deg')
-mtit('sit dF across experiment')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
 
 figure
 cwdth=size(dfofInterp,1)/2;
@@ -201,6 +144,96 @@ if exist('psfile','var')
     print('-dpsc',psfile,'-append');
 end
 
+%%get rid of temporal info and have first, second half and whole
+frmdata = nan(size(dFout,1),size(dFout,2),length(freq),length(sz),2);
+for s = 1:length(sz);
+    for fre = 1:length(freq)
+        for r = 1:2
+            frmdata(:,:,fre,s,r) = nanmean(nanmean(dFout(:,:,9:11,radius==sz(s)&sf==freq(fre)&running==(r-1)),4),3)-...
+                nanmean(nanmean(dFout(:,:,1:4,radius==sz(s)&sf==freq(fre)&running==(r-1)),4),3);
+        end
+    end
+end
+
+for i = 1:length(freq)
+    figure;
+    colormap jet
+    for j = 2:length(sz)
+        subplot(2,floor(length(sz)/2),j-1)
+        imagesc(frmdata(:,:,i,j,1),[-0.01 0.1])
+        set(gca,'ytick',[],'xtick',[])
+        axis square
+        xlabel(sprintf('%sdeg',sizes{j}))
+    end
+    mtit(sprintf('sit sf=%d',freq(i)))
+    if exist('psfile','var')
+        set(gcf, 'PaperPositionMode', 'auto');
+        print('-dpsc',psfile,'-append');
+    end
+end
+
+% %%%this code breaks down into first and half of session, saved because we
+% %%%know they look the same so it should be fine but just in case
+% %%get rid of temporal info and have first, second half and whole
+% frmdata = nan(size(dFout,1),size(dFout,2),length(sz),2);frmdata1=frmdata;frmdata2=frmdata;
+% starttrial = ceil(length(radius)/2);
+% for s = 1:length(sz);
+%     for r = 1:2
+%         frmdata(:,:,s,r) = nanmean(nanmean(dFout(:,:,9:11,radius==sz(s)&running==(r-1)),4),3)-...
+%             nanmean(nanmean(dFout(:,:,1:4,radius==sz(s)&running==(r-1)),4),3);
+%         frmdata1(:,:,s,r) = nanmean(nanmean(dFout(:,:,9:11,find(radius(1:starttrial)==sz(s)&running(1:starttrial)==(r-1))),4),3)-...
+%             nanmean(nanmean(dFout(:,:,1:4,find(radius(1:starttrial)==sz(s)&running(1:starttrial)==(r-1))),4),3);
+%         frmdata2(:,:,s,r) = nanmean(nanmean(dFout(:,:,9:11,find(radius(starttrial+1:end)==sz(s)&running(starttrial+1:end)==(r-1))+starttrial),4),3)-...
+%             nanmean(nanmean(dFout(:,:,1:4,find(radius(starttrial+1:end)==sz(s)&running(starttrial+1:end)==(r-1))+starttrial),4),3);
+% %     for loc = 1:length(x);
+% %         for f = 1:length(freq);
+% %             data(:,:,:,s,loc,f) = mean(dFout(:,:,:,xpos == x(loc) & radius ==sz(s) & sf ==freq(f)),4);
+% %         end
+% %     end
+%     end
+% end
+% 
+% plotmin=0;
+% plotmax=0.15*max(max(max(frmdata(:,:,:,1))));
+% figure;
+% colormap jet
+% subplot(2,3,1)
+% imagesc(frmdata1(:,:,4,1),[plotmin plotmax])
+% set(gca,'ytick',[],'xtick',[])
+% axis square
+% xlabel('1st half 20deg')
+% subplot(2,3,2)
+% imagesc(frmdata2(:,:,4,1),[plotmin plotmax])
+% set(gca,'ytick',[],'xtick',[])
+% axis square
+% xlabel('2nd half 20deg')
+% subplot(2,3,3)
+% imagesc(frmdata(:,:,4,1),[plotmin plotmax])
+% set(gca,'ytick',[],'xtick',[])
+% axis square
+% xlabel('Total 20deg')
+% subplot(2,3,4)
+% imagesc(frmdata1(:,:,end,1),[plotmin plotmax])
+% set(gca,'ytick',[],'xtick',[])
+% axis square
+% xlabel('1st half 50deg')
+% subplot(2,3,5)
+% imagesc(frmdata2(:,:,end,1),[plotmin plotmax])
+% set(gca,'ytick',[],'xtick',[])
+% axis square
+% xlabel('2nd half 50deg')
+% subplot(2,3,6)
+% imagesc(frmdata(:,:,end,1),[plotmin plotmax])
+% set(gca,'ytick',[],'xtick',[])
+% axis square
+% xlabel('Total 50deg')
+% mtit('sit dF across experiment')
+% if exist('psfile','var')
+%     set(gcf, 'PaperPositionMode', 'auto');
+%     print('-dpsc',psfile,'-append');
+% end
+
+
 % mainfig = figure
 % location =1; s = 4;
 % imagesc(squeeze(mean(dFout(:,:,find(timepts==duration),xpos==x(location) & radius == sz(s))-dFout(:,:,find(timepts==0),xpos==x(location) & radius==sz(s)),4)),[0 0.25]); colormap jet
@@ -211,8 +244,8 @@ end
 % end
 
 display('saving')
-save(sessionName,'frmdata','frmdata1','frmdata2','meandfofInterp','xpos','sf','theta','phase','radius','radiusRange','timepts','moviefname','sbxfilename','-append')
-
+save(sessionName,'frmdata','meandfofInterp','xpos','sf','theta','phase','radius','radiusRange','timepts','moviefname','sbxfilename','-append')
+%%%'frmdata1','frmdata2',
 
 % for i = 1:10;
 %     figure(mainfig)

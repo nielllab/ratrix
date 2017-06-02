@@ -200,7 +200,8 @@ for i = 1:length(db)
             keyboard
         end
     end
-
+    
+    close all;
     delete(psfilename);
 
 end

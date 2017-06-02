@@ -257,7 +257,7 @@ for f = 2:2
         figure
         bar(nUnits); ylim([0 1]); set(gca,'Xtick',1:6); ylabel('% units detected'); set(gca,'Xticklabel',{'topox','topoy','behav','pass 2x','pass 3x','grating'})
         
-        keyboard
+        %keyboard
         %%% start plotting!
         for i = 1:size(xdF,1)
             %if mean(bdF(i,:),2)~=0 | mean(dF2(i,:),2)~=0 | mean(dF3(i,:)~=0)

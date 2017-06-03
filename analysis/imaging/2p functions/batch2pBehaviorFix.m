@@ -859,7 +859,7 @@ files(n).depth = [135];
 % % files(n).notes = 'good imaging session';
 % % files(n).ncells = [];  %%% optional - we could use this to adjust # of cells selected
 % % files(n).depth = [135];
-% % files(n).S2P = 1;
+% % files(n).S2P   = 1;
 
 n=n+1;
 files(n).subj = 'g62ff8rt'; 

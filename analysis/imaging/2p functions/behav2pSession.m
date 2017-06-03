@@ -13,7 +13,7 @@ if (exist('S2P','var')&S2P==1)
     %was getting funny phasetimes when syncToVid was on
 else
     cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  %%% configuration parameters eff
-    cfg.syncToVid=1; cfg.saveDF=0;
+    cfg.syncToVid=0; cfg.saveDF=0;  %should synctToVid always be 0?
 end
 
 get2pSession_sbx;

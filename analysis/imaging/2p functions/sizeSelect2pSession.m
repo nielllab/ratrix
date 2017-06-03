@@ -60,8 +60,8 @@ cycLength = cycLength/dt;
 xpos=0;
 sf=0; isi=0; duration=0; theta=0; phase=0; radius=0;
 % moviefname = 'C:\sizeSelect2sf8sz26min.mat';
-% moviefname = 'C:\sizeselectBin22min.mat'
-moviefname = 'C:\sizeselectLongISI22min.mat'
+moviefname = 'C:\sizeselectBin22min.mat'
+% moviefname = 'C:\sizeselectLongISI22min.mat'
 load(moviefname)
 ntrials= min(dt*length(dfofInterp)/(isi+duration),length(sf))
 onsets = dt + (0:ntrials-1)*(isi+duration);

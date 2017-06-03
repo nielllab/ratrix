@@ -107,92 +107,142 @@ for f=1:length(use)
         
         
         %%%pixel-wise suppression plots
-        load(files(use(f)).sizesession,'frmdata','frmdata1','frmdata2')
+        load(files(use(f)).sizesession,'frmdata')
         
         %%%plot sit dF
-        figure;
-        colormap jet
-        for i = 2:length(sizes)
-            subplot(2,floor(length(sizes)/2),i-1)
-            resp = nanmean(frmdata(:,:,i,1),3);
-            imagesc(resp,[-0.01 0.1])
-            set(gca,'ytick',[],'xtick',[])
-            xlabel(sprintf('%sdeg',sizes{i}))
-            axis square
-        end
-        mtit('sit dF/size')
-        if exist('psfilei','var')
-            set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfilei,'-append');
-        end
-
-        %%%plot run dF
-        figure;
-        colormap jet
-        for i = 2:length(sizes)
-            subplot(2,floor(length(sizes)/2),i-1)
-            resp = nanmean(frmdata(:,:,i,2),3);
-            imagesc(resp,[-0.01 0.1])
-            set(gca,'ytick',[],'xtick',[])
-            xlabel(sprintf('%sdeg',sizes{i}))
-            axis square
-        end
-        mtit('run dF/size')
-        if exist('psfilei','var')
-            set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfilei,'-append');
+        for h = 1:length(sfrange)
+            figure;
+            colormap jet
+            for i = 2:length(sizes)
+                subplot(2,floor(length(sizes)/2),i-1)
+                resp = nanmean(frmdata(:,:,h,i,1),3);
+                imagesc(resp,[-0.01 0.1])
+                set(gca,'ytick',[],'xtick',[])
+                xlabel(sprintf('%sdeg',sizes{i}))
+                axis square
+            end
+            mtit(sprintf('sit dF/size %0.2fcpd',sfrange(h)))
+            if exist('psfilei','var')
+                set(gcf, 'PaperPositionMode', 'auto');
+                print('-dpsc',psfilei,'-append');
+            end
+            %%%plot run dF
+            figure;
+            colormap jet
+            for i = 2:length(sizes)
+                subplot(2,floor(length(sizes)/2),i-1)
+                resp = nanmean(frmdata(:,:,h,i,2),3);
+                imagesc(resp,[-0.01 0.1])
+                set(gca,'ytick',[],'xtick',[])
+                xlabel(sprintf('%sdeg',sizes{i}))
+                axis square
+            end
+            mtit(sprintf('run dF/size %0.2fcpd',sfrange(h)))
+            if exist('psfilei','var')
+                set(gcf, 'PaperPositionMode', 'auto');
+                print('-dpsc',psfilei,'-append');
+            end
         end
 
         %%%plot sit 20v50deg
         figure
+        subplot(2,2,1)
         mrg=zeros(size(frmdata,1),size(frmdata,2),3);
-        mrg(:,:,2) = nanmean(frmdata(:,:,4,1),3);
-        mrg(:,:,1) = nanmean(frmdata(:,:,end,1),3);
+        mrg(:,:,2) = nanmean(frmdata(:,:,1,4,1),3);
+        mrg(:,:,1) = nanmean(frmdata(:,:,1,end,1),3);
         mrg=mrg*10;
         image(mrg)
-        axis off
-        title('sit 20deg (g) vs 50 deg (r)')
+        set(gca,'ytick',[],'xtick',[])
+        xlabel(sprintf('sit %0.2fcpd',sfrange(1)))
+        subplot(2,2,2)
+        mrg=zeros(size(frmdata,1),size(frmdata,2),3);
+        mrg(:,:,2) = nanmean(frmdata(:,:,1,4,2),3);
+        mrg(:,:,1) = nanmean(frmdata(:,:,1,end,2),3);
+        mrg=mrg*10;
+        image(mrg)
+        set(gca,'ytick',[],'xtick',[])
+        xlabel(sprintf('run %0.2fcpd',sfrange(1)))
+        subplot(2,2,3)
+        mrg=zeros(size(frmdata,1),size(frmdata,2),3);
+        mrg(:,:,2) = nanmean(frmdata(:,:,2,4,1),3);
+        mrg(:,:,1) = nanmean(frmdata(:,:,2,end,1),3);
+        mrg=mrg*10;
+        image(mrg)
+        set(gca,'ytick',[],'xtick',[])
+        xlabel(sprintf('sit %0.2fcpd',sfrange(2)))
+        subplot(2,2,4)
+        mrg=zeros(size(frmdata,1),size(frmdata,2),3);
+        mrg(:,:,2) = nanmean(frmdata(:,:,2,4,2),3);
+        mrg(:,:,1) = nanmean(frmdata(:,:,2,end,2),3);
+        mrg=mrg*10;
+        image(mrg)
+        set(gca,'ytick',[],'xtick',[])
+        xlabel(sprintf('run %0.2fcpd',sfrange(2)))
+        mtit('20deg (g) vs 50 deg (r)')
         if exist('psfilei','var')
             set(gcf, 'PaperPositionMode', 'auto');
             print('-dpsc',psfilei,'-append');
         end
-        
-        %%%plot run 20vs50deg
+   
+        %%%plot average response of center pixels for 2 SFs
+        cwidth=[size(frmdata,1)/2 size(frmdata,2)/2];
+        centresp = zeros(length(sfrange),length(sizes),2);
+        for h = 1:length(sfrange)
+            for i = 1:length(sizes)
+                for j = 1:2
+                centresp(h,i,j) = nanmean(nanmean(frmdata(cwidth(1)-50:cwidth(1)+50,cwidth(2)-50:cwidth(2)+50,h,i,j)));
+                end
+            end
+        end
         figure
-        mrg=zeros(size(frmdata,1),size(frmdata,2),3);
-        mrg(:,:,2) = nanmean(frmdata(:,:,4,2),3);
-        mrg(:,:,1) = nanmean(frmdata(:,:,end,2),3);
-        mrg=mrg*10;
-        image(mrg)
-        axis off
-        title('run 20deg (g) vs 50 deg (r)')
-        if exist('psfilei','var')
+        subplot(1,2,1)
+        hold on
+        plot(centresp(1,:,1))
+        plot(centresp(2,:,1))
+        legend(sprintf('%0.2fcpd',sfrange(1)),sprintf('%0.2fcpd',sfrange(2)),'location','northwest')
+        xlabel('size')
+        ylabel('sit dfof')
+        axis([0 length(radiusRange)+1 -0.02 0.12])
+        axis square
+        set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'Fontsize',8)
+        subplot(1,2,2)
+        hold on
+        plot(centresp(1,:,2))
+        plot(centresp(2,:,2))
+        legend(sprintf('%0.2fcpd',sfrange(1)),sprintf('%0.2fcpd',sfrange(2)),'location','northwest')
+        xlabel('size')
+        ylabel('run dfof')
+        axis([0 length(radiusRange)+1 -0.02 0.12])
+        axis square
+        set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'Fontsize',8)
+        mtit('Center Response')
+        if exist('psfile','var')
             set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfilei,'-append');
+            print('-dpsc',psfile,'-append');
         end
         
-        %%%compare 1st half of experiment to 2nd
-        figure;
-        colormap jet
-        for i = 2:length(sizes)
-            subplot(2,length(sizes)-1,i-1)
-            imagesc(frmdata1(:,:,i,1),[-0.01 0.1])
-            set(gca,'ytick',[],'xtick',[])
-            xlabel(sprintf('%sdeg 1st',sizes{i}))
-            axis square
-        end
-        for i = 2:length(sizes)
-            subplot(2,length(sizes)-1,length(sizes)+i-2)
-            imagesc(frmdata2(:,:,i,1),[-0.01 0.1])
-            set(gca,'ytick',[],'xtick',[])
-            xlabel(sprintf('%sdeg 2nd',sizes{i}))
-            axis square
-        end
-        mtit('1st vs 2nd half responses (sit)')
-        if exist('psfilei','var')
-            set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfilei,'-append');
-        end
+%         %%%compare 1st half of experiment to 2nd
+%         figure;
+%         colormap jet
+%         for i = 2:length(sizes)
+%             subplot(2,length(sizes)-1,i-1)
+%             imagesc(frmdata1(:,:,i,1),[-0.01 0.1])
+%             set(gca,'ytick',[],'xtick',[])
+%             xlabel(sprintf('%sdeg 1st',sizes{i}))
+%             axis square
+%         end
+%         for i = 2:length(sizes)
+%             subplot(2,length(sizes)-1,length(sizes)+i-2)
+%             imagesc(frmdata2(:,:,i,1),[-0.01 0.1])
+%             set(gca,'ytick',[],'xtick',[])
+%             xlabel(sprintf('%sdeg 2nd',sizes{i}))
+%             axis square
+%         end
+%         mtit('1st vs 2nd half responses (sit)')
+%         if exist('psfilei','var')
+%             set(gcf, 'PaperPositionMode', 'auto');
+%             print('-dpsc',psfilei,'-append');
+%         end
              
         %%%compare 20deg pixel vs cell footprints
         goodprints = zeros(1,length(usePts));goodprints(allgoodTopo)=1;goodprints(goodTopo)=2;

@@ -216,9 +216,9 @@ for f=1:length(use)
         axis square
         set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'Fontsize',8)
         mtit('Center Response')
-        if exist('psfile','var')
+        if exist('psfilei','var')
             set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfile,'-append');
+            print('-dpsc',psfilei,'-append');
         end
         
 %         %%%compare 1st half of experiment to 2nd
@@ -248,14 +248,14 @@ for f=1:length(use)
         goodprints = zeros(1,length(usePts));goodprints(allgoodTopo)=1;goodprints(goodTopo)=2;
         figure
         subplot(1,3,1)
-        resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),2,1),3);
+        resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,2,1),3);
         respimg = mat2im(resp,jet,[-0.01 0.1]);
         imshow(respimg)
         set(gca,'ytick',[],'xtick',[])
         xlabel('5deg resp')
         axis equal
         subplot(1,3,2)
-        resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),3,1),3);
+        resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,3,1),3);
         respimg = mat2im(resp,jet,[-0.01 0.1]);
         imshow(respimg)
         set(gca,'ytick',[],'xtick',[])
@@ -269,9 +269,10 @@ for f=1:length(use)
         draw2pSegs(usePts,goodprints,parula,size(meanShiftImg),1:length(usePts),[0 2])
         xlabel('center footprints')
         colorbar off
+        set(gca,'LooseInset',get(gca,'TightInset'))
         mtit('Pixel vs. Cell Center Response')
         if exist('psfilei','var')
-            set(gcf, 'PaperPositionMode', 'auto');
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
             print('-dpsc',psfilei,'-append');
         end       
         
@@ -1519,7 +1520,7 @@ for f=1:length(use)
         
 
         %%%saving
-        save(fullfile(pathname,filename),'frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells')
+        save(fullfile(pathname,filename),'centresp','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells')
 
         try
             dos(['ps2pdf ' psfilei ' "' [fullfile(pathname,filename) '.pdf'] '"'] )

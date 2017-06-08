@@ -542,7 +542,29 @@ makeSbxMoviesBatch
 % sizeSelect2pSession('G62GGG3LT_001_008.sbx','sizeSession_POST_V2.mat',psfilename);
 % topo2pSession('G62GGG3LT_001_009.sbx','darkness_POST_V2.mat',psfilename);
 
+%%%060617
+% topo2pSession('G62GGG1LT_001_004.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('G62GGG1LT_001_005.sbx','topoYsession_V2.mat',psfilename);
+% topo2pSession('G62GGG1LT_001_006.sbx','darkness_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62GGG1LT_001_007.sbx','sizeSession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62GGG1LT_001_008.sbx','sizeSession_POST_V2.mat',psfilename);
+% topo2pSession('G62GGG1LT_001_009.sbx','darkness_POST_V2.mat',psfilename);
 
+% %%%060617
+% topo2pSession('G62GGG3LT_001_004.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('G62GGG3LT_001_005.sbx','topoYsession_V2.mat',psfilename);
+% topo2pSession('G62GGG3LT_001_006.sbx','darkness_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62GGG3LT_001_007.sbx','sizeSession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G62GGG3LT_001_008.sbx','sizeSession_POST_V2.mat',psfilename);
+% topo2pSession('G62GGG3LT_001_009.sbx','darkness_POST_V2.mat',psfilename);
+
+%%%060617
+topo2pSession('CG48LN_001_004.sbx','topoXsession_V2.mat',psfilename);
+topo2pSession('CG48LN_001_005.sbx','topoYsession_V2.mat',psfilename);
+topo2pSession('CG48LN_001_006.sbx','darkness_PRE_V2.mat',psfilename);
+sizeSelect2pSession('CG48LN_001_007.sbx','sizeSession_PRE_V2.mat',psfilename);
+sizeSelect2pSession('CG48LN_001_008.sbx','sizeSession_POST_V2.mat',psfilename);
+topo2pSession('CG48LN_001_009.sbx','darkness_POST_V2.mat',psfilename);
 
 toc
 

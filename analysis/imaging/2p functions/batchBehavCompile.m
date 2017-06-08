@@ -1,5 +1,6 @@
 close all
 
+
 batch2pBehaviorFix;
 
 %%% select files to analyze
@@ -70,6 +71,8 @@ for i = 1:length(alluse);
     sessionCond(i) = allCond(cellrange(1));
     sessionSubj{i} = files(alluse(i)).subj;
     sess(cellrange)=i;
+    sessionDate{i} = files(alluse(i)).expt;
+
     
     %%% get eye data for behavior
     clear eyes
@@ -488,10 +491,17 @@ for s= 1:max(sess)
     set(gcf,'Name',sprintf('%s %s %s',files(alluse(s)).subj, files(alluse(s)).expt, condLabel{sessCond(s)}));
     for t = 1:4 %%%  top/bottom, correct/incorrect
         subplot(2,2,t);
-        for i = 1:max(c)
+        for i = 1:max(clust)
             n = sum(clust==i & sess==s)/sum(sess==s)
             d =nanmean(invariantAll(clust==i & sess==s ,:),1); plot(0.1*(0:41),n*(d((t-1)*42 + (1:42))-mean(d(6:10))));hold on; ylim([ -0.025 0.065]); xlim([0 4.15])
-            
+                   
+            %%%mean activity for session, and each cluster (unweighted)
+            %%% s = session, t = trial type (top/bottom,
+            %%% correct/incorrect), cond = cluster, cells? 
+    ClustBehavTrialData(s,t,cond,:) = d((t-1)*42 + (1:42))-mean(d(6:10));
+    ClustBehavTrialDataErr(s,t,cond,:) = nanstd(invariantAll(clust==i & sess==s ,(t-1)*42 + (1:42)),[],1)/sqrt(sum(clust==i & sess==s));
+    
+            %%% (weighted)
             clustBehav(s,t,cond,:) = n*(d((t-1)*42 + (1:42))-mean(d(6:10)));
             clustBehavErr(s,t,cond,:) = n*nanstd(invariantAll(clust==i & sess==s ,(t-1)*42 + (1:42)),[],1)/sqrt(sum(clust==i & sess==s));
         end
@@ -499,6 +509,12 @@ for s= 1:max(sess)
     end
     legend;
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+        %%%mean activity for session, and each cluster (unweighted)
+    ClustBehavTrialData(s,t,cond,:) = d((t-1)*42 + (1:42))-mean(d(6:10));
+    ClustBehavTrialDataErr(s,t,cond,:) = nanstd(invariantAll(clust==i & sess==s ,(t-1)*42 + (1:42)),[],1)/sqrt(sum(clust==i & sess==s));
+    
+    std(behavTrialData(1:cutoff,alluse(i),:));
     
     
     %%% performance (correct, stopping, etc)
@@ -519,6 +535,8 @@ for s= 1:max(sess)
     title(sprintf('%s %s %s depth %d',files(alluse(s)).subj,files(alluse(s)).expt,files(alluse(s)).task,files(alluse(s)).depth));
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
+    %%%plot pixelwise activation on top of this fig? average activation at
+    %%%certain timepoint during behavior
     
     %%% check for dependencies in behavior (bias, correction trial, etc)
     loc = locationAll{s}; targ = targAll{s}; correct = correctAll{s};
@@ -597,6 +615,33 @@ for cond = 1:4
     set(gcf,'Name',condLabel{cond});
 end
 
+            %%%mean activity for session, and each cluster (unweighted)
+            %%% s = session, t = trial type (top/bottom,
+            %%% correct/incorrect), cond = behavioral condition, timepoints 
+            %%%c/i = cluster
+for ss = 1:length(sessionDate)
+     figure
+    for t = 1:4
+        subplot(2,2,t);        
+        for i = 1:max(clust)
+            d =nanmean(invariantAll(sess==ss & clust==i,:),1); 
+            e =nanstd(invariantAll(sess==ss & clust==i,:),[],1)/sqrt(sum(sess==ss & clust==i)); 
+          SessClustData(ss,t,i,:) =  d((t-1)*42 + (1:42))-min(d);
+          SessClustErr(ss,t,i,:) = e((t-1)*42 + (1:42));
+            %plot(d((t-1)*42 + (1:42))-min(d));hold on; ylim([ 0 0.3]); xlim([0.5 42.5])
+       errorbar(1:42,(d((t-1)*42 + (1:42))-min(d)),e((t-1)*42 + (1:42)));hold on; ylim([ 0 0.3]); xlim([0.5 42.5])
+        
+        end     
+        title(trialType{t});
+    legend;
+    set(gcf,'Name',[sessSubj{ss} sessionDate{ss}]);
+    end;
+    drawnow
+end;
+% if exist('psfilename','var')
+%     set(gcf, 'PaperPositionMode', 'auto');
+%     print('-dpsc',psfilename,'-append');
+% end
 
 
 orientInvariant3x(:,:,4) = mean(centered3x(:,:,[10 12]),3);
@@ -692,6 +737,7 @@ for c =1:3
     else
         range = 19:20
     end
+    clear resp
     resp(c,:,:,1) = mean(clustBehav(c,:,:,range),4);
     respErr(c,:,:,1) = mean(clustBehavErr(c,:,:,range),4);
     resp(c,:,:,2) = mean(clust3x(c,:,:,range-1),4);

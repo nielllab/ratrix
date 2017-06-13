@@ -69,19 +69,19 @@ for f = 1:length(files)
 %     end
 %     
 %     
-%     
-    if redo || isempty([pathname files(f).darkness]) || ~exist([pathname files(f).darkness],'file')
-        try
-            dfofMovie([datapathname files(f).darknessdata],rig);
-        catch exc
-            sprintf('couldnt do %s',files(f).darknessdata)
-            nerr=nerr+1;
-            errmsg{nerr}=sprintf('couldnt do %s',files(f).darknessdata)
-            errRpt{nerr}=getReport(exc,'extended')
-        end
-    else
-        sprintf('skipping %s',files(f).darknessdata)
-    end    
+% %     
+%     if redo || isempty([pathname files(f).darkness]) || ~exist([pathname files(f).darkness],'file')
+%         try
+%             dfofMovie([datapathname files(f).darknessdata],rig);
+%         catch exc
+%             sprintf('couldnt do %s',files(f).darknessdata)
+%             nerr=nerr+1;
+%             errmsg{nerr}=sprintf('couldnt do %s',files(f).darknessdata)
+%             errRpt{nerr}=getReport(exc,'extended')
+%         end
+%     else
+%         sprintf('skipping %s',files(f).darknessdata)
+%     end    
 
 %     if redo | isempty([pathname files(f).gratingdata4x3yLandscape]) | ~exist([pathname files(f).gratingdata4x3yLandscape],'file')
 %         try

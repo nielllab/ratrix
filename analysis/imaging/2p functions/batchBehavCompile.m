@@ -509,11 +509,7 @@ for s= 1:max(sess)
     end
     legend;
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
-        %%%mean activity for session, and each cluster (unweighted)
-    ClustBehavTrialData(s,t,cond,:) = d((t-1)*42 + (1:42))-mean(d(6:10));
-    ClustBehavTrialDataErr(s,t,cond,:) = nanstd(invariantAll(clust==i & sess==s ,(t-1)*42 + (1:42)),[],1)/sqrt(sum(clust==i & sess==s));
-    
+
     std(behavTrialData(1:cutoff,alluse(i),:));
     
     
@@ -630,7 +626,9 @@ for ss = 1:length(sessionDate)
           SessClustErr(ss,t,i,:) = e((t-1)*42 + (1:42));
             %plot(d((t-1)*42 + (1:42))-min(d));hold on; ylim([ 0 0.3]); xlim([0.5 42.5])
        errorbar(1:42,(d((t-1)*42 + (1:42))-min(d)),e((t-1)*42 + (1:42)));hold on; ylim([ 0 0.3]); xlim([0.5 42.5])
-        
+       %%%weighted by number of cells
+       n = sum(clust==i & sess==ss/sum(sess==ss);
+        d =nanmean(invariantAll(clust==i & sess==ss ,:),1); plot(0.1*(0:41),n*(d((t-1)*42 + (1:42))-mean(d(6:10))));hold on; ylim([ -0.025 0.065]); xlim([0 4.15])
         end     
         title(trialType{t});
     legend;
@@ -638,6 +636,31 @@ for ss = 1:length(sessionDate)
     end;
     drawnow
 end;
+
+  %%%weighted by number of cells get fraction for each session
+  %%%check that this is right (subtract min or mean?)(fractions dont add up
+  %%%to 1)? fraction based on active cells only?
+for ss = 1:length(sessionDate)
+     figure
+    for t = 1:4
+        subplot(2,2,t);        
+        for i = 1:max(clust)
+       n = sum(clust==i & sess==ss)/sum(sess==ss);
+        d =nanmean(invariantAll(clust==i & sess==ss ,:),1);
+            e =nanstd(invariantAll(sess==ss & clust==i,:),[],1)/sqrt(sum(sess==ss & clust==i)); 
+          WeightedSessClustData(ss,t,i,:) =  n*(d((t-1)*42 + (1:42))-mean(d(6:10)));
+          WeightedSessClustErr(ss,t,i,:) = n*(e((t-1)*42 + (1:42)));
+          SessClustFraction(ss,i) = sum(clust==i & sess==ss)/sum(sess==ss);
+        %plot(0.1*(0:41),n*(d((t-1)*42 + (1:42))-mean(d(6:10))));hold on; ylim([ -0.025 0.065]); xlim([0 4.15])    
+       errorbar(1:42,n*(d((t-1)*42 + (1:42))-min(d)),n*(e((t-1)*42 + (1:42))));hold on; ylim([ 0 0.3]); xlim([0.5 42.5])
+ end     
+        title(trialType{t});
+    legend;
+    set(gcf,'Name',[ 'weighted response_' sessSubj{ss} sessionDate{ss}]);
+    end;
+    drawnow
+end;
+
 % if exist('psfilename','var')
 %     set(gcf, 'PaperPositionMode', 'auto');
 %     print('-dpsc',psfilename,'-append');

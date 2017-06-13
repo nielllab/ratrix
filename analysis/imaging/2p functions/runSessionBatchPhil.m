@@ -558,13 +558,29 @@ makeSbxMoviesBatch
 % sizeSelect2pSession('G62GGG3LT_001_008.sbx','sizeSession_POST_V2.mat',psfilename);
 % topo2pSession('G62GGG3LT_001_009.sbx','darkness_POST_V2.mat',psfilename);
 
-%%%060617
-topo2pSession('CG48LN_001_004.sbx','topoXsession_V2.mat',psfilename);
-topo2pSession('CG48LN_001_005.sbx','topoYsession_V2.mat',psfilename);
-topo2pSession('CG48LN_001_006.sbx','darkness_PRE_V2.mat',psfilename);
-sizeSelect2pSession('CG48LN_001_007.sbx','sizeSession_PRE_V2.mat',psfilename);
-sizeSelect2pSession('CG48LN_001_008.sbx','sizeSession_POST_V2.mat',psfilename);
-topo2pSession('CG48LN_001_009.sbx','darkness_POST_V2.mat',psfilename);
+%%%060717
+% topo2pSession('CG48LN_001_004.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('CG48LN_001_005.sbx','topoYsession_V2.mat',psfilename);
+% topo2pSession('CG48LN_001_006.sbx','darkness_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('CG48LN_001_007.sbx','sizeSession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('CG48LN_001_008.sbx','sizeSession_POST_V2.mat',psfilename);
+% topo2pSession('CG48LN_001_009.sbx','darkness_POST_V2.mat',psfilename);
+
+%%%060917
+% topo2pSession('CG48LN_001_004.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('CG48LN_001_005.sbx','topoYsession_V2.mat',psfilename);
+% topo2pSession('CG48LN_001_006.sbx','darkness_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('CG48LN_001_007.sbx','sizeSession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('CG48LN_001_008.sbx','sizeSession_POST_V2.mat',psfilename);
+% topo2pSession('CG48LN_001_009.sbx','darkness_POST_V2.mat',psfilename);
+
+%%061217
+topo2pSession('G62YY5RN_001_009.sbx','topoXsession_PRE_V2.mat',psfilename);
+topo2pSession('G62YY5RN_001_010.sbx','topoYsession_PRE_V2.mat',psfilename);
+topo2pSession('G62YY5RN_001_011.sbx','darkness_PRE_V2.mat',psfilename);
+topo2pSession('G62YY5RN_001_012.sbx','darkness_POST_V2.mat',psfilename);
+topo2pSession('G62YY5RN_001_013.sbx','topoYsession_POST_V2.mat',psfilename);
+topo2pSession('G62YY5RN_001_014.sbx','topoXsession_POST_V2.mat',psfilename);
 
 toc
 

@@ -13,7 +13,7 @@ twocolor = 0;
 %%% will ask for ttl .mat file - uses this to find first frame of imaging after stim comes on
 %%% returns dfofInterp(x,y,t) = timeseries at requested framerate, with pre-stim frames clipped off
 %%% greenframe = mean fluorescence image
-get2pSession;
+get2pSession
 
 
 %%% generate periodic map 

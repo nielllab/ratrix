@@ -39,8 +39,10 @@ img = greenframe;
 filt = fspecial('gaussian',5,0.75);
 stdImg = imfilter(img,filt);
 
-%%% compare each point to the dilation of the region around it - if greater, it's a peak
-region = ones(3,3); region(2,2)=0;
+%%% compare each point to the dilation of the region around it - if
+%%% greater, it's a peak
+%%%% changed this region = ones(3,3); region(2,2)=0;
+region = ones(7,7); region(4,4)=0;
 maxStd = stdImg > imdilate(stdImg,region);
 maxStd(1:3,:) = 0; maxStd(end-2:end,:)=0; maxStd(:,1:3)=0; maxStd(:,end-2:end)=0; %%% no points on border
 pts = find(maxStd);

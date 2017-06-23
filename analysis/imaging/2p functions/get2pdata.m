@@ -45,7 +45,7 @@ open(vid);
 writeVideo(vid,mov(1:end));
 close(vid)
 
-fullMov= mat2im(imresize(img(25:end-25,25:end-25,:),2),gray,[prctile(m(:),2) 1.5*prctile(m(:),99)]);
+fullMov= mat2im(imresize(img(1:end-25,1:end-25,:),2),gray,[prctile(m(:),2) 1.5*prctile(m(:),99)]);
 %fullMov = squeeze(fullMov(:,:,:,1));
 mov = immovie(permute(fullMov,[1 2 4 3]));
 %mov = immovie(fullMov);

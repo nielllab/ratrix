@@ -17,13 +17,11 @@ if align
     tic
     r = sbxalign_tif(fname,1:nframes);
     toc
-    figure
-    
+    figure 
     plot(r.T(:,1));
     hold on
     plot(r.T(:,2),'g');
-    figure
-    imagesc(r.m{1}); colormap gray; axis equal
+    title('alignment');
 end
 
 
@@ -45,6 +43,7 @@ end
 if align
     for f=1:nframes
         img(:,:,f) = circshift(squeeze(img(:,:,f)),[r.T(f,1),r.T(f,2)]);
+ 
     end
     
     

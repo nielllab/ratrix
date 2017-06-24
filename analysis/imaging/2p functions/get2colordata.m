@@ -1,5 +1,5 @@
-function [dfofInterp im_dt red green] = get2colordata(fname,dt,cycLength);
-[imgAll framerate] = readAlign2color(fname,1,1,0.5);
+function [dfofInterp im_dt red green mv] = get2colordata(fname,dt,cycLength);
+[imgAll framerate mv] = readAlign2color(fname,1,1,0.5);
 
 
 red = squeeze(mean(imgAll(:,:,:,2),3));
@@ -29,7 +29,7 @@ for i = 1:2
     
     
     im_dt = 1/framerate;
-    dt = 0.25;
+
     if i == 1
         dfofInterp = interp1(0:im_dt:(nframes-1)*im_dt,shiftdim(dfof,2),0:dt:(nframes-1)*im_dt);
         dfofInterp = shiftdim(dfofInterp,1);

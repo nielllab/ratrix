@@ -22,7 +22,7 @@ else
     ttlFname = fullfile(ttlp,ttlf);
     cycLength = input('cycle length : ');
     if twocolor
-        [dfofInterp dtRaw redframe greenframe] = get2colordata(fullfile(p,f),dt,cycLength);
+        [dfofInterp dtRaw redframe greenframe mv] = get2colordata(fullfile(p,f),dt,cycLength);
     else
         [dfofInterp dtRaw greenframe] = get2pdata(fullfile(p,f),dt,cycLength);
     end
@@ -37,7 +37,7 @@ else
     end
     
     sprintf('estimated start time %f',startTime)
-    startTime = input('start time : ');
+   % startTime = input('start time : ');
     
     for st = 0:10
         plot(st*cycLength+ [startTime*dt startTime*dt],[0.2 1],'k:')

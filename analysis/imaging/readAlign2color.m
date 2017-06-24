@@ -1,4 +1,4 @@
-function [img, framerate] = readAlign2color(fname, align,showImg,fwidth)
+function [img, framerate,mv] = readAlign2color(fname, align,showImg,fwidth)
 
 inf = imfinfo(fname)
 
@@ -78,4 +78,7 @@ if align
         figure
         imshow(im)
     end
+    mv = r.T;
+else
+    mv = NaN;
 end

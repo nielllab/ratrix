@@ -122,7 +122,7 @@ xlabel('secs'); xlim([0 size(dF,2)*dt]);
 
 if exist('mv','var')
     figure
-    plot((1:size(dF,2))*dt,mv);
+    plot(mv);
     title('alignement')
 end
 
@@ -238,7 +238,7 @@ imagesc(corrcoef(dF'));
 %%% xselected = x(selecttrace(1:n)); yselected = y(selecttrace(1:n));
 
 
-xselected = x(order(1:n)); yselected = y(order(1:n)); %%% only keep cell positions for selected cells; you'll need to also do this again for any subsequent selections
+%xselected = x(order(1:n)); yselected = y(order(1:n)); %%% only keep cell positions for selected cells; you'll need to also do this again for any subsequent selections
 %%% xselected = xselected(orderdf(1:n)); yselected = yselected(orderdf(1:n));
 
 %  xselecteddf = x(orderdf(1:n)); yselecteddf = y(orderdf(1:n));
@@ -254,6 +254,21 @@ imagesc(stdImg,[0 prctile(stdImg(:),99)*1.2]); colormap gray; axis equal;hold on
 for clust=1:nclust
     plot(x(c==clust),y(c==clust),[colors(clust) 'o']);
 end
+
+nstim = input('num stim per repeat : ');
+totalframes = cycLength*nstim;
+
+reps = floor(size(dF,2)/totalframes);
+
+for rep = 1:reps
+    dFrepeats(:,:,rep) = dF(:,(1:totalframes) + (rep-1)*totalframes);
+end
+
+figure
+plot((1:totalframes)/cycLength + 1, squeeze(mean(dFrepeats,1)))
+xlabel('stim #'); xlim([1 nstim+1])
+title('mean trace for each repeat');
+
 
 
 for clust = 1:nclust
@@ -274,12 +289,21 @@ for clust = 1:nclust
     colormap jet;freezeColors;colormap gray;
     
     subplot(2,2,4);
-    plot(mv);
+plot((1:totalframes)/cycLength + 1, squeeze(mean(dFrepeats(c==clust,:,:),1)))
+xlabel('stim #'); xlim([1 nstim+1])
+title('mean of cluster, multiple repeats');
+
     
     subplot(2,2,3);
-    plot(selecttrace(c==clust,:)');
+    plot((1:size(selecttrace,2))*dt,selecttrace(c==clust,:)');
+    xlim([1 size(selecttrace,2)*dt]); xlabel('secs');
 end
 
+figure
+hold on
+for clust = 1:nclust
+    plot(mean(dF(c==clust,:),1));
+end
 
 
 % commented out

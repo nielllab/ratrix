@@ -90,7 +90,7 @@ end
        msPenalty               =3500;
        percentCorrectionTrials = .5;
        normalizedPosition      = [0.33 0.66];
-       radius                 = .29;        
+       radius                 = .28;        
        
    case 'g62aaa11rt'  %started 4/25/17 %%hvv center 5/10/17 %%%full 5/17/17
          requestRewardSizeULorMS = 0;

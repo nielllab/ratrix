@@ -216,17 +216,7 @@ end
 % axis off
 % subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
 % imagesc((dF(perm,:)),[-0.5 0.5]); axis xy ; hold on  %%% show sorted data
-%
 
-
-
-
-
-
-lower = min(dF(:)); upper = max(dF(:));
-figure
-imagesc(dF,[0 upper]); colormap gray; axis equal
-hold on
 
 %%% plot correlation coefficients
 figure
@@ -246,13 +236,14 @@ imagesc(corrcoef(dF'));
 
 nclust =input('# of clusters : '); %%% set to however many you want
 c= cluster(Z,'maxclust',nclust);
-colors = 'rgbcmy';
+
+colors = hsv(nclust+1);
 
 figure
-col='rgbcmy';
+
 imagesc(stdImg,[0 prctile(stdImg(:),99)*1.2]); colormap gray; axis equal;hold on
 for clust=1:nclust
-    plot(x(c==clust),y(c==clust),[colors(clust) 'o']);
+    plot(x(c==clust),y(c==clust),'o','Color',colors(clust,:));
 end
 
 nstim = input('num stim per repeat : ');
@@ -306,6 +297,8 @@ for clust = 1:nclust
 end
 
 
-% commented out
-% [f p] = uiputfile('*.mat','save results');
-% save(fullfile(p,f),'dF','greenframe','x','y');
+%%% commented out
+[f p] = uiputfile('*.mat','save results');
+if f~=0
+    save(fullfile(p,f),'dF','greenframe','x','y','dFrepeats','cycLength','nstim');
+end

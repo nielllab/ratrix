@@ -35,12 +35,27 @@ imshow(imresize(img,0.5))
 colormap(hsv); colorbar
 title(sprintf('fourier map at %d frame cycle',cycLength));
 
-stdFig = figure
-stdImg = std(dfofInterp,[],3);
-imagesc(stdImg,[0 0.5]); hold on;
+figure
+plot((1:size(dfofInterp,3))*dt,squeeze(mean(mean(dfofInterp,2),1));
+
+
+
+maxfig = figure;
+stdImg = max(dfofInterp,[],3); stdImg = medfilt2(stdImg);
+imagesc(stdImg,[prctile(stdImg(:),1) prctile(stdImg(:),99)*1.2]); hold on; axis equal; colormap gray; title('medfilt max')
+normMax = (stdImg - prctile(stdImg(:),1))/ (prctile(stdImg(:),98) - prctile(stdImg(:),1));
+
 greenFig = figure;
+subplot(2,2,4); title('green')
 stdImg = greenframe(49:end-32,37:end-36);
-imagesc(stdImg,[0 prctile(stdImg(:),99)*1.2]); hold on; axis equal; colormap gray
+imagesc(stdImg,[prctile(stdImg(:),1) prctile(stdImg(:),99)*1.2]); hold on; axis equal; colormap gray; title('green')
+normgreen = (stdImg - prctile(stdImg(:),1))/ (prctile(stdImg(:),99)*1.5 - prctile(stdImg(:),1));
+
+merge = zeros(size(stdImg,1),size(stdImg,2),3);
+merge(:,:,1)= normMax;
+merge(:,:,2) = normgreen;
+mergeFig = figure;
+imshow(merge);
 
 selectPts = input('select points by hand (1) or automatic (0) : ');
 if selectPts
@@ -48,9 +63,9 @@ if selectPts
   clear x y npts
    npts = input('how many points ? ');
     for i =1:npts
-        figure(greenFig);
+        figure(mergeFig); hold on
         [x(i) y(i)] = ginput(1); x=round(x); y = round(y);
-        plot(x(i),y(i),'r*');
+        plot(x(i),y(i),'b*');
         dF(i,:) = squeeze(mean(mean(dfofInterp(y(i)+range,x(i)+range,:),2),1));
     end
     
@@ -251,6 +266,7 @@ totalframes = cycLength*nstim;
 
 reps = floor(size(dF,2)/totalframes);
 
+clear dFrepeats
 for rep = 1:reps
     dFrepeats(:,:,rep) = dF(:,(1:totalframes) + (rep-1)*totalframes);
 end

@@ -1,7 +1,7 @@
 clear all
 
 global S2P
-S2P = 1; %S2P analysis = 1, other = 0
+S2P = 0; %S2P analysis = 1, other = 0
 
 
 %%% load pts file (contains cell locations and dF, along with analysis results

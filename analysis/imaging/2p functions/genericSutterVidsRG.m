@@ -1,8 +1,9 @@
 %%% reads in 2-color data and creates avi movie
 %%% puts first channel into green, second into red
-
+if ~exist(fname)
 [f p] = uigetfile({'*.mat;*.tif'},'.mat or .tif file');
 fname = fullfile(p,f);
+end
 img = readAlign2color(fname,1,1,0.5);  %%% filename, align = yes, showimg=yes, filter width = 0.5
 
 fullMov = zeros(size(img));

@@ -53,7 +53,8 @@ else
     plot(cycAvg)
     
     [fs ps] = uiputfile('*.mat','session data');
-    display('saving data')
+   if fs ~=0
+       display('saving data')
     sessionName= fullfile(ps,fs);
     if twocolor
         save(sessionName,'dfofInterp','startTime','cycLength','redframe','greenframe','-v7.3');
@@ -61,4 +62,5 @@ else
         save(sessionName,'dfofInterp','startTime','cycLength','greenframe','-v7.3');
     end
     display('done')
+   end
 end

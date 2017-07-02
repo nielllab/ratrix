@@ -17,6 +17,10 @@ get2pSession
 dfofInterp = dfofInterp(49:end-32,37:end-36,:);
 cycLength = cycLength/dt;
 
+nstim = input('num stim per repeat : ');
+totalframes = cycLength*nstim;
+reps = floor(size(dfofInterp,3)/totalframes);
+
 %%% generate periodic map
 
 map = 0;
@@ -36,17 +40,20 @@ colormap(hsv); colorbar
 title(sprintf('fourier map at %d frame cycle',cycLength));
 
 figure
-plot((1:size(dfofInterp,3))*dt,squeeze(mean(mean(dfofInterp,2),1));
-
+plot((1:size(dfofInterp,3))*dt,squeeze(mean(mean(dfofInterp,2),1)));
+title('full image mean'); hold on
+for i = 1:reps;
+    plot([i*nstim*cycLength*dt  i*nstim*cycLength*dt], [0 0.5],'g');
+end
 
 
 maxfig = figure;
 stdImg = max(dfofInterp,[],3); stdImg = medfilt2(stdImg);
-imagesc(stdImg,[prctile(stdImg(:),1) prctile(stdImg(:),99)*1.2]); hold on; axis equal; colormap gray; title('medfilt max')
+imagesc(stdImg,[prctile(stdImg(:),1) 2]); hold on; axis equal; colormap gray; title('medfilt max')
 normMax = (stdImg - prctile(stdImg(:),1))/ (prctile(stdImg(:),98) - prctile(stdImg(:),1));
 
 greenFig = figure;
-subplot(2,2,4); title('green')
+title('green')
 stdImg = greenframe(49:end-32,37:end-36);
 imagesc(stdImg,[prctile(stdImg(:),1) prctile(stdImg(:),99)*1.2]); hold on; axis equal; colormap gray; title('green')
 normgreen = (stdImg - prctile(stdImg(:),1))/ (prctile(stdImg(:),99)*1.5 - prctile(stdImg(:),1));
@@ -59,7 +66,7 @@ imshow(merge);
 
 selectPts = input('select points by hand (1) or automatic (0) : ');
 if selectPts
-  range = -1:1
+  range = -2:2
   clear x y npts
    npts = input('how many points ? ');
     for i =1:npts
@@ -72,9 +79,11 @@ if selectPts
 else
     
     %%% select points based on peaks in brightness
-    img = greenframe;
-    filt = fspecial('gaussian',5,0.75);
+    img = max(dfofInterp,[],3);
+    filt = fspecial('gaussian',5,3);
     stdImg = imfilter(img,filt);
+    figure
+    imagesc(stdImg,[0 2]); colormap gray
     
     %%% compare each point to the dilation of the region around it - if greater, it's a peak
     region = ones(3,3); region(2,2)=0;
@@ -83,49 +92,34 @@ else
     pts = find(maxStd);
     
     %%% show max points
-    [x y] = ind2sub(size(maxStd),pts);
+    [y x] = ind2sub(size(maxStd),pts);
     figure
-    imagesc(stdImg,[0 500]); hold on; colormap gray
-    plot(y,x,'o');
+    imagesc(stdImg,[0 2]); hold on; colormap gray
+    plot(x,y,'o');
     
-    % %%% select the top N points in brightness, changed to select range.
-    % %%% need to fix na nb discrepencies farther down the pipeline
-    % [brightness order] = sort(img(pts),1,'descend');
-    % figure
-    % plot(brightness); xlabel('N'); ylabel('brightness');
-    % na= input('# of points above: ');
-    % nb= input('# of points below: ');
-    %
-    % range = -1:1;
-    % clear dF
-    %
-    % for i = na:nb
-    %     dF(i,:) = mean(mean(dfofInterp(x(order(i))+range,y(order(i))+range,:),2),1);
-    % end
-    %
-    % %%% show selected points
-    % figure
-    % imagesc(stdImg,[0 500]); hold on; colormap gray
-    % plot(y(order(na:nb)),x(order(na:nb)),'o');
-    
-    
+    [xrange yrange] = ginput(2);
+    pts = pts(x>xrange(1) & x<xrange(2) & y>yrange(1) & y<yrange(2));
+
     [brightness order] = sort(img(pts),1,'descend');
     figure
     plot(brightness); xlabel('N'); ylabel('brightness');
-    n= input('# of points : ');
+    mindF= input('dF cutoff : ');
+    pts = pts(img(pts)>mindF);
+    
+       [y x] = ind2sub(size(maxStd),pts);
+    figure
+    imagesc(stdImg,[0 2]); hold on; colormap gray
+    plot(x,y,'o');
     
     
-    range = -1:1;
+    range = -2:2;
     clear dF
-    
-    for i = 1:n
-        dF(i,:) = mean(mean(dfofInterp(x(order(i))+range,y(order(i))+range,:),2),1);
+    for i = 1:length(x)
+        dF(i,:) = mean(mean(dfofInterp(y(i)+range,x(i)+range,:),2),1);
     end
     
     %%% show selected points
-    figure
-    imagesc(stdImg,[0 500]); hold on; colormap gray
-    plot(y(order(1:n)),x(order(1:n)),'o');
+
     
 end
 %%% plot all fluorescence traces
@@ -145,58 +139,9 @@ end
 figure
 imagesc(dF);
 
-%%% ID cells with greatest change over recording
-if ~selectPts
-for i =1:n
-    
-    delta = max(dF(i,:)) - min(dF(i,:));
-    diffs(i,:) =  delta;
-    
-end
-
-%%% sort based on dF and graph dF, keeping cell ID's with the change in
-%%% their dF
-
-seq=(1:n);
-permed = permute(seq,[2 1]);
-diffsnum = [permed diffs];
-
-
-
-sortdiffs = sortrows(diffsnum,-2);
-figure
-plot(sortdiffs(:,2)); xlabel('N'); ylabel('change in dF');
-
-%%% create a matrix of only cells above a user chosen threshold of dF
-
-n= input('# of points : ');
-
-for i =1:n;
-    selectdiffs(i,1) = sortdiffs(i,1);
-    selectdiffs(i,2)=sortdiffs(i,2);
-    
-end
-
-sizeselectdiffs = size (selectdiffs);
-sizecolselectdiffs=sizeselectdiffs(1,1);
-
-for i =1:sizecolselectdiffs;
-    
-    tracenum=selectdiffs(i,1);
-    trace=dF(tracenum,:);
-    selecttrace(i,:) = trace;
-    clear trace;
-    
-end
-
-[brightnessdf orderdf] = sort(selecttrace(pts),1,'descend');
-else
-    selecttrace = dF;
-end
-
 
 %%% cluster responses from selected traces
-dist = pdist(selecttrace,'correlation');  %%% sort based on correlation coefficient
+dist = pdist(dF,'correlation');  %%% sort based on correlation coefficient
 display('doing cluster')
 tic, Z = linkage(dist,'ward'); toc
 figure
@@ -205,7 +150,7 @@ display('doing dendrogram')
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3);
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-imagesc((selecttrace(perm,:)),[-0.1 1]); axis xy ; xlabel('selected traces based on dF'); colormap jet ;   %%% show sorted data
+imagesc((dF(perm,:)),[-0.1 1]); axis xy ; xlabel('selected traces based on dF'); colormap jet ;   %%% show sorted data
 hold on;
 totalT = size(dF,2);
 ncyc = floor(totalT/cycLength);
@@ -240,7 +185,7 @@ imagesc(corrcoef(dF'));
 
 
 %%% want some version of this...
-%%% xselected = x(selecttrace(1:n)); yselected = y(selecttrace(1:n));
+%%% xselected = x(dF(1:n)); yselected = y(dF(1:n));
 
 
 %xselected = x(order(1:n)); yselected = y(order(1:n)); %%% only keep cell positions for selected cells; you'll need to also do this again for any subsequent selections
@@ -251,7 +196,6 @@ imagesc(corrcoef(dF'));
 
 nclust =input('# of clusters : '); %%% set to however many you want
 c= cluster(Z,'maxclust',nclust);
-
 colors = hsv(nclust+1);
 
 figure
@@ -260,11 +204,6 @@ imagesc(stdImg,[0 prctile(stdImg(:),99)*1.2]); colormap gray; axis equal;hold on
 for clust=1:nclust
     plot(x(c==clust),y(c==clust),'o','Color',colors(clust,:));
 end
-
-nstim = input('num stim per repeat : ');
-totalframes = cycLength*nstim;
-
-reps = floor(size(dF,2)/totalframes);
 
 clear dFrepeats
 for rep = 1:reps
@@ -286,7 +225,7 @@ for clust = 1:nclust
     
     plot(x(c==clust),y(c==clust),'go')%%'Color',colors(c));
     subplot(2,2,2);
-    imagesc(selecttrace(c==clust,:),[-0.1 1]); axis xy % was df
+    imagesc(dF(c==clust,:),[-0.1 1]); axis xy % was df
     title(sprintf('clust %d',clust)); hold on
     totalT = size(dF,2);
     ncyc = floor(totalT/cycLength);
@@ -302,8 +241,8 @@ title('mean of cluster, multiple repeats');
 
     
     subplot(2,2,3);
-    plot((1:size(selecttrace,2))*dt,selecttrace(c==clust,:)');
-    xlim([1 size(selecttrace,2)*dt]); xlabel('secs');
+    plot((1:size(dF,2))*dt,dF(c==clust,:)');
+    xlim([1 size(dF,2)*dt]); xlabel('secs');
 end
 
 figure

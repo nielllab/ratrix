@@ -46,31 +46,33 @@ for i = 1:reps;
     plot([i*nstim*cycLength*dt  i*nstim*cycLength*dt], [0 0.5],'g');
 end
 
+greenFig = figure;
+title('mean')
+stdImg = greenframe(49:end-32,37:end-36);
+imagesc(stdImg,[prctile(stdImg(:),1) prctile(stdImg(:),99)*1.2]); hold on; axis equal; colormap gray; title('mean')
+normgreen = (stdImg - prctile(stdImg(:),1))/ (prctile(stdImg(:),99)*1.5 - prctile(stdImg(:),1));
+
 
 maxfig = figure;
 stdImg = max(dfofInterp,[],3); stdImg = medfilt2(stdImg);
-imagesc(stdImg,[prctile(stdImg(:),1) 2]); hold on; axis equal; colormap gray; title('medfilt max')
+imagesc(stdImg,[prctile(stdImg(:),1) 2]); hold on; axis equal; colormap gray; title('max')
 normMax = (stdImg - prctile(stdImg(:),1))/ (prctile(stdImg(:),98) - prctile(stdImg(:),1));
-
-greenFig = figure;
-title('green')
-stdImg = greenframe(49:end-32,37:end-36);
-imagesc(stdImg,[prctile(stdImg(:),1) prctile(stdImg(:),99)*1.2]); hold on; axis equal; colormap gray; title('green')
-normgreen = (stdImg - prctile(stdImg(:),1))/ (prctile(stdImg(:),99)*1.5 - prctile(stdImg(:),1));
 
 merge = zeros(size(stdImg,1),size(stdImg,2),3);
 merge(:,:,1)= normMax;
 merge(:,:,2) = normgreen;
 mergeFig = figure;
-imshow(merge);
+imshow(merge); title('merge')
 
 selectPts = input('select points by hand (1) or automatic (0) : ');
 if selectPts
-  range = -2:2
+  chooseFig = input('select based on 1) mean image, 2) max image, 3) merge image : ');
+    if chooseFig==1, selectFig = greenFig, elseif chooseFig==2, selectFig=greenFig, else selectFig=mergeFig, end;
+    range = -2:2
   clear x y npts
    npts = input('how many points ? ');
     for i =1:npts
-        figure(mergeFig); hold on
+        figure(selectFig); hold on
         [x(i) y(i)] = ginput(1); x=round(x); y = round(y);
         plot(x(i),y(i),'b*');
         dF(i,:) = squeeze(mean(mean(dfofInterp(y(i)+range,x(i)+range,:),2),1));
@@ -90,6 +92,7 @@ else
     maxStd = stdImg > imdilate(stdImg,region);
     maxStd(1:3,:) = 0; maxStd(end-2:end,:)=0; maxStd(:,1:3)=0; maxStd(:,end-2:end)=0; %%% no points on border
     pts = find(maxStd);
+    sprintf('%d max points', length(pts))
     
     %%% show max points
     [y x] = ind2sub(size(maxStd),pts);
@@ -103,10 +106,13 @@ else
     [brightness order] = sort(img(pts),1,'descend');
     figure
     plot(brightness); xlabel('N'); ylabel('brightness');
+    sprintf('%d points in ROI',length(pts))
+    
     mindF= input('dF cutoff : ');
     pts = pts(img(pts)>mindF);
+    sprintf('%d points in ROI over cutoff',length(pts))
     
-       [y x] = ind2sub(size(maxStd),pts);
+    [y x] = ind2sub(size(maxStd),pts);
     figure
     imagesc(stdImg,[0 2]); hold on; colormap gray
     plot(x,y,'o');

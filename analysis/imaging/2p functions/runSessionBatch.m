@@ -32,7 +32,7 @@ end
 
 
 
- behav2pSession('g62mm11lt_001_000.sbx','behavSessionV2.mat','trialRecords_420-535_20170629T102740-20170629T104954.mat',psfile);
+ behav2pSession('g62mm11lt_001_000.sbx','behavSessionV2.mat','trialRecords_537-733_20170630T101423-20170630T103328.mat',psfile);
 topo2pSession('g62mm11lt_001_001.sbx','topoXsessionV2.mat',psfile);
 topo2pSession('g62mm11lt_001_002.sbx','topoYsessionV2.mat',psfile);
 grating2pSession('g62mm11lt_001_005.sbx','gratingSessionV2.mat',psfile);
@@ -51,6 +51,6 @@ catch
     display('couldnt generate pdf');
 end
 %delete(psfile);
-%makeSbxMoviesBatch
+makeSbxMoviesBatch
 
 %getCellsBatch;

@@ -35,7 +35,7 @@ location0fig = figure;
 location1_0fig = figure;
 RFlocations2=figure
 
-rows=6;
+rows=7;
 %%%populate the figures
 numAni=length(alluse)/rows; %for subplots
 % if mod(numAni,4)~=0

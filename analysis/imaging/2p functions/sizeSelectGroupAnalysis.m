@@ -17,8 +17,9 @@ batchPhil2pSizeSelect22min
 
 
 
-path = '\\langevin\backup\twophoton\Phil\Compiled2p\'
-savepath = '\\langevin\backup\twophoton\Phil\Compiled2p\eff analysis'
+% path = '\\langevin\backup\twophoton\Phil\Compiled2p\'
+% savepath = '\\langevin\backup\twophoton\Phil\Compiled2p\eff analysis'
+path = 'C:\Users\nlab\Desktop\2pData'; savepath=path;
 
 psfile = 'c:\tempPhil2pSize.ps';
 if exist(psfile,'file')==2;delete(psfile);end
@@ -78,7 +79,8 @@ if redogrp
     grpSI = nan(10000,2,2);
     cellcnt=1;
     for i = 1:2:length(use)
-        aniFile = files(use(i)).sizeanalysis; load(aniFile);
+%         aniFile = files(use(i)).sizeanalysis; load(aniFile);
+        aniFile = [files(use(i)).subj '_' files(use(i)).expt '_' files(use(i)).inject '_pre']; load(aniFile);
         expcells = length(usecells)-1;
         grpcells(cellcnt:cellcnt+expcells) = usecells;
 %         grprf(cellcnt:cellcnt+expcells,:) = userf;
@@ -90,7 +92,8 @@ if redogrp
         for j = 1:length(cellprint)
             cellprintpre{cellcnt+j-1} = cellprint{j};
         end
-        aniFile = files(use(i+1)).sizeanalysis; load(aniFile);
+%         aniFile = files(use(i+1)).sizeanalysis; load(aniFile);
+        aniFile = [files(use(i)).subj '_' files(use(i)).expt '_' files(use(i)).inject '_post']; load(aniFile);
         grpdfsize(cellcnt:cellcnt+expcells,:,:,:,2) = dfsize;
         grpspsize(cellcnt:cellcnt+expcells,:,:,:,2) = spsize;
         grpsptuning(cellcnt:cellcnt+expcells,:,:,:,:,:,2) = sptuning;
@@ -575,6 +578,7 @@ for z=1%:length(ccvals)
     %%%cycle averages
     figure
     for i = 2:length(sizes)
+%         figure
         subplot(2,3,i-1)
         hold on
         pre=nan(length(unique(session)),15);post=pre;
@@ -590,7 +594,8 @@ for z=1%:length(ccvals)
             shadedErrorBar(timepts,nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r',1)
         end
         axis square
-        axis([timepts(1) timepts(end) 0 0.3])
+        axis([timepts(1) timepts(end) -0.02 0.25])
+%         axis off
         set(gca,'LooseInset',get(gca,'TightInset'))
     end
     mtit('Animal response/size sit')

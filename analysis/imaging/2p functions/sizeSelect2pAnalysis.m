@@ -1,5 +1,11 @@
 %%%this is a standalone size suppression analysis for 2p, does not
 %%%incorporate gratings into cell selection
+
+%%%add in code to label all trials to include every trial for each cell to
+%%%caclulate variance and Fano Factor
+
+altpath = 'C:\Users\nlab\Desktop\2pData';
+
 global S2P
 exclude = 0; %0 removes trials above threshold, 1 clips them to the threshold
 dfWindow = 9:11;
@@ -39,7 +45,7 @@ for f=1:length(use)
         load(files(use(f)).topoxpts);
         xph = phaseVal; rfCyc(:,:,1) = cycAvg;  %%%cycle averaged timecourse (10sec period)
         mapx = getMapPhase(map,cropx,cropy,usePts)'; close(gcf); %%% get topography based on neuropil
-        lagvarX = 0.075; %%in sec, adjust for topo lag
+        lagvarX = 0.08; %%in sec, adjust for topox lag
         rfAmp(:,1) = abs(xph); rf(:,1) = mapx*128/(2*pi) - (lagvarX*128); %%% convert phase to pixel position, subtract 0.25sec from phase for gcamp delay
 %         rfAmp(:,1) = abs(xph); rf(:,1) = mod(angle(xph)-(2*pi*lagvarX/10),2*pi)*128/(2*pi); %%% convert phase to pixel position, subtract 0.25sec from phase for gcamp delay
         topoxUse = mean(dF,2)~=0;  %%% find cells that were successfully extracted
@@ -51,7 +57,7 @@ for f=1:length(use)
         %%% extract phase and amplitude from complex fourier varlue at 0.1Hz
         yph = phaseVal; rfCyc(:,:,2) = cycAvg;
         mapy = getMapPhase(map,cropx,cropy,usePts)'; close(gcf); %%% get topography based on neuropil
-        lagvarY = -0.075; %%in sec, adjust for topo lag
+        lagvarY = 0.05; %%in sec, adjust for topoy lag
         rfAmp(:,2) = abs(yph); rf(:,2) = mapy*72/(2*pi) - (lagvarY*72);
 %         rfAmp(:,2) = abs(yph); rf(:,2) = mod(angle(yph) -(2*pi*lagvarY/10),2*pi)*72/(2*pi);
         topoyUse = mean(dF,2)~=0;
@@ -101,13 +107,99 @@ for f=1:length(use)
         sprintf('%d cells with good topo under cutoff',length(allgoodTopo))
         sprintf('%d cells in center with good topo under cutoff',length(goodTopo))
         usecells = goodTopo; %%nusecells = setdiff(allgoodTopo,usecells);
-        if isempty(usecells)
-            continue
-        end
+%         if isempty(usecells)
+%             continue
+%         end
         
         
         %%%pixel-wise suppression plots
         load(files(use(f)).sizesession,'frmdata')
+        
+        figure
+        subplot(1,2,1)
+        resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,2,1),3);
+        respimg = mat2im(resp,jet,[-0.01 0.1]);
+        imshow(respimg)
+        set(gca,'ytick',[],'xtick',[])
+        xlabel('5deg resp')
+        axis equal
+        subplot(1,2,2)
+        resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,3,1),3);
+        respimg = mat2im(resp,jet,[-0.01 0.1]);
+        imshow(respimg)
+        set(gca,'ytick',[],'xtick',[])
+        xlabel('10deg resp')
+        axis equal
+        
+        %%%use manual selection of 10 degree pixelwise response for cell selection
+        if mod(f,2)~=0
+            figure
+            title('select 10deg activated region')
+            if length(size(frmdata))==5
+                resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,3,1),3);
+            else
+                resp = frmdata(cropx(1):cropx(2),cropy(1):cropy(2),3,1);
+            end
+            respimg = mat2im(resp,jet,[-0.01 0.1]);
+            imshow(respimg)
+            set(gca,'ytick',[],'xtick',[])
+            [limy limx] = ginput(2);
+            limx = sort(round(limx)); limy= sort(round(limy));
+            hold on
+            plot([limy(1) limy(1) limy(2) limy(2) limy(2)], [limx(1) limx(2) limx(2) limx(1) limx(1)],'g','linewidth',2);
+            if exist('psfilei','var')
+                set(gcf, 'PaperPositionMode', 'auto');
+                print('-dpsc',psfilei,'-append');
+            end
+
+            goodprints = zeros(length(usePts),1);
+            for i = 1:length(usePts)
+                [xpt ypt] = ind2sub(size(meanShiftImg),usePts{i});
+                xpt=mean(xpt);ypt=mean(ypt);
+                if xpt>limx(1)&xpt<limx(2)&ypt>limy(1)&ypt<limy(2)
+                    goodprints(i) = 1;
+                end
+            end
+            usecells = find(goodprints==1);
+        else
+%             load(files(use(f-1)).sizeanalysis,'usecells')
+            load(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_pre']),'usecells')
+        end
+        
+        
+        
+        %%%compare 5/10deg pixel vs cell footprints
+%         goodprints = zeros(1,length(usePts));goodprints(allgoodTopo)=1;goodprints(goodTopo)=2;
+        figure
+        subplot(1,3,1)
+        resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,2,1),3);
+        respimg = mat2im(resp,jet,[-0.01 0.1]);
+        imshow(respimg)
+        set(gca,'ytick',[],'xtick',[])
+        xlabel('5deg resp')
+        axis equal
+        subplot(1,3,2)
+        resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,3,1),3);
+        respimg = mat2im(resp,jet,[-0.01 0.1]);
+        imshow(respimg)
+        set(gca,'ytick',[],'xtick',[])
+        xlabel('10deg resp')
+        axis equal
+        subplot(1,3,3)
+%         prints={};
+%         for i=1:length(usecells)
+%             prints{i} = usePts{usecells(i)};
+%         end
+        draw2pSegs(usePts,goodprints,parula,size(meanShiftImg),1:length(usePts),[0 2])
+        colorbar off
+        xlabel('center footprints')
+        set(gca,'LooseInset',get(gca,'TightInset'))
+        mtit('Pixel vs. Cell Center Response')
+        if exist('psfilei','var')
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+            print('-dpsc',psfilei,'-append');
+        end       
+        
         
         %%%plot sit dF
         for h = 1:length(sfrange)
@@ -243,39 +335,7 @@ for f=1:length(use)
 %             set(gcf, 'PaperPositionMode', 'auto');
 %             print('-dpsc',psfilei,'-append');
 %         end
-             
-        %%%compare 20deg pixel vs cell footprints
-        goodprints = zeros(1,length(usePts));goodprints(allgoodTopo)=1;goodprints(goodTopo)=2;
-        figure
-        subplot(1,3,1)
-        resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,2,1),3);
-        respimg = mat2im(resp,jet,[-0.01 0.1]);
-        imshow(respimg)
-        set(gca,'ytick',[],'xtick',[])
-        xlabel('5deg resp')
-        axis equal
-        subplot(1,3,2)
-        resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,3,1),3);
-        respimg = mat2im(resp,jet,[-0.01 0.1]);
-        imshow(respimg)
-        set(gca,'ytick',[],'xtick',[])
-        xlabel('10deg resp')
-        axis equal
-        subplot(1,3,3)
-%         prints={};
-%         for i=1:length(usecells)
-%             prints{i} = usePts{usecells(i)};
-%         end
-        draw2pSegs(usePts,goodprints,parula,size(meanShiftImg),1:length(usePts),[0 2])
-        xlabel('center footprints')
-        colorbar off
-        set(gca,'LooseInset',get(gca,'TightInset'))
-        mtit('Pixel vs. Cell Center Response')
-        if exist('psfilei','var')
-            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-            print('-dpsc',psfilei,'-append');
-        end       
-        
+            
         
 % %                         keyboard%%%%%%%%%%%%%
         
@@ -287,13 +347,13 @@ for f=1:length(use)
         
         %%%plot rasters for dfof and spikes
         figure
-        imagesc(dF(goodTopo,:),[0 1]); ylabel('cell #'); xlabel('frame'); title('dF');
+        imagesc(dF(usecells,:),[0 1]); ylabel('cell #'); xlabel('frame'); title('dF');
         if exist('psfilei','var')
             set(gcf, 'PaperPositionMode', 'auto');
             print('-dpsc',psfilei,'-append');
         end
         figure
-        imagesc(spikeBinned(goodTopo,:),[0 0.1]); ylabel('cell #'); xlabel('frame'); title('spikes');
+        imagesc(spikeBinned(usecells,:),[0 0.1]); ylabel('cell #'); xlabel('frame'); title('spikes');
         if exist('psfilei','var')
             set(gcf, 'PaperPositionMode', 'auto');
             print('-dpsc',psfilei,'-append');
@@ -523,22 +583,24 @@ for f=1:length(use)
             end
         end
         
-        %%%threshold out non-responding cells
+%         keyboard
+        %%%threshold out non-responding cells (only done for pre)
         if mod(f,2)~=0
-            respcells = max(max(nanmean(dfsize(:,dfWindow,:,:),2),[],3),[],4)>0.05;
+            respcells = max(max(nanmean(spsize(:,dfWindow,:,:),2),[],3),[],4)>0.1;
+            usecells = usecells(respcells);
+            dfsize = dfsize(respcells,:,:,:);
+            spsize = spsize(respcells,:,:,:);
+            dftuning = dftuning(respcells,:,:,:,:,:);
+            sptuning = sptuning(respcells,:,:,:,:,:);
         else
-            load(files(use(f-1)).sizeanalysis,'respcells')
+%             load(files(use(f-1)).sizeanalysis,'respcells')
+            load(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_pre']),'respcells')
         end
         
         if respcells==0
             continue
         end
-        
-        usecells = usecells(respcells);
-        dfsize = dfsize(respcells,:,:,:);
-        spsize = spsize(respcells,:,:,:);
-        dftuning = dftuning(respcells,:,:,:,:,:);
-        sptuning = sptuning(respcells,:,:,:,:,:);
+      
 
                
 %         %%%plot screen for all six sizes w/threshold label for responsive
@@ -1520,8 +1582,10 @@ for f=1:length(use)
         
 
         %%%saving
-        save(fullfile(pathname,filename),'centresp','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells')
+%         save(fullfile(pathname,filename),'centresp','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells','goodprints')
+        save(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing]),'centresp','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells','goodprints')
 
+        
         try
             dos(['ps2pdf ' psfilei ' "' [fullfile(pathname,filename) '.pdf'] '"'] )
         catch

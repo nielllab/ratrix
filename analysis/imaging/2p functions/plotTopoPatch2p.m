@@ -15,7 +15,7 @@ batchPhil2pSizeSelect22min
 txfig = figure;
 tyfig = figure;
 sz10fig = figure;
-sz20fig = figure;
+footfig = figure;
 
 %%%populate the figures
 numAni=length(files)/2; %for subplots
@@ -39,7 +39,7 @@ for z = 1:2:length(files)
     colormap(hsv); %colorbar
     xlabel(sprintf('%s %s',files(z).expt,files(z).subj))
     
-    load(files(z).sizesession,'frmdata')
+    load(files(z).sizesession,'frmdata','goodprints')
     if length(size(frmdata))==4
         img10 = squeeze(frmdata(:,:,3,1));
         img20 = squeeze(frmdata(:,:,4,1));
@@ -55,13 +55,12 @@ for z = 1:2:length(files)
     set(gca,'ytick',[],'xtick',[])
     axis equal
     
-    figure(sz20fig)
+    load(files(z).sizepts,'usePts','meanShiftImg');
+    figure(footfig)        
     subplot(2,numAni/2,cnt)
-    imagesc(img20,[-0.01,0.1])
-    colormap jet
+    draw2pSegs(usePts,goodprints,parula,size(meanShiftImg),1:length(usePts),[0 2])
+    colorbar off
     xlabel(sprintf('%s %s',files(z).expt,files(z).subj))
-    set(gca,'ytick',[],'xtick',[])
-    axis equal
     
     cnt=cnt+1;
 end
@@ -87,8 +86,8 @@ if exist('psfile','var')
     print('-dpsc',psfile,'-append');
 end
 
-figure(sz20fig)
-mtit('20deg response')
+figure(footfig)
+mtit('10deg footprints')
 if exist('psfile','var')
     set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
     print('-dpsc',psfile,'-append');

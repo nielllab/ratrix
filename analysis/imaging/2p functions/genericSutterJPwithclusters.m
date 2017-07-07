@@ -6,7 +6,13 @@ close all
 %%% frame rate for resampling
 dt = 0.5;
 framerate=1/dt;
+
 twocolor = input('how many colors? 1 / 2 : ')-1;
+makeFigs = input('make pdf file 0 / 1 :');
+if makeFigs
+    psfile = 'c:\temp.ps';
+    if exist(psfile,'file')==2;delete(psfile);end
+end
 
 %%% get sutter data
 %%% will ask for tif file - performs image registration and resamples at requested framerate
@@ -16,7 +22,7 @@ twocolor = input('how many colors? 1 / 2 : ')-1;
 get2pSession
 dfofInterp = dfofInterp(49:end-32,37:end-36,:);
 %cycLength = cycLength/dt;
-cycLength = mean(diff(stimPulse))/dt;
+cycF = mean(diff(stimPulse))/dt;
 nstim = input('num stim per repeat : ');
 totalframes = cycLength*nstim;
 reps = floor(size(dfofInterp,3)/totalframes);
@@ -45,31 +51,38 @@ title('full image mean'); hold on
 for i = 1:reps;
     plot([i*nstim*cycLength*dt  i*nstim*cycLength*dt], [0 0.5],'g');
 end
+xlabel('secs');
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
 
 greenFig = figure;
 title('mean')
 stdImg = greenframe(49:end-32,37:end-36);
 imagesc(stdImg,[prctile(stdImg(:),1) prctile(stdImg(:),99)*1.2]); hold on; axis equal; colormap gray; title('mean')
 normgreen = (stdImg - prctile(stdImg(:),1))/ (prctile(stdImg(:),99)*1.5 - prctile(stdImg(:),1));
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
 
 maxfig = figure;
 stdImg = max(dfofInterp,[],3); stdImg = medfilt2(stdImg);
 imagesc(stdImg,[prctile(stdImg(:),1) 2]); hold on; axis equal; colormap gray; title('max')
 normMax = (stdImg - prctile(stdImg(:),1))/ (prctile(stdImg(:),98) - prctile(stdImg(:),1));
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 merge = zeros(size(stdImg,1),size(stdImg,2),3);
 merge(:,:,1)= normMax;
 merge(:,:,2) = normgreen;
 mergeFig = figure;
 imshow(merge); title('merge')
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 selectPts = input('select points by hand (1) or automatic (0) : ');
 if selectPts
-  chooseFig = input('select based on 1) mean image, 2) max image, 3) merge image : ');
+    chooseFig = input('select based on 1) mean image, 2) max image, 3) merge image : ');
     if chooseFig==1, selectFig = greenFig, elseif chooseFig==2, selectFig=greenFig, else selectFig=mergeFig, end;
     range = -2:2
-  clear x y npts
-   npts = input('how many points ? ');
+    clear x y npts
+    npts = input('how many points ? ');
     for i =1:npts
         figure(selectFig); hold on
         [x(i) y(i)] = ginput(1); x=round(x); y = round(y);
@@ -101,7 +114,7 @@ else
     
     [xrange yrange] = ginput(2);
     pts = pts(x>xrange(1) & x<xrange(2) & y>yrange(1) & y<yrange(2));
-
+    
     [brightness order] = sort(img(pts),1,'descend');
     figure
     plot(brightness); xlabel('N'); ylabel('brightness');
@@ -124,21 +137,27 @@ else
     end
     
     %%% show selected points
-
+    
     
 end
+
+
+dF(dF>2)=2;
 %%% plot all fluorescence traces
 figure
 plot((1:size(dF,2))*dt,dF');
 hold on
 plot((1:size(dF,2))*dt,mean(dF,1),'g','Linewidth',2);
 xlabel('secs'); xlim([0 size(dF,2)*dt]);
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
 
 if exist('mv','var')
     figure
     plot(mv);
     title('alignement')
 end
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %%% heatmap of fluorescence traces
 figure
@@ -163,9 +182,12 @@ for i = 1:ncyc
     plot([i*cycLength i*cycLength]+0.5,[1 length(perm)],'k');
 end
 
-%%% plot correlation coefficients
-figure
-imagesc(corrcoef(dF'));
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+
+% %%% plot correlation coefficients
+% figure
+% imagesc(corrcoef(dF'));
 
 nclust =input('# of clusters : '); %%% set to however many you want
 c= cluster(Z,'maxclust',nclust);
@@ -177,6 +199,8 @@ imagesc(stdImg,[0 prctile(stdImg(:),99)*1.2]); colormap gray; axis equal;hold on
 for clust=1:nclust
     plot(x(c==clust),y(c==clust),'o','Color',colors(clust,:));
 end
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
 
 clear dFrepeats
 for rep = 1:reps
@@ -194,6 +218,7 @@ hold on; legend('1','2','3','4')
 for i = 1:nstim;
     plot([i i ],[0.3 0.6],'k:');
 end
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 
 for clust = 1:nclust
@@ -214,20 +239,34 @@ for clust = 1:nclust
     colormap jet;freezeColors;colormap gray;
     
     subplot(2,2,4);
-plot((0:totalframes-1)/cycLength + 1, squeeze(mean(dFrepeats(c==clust,:,:),1)))
-xlabel('stim #'); xlim([1 nstim+1])
-title('mean of cluster, multiple repeats');
-
+    plot((0:totalframes-1)/cycLength + 1, squeeze(mean(dFrepeats(c==clust,:,:),1)))
+    xlabel('stim #'); xlim([1 nstim+1])
+    title('mean of cluster, multiple repeats');
+    
     
     subplot(2,2,3);
     plot((1:size(dF,2))*dt,dF(c==clust,:)');
-    xlim([1 size(dF,2)*dt]); xlabel('secs');
+    xlim([1 size(dF,2)*dt]); xlabel('secs'); ylim([-0.2 2.1])
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
 end
 
 figure
 hold on
 for clust = 1:nclust
     plot(mean(dF(c==clust,:),1));
+end; title('mean for each cluster)')
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+if makeFigs
+    [f p] = uiputfile('*.pdf','save pdf file');
+    newpdfFile = fullfile(p,f)
+    try
+        dos(['ps2pdf ' 'c:\temp.ps "' newpdfFile '"'] )
+        
+    catch
+        display('couldnt generate pdf');
+    end
 end
 
 

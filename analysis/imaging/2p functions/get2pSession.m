@@ -1,6 +1,6 @@
 
 [f p] = uigetfile({'*.mat;*.tif'},'.mat or .tif file');
-   cycLength = input('cycle length : ');
+cycLength = input('cycle length : ');
 if strcmp(f(end-3:end),'.mat')
     display('loading data')
     sessionName = fullfile(p,f);
@@ -16,7 +16,9 @@ else
         [stimPulse framePulse] = getTTL(fullfile(ttlp,ttlf));
         figure
         plot(diff(stimPulse)); title('stimPulse cycle time');hold on
-        plot(1:length(stimPulse),ones(size(stimPulse))*cycLength);
+        plot(1:length(stimPulse),ones(size(stimPulse))*cycLength); ylabel('secs');xlabel('stim #')
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
         startTime = ceil(stimPulse(1)/dt);
     catch
         display('couldnt read TTLs')
@@ -24,7 +26,7 @@ else
     end
     
     ttlFname = fullfile(ttlp,ttlf);
- 
+    
     if twocolor
         [dfofInterp dtRaw redframe greenframe mv] = get2colordata(fullfile(p,f),dt,cycLength);
     else
@@ -34,14 +36,14 @@ else
     figure
     timecourse = squeeze(mean(mean(dfofInterp(:,:,1:end),2),1));
     plot(timecourse);
-    
+        
     hold on
     for st = 0:10
         plot(st*cycLength/dt+ [startTime startTime],[0.2 1],'g:')
     end
     
     sprintf('estimated start time %f',startTime)
-   % startTime = input('start time : ');
+    % startTime = input('start time : ');
     
     for st = 0:10
         plot(st*cycLength+ [startTime*dt startTime*dt],[0.2 1],'k:')
@@ -56,15 +58,15 @@ else
     figure
     plot(cycAvg)
     
-    [fs ps] = uiputfile('*.mat','session data');
-   if fs ~=0
-       display('saving data')
-    sessionName= fullfile(ps,fs);
-    if twocolor
-        save(sessionName,'dfofInterp','startTime','cycLength','redframe','greenframe','-v7.3');
-    else
-        save(sessionName,'dfofInterp','startTime','cycLength','greenframe','-v7.3');
-    end
-    display('done')
-   end
+%     [fs ps] = uiputfile('*.mat','session data');
+%     if fs ~=0
+%         display('saving data')
+%         sessionName= fullfile(ps,fs);
+%         if twocolor
+%             save(sessionName,'dfofInterp','startTime','cycLength','redframe','greenframe','-v7.3');
+%         else
+%             save(sessionName,'dfofInterp','startTime','cycLength','greenframe','-v7.3');
+%         end
+%         display('done')
+%     end
 end

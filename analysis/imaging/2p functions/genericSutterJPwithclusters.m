@@ -15,8 +15,8 @@ twocolor = input('how many colors? 1 / 2 : ')-1;
 %%% greenframe = mean fluorescence image
 get2pSession
 dfofInterp = dfofInterp(49:end-32,37:end-36,:);
-cycLength = cycLength/dt;
-
+%cycLength = cycLength/dt;
+cycLength = mean(diff(stimPulse))/dt;
 nstim = input('num stim per repeat : ');
 totalframes = cycLength*nstim;
 reps = floor(size(dfofInterp,3)/totalframes);
@@ -51,7 +51,6 @@ title('mean')
 stdImg = greenframe(49:end-32,37:end-36);
 imagesc(stdImg,[prctile(stdImg(:),1) prctile(stdImg(:),99)*1.2]); hold on; axis equal; colormap gray; title('mean')
 normgreen = (stdImg - prctile(stdImg(:),1))/ (prctile(stdImg(:),99)*1.5 - prctile(stdImg(:),1));
-
 
 maxfig = figure;
 stdImg = max(dfofInterp,[],3); stdImg = medfilt2(stdImg);
@@ -156,49 +155,17 @@ display('doing dendrogram')
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3);
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-imagesc((dF(perm,:)),[-0.1 1]); axis xy ; xlabel('selected traces based on dF'); colormap jet ;   %%% show sorted data
+imagesc(dF(perm,:),[-0.1 1]); axis xy ; xlabel('selected traces based on dF'); colormap jet ;   %%% show sorted data
 hold on;
 totalT = size(dF,2);
 ncyc = floor(totalT/cycLength);
 for i = 1:ncyc
-    plot([i*cycLength i*cycLength],[1 length(perm)],'k');
+    plot([i*cycLength i*cycLength]+0.5,[1 length(perm)],'k');
 end
-
-
-
-
-%%% cluster responses
-
-%%%comment back?
-
-%
-% dist = pdist(dF,'correlation');  %%% sort based on correlation coefficient
-% display('doing cluster')
-% tic, Z = linkage(dist,'ward'); toc
-% figure
-% subplot(3,4,[1 5 9 ])
-% display('doing dendrogram')
-% [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3); %%% cris had 5 as the last value, created fewer clusters in dendrogram
-% axis off
-% subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-% imagesc((dF(perm,:)),[-0.5 0.5]); axis xy ; hold on  %%% show sorted data
-
 
 %%% plot correlation coefficients
 figure
 imagesc(corrcoef(dF'));
-
-
-
-%%% want some version of this...
-%%% xselected = x(dF(1:n)); yselected = y(dF(1:n));
-
-
-%xselected = x(order(1:n)); yselected = y(order(1:n)); %%% only keep cell positions for selected cells; you'll need to also do this again for any subsequent selections
-%%% xselected = xselected(orderdf(1:n)); yselected = yselected(orderdf(1:n));
-
-%  xselecteddf = x(orderdf(1:n)); yselecteddf = y(orderdf(1:n));
-
 
 nclust =input('# of clusters : '); %%% set to however many you want
 c= cluster(Z,'maxclust',nclust);
@@ -213,14 +180,20 @@ end
 
 clear dFrepeats
 for rep = 1:reps
-    dFrepeats(:,:,rep) = dF(:,(1:totalframes) + (rep-1)*totalframes);
+    dFrepeats(:,:,rep) = dF(:,(1:totalframes) + round((rep-1)*totalframes));
 end
 
+dFrepeats(dFrepeats>2)=2;
+
 figure
-plot((1:totalframes)/cycLength + 1, squeeze(mean(dFrepeats,1)))
+plot((0:totalframes-1)/cycLength+1, squeeze(mean(dFrepeats,1)))
 xlabel('stim #'); xlim([1 nstim+1])
 title('mean trace for each repeat');
-
+hold on; legend('1','2','3','4')
+%plot((0:totalframes-1)/cycLength +1, squeeze(mean(mean(dFrepeats,3),1)),'g','Linewidth',2)
+for i = 1:nstim;
+    plot([i i ],[0.3 0.6],'k:');
+end
 
 
 for clust = 1:nclust
@@ -236,12 +209,12 @@ for clust = 1:nclust
     totalT = size(dF,2);
     ncyc = floor(totalT/cycLength);
     for i = 1:ncyc
-        plot([i*cycLength i*cycLength],[1 sum(clust==c)],'k');
+        plot([i*cycLength i*cycLength]+0.5,[1 sum(clust==c)],'k');
     end
     colormap jet;freezeColors;colormap gray;
     
     subplot(2,2,4);
-plot((1:totalframes)/cycLength + 1, squeeze(mean(dFrepeats(c==clust,:,:),1)))
+plot((0:totalframes-1)/cycLength + 1, squeeze(mean(dFrepeats(c==clust,:,:),1)))
 xlabel('stim #'); xlim([1 nstim+1])
 title('mean of cluster, multiple repeats');
 

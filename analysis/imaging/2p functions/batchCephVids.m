@@ -5,7 +5,8 @@ while done==0;
     if f~=0
        i = i+1;
        files{i} = fullfile(p,f);
-    else done=1;
+       f
+    else done=1;        
     end
 end
 

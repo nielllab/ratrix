@@ -1,5 +1,6 @@
 
 [f p] = uigetfile({'*.mat;*.tif'},'.mat or .tif file');
+   cycLength = input('cycle length : ');
 if strcmp(f(end-3:end),'.mat')
     display('loading data')
     sessionName = fullfile(p,f);
@@ -9,18 +10,21 @@ if strcmp(f(end-3:end),'.mat')
         cycLength=8;
     end
 else
-    
+    f
     [ttlf ttlp] = uigetfile('*.mat','ttl file')
     try
         [stimPulse framePulse] = getTTL(fullfile(ttlp,ttlf));
-        startTime = round(stimPulse(1)/dt);
+        figure
+        plot(diff(stimPulse)); title('stimPulse cycle time');hold on
+        plot(1:length(stimPulse),ones(size(stimPulse))*cycLength);
+        startTime = ceil(stimPulse(1)/dt);
     catch
         display('couldnt read TTLs')
         stimPulse=[]; framePulse=[]; startTime = 1;
     end
     
     ttlFname = fullfile(ttlp,ttlf);
-    cycLength = input('cycle length : ');
+ 
     if twocolor
         [dfofInterp dtRaw redframe greenframe mv] = get2colordata(fullfile(p,f),dt,cycLength);
     else

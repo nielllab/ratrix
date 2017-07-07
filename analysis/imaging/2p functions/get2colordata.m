@@ -1,7 +1,6 @@
 function [dfofInterp im_dt red green mv] = get2colordata(fname,dt,cycLength);
 [imgAll framerate mv] = readAlign2color(fname,1,1,0.5);
 
-
 red = squeeze(mean(imgAll(:,:,:,2),3));
 green = squeeze(prctile(imgAll(:,:,:,1),95,3));
 for i = 1:2
@@ -19,15 +18,14 @@ for i = 1:2
     
     dfof=zeros(size(img));
     if i==1
+    %if i==2
         for f = 1:nframes
             dfof(:,:,f)=(img(:,:,f)-m{i})./m{i};
         end
     else
         dfof = img;
     end
-    
-    
-    
+       
     im_dt = 1/framerate;
 
     if i == 1

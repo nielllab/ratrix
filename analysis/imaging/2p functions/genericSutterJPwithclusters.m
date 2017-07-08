@@ -239,13 +239,16 @@ for clust = 1:nclust
     colormap jet;freezeColors;colormap gray;
     
     subplot(2,2,4);
-    plot((0:totalframes-1)/cycLength + 1, squeeze(mean(dFrepeats(c==clust,:,:),1)))
+    plot((0:totalframes-1)/cycLength + 1, squeeze(mean(dFrepeats(c==clust,:,:),1))); hold on
+     plot((0:totalframes-1)/cycLength + 1, squeeze(mean(mean(dFrepeats(c==clust,:,:),3),1)),'g','LineWidth',2)
     xlabel('stim #'); xlim([1 nstim+1])
     title('mean of cluster, multiple repeats');
-    
+    for i = 1:nstim;
+    plot([i i ],[0  0.5],'k:');
+end
     
     subplot(2,2,3);
-    plot((1:size(dF,2))*dt,dF(c==clust,:)');
+    plot((1:size(dF,2))*dt,dF(c==clust,:)'); hold on; 
     xlim([1 size(dF,2)*dt]); xlabel('secs'); ylim([-0.2 2.1])
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     

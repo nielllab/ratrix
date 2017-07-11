@@ -63,7 +63,7 @@ normgreen = (stdImg - prctile(stdImg(:),1))/ (prctile(stdImg(:),99)*1.5 - prctil
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 
-maxfig = figure;
+maxFig = figure;
 stdImg = max(dfofInterp,[],3); stdImg = medfilt2(stdImg);
 imagesc(stdImg,[prctile(stdImg(:),1) 2]); hold on; axis equal; colormap gray; title('max')
 normMax = (stdImg - prctile(stdImg(:),1))/ (prctile(stdImg(:),98) - prctile(stdImg(:),1));
@@ -79,7 +79,7 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 selectPts = input('select points by hand (1) or automatic (0) : ');
 if selectPts
     chooseFig = input('select based on 1) mean image, 2) max image, 3) merge image : ');
-    if chooseFig==1, selectFig = greenFig, elseif chooseFig==2, selectFig=greenFig, else selectFig=mergeFig, end;
+    if chooseFig==1, selectFig = greenFig, elseif chooseFig==2, selectFig=maxFig, else selectFig=mergeFig, end;
     range = -2:2
     clear x y npts
     npts = input('how many points ? ');

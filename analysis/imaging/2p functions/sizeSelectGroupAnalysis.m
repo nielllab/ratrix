@@ -17,9 +17,9 @@ batchPhil2pSizeSelect22min
 
 
 
-% path = '\\langevin\backup\twophoton\Phil\Compiled2p\'
+path = '\\langevin\backup\twophoton\Phil\Compiled2p\'
 % savepath = '\\langevin\backup\twophoton\Phil\Compiled2p\eff analysis'
-path = 'C:\Users\nlab\Desktop\2pData'; savepath=path;
+savepath = 'C:\Users\nlab\Desktop\2pData'; %%%savepath=path;
 
 psfile = 'c:\tempPhil2pSize.ps';
 if exist(psfile,'file')==2;delete(psfile);end

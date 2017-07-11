@@ -16,7 +16,7 @@ else
 end
 get2pSession_sbx;
 
-nframes = min(size(dfofInterp,3),1920);  %%% limit topoY data to 5mins to avoid movie boundaries
+nframes = min(size(dfofInterp,3),1920+10);  %%% limit topoY data to 5mins to avoid movie boundaries
 dfofInterp = dfofInterp(:,:,1:nframes);
 
 %%% generate pixel-wise fourier map
@@ -73,7 +73,7 @@ open(vid);
 writeVideo(vid,mov);
 close(vid)
 
-xpos=0; sf=0; isi=0; duration=0; theta=0; phase=0; radius=0;
+
 moviefname = 'C:\bigSizeTest.mat'
 load(moviefname)
 ntrials= min(dt*length(dfofInterp)/(isi+duration),length(sf))

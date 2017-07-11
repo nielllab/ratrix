@@ -5,7 +5,7 @@ batch2pBehaviorFix;
 
 %%% select files to analyze
 %alluse = find(strcmp({files.task},'GTS') & strcmp({files.notes},'good imaging session'))
-alluse = find( strcmp({files.notes},'good imaging session'))
+alluse = find( strcmp({files.notes},'possible'))
 
 %%% labels for each condition
 gts = 1; naive=2; naiveTrained=5;  rand =3; hvv = 4;
@@ -31,7 +31,12 @@ for i = 1:length(alluse);
     behavDfAll{i} =dF;
     %%% store behavioral performance over time
     respRateAll{i} = resprate; correctRateAll{i} = correctRate; stopRateAll{i} = stoprate;
+    %%%get depth info
+    if ~isempty (files(alluse(i)).depth)    
     depth(i) = files(alluse(i)).depth;
+    else
+        depth(i) = 1;
+    end
     
     %%% apply manual cutoff for cell numbers if included
     if ~isempty(files(alluse(i)).ncells)
@@ -467,7 +472,7 @@ for cond = 1:4
 end
 
 %%% weighted mean (by fraction of cells) by session, and session plots
-clear clustBehav clustBehavErr
+clear clustBehavS clustBehavErrS
 trialType = {'correct pref','error pref','correct non-pref','error non-pref'};
 
 close all
@@ -480,8 +485,8 @@ if exist(psfile,'file')==2;delete(psfile);end
 for s= 1:max(sess)
     s
     if strcmp(files(alluse(s)).task,'GTS'), sessCond(s) = gts; end;
-    if strcmp(files(alluse(s)).task,'Naive') & files(alluse(s)).learningDay<5, sessCond(s)  = naive; end;
-    if strcmp(files(alluse(s)).task,'Naive') & files(alluse(s)).learningDay>=5,sessCond(s)  = naiveTrained; end;
+    if strcmp(files(alluse(s)).task,'Naive') & files(alluse(s)).learningDay<8, sessCond(s)  = naive; end;
+    if strcmp(files(alluse(s)).task,'Naive') & files(alluse(s)).learningDay>=8,sessCond(s)  = naiveTrained; end;
     if strcmp(files(alluse(s)).task,'HvV'), sessCond(s)  = hvv; end;
     if strcmp(files(alluse(s)).task, 'RandReward'), sessCond(s)  = rand; end;
     sessSubj{s} = files(alluse(s)).subj;
@@ -492,18 +497,18 @@ for s= 1:max(sess)
     for t = 1:4 %%%  top/bottom, correct/incorrect
         subplot(2,2,t);
         for i = 1:max(clust)
-            n = sum(clust==i & sess==s)/sum(sess==s)
+            n = sum(clust==i & sess==s)/sum(sess==s);
             d =nanmean(invariantAll(clust==i & sess==s ,:),1); plot(0.1*(0:41),n*(d((t-1)*42 + (1:42))-mean(d(6:10))));hold on; ylim([ -0.025 0.065]); xlim([0 4.15])
                    
             %%%mean activity for session, and each cluster (unweighted)
             %%% s = session, t = trial type (top/bottom,
-            %%% correct/incorrect), cond = cluster, cells? 
-    ClustBehavTrialData(s,t,cond,:) = d((t-1)*42 + (1:42))-mean(d(6:10));
-    ClustBehavTrialDataErr(s,t,cond,:) = nanstd(invariantAll(clust==i & sess==s ,(t-1)*42 + (1:42)),[],1)/sqrt(sum(clust==i & sess==s));
+            %%% correct/incorrect), clust = cluster
+    ClustBehavTrialData(s,t,i,:) = d((t-1)*42 + (1:42))-mean(d(6:10));
+    ClustBehavTrialDataErr(s,t,i,:) = nanstd(invariantAll(clust==i & sess==s ,(t-1)*42 + (1:42)),[],1)/sqrt(sum(clust==i & sess==s));
     
             %%% (weighted)
-            clustBehav(s,t,cond,:) = n*(d((t-1)*42 + (1:42))-mean(d(6:10)));
-            clustBehavErr(s,t,cond,:) = n*nanstd(invariantAll(clust==i & sess==s ,(t-1)*42 + (1:42)),[],1)/sqrt(sum(clust==i & sess==s));
+            clustBehavS(s,t,i,:) = n*(d((t-1)*42 + (1:42))-mean(d(6:10)));
+            clustBehavErrS(s,t,i,:) = n*nanstd(invariantAll(clust==i & sess==s ,(t-1)*42 + (1:42)),[],1)/sqrt(sum(clust==i & sess==s));
         end
         title([trialType{t} ' weighted']); xlabel('secs'); ylabel('weighted response'); set(gca,'Ytick',-0.025:0.025:0.075);
     end
@@ -626,7 +631,7 @@ for ss = 1:length(sessionDate)
           SessClustData(ss,t,i,:) =  d((t-1)*42 + (1:42))-mean(d(6:10));
           SessClustErr(ss,t,i,:) = e((t-1)*42 + (1:42));
             %plot(d((t-1)*42 + (1:42))-mean(d(6:10)));hold on; ylim([ 0 0.3]); xlim([0.5 42.5])
-       errorbar(1:42,(d((t-1)*42 + (1:42))-mean(d(6:10))),e((t-1)*42 + (1:42)));hold on; ylim([ 0 0.3]); xlim([0.5 42.5])
+       errorbar(1:42,(d((t-1)*42 + (1:42))-mean(d(6:10))),e((t-1)*42 + (1:42)));hold on; ylim([-0.15 0.3]); xlim([0.5 42.5])
                                    
       
         end     
@@ -651,7 +656,7 @@ for ss = 1:length(sessionDate)
           WeightedSessClustErr(ss,t,i,:) = n*(e((t-1)*42 + (1:42)));
           SessClustFraction(ss,i) = sum(clust==i & sess==ss)/sum(sess==ss);
         
-       errorbar(1:42,n*(d((t-1)*42 + (1:42))-mean(d(6:10))),n*(e((t-1)*42 + (1:42))));hold on; ylim([ 0 0.3]); xlim([0.5 42.5])
+       errorbar(1:42,n*(d((t-1)*42 + (1:42))-mean(d(6:10))),n*(e((t-1)*42 + (1:42))));hold on; ylim([-0.05 0.1]); xlim([0.5 42.5])
  end     
         title(trialType{t});
     legend;
@@ -751,7 +756,7 @@ for ss = 1:length(sessionDate)
           WeightedSessClust3xErr(ss,t,i,:) = n*(e((t-1)*28 + (1:28)));
 %           SessClustFraction3x(ss,i) = sum(clust==i & sess==ss)/sum(sess==ss);  %same as behav
         
-       errorbar(1:28,n*(d((t-1)*28 + (1:28))-mean(d(6:10))),n*(e((t-1)*28 + (1:28))));hold on; ylim([ 0 0.1]); xlim([0.5 41.5])
+       errorbar(1:28,n*(d((t-1)*28 + (1:28))-mean(d(6:10))),n*(e((t-1)*28 + (1:28))));hold on; ylim([-0.05 0.1]); xlim([0.5 41.5])
  end     
         title(trialType{t});
     legend;
@@ -805,7 +810,7 @@ for ss = 1:length(sessionDate)
           WeightedSessClust2sfErr(ss,t,i,:) = n*(e((t-1)*39 + (1:39)));
 %           SessClustFraction2sf(ss,i) = sum(clust==i &sess==ss)/sum(sess==ss);  %same as behav
         
-       errorbar(1:39,n*(d((t-1)*39 + (1:39))-mean(d(6:10))),n*(e((t-1)*39 + (1:39))));hold on; ylim([ 0 0.1]); xlim([0.5 41.5])
+       errorbar(1:39,n*(d((t-1)*39 + (1:39))-mean(d(6:10))),n*(e((t-1)*39 + (1:39))));hold on; ylim([-0.05 0.1]); xlim([0.5 41.5])
  end     
         title(trialType{t});
     legend;
@@ -824,7 +829,7 @@ for j = 1:5 %%%loop through training conditions
         clear d
             d =squeeze(nanmean(WeightedSessClust2sfData(sessCond==j,t,i,:),1)); 
             e = squeeze(nanstd(WeightedSessClust2sfData(sessCond==j,t,i,:),[],1)/sqrt(sum(sessCond==j))); 
-            fraction(j,i) = mean(SessClustFraction(sessCond==j,i));
+            fraction(j,i) = mean(SessClustFraction(sessCond==j,i));   %calculate mean accross groups
             
           clust2sfSess(i,t,j,:) =  d(1:39)-mean(d(6:10));
           clust2sfErrSess(i,t,j,:) = e(1:39);
@@ -892,13 +897,10 @@ end
 
 
 %%% resp(clust,stim, training cond, session)
+%%%w/o hvv
 figure
 barweb(squeeze(respSess(:,1,[2 1 3],1)), squeeze(respErrSess(:,1,[2 1 3],1))); ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
 legend('naive','gts','rand'); ylabel('weighted response'); title('behavior - preferred')
-
-figure
-barweb(squeeze(respSess(:,1,[2 1 3 4],1)), squeeze(respErrSess(:,1,[2 1 3 4],1))); ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
-legend('naive','gts','rand','hvv'); ylabel('weighted response'); title('behavior - preferred')
 
 figure
 barweb(squeeze(respSess(:,1,[2 1 3],2)), squeeze(respErrSess(:,1,[2 1 3],2))); ylim([-0.01 0.04]); set(gca,'Ytick',-0.01:0.01:0.04);
@@ -921,6 +923,34 @@ barweb(squeeze(respSess(:,1,3,[1 2])), squeeze(respErrSess(:,1,1,[1 3]))); ylim(
 legend('task','passive 3x'); ylabel('weighted response'); title('active vs passive rand');
 
 
+%%%w/ hvv
+figure
+barweb(squeeze(respSess(:,1,[2 1 3 4],1)), squeeze(respErrSess(:,1,[2 1 3 4],1))); ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
+legend('naive','gts','rand','hvv'); ylabel('weighted response'); title('behavior - preferred')
+
+figure
+barweb(squeeze(respSess(:,1,[2 1 3 4],2)), squeeze(respErrSess(:,1,[2 1 3 4],2))); ylim([-0.01 0.04]); set(gca,'Ytick',-0.01:0.01:0.04);
+legend('naive','gts','rand', 'hvv'); ylabel('weighted response'); title('passive 3x - cardinal')
+
+figure
+barweb(squeeze(respSess(:,2,[2 1 3 4],2)), squeeze(respErrSess(:,2,[2 1 3 4],2))); ylim([-0.01 0.04]); set(gca,'Ytick',-0.01:0.01:0.04);
+legend('naive','gts','rand', 'hvv'); ylabel('weighted response'); title('passive 3x - oblique')
+
+figure
+barweb(squeeze(respSess(:,1,2,[1 2])), squeeze(respErrSess(:,1,1,[1 3]))); ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
+legend('task','passive 3x'); ylabel('weighted response'); title('active vs passive naive')
+
+figure
+barweb(squeeze(respSess(:,1,1,[1 2])), squeeze(respErrSess(:,1,1,[1 3]))); ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
+legend('task','passive 3x'); ylabel('weighted response'); title('active vs passive gts');
+
+figure
+barweb(squeeze(respSess(:,1,3,[1 2])), squeeze(respErrSess(:,1,1,[1 3]))); ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
+legend('task','passive 3x'); ylabel('weighted response'); title('active vs passive rand');
+
+figure
+barweb(squeeze(respSess(:,1,4,[1 2])), squeeze(respErrSess(:,1,1,[1 3]))); ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
+legend('task','passive 3x'); ylabel('weighted response'); title('active vs passive hvv');
 
 %%
 %%%%%%%%%%%%%passive analysis for all cells, not by session
@@ -1087,7 +1117,7 @@ ylabel('mean absolute modulation'); set(gca,'FontSize',16); ylim([0 0.125]); set
 
 osifig = figure;
 %%% calculate response parameters (sustained, transient, OSI, running modulation) for each cluster; put each graph into one subpanel
-for i = 1:max(c)
+for i = 1:max(clust)
     clustData = allData(sortClust==i ,:);
     clear transResp sustResp
     

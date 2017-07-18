@@ -4,8 +4,6 @@
 %%%add in code to label all trials to include every trial for each cell to
 %%%caclulate variance and Fano Factor
 
-altpath = 'C:\Users\nlab\Desktop\2pData';
-
 global S2P
 exclude = 0; %0 removes trials above threshold, 1 clips them to the threshold
 dfWindow = 9:11;
@@ -17,12 +15,6 @@ load(moviefname)
 contrastRange = unique(contrasts); sfrange = unique(sf); phaserange = unique(phase);
 for i = 1:length(contrastRange);contrastlist{i} = num2str(contrastRange(i));end
 for i=1:length(radiusRange); sizes{i} = num2str(radiusRange(i)*2); end
-% thetamod = mod(theta,pi)-pi/8;
-% thetaQuad = zeros(1,length(theta)); %break orientation into quadrants, 1=top,2=right,3=bot,4=left, offset pi/8 CCW
-% thetaQuad(1,find(-pi/8<=thetamod&thetamod<pi/8))=1;
-% thetaQuad(1,find(pi/8<=thetamod&thetamod<3*pi/8))=2;
-% thetaQuad(1,find(3*pi/8<=thetamod&thetamod<5*pi/8))=3;
-% thetaQuad(1,find(5*pi/8<=thetamod&thetamod<=7*pi/8))=4;
 thetaRange = unique(theta);
 
 for f=1:length(use)
@@ -33,6 +25,158 @@ for f=1:length(use)
         if exist(psfilei,'file')==2;delete(psfilei);end
 
         clear xph yph phaseVal rfCyc cycAvg rfAmp rf dftuning dftuningall sptuning sptuningall
+
+        load(files(use(f)).sizepts);
+        load(files(use(f)).sizestimObj);
+        spInterp = get2pSpeed(stimRec,dt,size(dF,2));
+        spikeBinned = imresize(spikes,[size(spikes,1) size(spikes,2)/10]);
+
+        ntrials= floor(min(dt*length(dF)/(isi+duration),length(sf)))-1;
+        sf=sf(1:ntrials); theta=theta(1:ntrials); phase=phase(1:ntrials); radius=radius(1:ntrials); xpos=xpos(1:ntrials);
+        onsets = dt + (0:ntrials-1)*(isi+duration);
+        timepts = 1:(2*isi+duration)/dt;
+        timepts = (timepts-1)*dt;
+        running = zeros(1,ntrials);
+        for i = 1:ntrials
+            running(i) = mean(spInterp(1,1+cyclelength*(i-1):cyclelength+cyclelength*(i-1)),2)>20;
+        end
+
+        %%%scale spikes
+        if (exist('S2P','var')&S2P==1)
+            spikes = spikes/2;
+        else
+            spikes = spikes*10;
+        end
+        
+        %%PCA coeff, score, latent
+        [Cdf,Sdf,Ldf] = pca(dF');
+        [Csp,Ssp,Lsp] = pca(spikes');
+        pcdf = Sdf(:,1:10)';
+        pcsp = Ssp(:,1:10)';
+
+
+         if exist(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing '.mat']))==0 |...
+            ~ismember('updated',who('-file',fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing]))) %%comment for redo
+            % load size select points file and stim object and align to stim
+            sprintf('realigning to onsets')
+            
+            %%%PCA%%% add in first 10 components to end of dF/spikes variable
+    %         exvar = L/sum(L); exvar = exvar(1:10);
+            cells=1:size(dF,1);
+            pci = max(cells)+1:max(cells)+10;
+            dF(pci,:) = pcdf; %%%add PCs to dF
+            spikes(pci,:) = pcsp; %%%add PCs to spikes
+
+            dFout = align2onsets(dF,onsets,dt,timepts);
+    %         dFout = dFout(1:end-1,:,:); %%%extra cell at end for some reason
+            pcdfOut = dFout(pci,:,:);
+            dFout = dFout(cells,:,:);
+
+            spikesOut = align2onsets(spikes,onsets,dt,timepts);
+            pcspOut = spikesOut(pci,:,:);
+            spikesOut = spikesOut(cells,:,:);
+
+            %%%subtract baseline period
+            dFout2 = dFout;
+            spikesOut2 = spikesOut;
+            pcdfOut2 = pcdfOut;
+            pcspOut2 = pcspOut;
+
+            for i = 1:size(dFout,1)
+                for j = 1:size(dFout,3)
+                    dFout2(i,:,j) = dFout(i,:,j)-nanmean(dFout(i,1:4,j));
+                    spikesOut2(i,:,j) = spikesOut(i,:,j)-nanmean(spikesOut(i,1:4,j));
+    %                 pcaOut2(i,:,j) = pcaOut(i,:,j)-nanmean(pcaOut(i,1:4,j));
+    %                 %% subtract baseline for pcs???
+                end
+            end
+
+            for i = 1:size(pcdfOut2,1)
+                for j = 1:size(pcdfOut2,3)
+                    pcdfOut2(i,:,j) = pcdfOut(i,:,j)-nanmean(pcdfOut(i,1:4,j));
+                    pcspOut2(i,:,j) = pcspOut(i,:,j)-nanmean(pcspOut(i,1:4,j));
+                end
+            end
+            
+            %create array w/average responses per stim type
+            dftuning = zeros(size(dFout2,1),size(dFout2,2),length(sfrange),length(thetaRange),length(radiusRange),2);
+            sptuning = zeros(size(spikesOut2,1),size(spikesOut2,2),length(sfrange),length(thetaRange),length(radiusRange),2);
+            for h = 1:size(dFout2,1)
+                for i = 1:length(sfrange)
+                    for j = 1:length(thetaRange)
+                        for k = 1:length(radiusRange)
+                            for l = 1:2
+                                dftuning(h,1:size(dFout2,2),i,j,k,l) = nanmean(dFout2(h,:,find(sf==sfrange(i)&theta==thetaRange(j)&radius==k&running==(l-1))),3);
+                                sptuning(h,1:size(spikesOut2,2),i,j,k,l) = nanmean(spikesOut2(h,:,find(sf==sfrange(i)&theta==thetaRange(j)&radius==k&running==(l-1))),3);
+                            end
+                        end
+                    end
+                end
+            end
+
+
+            %%%subtract size zero trials
+            dftuning2 = dftuning;sptuning2 = sptuning;
+            ztrialdf = nan(size(dftuning,1),size(dftuning,2),2);ztrialsp=ztrialdf;
+            for i = 1:2
+                ztrialdf(:,:,i) = nanmean(nanmean(dftuning(:,:,:,:,1,i),3),4);
+                ztrialsp(:,:,i) = nanmean(nanmean(sptuning(:,:,:,:,1,i),3),4);
+            end
+            for i = 1:length(sfrange)
+                for j = 1:length(thetaRange)
+                    for k = 1:length(radiusRange)
+                        for l = 1:2
+                            dftuning2(:,:,i,j,k,l) = dftuning(:,:,i,j,k,l) - ztrialdf(:,:,l);
+                            sptuning2(:,:,i,j,k,l) = sptuning(:,:,i,j,k,l) - ztrialsp(:,:,l);
+                        end
+                    end
+                end
+            end
+
+            dftuning = dftuning2;
+            sptuning = sptuning2;
+
+
+            pcdftuning = zeros(size(pcdfOut2,1),size(pcdfOut2,2),length(sfrange),length(thetaRange),length(radiusRange),2); pcsptuning = pcdftuning;
+            for h = 1:size(pcdfOut2,1)
+                for i = 1:length(sfrange)
+                    for j = 1:length(thetaRange)
+                        for k = 1:length(radiusRange)
+                            for l = 1:2
+                                pcdftuning(h,1:size(pcdfOut2,2),i,j,k,l) = nanmean(pcdfOut2(h,:,find(sf==sfrange(i)&theta==thetaRange(j)&radius==k&running==(l-1))),3);
+                                pcsptuning(h,1:size(pcdfOut2,2),i,j,k,l) = nanmean(pcspOut2(h,:,find(sf==sfrange(i)&theta==thetaRange(j)&radius==k&running==(l-1))),3);
+                            end
+                        end
+                    end
+                end
+            end
+
+
+            %%%subtract size zero trials
+            pcdftuning2 = pcdftuning; pcsptuning2 = pcsptuning;
+            ztrialdf = nan(size(pcdftuning,1),size(pcdftuning,2),2);ztrialsp=ztrialdf;
+            for i = 1:2
+                ztrialdf(:,:,i) = nanmean(nanmean(pcdftuning(:,:,:,:,1,i),3),4);
+                ztrialsp(:,:,i) = nanmean(nanmean(pcsptuning(:,:,:,:,1,i),3),4);
+            end
+            for i = 1:length(sfrange)
+                for j = 1:length(thetaRange)
+                    for k = 1:length(radiusRange)
+                        for l = 1:2
+                            pcdftuning2(:,:,i,j,k,l) = pcdftuning(:,:,i,j,k,l) - ztrialdf(:,:,l);
+                            pcsptuning2(:,:,i,j,k,l) = pcsptuning(:,:,i,j,k,l) - ztrialsp(:,:,l);
+                        end
+                    end
+                end
+            end
+            pcdftuning = pcdftuning2; pcsptuning = pcsptuning2;
+            updated = 1;
+        else
+            load(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_pre']),'sptuning','dftuning','pcdftuning','pcsptuning')
+        end
+        timepts = timepts - isi;
+        
+        
 
         %%% get topo stimuli
 
@@ -132,7 +276,7 @@ for f=1:length(use)
         axis equal
         
         %%%use manual selection of 10 degree pixelwise response for cell selection
-        if mod(f,2)~=0
+        if mod(f,2)~=0 & (~exist(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing '.mat'])) | reselect==1)
             figure
             title('select 10deg activated region')
             if length(size(frmdata))==5
@@ -146,7 +290,7 @@ for f=1:length(use)
             [limy limx] = ginput(2);
             limx = sort(round(limx)); limy= sort(round(limy));
             hold on
-            plot([limy(1) limy(1) limy(2) limy(2) limy(2)], [limx(1) limx(2) limx(2) limx(1) limx(1)],'g','linewidth',2);
+            plot([limy(1) limy(1) limy(2) limy(2) limy(1)], [limx(1) limx(2) limx(2) limx(1) limx(1)],'g','linewidth',2);
             if exist('psfilei','var')
                 set(gcf, 'PaperPositionMode', 'auto');
                 print('-dpsc',psfilei,'-append');
@@ -160,14 +304,59 @@ for f=1:length(use)
                     goodprints(i) = 1;
                 end
             end
-            usecells = find(goodprints==1);
+            usecells = find(goodprints==1);usecells = usecells(usecells<cellCutoff);
+            %%%calculate response as a function of distance from center
+            y0 = round(mean(limy))+cropy(1);x0 = round(mean(limx))+cropx(1);
+            limy=limy+cropy(1);limx=limx+cropx(1);
+            [X,Y] = meshgrid(1:size(frmdata,1),1:size(frmdata,2));Y=Y/2;
+            dist =sqrt((Y - x0/2).^2 + (X - y0).^2);
         else
-%             load(files(use(f-1)).sizeanalysis,'usecells')
-            load(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_pre']),'usecells')
+%             if mod(f,2)~=0
+%                 load(files(use(f)).sizeanalysis,'usecells','limx','limy','x0','y0','dist','goodprints')
+%             else
+%                 load(files(use(f-1)).sizeanalysis,'usecells','limx','limy','x0','y0','dist','goodprints')
+%             end
+            load(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_pre']),'usecells','limx','limy','x0','y0','dist','goodprints')
+            figure
+            title('select 10deg activated region')
+            resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,3,1),3);
+            respimg = mat2im(resp,jet,[-0.01 0.1]);
+            imshow(respimg)
+            set(gca,'ytick',[],'xtick',[])
+            hold on
+            plot([limy(1) limy(1) limy(2) limy(2) limy(1)]-cropy(1), [limx(1) limx(2) limx(2) limx(1) limx(1)]-cropx(1),'g','linewidth',2);
+            if exist('psfilei','var')
+                set(gcf, 'PaperPositionMode', 'auto');
+                print('-dpsc',psfilei,'-append');
+            end
         end
         
-        
-        
+        %%%calculate response as a function of distance from center
+        binwidth = 5;
+        ring = nan(ceil(max(max(dist))/binwidth),size(frmdata,3),size(frmdata,4),size(frmdata,5));
+        for j = 1:size(frmdata,3)
+            for k = 1:size(frmdata,4)
+                for l = 1:size(frmdata,5)
+                    resp = squeeze(frmdata(:,:,j,k,l));
+                    for i = 1:ceil(max(max(dist)))/binwidth
+                        ring(i,j,k,l) = mean(resp(dist>(binwidth*(i-1)) & dist<binwidth*i));
+                        ring(i,j,k,l) = mean(resp(dist>(binwidth*(i-1)) & dist<binwidth*i));
+                    end
+                end
+            end
+        end
+            
+        figure
+        subplot(1,2,1);imagesc(nanmean(frmdata(:,:,:,3,1),3),[-0.01 0.1]);axis equal;
+        hold on
+        plot([limy(1) limy(1) limy(2) limy(2) limy(1)], [limx(1) limx(2) limx(2) limx(1) limx(1)],'g','linewidth',2);
+        plot(y0,x0,'ro')
+        subplot(1,2,2);imagesc(dist);axis equal;hold on;plot(y0,x0,'ro')
+        if exist('psfilei','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilei,'-append');
+        end
+            
         %%%compare 5/10deg pixel vs cell footprints
 %         goodprints = zeros(1,length(usePts));goodprints(allgoodTopo)=1;goodprints(goodTopo)=2;
         figure
@@ -275,286 +464,8 @@ for f=1:length(use)
             set(gcf, 'PaperPositionMode', 'auto');
             print('-dpsc',psfilei,'-append');
         end
-   
-        %%%plot average response of center pixels for 2 SFs
-        cwidth=[size(frmdata,1)/2 size(frmdata,2)/2];
-        centresp = zeros(length(sfrange),length(sizes),2);
-        for h = 1:length(sfrange)
-            for i = 1:length(sizes)
-                for j = 1:2
-                centresp(h,i,j) = nanmean(nanmean(frmdata(cwidth(1)-50:cwidth(1)+50,cwidth(2)-50:cwidth(2)+50,h,i,j)));
-                end
-            end
-        end
-        figure
-        subplot(1,2,1)
-        hold on
-        plot(centresp(1,:,1))
-        plot(centresp(2,:,1))
-        legend(sprintf('%0.2fcpd',sfrange(1)),sprintf('%0.2fcpd',sfrange(2)),'location','northwest')
-        xlabel('size')
-        ylabel('sit dfof')
-        axis([0 length(radiusRange)+1 -0.02 0.12])
-        axis square
-        set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'Fontsize',8)
-        subplot(1,2,2)
-        hold on
-        plot(centresp(1,:,2))
-        plot(centresp(2,:,2))
-        legend(sprintf('%0.2fcpd',sfrange(1)),sprintf('%0.2fcpd',sfrange(2)),'location','northwest')
-        xlabel('size')
-        ylabel('run dfof')
-        axis([0 length(radiusRange)+1 -0.02 0.12])
-        axis square
-        set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'Fontsize',8)
-        mtit('Center Response')
-        if exist('psfilei','var')
-            set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfilei,'-append');
-        end
-        
-%         %%%compare 1st half of experiment to 2nd
-%         figure;
-%         colormap jet
-%         for i = 2:length(sizes)
-%             subplot(2,length(sizes)-1,i-1)
-%             imagesc(frmdata1(:,:,i,1),[-0.01 0.1])
-%             set(gca,'ytick',[],'xtick',[])
-%             xlabel(sprintf('%sdeg 1st',sizes{i}))
-%             axis square
-%         end
-%         for i = 2:length(sizes)
-%             subplot(2,length(sizes)-1,length(sizes)+i-2)
-%             imagesc(frmdata2(:,:,i,1),[-0.01 0.1])
-%             set(gca,'ytick',[],'xtick',[])
-%             xlabel(sprintf('%sdeg 2nd',sizes{i}))
-%             axis square
-%         end
-%         mtit('1st vs 2nd half responses (sit)')
-%         if exist('psfilei','var')
-%             set(gcf, 'PaperPositionMode', 'auto');
-%             print('-dpsc',psfilei,'-append');
-%         end
-            
-        
-% %                         keyboard%%%%%%%%%%%%%
-        
-        % load size select points file and stim object and align to stim
-        load(files(use(f)).sizepts);
-        load(files(use(f)).sizestimObj);
-        spInterp = get2pSpeed(stimRec,dt,size(dF,2));
-        spikeBinned = imresize(spikes,[size(spikes,1) size(spikes,2)/10]);
-        
-        %%%plot rasters for dfof and spikes
-        figure
-        imagesc(dF(usecells,:),[0 1]); ylabel('cell #'); xlabel('frame'); title('dF');
-        if exist('psfilei','var')
-            set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfilei,'-append');
-        end
-        figure
-        imagesc(spikeBinned(usecells,:),[0 0.1]); ylabel('cell #'); xlabel('frame'); title('spikes');
-        if exist('psfilei','var')
-            set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfilei,'-append');
-        end
-
-        ntrials= min(dt*length(dF)/(isi+duration),length(sf));
-        onsets = dt + (0:ntrials-1)*(isi+duration);
-        timepts = 1:(2*isi+duration)/dt;
-        timepts = (timepts-1)*dt;
-        
-        %%%scale spikes
-        if (exist('S2P','var')&S2P==1)
-            spikes = spikes/2;
-        else
-            spikes = spikes*10;
-        end
-        
-                
-        %%%PCA%%% add in first 10 components to end of dF/spikes variable
-        %%coeff, score, latent
-        [Cdf,Sdf,Ldf] = pca(dF');
-        [Csp,Ssp,Lsp] = pca(spikes');
-
-        pcdf = Sdf(:,1:10)';
-        pcsp = Ssp(:,1:10)';
-        
-%         exvar = L/sum(L); exvar = exvar(1:10);
-        cells=1:size(dF,1);
-        pci = max(cells)+1:max(cells)+10;
-        dF(pci,:) = pcdf; %%%add PCs to dF
-        spikes(pci,:) = pcsp; %%%add PCs to spikes
-        
-        dFout = align2onsets(dF,onsets,dt,timepts);
-%         dFout = dFout(1:end-1,:,:); %%%extra cell at end for some reason
-        pcdfOut = dFout(pci,:,:);
-        dFout = dFout(cells,:,:);
-
-        spikesOut = align2onsets(spikes,onsets,dt,timepts);
-        pcspOut = spikesOut(pci,:,:);
-        spikesOut = spikesOut(cells,:,:);
         
         
-        timepts = timepts - isi;
-        running = zeros(1,ntrials);
-        for i = 1:ntrials
-            running(i) = mean(spInterp(1,1+cyclelength*(i-1):cyclelength+cyclelength*(i-1)),2)>20;
-        end
-        
-        
-%         if exclude
-%             %threshold big guys out
-%             sigthresh = 10;
-%             for i=1:size(dFout,1)
-%                 for j=1:size(dFout,3)
-%                     if squeeze(max(dFout2(i,1:10,j),[],2))>sigthresh
-%                         dFout2(i,:,j) = nan(1,size(dFout2,2));
-%                     end
-%                 end
-%             end 
-%         end
-        % else
-        %     %re-size big guys down to a max threshold
-        %     sigthresh = 10;
-        %     for i=1:size(dFout,1)
-        %         for j=1:size(dFout,3)
-        %             if squeeze(max(dFout(i,1:10,j),[],2))>sigthresh
-        %                 vals = dFout(i,:,j);
-        %                 vals(vals>sigthresh) = sigthresh;
-        %                 dFout(i,:,j) = vals;
-        %             end
-        %         end
-        %     end
-        % end
-
-        %%%subtract baseline period
-        dFout2 = dFout;
-        spikesOut2 = spikesOut;
-        pcdfOut2 = pcdfOut;
-        pcspOut2 = pcspOut;
-        
-        for i = 1:size(dFout,1)
-            for j = 1:size(dFout,3)
-                dFout2(i,:,j) = dFout(i,:,j)-nanmean(dFout(i,1:4,j));
-                spikesOut2(i,:,j) = spikesOut(i,:,j)-nanmean(spikesOut(i,1:4,j));
-%                 pcaOut2(i,:,j) = pcaOut(i,:,j)-nanmean(pcaOut(i,1:4,j));
-%                 %% subtract baseline for pcs???
-            end
-        end
-        
-        for i = 1:size(pcdfOut2,1)
-            for j = 1:size(pcdfOut2,3)
-                pcdfOut2(i,:,j) = pcdfOut(i,:,j)-nanmean(pcdfOut(i,1:4,j));
-                pcspOut2(i,:,j) = pcspOut(i,:,j)-nanmean(pcspOut(i,1:4,j));
-            end
-        end        
-%         %%%use output from PRE and POST gratings analysis to pick cells
-%         if mod(f,2)
-%             gratfile = files(use(f)).gratinganalysis;
-%             gratfile2 = files(use(f+1)).gratinganalysis;
-%             openfig([gratfile '.fig'])
-%             if exist('psfilei','var')
-%                 set(gcf, 'PaperPositionMode', 'auto');
-%                 print('-dpsc',psfilei,'-append');
-%             end
-%         else
-%             gratfile = files(use(f-1)).gratinganalysis;
-%             gratfile2 = files(use(f)).gratinganalysis;
-%         end
-%         load(gratfile,'dfgrat','dirrange','prefdir','prefthetaQuad','bestsftf','respcells','dfori','osi','dsi')
-%         
-%         %%%find usable cells, change arrays to match/decrease file size
-%         usecells1 = intersect(goodTopo,respcells); %%%use only cells in center w/good resp to gratings
-%         load(gratfile2,'respcells')
-%         usecells2 = intersect(goodTopo,respcells);
-
-%         usecells = union(usecells1,usecells2);
-%         sprintf('%d cells with good topo in center & good gratings response',length(usecells))
-%         usedfori = dfori(usecells,:,:);
-%         useosi=osi(usecells,:); usedsi=dsi(usecells,:);
-%         usebestsftf = bestsftf(usecells,:,:); useprefthetaQuad = prefthetaQuad(usecells,:);
-%         userf = rf(usecells,:);
-%         dfgrat = dfgrat(usecells,:,:);
-        
-        %%%the two stimuli are different so adjust cell preferences to try
-        %%%to match them from gratings->size select
-%         usebestsftf(find(usebestsftf==2))=1; %%combine 0.01 and 0.04 pref, set to index 1
-%         usebestsftf(find(usebestsftf==3))=2; %%0.16, change to index 2
-
-        %create array w/average responses per stim type
-        dftuning = zeros(length(usecells),size(dFout,2),length(sfrange),length(thetaRange),length(radiusRange),2);
-        sptuning = zeros(length(usecells),size(spikesOut,2),length(sfrange),length(thetaRange),length(radiusRange),2);
-        for h = 1:length(usecells)
-            for i = 1:length(sfrange)
-                for j = 1:length(thetaRange)
-                    for k = 1:length(radiusRange)
-                        for l = 1:2
-                            dftuning(h,1:size(dFout,2),i,j,k,l) = nanmean(dFout2(usecells(h),:,find(sf==sfrange(i)&theta==thetaRange(j)&radius==k&running==(l-1))),3);
-                            sptuning(h,1:size(spikesOut,2),i,j,k,l) = nanmean(spikesOut2(usecells(h),:,find(sf==sfrange(i)&theta==thetaRange(j)&radius==k&running==(l-1))),3);
-                        end
-                    end
-                end
-            end
-        end
-       
-
-        %%%subtract size zero trials
-        dftuning2 = dftuning;sptuning2 = sptuning;
-        ztrialdf = nan(size(dftuning,1),size(dftuning,2),2);ztrialsp=ztrialdf;
-        for i = 1:2
-            ztrialdf(:,:,i) = nanmean(nanmean(dftuning(:,:,:,:,1,i),3),4);
-            ztrialsp(:,:,i) = nanmean(nanmean(sptuning(:,:,:,:,1,i),3),4);
-        end
-        for i = 1:length(sfrange)
-            for j = 1:length(thetaRange)
-                for k = 1:length(radiusRange)
-                    for l = 1:2
-                        dftuning2(:,:,i,j,k,l) = dftuning(:,:,i,j,k,l) - ztrialdf(:,:,l);
-                        sptuning2(:,:,i,j,k,l) = sptuning(:,:,i,j,k,l) - ztrialsp(:,:,l);
-                    end
-                end
-            end
-        end
-        
-        dftuning = dftuning2;
-        sptuning = sptuning2;
-        
-                
-        pcdftuning = zeros(size(pcdfOut,1),size(pcdfOut,2),length(sfrange),length(thetaRange),length(radiusRange),2); pcsptuning = pcdftuning;
-        for h = 1:size(pcdfOut,1)
-            for i = 1:length(sfrange)
-                for j = 1:length(thetaRange)
-                    for k = 1:length(radiusRange)
-                        for l = 1:2
-                            pcdftuning(h,1:size(pcdfOut,2),i,j,k,l) = nanmean(pcdfOut2(h,:,find(sf==sfrange(i)&theta==thetaRange(j)&radius==k&running==(l-1))),3);
-                            pcsptuning(h,1:size(pcdfOut,2),i,j,k,l) = nanmean(pcspOut2(h,:,find(sf==sfrange(i)&theta==thetaRange(j)&radius==k&running==(l-1))),3);
-                        end
-                    end
-                end
-            end
-        end
-        
-        
-        %%%subtract size zero trials
-        pcdftuning2 = pcdftuning; pcsptuning2 = pcsptuning;
-        ztrialdf = nan(size(pcdftuning,1),size(pcdftuning,2),2);ztrialsp=ztrialdf;
-        for i = 1:2
-            ztrialdf(:,:,i) = nanmean(nanmean(pcdftuning(:,:,:,:,1,i),3),4);
-            ztrialsp(:,:,i) = nanmean(nanmean(pcsptuning(:,:,:,:,1,i),3),4);
-        end
-        for i = 1:length(sfrange)
-            for j = 1:length(thetaRange)
-                for k = 1:length(radiusRange)
-                    for l = 1:2
-                        pcdftuning2(:,:,i,j,k,l) = pcdftuning(:,:,i,j,k,l) - ztrialdf(:,:,l);
-                        pcsptuning2(:,:,i,j,k,l) = pcsptuning(:,:,i,j,k,l) - ztrialsp(:,:,l);
-                    end
-                end
-            end
-        end
-        pcdftuning = pcdftuning2; pcsptuning = pcsptuning2;
-
         
         
         %%%%%cell-wise analysis
@@ -563,101 +474,59 @@ for f=1:length(use)
         sizebestsfresp=sizebestsf;sizebestthetaresp=sizebestsf;
         for i = 1:length(usecells)
             for j=1:2
-                [sizebestsfrespdf(i,j) sizebestsfdf(i,j)] = max(squeeze(nanmean(nanmean(dftuning(i,dfWindow,:,:,3,j),2),4))); %index of best sf
-                [sizebestsfrespsp(i,j) sizebestsfsp(i,j)] = max(squeeze(nanmean(nanmean(sptuning(i,spWindow,:,:,3,j),2),4)));
-                [sizebestthetarespdf(i,j) sizebestthetadf(i,j)] = max(squeeze(nanmean(dftuning(i,dfWindow,sizebestsfdf(i,1),:,3,j),2))); %index of best thetaQuad
-                [sizebestthetarespsp(i,j) sizebestthetasp(i,j)] = max(squeeze(nanmean(sptuning(i,spWindow,sizebestsfsp(i,1),:,3,j),2)));
+                [sizebestsfrespdf(i,j) sizebestsfdf(i,j)] = max(squeeze(nanmean(nanmean(dftuning(usecells(i),dfWindow,:,:,3,j),2),4))); %index of best sf
+                [sizebestsfrespsp(i,j) sizebestsfsp(i,j)] = max(squeeze(nanmean(nanmean(sptuning(usecells(i),spWindow,:,:,3,j),2),4)));
+                [sizebestthetarespdf(i,j) sizebestthetadf(i,j)] = max(squeeze(nanmean(dftuning(usecells(i),dfWindow,sizebestsfdf(i,1),:,3,j),2))); %index of best thetaQuad
+                [sizebestthetarespsp(i,j) sizebestthetasp(i,j)] = max(squeeze(nanmean(sptuning(usecells(i),spWindow,sizebestsfsp(i,1),:,3,j),2)));
             end
         end
         
         %%%pull out best traces here
-        dfsize = nan(length(usecells),size(dFout,2),length(radiusRange),2);spsize=dfsize;
+        dfsize = nan(length(usecells),size(dftuning,2),length(radiusRange),2);spsize=dfsize;
         for i = 1:length(usecells)
             for k = 1:length(sizes)
                 for l = 1:2
-                dfsize(i,:,k,l) = squeeze(nanmean(dftuning(i,:,sizebestsfdf(i,1),...
+                dfsize(i,:,k,l) = squeeze(nanmean(dftuning(usecells(i),:,sizebestsfdf(i,1),...
                     sizebestthetadf(i,1),k,l),5));
-                spsize(i,:,k,l) = squeeze(nanmean(sptuning(i,:,sizebestsfsp(i,1),...
+                spsize(i,:,k,l) = squeeze(nanmean(sptuning(usecells(i),:,sizebestsfsp(i,1),...
                     sizebestthetasp(i,1),k,l),5));
                 end
             end
         end
         
-%         keyboard
         %%%threshold out non-responding cells (only done for pre)
         if mod(f,2)~=0
             respcells = max(max(nanmean(spsize(:,dfWindow,:,:),2),[],3),[],4)>0.1;
             usecells = usecells(respcells);
             dfsize = dfsize(respcells,:,:,:);
             spsize = spsize(respcells,:,:,:);
-            dftuning = dftuning(respcells,:,:,:,:,:);
-            sptuning = sptuning(respcells,:,:,:,:,:);
         else
 %             load(files(use(f-1)).sizeanalysis,'respcells')
             load(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_pre']),'respcells')
+            usecells = usecells(respcells);
+            dfsize = dfsize(respcells,:,:,:);
+            spsize = spsize(respcells,:,:,:);
         end
         
         if respcells==0
             continue
         end
       
-
-               
-%         %%%plot screen for all six sizes w/threshold label for responsive
-%         %%%df
-%         userf = rf(usecells,:);
-%         figure
-%         for i=2:length(sizes)
-%             subplot(2,floor(length(sizes)/2),i-1)
-%             sizerespcells=[];
-%             for j=1:length(usecells)
-%                 goodresp = squeeze(nanmean(dfsize(j,dfWindow,i,1),2))>=0.05;
-%                 if goodresp
-%                     sizerespcells = [sizerespcells j];
-%                 end
-%             end
-%             hold on
-%             plot(userf(:,2),userf(:,1),'.','color',[0.5 0.5 0.5],'MarkerSize',5); %%% the rfAmp criterion wasn't being applied here
-%             plot(userf(sizerespcells,2),userf(sizerespcells,1),'b.','MarkerSize',5);
-%             circle(ycent,xcent,radiusRange(i)/dpix)
-%             axis equal;
-%             axis([0 72 0 128]);
-%             box on
-%             set(gca,'xticklabel','','yticklabel','','xtick',[],'ytick',[])
-%         end
-%         mtit('Responsive for each size (dF)')
-%         if exist('psfilei','var')
-%             set(gcf, 'PaperPositionMode', 'auto');
-%             print('-dpsc',psfilei,'-append');
-%         end
         
-%         %%%plot screen for all six sizes w/threshold label for responsive
-%         %%%spikes
-%         figure
-%         for i=2:length(sizes)
-%             subplot(2,floor(length(sizes)/2),i-1)
-%             sizerespcells=[];
-%             for j=1:length(usecells)
-%                 goodresp = squeeze(nanmean(spsize(j,spWindow,i,1),2))>=0.1;
-%                 if goodresp
-%                     sizerespcells = [sizerespcells j];
-%                 end
-%             end
-%             hold on
-%             plot(userf(:,2),userf(:,1),'.','color',[0.5 0.5 0.5],'MarkerSize',5); %%% the rfAmp criterion wasn't being applied here
-%             plot(userf(sizerespcells,2),userf(sizerespcells,1),'b.','MarkerSize',5);
-%             circle(ycent,xcent,radiusRange(i)/dpix)
-%             axis equal;
-%             axis([0 72 0 128]);
-%             box on
-%             set(gca,'xticklabel','','yticklabel','','xtick',[],'ytick',[])
-%         end
-%         mtit('Responsive for each size (spikes)')
-%         if exist('psfilei','var')
-%             set(gcf, 'PaperPositionMode', 'auto');
-%             print('-dpsc',psfilei,'-append');
-%         end
-        
+        %%%plot rasters for dfof and spikes
+        load(files(use(f)).sizepts,'dF','spikes');
+        figure
+        imagesc(dF(usecells,:),[0 1]); ylabel('cell #'); xlabel('frame'); title('dF');
+        if exist('psfilei','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilei,'-append');
+        end
+        figure
+        imagesc(spikes(usecells,:),[0 0.1]); ylabel('cell #'); xlabel('frame'); title('spikes');
+        if exist('psfilei','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilei,'-append');
+        end
         
         %%%plot group df data for size select
         figure
@@ -894,48 +763,7 @@ for f=1:length(use)
             print('-dpsc',psfilei,'-append');
         end
         
-%         %%%plot pca time course for dF
-%         figure
-%         for i=1:10
-%             subplot(2,5,i)
-%             plot(timepts,squeeze(nanmean(nanmean(pcdftuning(i,:,:,:,[4 7],1),4),3)))
-%             axis square
-%             axis([timepts(1) timepts(end) -1 1])
-%         end
-%         legend('20deg','50deg','location','northwest')
-%         mtit('dF pc timecourses')
-%         if exist('psfilei','var')
-%             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-%             print('-dpsc',psfilei,'-append');
-%         end
-%         
-%         %%%plot first two pca components for dF
-%         cnt=1;
-%         figure
-%         for i = 1:size(pcdftuning,4)
-%             for j = 2:size(pcdftuning,5)
-%                 pc1 = squeeze(nanmean(pcdftuning(1,:,:,i,j,1),3));
-%                 pc2 = squeeze(nanmean(pcdftuning(2,:,:,i,j,1),3));
-%                 subplot(size(pcdftuning,4),size(pcdftuning,5)-1,cnt)
-%                 hold on
-%                 for k = 2:length(pc1)
-% %                     col = cmapVar(k,1,length(pc1),jet);
-%                     if k<5|k>9
-%                         plot(pc1(k-1:k),pc2(k-1:k),'k.-')
-%                     else
-%                         plot(pc1(k-1:k),pc2(k-1:k),'b.-')
-%                     end
-%                 end
-%                 axis square
-%                 axis([-0.5 0.5 -0.5 0.5])
-%                 cnt=cnt+1;
-%             end
-%         end
-%         mtit('dfPC1 vs dfPC2 by orientation/size')
-%         if exist('psfilei','var')
-%             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-%             print('-dpsc',psfilei,'-append');
-%         end
+
         
         %%%plot pca time course for spikes
         figure
@@ -1065,7 +893,241 @@ for f=1:length(use)
             print('-dpsc',psfilei,'-append');
         end
         
+
         
+        %%%plot individual cell data
+        cellprint = {};
+        for i=1:length(usecells)
+            figure
+            
+           
+            %%%avg resp to best stim for each size stationary
+            subplot(1,4,1)
+            hold on
+            traces = squeeze(dfsize(i,:,:,1));
+            plot(timepts,traces)
+            xlabel('Time(s)')
+            ylabel('sit dfof')
+            if isnan(min(min(traces)))
+                axis([0 1 0 1])
+            else
+                axis([timepts(1) timepts(end) min(min(traces))-0.01 max(max(traces))+0.01])
+            end
+            axis square
+            set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+            
+            %%%avg resp to best stim for each size running
+            subplot(1,4,2)
+            hold on
+            traces = squeeze(dfsize(i,:,:,2));
+            plot(timepts,traces)
+            xlabel('Time(s)')
+            ylabel('run dfof')
+            if isnan(min(min(traces)))
+                axis([0 1 0 1])
+            else
+                axis([timepts(1) timepts(end) min(min(traces))-0.01 max(max(traces))+0.01])
+            end
+            axis square
+            set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+            
+            %%%size curve based on gratings parameters
+            subplot(1,4,3)
+            hold on
+            splotsit = squeeze(nanmean(dfsize(i,dfWindow,:,1),2));
+            splotrun = squeeze(nanmean(dfsize(i,dfWindow,:,2),2));
+            plot(1:length(radiusRange),splotsit,'k-o','Markersize',5)
+            plot(1:length(radiusRange),splotrun,'r-o','Markersize',5)
+            xlabel('Stim Size (deg)')
+            ylabel('dfof')
+            axis([0 length(radiusRange)+1 min(min([splotsit splotrun]))-0.01 max(max([splotsit splotrun]))+0.01])
+            set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes)
+            axis square
+            set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+            
+            %%%size curve based on gratings parameters
+            subplot(1,4,4)
+            acell = usePts{usecells(i)};
+            cellpts = nan(length(acell),2);
+            for j = 1:length(acell)
+                [cellpts(j,1) cellpts(j,2)] = ind2sub(size(meanShiftImg),acell(j));
+            end
+            cellprint{i} = meanShiftImg(min(cellpts(:,1)):max(cellpts(:,1)),min(cellpts(:,2)):max(cellpts(:,2)),:);
+            cellprint{i} = cellprint{i}/max(max(max(cellprint{i})));
+            imagesc(cellprint{i},[0.5 1]);
+            axis square
+            axis off
+     
+            mtit(sprintf('Cell #%d tuning',usecells(i)))
+            if exist('psfilei','var')
+                set(gcf, 'PaperPositionMode', 'auto'); %%%figure out how to make this full page landscape
+                print('-dpsc',psfilei,'-append');
+            end
+        end
+        
+        
+        updated=1;
+        %%%saving
+%         save(fullfile(pathname,filename),'updated','ring','dist','limx','limy','x0','y0','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells','goodprints','-append')
+        save(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing]),'updated','ring','dist','limx','limy','x0','y0','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells','goodprints','-append')
+
+        
+        try
+%             dos(['ps2pdf ' psfilei ' "' [fullfile(pathname,filename) '.pdf'] '"'] )
+            dos(['ps2pdf ' psfilei ' "' [fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing]) '.pdf'] '"'] )
+        catch
+            display('couldnt generate pdf');
+        end
+
+        delete(psfilei);
+        close all
+%     else
+%         sprintf('skipping %s',filename)
+%     end
+
+% keyboard
+end
+
+
+
+
+
+
+
+%         %%%plot average response of center pixels for 2 SFs
+%         cwidth=[size(frmdata,1)/2 size(frmdata,2)/2];
+%         centresp = zeros(length(sfrange),length(sizes),2);
+%         for h = 1:length(sfrange)
+%             for i = 1:length(sizes)
+%                 for j = 1:2
+%                 centresp(h,i,j) = nanmean(nanmean(frmdata(cwidth(1)-50:cwidth(1)+50,cwidth(2)-50:cwidth(2)+50,h,i,j)));
+%                 end
+%             end
+%         end
+%         figure
+%         subplot(1,2,1)
+%         hold on
+%         plot(centresp(1,:,1))
+%         plot(centresp(2,:,1))
+%         legend(sprintf('%0.2fcpd',sfrange(1)),sprintf('%0.2fcpd',sfrange(2)),'location','northwest')
+%         xlabel('size')
+%         ylabel('sit dfof')
+%         axis([0 length(radiusRange)+1 -0.02 0.12])
+%         axis square
+%         set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'Fontsize',8)
+%         subplot(1,2,2)
+%         hold on
+%         plot(centresp(1,:,2))
+%         plot(centresp(2,:,2))
+%         legend(sprintf('%0.2fcpd',sfrange(1)),sprintf('%0.2fcpd',sfrange(2)),'location','northwest')
+%         xlabel('size')
+%         ylabel('run dfof')
+%         axis([0 length(radiusRange)+1 -0.02 0.12])
+%         axis square
+%         set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'Fontsize',8)
+%         mtit('Center Response')
+%         if exist('psfilei','var')
+%             set(gcf, 'PaperPositionMode', 'auto');
+%             print('-dpsc',psfilei,'-append');
+%         end
+        
+        
+%         %%%compare 1st half of experiment to 2nd
+%         figure;
+%         colormap jet
+%         for i = 2:length(sizes)
+%             subplot(2,length(sizes)-1,i-1)
+%             imagesc(frmdata1(:,:,i,1),[-0.01 0.1])
+%             set(gca,'ytick',[],'xtick',[])
+%             xlabel(sprintf('%sdeg 1st',sizes{i}))
+%             axis square
+%         end
+%         for i = 2:length(sizes)
+%             subplot(2,length(sizes)-1,length(sizes)+i-2)
+%             imagesc(frmdata2(:,:,i,1),[-0.01 0.1])
+%             set(gca,'ytick',[],'xtick',[])
+%             xlabel(sprintf('%sdeg 2nd',sizes{i}))
+%             axis square
+%         end
+%         mtit('1st vs 2nd half responses (sit)')
+%         if exist('psfilei','var')
+%             set(gcf, 'PaperPositionMode', 'auto');
+%             print('-dpsc',psfilei,'-append');
+%         end
+
+
+
+%         if exclude
+%             %threshold big guys out
+%             sigthresh = 10;
+%             for i=1:size(dFout,1)
+%                 for j=1:size(dFout,3)
+%                     if squeeze(max(dFout2(i,1:10,j),[],2))>sigthresh
+%                         dFout2(i,:,j) = nan(1,size(dFout2,2));
+%                     end
+%                 end
+%             end 
+%         end
+        % else
+        %     %re-size big guys down to a max threshold
+        %     sigthresh = 10;
+        %     for i=1:size(dFout,1)
+        %         for j=1:size(dFout,3)
+        %             if squeeze(max(dFout(i,1:10,j),[],2))>sigthresh
+        %                 vals = dFout(i,:,j);
+        %                 vals(vals>sigthresh) = sigthresh;
+        %                 dFout(i,:,j) = vals;
+        %             end
+        %         end
+        %     end
+        % end
+
+        
+        % thetamod = mod(theta,pi)-pi/8;
+% thetaQuad = zeros(1,length(theta)); %break orientation into quadrants, 1=top,2=right,3=bot,4=left, offset pi/8 CCW
+% thetaQuad(1,find(-pi/8<=thetamod&thetamod<pi/8))=1;
+% thetaQuad(1,find(pi/8<=thetamod&thetamod<3*pi/8))=2;
+% thetaQuad(1,find(3*pi/8<=thetamod&thetamod<5*pi/8))=3;
+% thetaQuad(1,find(5*pi/8<=thetamod&thetamod<=7*pi/8))=4;
+
+
+      
+%         %%%use output from PRE and POST gratings analysis to pick cells
+%         if mod(f,2)
+%             gratfile = files(use(f)).gratinganalysis;
+%             gratfile2 = files(use(f+1)).gratinganalysis;
+%             openfig([gratfile '.fig'])
+%             if exist('psfilei','var')
+%                 set(gcf, 'PaperPositionMode', 'auto');
+%                 print('-dpsc',psfilei,'-append');
+%             end
+%         else
+%             gratfile = files(use(f-1)).gratinganalysis;
+%             gratfile2 = files(use(f)).gratinganalysis;
+%         end
+%         load(gratfile,'dfgrat','dirrange','prefdir','prefthetaQuad','bestsftf','respcells','dfori','osi','dsi')
+%         
+%         %%%find usable cells, change arrays to match/decrease file size
+%         usecells1 = intersect(goodTopo,respcells); %%%use only cells in center w/good resp to gratings
+%         load(gratfile2,'respcells')
+%         usecells2 = intersect(goodTopo,respcells);
+
+%         usecells = union(usecells1,usecells2);
+%         sprintf('%d cells with good topo in center & good gratings response',length(usecells))
+%         usedfori = dfori(usecells,:,:);
+%         useosi=osi(usecells,:); usedsi=dsi(usecells,:);
+%         usebestsftf = bestsftf(usecells,:,:); useprefthetaQuad = prefthetaQuad(usecells,:);
+%         userf = rf(usecells,:);
+%         dfgrat = dfgrat(usecells,:,:);
+        
+        %%%the two stimuli are different so adjust cell preferences to try
+        %%%to match them from gratings->size select
+%         usebestsftf(find(usebestsftf==2))=1; %%combine 0.01 and 0.04 pref, set to index 1
+%         usebestsftf(find(usebestsftf==3))=2; %%0.16, change to index 2
+
+
+
+
         
 % %         %%%redo pca for cells in center vs outside     
 % %         [Cusedf,Susedf,Lusedf] = pca(dF(usecells,:)');
@@ -1421,182 +1483,104 @@ for f=1:length(use)
 % %             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
 % %             print('-dpsc',psfilei,'-append');
 % %         end
-        
-        
-        
-        
-        %%%plot individual cell data
-%         sitcolor = [0.6 0.6 0.6;0.8 0.8 0.8;1 1 1];
-%         runcolor = [0.6 0 0;0.8 0 0;1 0 0];
-        cellprint = {};
-        for i=1:length(usecells)
-            figure
-            
-%             %%%direction tuning curve
-%             subplot(2,4,1)
-%             hold on
-%             sitcurv = usedfori(i,:,1);
-%             runcurv = usedfori(i,:,2);
-%             plot(1:12,sitcurv,'k-')
-%             plot(1:12,runcurv,'r-')
-%             xlabel('Direction')
-%             ylabel('dfof')
-%             axis([1 12 min([sitcurv runcurv])-0.01 max([sitcurv runcurv])+0.01])
-%             axis square
-%             set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
-%             hold off
-%             
-%             %%%polar direction tuning curve
-%             subplot(2,4,2)
-%             sitpol = usedfori(i,:,1);sitpol(sitpol<0)=0;
-%             runpol = usedfori(i,:,2);runpol(runpol<0)=0;
-%             polarplot([dirrange dirrange(1)],[sitpol sitpol(1)],'k-')
-%             hold on
-%             polarplot([dirrange dirrange(1)],[runpol runpol(1)],'r-')
-%             set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
-%             hold off
-%             
-%             %%%osi/dsi
-%             subplot(2,4,3)
-%             hold on
-%             plot([1 2],[useosi(i,1) usedsi(i,1)],'k.','Markersize',20)
-%             plot([1 2],[useosi(i,2) usedsi(i,2)],'r.','Markersize',20)
-%             axis([0 3 0 1])
-%             set(gca,'xtick',[1 2],'xticklabel',{'OSI','DSI'})
-%             axis square
-%             set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
-%             hold off
-            
-            %%%avg resp to best stim for each size stationary
-            subplot(1,4,1)
-            hold on
-            traces = squeeze(dfsize(i,:,:,1));
-            plot(timepts,traces)
-            xlabel('Time(s)')
-            ylabel('sit dfof')
-            if isnan(min(min(traces)))
-                axis([0 1 0 1])
-            else
-                axis([timepts(1) timepts(end) min(min(traces))-0.01 max(max(traces))+0.01])
-            end
-            axis square
-            set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
-            
-            %%%avg resp to best stim for each size running
-            subplot(1,4,2)
-            hold on
-            traces = squeeze(dfsize(i,:,:,2));
-            plot(timepts,traces)
-            xlabel('Time(s)')
-            ylabel('run dfof')
-            if isnan(min(min(traces)))
-                axis([0 1 0 1])
-            else
-                axis([timepts(1) timepts(end) min(min(traces))-0.01 max(max(traces))+0.01])
-            end
-            axis square
-            set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
-            
-            %%%size curve based on gratings parameters
-            subplot(1,4,3)
-            hold on
-            splotsit = squeeze(nanmean(dfsize(i,dfWindow,:,1),2));
-            splotrun = squeeze(nanmean(dfsize(i,dfWindow,:,2),2));
-            plot(1:length(radiusRange),splotsit,'k-o','Markersize',5)
-            plot(1:length(radiusRange),splotrun,'r-o','Markersize',5)
-            xlabel('Stim Size (deg)')
-            ylabel('dfof')
-            axis([0 length(radiusRange)+1 min(min([splotsit splotrun]))-0.01 max(max([splotsit splotrun]))+0.01])
-            set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes)
-            axis square
-            set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
-            
-            %%%size curve based on gratings parameters
-            subplot(1,4,4)
-            acell = usePts{usecells(i)};
-            cellpts = nan(length(acell),2);
-            for j = 1:length(acell)
-                [cellpts(j,1) cellpts(j,2)] = ind2sub(size(meanShiftImg),acell(j));
-            end
-            cellprint{i} = meanShiftImg(min(cellpts(:,1)):max(cellpts(:,1)),min(cellpts(:,2)):max(cellpts(:,2)),:);
-            cellprint{i} = cellprint{i}/max(max(max(cellprint{i})));
-            imagesc(cellprint{i},[0.5 1]);
-            axis square
-            axis off
-            
-%             %%%size curve based on size parameters
-%             subplot(2,4,6)
-%             hold on
-%             splotsit = squeeze(nanmean(dfsizebest(i,dfWindow,end,:,1),2));
-%             splotrun = squeeze(nanmean(dfsizebest(i,dfWindow,end,:,2),2));
-%             plot(1:length(radiusRange),splotsit,'k-o','Markersize',5)
-%             plot(1:length(radiusRange),splotrun,'r-o','Markersize',5)
-%             xlabel('Stim Size (deg)')
-%             ylabel('size params dfof')
-%             axis([0 length(radiusRange)+1 min(min([splotsit splotrun]))-0.01 max(max([splotsit splotrun]))+0.01])
-%             set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes)
-%             axis square
-%             set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
-%             
-%             %%%contrast function based on gratings params
-%             subplot(2,4,7)
-%             hold on
-%             splotsit = squeeze(nanmean(dfsize(i,dfWindow,:,[1 4 7],1),2));
-%             splotrun = squeeze(nanmean(dfsize(i,dfWindow,:,[1 4 7],2),2));
-% 
-%             plot(1:length(contrastlist),splotsit,'k-o','Markersize',5)
-% %             set(groot,'defaultAxesColorOrder',sitcolor)
-%             plot(1:length(contrastlist),splotrun,'r-o','Markersize',5)
-% %             set(groot,'defaultAxesColorOrder',runcolor)
-%             xlabel('contrast')
-%             ylabel('grat params dfof')
-%             axis([0 length(contrastlist)+1 min(min([splotsit splotrun]))-0.01 max(max([splotsit splotrun]))+0.01])
-%             set(gca,'xtick',1:length(contrastlist),'xticklabel',contrastlist)
-%             axis square
-%             set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
-%             
-%             %%%contrast function based on size params
-%             subplot(2,4,8)
-%             hold on
-%             splotsit = squeeze(nanmean(dfsizebest(i,dfWindow,:,[1 4 7],1),2));
-%             splotrun = squeeze(nanmean(dfsizebest(i,dfWindow,:,[1 4 7],2),2));
-% 
-%             plot(1:length(contrastlist),splotsit,'k-o','Markersize',5)
-% %             set(groot,'defaultAxesColorOrder',sitcolor)
-%             plot(1:length(contrastlist),splotrun,'r-o','Markersize',5)
-% %             set(groot,'defaultAxesColorOrder',runcolor)
-%             xlabel('contrast')
-%             ylabel('size params dfof')
-%             axis([0 length(contrastlist)+1 min(min([splotsit splotrun]))-0.01 max(max([splotsit splotrun]))+0.01])
-%             set(gca,'xtick',1:length(contrastlist),'xticklabel',contrastlist)
-%             axis square
-%             set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
-            
-            mtit(sprintf('Cell #%d tuning',usecells(i)))
-            if exist('psfilei','var')
-                set(gcf, 'PaperPositionMode', 'auto'); %%%figure out how to make this full page landscape
-                print('-dpsc',psfilei,'-append');
-            end
-        end
-        
-        
 
-        %%%saving
-%         save(fullfile(pathname,filename),'centresp','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells','goodprints')
-        save(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing]),'centresp','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells','goodprints')
 
+
+%%%plot screen for all six sizes w/threshold label for responsive
+%         %%%df
+%         userf = rf(usecells,:);
+%         figure
+%         for i=2:length(sizes)
+%             subplot(2,floor(length(sizes)/2),i-1)
+%             sizerespcells=[];
+%             for j=1:length(usecells)
+%                 goodresp = squeeze(nanmean(dfsize(j,dfWindow,i,1),2))>=0.05;
+%                 if goodresp
+%                     sizerespcells = [sizerespcells j];
+%                 end
+%             end
+%             hold on
+%             plot(userf(:,2),userf(:,1),'.','color',[0.5 0.5 0.5],'MarkerSize',5); %%% the rfAmp criterion wasn't being applied here
+%             plot(userf(sizerespcells,2),userf(sizerespcells,1),'b.','MarkerSize',5);
+%             circle(ycent,xcent,radiusRange(i)/dpix)
+%             axis equal;
+%             axis([0 72 0 128]);
+%             box on
+%             set(gca,'xticklabel','','yticklabel','','xtick',[],'ytick',[])
+%         end
+%         mtit('Responsive for each size (dF)')
+%         if exist('psfilei','var')
+%             set(gcf, 'PaperPositionMode', 'auto');
+%             print('-dpsc',psfilei,'-append');
+%         end
         
-        try
-            dos(['ps2pdf ' psfilei ' "' [fullfile(pathname,filename) '.pdf'] '"'] )
-        catch
-            display('couldnt generate pdf');
-        end
+%         %%%plot screen for all six sizes w/threshold label for responsive
+%         %%%spikes
+%         figure
+%         for i=2:length(sizes)
+%             subplot(2,floor(length(sizes)/2),i-1)
+%             sizerespcells=[];
+%             for j=1:length(usecells)
+%                 goodresp = squeeze(nanmean(spsize(j,spWindow,i,1),2))>=0.1;
+%                 if goodresp
+%                     sizerespcells = [sizerespcells j];
+%                 end
+%             end
+%             hold on
+%             plot(userf(:,2),userf(:,1),'.','color',[0.5 0.5 0.5],'MarkerSize',5); %%% the rfAmp criterion wasn't being applied here
+%             plot(userf(sizerespcells,2),userf(sizerespcells,1),'b.','MarkerSize',5);
+%             circle(ycent,xcent,radiusRange(i)/dpix)
+%             axis equal;
+%             axis([0 72 0 128]);
+%             box on
+%             set(gca,'xticklabel','','yticklabel','','xtick',[],'ytick',[])
+%         end
+%         mtit('Responsive for each size (spikes)')
+%         if exist('psfilei','var')
+%             set(gcf, 'PaperPositionMode', 'auto');
+%             print('-dpsc',psfilei,'-append');
+%         end
 
-        delete(psfilei);
-        close all
-%     else
-%         sprintf('skipping %s',filename)
-%     end
 
-% keyboard
-end
+%         %%%plot pca time course for dF
+%         figure
+%         for i=1:10
+%             subplot(2,5,i)
+%             plot(timepts,squeeze(nanmean(nanmean(pcdftuning(i,:,:,:,[4 7],1),4),3)))
+%             axis square
+%             axis([timepts(1) timepts(end) -1 1])
+%         end
+%         legend('20deg','50deg','location','northwest')
+%         mtit('dF pc timecourses')
+%         if exist('psfilei','var')
+%             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+%             print('-dpsc',psfilei,'-append');
+%         end
+%         
+%         %%%plot first two pca components for dF
+%         cnt=1;
+%         figure
+%         for i = 1:size(pcdftuning,4)
+%             for j = 2:size(pcdftuning,5)
+%                 pc1 = squeeze(nanmean(pcdftuning(1,:,:,i,j,1),3));
+%                 pc2 = squeeze(nanmean(pcdftuning(2,:,:,i,j,1),3));
+%                 subplot(size(pcdftuning,4),size(pcdftuning,5)-1,cnt)
+%                 hold on
+%                 for k = 2:length(pc1)
+% %                     col = cmapVar(k,1,length(pc1),jet);
+%                     if k<5|k>9
+%                         plot(pc1(k-1:k),pc2(k-1:k),'k.-')
+%                     else
+%                         plot(pc1(k-1:k),pc2(k-1:k),'b.-')
+%                     end
+%                 end
+%                 axis square
+%                 axis([-0.5 0.5 -0.5 0.5])
+%                 cnt=cnt+1;
+%             end
+%         end
+%         mtit('dfPC1 vs dfPC2 by orientation/size')
+%         if exist('psfilei','var')
+%             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+%             print('-dpsc',psfilei,'-append');
+%         end

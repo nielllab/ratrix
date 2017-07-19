@@ -103,7 +103,7 @@ if redogrp
             cellprintpre{cellcnt+j-1} = cellprint{j};
         end
         
-        X0(i) = x0;Y0(i) = y0;
+        X0(anicnt) = x0;Y0(anicnt) = y0;
         binwidth = 5;
         dist=dist(:,25:375);
         ring = nan(ceil(max(max(dist))/binwidth),size(frmdata,3),size(frmdata,4),size(frmdata,5));
@@ -173,7 +173,7 @@ if redogrp
     end       
 
     sprintf('saving group file...')
-    save(fullfile(savepath,grpfilename),'numAni','grpring','grpfrmdata','grprf','session','grpdfsize','grpspsize','grpsptuning','grpcells','cellprintpre','cellprintpost','grpSI','rmsdiff','footcc','cellcnt')
+    save(fullfile(savepath,grpfilename),'X0','Y0','numAni','grpring','grpfrmdata','grprf','session','grpdfsize','grpspsize','grpsptuning','grpcells','cellprintpre','cellprintpost','grpSI','rmsdiff','footcc','cellcnt')
     sprintf('done')
 else
     sprintf('loading data')
@@ -209,43 +209,34 @@ for z = 1:numAni
         figure;
         colormap jet
         for i = 1:length(sizes)
-            subplot(2,length(sizes),i)
+            subplot(4,length(sizes),i)
             resp = squeeze(grpfrmdata(z,:,:,h,i,1,1)-grpfrmdata(z,:,:,h,1,1,1));
             imagesc(resp,[-0.01 0.1])
-            set(gca,'ytick',[],'xtick',[])
-            xlabel(sprintf('%sdeg pre',sizes{i}))
+            set(gca,'ytick',[],'xtick',[],'FontSize',7)
+            xlabel(sprintf('sit %sdeg pre',sizes{i}))
             axis square
-            subplot(2,length(sizes),i+length(sizes))
+            subplot(4,length(sizes),i+length(sizes))
             resp = squeeze(grpfrmdata(z,:,:,h,i,1,2)-grpfrmdata(z,:,:,h,1,1,2));
             imagesc(resp,[-0.01 0.1])
-            set(gca,'ytick',[],'xtick',[])
-            xlabel(sprintf('%sdeg post',sizes{i}))
+            set(gca,'ytick',[],'xtick',[],'FontSize',7)
+            xlabel(sprintf('sit %sdeg post',sizes{i}))
             axis square
         end
-        mtit(sprintf('sit dF/size %0.2fcpd %s',sfrange(h),files(z*2).subj))
-        if exist('psfilei','var')
-            set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfilei,'-append');
-        end
-    end
-    for h = 1:length(sfrange)
-        figure;
-        colormap jet
         for i = 1:length(sizes)
-            subplot(2,length(sizes),i)
+            subplot(4,length(sizes),i+2*length(sizes))
             resp = squeeze(grpfrmdata(z,:,:,h,i,2,1)-grpfrmdata(z,:,:,h,1,2,1));
             imagesc(resp,[-0.01 0.1])
-            set(gca,'ytick',[],'xtick',[])
-            xlabel(sprintf('%sdeg pre',sizes{i}))
+            set(gca,'ytick',[],'xtick',[],'FontSize',7)
+            xlabel(sprintf('run %sdeg pre',sizes{i}))
             axis square
-            subplot(2,length(sizes),i+length(sizes))
+            subplot(4,length(sizes),i+3*length(sizes))
             resp = squeeze(grpfrmdata(z,:,:,h,i,2,2)-grpfrmdata(z,:,:,h,1,2,2));
             imagesc(resp,[-0.01 0.1])
-            set(gca,'ytick',[],'xtick',[])
-            xlabel(sprintf('%sdeg post',sizes{i}))
+            set(gca,'ytick',[],'xtick',[],'FontSize',7)
+            xlabel(sprintf('run %sdeg post',sizes{i}))
             axis square
         end
-        mtit(sprintf('run dF/size %0.2fcpd %s',sfrange(h),files(z*2).subj))
+        mtit(sprintf('dF/size %0.2fcpd %s',sfrange(h),files(use(z*2)).subj))
         if exist('psfile','var')
             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
             print('-dpsc',psfile,'-append');
@@ -277,7 +268,7 @@ for z = 1:numAni
     set(gca,'ytick',[],'xtick',[])
     xlabel('post run')
     axis square
-    mtit(sprintf('0deg responses %s',files(z*2).subj))
+    mtit(sprintf('0deg responses %s',files(use(z*2)).subj))
     if exist('psfile','var')
         set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfile,'-append');

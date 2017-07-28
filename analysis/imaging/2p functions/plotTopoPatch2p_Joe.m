@@ -8,17 +8,17 @@ dbstop if error
 batch2pBehaviorFix;
 
 %%% select files to analyze
-%alluse = find(strcmp({files.task},'GTS') & strcmp({files.notes},'good imaging session'))
+alluse = find(strcmp({files.task},'HvV') & strcmp({files.notes},'good imaging session'))
 %alluse = find( ~strcmp({files.notes},'good imaging session'));
 %alluse = find( strcmp({files.notes},'good imaging session'));
-alluse = find( strcmp({files.notes},'possible'));
+%alluse = find( strcmp({files.notes},'possible'));
 %alluse = files  %all files
 
 %%%set up savepaths
 savepsfile = 'C:\tempJoe2pbehavTest.ps';
 if exist(savepsfile,'file')==2;delete(savepsfile);end
 
-savefilename = 'TopoMaps_vs_behavior_Joe_possibleGTS';
+savefilename = 'TopoMaps_vs_behavior_Joe_HvV';
 %savefilename = 'TopoMaps_vs_behavior_Joe_notuse';
 
 savepathname = 'C:\';
@@ -34,7 +34,7 @@ tyfig = figure;
 location1fig = figure;
 location0fig = figure;
 location1_0fig = figure;
-RFlocations2=figure
+RFlocations2=figure;
 
 rows=7;
 %%%populate the figures

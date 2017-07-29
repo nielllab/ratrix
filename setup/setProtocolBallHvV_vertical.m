@@ -32,15 +32,15 @@ if ~isscalar(subjIDs)
 end
  switch subjIDs{1}
      
-    case 'test' 
+    case 'hvvtest' 
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 123;
        msPenalty               =3500;
        percentCorrectionTrials = .5;     
        pixPerCycs              = [200];
-       normalizedPosition      = [0.50 0.66];
-       radius                 = .27; 
-
+         normalizedPosition      = [0.33 0.66];
+         radius                 = .32;  
+         
     case 'g62pp9lt' % Started 4/07/17  %%start hvv 4/18/17
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 219;

@@ -31,7 +31,7 @@ for f=1:length(use)
         spInterp = get2pSpeed(stimRec,dt,size(dF,2));
         spikeBinned = imresize(spikes,[size(spikes,1) size(spikes,2)/10]);
 
-        ntrials= floor(min(dt*length(dF)/(isi+duration),length(sf)))-1;
+        ntrials= floor(min(dt*length(dF)/(isi+duration),length(sf)));
         sf=sf(1:ntrials); theta=theta(1:ntrials); phase=phase(1:ntrials); radius=radius(1:ntrials); xpos=xpos(1:ntrials);
         onsets = dt + (0:ntrials-1)*(isi+duration);
         timepts = 1:(2*isi+duration)/dt;
@@ -40,6 +40,83 @@ for f=1:length(use)
         for i = 1:ntrials
             running(i) = mean(spInterp(1,1+cyclelength*(i-1):cyclelength+cyclelength*(i-1)),2)>20;
         end
+        
+        %%%get eye data: move this into the next loop after done w/first
+        %%%round of analysis
+        load(files(use(f)).sizesession,'meandfofInterp')
+        [eyeAlign] = get2pEyes(files(use(f)).sizeeye,0,dt);
+        eyeAlign = eyeAlign(end-length(meandfofInterp)+1:end,:);
+        figure
+        plot(eyeAlign); legend('x','y','r');
+        xlabel('frame')
+        ylabel('position/diameter')
+        title('eye data')
+        if exist('psfilei','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilei,'-append');
+        end
+        
+        %%%calculate running/eye correlation
+        rad = squeeze(eyeAlign(:,3));
+        rad(find(isnan(rad))) = nanmean(rad);
+        spInterp(find(isnan(spInterp))) = 0;
+        radsp = corr(rad,spInterp')
+        %%%plot running vs. pupil diameter
+        figure
+        hold on
+        plot(eyeAlign(:,3),'r')
+        plot(spInterp,'b')
+        set(gca,'ylim',[0 50],'ytick',[0:10:50])
+        xlabel('frame')
+        legend('pupil diam','speed')
+        title(sprintf('pupil vs. running corr=%0.3f',radsp))
+        if exist('psfilei','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilei,'-append');
+        end
+        
+        eyes = align2onsets(eyeAlign',onsets,dt,timepts);
+        
+%         %%%pull out trial-trial eye data
+%         eyetuning = zeros(size(eyes,1),size(eyes,2),length(sfrange),length(thetaRange),length(radiusRange),2);
+%         for h = 1:size(eyetuning,1)
+%             for i = 1:length(sfrange)
+%                 for j = 1:length(thetaRange)
+%                     for k = 1:length(radiusRange)
+%                         for l = 1:2
+%                             eyetuning(h,:,i,j,k,l) = nanmean(eyes(h,:,find(sf==sfrange(i)&theta==thetaRange(j)&radius==k&running==(l-1))),3);
+%                         end
+%                     end
+%                 end
+%             end
+%         end
+% 
+%         %%%plot pupil diameter per size
+%         avgrad = nan(length(sizes),2);
+%         for i = 1:length(sizes)
+%             for j = 1:2
+%                 avgrad(i,j) = nanmean(nanmean(nanmean(eyetuning(3,:,:,:,i,j),4),3),2);
+%             end
+%         end
+% 
+%         figure
+%         subplot(1,2,1)
+%         plot(1:length(sizes),avgrad(:,1),'ko')
+%         axis([0 length(sizes) 15 25])
+%         xlabel('size')
+%         ylabel('sit pupil diameter')
+%         set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'Fontsize',8)
+%         subplot(1,2,2)
+%         plot(1:length(sizes),avgrad(:,2),'ko')
+%         axis([0 length(sizes) 20 30])
+%         xlabel('size')
+%         ylabel('run pupil diameter')
+%         set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'Fontsize',8)
+%         mtit('pupil size per stim size')
+%         if exist('psfilei','var')
+%             set(gcf, 'PaperPositionMode', 'auto');
+%             print('-dpsc',psfilei,'-append');
+%         end
 
         %%%scale spikes
         if (exist('S2P','var')&S2P==1)
@@ -97,6 +174,9 @@ for f=1:length(use)
                     pcspOut2(i,:,j) = pcspOut(i,:,j)-nanmean(pcspOut(i,1:4,j));
                 end
             end
+            
+            
+
             
             %create array w/average responses per stim type
             dftuning = zeros(size(dFout2,1),size(dFout2,2),length(sfrange),length(thetaRange),length(radiusRange),2);
@@ -280,7 +360,8 @@ for f=1:length(use)
             figure
             title('select 10deg activated region')
             if length(size(frmdata))==5
-                resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,3,1),3);
+                resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,3,1),3)-...
+                    nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,1,1),3);
             else
                 resp = frmdata(cropx(1):cropx(2),cropy(1):cropy(2),3,1);
             end
@@ -503,9 +584,9 @@ for f=1:length(use)
         else
 %             load(files(use(f-1)).sizeanalysis,'respcells')
             load(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_pre']),'respcells')
-            usecells = usecells(respcells);
-            dfsize = dfsize(respcells,:,:,:);
-            spsize = spsize(respcells,:,:,:);
+%             usecells = usecells(respcells);
+%             dfsize = dfsize(respcells,:,:,:);
+%             spsize = spsize(respcells,:,:,:);
         end
         
         if respcells==0
@@ -968,12 +1049,16 @@ for f=1:length(use)
         
         updated=1;
         %%%saving
-%         save(fullfile(pathname,filename),'updated','ring','dist','limx','limy','x0','y0','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells','goodprints','-append')
-        save(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing]),'updated','ring','dist','limx','limy','x0','y0','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells','goodprints','-append')
-
+        if ~exist(fullfile(pathname,[filename '.mat']))
+            save(fullfile(pathname,filename),'spInterp','running','eyes','eyeAlign','timepts','ntrials','onsets','dt','updated','ring','dist','limx','limy','x0','y0','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells','goodprints')
+            save(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing]),'spInterp','running','eyes','eyeAlign','timepts','ntrials','onsets','dt','updated','ring','dist','limx','limy','x0','y0','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells','goodprints')
+        else
+            save(fullfile(pathname,filename),'spInterp','running','eyes','eyeAlign','timepts','ntrials','onsets','dt','updated','ring','dist','limx','limy','x0','y0','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells','goodprints','-append')
+            save(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing]),'spInterp','running','eyes','eyeAlign','timepts','ntrials','onsets','dt','updated','ring','dist','limx','limy','x0','y0','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells','goodprints','-append')
+        end
         
         try
-%             dos(['ps2pdf ' psfilei ' "' [fullfile(pathname,filename) '.pdf'] '"'] )
+            dos(['ps2pdf ' psfilei ' "' [fullfile(pathname,filename) '.pdf'] '"'] )
             dos(['ps2pdf ' psfilei ' "' [fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing]) '.pdf'] '"'] )
         catch
             display('couldnt generate pdf');

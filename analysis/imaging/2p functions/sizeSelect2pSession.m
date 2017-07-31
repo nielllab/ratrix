@@ -1,4 +1,4 @@
-function sizeSelect2pSession(fileName,sessionName,stimobj,psfile)
+function sizeSelect2pSession(fileName,sessionName,psfile)
 dbstop if error
 %%% create session file for passive presentation of behavior (grating patch) stim
 %%% reads raw images, calculates dfof, and aligns to stim sync

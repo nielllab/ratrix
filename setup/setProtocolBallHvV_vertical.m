@@ -72,8 +72,8 @@ end
        rewardSizeULorMS        = 219;
        msPenalty               =3500;
        percentCorrectionTrials = .5;
-       normalizedPosition      = [0.33 0.66];
-       radius                 = .25;
+       normalizedPosition      = [0.42 0.58];
+       radius                 = .30;
        
     case 'g62aaa10lt' % Started 4/07/17 %%start hvv 4/15/17
        requestRewardSizeULorMS = 0;

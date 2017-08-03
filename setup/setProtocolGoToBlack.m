@@ -64,11 +64,11 @@ switch subjIDs{1}
          percentCorrectionTrials = .5;  
     
     
-           case 'pvchr4b16nt'  %started 5/26/17 xx
-           requestRewardSizeULorMS = 0;
-           rewardSizeULorMS        = 219;
-           msPenalty               =3500;
-           percentCorrectionTrials = .5; 
+%            case 'pvchr4b16nt'  %started 5/26/17 xx
+%            requestRewardSizeULorMS = 0;
+%            rewardSizeULorMS        = 219;
+%            msPenalty               =3500;
+%            percentCorrectionTrials = .5; 
     
            case 'pvchr4b16rt'  %started 5/26/17
            requestRewardSizeULorMS = 0;
@@ -76,11 +76,11 @@ switch subjIDs{1}
            msPenalty               =3500;
            percentCorrectionTrials = .5; 
     
-           case 'pvchr4b16lt'  %started 5/26/17
-           requestRewardSizeULorMS = 0;
-           rewardSizeULorMS        = 219;
-           msPenalty               =3500;
-           percentCorrectionTrials = .5; 
+%            case 'pvchr4b16lt'  %started 5/26/17
+%            requestRewardSizeULorMS = 0;
+%            rewardSizeULorMS        = 219;
+%            msPenalty               =3500;
+%            percentCorrectionTrials = .5; 
     
     
 %          case 'g62zz9tt'  %started 5/4/17

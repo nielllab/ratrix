@@ -40,83 +40,6 @@ for f=1:length(use)
         for i = 1:ntrials
             running(i) = mean(spInterp(1,1+cyclelength*(i-1):cyclelength+cyclelength*(i-1)),2)>20;
         end
-        
-        %%%get eye data: move this into the next loop after done w/first
-        %%%round of analysis
-        load(files(use(f)).sizesession,'meandfofInterp')
-        [eyeAlign] = get2pEyes(files(use(f)).sizeeye,0,dt);
-        eyeAlign = eyeAlign(end-length(meandfofInterp)+1:end,:);
-        figure
-        plot(eyeAlign); legend('x','y','r');
-        xlabel('frame')
-        ylabel('position/diameter')
-        title('eye data')
-        if exist('psfilei','var')
-            set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfilei,'-append');
-        end
-        
-        %%%calculate running/eye correlation
-        rad = squeeze(eyeAlign(:,3));
-        rad(find(isnan(rad))) = nanmean(rad);
-        spInterp(find(isnan(spInterp))) = 0;
-        radsp = corr(rad,spInterp')
-        %%%plot running vs. pupil diameter
-        figure
-        hold on
-        plot(eyeAlign(:,3),'r')
-        plot(spInterp,'b')
-        set(gca,'ylim',[0 50],'ytick',[0:10:50])
-        xlabel('frame')
-        legend('pupil diam','speed')
-        title(sprintf('pupil vs. running corr=%0.3f',radsp))
-        if exist('psfilei','var')
-            set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfilei,'-append');
-        end
-        
-        eyes = align2onsets(eyeAlign',onsets,dt,timepts);
-        
-%         %%%pull out trial-trial eye data
-%         eyetuning = zeros(size(eyes,1),size(eyes,2),length(sfrange),length(thetaRange),length(radiusRange),2);
-%         for h = 1:size(eyetuning,1)
-%             for i = 1:length(sfrange)
-%                 for j = 1:length(thetaRange)
-%                     for k = 1:length(radiusRange)
-%                         for l = 1:2
-%                             eyetuning(h,:,i,j,k,l) = nanmean(eyes(h,:,find(sf==sfrange(i)&theta==thetaRange(j)&radius==k&running==(l-1))),3);
-%                         end
-%                     end
-%                 end
-%             end
-%         end
-% 
-%         %%%plot pupil diameter per size
-%         avgrad = nan(length(sizes),2);
-%         for i = 1:length(sizes)
-%             for j = 1:2
-%                 avgrad(i,j) = nanmean(nanmean(nanmean(eyetuning(3,:,:,:,i,j),4),3),2);
-%             end
-%         end
-% 
-%         figure
-%         subplot(1,2,1)
-%         plot(1:length(sizes),avgrad(:,1),'ko')
-%         axis([0 length(sizes) 15 25])
-%         xlabel('size')
-%         ylabel('sit pupil diameter')
-%         set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'Fontsize',8)
-%         subplot(1,2,2)
-%         plot(1:length(sizes),avgrad(:,2),'ko')
-%         axis([0 length(sizes) 20 30])
-%         xlabel('size')
-%         ylabel('run pupil diameter')
-%         set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'Fontsize',8)
-%         mtit('pupil size per stim size')
-%         if exist('psfilei','var')
-%             set(gcf, 'PaperPositionMode', 'auto');
-%             print('-dpsc',psfilei,'-append');
-%         end
 
         %%%scale spikes
         if (exist('S2P','var')&S2P==1)
@@ -132,8 +55,7 @@ for f=1:length(use)
         pcsp = Ssp(:,1:10)';
 
 
-         if exist(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing '.mat']))==0 |...
-            ~ismember('updated',who('-file',fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing]))) %%comment for redo
+         if exist(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing '.mat']))==0 | rerun%%comment for redo
             % load size select points file and stim object and align to stim
             sprintf('realigning to onsets')
             
@@ -250,14 +172,54 @@ for f=1:length(use)
                 end
             end
             pcdftuning = pcdftuning2; pcsptuning = pcsptuning2;
+            
+            
+            %%%get eye data
+            [eyeAlign] = get2pEyes(files(use(f)).sizeeye,0,dt);
+            eyes = align2onsets(eyeAlign',onsets,dt,timepts);
+            
             updated = 1;
         else
-            load(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_pre']),'sptuning','dftuning','pcdftuning','pcsptuning')
+            load(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing '.mat']),'sptuning','dftuning','pcdftuning','pcsptuning','eyeAlign','eyes')
         end
-        timepts = timepts - isi;
+        timepts = timepts - isi;%%%shift for plotting to stim onset
+        
+        %%%plot eye data
+        figure
+        plot(eyeAlign); legend('x','y','r');
+        xlabel('frame')
+        ylabel('position/diameter')
+        title('eye data')
+        if exist('psfilei','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilei,'-append');
+        end
+        %%%calculate running/eye correlation
+        rad = squeeze(eyeAlign(:,3));
+        radbins = [0:5:50];
+        avgrad = nanmean(rad);
+        histrad = hist(rad,radbins);
+        rad(find(isnan(rad))) = nanmean(rad);
+        speed = spInterp';
+        speed(find(isnan(speed))) = 0;
+        cut = min(length(speed),length(rad));
+        speed = speed(1:cut);rad = rad(1:cut);
+        radsp = corr(rad,speed);
+        %%%plot running vs. pupil diameter
+        figure
+        hold on
+        plot(eyeAlign(:,3),'r')
+        plot(spInterp,'b')
+        set(gca,'ylim',[0 50],'ytick',[0:10:50])
+        xlabel('frame')
+        legend('pupil diam','speed')
+        title(sprintf('pupil vs. running corr=%0.3f',radsp))
+        if exist('psfilei','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilei,'-append');
+        end
         
         
-
         %%% get topo stimuli
 
         %%% read topoX (spatially periodic white noise)
@@ -420,7 +382,6 @@ for f=1:length(use)
                 for l = 1:size(frmdata,5)
                     resp = squeeze(frmdata(:,:,j,k,l));
                     for i = 1:ceil(max(max(dist)))/binwidth
-                        ring(i,j,k,l) = mean(resp(dist>(binwidth*(i-1)) & dist<binwidth*i));
                         ring(i,j,k,l) = mean(resp(dist>(binwidth*(i-1)) & dist<binwidth*i));
                     end
                 end
@@ -764,8 +725,8 @@ for f=1:length(use)
         
         figure
         hold on
-        plot([1 2],[SI(:,1) SI(:,2)],'k.','Markersize',5)
-        errorbar([1 2],[nanmean(SI(:,1)) nanmean(SI(:,2))],[nanstd(SI(:,1)) nanstd(SI(:,2))]/sqrt(size(dfsize,1)),'b','Markersize',20)
+        plot([1 2],[SI(:,1) SI(:,2)],'k.-','Markersize',5)
+        errorbar([1 2],[nanmean(SI(:,1)) nanmean(SI(:,2))],[nanstd(SI(:,1)) nanstd(SI(:,2))]/sqrt(size(dfsize,1)),'r','Markersize',20)
         axis([0 3 0 1])
         set(gca,'xtick',[1 2],'xticklabel',{'sit','run'})
         ylabel('spike SI')
@@ -778,256 +739,205 @@ for f=1:length(use)
         
         
                 
-        %%%plot pca EV
-        %%%pca all cells
-        figure
-        subplot(1,2,1)
-        plot(Ldf/sum(Ldf))
-        xlim([1 10])
-        xlabel('Principle Component')
-        ylabel('all dF Explained Variance')
-        axis square
-        axis([1 10 0 0.25])
-        subplot(1,2,2)
-        plot(Lsp/sum(Lsp))
-        xlim([1 10])
-        xlabel('Principle Component')
-        ylabel('all spikes Explained Variance')
-        axis square
-        axis([1 10 0 0.25])
-        if exist('psfilei','var')
-            set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfilei,'-append');
-        end
-
-        % figure
-        % hold on
-        % for i = 2:size(S,1)
-        %     col = cmapVar(i,1,size(S,1),jet);
-        %     plot(S(i-1:i,1),S(i-1:i,2),'.-','color',col)
-        % end
+% %         %%%plot pca EV
+% %         %%%pca all cells
+% %         figure
+% %         subplot(1,2,1)
+% %         plot(Ldf/sum(Ldf))
+% %         xlim([1 10])
+% %         xlabel('Principle Component')
+% %         ylabel('all dF Explained Variance')
+% %         axis square
+% %         axis([1 10 0 0.25])
+% %         subplot(1,2,2)
+% %         plot(Lsp/sum(Lsp))
+% %         xlim([1 10])
+% %         xlabel('Principle Component')
+% %         ylabel('all spikes Explained Variance')
+% %         axis square
+% %         axis([1 10 0 0.25])
+% %         if exist('psfilei','var')
+% %             set(gcf, 'PaperPositionMode', 'auto');
+% %             print('-dpsc',psfilei,'-append');
+% %         end
+% % 
+% %         % figure
+% %         % hold on
+% %         % for i = 2:size(S,1)
+% %         %     col = cmapVar(i,1,size(S,1),jet);
+% %         %     plot(S(i-1:i,1),S(i-1:i,2),'.-','color',col)
+% %         % end
+% %         
+% %         %%%plot overall time course for pca
+% %         figure
+% %         for i=1:10
+% %             subplot(2,5,i)
+% %             hold on
+% %             plot(pcdf(i,:),'k')
+% %             plot(spInterp/1000-5,'b')
+% %             axis([1 length(spInterp) -5 10])
+% %             axis square
+% %             ylabel(sprintf('pc%d',i))
+% %             xlabel('frame')
+% %         end
+% %         legend('PC','running','location','northeast')
+% %         mtit('dF principle components')
+% %         if exist('psfilei','var')
+% %             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+% %             print('-dpsc',psfilei,'-append');
+% %         end
+% %         
+% %         figure
+% %         for i=1:10
+% %             subplot(2,5,i)
+% %             hold on
+% %             plot(pcsp(i,:),'k')
+% %             plot(spInterp/1000-5,'b')
+% %             axis([1 length(spInterp) -5 10])
+% %             axis square
+% %             ylabel(sprintf('pc%d',i))
+% %             xlabel('frame')
+% %         end
+% %         legend('PC','running','location','northeast')
+% %         mtit('spike principle components')
+% %         if exist('psfilei','var')
+% %             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+% %             print('-dpsc',psfilei,'-append');
+% %         end
+% %         
+% % 
+% %         
+% %         %%%plot pca time course for spikes
+% %         figure
+% %         for i=1:10
+% %             subplot(2,5,i)
+% %             plot(timepts,squeeze(nanmean(nanmean(nanmean(pcsptuning(i,:,:,:,[4 7],:),6),4),3)))
+% %             axis square
+% %             axis([timepts(1) timepts(end) -2 2])
+% %             xlabel(sprintf('pc%d',i))
+% %         end
+% %         legend('20deg','50deg','location','northwest')
+% %         mtit('spike pc timecourses')
+% %         if exist('psfilei','var')
+% %             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+% %             print('-dpsc',psfilei,'-append');
+% %         end
+% %         
+% %         %%%plot first two pca components for spikes ori vs. size
+% %         cnt=1;
+% %         figure
+% %         for i = 1:size(pcsptuning,4)
+% %             for j = 2:size(pcsptuning,5)
+% %                 pc1 = squeeze(nanmean(nanmean(pcsptuning(1,:,:,i,j,:),6),3));
+% %                 pc2 = squeeze(nanmean(nanmean(pcsptuning(2,:,:,i,j,:),6),3));
+% %                 subplot(size(pcsptuning,4),size(pcsptuning,5)-1,cnt)
+% %                 hold on
+% %                 for k = 2:length(pc1)
+% % %                     col = cmapVar(k,1,length(pc1),jet);
+% %                     if k<5|k>9
+% %                         plot(pc1(k-1:k),pc2(k-1:k),'k.-')
+% %                     else
+% %                         plot(pc1(k-1:k),pc2(k-1:k),'b.-')
+% %                     end
+% %                 end
+% %                 axis square
+% %                 axis([-2 2 -2 2])
+% %                 cnt=cnt+1;
+% %             end
+% %         end
+% %         mtit('spPC1 vs spPC2 by orientation(row)/size(col)')
+% %         if exist('psfilei','var')
+% %             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+% %             print('-dpsc',psfilei,'-append');
+% %         end
+% %         
+% %         %%%plot first two pca components for spikes sf vs. run
+% %         cnt=1;
+% %         figure
+% %         for i = 1:size(pcsptuning,3)
+% %             for j = 1:size(pcsptuning,6)
+% %                 pc1 = squeeze(nanmean(nanmean(pcsptuning(1,:,i,:,:,j),5),4));
+% %                 pc2 = squeeze(nanmean(nanmean(pcsptuning(2,:,i,:,:,j),5),4));
+% %                 subplot(size(pcsptuning,3),size(pcsptuning,6),cnt)
+% %                 hold on
+% %                 for k = 2:length(pc1)
+% % %                     col = cmapVar(k,1,length(pc1),jet);
+% %                     if k<5|k>9
+% %                         plot(pc1(k-1:k),pc2(k-1:k),'k.-')
+% %                     else
+% %                         plot(pc1(k-1:k),pc2(k-1:k),'b.-')
+% %                     end
+% %                 end
+% %                 axis square
+% %                 axis([-2 2 -2 2])
+% %                 cnt=cnt+1;
+% %             end
+% %         end
+% %         mtit('spPC1 vs spPC2 by sf(row)/run(col)')
+% %         if exist('psfilei','var')
+% %             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+% %             print('-dpsc',psfilei,'-append');
+% %         end
+% %         
+% %         %%%plot first pc3 vs pc4 for spikes ori vs. size
+% %         cnt=1;
+% %         figure
+% %         for i = 1:size(pcsptuning,4)
+% %             for j = 2:size(pcsptuning,5)
+% %                 pc1 = squeeze(nanmean(nanmean(pcsptuning(3,:,:,i,j,:),6),3));
+% %                 pc2 = squeeze(nanmean(nanmean(pcsptuning(4,:,:,i,j,:),6),3));
+% %                 subplot(size(pcsptuning,4),size(pcsptuning,5)-1,cnt)
+% %                 hold on
+% %                 for k = 2:length(pc1)
+% % %                     col = cmapVar(k,1,length(pc1),jet);
+% %                     if k<5|k>9
+% %                         plot(pc1(k-1:k),pc2(k-1:k),'k.-')
+% %                     else
+% %                         plot(pc1(k-1:k),pc2(k-1:k),'b.-')
+% %                     end
+% %                 end
+% %                 axis square
+% %                 axis([-2 2 -2 2])
+% %                 cnt=cnt+1;
+% %             end
+% %         end
+% %         mtit('spPC3 vs spPC4 by orientation(row)/size(col)')
+% %         if exist('psfilei','var')
+% %             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+% %             print('-dpsc',psfilei,'-append');
+% %         end
+% %         
+% %         %%%plot PC3 vs PC4 for spikes sf vs. run
+% %         cnt=1;
+% %         figure
+% %         for i = 1:size(pcsptuning,3)
+% %             for j = 1:size(pcsptuning,6)
+% %                 pc1 = squeeze(nanmean(nanmean(pcsptuning(3,:,i,:,:,j),5),4));
+% %                 pc2 = squeeze(nanmean(nanmean(pcsptuning(4,:,i,:,:,j),5),4));
+% %                 subplot(size(pcsptuning,3),size(pcsptuning,6),cnt)
+% %                 hold on
+% %                 for k = 2:length(pc1)
+% % %                     col = cmapVar(k,1,length(pc1),jet);
+% %                     if k<5|k>9
+% %                         plot(pc1(k-1:k),pc2(k-1:k),'k.-')
+% %                     else
+% %                         plot(pc1(k-1:k),pc2(k-1:k),'b.-')
+% %                     end
+% %                 end
+% %                 axis square
+% %                 axis([-2 2 -2 2])
+% %                 cnt=cnt+1;
+% %             end
+% %         end
+% %         mtit('spPC3 vs spPC4 by sf(row)/run(col)')
+% %         if exist('psfilei','var')
+% %             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+% %             print('-dpsc',psfilei,'-append');
+% %         end
         
-        %%%plot overall time course for pca
-        figure
-        for i=1:10
-            subplot(2,5,i)
-            hold on
-            plot(pcdf(i,:),'k')
-            plot(spInterp/1000-5,'b')
-            axis([1 length(spInterp) -5 10])
-            axis square
-            ylabel(sprintf('pc%d',i))
-            xlabel('frame')
-        end
-        legend('PC','running','location','northeast')
-        mtit('dF principle components')
-        if exist('psfilei','var')
-            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-            print('-dpsc',psfilei,'-append');
-        end
-        
-        figure
-        for i=1:10
-            subplot(2,5,i)
-            hold on
-            plot(pcsp(i,:),'k')
-            plot(spInterp/1000-5,'b')
-            axis([1 length(spInterp) -5 10])
-            axis square
-            ylabel(sprintf('pc%d',i))
-            xlabel('frame')
-        end
-        legend('PC','running','location','northeast')
-        mtit('spike principle components')
-        if exist('psfilei','var')
-            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-            print('-dpsc',psfilei,'-append');
-        end
-        
-
-        
-        %%%plot pca time course for spikes
-        figure
-        for i=1:10
-            subplot(2,5,i)
-            plot(timepts,squeeze(nanmean(nanmean(nanmean(pcsptuning(i,:,:,:,[4 7],:),6),4),3)))
-            axis square
-            axis([timepts(1) timepts(end) -2 2])
-            xlabel(sprintf('pc%d',i))
-        end
-        legend('20deg','50deg','location','northwest')
-        mtit('spike pc timecourses')
-        if exist('psfilei','var')
-            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-            print('-dpsc',psfilei,'-append');
-        end
-        
-        %%%plot first two pca components for spikes ori vs. size
-        cnt=1;
-        figure
-        for i = 1:size(pcsptuning,4)
-            for j = 2:size(pcsptuning,5)
-                pc1 = squeeze(nanmean(nanmean(pcsptuning(1,:,:,i,j,:),6),3));
-                pc2 = squeeze(nanmean(nanmean(pcsptuning(2,:,:,i,j,:),6),3));
-                subplot(size(pcsptuning,4),size(pcsptuning,5)-1,cnt)
-                hold on
-                for k = 2:length(pc1)
-%                     col = cmapVar(k,1,length(pc1),jet);
-                    if k<5|k>9
-                        plot(pc1(k-1:k),pc2(k-1:k),'k.-')
-                    else
-                        plot(pc1(k-1:k),pc2(k-1:k),'b.-')
-                    end
-                end
-                axis square
-                axis([-2 2 -2 2])
-                cnt=cnt+1;
-            end
-        end
-        mtit('spPC1 vs spPC2 by orientation(row)/size(col)')
-        if exist('psfilei','var')
-            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-            print('-dpsc',psfilei,'-append');
-        end
-        
-        %%%plot first two pca components for spikes sf vs. run
-        cnt=1;
-        figure
-        for i = 1:size(pcsptuning,3)
-            for j = 1:size(pcsptuning,6)
-                pc1 = squeeze(nanmean(nanmean(pcsptuning(1,:,i,:,:,j),5),4));
-                pc2 = squeeze(nanmean(nanmean(pcsptuning(2,:,i,:,:,j),5),4));
-                subplot(size(pcsptuning,3),size(pcsptuning,6),cnt)
-                hold on
-                for k = 2:length(pc1)
-%                     col = cmapVar(k,1,length(pc1),jet);
-                    if k<5|k>9
-                        plot(pc1(k-1:k),pc2(k-1:k),'k.-')
-                    else
-                        plot(pc1(k-1:k),pc2(k-1:k),'b.-')
-                    end
-                end
-                axis square
-                axis([-2 2 -2 2])
-                cnt=cnt+1;
-            end
-        end
-        mtit('spPC1 vs spPC2 by sf(row)/run(col)')
-        if exist('psfilei','var')
-            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-            print('-dpsc',psfilei,'-append');
-        end
-        
-        %%%plot first pc3 vs pc4 for spikes ori vs. size
-        cnt=1;
-        figure
-        for i = 1:size(pcsptuning,4)
-            for j = 2:size(pcsptuning,5)
-                pc1 = squeeze(nanmean(nanmean(pcsptuning(3,:,:,i,j,:),6),3));
-                pc2 = squeeze(nanmean(nanmean(pcsptuning(4,:,:,i,j,:),6),3));
-                subplot(size(pcsptuning,4),size(pcsptuning,5)-1,cnt)
-                hold on
-                for k = 2:length(pc1)
-%                     col = cmapVar(k,1,length(pc1),jet);
-                    if k<5|k>9
-                        plot(pc1(k-1:k),pc2(k-1:k),'k.-')
-                    else
-                        plot(pc1(k-1:k),pc2(k-1:k),'b.-')
-                    end
-                end
-                axis square
-                axis([-2 2 -2 2])
-                cnt=cnt+1;
-            end
-        end
-        mtit('spPC3 vs spPC4 by orientation(row)/size(col)')
-        if exist('psfilei','var')
-            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-            print('-dpsc',psfilei,'-append');
-        end
-        
-        %%%plot PC3 vs PC4 for spikes sf vs. run
-        cnt=1;
-        figure
-        for i = 1:size(pcsptuning,3)
-            for j = 1:size(pcsptuning,6)
-                pc1 = squeeze(nanmean(nanmean(pcsptuning(3,:,i,:,:,j),5),4));
-                pc2 = squeeze(nanmean(nanmean(pcsptuning(4,:,i,:,:,j),5),4));
-                subplot(size(pcsptuning,3),size(pcsptuning,6),cnt)
-                hold on
-                for k = 2:length(pc1)
-%                     col = cmapVar(k,1,length(pc1),jet);
-                    if k<5|k>9
-                        plot(pc1(k-1:k),pc2(k-1:k),'k.-')
-                    else
-                        plot(pc1(k-1:k),pc2(k-1:k),'b.-')
-                    end
-                end
-                axis square
-                axis([-2 2 -2 2])
-                cnt=cnt+1;
-            end
-        end
-        mtit('spPC3 vs spPC4 by sf(row)/run(col)')
-        if exist('psfilei','var')
-            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-            print('-dpsc',psfilei,'-append');
-        end
-        
-
-        
-        %%%plot individual cell data
+        %%%pull out cell footprints
         cellprint = {};
-        for i=1:length(usecells)
-            figure
-            
-           
-            %%%avg resp to best stim for each size stationary
-            subplot(1,4,1)
-            hold on
-            traces = squeeze(dfsize(i,:,:,1));
-            plot(timepts,traces)
-            xlabel('Time(s)')
-            ylabel('sit dfof')
-            if isnan(min(min(traces)))
-                axis([0 1 0 1])
-            else
-                axis([timepts(1) timepts(end) min(min(traces))-0.01 max(max(traces))+0.01])
-            end
-            axis square
-            set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
-            
-            %%%avg resp to best stim for each size running
-            subplot(1,4,2)
-            hold on
-            traces = squeeze(dfsize(i,:,:,2));
-            plot(timepts,traces)
-            xlabel('Time(s)')
-            ylabel('run dfof')
-            if isnan(min(min(traces)))
-                axis([0 1 0 1])
-            else
-                axis([timepts(1) timepts(end) min(min(traces))-0.01 max(max(traces))+0.01])
-            end
-            axis square
-            set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
-            
-            %%%size curve based on gratings parameters
-            subplot(1,4,3)
-            hold on
-            splotsit = squeeze(nanmean(dfsize(i,dfWindow,:,1),2));
-            splotrun = squeeze(nanmean(dfsize(i,dfWindow,:,2),2));
-            plot(1:length(radiusRange),splotsit,'k-o','Markersize',5)
-            plot(1:length(radiusRange),splotrun,'r-o','Markersize',5)
-            xlabel('Stim Size (deg)')
-            ylabel('dfof')
-            axis([0 length(radiusRange)+1 min(min([splotsit splotrun]))-0.01 max(max([splotsit splotrun]))+0.01])
-            set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes)
-            axis square
-            set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
-            
-            %%%size curve based on gratings parameters
-            subplot(1,4,4)
+        for i = 1:length(usecells)
             acell = usePts{usecells(i)};
             cellpts = nan(length(acell),2);
             for j = 1:length(acell)
@@ -1035,26 +945,79 @@ for f=1:length(use)
             end
             cellprint{i} = meanShiftImg(min(cellpts(:,1)):max(cellpts(:,1)),min(cellpts(:,2)):max(cellpts(:,2)),:);
             cellprint{i} = cellprint{i}/max(max(max(cellprint{i})));
-            imagesc(cellprint{i},[0.5 1]);
-            axis square
-            axis off
-     
-            mtit(sprintf('Cell #%d tuning',usecells(i)))
-            if exist('psfilei','var')
-                set(gcf, 'PaperPositionMode', 'auto'); %%%figure out how to make this full page landscape
-                print('-dpsc',psfilei,'-append');
-            end
         end
+            
+%         %%%plot individual cell data
+%         for i=1:length(usecells)
+%             figure
+%             
+%            
+%             %%%avg resp to best stim for each size stationary
+%             subplot(1,4,1)
+%             hold on
+%             traces = squeeze(dfsize(i,:,:,1));
+%             plot(timepts,traces)
+%             xlabel('Time(s)')
+%             ylabel('sit dfof')
+%             if isnan(min(min(traces)))
+%                 axis([0 1 0 1])
+%             else
+%                 axis([timepts(1) timepts(end) min(min(traces))-0.01 max(max(traces))+0.01])
+%             end
+%             axis square
+%             set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+%             
+%             %%%avg resp to best stim for each size running
+%             subplot(1,4,2)
+%             hold on
+%             traces = squeeze(dfsize(i,:,:,2));
+%             plot(timepts,traces)
+%             xlabel('Time(s)')
+%             ylabel('run dfof')
+%             if isnan(min(min(traces)))
+%                 axis([0 1 0 1])
+%             else
+%                 axis([timepts(1) timepts(end) min(min(traces))-0.01 max(max(traces))+0.01])
+%             end
+%             axis square
+%             set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+%             
+%             %%%size curve based on gratings parameters
+%             subplot(1,4,3)
+%             hold on
+%             splotsit = squeeze(nanmean(dfsize(i,dfWindow,:,1),2));
+%             splotrun = squeeze(nanmean(dfsize(i,dfWindow,:,2),2));
+%             plot(1:length(radiusRange),splotsit,'k-o','Markersize',5)
+%             plot(1:length(radiusRange),splotrun,'r-o','Markersize',5)
+%             xlabel('Stim Size (deg)')
+%             ylabel('dfof')
+%             axis([0 length(radiusRange)+1 min(min([splotsit splotrun]))-0.01 max(max([splotsit splotrun]))+0.01])
+%             set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes)
+%             axis square
+%             set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+%             
+%             %%%size curve based on gratings parameters
+%             subplot(1,4,4)
+%             imagesc(cellprint{i},[0.5 1]);
+%             axis square
+%             axis off
+%      
+%             mtit(sprintf('Cell #%d tuning',usecells(i)))
+%             if exist('psfilei','var')
+%                 set(gcf, 'PaperPositionMode', 'auto'); %%%figure out how to make this full page landscape
+%                 print('-dpsc',psfilei,'-append');
+%             end
+%         end
         
         
         updated=1;
         %%%saving
         if ~exist(fullfile(pathname,[filename '.mat']))
-            save(fullfile(pathname,filename),'spInterp','running','eyes','eyeAlign','timepts','ntrials','onsets','dt','updated','ring','dist','limx','limy','x0','y0','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells','goodprints')
-            save(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing]),'spInterp','running','eyes','eyeAlign','timepts','ntrials','onsets','dt','updated','ring','dist','limx','limy','x0','y0','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells','goodprints')
+            save(fullfile(pathname,filename),'avgrad','histrad','spInterp','running','eyes','eyeAlign','timepts','ntrials','onsets','dt','updated','ring','dist','limx','limy','x0','y0','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells','goodprints')
+            save(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing]),'avgrad','histrad','spInterp','running','eyes','eyeAlign','timepts','ntrials','onsets','dt','updated','ring','dist','limx','limy','x0','y0','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells','goodprints')
         else
-            save(fullfile(pathname,filename),'spInterp','running','eyes','eyeAlign','timepts','ntrials','onsets','dt','updated','ring','dist','limx','limy','x0','y0','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells','goodprints','-append')
-            save(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing]),'spInterp','running','eyes','eyeAlign','timepts','ntrials','onsets','dt','updated','ring','dist','limx','limy','x0','y0','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells','goodprints','-append')
+            save(fullfile(pathname,filename),'avgrad','histrad','spInterp','running','eyes','eyeAlign','timepts','ntrials','onsets','dt','updated','ring','dist','limx','limy','x0','y0','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells','goodprints','-append')
+            save(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing]),'avgrad','histrad','spInterp','running','eyes','eyeAlign','timepts','ntrials','onsets','dt','updated','ring','dist','limx','limy','x0','y0','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells','goodprints','-append')
         end
         
         try
@@ -1667,5 +1630,48 @@ end
 %         mtit('dfPC1 vs dfPC2 by orientation/size')
 %         if exist('psfilei','var')
 %             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+%             print('-dpsc',psfilei,'-append');
+%         end
+
+
+        
+%         %%%pull out trial-trial eye data
+%         eyetuning = zeros(size(eyes,1),size(eyes,2),length(sfrange),length(thetaRange),length(radiusRange),2);
+%         for h = 1:size(eyetuning,1)
+%             for i = 1:length(sfrange)
+%                 for j = 1:length(thetaRange)
+%                     for k = 1:length(radiusRange)
+%                         for l = 1:2
+%                             eyetuning(h,:,i,j,k,l) = nanmean(eyes(h,:,find(sf==sfrange(i)&theta==thetaRange(j)&radius==k&running==(l-1))),3);
+%                         end
+%                     end
+%                 end
+%             end
+%         end
+% 
+%         %%%plot pupil diameter per size
+%         avgrad = nan(length(sizes),2);
+%         for i = 1:length(sizes)
+%             for j = 1:2
+%                 avgrad(i,j) = nanmean(nanmean(nanmean(eyetuning(3,:,:,:,i,j),4),3),2);
+%             end
+%         end
+% 
+%         figure
+%         subplot(1,2,1)
+%         plot(1:length(sizes),avgrad(:,1),'ko')
+%         axis([0 length(sizes) 15 25])
+%         xlabel('size')
+%         ylabel('sit pupil diameter')
+%         set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'Fontsize',8)
+%         subplot(1,2,2)
+%         plot(1:length(sizes),avgrad(:,2),'ko')
+%         axis([0 length(sizes) 20 30])
+%         xlabel('size')
+%         ylabel('run pupil diameter')
+%         set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'Fontsize',8)
+%         mtit('pupil size per stim size')
+%         if exist('psfilei','var')
+%             set(gcf, 'PaperPositionMode', 'auto');
 %             print('-dpsc',psfilei,'-append');
 %         end

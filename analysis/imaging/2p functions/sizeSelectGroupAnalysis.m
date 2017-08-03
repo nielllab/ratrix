@@ -30,6 +30,7 @@ cd(pathname);
 group = input('which group? 1=saline naive, 2=saline trained, 3=DOI naive, 4=DOI trained: ')
 redoani = input('reanalyze individual animal data? 0=no, 1=yes: ')
 if redoani
+    rerun = input('rerun entire analysis with stim align? 0=no, 1=yes: ')
     reselect = input('reselect cells in each experiment? 0=no, 1=yes: ')
 end
 redogrp = input('reanalyze group data? 0=no, 1=yes: ')
@@ -59,9 +60,7 @@ if redoani==1
     sizeSelect2pAnalysis
 end
 
-%%%%%%%%%%debug
-% % keyboard
-cd(altpath);
+
 moviefname = 'C:\sizeselectBin22min';
 load(moviefname)
 dfWindow = 9:11;
@@ -75,6 +74,7 @@ thetaRange = unique(theta);
 timepts = 1:(2*isi+duration)/dt; timepts = (timepts-1)*dt; timepts = timepts - isi;
 
 if redogrp
+    binwidth = 20;
     grpdfsize = nan(10000,15,length(sizes),2,2);grpspsize=grpdfsize;
     grpsptuning = nan(10000,15,length(sfrange),length(thetaRange),length(sizes),2,2);
     grprf=nan(10000,2);
@@ -83,6 +83,8 @@ if redogrp
     grpSI = nan(10000,2,2);
     grpfrmdata = nan(100,398,398,length(sfrange),length(sizes),2,2);
     grpring = nan(100,80,length(sfrange),length(sizes),2,2);
+    grpavgrad = nan(100,2);
+    grphistrad = nan(100,11,2);
     cellcnt=1;
     anicnt = 1;
     for i = 1:2:length(use)
@@ -99,12 +101,13 @@ if redogrp
         grpsptuning(cellcnt:cellcnt+expcells,:,:,:,:,:,1) = sptuning;
         grpSI(cellcnt:cellcnt+expcells,:,1) = SI;
         grpfrmdata(anicnt,:,:,:,:,:,1) = frmdata;
+        grpavgrad(anicnt,1) = avgrad;
+        grphistrad(anicnt,:,1) = histrad;
         for j = 1:length(cellprint)
             cellprintpre{cellcnt+j-1} = cellprint{j};
         end
         
         X0(anicnt) = x0;Y0(anicnt) = y0;
-        binwidth = 5;
         dist=dist(:,25:375);
         ring = nan(ceil(max(max(dist))/binwidth),size(frmdata,3),size(frmdata,4),size(frmdata,5));
         for j = 1:size(frmdata,3)
@@ -112,8 +115,7 @@ if redogrp
                 for l = 1:size(frmdata,5)
                     resp = squeeze(frmdata(:,25:375,j,k,l));
                     for m = 1:ceil(max(max(dist)))/binwidth
-                        ring(m,j,k,l) = mean(resp(dist>(binwidth*(m-1)) & dist<binwidth*m));
-                        ring(m,j,k,l) = mean(resp(dist>(binwidth*(m-1)) & dist<binwidth*m));
+                        ring(m,j,k,l) = nanmean(resp(dist>(binwidth*(m-1)) & dist<binwidth*m));
                     end
                 end
             end
@@ -129,12 +131,13 @@ if redogrp
         grpsptuning(cellcnt:cellcnt+expcells,:,:,:,:,:,2) = sptuning;
         grpSI(cellcnt:cellcnt+expcells,:,2) = SI;
         grpfrmdata(anicnt,:,:,:,:,:,2) = frmdata;
-        grpring(anicnt,1:size(ring,1),:,:,:,2) = ring;
+        grpavgrad(anicnt,2) = avgrad;
+        grphistrad(anicnt,:,2) = histrad;
+%         grpring(anicnt,1:size(ring,1),:,:,:,2) = ring;
         for j = 1:length(cellprint)
             cellprintpost{cellcnt+j-1} = cellprint{j};
         end
         
-        binwidth = 5;
         dist=dist(:,25:375);
         ring = nan(ceil(max(max(dist))/binwidth),size(frmdata,3),size(frmdata,4),size(frmdata,5));
         for j = 1:size(frmdata,3)
@@ -142,8 +145,7 @@ if redogrp
                 for l = 1:size(frmdata,5)
                     resp = squeeze(frmdata(:,25:375,j,k,l));
                     for m = 1:ceil(max(max(dist)))/binwidth
-                        ring(m,j,k,l) = mean(resp(dist>(binwidth*(m-1)) & dist<binwidth*m));
-                        ring(m,j,k,l) = mean(resp(dist>(binwidth*(m-1)) & dist<binwidth*m));
+                        ring(m,j,k,l) = nanmean(resp(dist>(binwidth*(m-1)) & dist<binwidth*m));
                     end
                 end
             end
@@ -164,6 +166,8 @@ if redogrp
     grpcells = grpcells(1:cellcnt);
     grpfrmdata = grpfrmdata(1:numAni,:,25:375,:,:,:,:);
     grpring = grpring(1:numAni,:,:,:,:,:);
+    grpavgrad = grpavgrad(1:numAni,:);
+    grphistrad = grphistrad(1:numAni,:,:);
     
     rmsdiff = nan(cellcnt,1);
     footcc = nan(cellcnt,1);
@@ -173,7 +177,7 @@ if redogrp
     end       
 
     sprintf('saving group file...')
-    save(fullfile(savepath,grpfilename),'X0','Y0','numAni','grpring','grpfrmdata','grprf','session','grpdfsize','grpspsize','grpsptuning','grpcells','cellprintpre','cellprintpost','grpSI','rmsdiff','footcc','cellcnt')
+    save(fullfile(savepath,grpfilename),'binwidth','grpavgrad','grphistrad','X0','Y0','numAni','grpring','grpfrmdata','grprf','session','grpdfsize','grpspsize','grpsptuning','grpcells','cellprintpre','cellprintpost','grpSI','rmsdiff','footcc','cellcnt')
     sprintf('done')
 else
     sprintf('loading data')
@@ -200,6 +204,36 @@ end
 %         end
 %     end
 % end
+
+
+%%%eye analysis
+figure
+subplot(1,2,1)
+pre = grpavgrad(:,1);post = grpavgrad(:,2);
+hold on
+errorbar([1 2],[nanmean(pre) nanmean(post)],[nanstd(pre)/sqrt(numAni) nanstd(post)/sqrt(numAni)],'ko-','linewidth',2)
+plot([1 2],grpavgrad,'b.-')
+axis([0 3 0 30])
+set(gca,'xtick',[1 2],'xticklabel',{'pre','post'},'tickdir','out','fontsize',8)
+ylabel('pupil diameter')
+axis square
+subplot(1,2,2)
+pre = grphistrad(:,:,1);post = grphistrad(:,:,2);
+hold on
+shadedErrorBar(1:11,nanmean(pre),nanstd(pre)/sqrt(numAni),'k',1)
+shadedErrorBar(1:11,nanmean(post),nanstd(post)/sqrt(numAni),'r',1)
+set(gca,'xtick',1:2:10,'xticklabel',[0:10:50],'ytick',0:2000:8000,'tickdir','out','fontsize',8)
+xlabel('pupil diameter')
+ylabel('number of frames')
+legend('pre','post')
+axis([0 11 0 8000])
+axis square
+mtit('pupil pre vs. post')
+if exist('psfile','var')
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    print('-dpsc',psfile,'-append');
+end
+
 
 
 %%%pixelwise analysis
@@ -299,11 +333,12 @@ for i=2:length(sizes)
     hold on
     shadedErrorBar(1:80,nanmean(pre),nanstd(pre)/sqrt(numAni),'k',1)
     shadedErrorBar(1:80,nanmean(post),nanstd(post)/sqrt(numAni),'r',1)
-    plot([0 80],[0 0],'b:')
+    plot([0 10],[0 0],'b:')
     axis square
-    axis([0 80 -0.05 0.3])
-    xlabel('dist from cent (pix)')
+    axis([0 10 -0.05 0.3])
+    xlabel('dist from cent (um)')
     ylabel(sprintf('%sdeg dfof',sizes{i}))
+    set(gca,'xtick',[0:5:10],'xticklabel',[0:5*binwidth:10*binwidth])
 end
 mtit(sprintf('Sit spread from center N=%d animals %0.2fcpd',numAni,sfrange(1)));
 if exist('psfile','var')
@@ -317,11 +352,12 @@ for i=2:length(sizes)
     hold on
     shadedErrorBar(1:80,nanmean(pre),nanstd(pre)/sqrt(numAni),'k',1)
     shadedErrorBar(1:80,nanmean(post),nanstd(post)/sqrt(numAni),'r',1)
-    plot([0 80],[0 0],'b:')
+    plot([0 10],[0 0],'b:')
     axis square
-    axis([0 80 -0.05 0.3])
-    xlabel('dist from cent (pix)')
+    axis([0 10 -0.05 0.3])
+    xlabel('dist from cent (um)')
     ylabel(sprintf('%sdeg dfof',sizes{i}))
+    set(gca,'xtick',[0:5:10],'xticklabel',[0:5*binwidth:10*binwidth])
 end
 mtit(sprintf('Sit spread from center N=%d animals %0.2fcpd',numAni,sfrange(2)));
 if exist('psfile','var')
@@ -335,11 +371,12 @@ for i=2:length(sizes)
     hold on
     shadedErrorBar(1:80,nanmean(pre),nanstd(pre)/sqrt(numAni),'k',1)
     shadedErrorBar(1:80,nanmean(post),nanstd(post)/sqrt(numAni),'r',1)
-    plot([0 80],[0 0],'b:')
+    plot([0 10],[0 0],'b:')
     axis square
-    axis([0 80 -0.05 0.3])
-    xlabel('dist from cent (pix)')
+    axis([0 10 -0.05 0.3])
+    xlabel('dist from cent (um)')
     ylabel(sprintf('%sdeg dfof',sizes{i}))
+    set(gca,'xtick',[0:5:10],'xticklabel',[0:5*binwidth:10*binwidth])
 end
 mtit(sprintf('Run spread from center N=%d animals %0.2fcpd',numAni,sfrange(1)));
 if exist('psfile','var')
@@ -353,11 +390,12 @@ for i=2:length(sizes)
     hold on
     shadedErrorBar(1:80,nanmean(pre),nanstd(pre)/sqrt(numAni),'k',1)
     shadedErrorBar(1:80,nanmean(post),nanstd(post)/sqrt(numAni),'r',1)
-    plot([0 80],[0 0],'b:')
+    plot([0 10],[0 0],'b:')
     axis square
-    axis([0 80 -0.05 0.3])
-    xlabel('dist from cent (pix)')
+    axis([0 10 -0.05 0.3])
+    xlabel('dist from cent (um)')
     ylabel(sprintf('%sdeg dfof',sizes{i}))
+    set(gca,'xtick',[0:5:10],'xticklabel',[0:5*binwidth:10*binwidth])
 end
 mtit(sprintf('Run spread from center N=%d animals %0.2fcpd',numAni,sfrange(2)));
 if exist('psfile','var')
@@ -374,16 +412,20 @@ hold on
 shadedErrorBar(1:80,nanmean(presit),nanstd(presit)/sqrt(numAni),'k',1)
 shadedErrorBar(1:80,nanmean(postsit),nanstd(postsit)/sqrt(numAni),'r',1)
 axis square
-axis([0 80 -0.2 0.2])
-xlabel('dist from cent (pix)')
+plot([0 10],[0 0],'b:')
+axis([0 10 -0.15 0.1])
+xlabel('dist from cent (um)')
+set(gca,'xtick',[0:5:10],'xticklabel',[0:5*binwidth:10*binwidth])
 ylabel('zero size sit')
 subplot(1,2,2)
 hold on
 shadedErrorBar(1:80,nanmean(prerun),nanstd(prerun)/sqrt(numAni),'k',1)
 shadedErrorBar(1:80,nanmean(postrun),nanstd(postrun)/sqrt(numAni),'r',1)
+plot([0 10],[0 0],'b:')
 axis square
-axis([0 80 -0.2 0.2])
-xlabel('dist from cent (pix)')
+axis([0 10 -0.15 0.1])
+xlabel('dist from cent (um)')
+set(gca,'xtick',[0:5:10],'xticklabel',[0:5*binwidth:10*binwidth])
 ylabel('zero size run')
 mtit(sprintf('spread from center zero size N=%d animals',numAni));
 if exist('psfile','var')
@@ -399,11 +441,12 @@ for i=2:length(sizes)
     hold on
     plot(1:80,pre,'k')
     plot(1:80,post,'r')
-    plot([0 80],[0 0],'b:')
+    plot([0 10],[0 0],'b:')
     axis square
-    axis([0 80 -0.1 0.4])
-    xlabel('dist from cent (pix)')
+    axis([0 10 -0.05 0.3])
+    xlabel('dist from cent (um)')
     ylabel(sprintf('%sdeg dfof',sizes{i}))
+    set(gca,'xtick',[0:5:10],'xticklabel',[0:5*binwidth:10*binwidth])
 end
 mtit(sprintf('Sit spread from center N=%d animals %0.2fcpd',numAni,sfrange(1)));
 if exist('psfile','var')
@@ -417,11 +460,12 @@ for i=2:length(sizes)
     hold on
     plot(1:80,pre,'k')
     plot(1:80,post,'r')
-    plot([0 80],[0 0],'b:')
+    plot([0 10],[0 0],'b:')
     axis square
-    axis([0 80 -0.1 0.4])
-    xlabel('dist from cent (pix)')
+    axis([0 10 -0.05 0.3])
+    xlabel('dist from cent (um)')
     ylabel(sprintf('%sdeg dfof',sizes{i}))
+    set(gca,'xtick',[0:5:10],'xticklabel',[0:5*binwidth:10*binwidth])
 end
 mtit(sprintf('Sit spread from center N=%d animals %0.2fcpd',numAni,sfrange(2)));
 if exist('psfile','var')
@@ -435,11 +479,12 @@ for i=2:length(sizes)
     hold on
     plot(1:80,pre,'k')
     plot(1:80,post,'r')
-    plot([0 80],[0 0],'b:')
+    plot([0 10],[0 0],'b:')
     axis square
-    axis([0 80 -0.1 0.4])
-    xlabel('dist from cent (pix)')
+    axis([0 10 -0.05 0.3])
+    xlabel('dist from cent (um)')
     ylabel(sprintf('%sdeg dfof',sizes{i}))
+    set(gca,'xtick',[0:5:10],'xticklabel',[0:5*binwidth:10*binwidth])
 end
 mtit(sprintf('Run spread from center N=%d animals %0.2fcpd',numAni,sfrange(1)));
 if exist('psfile','var')
@@ -453,11 +498,12 @@ for i=2:length(sizes)
     hold on
     plot(1:80,pre,'k')
     plot(1:80,post,'r')
-    plot([0 80],[0 0],'b:')
+    plot([0 10],[0 0],'b:')
     axis square
-    axis([0 80 -0.1 0.4])
-    xlabel('dist from cent (pix)')
+    axis([0 10 -0.05 0.3])
+    xlabel('dist from cent (um)')
     ylabel(sprintf('%sdeg dfof',sizes{i}))
+    set(gca,'xtick',[0:5:10],'xticklabel',[0:5*binwidth:10*binwidth])
 end
 mtit(sprintf('Run spread from center N=%d animals %0.2fcpd',numAni,sfrange(2)));
 if exist('psfile','var')
@@ -473,20 +519,22 @@ subplot(1,2,1)
 hold on
 plot(1:80,presit,'k')
 plot(1:80,postsit,'r')
-plot([0 80],[0 0],'b:')
 axis square
-axis([0 80 -0.2 0.2])
-xlabel('dist from cent (pix)')
+plot([0 10],[0 0],'b:')
+axis([0 10 -0.15 0.1])
+xlabel('dist from cent (um)')
+set(gca,'xtick',[0:5:10],'xticklabel',[0:5*binwidth:10*binwidth])
 ylabel('zero size sit')
 subplot(1,2,2)
 hold on
 plot(1:80,prerun,'k')
 plot(1:80,postrun,'r')
-plot([0 80],[0 0],'b:')
 axis square
-axis([0 80 -0.2 0.2])
-xlabel('dist from cent (pix)')
-ylabel('zero size run')
+plot([0 10],[0 0],'b:')
+axis([0 10 -0.15 0.1])
+xlabel('dist from cent (um)')
+set(gca,'xtick',[0:5:10],'xticklabel',[0:5*binwidth:10*binwidth])
+ylabel('zero size sit')
 mtit(sprintf('spread from center zero size N=%d animals',numAni));
 if exist('psfile','var')
     set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
@@ -964,7 +1012,7 @@ for z=1%:length(ccvals)
     % plot(1:length(radiusRange),post,'r--.')
     xlabel('Stim Size (deg)')
     ylabel('entire spike window')
-    axis([0 length(radiusRange)+1 -0.01 0.5])
+    axis([0 length(radiusRange)+1 -0.05 0.5])
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
 
@@ -981,7 +1029,7 @@ for z=1%:length(ccvals)
     % plot(1:length(radiusRange),post,'r--.')
     xlabel('Stim Size (deg)')
     ylabel('first half')
-    axis([0 length(radiusRange)+1 -0.01 0.5])
+    axis([0 length(radiusRange)+1 -0.05 0.5])
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
     
@@ -998,7 +1046,7 @@ for z=1%:length(ccvals)
     % plot(1:length(radiusRange),post,'r--.')
     xlabel('Stim Size (deg)')
     ylabel('second half')
-    axis([0 length(radiusRange)+1 -0.01 0.5])
+    axis([0 length(radiusRange)+1 -0.05 0.5])
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
     
@@ -1023,7 +1071,7 @@ for z=1%:length(ccvals)
     % plot(1:length(radiusRange),post,'r--.')
     xlabel('Stim Size (deg)')
     ylabel('entire spike window')
-    axis([0 length(radiusRange)+1 -0.01 0.5])
+    axis([0 length(radiusRange)+1 -0.05 0.5])
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
 
@@ -1040,7 +1088,7 @@ for z=1%:length(ccvals)
     % plot(1:length(radiusRange),post,'r--.')
     xlabel('Stim Size (deg)')
     ylabel('first half')
-    axis([0 length(radiusRange)+1 -0.01 0.5])
+    axis([0 length(radiusRange)+1 -0.05 0.5])
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
     
@@ -1057,7 +1105,7 @@ for z=1%:length(ccvals)
     % plot(1:length(radiusRange),post,'r--.')
     xlabel('Stim Size (deg)')
     ylabel('second half')
-    axis([0 length(radiusRange)+1 -0.01 0.5])
+    axis([0 length(radiusRange)+1 -0.05 0.5])
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
     
@@ -1081,7 +1129,7 @@ for z=1%:length(ccvals)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
 %     xlabel('Stim Size (deg)')
     ylabel('sit 0.04cpd dfof')
-    axis([0 length(radiusRange)+1 -0.01 0.3])
+    axis([0 length(radiusRange)+1 -0.05 0.3])
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
     subplot(3,2,2)
@@ -1094,7 +1142,7 @@ for z=1%:length(ccvals)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
 %     xlabel('Stim Size (deg)')
     ylabel('run 0.04cpd dfof')
-    axis([0 length(radiusRange)+1 -0.01 0.3])
+    axis([0 length(radiusRange)+1 -0.05 0.3])
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
     subplot(3,2,3)
@@ -1107,7 +1155,7 @@ for z=1%:length(ccvals)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
 %     xlabel('Stim Size (deg)')
     ylabel('sit 0.16cpd dfof')
-    axis([0 length(radiusRange)+1 -0.01 0.3])
+    axis([0 length(radiusRange)+1 -0.05 0.3])
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
     subplot(3,2,4)
@@ -1120,7 +1168,7 @@ for z=1%:length(ccvals)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
 %     xlabel('Stim Size (deg)')
     ylabel('run 0.16cpd dfof')
-    axis([0 length(radiusRange)+1 -0.01 0.3])
+    axis([0 length(radiusRange)+1 -0.05 0.3])
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
     subplot(3,2,5)
@@ -1133,7 +1181,7 @@ for z=1%:length(ccvals)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
     xlabel('Stim Size (deg)')
     ylabel('sit avg dfof')
-    axis([0 length(radiusRange)+1 -0.01 0.3])
+    axis([0 length(radiusRange)+1 -0.05 0.3])
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
     subplot(3,2,6)
@@ -1146,7 +1194,7 @@ for z=1%:length(ccvals)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
     xlabel('Stim Size (deg)')
     ylabel('run avg dfof')
-    axis([0 length(radiusRange)+1 -0.01 0.3])
+    axis([0 length(radiusRange)+1 -0.05 0.3])
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
     mtit('SF-dependent Size Curves')

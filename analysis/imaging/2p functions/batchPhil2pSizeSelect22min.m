@@ -97,7 +97,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'trained';
-files(n).cutoff = 375;
+files(n).cutoff = 200;
 
 n=n+1;
 files(n).subj = 'G62GG10LT';
@@ -127,7 +127,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'trained';
-files(n).cutoff = 375;
+files(n).cutoff = 200;
 
 
 n=n+1;
@@ -158,7 +158,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 375;
+files(n).cutoff = 200;
 
 n=n+1;
 files(n).subj = 'G62BB6RT';
@@ -188,7 +188,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 375;
+files(n).cutoff = 200;
 
 
 n=n+1;
@@ -219,7 +219,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'trained';
-files(n).cutoff = 350;
+files(n).cutoff = 250;
 
 n=n+1;
 files(n).subj = 'G62Y3LT';
@@ -249,7 +249,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'trained';
-files(n).cutoff = 350;
+files(n).cutoff = 250;
 
 
 n=n+1;
@@ -280,7 +280,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'trained';
-files(n).cutoff = 300;
+files(n).cutoff = 225;
 
 n=n+1;
 files(n).subj = 'G62W9RT';
@@ -310,7 +310,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'trained';
-files(n).cutoff = 300;
+files(n).cutoff = 225;
 
 
 n=n+1;
@@ -341,7 +341,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'trained';
-files(n).cutoff = 350;
+files(n).cutoff = 250;
 
 n=n+1;
 files(n).subj = 'G62GG10LT';
@@ -371,7 +371,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'trained';
-files(n).cutoff = 350;
+files(n).cutoff = 250;
 
 
 n=n+1;
@@ -402,7 +402,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'trained';
-files(n).cutoff = 300;
+files(n).cutoff = 200;
 
 n=n+1;
 files(n).subj = 'G62Y3LT';
@@ -432,7 +432,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'trained';
-files(n).cutoff = 300;
+files(n).cutoff = 200;
 
 
 n=n+1;
@@ -463,7 +463,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'trained';
-files(n).cutoff = 300;
+files(n).cutoff = 250;
 
 n=n+1;
 files(n).subj = 'G62QQ2LT';
@@ -493,7 +493,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'trained';
-files(n).cutoff = 300;
+files(n).cutoff = 250;
 
 
 
@@ -711,7 +711,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 425;
+files(n).cutoff = 250;
 
 n=n+1;
 files(n).subj = 'G62BB2RT';
@@ -741,7 +741,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 425;
+files(n).cutoff = 250;
 
 
 
@@ -773,7 +773,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'trained';
-files(n).cutoff = 300;
+files(n).cutoff = 200;
 
 n=n+1;
 files(n).subj = 'G62BB10LT';
@@ -803,7 +803,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'trained';
-files(n).cutoff = 300;
+files(n).cutoff = 200;
 
 
 
@@ -835,7 +835,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 400;
+files(n).cutoff = 250;
 
 n=n+1;
 files(n).subj = 'G62BB2RT';
@@ -865,7 +865,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 400;
+files(n).cutoff = 250;
 
 
 n=n+1;
@@ -896,7 +896,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 350; %%%adjust
+files(n).cutoff = 250; %%%adjust
 
 n=n+1;
 files(n).subj = 'G62GGG1LT';
@@ -926,7 +926,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 350;
+files(n).cutoff = 250;
 
 
 n=n+1;
@@ -957,7 +957,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 400; %%%adjust
+files(n).cutoff = 250; %%%adjust
 
 n=n+1;
 files(n).subj = 'G62GGG3LT';
@@ -987,7 +987,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 400;
+files(n).cutoff = 250;
 
 
 n=n+1;
@@ -1018,7 +1018,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 300; %%%adjust
+files(n).cutoff = 250; %%%adjust
 
 n=n+1;
 files(n).subj = 'G62GGG1LT';
@@ -1048,7 +1048,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 300;
+files(n).cutoff = 250;
 
 
 n=n+1;
@@ -1079,7 +1079,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 350; %%%adjust
+files(n).cutoff = 150; %%%adjust
 
 n=n+1;
 files(n).subj = 'G62GGG3LT';
@@ -1109,7 +1109,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 350;
+files(n).cutoff = 150;
 
 
 n=n+1;
@@ -1140,7 +1140,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 400; %%%adjust
+files(n).cutoff = 250; %%%adjust
 
 n=n+1;
 files(n).subj = 'CG48LN';
@@ -1170,7 +1170,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 400;
+files(n).cutoff = 250;
 
 
 n=n+1;
@@ -1201,7 +1201,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 400; %%%adjust
+files(n).cutoff = 275; %%%adjust
 
 n=n+1;
 files(n).subj = 'CG48LN';
@@ -1231,7 +1231,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 400;
+files(n).cutoff = 275;
 
 
 n=n+1;
@@ -1262,7 +1262,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 250; %%%adjust
+files(n).cutoff = 150; %%%adjust
 
 n=n+1;
 files(n).subj = 'G62RR4LT';
@@ -1292,7 +1292,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 250;
+files(n).cutoff = 150;
 
 
 n=n+1;
@@ -1323,7 +1323,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 250; %%%adjust
+files(n).cutoff = 150; %%%adjust
 
 n=n+1;
 files(n).subj = 'G62FFF1RT';
@@ -1353,7 +1353,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 250;
+files(n).cutoff = 150;
 
 n=n+1;
 files(n).subj = 'G62FFF1RT';
@@ -1383,7 +1383,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 200; %%%adjust
+files(n).cutoff = 150; %%%adjust
 
 n=n+1;
 files(n).subj = 'G62FFF1RT';
@@ -1413,7 +1413,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 200;
+files(n).cutoff = 150;
 
 
 n=n+1;
@@ -1444,7 +1444,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'trained';
-files(n).cutoff = 150; %%%adjust
+files(n).cutoff = 50; %%%adjust
 
 n=n+1;
 files(n).subj = 'G62JJ2RT';
@@ -1474,7 +1474,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'trained';
-files(n).cutoff = 150;
+files(n).cutoff = 50;
 
 
 n=n+1;
@@ -1505,7 +1505,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 250; %%%adjust
+files(n).cutoff = 150; %%%adjust
 
 n=n+1;
 files(n).subj = 'G62RR4LT';
@@ -1535,7 +1535,7 @@ files(n).monitor = 'vert'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'naive';
-files(n).cutoff = 250;
+files(n).cutoff = 150;
 
 %%%crappy session
 % % % n=n+1;
@@ -1566,7 +1566,7 @@ files(n).cutoff = 250;
 % % % files(n).label = 'camk2 gc6'; %%% or 'calb2'
 % % % files(n).notes = 'good imaging session'; 
 % % % files(n).training = 'trained';
-% % % files(n).cutoff = 150; %%%adjust
+% % % files(n).cutoff = 50; %%%adjust
 % % % 
 % % % n=n+1;
 % % % files(n).subj = 'G62JJ2RT';
@@ -1596,7 +1596,7 @@ files(n).cutoff = 250;
 % % % files(n).label = 'camk2 gc6'; %%% or 'calb2'
 % % % files(n).notes = 'good imaging session'; 
 % % % files(n).training = 'trained';
-% % % files(n).cutoff = 150;
+% % % files(n).cutoff = 50;
 
 %%%crappy session
 % % % n=n+1;
@@ -1627,7 +1627,7 @@ files(n).cutoff = 250;
 % % % files(n).label = 'camk2 gc6'; %%% or 'calb2'
 % % % files(n).notes = 'good imaging session'; 
 % % % files(n).training = 'trained';
-% % % files(n).cutoff = 200; %%%adjust
+% % % files(n).cutoff = 100; %%%adjust
 % % % 
 % % % n=n+1;
 % % % files(n).subj = 'G62TT1LT';
@@ -1657,6 +1657,6 @@ files(n).cutoff = 250;
 % % % files(n).label = 'camk2 gc6'; %%% or 'calb2'
 % % % files(n).notes = 'good imaging session'; 
 % % % files(n).training = 'trained';
-% % % files(n).cutoff = 200;
+% % % files(n).cutoff = 100;
 
 

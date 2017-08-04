@@ -1854,7 +1854,7 @@ files(n).passive2sfEyes = 'g62jj2rt_001_003_eye';
 files(n).task = 'HvV';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'good imaging session- outlier';
 files(n).ncells = [450];  %%% optional - we could use this to adjust # of cells selected
 files(n).depth = [140];
 
@@ -1878,7 +1878,7 @@ files(n).passive2sfEyes = 'g62jj2rt_001_003_eye';
 files(n).task = 'HvV';
 files(n).learningDay = [];   %%% can probably ignore for GTS, more important for naive
 files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
+files(n).notes = 'good imaging session - outlier';
 files(n).ncells = [250];  %%% optional - we could use this to adjust # of cells selected
 files(n).depth = [140];
 

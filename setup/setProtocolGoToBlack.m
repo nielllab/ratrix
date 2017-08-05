@@ -43,7 +43,7 @@ switch subjIDs{1}
          requestRewardSizeULorMS = 0;
          rewardSizeULorMS        = 219;
          msPenalty               =3500;
-         percentCorrectionTrials = .5;      
+         percentCorrectionTrials = .0;      
         
          case 'j352tt'  %started 7/26/17
          requestRewardSizeULorMS = 0;
@@ -61,7 +61,7 @@ switch subjIDs{1}
          requestRewardSizeULorMS = 0;
          rewardSizeULorMS        = 219;
          msPenalty               =3500;
-         percentCorrectionTrials = .5;  
+         percentCorrectionTrials = .0;  
     
     
 %            case 'pvchr4b16nt'  %started 5/26/17 xx

@@ -56,8 +56,8 @@ end
          msPenalty               =3500;
          percentCorrectionTrials = .5;
          pixPerCycs              = [200];
-         normalizedPosition      = [0.39 0.60];
-         radius                 = .35; 
+         normalizedPosition      = [0.38 0.62];
+         radius                 = .34; 
        
    case 'g62aaa11lt'  %started 4/25/17 %%start center 5/4/17 %%%full 5/24/17
          requestRewardSizeULorMS = 0;

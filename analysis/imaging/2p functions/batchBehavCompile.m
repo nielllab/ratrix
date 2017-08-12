@@ -645,7 +645,7 @@ for ss = 1:length(sessionDate)
     set(gcf,'Name',[sessSubj{ss} sessionDate{ss}]);
     end;
     drawnow
-   % close
+    close
 end;
 
   %%%weighted by number of cells get fraction for each session
@@ -665,7 +665,7 @@ for ss = 1:length(sessionDate)
        errorbar(WeightedSessClustData(ss,t,i,:),WeightedSessClustErr(ss,t,i,:));hold on; ylim([-0.05 0.12]); xlim([0.5 42.5])
         end  
         %fraction unresponsive
-        SessClustFraction(ss,4) = sum(clust==0 & sess==ss &centered')/sum(sess==ss & centered')
+        SessClustFraction(ss,4) = sum(clust==0 & sess==ss &centered')/sum(sess==ss & centered');
         
         title(trialType{t});
     legend;
@@ -779,13 +779,27 @@ for ss = 1:length(sessionDate)
           
           %diff from behavior
           if t==1
-          DiffAP(ss,i,:) = squeeze(SessClustData(ss,t,i,2:30)-SessClust3xData(ss,t,i,:));
-          DiffAPMod(ss,i,:) = (squeeze(SessClustData(ss,t,i,2:30)-SessClust3xData(ss,t,i,:)))./(squeeze(SessClustData(ss,t,i,2:30)+SessClust3xData(ss,t,i,:)));
+              behavDiff(ss,i,:)=squeeze(SessClustData(ss,t,i,2:30));
+              passDiff(ss,i,:) = squeeze(SessClust3xData(ss,t,i,:));
+          %flip for supressed
+          if i==3
+              behavDiff(ss,i,:)=-behavDiff(ss,i,:);
+              passDiff(ss,i,:)=-passDiff(ss,i,:); 
+          end  
+          %remove negative values
+              behavDiff(behavDiff<0)=0;
+              passDiff(passDiff<0)=0;
+              
+         % DiffAP(ss,i,:) = squeeze(SessClustData(ss,t,i,2:30)-SessClust3xData(ss,t,i,:));
+          %DiffAPMod(ss,i,:) = (squeeze(SessClustData(ss,t,i,2:30)-SessClust3xData(ss,t,i,:)))./(squeeze(SessClustData(ss,t,i,2:30)+SessClust3xData(ss,t,i,:)));
+         DiffAP(ss,i,:) = behavDiff(ss,i,:)-passDiff(ss,i,:);
+         DiffAPMod(ss,i,:) = (behavDiff(ss,i,:)-passDiff(ss,i,:))./(behavDiff(ss,i,:)+passDiff(ss,i,:));
+          
           end
           %weighted
           WeightedSessClust3xData(ss,t,i,:) =  n*(d((t-1)*29 + (1:29))-mean(d(6:10)));
           WeightedSessClust3xErr(ss,t,i,:) = n*(e((t-1)*29 + (1:29)));
-          errorbar(0:28,SessClust3xData(ss,t,i,:),SessClust3xErr(ss,t,i,:));hold on; %ylim([-0.05 0.12]); xlim([0.5 41.5])
+          errorbar(0:28,SessClust3xData(ss,t,i,:),SessClust3xErr(ss,t,i,:));hold on; ylim([-0.05 0.12]); xlim([0.5 41.5])
      %  errorbar(0:28,WeightedSessClust3xData(ss,t,i,:),WeightedSessClust3xErr(ss,t,i,:));hold on; ylim([-0.05 0.12]); xlim([0.5 41.5])
  end     
         title(trialType{t});
@@ -793,7 +807,7 @@ for ss = 1:length(sessionDate)
     set(gcf,'Name',[ '3x weighted response_' sessSubj{ss} sessionDate{ss}]);
     end;
     drawnow
-   % close
+    close
 end;
 %%% mean weighted timecourse of clusters by training condition
 %%%also active passive difference
@@ -969,340 +983,281 @@ end
 %%
 for i=1
 %%%%(includes only random and naive training conditions)
-figure; set(gcf,'Name','behav')
-for c = 1:3
-    subplot(2,2,c)
-    plot(squeeze(ClustSessData(c,1,1:2,:))'); xlim([ 1 30]);%ylim([-0.02 0.06]);
-end; legend(condLabel); 
-
-
-figure; set(gcf,'Name','cardinal')
-for c = 1:3
-    subplot(2,2,c)
-    plot(squeeze(clust3xSess(c,1,1:2,:))'); xlim([ 1 30]);%ylim([-0.02 0.06])
-end; legend(condLabel);
-
-figure; set(gcf,'Name','2sf - low')
-for c = 1:3
-    subplot(2,2,c)
-    plot(squeeze(clust2sfSess(c,1,1:2,:))'); xlim([ 1 30]);%ylim([-0.02 0.06]);
-end; legend(condLabel);
-
-figure; set(gcf,'Name','oblique');
-for c = 1:3
-    subplot(2,2,c)
-    plot(squeeze(clust3xSess(c,2,1:2,:))'); xlim([ 1 30]);% ylim([-0.02 0.06])
-end; legend(condLabel);
-
-figure; set(gcf,'Name','2sf - high')
-for c = 1:3
-    subplot(2,2,c)
-    plot(squeeze(clust2sfSess(c,2,1:2,:))'); xlim([ 1 30]);% ylim([-0.02 0.06])
-end; legend(condLabel);
-%%
-%%%%timecorse figs of each trining codition for cluster for each stim
-%%%%(includes only gts and naive training conditions)
-figure; set(gcf,'Name','behav')
-for c = 1:3
-    subplot(2,2,c)
-    plot(squeeze(ClustSessData(c,1,[1 3],:))'); xlim([ 1 30]);%ylim([-0.02 0.06]);
-end; legend(condLabel{[1 3]}); 
-
-
-figure; set(gcf,'Name','cardinal')
-for c = 1:3
-    subplot(2,2,c)
-    plot(squeeze(clust3xSess(c,1,[1 3],:))'); xlim([ 1 30]);%ylim([-0.02 0.06])
-end; legend(condLabel{[1 3]});
-
-figure; set(gcf,'Name','2sf - low')
-for c = 1:3
-    subplot(2,2,c)
-    plot(squeeze(clust2sfSess(c,1,[1 3],:))'); xlim([ 1 30]);%ylim([-0.02 0.06]);
-end; legend(condLabel{[1 3]});
-
-figure; set(gcf,'Name','oblique');
-for c = 1:3
-    subplot(2,2,c)
-    plot(squeeze(clust3xSess(c,2,[1 3],:))'); xlim([ 1 30]);% ylim([-0.02 0.06])
-end; legend(condLabel{[1 3]});
-
-figure; set(gcf,'Name','2sf - high')
-for c = 1:3
-    subplot(2,2,c)
-    plot(squeeze(clust2sfSess(c,2,[1 3],:))'); xlim([ 1 30]);% ylim([-0.02 0.06])
-end; legend(condLabel{[1 3]});
-
-%%%%timecorse figs of each trining codition for cluster for each stim
-%%%%(includes only gts and rand training conditions)
-figure; set(gcf,'Name','behav')
-for c = 1:3
-    subplot(2,2,c)
-    plot(squeeze(ClustSessData(c,1,[2 3],:))'); xlim([ 1 30]);%ylim([-0.02 0.06]);
-end; legend(condLabel{[2 3]}); 
-
-
-figure; set(gcf,'Name','cardinal')
-for c = 1:3
-    subplot(2,2,c)
-    plot(squeeze(clust3xSess(c,1,[2 3],:))'); xlim([ 1 30]);%ylim([-0.02 0.06])
-end; legend(condLabel{[2 3]});
-
-figure; set(gcf,'Name','2sf - low')
-for c = 1:3
-    subplot(2,2,c)
-    plot(squeeze(clust2sfSess(c,1,[2 3],:))'); xlim([ 1 30]);%ylim([-0.02 0.06]);
-end; legend(condLabel{[2 3]});
-
-figure; set(gcf,'Name','oblique');
-for c = 1:3
-    subplot(2,2,c)
-    plot(squeeze(clust3xSess(c,2,[2 3],:))'); xlim([ 1 30]);% ylim([-0.02 0.06])
-end; legend(condLabel{[2 3]});
-
-figure; set(gcf,'Name','2sf - high')
-for c = 1:3
-    subplot(2,2,c)
-    plot(squeeze(clust2sfSess(c,2,[2 3],:))'); xlim([ 1 30]);% ylim([-0.02 0.06])
-end; legend(condLabel{[2 3]});
+% figure; set(gcf,'Name','behav')
+% for c = 1:3
+%     subplot(2,2,c)
+%     plot(squeeze(ClustSessData(c,1,1:2,:))'); xlim([ 1 30]);%ylim([-0.02 0.06]);
+% end; legend(condLabel); 
+% 
+% 
+% figure; set(gcf,'Name','cardinal')
+% for c = 1:3
+%     subplot(2,2,c)
+%     plot(squeeze(clust3xSess(c,1,1:2,:))'); xlim([ 1 30]);%ylim([-0.02 0.06])
+% end; legend(condLabel);
+% 
+% figure; set(gcf,'Name','2sf - low')
+% for c = 1:3
+%     subplot(2,2,c)
+%     plot(squeeze(clust2sfSess(c,1,1:2,:))'); xlim([ 1 30]);%ylim([-0.02 0.06]);
+% end; legend(condLabel);
+% 
+% figure; set(gcf,'Name','oblique');
+% for c = 1:3
+%     subplot(2,2,c)
+%     plot(squeeze(clust3xSess(c,2,1:2,:))'); xlim([ 1 30]);% ylim([-0.02 0.06])
+% end; legend(condLabel);
+% 
+% figure; set(gcf,'Name','2sf - high')
+% for c = 1:3
+%     subplot(2,2,c)
+%     plot(squeeze(clust2sfSess(c,2,1:2,:))'); xlim([ 1 30]);% ylim([-0.02 0.06])
+% end; legend(condLabel);
+% %%
+% %%%%timecorse figs of each trining codition for cluster for each stim
+% %%%%(includes only gts and naive training conditions)
+% figure; set(gcf,'Name','behav')
+% for c = 1:3
+%     subplot(2,2,c)
+%     plot(squeeze(ClustSessData(c,1,[1 3],:))'); xlim([ 1 30]);%ylim([-0.02 0.06]);
+% end; legend(condLabel{[1 3]}); 
+% 
+% 
+% figure; set(gcf,'Name','cardinal')
+% for c = 1:3
+%     subplot(2,2,c)
+%     plot(squeeze(clust3xSess(c,1,[1 3],:))'); xlim([ 1 30]);%ylim([-0.02 0.06])
+% end; legend(condLabel{[1 3]});
+% 
+% figure; set(gcf,'Name','2sf - low')
+% for c = 1:3
+%     subplot(2,2,c)
+%     plot(squeeze(clust2sfSess(c,1,[1 3],:))'); xlim([ 1 30]);%ylim([-0.02 0.06]);
+% end; legend(condLabel{[1 3]});
+% 
+% figure; set(gcf,'Name','oblique');
+% for c = 1:3
+%     subplot(2,2,c)
+%     plot(squeeze(clust3xSess(c,2,[1 3],:))'); xlim([ 1 30]);% ylim([-0.02 0.06])
+% end; legend(condLabel{[1 3]});
+% 
+% figure; set(gcf,'Name','2sf - high')
+% for c = 1:3
+%     subplot(2,2,c)
+%     plot(squeeze(clust2sfSess(c,2,[1 3],:))'); xlim([ 1 30]);% ylim([-0.02 0.06])
+% end; legend(condLabel{[1 3]});
+% 
+% %%%%timecorse figs of each trining codition for cluster for each stim
+% %%%%(includes only gts and rand training conditions)
+% figure; set(gcf,'Name','behav')
+% for c = 1:3
+%     subplot(2,2,c)
+%     plot(squeeze(ClustSessData(c,1,[2 3],:))'); xlim([ 1 30]);%ylim([-0.02 0.06]);
+% end; legend(condLabel{[2 3]}); 
+% 
+% 
+% figure; set(gcf,'Name','cardinal')
+% for c = 1:3
+%     subplot(2,2,c)
+%     plot(squeeze(clust3xSess(c,1,[2 3],:))'); xlim([ 1 30]);%ylim([-0.02 0.06])
+% end; legend(condLabel{[2 3]});
+% 
+% figure; set(gcf,'Name','2sf - low')
+% for c = 1:3
+%     subplot(2,2,c)
+%     plot(squeeze(clust2sfSess(c,1,[2 3],:))'); xlim([ 1 30]);%ylim([-0.02 0.06]);
+% end; legend(condLabel{[2 3]});
+% 
+% figure; set(gcf,'Name','oblique');
+% for c = 1:3
+%     subplot(2,2,c)
+%     plot(squeeze(clust3xSess(c,2,[2 3],:))'); xlim([ 1 30]);% ylim([-0.02 0.06])
+% end; legend(condLabel{[2 3]});
+% 
+% figure; set(gcf,'Name','2sf - high')
+% for c = 1:3
+%     subplot(2,2,c)
+%     plot(squeeze(clust2sfSess(c,2,[2 3],:))'); xlim([ 1 30]);% ylim([-0.02 0.06])
+% end; legend(condLabel{[2 3]});
 end
 %%
 
 %%%%timecorse figs of each trining codition for cluster for each stim
 %%%%(includes all 4 training conditions) weighted
-figure; set(gcf,'Name','behav weighted')
-for c = 1:3
-    subplot(2,2,c)
-    plot(squeeze(ClustSessData(c,1,1:4,:))'); xlim([ 1 30]);%ylim([-0.02 0.06]);
-end; legend(condLabel); 
 
 
-figure; set(gcf,'Name','cardinal weighted')
-for c = 1:3
-    subplot(2,2,c)
-    plot(squeeze(clust3xSess(c,1,1:4,:))'); xlim([ 1 30]);%ylim([-0.02 0.06])
-end; legend(condLabel);
+ %%%%timecorse figs of each trining codition for cluster for each stim
+%%%%(includes only Naive Rand and GTS) not weighted
 
-figure; set(gcf,'Name','2sf - low weighted')
-for c = 1:3
-    subplot(2,2,c)
-    plot(squeeze(clust2sfSess(c,1,1:4,:))'); xlim([ 1 30]);%ylim([-0.02 0.06]);
-end; legend(condLabel);
-
-figure; set(gcf,'Name','oblique weighted');
-for c = 1:3
-    subplot(2,2,c)
-    plot(squeeze(clust3xSess(c,2,1:4,:))'); xlim([ 1 30]);% ylim([-0.02 0.06])
-end; legend(condLabel);
-
-figure; set(gcf,'Name','2sf - high weighted')
-for c = 1:3
-    subplot(2,2,c)
-    plot(squeeze(clust2sfSess(c,2,1:4,:))'); xlim([ 1 30]);% ylim([-0.02 0.06])
-end; legend(condLabel);
-
-%%%%timecorse figs of each trining codition for cluster for each stim
-%%%%(includes all 4 training conditions) not weighted
 figure; set(gcf,'Name','behav unweighted')
 for c = 1:3
     subplot(2,2,c)
-    plot(squeeze(NWClustSessData(c,1,1:4,:))'); xlim([ 1 30]);%ylim([-0.02 0.06]);
+    plot(squeeze(NWClustSessData(c,1,1:3,:))'); xlim([ 1 30]); ylim([-0.15 0.22]);
 end; legend(condLabel); 
 
 
 figure; set(gcf,'Name','cardinal unweighted')
 for c = 1:3
     subplot(2,2,c)
-    plot(squeeze(NWclust3xSess(c,1,1:4,:))'); xlim([ 1 30]);%ylim([-0.02 0.06])
+    plot(squeeze(NWclust3xSess(c,1,1:3,:))'); xlim([ 1 30]);ylim([-0.15 0.22])
 end; legend(condLabel);
 
 figure; set(gcf,'Name','2sf - low unweighted')
 for c = 1:3
     subplot(2,2,c)
-    plot(squeeze(NWclust2sfSess(c,1,1:4,:))'); xlim([ 1 30]);%ylim([-0.02 0.06]);
+    plot(squeeze(NWclust2sfSess(c,1,1:3,:))'); xlim([ 1 30]);%ylim([-0.02 0.06]);
 end; legend(condLabel);
 
 figure; set(gcf,'Name','oblique unweighted');
 for c = 1:3
     subplot(2,2,c)
-    plot(squeeze(NWclust3xSess(c,2,1:4,:))'); xlim([ 1 30]);% ylim([-0.02 0.06])
+    plot(squeeze(NWclust3xSess(c,2,1:3,:))'); xlim([ 1 30]);% ylim([-0.02 0.06])
 end; legend(condLabel);
 
 figure; set(gcf,'Name','2sf - high unweighted')
 for c = 1:3
     subplot(2,2,c)
-    plot(squeeze(NWclust2sfSess(c,2,1:4,:))'); xlim([ 1 30]);% ylim([-0.02 0.06])
+    plot(squeeze(NWclust2sfSess(c,2,1:3,:))'); xlim([ 1 30]);% ylim([-0.02 0.06])
 end; legend(condLabel);
 
-
-% %%% resp(clust,stim, training cond, session)
-% %%%w/o hvv
-% figure
-% barweb(squeeze(respSess(:,1,[1:3],1)), squeeze(respErrSess(:,1,[2 1 3],1))); ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
-% legend(conLabel{1:3}); ylabel('weighted response'); title('behavior - preferred')
-% 
-% figure
-% barweb(squeeze(respSess(:,1,[1:3],2)), squeeze(respErrSess(:,1,[2 1 3],2))); ylim([-0.01 0.04]); set(gca,'Ytick',-0.01:0.01:0.04);
-% legend(conLabel{1:3}); ylabel('weighted response'); title('passive 3x - cardinal')
-% 
-% figure
-% barweb(squeeze(respSess(:,2,[1:3],2)), squeeze(respErrSess(:,2,[2 1 3],2))); ylim([-0.01 0.04]); set(gca,'Ytick',-0.01:0.01:0.04);
-% legend(conLabel{1:3}); ylabel('weighted response'); title('passive 3x - oblique')
-% 
-% figure
-% barweb(squeeze(respSess(:,1,2,[1 2])), squeeze(respErrSess(:,1,1,[1 3]))); ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
-% legend('task','passive 3x'); ylabel('weighted response'); title('active vs passive naive')
-% 
-% figure
-% barweb(squeeze(respSess(:,1,1,[1 2])), squeeze(respErrSess(:,1,1,[1 3]))); ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
-% legend('task','passive 3x'); ylabel('weighted response'); title('active vs passive gts');
-% 
-% figure
-% barweb(squeeze(respSess(:,1,3,[1 2])), squeeze(respErrSess(:,1,1,[1 3]))); ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
-% legend('task','passive 3x'); ylabel('weighted response'); title('active vs passive rand');
-
-
-%%%w/ hvv
+%%% resp(clust,stim, training cond, session)
+%%%w/o hvv
 figure
-barweb(squeeze(respSess(:,1,[1:4],1)), squeeze(respErrSess(:,1,[2 1 3 4],1)));% ylim([-0.025 0.085]); set(gca,'Ytick',-0.025:0.025:0.085);
-legend(condLabel{1:4}); ylabel('weighted response'); title('behavior - preferred')
+barweb(squeeze(respSess(:,1,[1:3],1)), squeeze(respErrSess(:,1,[1:3],1))); %ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
+legend(condLabel{1:3}); ylabel('avg response'); title('behavior - preferred')
+
+figure%
+barweb(squeeze(respSess(:,1,[1:3],2)), squeeze(respErrSess(:,1,[1:3],2))); %ylim([-0.01 0.04]); set(gca,'Ytick',-0.01:0.01:0.04);
+legend(condLabel{1:3}); ylabel('avg response'); title('passive 3x - cardinal')
 
 figure
-barweb(squeeze(respSess(:,1,[1:4],2)), squeeze(respErrSess(:,1,[2 1 3 4],2)));% ylim([-0.02 0.085]); set(gca,'Ytick',-0.01:0.01:0.08);
-legend(condLabel{1:4}); ylabel('weighted response'); title('passive 3x - cardinal')
+barweb(squeeze(respSess(:,2,[1:3],2)), squeeze(respErrSess(:,2,[2 1 3],2))); %ylim([-0.01 0.04]); set(gca,'Ytick',-0.01:0.01:0.04);
+legend(condLabel{1:3}); ylabel('avg response'); title('passive 3x - oblique')
 
 figure
-barweb(squeeze(respSess(:,2,[1:4],2)), squeeze(respErrSess(:,2,[2 1 3 4],2))); %ylim([-0.02 0.085]); set(gca,'Ytick',-0.01:0.01:0.08);
-legend(condLabel{1:4}); ylabel('weighted response'); title('passive 3x - oblique')
+barweb(squeeze(respSess(:,1,1,[1 2])), squeeze(respErrSess(:,1,1,[1 3]))); %ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
+legend('task','passive 3x'); ylabel('avg response'); title('active vs passive naive')
 
 figure
-barweb(squeeze(respSess(:,1,[1:4],3)), squeeze(respErrSess(:,1,[2 1 3 4],3))); %ylim([-0.02 0.085]); set(gca,'Ytick',-0.01:0.01:0.08);
-legend(condLabel{1:4}); ylabel('weighted response'); title('passive 2sf - low sf')
+barweb(squeeze(respSess(:,1,3,[1 2])), squeeze(respErrSess(:,1,3,[1 3]))); %ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
+legend('task','passive 3x'); ylabel('avg response'); title('active vs passive gts');
 
 figure
-barweb(squeeze(respSess(:,2,[1:4],3)), squeeze(respErrSess(:,2,[2 1 3 4],3))); %ylim([-0.02 0.085]); set(gca,'Ytick',-0.01:0.01:0.08);
-legend(condLabel{1:4}); ylabel('weighted response'); title('passive 2sf - high sf')
+barweb(squeeze(respSess(:,1,2,[1 2])), squeeze(respErrSess(:,1,2,[1 3]))); %ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
+legend('task','passive 3x'); ylabel('avg response'); title('active vs passive rand');
+
+
+% %%%w/ hvv
+% figure
+% barweb(squeeze(respSess(:,1,[1:4],1)), squeeze(respErrSess(:,1,[2 1 3 4],1)));% ylim([-0.025 0.085]); set(gca,'Ytick',-0.025:0.025:0.085);
+% legend(condLabel{1:4}); ylabel('weighted response'); title('behavior - preferred')
+% 
+% figure
+% barweb(squeeze(respSess(:,1,[1:4],2)), squeeze(respErrSess(:,1,[2 1 3 4],2)));% ylim([-0.02 0.085]); set(gca,'Ytick',-0.01:0.01:0.08);
+% legend(condLabel{1:4}); ylabel('weighted response'); title('passive 3x - cardinal')
+% 
+% figure
+% barweb(squeeze(respSess(:,2,[1:4],2)), squeeze(respErrSess(:,2,[2 1 3 4],2))); %ylim([-0.02 0.085]); set(gca,'Ytick',-0.01:0.01:0.08);
+% legend(condLabel{1:4}); ylabel('weighted response'); title('passive 3x - oblique')
+% 
+% figure
+% barweb(squeeze(respSess(:,1,[1:4],3)), squeeze(respErrSess(:,1,[2 1 3 4],3))); %ylim([-0.02 0.085]); set(gca,'Ytick',-0.01:0.01:0.08);
+% legend(condLabel{1:4}); ylabel('weighted response'); title('passive 2sf - low sf')
+% 
+% figure
+% barweb(squeeze(respSess(:,2,[1:4],3)), squeeze(respErrSess(:,2,[2 1 3 4],3))); %ylim([-0.02 0.085]); set(gca,'Ytick',-0.01:0.01:0.08);
+% legend(condLabel{1:4}); ylabel('weighted response'); title('passive 2sf - high sf')
 
 %%%w/ hvv  (by cluster)
 
 for i=1:3
-figure
-barweb(squeeze(respSess(i,1,[1:4],1)), squeeze(respErrSess(i,1,[2 1 3 4],1))); %ylim([-0.025 0.085]); set(gca,'Ytick',-0.025:0.025:0.085);
-legend(condLabel{1:4}); ylabel('weighted response'); title(['behavior - preferred cluster' num2str(i)])
-
-figure
-barweb(squeeze(respSess(i,1,[1:4],2)), squeeze(respErrSess(i,1,[2 1 3 4],2))); %ylim([-0.02 0.085]); set(gca,'Ytick',-0.01:0.01:0.08);
-legend(condLabel{1:4}); ylabel('weighted response'); title(['passive 3x - cardinal cluster' num2str(i)])
-
-figure
-barweb(squeeze(respSess(i,2,[1:4],2)), squeeze(respErrSess(i,2,[2 1 3 4],2))); %ylim([-0.02 0.085]); set(gca,'Ytick',-0.01:0.01:0.08);
-legend(condLabel{1:4}); ylabel('weighted response'); title(['passive 3x - oblique cluster' num2str(i)])
-
-figure
-barweb(squeeze(respSess(i,1,[1:4],3)), squeeze(respErrSess(i,1,[2 1 3 4],3))); %ylim([-0.02 0.085]); set(gca,'Ytick',-0.01:0.01:0.08);
-legend(condLabel{1:4}); ylabel('weighted response'); title(['passive 2sf - low sf cluster' num2str(i)])
-
-figure
-barweb(squeeze(respSess(i,2,[1:4],3)), squeeze(respErrSess(i,2,[2 1 3 4],3))); %ylim([-0.02 0.085]); set(gca,'Ytick',-0.01:0.01:0.08);
-legend(condLabel{1:4}); ylabel('weighted response'); title(['passive 2sf - high sf cluster' num2str(i)])
+% figure
+% barweb(squeeze(respSess(i,1,[1:4],1)), squeeze(respErrSess(i,1,[1:4],1))); %ylim([-0.025 0.085]); set(gca,'Ytick',-0.025:0.025:0.085);
+% legend(condLabel{1:4}); ylabel('weighted response'); title(['behavior - preferred cluster' num2str(i)])
+% 
+% figure
+% barweb(squeeze(respSess(i,1,[1:4],2)), squeeze(respErrSess(i,1,[1:4],2))); %ylim([-0.02 0.085]); set(gca,'Ytick',-0.01:0.01:0.08);
+% legend(condLabel{1:4}); ylabel('weighted response'); title(['passive 3x - cardinal cluster' num2str(i)])
+% 
+% figure
+% barweb(squeeze(respSess(i,2,[1:4],2)), squeeze(respErrSess(i,2,[1:4],2))); %ylim([-0.02 0.085]); set(gca,'Ytick',-0.01:0.01:0.08);
+% legend(condLabel{1:4}); ylabel('weighted response'); title(['passive 3x - oblique cluster' num2str(i)])
+% 
+% figure
+% barweb(squeeze(respSess(i,1,[1:4],3)), squeeze(respErrSess(i,1,[1:4],3))); %ylim([-0.02 0.085]); set(gca,'Ytick',-0.01:0.01:0.08);
+% legend(condLabel{1:4}); ylabel('weighted response'); title(['passive 2sf - low sf cluster' num2str(i)])
+% 
+% figure
+% barweb(squeeze(respSess(i,2,[1:4],3)), squeeze(respErrSess(i,2,[1:4],3))); %ylim([-0.02 0.085]); set(gca,'Ytick',-0.01:0.01:0.08);
+% legend(condLabel{1:4}); ylabel('weighted response'); title(['passive 2sf - high sf cluster' num2str(i)])
 
 end
 
 
 %%%%%%% active vs passive
-for i=1:4
-figure
-barweb(squeeze(respSess(:,1,i,[1 2])), squeeze(respErrSess(:,1,i,[1 2])));% ylim([-0.025 0.085]); set(gca,'Ytick',-0.025:0.025:0.085);
-legend('task','passive 3x'); ylabel('weighted response'); title(['active vs passive ' condLabel{i}])
+%%%%not by session
+for i=1
+% for i=1:4
+% figure
+% barweb(squeeze(respSess(:,1,i,[1 2])), squeeze(respErrSess(:,1,i,[1 2])));% ylim([-0.025 0.085]); set(gca,'Ytick',-0.025:0.025:0.085);
+% legend('task','passive 3x'); ylabel('weighted response'); title(['active vs passive ' condLabel{i}])
+% end
+% 
+% %%%active vs passive summary by task/cluster
+% for j=1:4
+%     for i=1:3
+%   diff(i,j) = squeeze(respSess(i,1,j,1)-respSess(i,1,j,2));      
+% diffMod(i,j)=(respSess(i,1,j,1)-respSess(i,1,j,2))./(respSess(i,1,j,1)+respSess(i,1,j,2));
+%     end
+% end
+% %task vs passive modulation      %should be by session then averaged?errorbars?
+% figure
+% bar(diffMod(:,:)); %set(gca,'Ytick',0:0.1:1); ylim([0 1]);
+% legend(condLabel{1:4}); ylabel('task modulation'); title(['Cluster active vs passive Modulation']);
+% %difference in activity
+% figure
+% bar(diff(:,:)); %set(gca,'Ytick',-0.025:.005:.025); ylim([-0.025 0.025]);
+% legend(condLabel{1:4}); ylabel('weighted response difference'); title(['Cluster active vs passive Diff']);
 end
-
-%%%active vs passive summary by task/cluster
-for j=1:4
-    for i=1:3
-  diff(i,j) = squeeze(respSess(i,1,j,1)-respSess(i,1,j,2));      
-diffMod(i,j)=(respSess(i,1,j,1)-respSess(i,1,j,2))./(respSess(i,1,j,1)+respSess(i,1,j,2));
-    end
-end
-%task vs passive modulation      %should be by session then averaged?errorbars?
-figure
-bar(diffMod(:,:)); %set(gca,'Ytick',0:0.1:1); ylim([0 1]);
-legend(condLabel{1:4}); ylabel('task modulation'); title(['Cluster active vs passive Modulation']);
-%difference in activity
-figure
-bar(diff(:,:)); %set(gca,'Ytick',-0.025:.005:.025); ylim([-0.025 0.025]);
-legend(condLabel{1:4}); ylabel('weighted response difference'); title(['Cluster active vs passive Diff']);
 
 %%%  difference active passive avg by sess
 figure
-barweb(squeeze(APDiffResp(:,:)), squeeze(APDiffRespErr(:,:)));% ylim([-0.025 0.085]); set(gca,'Ytick',-0.025:0.025:0.085);
+barweb(squeeze(APDiffResp(:,1:3)), squeeze(APDiffRespErr(:,1:3))); ylim([-0.025 0.15]); set(gca,'Ytick',-0.025:0.025:0.1);
 legend(condLabel{1:4}); ylabel('response diff'); title(['active vs passive ']);
 %%%%modulation by session
 figure
-barweb(squeeze(APDiffRespMod(:,:)), squeeze(APDiffRespModErr(:,:)));% ylim([-0.025 0.085]); set(gca,'Ytick',-0.025:0.025:0.085);
+barweb(squeeze(APDiffRespMod(:,1:3)), squeeze(APDiffRespModErr(:,1:3))); ylim([0 0.85]); set(gca,'Ytick',0:0.25:0.85);
 legend(condLabel{1:4}); ylabel('task modulation index'); title(['active vs passive modulation']);
 
-    
-%     %active vs passive diff (this session)      %i dont think its right
-%     for ss = 1:length(sessionDate)
-%         for i=1:max(clust)
-%             if i==2
-%         range = 13:14;
-%     else
-%         range = 19:20;
-%     end 
-%     baseline = 6:10;
-% %%%%%need to subtract baseline %%need to do cell by cell?  allData?
-%     ActivePassive(ss,i) = (nanmean(SessClustData(ss,1,i,range),4)-nanmean(SessClustData(ss,1,i,baseline),4))-(nanmean(SessClust3xData(ss,1,i,range),4)-nanmean(SessClust3xData(ss,1,i,baseline),4));
-%     if i==3
-%         ActivePassive(ss,i) = -ActivePassive(ss,i);
-%     end
-%        ActivePassiveMod(ss,i) = ((nanmean(SessClustData(ss,1,i,range),4)-nanmean(SessClustData(ss,1,i,baseline),4))-(nanmean(SessClust3xData(ss,1,i,range),4)-nanmean(SessClust3xData(ss,1,i,baseline),4)))./((nanmean(SessClustData(ss,1,i,range),4)-nanmean(SessClustData(ss,1,i,baseline),4))+(nanmean(SessClust3xData(ss,1,i,range),4) - nanmean(SessClust3xData(ss,1,i,baseline),4)));
-%         end
-%     end
-%     %combine over training conditions
-%     for j=1:4
-%         for i =1:3
-%        ActivePassiveGroup(j,i) = nanmean(ActivePassive(sessCond==j,i));
-%            ActivePassiveGroupMod(j,i) = nanmean(ActivePassiveMod(sessCond==j,i));%is this right?
-%        ActivePassiveGroupErr(j,i) = nanstd(ActivePassive(sessCond==j,i)/sum(sessCond==j));
-%         end
-%     end
-%     %plot session average task - passive diff
-%   figure;
-% barweb(ActivePassiveGroupMod(:,:)',ActivePassiveGroupErr(:,:)',0.8);% ylim([-0.05 .2]);set(gca,'Ytick',0:0.05:0.2);
-% legend(condLabel{1:4}); title(['task modulation (session avg)']); ylabel('task modulation'); 
-%     figure;
-% barweb(ActivePassiveGroup(:,:)',ActivePassiveGroupErr(:,:)',0.8);% ylim([-0.05 .2]);set(gca,'Ytick',0:0.05:0.2);
-% legend(condLabel{1:4}); title(['task - pass diff (session avg)']); ylabel('task modulation'); 
-%     
-    
+ 
 
 %%%%%%%compare passive responses from 3x and 2sf stim to behav
-for i = 1:4
-figure
-barweb(squeeze(respSess(:,1,i,[1 2 3])), squeeze(respErrSess(:,1,i,[1 2 3]))); %ylim([-0.025 0.085]); set(gca,'Ytick',-0.025:0.025:0.085);
-legend('task','passive 3x', 'passive 2sf'); ylabel('weighted response'); title(['active vs passive ' condLabel{i}])
+for i=1
+% for i = 1:4
+% figure
+% barweb(squeeze(respSess(:,1,i,[1 2 3])), squeeze(respErrSess(:,1,i,[1 2 3]))); %ylim([-0.025 0.085]); set(gca,'Ytick',-0.025:0.025:0.085);
+% legend('task','passive 3x', 'passive 2sf'); ylabel('weighted response'); title(['active vs passive ' condLabel{i}])
+% end
+% 
+% %%%%2sf passive low vs 2sf passive high
+% for i =1:4
+% figure
+% barweb(squeeze(respSess(:,[1 2],i,[3])), squeeze(respErrSess(:,[1 2],i,[3])));% ylim([-0.025 0.085]); set(gca,'Ytick',-0.025:0.025:0.085);
+% legend('passive2sf low','passive 2sf high'); ylabel('weighted response'); title(['sf dependence ' condLabel{i}]);
+% end
+% 
+% %%%%3x passive oblique vs cardinal 
+% for i = 1:4
+% figure
+% barweb(squeeze(respSess(:,[1 2],i,[2])), squeeze(respErrSess(:,[1 2],i,[2]))); %ylim([-0.025 0.085]); set(gca,'Ytick',-0.025:0.025:0.085);
+% legend('cardinal','oblique'); ylabel('weighted response'); title(['orientation dependence '  condLabel{i}]);
+% end
 end
-
-%%%%2sf passive low vs 2sf passive high
-for i =1:4
-figure
-barweb(squeeze(respSess(:,[1 2],i,[3])), squeeze(respErrSess(:,[1 2],i,[3])));% ylim([-0.025 0.085]); set(gca,'Ytick',-0.025:0.025:0.085);
-legend('passive2sf low','passive 2sf high'); ylabel('weighted response'); title(['sf dependence ' condLabel{i}]);
-end
-
-%%%%3x passive oblique vs cardinal 
-for i = 1:4
-figure
-barweb(squeeze(respSess(:,[1 2],i,[2])), squeeze(respErrSess(:,[1 2],i,[2]))); %ylim([-0.025 0.085]); set(gca,'Ytick',-0.025:0.025:0.085);
-legend('cardinal','oblique'); ylabel('weighted response'); title(['orientation dependence '  condLabel{i}]);
-end
-
 
 %%% plot modulation by running (average over all cells)
  clear spontMod spontModErr
 for i= 1:max(clust);
-    figure
+    figure      %(& sesscond~=4)?
     [n b] =hist(deltaSpontAll(clust==i),[-0.5:0.1:0.5]); bar(b,n/sum(n)); title(sprintf('cluster %d',i)); xlim([-0.55 0.55]); ylim([0 0.85]); ylabel('fraction'); xlabel('running modulation (spont)');
     set(gca,'Xtick',-0.5:0.25:0.5); set(gca,'Ytick',0:0.2:0.8); set(gca,'Fontsize',16);
     spontMod(i) = nanmean(abs(deltaSpontAll(clust==i))); spontModErr(i) = nanstd(abs(deltaSpontAll(clust==i)))/sqrt(sum(clust==i));
@@ -1346,8 +1301,8 @@ legend(condLabel{1:4}); title(['running modulation, Cluster ' num2str(i)]); ylab
 end 
 %%%%%all clusters and groups
  figure;
-barweb(spontModSessGroup(:,:)',spontModSessGroupErr(:,:)',0.8); ylim([-0.05 .2]);set(gca,'Ytick',0:0.05:0.2);
-legend(condLabel{1:4}); title(['running modulation']); ylabel('mean absolute modulation'); 
+barweb(spontModSessGroup(1:3,:)',spontModSessGroupErr(1:3,:)',0.8); ylim([-0.05 .2]);set(gca,'Ytick',0:0.05:0.2);
+legend(condLabel{1:3}); title(['running modulation']); ylabel('mean absolute modulation'); 
    
 
 
@@ -1427,6 +1382,7 @@ set(gca,'FontSize',16)
 %close individual session plots
 close;close;close;close;close; 
 end
+
 %bar plots by group and by cluster
 for j=1:4
     for i=1:3
@@ -1443,83 +1399,89 @@ barweb(osiSessGroup(:,i), osiSessGroupErr(:,i),0.8); ylim([-0.05 1.05]); set(gca
 legend(condLabel{1:4}); ylabel('(OSI)');xlabel('training condition'); title(['cluster ' num2str(i) ' OSI behav'])   
 end
 figure
-barweb(osiSessGroup(:,:)', osiSessGroupErr(:,:)',0.8); ylim([-0.05 1.05]); set(gca,'Ytick',0:0.25:1.0);
-legend(condLabel{1:4}); ylabel('(OSI)');xlabel('training condition'); title(['all clusters OSI behav'])   
+barweb(osiSessGroup(1:3,:)', osiSessGroupErr(1:3,:)',0.8); ylim([-0.05 1.05]); set(gca,'Ytick',0:0.25:1.0);
+legend(condLabel{1:3}); ylabel('(OSI)');xlabel('training condition'); title(['all clusters OSI behav'])   
 
   
 % %% calculate response parameters (sustained, transient, OSI) for each cluster; put each graph into one subpanel
-% %(not by session)
-%  clear transOSI sustOSI clustOSI osi osi_err
-%  for j = 1:4  %for each training condition
-%     osifig(j) = figure;
-%   for i = 1:max(clust)
-% clear transResp sustResp 
-%     ThisData{j} = allData(sortClust==i & sortCond==j ,:);  %can we index from already weighted data?
-% 
-%    %%% calculate transient and sustained responses (relative to baseline)
-%     transResp{j}(:,1) = mean(ThisData{j}(:,13:14),2) - mean(ThisData{j}(:,1:10),2);  %this changes based on clustering
-%     transResp{j}(:,2) = mean(ThisData{j}(:,74:75),2) - mean(ThisData{j}(:,62:71),2);
-%     sustResp{j}(:,1) = mean(ThisData{j}(:,20:40),2) - mean(ThisData{j}(:,1:10),2);
-%     sustResp{j}(:,2) = mean(ThisData{j}(:,81:101),2) - mean(ThisData{j}(:,62:71),2);
-%     
-%    condLabel(j) 
-%    sprintf('cluster %d trans (early) %0.3f sust %0.3f',i,mean(transResp{j}(:,2)),mean(sustResp{j}(:,2)))
-%    sprintf('cluster %d trans (late) %0.3f sust %0.3f',i,mean(transResp{j}(:,1)),mean(sustResp{j}(:,1)))
-%     
-%     figure
-%     subplot(2,2,1);
-%     hist(transResp{j}(:,1),-1:0.1:1); title([condLabel(j) ' trans resp ' num2str(i)]);  xlim([-1 1])
-%     
-%     subplot(2,2,2);
-%     hist(sustResp{j}(:,1),-1:0.1:1); title([condLabel(j) 'sust resp ' num2str(i)]); xlim([-1 1])
-%     
-%     if i==3
-%         transResp{j} = -transResp{j}; sustResp{j} = -sustResp{j};
+% %(not by session)  using this again!!
+for i=1
+ clear transOSI sustOSI clustOSI osi osi_err
+ for j = 6  %not for each training condition, for all cells only
+     condLabel{6}='all cells'
+    osifig(j) = figure;
+  for i = 1:max(clust)
+clear transResp sustResp 
+    ThisData{j} = allData(sortClust==i,:);  %took out &sessCond==j to do all cells
+
+   %%% calculate transient and sustained responses (relative to baseline)
+    transResp{j}(:,1) = mean(ThisData{j}(:,13:14),2) - mean(ThisData{j}(:,1:10),2);  %this changes based on clustering
+    transResp{j}(:,2) = mean(ThisData{j}(:,74:75),2) - mean(ThisData{j}(:,62:71),2);
+    sustResp{j}(:,1) = mean(ThisData{j}(:,20:40),2) - mean(ThisData{j}(:,1:10),2);
+    sustResp{j}(:,2) = mean(ThisData{j}(:,81:101),2) - mean(ThisData{j}(:,62:71),2);
+    
+   condLabel(j) 
+   sprintf('cluster %d trans (early) %0.3f sust %0.3f',i,mean(transResp{j}(:,2)),mean(sustResp{j}(:,2)))
+   sprintf('cluster %d trans (late) %0.3f sust %0.3f',i,mean(transResp{j}(:,1)),mean(sustResp{j}(:,1)))
+    
+    figure
+    subplot(2,2,1);
+    hist(transResp{j}(:,1),-1:0.1:1); title([condLabel(j) ' trans resp ' num2str(i)]);  xlim([-1 1])
+    
+    subplot(2,2,2);
+    hist(sustResp{j}(:,1),-1:0.1:1); title([condLabel(j) 'sust resp ' num2str(i)]); xlim([-1 1])
+    
+    if i==3
+        transResp{j} = -transResp{j}; sustResp{j} = -sustResp{j};
+    end;
+    
+    transResp{j}(transResp{j}<0)=0; sustResp{j}(sustResp{j}<0)=0;  %should we add min instead?
+    
+%     for t=1:2 %two orientations
+%     if transResp{j}(:,t)<0
+%        transResp{j}(:,t) = transResp{j}(:,t)-min(transResp{j}(:,t)); 
 %     end;
-%     
-%     transResp{j}(transResp{j}<0)=0; sustResp{j}(sustResp{j}<0)=0;  %should we add min instead?
-%     
-% %     for t=1:2 %two orientations
-% %     if transResp{j}(:,t)<0
-% %        transResp{j}(:,t) = transResp{j}(:,t)-min(transResp{j}(:,t)); 
-% %     end;
-% %         if sustResp{j}(:,t)<0
-% %        sustResp{j}(:,t) = sustResp{j}(:,t)-min(sustResp{j}(:,t)); 
-% %         end;
-% %     end;
-%     
-%     transOSI{j} = (transResp{j}(:,2)- transResp{j}(:,1))./(transResp{j}(:,2) + transResp{j}(:,1));
-%     sustOSI{j} = (sustResp{j}(:,2)- sustResp{j}(:,1))./(sustResp{j}(:,2) + sustResp{j}(:,1));
-%     
-%     peak = max(transResp{j},[],2);
-%     subplot(2,2,3)
-%     [n b] = hist(abs(transOSI{j}(peak>0.1))); bar(b,n/sum(n));title([condLabel(j) 'trans osi ' num2str(i)])
-%     
-%     peak = max(sustResp{j},[],2);
-%     subplot(2,2,4);
-%     [n b] = hist(abs(sustOSI{j}(peak>0.1))); bar(b,n/sum(n)); title([condLabel(j) 'sust osi ' num2str(i)])
-%     
-%     if i ==2  %for transient cluster
-%         peak = max(transResp{j},[],2);
-%         clustOSI{j} = abs(transOSI{j}(peak>0.1));
-%     else
-%         clustOSI{j} = abs(sustOSI{j}(peak>0.1));
-%     end
-%     %osi(i) = median(clustOSI{j}); 
-%     osi(i) = mean(clustOSI{j}); 
-%     osi_err(i) = std(clustOSI{j})/sqrt(length(clustOSI{j})); %this should be redone for sessions
-%     figure(osifig(j));
-%     subplot(2,2,i);
-%     [n b] = hist(clustOSI{j}); bar(b,n/sum(n)); title([condLabel(j) sprintf('OSI clust %d',i)]); ylim([0 0.4]); xlabel('OSI'); ylabel('fraction');
-% 
-%     osiJ{j}(i) = osi(i); osi_errJ{j}(i) = osi_err(i);
-% end
-% figure
-% bar(osi); hold on; errorbar(1:3,osi,osi_err,'k.','markersize',8,'Linewidth',2);title([condLabel(j)]); ylabel('osi'); xlabel('cluster'); ylim([0 1])
-% set(gca,'FontSize',16)
-%  end
-%  
-% %%%%%%%%plot OSi for all clusters, all training groups (not by session)
+%         if sustResp{j}(:,t)<0
+%        sustResp{j}(:,t) = sustResp{j}(:,t)-min(sustResp{j}(:,t)); 
+%         end;
+%     end;
+    
+    transOSI{j} = (transResp{j}(:,2)- transResp{j}(:,1))./(transResp{j}(:,2) + transResp{j}(:,1));
+    sustOSI{j} = (sustResp{j}(:,2)- sustResp{j}(:,1))./(sustResp{j}(:,2) + sustResp{j}(:,1));
+    
+    peak = max(transResp{j},[],2);
+    subplot(2,2,3)
+    [n b] = hist(abs(transOSI{j}(peak>0.1))); bar(b,n/sum(n));title([condLabel(j) 'trans osi ' num2str(i)])
+    
+    peak = max(sustResp{j},[],2);
+    subplot(2,2,4);
+    [n b] = hist(abs(sustOSI{j}(peak>0.1))); bar(b,n/sum(n)); title([condLabel(j) 'sust osi ' num2str(i)])
+    
+    if i ==2  %for transient cluster
+        peak = max(transResp{j},[],2);
+        clustOSI{j} = abs(transOSI{j}(peak>0.1));
+    else
+        clustOSI{j} = abs(sustOSI{j}(peak>0.1));
+    end
+    %osi(i) = median(clustOSI{j}); 
+    osi(i) = mean(clustOSI{j}); 
+    osi_err(i) = std(clustOSI{j})/sqrt(length(clustOSI{j})); %this should be redone for sessions
+    figure(osifig(j));
+    subplot(2,2,i);
+    [n b] = hist(clustOSI{j}); bar(b,n/sum(n)); title([condLabel(j) sprintf('OSI clust %d',i)]); ylim([0 0.4]); xlabel('OSI'); ylabel('fraction');
+
+    osiJ{j}(i) = osi(i); osi_errJ{j}(i) = osi_err(i);
+end
+figure
+bar(osi); hold on; errorbar(1:3,osi,osi_err,'k.','markersize',8,'Linewidth',2);title([condLabel(j)]); ylabel('osi'); xlabel('cluster'); ylim([0 1])
+set(gca,'FontSize',16)
+ end
+ 
+ figure
+bar(osi); hold on; errorbar(1:3,osi,osi_err,'k.','markersize',8,'Linewidth',2);title(['OSI - behavior']); ylabel('osi'); xlabel('cluster'); ylim([0 1])
+set(gca,'FontSize',16)
+ 
+%%%%%%%%plot OSi for all clusters, all training groups (not by session)
 % figure
 % bar([osiJ{1} osiJ{2} osiJ{3} osiJ{4}],0.8,'g');
 % hold on; 
@@ -1529,8 +1491,8 @@ legend(condLabel{1:4}); ylabel('(OSI)');xlabel('training condition'); title(['al
 % errorbar(10:12,osiJ{4},osi_errJ{4},'k.','markersize',8,'Linewidth',2)
 % title('all conditions'); ylabel('osi'); xlabel('cluster x training cond'); ylim([0 1.2])
 % set(gca,'FontSize',16)
-% 
-% %%%%%group comparison by cluster  (not by session)
+
+%%%%%group comparison by cluster  (not by session)
 % 
 % for i=1:max(clust)
 % figure
@@ -1544,7 +1506,7 @@ legend(condLabel{1:4}); ylabel('(OSI)');xlabel('training condition'); title(['al
 % set(gca,'FontSize',16)
 % end
 %%
-
+end
 
 %%%%%%use calcOSI function to get orientation selectiveity from 3x data
 %%%%expects 8 orientations, orientations = [12341234]
@@ -1583,7 +1545,15 @@ end
 figure
 barweb(circVarClust(:), circVarClustErr(:),0.8); ylim([-0.05 1.05]); set(gca,'Ytick',0:0.25:1.0);
 legend(clustLabel{1:3}); ylabel('circular varience (OSI)'); title('Cluster OSI 3x passive all cells')
-
+%all cells circvar distribution by cluster
+figure;
+    subplot(2,2,1)
+    [n b] = hist(abs(cirVar(clust==1 & maxresp>0.2))); bar(b,n/sum(n));title(['circVar sustained']); ylim([0 0.3]); xlabel('OSI (circVar)'); ylabel('fraction');
+    subplot(2,2,2)
+    [n b] = hist(abs(cirVar(clust==2 & maxresp>0.2))); bar(b,n/sum(n));title(['circVar transient']); ylim([0 0.3]); xlabel('OSI (circVar)'); ylabel('fraction');
+    subplot(2,2,3)
+    [n b] = hist(abs(cirVar(clust==3 & maxresp>0.2))); bar(b,n/sum(n));title(['circVar supressed']); ylim([0 0.3]); xlabel('OSI (circVar)'); ylabel('fraction');
+    
 
 % %%%%average circular varience for each training condition (not by session)
 % clear circVarGroup circVarGroupErr
@@ -1621,19 +1591,20 @@ for j=1:4
 end;
  figure
 barweb(circVarGroupSess(j,:), circVarGroupSessErr(j,:),0.8); ylim([-0.05 1.05]); set(gca,'Ytick',0:0.25:1.0);
-legend(clustLabel{1:3}); ylabel('circular varience (OSI)'); title([condLabel{j} ' Cluster OSI 3x passive'])   
+legend(clustLabel{1:3}); ylabel('circular varience (OSI)'); title([condLabel{j} ' Cluster OSI 3x passive'])  
+close
 end;
 
 %plot by cluster
-for i=1:3
-  figure
-barweb(circVarGroupSess(:,i), circVarGroupSessErr(:,i),0.8); ylim([-0.05 1.05]); set(gca,'Ytick',0:0.25:1.0);
-legend(condLabel{1:4}); ylabel('circular varience (OSI)'); title([clustLabel{i} ' Cluster OSI 3x passive'])     
-end;    
+% for i=1:3
+%   figure
+% barweb(circVarGroupSess(:,i), circVarGroupSessErr(:,i),0.8); ylim([-0.05 1.05]); set(gca,'Ytick',0:0.25:1.0);
+% legend(condLabel{1:4}); ylabel('circular varience (OSI)'); title([clustLabel{i} ' Cluster OSI 3x passive'])     
+% end;    
 %%%%all groups all clusters
  figure
-barweb(circVarGroupSess(:,:)', circVarGroupSessErr(:,:)',0.8); ylim([-0.05 1.05]); set(gca,'Ytick',0:0.25:1.0);
-legend(condLabel{1:4}); ylabel('circular varience (OSI)'); title(['all clusters OSI 3x passive'])     
+barweb(circVarGroupSess(1:3,:)', circVarGroupSessErr(1:3,:)',0.8); ylim([-0.05 1.05]); set(gca,'Ytick',0:0.25:1.0);
+legend(condLabel{1:3}); ylabel('circular varience (OSI)'); title(['all clusters OSI 3x passive'])     
 
 
 
@@ -1654,6 +1625,7 @@ for cond =1:4
 %      clustfract(cond,max(clust)+1) = nanstd(SessClustFraction(sessCond==j,i),[],1)/sqrt(sum(sessCond==j))
     figure
     pie(clustfract(cond,:));title(condLabel{cond});legend(clustLabel{1:4});
+    close
 end
 clustfract
 sum(clustfract,2);
@@ -1666,19 +1638,19 @@ barweb(clustfract(:,i), clustfractErr(:,i), 0.8);% ylim([-0.25 1.05]); set(gca,'
 legend(condLabel{1:4});xlabel('training condition'); ylabel('cluster fraction'); title(['Fraction of ' clustLabel{i} ' cells by group'])     
 end; 
 
-for j=1:4  % (by condition)
-          figure
-barweb(clustfract(j,:), clustfractErr(j,:), 0.8); %ylim([-0.25 1.05]); set(gca,'Ytick',0:0.25:1.5);
-legend(clustLabel{1:4});xlabel('training condition'); ylabel('cluster fraction'); title(['Fraction of ' condLabel{j} ' cells'])     
-end
-%by cluster for all conditions
-          figure
-barweb(clustfract(:,:), clustfractErr(:,:), 0.8); %ylim([-0.25 1.05]); set(gca,'Ytick',0:0.25:1.5);
-legend(clustLabel{1:4});xlabel('training condition'); ylabel('cluster fraction'); title(['Fraction of cells'])     
+% for j=1:4  % (by condition)
+%           figure
+% barweb(clustfract(j,:), clustfractErr(j,:), 0.8); %ylim([-0.25 1.05]); set(gca,'Ytick',0:0.25:1.5);
+% legend(clustLabel{1:4});xlabel('training condition'); ylabel('cluster fraction'); title(['Fraction of ' condLabel{j} ' cells'])     
+% end
+% %by cluster for all conditions
+%           figure
+% barweb(clustfract(:,:), clustfractErr(:,:), 0.8); %ylim([-0.25 1.05]); set(gca,'Ytick',0:0.25:1.5);
+% legend(clustLabel{1:4});xlabel('training condition'); ylabel('cluster fraction'); title(['Fraction of cells'])     
 %%%by training condition for each cluster (including inactive)
           figure
-barweb(clustfract(:,:)', clustfractErr(:,:)', 0.8); %ylim([-0.25 1.05]); set(gca,'Ytick',0:0.25:1.5);
-legend(condLabel{1:4});xlabel('cell type (cluster)'); ylabel('cluster fraction'); title(['Fraction of cells'])     
+barweb(clustfract(1:3,:)', clustfractErr(1:3,:)', 0.8); ylim([0 0.65]); set(gca,'Ytick',0:0.1:0.75);
+legend(condLabel{1:3});xlabel('cell type (cluster)'); ylabel('cluster fraction'); title(['Fraction of cells'])     
 
 
 

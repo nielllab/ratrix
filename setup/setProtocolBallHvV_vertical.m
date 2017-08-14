@@ -64,8 +64,8 @@ end
          rewardSizeULorMS        = 219;
          msPenalty               =3500;
          percentCorrectionTrials = .5;         
-         normalizedPosition      = [0.38 0.61];
-         radius                 = .35;        
+         normalizedPosition      = [0.37 0.62];
+         radius                 = .33;        
        
    case 'g62aaa10tt' % Started 4/07/17 %%start hvv center 4/15/17 %%%full 5/23/17
        requestRewardSizeULorMS = 0;

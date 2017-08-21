@@ -49,37 +49,37 @@ switch subjIDs{1}
          requestRewardSizeULorMS = 0;
          rewardSizeULorMS        = 219;
          msPenalty               =3500;
-         percentCorrectionTrials = .0;  
+         percentCorrectionTrials = .5;  
          
          case 'j351rt'  %started 7/26/17 %%start center 8/17/17
          requestRewardSizeULorMS = 0;
          rewardSizeULorMS        = 219;
          msPenalty               =3500;
-         percentCorrectionTrials = .0;   
+         percentCorrectionTrials = .5;   
          
          case 'j351lt'  %started 7/26/17 %%start center 8/17/17
          requestRewardSizeULorMS = 0;
          rewardSizeULorMS        = 219;
          msPenalty               =3500;
-         percentCorrectionTrials = .0;      
+         percentCorrectionTrials = .5;      
         
          case 'j352tt'  %started 7/26/17 %%start center 8/17/17
          requestRewardSizeULorMS = 0;
          rewardSizeULorMS        = 219;
          msPenalty               =3500;
-         percentCorrectionTrials = .0;      
+         percentCorrectionTrials = .5;      
         
          case 'j352rt'  %started 7/26/17 %%start center 8/17/17
          requestRewardSizeULorMS = 0;
          rewardSizeULorMS        = 219;
          msPenalty               =3500;
-         percentCorrectionTrials = .0;      
+         percentCorrectionTrials = .5;      
     
          case 'j352lt'  %started 7/26/17 %%start center 8/17/17
          requestRewardSizeULorMS = 0;
          rewardSizeULorMS        = 219;
          msPenalty               =3500;
-         percentCorrectionTrials = .0;         
+         percentCorrectionTrials = .5;         
        
    case 'g62aaa11rt'  %started 4/25/17 %%hvv center 5/10/17
          requestRewardSizeULorMS = 0;

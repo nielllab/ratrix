@@ -1,7 +1,7 @@
 close all
 clear all
 
-pathname = 'C:\Users\nlab\Box Sync\Phil Niell Lab\2pData';
+grppath = 'C:\Users\nlab\Box Sync\Phil Niell Lab\2pData';
 
 psfile = 'c:\tempPhil2pSize.ps';
 if exist(psfile,'file')==2;delete(psfile);end
@@ -31,9 +31,11 @@ thetaRange = unique(theta);
 timepts = 1:(2*isi+duration)/dt; timepts = (timepts-1)*dt; timepts = timepts - isi;
 
 f1=figure;f2=figure;f3=figure;f4=figure;
+hvals=zeros(4,length(sizes),4);
+pvals=zeros(4,length(sizes));
 for i = 1:length(grpfiles)
     sprintf('loading %s data',grpnames{i})
-    load(fullfile(pathname,grpfiles{i}))
+    load(fullfile(grppath,grpfiles{i}))
     
     figure(f1)%%%stationary size curves
     subplot(1,length(grpfiles),i)
@@ -43,13 +45,16 @@ for i = 1:length(grpfiles)
         pre(j,:) = squeeze(nanmean(nanmean(grpspsize(find(session==j),spWindow,:,1,1),2),1));
         post(j,:) = squeeze(nanmean(nanmean(grpspsize(find(session==j),spWindow,:,1,2),2),1));
     end
+    [hvals(i,:,1) pvals(i,:,1)] = ttest(pre,post,'alpha',0.05);
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
+    plot(1:length(radiusRange),hvals(i,:,1)-0.75,'b*')
     xlabel('Stim Size (deg)')
     ylabel(sprintf('%s sit',grpnames{i}))
     axis([0 length(radiusRange)+1 -0.025 0.25])
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+    
 
     
     figure(f2)%%%running size curves
@@ -60,8 +65,10 @@ for i = 1:length(grpfiles)
         pre(j,:) = squeeze(nanmean(nanmean(grpspsize(find(session==j),spWindow,:,2,1),2),1));
         post(j,:) = squeeze(nanmean(nanmean(grpspsize(find(session==j),spWindow,:,2,2),2),1));
     end
+    [hvals(i,:,2) pvals(i,:,2)] = ttest(pre,post,'alpha',0.05);
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
+    plot(1:length(radiusRange),hvals(i,:,2)-0.65,'b*')
     xlabel('Stim Size (deg)')
     ylabel(sprintf('%s run',grpnames{i}))
     axis([0 length(radiusRange)+1 -0.025 0.35])
@@ -109,9 +116,11 @@ for i = 1:length(grpfiles)
         pre(j,:) = pre(j,:)-squeeze(grpring(j,1,1,1,1,1));
         post(j,:) = post(j,:)-squeeze(grpring(j,1,1,1,1,2));
     end
+    [hvals(i,:,3) pvals(i,:,3)] = ttest(pre,post,'alpha',0.05);
     hold on
     errorbar(1:length(sizes),nanmean(pre),nanstd(pre)/sqrt(numAni),'k')
     errorbar(1:length(sizes),nanmean(post),nanstd(post)/sqrt(numAni),'r')
+    plot(1:length(radiusRange),hvals(i,:,3)-0.7,'b*')
     axis square
     axis([0 length(sizes)+1 -0.1 0.3])
     xlabel('Stim Size (deg)')
@@ -159,9 +168,11 @@ for i = 1:length(grpfiles)
         pre(j,:) = pre(j,:)-squeeze(grpring(j,1,1,1,2,1));
         post(j,:) = post(j,:)-squeeze(grpring(j,1,1,1,2,2));
     end
+    [hvals(i,:,4) pvals(i,:,4)] = ttest(pre,post,'alpha',0.05);
     hold on
     errorbar(1:length(sizes),nanmean(pre),nanstd(pre)/sqrt(numAni),'k')
     errorbar(1:length(sizes),nanmean(post),nanstd(post)/sqrt(numAni),'r')
+    plot(1:length(radiusRange),hvals(i,:,4)-0.7,'b*')
     axis square
     axis([0 length(sizes)+1 -0.1 0.3])
     xlabel('Stim Size (deg)')
@@ -199,7 +210,7 @@ if exist('psfile','var')
 end
 
 try
-    dos(['ps2pdf ' psfile ' "' [fullfile(pathname,'2pSizeSummary') '.pdf'] '"'] )
+    dos(['ps2pdf ' psfile ' "' [fullfile(grppath,'2pSizeSummary') '.pdf'] '"'] )
 catch
     display('couldnt generate pdf');
 end

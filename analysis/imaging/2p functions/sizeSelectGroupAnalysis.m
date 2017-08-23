@@ -2,6 +2,7 @@
 
 close all
 clear all
+dbstop if error
 
 global S2P
 
@@ -24,8 +25,8 @@ altpath = 'C:\Users\nlab\Box Sync\Phil Niell Lab\2pData'; savepath=altpath;
 psfile = 'c:\tempPhil2pSize.ps';
 if exist(psfile,'file')==2;delete(psfile);end
 
-cd(pathname);
-% cd(altpath);
+% cd(pathname);
+cd(altpath);
 
 group = input('which group? 1=saline naive, 2=saline trained, 3=DOI naive, 4=DOI trained: ')
 redoani = input('reanalyze individual animal data? 0=no, 1=yes: ')
@@ -72,25 +73,31 @@ for i = 1:length(contrastRange);contrastlist{i} = num2str(contrastRange(i));end
 for i=1:length(radiusRange); sizes{i} = num2str(radiusRange(i)*2); end
 thetaRange = unique(theta);
 timepts = 1:(2*isi+duration)/dt; timepts = (timepts-1)*dt; timepts = timepts - isi;
+numAni = length(use)/2;
 
 if redogrp
     binwidth = 20;
+    ntotframes = 13400;
+    shufreps = 100;
     grpdfsize = nan(10000,15,length(sizes),2,2);grpspsize=grpdfsize;
     grpsptuning = nan(10000,15,length(sfrange),length(thetaRange),length(sizes),2,2);
     grprf=nan(10000,2);
     session = nan(10000,1);%%%make an array for animal #/session
     grpcells = nan(10000,1);
     grpSI = nan(10000,2,2);
-    grpfrmdata = nan(100,398,398,length(sfrange),length(sizes),2,2);
-    grpring = nan(100,80,length(sfrange),length(sizes),2,2);
-    grpavgrad = nan(100,2);
-    grphistrad = nan(100,11,2);
+    grpfrmdata = nan(numAni,398,398,length(sfrange),length(sizes),2,2);
+    grpring = nan(numAni,80,length(sfrange),length(sizes),2,2);
+    grpavgrad = nan(numAni,2);
+    grphistrad = nan(numAni,11,2);
+    grpfrmsim = nan(numAni,ntotframes);grpfrmsimcent=grpfrmsim;
+    anisig = nan(numAni,2);
     cellcnt=1;
     anicnt = 1;
     for i = 1:2:length(use)
         %%%pre
 %         aniFile = files(use(i)).sizeanalysis; load(aniFile);
         aniFile = [files(use(i)).subj '_' files(use(i)).expt '_' files(use(i)).inject '_pre']; load(aniFile);
+        cut=files(use(i)).cutoff;
         expcells = length(usecells)-1;
         grpcells(cellcnt:cellcnt+expcells) = usecells;
 %         grprf(cellcnt:cellcnt+expcells,:) = userf;
@@ -122,6 +129,12 @@ if redogrp
         end
         grpring(anicnt,1:size(ring,1),:,:,:,1) = ring;
         
+        load(fullfile(pathname,files(use(i)).sizepts),'spikes')
+        spikespre = spikes;
+        spikes1 = spikes(1:cut,1:ntotframes);
+        spikescent1 = spikes(usecells,1:ntotframes);
+        
+        
         %%%post
 %         aniFile = files(use(i+1)).sizeanalysis; load(aniFile);
         aniFile = [files(use(i)).subj '_' files(use(i)).expt '_' files(use(i)).inject '_post']; load(aniFile);
@@ -152,32 +165,78 @@ if redogrp
         end
         grpring(anicnt,1:size(ring,1),:,:,:,2) = ring;
         
+        load(fullfile(pathname,files(use(i+1)).sizepts),'spikes')
+        spikespost = spikes;
+        spikes2 = spikes(1:cut,1:ntotframes);
+        spikescent2 = spikes(usecells,1:ntotframes);
+        
+        simmtx = nan(1,size(spikes1,2));simmtxcent=simmtx;
+        for k = 1:size(spikes1,2)
+            Ca=spikes1(:,k)';Cb=spikes2(:,k)';
+            simmtx(1,k) = (Ca.*Cb)/((Ca.^2 + Cb.^2)/2);
+            Ca=spikescent1(:,k)';Cb=spikescent2(:,k)';
+            simmtxcent(1,k) = (Ca.*Cb)/((Ca.^2 + Cb.^2)/2);
+        end
+        grpfrmsim(anicnt,:) = simmtx;
+        grpfrmsimcent(anicnt,:) = simmtxcent;
+        
+        shufsig = nan(1,shufreps);shufsigcent = shufsig;
+        parfor j=1:shufreps
+            shuf1 = spikespre;shuf2 = spikespost;
+            for k = 1:size(shuf1,1)
+                tshf = randi([1 size(shuf1,2)],1,1);
+                shuf1(k,:) = circshift(shuf1(k,:),tshf,2);
+                tshf = randi([1 size(shuf1,2)],1,1);
+                shuf2(k,:) = circshift(shuf2(k,:),tshf,2);
+            end
+            shuf1cent = shuf1(usecells,:);shuf2cent = shuf2(usecells,:);
+            shuf1 = shuf1(1:cut,:);shuf2 = shuf2(1:cut,:);
+            simmtx = nan(1,ntotframes);simmtxcent=simmtx;
+            for k = 1:ntotframes
+                Ca=shuf1(:,k)';Cb=shuf2(:,k)';
+                simmtx(1,k) = (Ca.*Cb)/((Ca.^2 + Cb.^2)/2);
+                Ca=shuf1cent(:,k)';Cb=shuf2cent(:,k)';
+                simmtxcent(1,k) = (Ca.*Cb)/((Ca.^2 + Cb.^2)/2);
+            end
+            shufsig(1,j) = prctile(simmtx,99);shufsigcent(1,j) = prctile(simmtxcent,99);
+        end
+        anisig(anicnt,1) = nanmean(shufsig);anisig(anicnt,2) = nanmean(shufsigcent);
+        
+        
         cellcnt = cellcnt+expcells;
         anicnt=anicnt+1;
     end
 
 %     grprf = grprf(1:cellcnt,:);
     session = session(1:cellcnt);
-    numAni = length(unique(session));
+    
     grpdfsize = grpdfsize(1:cellcnt,:,:,:,:,:); %cell#,t,contr,size,run,pre/post
     grpspsize = grpspsize(1:cellcnt,:,:,:,:,:);
     grpsptuning = grpsptuning(1:cellcnt,:,:,:,:,:,:);
     grpSI = grpSI(1:cellcnt,:,:);
     grpcells = grpcells(1:cellcnt);
-    grpfrmdata = grpfrmdata(1:numAni,:,25:375,:,:,:,:);
-    grpring = grpring(1:numAni,:,:,:,:,:);
-    grpavgrad = grpavgrad(1:numAni,:);
-    grphistrad = grphistrad(1:numAni,:,:);
+%     grpfrmdata = grpfrmdata(1:numAni,:,25:375,:,:,:,:);
+%     grpring = grpring(1:numAni,:,:,:,:,:);
+%     grpavgrad = grpavgrad(1:numAni,:);
+%     grphistrad = grphistrad(1:numAni,:,:);
+%     grpfrmsim = grpfrmsim(1:numAni,:);
     
     rmsdiff = nan(cellcnt,1);
     footcc = nan(cellcnt,1);
     for i = 1:cellcnt
         rmsdiff(i) = sqrt(mean(mean((cellprintpre{i}-cellprintpost{i}).^2)));
         cc = corrcoef(cellprintpre{i},cellprintpost{i}); footcc(i)=cc(1,2);
-    end       
+    end
+    
+    prcanisig = nan(numAni,2);
+    for j = 1:numAni
+        prcanisig(j,1) = sum(grpfrmsim(j,:)>anisig(j,1))/ntotframes;
+        prcanisig(j,2) = sum(grpfrmsimcent(j,:)>anisig(j,2))/ntotframes;
+    end
+    clear i j k l m
 
     sprintf('saving group file...')
-    save(fullfile(savepath,grpfilename),'binwidth','grpavgrad','grphistrad','X0','Y0','numAni','grpring','grpfrmdata','grprf','session','grpdfsize','grpspsize','grpsptuning','grpcells','cellprintpre','cellprintpost','grpSI','rmsdiff','footcc','cellcnt')
+    save(fullfile(savepath,grpfilename))
     sprintf('done')
 else
     sprintf('loading data')
@@ -185,25 +244,84 @@ else
 end
 
 
-%%%%%%%%%%debug
-% % % keyboard
+%%%see how similar responses are for pre and post across the population
+figure;
+subplot(1,2,1)
+hold on
+for i = 1:numAni
+    plot(grpfrmsim(i,:),'.','MarkerSize',3)
+end
+axis([0 ntotframes 0 1])
+xlabel('frame')
+ylabel('similarity index')
+axis square
+
+subplot(1,2,2)
+hold on
+histo = nan(numAni,20);
+for i = 1:numAni
+    histo(numAni,:) = cumsum(hist(grpfrmsim(i,:),20))/size(grpfrmsim,2);
+    plot(histo(numAni,:),'-')
+end
+plot(nanmean(histo),'LineWidth',2,'Color','k')
+set(gca,'xtick',0:4:20,'xticklabel',0:0.2:1)
+axis([0 20 0 1])
+xlabel('similarity index')
+ylabel('cumulative frames')
+axis square
+
+mtit(sprintf('frame similarity pre/post all cells mean=%0.2f +/- %0.2f',...
+    nanmean(nanmean(grpfrmsim,2),1),nanstd(nanmean(grpfrmsim,2),1)/sqrt(numAni)))
+if exist('psfile','var')
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    print('-dpsc',psfile,'-append');
+end
 
 
+figure;
+subplot(1,2,1)
+hold on
+for i = 1:numAni
+    plot(grpfrmsimcent(i,:),'.','MarkerSize',3)
+end
+axis([0 ntotframes 0 1])
+xlabel('frame')
+ylabel('similarity index')
+axis square
 
-%%%%%%plotting code
-% SI = nan(size(grpdfsize,1),2,2);
-% for i = 1:size(grpdfsize,1)
-%     for j = 1:2
-%         for k = 1:2
-%             [val ind] = max(nanmean(grpdfsize(i,dfWindow,:,j,k)));
-%             if ind==length(sizes)
-%                 SI(i,j,k) = 0;
-%             else
-%                 SI(i,j,k) = val; %%%calc suppression index
-%             end
-%         end
-%     end
-% end
+subplot(1,2,2)
+hold on
+histo = nan(numAni,20);
+for i = 1:numAni
+    histo(numAni,:) = cumsum(hist(grpfrmsimcent(i,:),20))/size(grpfrmsimcent,2);
+    plot(histo(numAni,:),'-')
+end
+plot(nanmean(histo),'LineWidth',2,'Color','k')
+set(gca,'xtick',0:4:20,'xticklabel',0:0.2:1)
+axis([0 20 0 1])
+xlabel('similarity index')
+ylabel('cumulative frames')
+axis square
+
+mtit(sprintf('frame similarity pre/post center cells mean=%0.2f +/- %0.2f',...
+    nanmean(nanmean(grpfrmsimcent,2),1),nanstd(nanmean(grpfrmsimcent,2),1)/sqrt(numAni)))
+if exist('psfile','var')
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    print('-dpsc',psfile,'-append');
+end
+
+figure
+hold on
+plot([1 2],prcanisig,'k.')
+errorbar([1 2],nanmean(prcanisig),nanstd(prcanisig)/sqrt(numAni),'LineStyle','none','Marker','o','Color','red')
+axis([0 3 0 0.2])
+set(gca,'xtick',1:2,'xticklabel',{'all','center'})
+ylabel('fraction similar frames at p<0.01')
+axis square
+if exist('psfile','var')
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    print('-dpsc',psfile,'-append');
+end
 
 
 %%%eye analysis
@@ -1293,6 +1411,64 @@ for z=1%:length(ccvals)
         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfile,'-append');
     end
+    
+    
+    %%%pull out response to best size
+    resp = squeeze(nanmean(grpspsize(:,spWindow,:,1,1),2));
+    [valpre idxpre] = max(resp,[],2);
+    for i = 1:length(idxpre)
+        valpost(i) = squeeze(nanmean(grpspsize(i,spWindow,idxpre(i),1,2),2));
+    end
+% %     resp = squeeze(nanmean(grpspsize(:,spWindow,:,1,2),2));
+% %     [valpost idxpost] = max(resp,[],2);
+% %     for i = 1:length(idxpost)
+% %         valpre(i) = squeeze(nanmean(grpspsize(i,spWindow,idxpost(i),1,1),2));
+% %     end
+    
+    minresp = 0.1;
+    valpost = valpost';
+    indeces = (valpre>minresp & valpost>minresp);
+    valpre = valpre(indeces);valpost = valpost(indeces);sess = session(indeces);
+    
+    %%%avg by animal
+    for j = 1:length(unique(sess))
+        valpreani(j,:) = nanmean(valpre(find(sess==j)));
+        valpostani(j,:) = nanmean(valpost(find(sess==j)));
+    end
+
+    %%%plot best size pre vs. post
+    figure;
+    subplot(1,2,1)
+    hold on
+    plot(valpre,valpost,'color',[0.6 0.6 0.6],'marker','.','linestyle','none')
+    plot(valpreani,valpostani,'bo')
+    errorbarxy(nanmean(valpreani),nanmean(valpostani),nanstd(valpreani)/sqrt(numAni),nanstd(valpostani)/sqrt(numAni))
+    plot([0 3],[0 3],'k--')
+    axis square
+    axis([0 3 0 3])
+    xlabel('pre dfof')
+    ylabel('post dfof')
+    %%%same zoomed in
+    subplot(1,2,2)
+    hold on
+    plot(valpre,valpost,'color',[0.6 0.6 0.6],'marker','.','linestyle','none')
+    plot(valpreani,valpostani,'bo')
+    errorbarxy(nanmean(valpreani),nanmean(valpostani),nanstd(valpreani)/sqrt(numAni),nanstd(valpostani)/sqrt(numAni))
+    plot([0 1],[0 1],'k--')
+    axis square
+    axis([0 1 0 1])
+    xlabel('pre dfof')
+    ylabel('post dfof')
+    legend('cells','ani','aniavg','location','northwest')
+    
+    [h p] = ttest(valpreani,valpostani);
+
+    mtit(sprintf('Response to best size pre vs. post p=%0.3f',p))
+    if exist('psfile','var')
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+        print('-dpsc',psfile,'-append');
+    end
+
 end
 
 

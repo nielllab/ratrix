@@ -3,10 +3,11 @@
 
 close all
 clear all
+dbstop if error
 
 %%choose dataset
-batchPhil2pSizeSelect
-% batchPhil2pSizeSelect22min
+% batchPhil2pSizeSelect
+batchPhil2pSizeSelect22min
 
 path = '\\langevin\backup\twophoton\Phil\Compiled2p\'
 
@@ -40,90 +41,241 @@ if isempty(use)
 end
 
 if redogrp
-    gratSpikes = nan(10000,3000,2); %%cell, timepts, pre/post
-    topoSpikes = nan(10000,3000,2); %%cell, timepts, pre/post
-    gratsession = nan(10000,1); %%make an array for animal #/session for gratings data
-    toposession = nan(10000,1); %%array for animal #/session for topo data
-    gratrf = nan(10000,2); %%cell, x/y receptive field location grat data
-    toporf = nan(10000,2); %%cell, x/y receptive field location topo data
-    osi = nan(10000,2); %%cell, osi sit/run
-    dsi = nan(10000,2); %%cell, dsi sit/run
-    bestsftf = nan(10000,2,2); %%cell, sf/tf, sit/run
-    gratori = nan(10000,2); %%cell, sit/run
-    gratcells = nan(10000,1); %%cell #, all cells w/good grat data
-    topocells = nan(10000,1); %%cell #, all cells w/good rf data
-    gratcnt=1; %%counter for gratings data
-    topocnt=1; %%counter for topo data
+    reps=10;
+    numAni = length(use)/2;
+    grpcoamtx = nan(numAni,500,500,2); %%ani, cell, cell, pre/post
+    grpsimIdx = nan(numAni,500,500,2);
+    cut=nan(1,numAni);
+    sig = nan(numAni,5);
+    ensshuf = nan(numAni,reps,2);
+    grpensmtx = nan(anicnt,500,500,2);
+    enspks = nan(anicnt,500,2);
+    enslocs = nan(anicnt,500,2);
+    grpenssimIdx = nan(numAni,500,500,2);
+    anicnt = 1;
+    
     for i = 1:2:length(use)
-        aniFile = files(use(i)).sizeanalysis; load(aniFile,'userf','useosi','usedsi','usebestsftf','useprefthetaQuad','usecells','rf','allgoodTopo');
-
-        %%%grat relevant data
-        gratrange = gratcnt:gratcnt+length(usecells)-1;
-        gratrf(gratrange,:) = userf;
-        gratcells(gratrange) = usecells;
-        gratsession(gratrange) = (i+1)/2;
-        osi(gratrange,:) = useosi;
-        dsi(gratrange,:) = usedsi;
-        bestsftf(gratrange,:,:) = usebestsftf;
-        gratori(gratrange,:) = useprefthetaQuad;
-
-        %%%topo relevant data
-        toporange = topocnt:topocnt+length(allgoodTopo)-1;
-        toporf(toporange,:) = rf(allgoodTopo,:);
-        topocells(toporange) = allgoodTopo;
-        toposession(toporange) = (i+1)/2;
 
         %%%darkness data pre
         aniFile = files(use(i)).darknesspts; load(aniFile,'spikes');
-        gratSpikes(gratrange,:,1) = spikes(usecells,size(spikes,2)-2999:end);
-        topoSpikes(toporange,:,1) = spikes(allgoodTopo,size(spikes,2)-2999:end);
-
-        %%%darkness data post
-        aniFile = files(use(i+1)).darknesspts; load(aniFile,'spikes');
-        gratSpikes(gratrange,:,2) = spikes(usecells,size(spikes,2)-2999:end);
-        topoSpikes(toporange,:,2) = spikes(allgoodTopo,size(spikes,2)-2999:end);
+        cut(anicnt) = files(use(i)).cutoff;
+        spikes = spikes(1:cut(anicnt),end-2999:end);
         
-        gratcnt = gratcnt+length(usecells);
-        topocnt = topocnt+length(allgoodTopo);
-    end
-    
-    gratcnt=gratcnt-1;topocnt=topocnt-1;
-    gratSpikes = gratSpikes(1:gratcnt,:,:); %%cell, timepts, pre/post
-    topoSpikes = topoSpikes(1:topocnt,:,:); %%cell, timepts, pre/post
-    gratsession = gratsession(1:gratcnt); %%make an array for animal #/session for gratings data
-    toposession = toposession(1:topocnt); %%array for animal #/session for topo data
-    gratrf = gratrf(1:gratcnt,:); %%cell, x/y receptive field location grat data
-    toporf = toporf(1:topocnt,:); %%cell, x/y receptive field location topo data
-    osi = osi(1:gratcnt,:); %%cell, osi sit/run
-    dsi = dsi(1:gratcnt,:); %%cell, dsi sit/run
-    bestsftf = bestsftf(1:gratcnt,:,:,:); %%cell, sf/tf, sit/run, pre/post
-    gratori = gratori(1:gratcnt,:,:); %%cell, sit/run, pre/post
-    gratcells = gratcells(1:gratcnt); %%cell #, all cells w/good grat data
-    topocells = topocells(1:topocnt); %%cell #, all cells w/good rf data
-    
-    dpix = 0.8022; %%%degrees per pixel
-    topodistance = {}; %%%Cartesian distance between cells in pixels
-    for h = 1:length(unique(toposession))
-        k = find(toposession==h);
-        for i = 1:length(k)
-            for j = 1:length(k)
-                topodistance{h}(i,j) = sqrt((toporf(k(i),1)-toporf(k(j),1))^2 + (toporf(k(i),2)-toporf(k(j),2))^2);
+        %%%pairwise coactivity
+        coamtx = nan(size(spikes,1),size(spikes,1));
+        for j = 1:size(spikes,1)
+            for k = 1:size(spikes,1)
+                Ca=spikes(j,:);Cb=spikes(k,:);
+                coamtx(j,k) = (Ca.*Cb)/((Ca.^2 + Cb.^2)/2);
             end
         end
-        topodistance{h} = topodistance{h}*dpix; %%%convert to degrees
-        topoFR{h} = topoSpikes(k,:,:);
-        k = find(gratsession==h);
-        gratoripref{h} = gratori(k,1);
-        gratFR{h} = gratSpikes(k,:,:);
+        grpcoamtx(anicnt,1:cut(anicnt),1:cut(anicnt),1) = coamtx;
+        
+
+        %%%bootstrap to get significance threshold for each cell pair
+        simind = nan(size(spikes,1),size(spikes,1),reps);
+        tic
+        parfor h = 1:reps
+            shufmtx = nan(size(spikes,1));
+            shuf = nan(size(spikes));
+            normshuf = nan(size(spikes));
+            for j = 1:size(spikes,1)
+                tshf = randi([1 size(spikes,2)],1,1);
+                shuf(j,:) = circshift(spikes(j,:),tshf,2);
+                normshuf(j,:) = shuf(j,:)/max(shuf(j,:));
+            end
+            normshuf = nanmean(normshuf,1);
+            ensshuf(anicnt,h,1) = prctile(normshuf,99);
+            
+            
+            for j=1:size(spikes,1)
+                for k=1:size(spikes,1)
+                    Ca=shuf(j,:);Cb=shuf(k,:);
+                    shufmtx(j,k) = (Ca.*Cb)/((Ca.^2 + Cb.^2)/2);
+                end
+            end
+            simind(:,:,h) = shufmtx;
+        end
+        toc
+        
+        
+        simIdx = nan(size(simind,1),size(simind,2));
+        for j = 1:size(simind,1)
+            for k = 1:size(simind,2)
+                simIdx(j,k) = prctile(squeeze(simind(j,k,:)),99);
+            end
+        end
+        sigmtx = coamtx>simIdx;
+        pre=sigmtx;
+        grpsimIdx(anicnt,1:cut(anicnt),1:cut(anicnt),1) = simIdx;
+        
+        
+        %%%ensemble analysis
+        normspikes = spikes;
+        for h = 1:size(normspikes,1)
+            normspikes(h,:) = normspikes(h,:)/max(normspikes(h,:));
+        end
+        allspikes = nanmean(normspikes,1);
+        [pks locs] = findpeaks(allspikes);
+        sigpks = find(pks>nanmean(ensshuf(anicnt,:,1)));
+        pks = pks(sigpks);locs = locs(sigpks);
+        ensmtx = nan(length(pks));
+        for j = 1:length(locs)
+            for k = 1:length(locs)
+                Ca=spikes(:,locs(j))';Cb=spikes(:,locs(k))';
+                ensmtx(j,k) = (Ca.*Cb)/((Ca.^2 + Cb.^2)/2);
+            end
+        end
+        enspks(anicnt,1:length(pks),1) = pks;enslocs(anicnt,1:length(locs),1) = locs;
+        grpensmtx(anicnt,1:length(pks),1:length(pks),1) = ensmtx;
+        
+        simind = nan(length(locs),length(locs),reps);
+        tic
+        parfor h = 1:reps
+            shufmtx = nan(length(locs));
+            shuf = nan(size(normspikes));
+            for j = 1:size(normspikes,1)
+                tshf = randi([1 size(normspikes,2)],1,1);
+                shuf(j,:) = circshift(normspikes(j,:),tshf,2);
+            end
+
+            for j = 1:length(locs)
+                for k = 1:length(locs)
+                    Ca=shuf(:,locs(j))';Cb=shuf(:,locs(k))';
+                    shufmtx(j,k) = (Ca.*Cb)/((Ca.^2 + Cb.^2)/2);
+                end
+            end
+            simind(:,:,h) = shufmtx;
+        end
+        toc
+        
+        simIdx = nan(size(simind,1),size(simind,2));
+        for j = 1:size(simind,1)
+            for k = 1:size(simind,2)
+                simIdx(j,k) = prctile(squeeze(simind(j,k,:)),99);
+            end
+        end
+        sigmtx = ensmtx>simIdx;
+        grpenssimIdx(anicnt,1:length(locs),1:length(locs),1) = simIdx;
+        
+        %%%darkness data post
+        aniFile = files(use(i+1)).darknesspts; load(aniFile,'spikes');
+        spikes = spikes(1:cut(anicnt),end-2999:end);
+
+        %%%pairwise coactivity
+        coamtx = nan(size(spikes,1),size(spikes,1));
+        for j = 1:size(spikes,1)
+            for k = 1:size(spikes,1)
+                Ca=spikes(j,:);Cb=spikes(k,:);
+                coamtx(j,k) = (Ca.*Cb)/((Ca.^2 + Cb.^2)/2);
+            end
+        end
+        grpcoamtx(anicnt,1:cut(anicnt),1:cut(anicnt),2) = coamtx;
+
+        %%%bootstrap to get significance threshold for each cell pair
+        simind = nan(size(spikes,1),size(spikes,1),reps);
+        tic
+        parfor h = 1:reps
+            shufmtx = nan(size(spikes,1));
+            shuf = nan(size(spikes));
+            for j = 1:size(spikes,1)
+                tshf = randi([1 size(spikes,2)],1,1);
+                shuf(j,:) = circshift(spikes(j,:),tshf,2);
+            end
+            for j=1:size(spikes,1)
+                for k=1:size(spikes,1)
+                    Ca=shuf(j,:);Cb=shuf(k,:);
+                    shufmtx(j,k) = (Ca.*Cb)/((Ca.^2 + Cb.^2)/2);
+                end
+            end
+            simind(:,:,h) = shufmtx;
+        end
+        toc
+        
+        simIdx = nan(size(simind,1),size(simind,2));
+        for j = 1:size(simind,1)
+            for k = 1:size(simind,2)
+                simIdx(j,k) = prctile(squeeze(simind(j,k,:)),99);
+            end
+        end
+        sigmtx = coamtx>simIdx;
+        post=sigmtx;
+        grpsimIdx(anicnt,1:cut(anicnt),1:cut(anicnt),2) = simIdx;
+        
+        sig(anicnt,1) = sum(pre(:))/(cut(anicnt)^2);sprintf('percent coactive pre: %0.2f',sig(anicnt,1))
+        sig(anicnt,2) = sum(post(:))/(cut(anicnt)^2);sprintf('percent coactive post: %0.2f',sig(anicnt,2))
+        sig(anicnt,3) = sum(pre(:)&post(:))/(cut(anicnt)^2);sprintf('percent coactive pre and post: %0.2f',sig(anicnt,3))
+        sig(anicnt,4) = sum(pre(:)&~post(:))/(cut(anicnt)^2);sprintf('percent coactive pre and not post: %0.2f',sig(anicnt,4))
+        sig(anicnt,5) = sum(~pre(:)&post(:))/(cut(anicnt)^2);sprintf('percent coactive not pre and post: %0.2f',sig(anicnt,5))
+        
+        anicnt=anicnt+1;
+        sprintf('%0.0f/%0.0f done',anicnt-1,numAni)
     end
     
-    
-    sprintf('saving group file...')
-    save(grpfilename,'gratFR','topoFR','gratoripref','topodistance')
+
+    save(fullfile(pathname,grpfilename));
     sprintf('done')
 else
     sprintf('loading data')
     load(grpfilename)
 end
 
+%%%plotting
+for i = 1:numAni
+    figure
+	subplot(2,2,1);imagesc(squeeze(grpcoamtx(i,1:cut(i),1:cut(i),1)),[-0.01 0.5]);colormap jet;colorbar
+    xlabel(sprintf('coact matrix %s',[files(use(i*2-1)).timing]))
+    ylabel('cell #')
+    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',6)
+    axis equal
+    
+    subplot(2,2,2);imagesc(squeeze(grpsimIdx(i,1:cut(i),1:cut(i),1)),[0 1]);colormap jet;colorbar
+    xlabel(sprintf('coact sig %s',[files(use(i*2-1)).timing]))
+    ylabel('cell #')
+    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',6)
+    axis equal
+    
+    subplot(2,2,3);imagesc(squeeze(grpcoamtx(i,1:cut(i),1:cut(i),2)),[-0.01 0.5]);colormap jet;colorbar
+    xlabel(sprintf('coact matrix %s',[files(use(i*2)).timing]))
+    ylabel('cell #')
+    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',6)
+    axis equal
+    
+    subplot(2,2,4);imagesc(squeeze(grpsimIdx(i,1:cut(i),1:cut(i),2)),[0 1]);colormap jet;colorbar
+    xlabel(sprintf('coact sig %s',[files(use(i*2)).timing]))
+    ylabel('cell #')
+    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',6)
+    axis equal
 
+    mtit(sprintf('%s',[files(use(i*2)).subj ' ' files(use(i*2)).inject]))
+    if exist('psfile','var')
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+        print('-dpsc',psfile,'-append');
+    end
+end
+
+figure;
+hold on
+errorbar(1:5,nanmean(sig,1),nanstd(sig,1)/sqrt(numAni),'ro')
+plot(1:5,sig','b.-','MarkerSize',5)
+% for i = 1:size(sig,1)
+%     plot(1:5,sig(i,:),'b.-')
+% end
+axis square
+axis([0 6 0 0.1])
+ylabel('percent of cell pairs')
+set(gca,'xtick',1:5,'xticklabel',{'pre','post','pre&post','pre~post','~prepost'},'fontsize',6)
+title('percent of cells coactive')
+if exist('psfile','var')
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    print('-dpsc',psfile,'-append');
+end
+   
+%%%saving pdf
+try
+    dos(['ps2pdf ' psfile ' "' [fullfile(pathname,grpfilename) '.pdf'] '"'] )
+catch
+    display('couldnt generate pdf');
+end
+
+delete(psfile);

@@ -24,11 +24,24 @@ dfWindow = 9:11;
 spWindow = 6:10;
 dt = 0.1;
 cyclelength = 1/0.1;
-contrastRange = unique(contrasts); sfrange = unique(sf); phaserange = unique(phase);
+timepts = 1:(2*isi+duration)/dt; timepts = (timepts-1)*dt; timepts = timepts - isi;
+contrastRange = unique(contrasts); sfrange = unique(sf); phaserange = unique(phase);thetaRange = unique(theta);radiusrange = unique(radius);
 for i = 1:length(contrastRange);contrastlist{i} = num2str(contrastRange(i));end
 for i=1:length(radiusRange); sizes{i} = num2str(radiusRange(i)*2); end
-thetaRange = unique(theta);
-timepts = 1:(2*isi+duration)/dt; timepts = (timepts-1)*dt; timepts = timepts - isi;
+numtrialtypes = length(sfrange)*length(contrastRange)*length(radiusRange)*length(thetaRange);
+trialtype = nan(numtrialtypes,ntrials/numtrialtypes);
+cnt=1;
+for i = 1:length(sfrange)
+    for j = 1:length(contrastRange)
+        for k = 1:length(radiusrange)
+            for l = 1:length(thetaRange)
+                trialtype(cnt,:) = find(sf==sfrange(i)&contrasts==contrastRange(j)&...
+                    radius==radiusrange(k)&theta==thetaRange(l));
+                cnt=cnt+1;
+            end
+        end
+    end
+end
 
 f1=figure;f2=figure;f3=figure;f4=figure;
 hvals=zeros(4,length(sizes),4);

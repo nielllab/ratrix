@@ -744,7 +744,7 @@ files(n).training = 'naive';
 files(n).cutoff = 250;
 
 
-
+%%%this guy has very few stationary trials, messes up size curve fits
 n=n+1;
 files(n).subj = 'G62BB10LT';
 files(n).expt = '031617';

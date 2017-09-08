@@ -528,31 +528,33 @@ for f=1:length(use)
         for i = 1:length(usecells)
             for k = 1:length(sizes)
                 for l = 1:2
-                dfsize(i,:,k,l) = squeeze(nanmean(dftuning(usecells(i),:,sizebestsfdf(i,1),...
-                    sizebestthetadf(i,1),k,l),5));
-                spsize(i,:,k,l) = squeeze(nanmean(sptuning(usecells(i),:,sizebestsfsp(i,1),...
-                    sizebestthetasp(i,1),k,l),5));
+                dfsize(i,:,k,l) = squeeze(dftuning(usecells(i),:,sizebestsfdf(i,1),...
+                    sizebestthetadf(i,1),k,l));
+                spsize(i,:,k,l) = squeeze(sptuning(usecells(i),:,sizebestsfsp(i,1),...
+                    sizebestthetasp(i,1),k,l));
                 end
             end
         end
         
-        %%%threshold out non-responding cells (only done for pre)
-        if mod(f,2)~=0
-            respcells = max(max(nanmean(spsize(:,dfWindow,:,:),2),[],3),[],4)>0.1;
-            usecells = usecells(respcells);
-            dfsize = dfsize(respcells,:,:,:);
-            spsize = spsize(respcells,:,:,:);
-        else
-%             load(files(use(f-1)).sizeanalysis,'respcells')
-            load(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_pre']),'respcells')
-%             usecells = usecells(respcells);
-%             dfsize = dfsize(respcells,:,:,:);
-%             spsize = spsize(respcells,:,:,:);
-        end
-        
-        if respcells==0
-            continue
-        end
+        %%%i do this thresholding at the group stage now since you need
+        %%%pre+post data
+% % %         %%%threshold out non-responding cells (only done for pre)
+% % %         if mod(f,2)~=0
+% % %             respcells = max(max(nanmean(spsize(:,dfWindow,:,:),2),[],3),[],4)>0.1;
+% % %             usecells = usecells(respcells);
+% % %             dfsize = dfsize(respcells,:,:,:);
+% % %             spsize = spsize(respcells,:,:,:);
+% % %         else
+% % % %             load(files(use(f-1)).sizeanalysis,'respcells')
+% % %             load(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_pre']),'respcells')
+% % % %             usecells = usecells(respcells);
+% % % %             dfsize = dfsize(respcells,:,:,:);
+% % % %             spsize = spsize(respcells,:,:,:);
+% % %         end
+% % %         
+% % %         if respcells==0
+% % %             continue
+% % %         end
       
         
         %%%plot rasters for dfof and spikes
@@ -1013,11 +1015,11 @@ for f=1:length(use)
         updated=1;
         %%%saving
         if ~exist(fullfile(pathname,[filename '.mat']))
-            save(fullfile(pathname,filename),'avgrad','histrad','spInterp','running','eyes','eyeAlign','timepts','ntrials','onsets','dt','updated','ring','dist','limx','limy','x0','y0','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells','goodprints')
-            save(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing]),'avgrad','histrad','spInterp','running','eyes','eyeAlign','timepts','ntrials','onsets','dt','updated','ring','dist','limx','limy','x0','y0','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells','goodprints')
+            save(fullfile(pathname,filename),'avgrad','histrad','spInterp','running','eyes','eyeAlign','timepts','ntrials','onsets','dt','updated','ring','dist','limx','limy','x0','y0','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','goodprints')
+            save(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing]),'avgrad','histrad','spInterp','running','eyes','eyeAlign','timepts','ntrials','onsets','dt','updated','ring','dist','limx','limy','x0','y0','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','goodprints')
         else
-            save(fullfile(pathname,filename),'avgrad','histrad','spInterp','running','eyes','eyeAlign','timepts','ntrials','onsets','dt','updated','ring','dist','limx','limy','x0','y0','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells','goodprints','-append')
-            save(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing]),'avgrad','histrad','spInterp','running','eyes','eyeAlign','timepts','ntrials','onsets','dt','updated','ring','dist','limx','limy','x0','y0','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','respcells','goodprints','-append')
+            save(fullfile(pathname,filename),'avgrad','histrad','spInterp','running','eyes','eyeAlign','timepts','ntrials','onsets','dt','updated','ring','dist','limx','limy','x0','y0','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','goodprints','-append')
+            save(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing]),'avgrad','histrad','spInterp','running','eyes','eyeAlign','timepts','ntrials','onsets','dt','updated','ring','dist','limx','limy','x0','y0','frmdata','pcdftuning','pcsptuning','dftuning','sptuning','dfsize','spsize','usecells','cellprint','SI','goodprints','-append')
         end
         
         try

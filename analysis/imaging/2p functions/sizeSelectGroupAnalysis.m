@@ -61,14 +61,18 @@ if isempty(use)
 end
 
 if redoani==1
-    sizeSelect2pAnalysis
+    sizeSelect2pAnalysisNeuropilSelect
+%     sizeSelect2pAnalysis
 end
 
+% % % keyboard
 
+mycol = {'b','g','r','c','m','y','k','b','g','r','c','m','y','k'};
 moviefname = 'C:\sizeselectBin22min';
 load(moviefname)
 dfWindow = 9:11;
 spWindow = 6:10;
+spthresh = 0.1;
 dt = 0.1;
 cyclelength = 1/0.1;
 timepts = 1:(2*isi+duration)/dt; timepts = (timepts-1)*dt; timepts = timepts - isi;
@@ -97,16 +101,18 @@ if redogrp
     shufreps = 1000;
     grpdfsize = nan(10000,15,length(sizes),2,2);grpspsize=grpdfsize;
     grpsptuning = nan(10000,15,length(sfrange),length(thetaRange),length(sizes),2,2);
-    grprf=nan(10000,2);
+%     grprf=nan(10000,2);
     session = nan(10000,1);%%%make an array for animal #/session
     grpcells = nan(10000,1);
-    grpSI = nan(10000,2,2);
+    grpSIsp = nan(10000,2,2);
     grpfrmdata = nan(numAni,398,398,length(sfrange),length(sizes),2,2);
     grpring = nan(numAni,80,length(sfrange),length(sizes),2,2);
     grpavgrad = nan(numAni,2);
     grphistrad = nan(numAni,11,2);
     grpfrmsim = nan(numAni,ntotframes);grpfrmsimcent=grpfrmsim;grpfrmsimtr = nan(numAni,numtrialtypes);
     anisig = nan(numAni,2);anisigtr = nan(numAni,1);
+%     grpshufdist = nan(numAni,numtrialtypes);
+    grpsimmtx = nan(numAni,shufreps,ntotframes);grpsimmtxcent = grpsimmtx;grpsimmtxtr = nan(numAni,shufreps,numtrialtypes);
     cellcnt=1;
     anicnt = 1;
     for i = 1:2:length(use)
@@ -120,9 +126,9 @@ if redogrp
         session(cellcnt:cellcnt+expcells) = (i+1)/2;
         grpdfsize(cellcnt:cellcnt+expcells,:,:,:,1) = dfsize;
         grpspsize(cellcnt:cellcnt+expcells,:,:,:,1) = spsize;
-        sptuning = sptuning(usecells,:,:,:,:,:);
+%         sptuning = sptuning(usecells,:,:,:,:,:);
         grpsptuning(cellcnt:cellcnt+expcells,:,:,:,:,:,1) = sptuning;
-        grpSI(cellcnt:cellcnt+expcells,:,1) = SI;
+        grpSIsp(cellcnt:cellcnt+expcells,:,1) = SIsp;
         grpfrmdata(anicnt,:,:,:,:,:,1) = frmdata;
         grpavgrad(anicnt,1) = avgrad;
         grphistrad(anicnt,:,1) = histrad;
@@ -131,12 +137,16 @@ if redogrp
         end
         
         X0(anicnt) = x0;Y0(anicnt) = y0;
-        dist=dist(:,25:375);
+        if size(dist,2)==398;dist=dist(:,25:375);end
         ring = nan(ceil(max(max(dist))/binwidth),size(frmdata,3),size(frmdata,4),size(frmdata,5));
         for j = 1:size(frmdata,3)
             for k = 1:size(frmdata,4)
                 for l = 1:size(frmdata,5)
-                    resp = squeeze(frmdata(:,25:375,j,k,l));
+                    if size(frmdata,2)==398
+                        resp = squeeze(frmdata(:,25:375,j,k,l));
+                    else
+                        resp = squeeze(frmdata(:,:,j,k,l));
+                    end
                     for m = 1:ceil(max(max(dist)))/binwidth
                         ring(m,j,k,l) = nanmean(resp(dist>(binwidth*(m-1)) & dist<binwidth*m));
                     end
@@ -156,9 +166,9 @@ if redogrp
         aniFile = [files(use(i)).subj '_' files(use(i)).expt '_' files(use(i)).inject '_post']; load(aniFile);
         grpdfsize(cellcnt:cellcnt+expcells,:,:,:,2) = dfsize;
         grpspsize(cellcnt:cellcnt+expcells,:,:,:,2) = spsize;
-        sptuning = sptuning(usecells,:,:,:,:,:);
+%         sptuning = sptuning(usecells,:,:,:,:,:);
         grpsptuning(cellcnt:cellcnt+expcells,:,:,:,:,:,2) = sptuning;
-        grpSI(cellcnt:cellcnt+expcells,:,2) = SI;
+        grpSIsp(cellcnt:cellcnt+expcells,:,2) = SIsp;
         grpfrmdata(anicnt,:,:,:,:,:,2) = frmdata;
         grpavgrad(anicnt,2) = avgrad;
         grphistrad(anicnt,:,2) = histrad;
@@ -167,12 +177,16 @@ if redogrp
             cellprintpost{cellcnt+j-1} = cellprint{j};
         end
         
-        dist=dist(:,25:375);
+        if size(dist,2)==398;dist=dist(:,25:375);end
         ring = nan(ceil(max(max(dist))/binwidth),size(frmdata,3),size(frmdata,4),size(frmdata,5));
         for j = 1:size(frmdata,3)
             for k = 1:size(frmdata,4)
                 for l = 1:size(frmdata,5)
-                    resp = squeeze(frmdata(:,25:375,j,k,l));
+                    if size(frmdata,2)==398
+                        resp = squeeze(frmdata(:,25:375,j,k,l));
+                    else
+                        resp = squeeze(frmdata(:,:,j,k,l));
+                    end
                     for m = 1:ceil(max(max(dist)))/binwidth
                         ring(m,j,k,l) = nanmean(resp(dist>(binwidth*(m-1)) & dist<binwidth*m));
                     end
@@ -212,7 +226,12 @@ if redogrp
         
         sprintf('doing shuffle ani %d/%d',anicnt,numAni)
         tic
-        shufsig = nan(1,shufreps);shufsigcent = shufsig;shufsigtr = shufsig;
+%         shufsig = nan(1,shufreps);shufsigcent = shufsig;shufsigtr = shufsig;
+%         shufdist = zeros(1,numtrialtypes);
+%         simmtx = nan(shufreps,ntotframes);simmtxcent=simmtx;simmtxtr = nan(shufreps,numtrialtypes);
+%         simmtx=[];simmtxcent=[];simmtxtr=[];
+        %%%%fix this it takes forever, do something with simmtx
+        %%%%concatenation
         parfor j=1:shufreps
             shuf1 = spikespre;shuf2 = spikespost;shuftrpre = pre;shuftrpost = post;
             for k = 1:size(shuf1,1)
@@ -234,23 +253,32 @@ if redogrp
             simmtx = nan(1,ntotframes);simmtxcent=simmtx;
             for k = 1:ntotframes
                 Ca=shuf1(:,k)';Cb=shuf2(:,k)';
-                simmtx(1,k) = (Ca.*Cb)/((Ca.^2 + Cb.^2)/2);
+                simmtx(k) = (Ca.*Cb)/((Ca.^2 + Cb.^2)/2);
                 Ca=shuf1cent(:,k)';Cb=shuf2cent(:,k)';
-                simmtxcent(1,k) = (Ca.*Cb)/((Ca.^2 + Cb.^2)/2);
+                simmtxcent(k) = (Ca.*Cb)/((Ca.^2 + Cb.^2)/2);
             end
-            shufsig(1,j) = prctile(simmtx,99);shufsigcent(1,j) = prctile(simmtxcent,99);
+            grpsimmtx(anicnt,j,:) = simmtx;grpsimmtxcent(anicnt,j,:) = simmtxcent;
+%             shufsig(1,j) = prctile(simmtx,99);shufsigcent(1,j) = prctile(simmtxcent,99);
             
-            simmtxtr = nan(1,size(pre,2));
-            for k = 1:size(pre,2)
+            simmtxtr = nan(1,numtrialtypes);
+            for k = 1:numtrialtypes
                 Ca=shuftrpre(:,k)';Cb=shuftrpost(:,k)';
-                simmtxtr(1,k) = (Ca.*Cb)/((Ca.^2 + Cb.^2)/2);
+                simmtxtr(k) = (Ca.*Cb)/((Ca.^2 + Cb.^2)/2);
             end
-            shufsigtr(1,j) = prctile(simmtxtr,99);
+            grpsimmtxtr(anicnt,j,:) = simmtxtr
+%             shufsigtr(1,j) = prctile(simmtxtr,99);
+%             shufdist = shufdist + simmtxtr;
             
         end
         toc
-        anisig(anicnt,1) = nanmean(shufsig);anisig(anicnt,2) = nanmean(shufsigcent);
-        anisigtr(anicnt) = nanmean(shufsigtr);
+%         grpshufdist(anicnt,:) = shufdist/shufreps;
+%         anisig(anicnt,1) = nanmean(shufsig);anisig(anicnt,2) = nanmean(shufsigcent);
+%         anisigtr(anicnt) = nanmean(shufsigtr);
+%         grpsimmtx(anicnt,:) = simmtx;grpsimmtxcent(anicnt,:) = simmtxcent;grpsimmtxtr(anicnt,:) = simmtxtr;
+        simmtx = squeeze(grpsimmtx(anicnt,:,:));simmtxcent = squeeze(grpsimmtxcent(anicnt,:,:));
+        anisig(anicnt,1) = prctile(simmtx(:),99);anisig(anicnt,2) = prctile(simmtxcent(:),99);
+        simmtxtr = squeeze(grpsimmtxtr(anicnt,:,:));
+        anisigtr(anicnt) = prctile(simmtxtr(:),99);
         
         cellcnt = cellcnt+expcells;
         anicnt=anicnt+1;
@@ -262,7 +290,7 @@ if redogrp
     grpdfsize = grpdfsize(1:cellcnt,:,:,:,:,:); %cell#,t,contr,size,run,pre/post
     grpspsize = grpspsize(1:cellcnt,:,:,:,:,:);
     grpsptuning = grpsptuning(1:cellcnt,:,:,:,:,:,:);
-    grpSI = grpSI(1:cellcnt,:,:);
+    grpSIsp = grpSIsp(1:cellcnt,:,:);
     grpcells = grpcells(1:cellcnt);
 %     grpfrmdata = grpfrmdata(1:numAni,:,25:375,:,:,:,:);
 %     grpring = grpring(1:numAni,:,:,:,:,:);
@@ -300,220 +328,255 @@ end
 
 
 %%%see how similar responses are for pre and post across the population
-figure;
-subplot(1,2,1)
-hold on
-for i = 1:numAni
-    plot(grpfrmsimtr(i,:),'.','MarkerSize',3)
+%% 
+% figure;
+% subplot(1,2,1)
+% hold on
+% for i = 1:numAni
+%     plot(grpfrmsimtr(i,:),'o','MarkerSize',5,'color',mycol{i})
+%     plot([0 numtrialtypes],[anisigtr(i) anisigtr(i)],':','LineWidth',2,'color',mycol{i})
+% end
+% axis([0 numtrialtypes 0 1])
+% xlabel('unique stim number')
+% ylabel('frame similarity index')
+% axis square
+% 
+% subplot(1,2,2)
+% hold on
+% histo = nan(numAni,10);shufhist=histo;
+% for i = 1:numAni
+%     histo(i,:) = cumsum(hist(grpfrmsimtr(i,:),0.05:0.1:0.95))/size(grpfrmsimtr,2);
+%     plot(histo(i,:),'-','LineWidth',2,'color',mycol{i})
+% %     shufhist(i,:) = cumsum(hist(grpshufdist(i,:),10))/size(grpshufdist,2);
+% %     plot(shufhist(i,:),':','LineWidth',2,'color',mycol{i})
+%     plot([anisigtr(i)*10 anisigtr(i)*10],[0 1],'-.','LineWidth',1,'color',mycol{i})
+% end
+% plot(nanmean(histo),'-','LineWidth',4,'Color','k')
+% % plot(nanmean(shufhist),':','LineWidth',4,'Color','k')
+% set(gca,'xtick',0:2:10,'xticklabel',0:0.2:1)
+% axis([0 10 0 1])
+% xlabel('similarity index')
+% ylabel('cumulative frames')
+% axis square
+% 
+% mtit(sprintf('unique stim similarity pre/post all cells mean=%0.2f +/- %0.2f',...
+%     nanmean(nanmean(grpfrmsimtr,2),1),nanstd(nanmean(grpfrmsimtr,2),1)/sqrt(numAni)))
+% if exist('psfile','var')
+%     set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+%     print('-dpsc',psfile,'-append');
+% end
+% 
+% %%%plot shuffled vs. real data
+% figure
+% for i = 1:numAni
+%     subplot(2,ceil(numAni/2),i)
+%     simmtxtr = grpsimmtxtr(i,:,:);
+%     histo = hist(simmtxtr(:),0:0.01:1);histo=histo/max(histo);
+%     hold on
+%     bar(0:0.01:1,histo,'k')
+%     histo = hist(grpfrmsimtr(i,:),0:0.01:1);histo=histo/max(histo);
+%     hold on
+%     bar([0:0.01:1]+0.01,histo,'r')
+%     plot([anisigtr(i) anisigtr(i)],[0 1],'g:')
+%     legend('shuffle','data','sig','location','northwest')
+%     axis([0 1 0 1])
+%     axis square
+%     xlabel('similarity index')
+%     ylabel('normalized count')
+%     title(sprintf('%s %s',files(use(i*2)).subj,files(use(i*2)).expt))
+%     set(gca,'LooseInset',get(gca,'TightInset'),'Fontsize',8)
+% end
+% mtit('sim of pop resp to each stim pre vs. post')
+% if exist('psfile','var')
+%     set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+%     print('-dpsc',psfile,'-append');
+% end
+% 
+% 
+% figure;
+% subplot(1,2,1)
+% hold on
+% for i = 1:numAni
+%     plot(grpfrmsim(i,:),'o','MarkerSize',3)
+% end
+% axis([0 ntotframes 0 1])
+% xlabel('frame')
+% ylabel('similarity index')
+% axis square
+% 
+% subplot(1,2,2)
+% hold on
+% histo = nan(numAni,20);
+% for i = 1:numAni
+%     histo(i,:) = cumsum(hist(grpfrmsim(i,:),20))/size(grpfrmsim,2);
+%     plot(histo(i,:),'-')
+% end
+% plot(nanmean(histo),'LineWidth',2,'Color','k')
+% set(gca,'xtick',0:4:20,'xticklabel',0:0.2:1)
+% axis([0 20 0 1])
+% xlabel('similarity index')
+% ylabel('cumulative frames')
+% axis square
+% 
+% mtit(sprintf('frame similarity pre/post all cells mean=%0.2f +/- %0.2f',...
+%     nanmean(nanmean(grpfrmsim,2),1),nanstd(nanmean(grpfrmsim,2),1)/sqrt(numAni)))
+% if exist('psfile','var')
+%     set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+%     print('-dpsc',psfile,'-append');
+% end
+% 
+% 
+% figure;
+% subplot(1,2,1)
+% hold on
+% for i = 1:numAni
+%     plot(grpfrmsimcent(i,:),'o','MarkerSize',3)
+% end
+% axis([0 ntotframes 0 1])
+% xlabel('frame')
+% ylabel('similarity index')
+% axis square
+% 
+% subplot(1,2,2)
+% hold on
+% histo = nan(numAni,20);
+% for i = 1:numAni
+%     histo(i,:) = cumsum(hist(grpfrmsimcent(i,:),20))/size(grpfrmsimcent,2);
+%     plot(histo(i,:),'-')
+% end
+% plot(nanmean(histo),'LineWidth',2,'Color','k')
+% set(gca,'xtick',0:4:20,'xticklabel',0:0.2:1)
+% axis([0 20 0 1])
+% xlabel('similarity index')
+% ylabel('cumulative frames')
+% axis square
+% 
+% mtit(sprintf('frame similarity pre/post center cells mean=%0.2f +/- %0.2f',...
+%     nanmean(nanmean(grpfrmsimcent,2),1),nanstd(nanmean(grpfrmsimcent,2),1)/sqrt(numAni)))
+% if exist('psfile','var')
+%     set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+%     print('-dpsc',psfile,'-append');
+% end
+% 
+% figure
+% hold on
+% plot([1 2 3],[prcanisigtr prcanisig],'k.')
+% errorbar([1 2 3],[nanmean(prcanisigtr) nanmean(prcanisig)],[nanstd(prcanisigtr)/sqrt(numAni) nanstd(prcanisig)/sqrt(numAni)],'LineStyle','none','Marker','o','Color','red')
+% axis([0.5 3.5 0 0.5])
+% set(gca,'xtick',1:3,'xticklabel',{'all unique' 'all frames','center frames'})
+% ylabel('fraction similar frames at p<0.01')
+% axis square
+% if exist('psfile','var')
+%     set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+%     print('-dpsc',psfile,'-append');
+% end
+% 
+% 
+% %%%eye analysis
+% figure
+% subplot(1,2,1)
+% pre = grpavgrad(:,1);post = grpavgrad(:,2);
+% hold on
+% errorbar([1 2],[nanmean(pre) nanmean(post)],[nanstd(pre)/sqrt(numAni) nanstd(post)/sqrt(numAni)],'ko-','linewidth',2)
+% plot([1 2],grpavgrad,'b.-')
+% axis([0 3 0 30])
+% set(gca,'xtick',[1 2],'xticklabel',{'pre','post'},'tickdir','out','fontsize',8)
+% ylabel('pupil diameter')
+% axis square
+% [h p] = ttest(pre,post);
+% title(sprintf('p = %0.3f',p))
+% subplot(1,2,2)
+% pre = grphistrad(:,:,1);post = grphistrad(:,:,2);
+% hold on
+% shadedErrorBar(1:11,nanmean(pre),nanstd(pre)/sqrt(numAni),'k',1)
+% shadedErrorBar(1:11,nanmean(post),nanstd(post)/sqrt(numAni),'r',1)
+% set(gca,'xtick',1:2:10,'xticklabel',[0:10:50],'ytick',0:2000:10000,'tickdir','out','fontsize',8)
+% xlabel('pupil diameter')
+% ylabel('number of frames')
+% legend('pre','post')
+% axis([0 11 0 10000])
+% axis square
+% mtit('pupil pre vs. post')
+% if exist('psfile','var')
+%     set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+%     print('-dpsc',psfile,'-append');
+% end
+%% 
+
+
+
+%%%pixelwise analysis
+for z = 1:numAni
+    %%%plot sit dF
+    for h = 1:length(sfrange)
+        figure;
+        colormap jet
+        for i = 1:length(sizes)
+            subplot(4,length(sizes),i)
+            resp = squeeze(grpfrmdata(z,:,:,h,i,1,1)-grpfrmdata(z,:,:,h,1,1,1));
+            imagesc(imresize(resp,0.25),[-0.01 0.3])
+            set(gca,'ytick',[],'xtick',[],'FontSize',7)
+            xlabel(sprintf('sit %sdeg pre',sizes{i}))
+            axis square
+            subplot(4,length(sizes),i+length(sizes))
+            resp = squeeze(grpfrmdata(z,:,:,h,i,1,2)-grpfrmdata(z,:,:,h,1,1,2));
+            imagesc(imresize(resp,0.25),[-0.01 0.3])
+            set(gca,'ytick',[],'xtick',[],'FontSize',7)
+            xlabel(sprintf('sit %sdeg post',sizes{i}))
+            axis square
+        end
+        for i = 1:length(sizes)
+            subplot(4,length(sizes),i+2*length(sizes))
+            resp = squeeze(grpfrmdata(z,:,:,h,i,2,1)-grpfrmdata(z,:,:,h,1,2,1));
+            imagesc(imresize(resp,0.25),[-0.01 0.3])
+            set(gca,'ytick',[],'xtick',[],'FontSize',7)
+            xlabel(sprintf('run %sdeg pre',sizes{i}))
+            axis square
+            subplot(4,length(sizes),i+3*length(sizes))
+            resp = squeeze(grpfrmdata(z,:,:,h,i,2,2)-grpfrmdata(z,:,:,h,1,2,2));
+            imagesc(imresize(resp,0.25),[-0.01 0.3])
+            set(gca,'ytick',[],'xtick',[],'FontSize',7)
+            xlabel(sprintf('run %sdeg post',sizes{i}))
+            axis square
+        end
+        mtit(sprintf('dF/size %0.2fcpd %s',sfrange(h),files(use(z*2)).subj))
+        if exist('psfile','var')
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+            print('-dpsc',psfile,'-append');
+        end
+    end
+    
+    figure
+    subplot(2,2,1)
+    resp = squeeze(nanmean(grpfrmdata(z,:,:,:,1,1,1),4));
+    imagesc(resp,[-0.01 0.1])
+    set(gca,'ytick',[],'xtick',[])
+    xlabel('pre sit')
+    axis square
+    subplot(2,2,2)
+    resp = squeeze(nanmean(grpfrmdata(z,:,:,:,1,2,1),4));
+    imagesc(resp,[-0.01 0.1])
+    set(gca,'ytick',[],'xtick',[])
+    xlabel('pre run')
+    axis square
+    subplot(2,2,3)
+    resp = squeeze(nanmean(grpfrmdata(z,:,:,:,1,1,2),4));
+    imagesc(resp,[-0.01 0.1])
+    set(gca,'ytick',[],'xtick',[])
+    xlabel('post sit')
+    axis square
+    subplot(2,2,4)
+    resp = squeeze(nanmean(grpfrmdata(z,:,:,:,1,2,2),4));
+    imagesc(resp,[-0.01 0.1])
+    set(gca,'ytick',[],'xtick',[])
+    xlabel('post run')
+    axis square
+    mtit(sprintf('0deg responses %s',files(use(z*2)).subj))
+    if exist('psfile','var')
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+        print('-dpsc',psfile,'-append');
+    end
 end
-axis([0 numtrialtypes 0 1])
-xlabel('stim type')
-ylabel('similarity index')
-axis square
-
-subplot(1,2,2)
-hold on
-histo = nan(numAni,10);
-for i = 1:numAni
-    histo(i,:) = cumsum(hist(grpfrmsimtr(i,:),10))/size(grpfrmsimtr,2);
-    plot(histo(i,:),'-')
-end
-plot(nanmean(histo),'LineWidth',2,'Color','k')
-set(gca,'xtick',0:2:10,'xticklabel',0:0.2:1)
-axis([0 10 0 1])
-xlabel('similarity index')
-ylabel('cumulative frames')
-axis square
-
-mtit(sprintf('unique stim similarity pre/post all cells mean=%0.2f +/- %0.2f',...
-    nanmean(nanmean(grpfrmsimtr,2),1),nanstd(nanmean(grpfrmsimtr,2),1)/sqrt(numAni)))
-if exist('psfile','var')
-    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-    print('-dpsc',psfile,'-append');
-end
-
-
-figure;
-subplot(1,2,1)
-hold on
-for i = 1:numAni
-    plot(grpfrmsim(i,:),'.','MarkerSize',3)
-end
-axis([0 ntotframes 0 1])
-xlabel('frame')
-ylabel('similarity index')
-axis square
-
-subplot(1,2,2)
-hold on
-histo = nan(numAni,20);
-for i = 1:numAni
-    histo(i,:) = cumsum(hist(grpfrmsim(i,:),20))/size(grpfrmsim,2);
-    plot(histo(i,:),'-')
-end
-plot(nanmean(histo),'LineWidth',2,'Color','k')
-set(gca,'xtick',0:4:20,'xticklabel',0:0.2:1)
-axis([0 20 0 1])
-xlabel('similarity index')
-ylabel('cumulative frames')
-axis square
-
-mtit(sprintf('frame similarity pre/post all cells mean=%0.2f +/- %0.2f',...
-    nanmean(nanmean(grpfrmsim,2),1),nanstd(nanmean(grpfrmsim,2),1)/sqrt(numAni)))
-if exist('psfile','var')
-    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-    print('-dpsc',psfile,'-append');
-end
-
-
-figure;
-subplot(1,2,1)
-hold on
-for i = 1:numAni
-    plot(grpfrmsimcent(i,:),'.','MarkerSize',3)
-end
-axis([0 ntotframes 0 1])
-xlabel('frame')
-ylabel('similarity index')
-axis square
-
-subplot(1,2,2)
-hold on
-histo = nan(numAni,20);
-for i = 1:numAni
-    histo(i,:) = cumsum(hist(grpfrmsimcent(i,:),20))/size(grpfrmsimcent,2);
-    plot(histo(i,:),'-')
-end
-plot(nanmean(histo),'LineWidth',2,'Color','k')
-set(gca,'xtick',0:4:20,'xticklabel',0:0.2:1)
-axis([0 20 0 1])
-xlabel('similarity index')
-ylabel('cumulative frames')
-axis square
-
-mtit(sprintf('frame similarity pre/post center cells mean=%0.2f +/- %0.2f',...
-    nanmean(nanmean(grpfrmsimcent,2),1),nanstd(nanmean(grpfrmsimcent,2),1)/sqrt(numAni)))
-if exist('psfile','var')
-    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-    print('-dpsc',psfile,'-append');
-end
-
-figure
-hold on
-plot([1 2 3],[prcanisigtr prcanisig],'k.')
-errorbar([1 2 3],[nanmean(prcanisigtr) nanmean(prcanisig)],[nanstd(prcanisigtr)/sqrt(numAni) nanstd(prcanisig)/sqrt(numAni)],'LineStyle','none','Marker','o','Color','red')
-axis([0.5 3.5 0 0.5])
-set(gca,'xtick',1:3,'xticklabel',{'all unique' 'all frames','center frames'})
-ylabel('fraction similar frames at p<0.01')
-axis square
-if exist('psfile','var')
-    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-    print('-dpsc',psfile,'-append');
-end
-
-
-%%%eye analysis
-figure
-subplot(1,2,1)
-pre = grpavgrad(:,1);post = grpavgrad(:,2);
-hold on
-errorbar([1 2],[nanmean(pre) nanmean(post)],[nanstd(pre)/sqrt(numAni) nanstd(post)/sqrt(numAni)],'ko-','linewidth',2)
-plot([1 2],grpavgrad,'b.-')
-axis([0 3 0 30])
-set(gca,'xtick',[1 2],'xticklabel',{'pre','post'},'tickdir','out','fontsize',8)
-ylabel('pupil diameter')
-axis square
-subplot(1,2,2)
-pre = grphistrad(:,:,1);post = grphistrad(:,:,2);
-hold on
-shadedErrorBar(1:11,nanmean(pre),nanstd(pre)/sqrt(numAni),'k',1)
-shadedErrorBar(1:11,nanmean(post),nanstd(post)/sqrt(numAni),'r',1)
-set(gca,'xtick',1:2:10,'xticklabel',[0:10:50],'ytick',0:2000:8000,'tickdir','out','fontsize',8)
-xlabel('pupil diameter')
-ylabel('number of frames')
-legend('pre','post')
-axis([0 11 0 8000])
-axis square
-mtit('pupil pre vs. post')
-if exist('psfile','var')
-    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-    print('-dpsc',psfile,'-append');
-end
-
-
-
-% % %%%pixelwise analysis
-% % for z = 1:numAni
-% %     %%%plot sit dF
-% %     for h = 1:length(sfrange)
-% %         figure;
-% %         colormap jet
-% %         for i = 1:length(sizes)
-% %             subplot(4,length(sizes),i)
-% %             resp = squeeze(grpfrmdata(z,:,:,h,i,1,1)-grpfrmdata(z,:,:,h,1,1,1));
-% %             imagesc(resp,[-0.01 0.1])
-% %             set(gca,'ytick',[],'xtick',[],'FontSize',7)
-% %             xlabel(sprintf('sit %sdeg pre',sizes{i}))
-% %             axis square
-% %             subplot(4,length(sizes),i+length(sizes))
-% %             resp = squeeze(grpfrmdata(z,:,:,h,i,1,2)-grpfrmdata(z,:,:,h,1,1,2));
-% %             imagesc(resp,[-0.01 0.1])
-% %             set(gca,'ytick',[],'xtick',[],'FontSize',7)
-% %             xlabel(sprintf('sit %sdeg post',sizes{i}))
-% %             axis square
-% %         end
-% %         for i = 1:length(sizes)
-% %             subplot(4,length(sizes),i+2*length(sizes))
-% %             resp = squeeze(grpfrmdata(z,:,:,h,i,2,1)-grpfrmdata(z,:,:,h,1,2,1));
-% %             imagesc(resp,[-0.01 0.1])
-% %             set(gca,'ytick',[],'xtick',[],'FontSize',7)
-% %             xlabel(sprintf('run %sdeg pre',sizes{i}))
-% %             axis square
-% %             subplot(4,length(sizes),i+3*length(sizes))
-% %             resp = squeeze(grpfrmdata(z,:,:,h,i,2,2)-grpfrmdata(z,:,:,h,1,2,2));
-% %             imagesc(resp,[-0.01 0.1])
-% %             set(gca,'ytick',[],'xtick',[],'FontSize',7)
-% %             xlabel(sprintf('run %sdeg post',sizes{i}))
-% %             axis square
-% %         end
-% %         mtit(sprintf('dF/size %0.2fcpd %s',sfrange(h),files(use(z*2)).subj))
-% %         if exist('psfile','var')
-% %             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-% %             print('-dpsc',psfile,'-append');
-% %         end
-% %     end
-% %     
-% %     figure
-% %     subplot(2,2,1)
-% %     resp = squeeze(nanmean(grpfrmdata(z,:,:,:,1,1,1),4));
-% %     imagesc(resp,[-0.01 0.1])
-% %     set(gca,'ytick',[],'xtick',[])
-% %     xlabel('pre sit')
-% %     axis square
-% %     subplot(2,2,2)
-% %     resp = squeeze(nanmean(grpfrmdata(z,:,:,:,1,2,1),4));
-% %     imagesc(resp,[-0.01 0.1])
-% %     set(gca,'ytick',[],'xtick',[])
-% %     xlabel('pre run')
-% %     axis square
-% %     subplot(2,2,3)
-% %     resp = squeeze(nanmean(grpfrmdata(z,:,:,:,1,1,2),4));
-% %     imagesc(resp,[-0.01 0.1])
-% %     set(gca,'ytick',[],'xtick',[])
-% %     xlabel('post sit')
-% %     axis square
-% %     subplot(2,2,4)
-% %     resp = squeeze(nanmean(grpfrmdata(z,:,:,:,1,2,2),4));
-% %     imagesc(resp,[-0.01 0.1])
-% %     set(gca,'ytick',[],'xtick',[])
-% %     xlabel('post run')
-% %     axis square
-% %     mtit(sprintf('0deg responses %s',files(use(z*2)).subj))
-% %     if exist('psfile','var')
-% %         set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-% %         print('-dpsc',psfile,'-append');
-% %     end
-% % end
 
 
 % % % %         %%%plot run dF
@@ -658,8 +721,8 @@ for i=2:length(sizes)
     fitanipre = ~isnan(pre(1:numAni,1));
     fitanipost = ~isnan(post(1:numAni,1));
     fitani = fitanipre&fitanipost;
-    [prea preb prec preresult] = gausFit(0:9,pre(fitani,1:10));
-    [posta postb postc postresult] = gausFit(0:9,post(fitani,1:10));
+    [prea preb prec preresult] = gausFit(0:9,pre(fitani,1:10),[0.1 2 0.05]);
+    [posta postb postc postresult] = gausFit(0:9,post(fitani,1:10),[0.1 2 0.05]);
     
     for j = 1:length(preresult)
         plot(preresult{j},'k:')
@@ -702,8 +765,8 @@ for i=2:length(sizes)
     fitanipre = ~isnan(pre(1:numAni,1));
     fitanipost = ~isnan(post(1:numAni,1));
     fitani = fitanipre&fitanipost;
-    [prea preb prec preresult] = gausFit(0:9,pre(fitani,1:10));
-    [posta postb postc postresult] = gausFit(0:9,post(fitani,1:10));
+    [prea preb prec preresult] = gausFit(0:9,pre(fitani,1:10),[0.1 2 0.05]);
+    [posta postb postc postresult] = gausFit(0:9,post(fitani,1:10),[0.1 2 0.05]);
     
     for j = 1:length(preresult)
         plot(preresult{j},'k:')
@@ -745,8 +808,8 @@ for i=2:length(sizes)
     fitanipre = ~isnan(pre(1:numAni,1));
     fitanipost = ~isnan(post(1:numAni,1));
     fitani = fitanipre&fitanipost;
-    [prea preb prec preresult] = gausFit(0:9,pre(fitani,1:10));
-    [posta postb postc postresult] = gausFit(0:9,post(fitani,1:10));
+    [prea preb prec preresult] = gausFit(0:9,pre(fitani,1:10),[0.1 2 0.05]);
+    [posta postb postc postresult] = gausFit(0:9,post(fitani,1:10),[0.1 2 0.05]);
     
     for j = 1:length(preresult)
         plot(preresult{j},'k:')
@@ -788,8 +851,8 @@ for i=2:length(sizes)
     fitanipre = ~isnan(pre(1:numAni,1));
     fitanipost = ~isnan(post(1:numAni,1));
     fitani = fitanipre&fitanipost;
-    [prea preb prec preresult] = gausFit(0:9,pre(fitani,1:10));
-    [posta postb postc postresult] = gausFit(0:9,post(fitani,1:10));
+    [prea preb prec preresult] = gausFit(0:9,pre(fitani,1:10),[0.1 2 0.05]);
+    [posta postb postc postresult] = gausFit(0:9,post(fitani,1:10),[0.1 2 0.05]);
     
     for j = 1:length(preresult)
         plot(preresult{j},'k:')
@@ -1301,14 +1364,21 @@ for z=1%:length(ccvals)
 %         print('-dpsc',psfile,'-append');
 %     end
     
+
+    valpre = max(squeeze(nanmean(grpspsize(:,spWindow,:,1,1),2)),[],2);
+    valpost = max(squeeze(nanmean(grpspsize(:,spWindow,:,1,1),2)),[],2);
+    threshcells = (valpre>spthresh)&(valpost>spthresh);
+    grpsize = grpsize(threshcells,:,:,:,:);
+    sess = session(threshcells);
+    
     %%%mean animal size curve sit
     figure
     subplot(3,3,1)
     hold on
-    pre=nan(length(unique(session)),length(sizes));post=pre;
-    for j = 1:length(unique(session))
-        pre(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(session==j),goodcc{z}),spWindow,:,1,1),2),1)); %pre(1)=0; %median of 0 = nan
-        post(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(session==j),goodcc{z}),spWindow,:,1,2),2),1)); %post(1)=0;
+    pre=nan(length(unique(sess)),length(sizes));post=pre;
+    for j = 1:length(unique(sess))
+        pre(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(sess==j),goodcc{z}),spWindow,:,1,1),2),1)); %pre(1)=0; %median of 0 = nan
+        post(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(sess==j),goodcc{z}),spWindow,:,1,2),2),1)); %post(1)=0;
     end
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
@@ -1353,10 +1423,10 @@ for z=1%:length(ccvals)
 
     subplot(3,3,2)
     hold on
-    pre=nan(length(unique(session)),length(sizes));post=pre;
-    for j = 1:length(unique(session))
-        pre(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(session==j),goodcc{z}),6:7,:,1,1),2),1)); %pre(1)=0; %median of 0 = nan
-        post(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(session==j),goodcc{z}),6:7,:,1,2),2),1)); %post(1)=0;
+    pre=nan(length(unique(sess)),length(sizes));post=pre;
+    for j = 1:length(unique(sess))
+        pre(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(sess==j),goodcc{z}),6:7,:,1,1),2),1)); %pre(1)=0; %median of 0 = nan
+        post(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(sess==j),goodcc{z}),6:7,:,1,2),2),1)); %post(1)=0;
     end
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
@@ -1401,10 +1471,10 @@ for z=1%:length(ccvals)
     
     subplot(3,3,3)
     hold on
-    pre=nan(length(unique(session)),length(sizes));post=pre;
-    for j = 1:length(unique(session))
-        pre(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(session==j),goodcc{z}),8:10,:,1,1),2),1)); %pre(1)=0; %median of 0 = nan
-        post(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(session==j),goodcc{z}),8:10,:,1,2),2),1)); %post(1)=0;
+    pre=nan(length(unique(sess)),length(sizes));post=pre;
+    for j = 1:length(unique(sess))
+        pre(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(sess==j),goodcc{z}),8:10,:,1,1),2),1)); %pre(1)=0; %median of 0 = nan
+        post(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(sess==j),goodcc{z}),8:10,:,1,2),2),1)); %post(1)=0;
     end
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
@@ -1457,10 +1527,10 @@ for z=1%:length(ccvals)
     figure
     subplot(3,3,1)
     hold on
-    pre=nan(length(unique(session)),length(sizes));post=pre;
-    for j = 1:length(unique(session))
-        pre(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(session==j),goodcc{z}),spWindow,:,2,1),2),1)); %pre(1)=0; %median of 0 = nan
-        post(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(session==j),goodcc{z}),spWindow,:,2,2),2),1)); %post(1)=0;
+    pre=nan(length(unique(sess)),length(sizes));post=pre;
+    for j = 1:length(unique(sess))
+        pre(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(sess==j),goodcc{z}),spWindow,:,2,1),2),1)); %pre(1)=0; %median of 0 = nan
+        post(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(sess==j),goodcc{z}),spWindow,:,2,2),2),1)); %post(1)=0;
     end
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
@@ -1505,10 +1575,10 @@ for z=1%:length(ccvals)
 
     subplot(3,3,2)
     hold on
-    pre=nan(length(unique(session)),length(sizes));post=pre;
-    for j = 1:length(unique(session))
-        pre(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(session==j),goodcc{z}),6:7,:,2,1),2),1)); %pre(1)=0; %median of 0 = nan
-        post(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(session==j),goodcc{z}),6:7,:,2,2),2),1)); %post(1)=0;
+    pre=nan(length(unique(sess)),length(sizes));post=pre;
+    for j = 1:length(unique(sess))
+        pre(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(sess==j),goodcc{z}),6:7,:,2,1),2),1)); %pre(1)=0; %median of 0 = nan
+        post(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(sess==j),goodcc{z}),6:7,:,2,2),2),1)); %post(1)=0;
     end
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
@@ -1553,10 +1623,10 @@ for z=1%:length(ccvals)
     
     subplot(3,3,3)
     hold on
-    pre=nan(length(unique(session)),length(sizes));post=pre;
-    for j = 1:length(unique(session))
-        pre(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(session==j),goodcc{z}),8:10,:,2,1),2),1)); %pre(1)=0; %median of 0 = nan
-        post(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(session==j),goodcc{z}),8:10,:,2,2),2),1)); %post(1)=0;
+    pre=nan(length(unique(sess)),length(sizes));post=pre;
+    for j = 1:length(unique(sess))
+        pre(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(sess==j),goodcc{z}),8:10,:,2,1),2),1)); %pre(1)=0; %median of 0 = nan
+        post(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(sess==j),goodcc{z}),8:10,:,2,2),2),1)); %post(1)=0;
     end
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
@@ -1610,9 +1680,9 @@ for z=1%:length(ccvals)
     figure
     subplot(3,2,1)
     pre=nan(numAni,length(sizes));post=pre;
-    for j = 1:length(unique(session))
-        pre(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(session==j),goodcc{z}),spWindow,1,:,:,1,1),4),2),1));
-        post(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(session==j),goodcc{z}),spWindow,1,:,:,1,2),4),2),1));
+    for j = 1:length(unique(sess))
+        pre(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(sess==j),goodcc{z}),spWindow,1,:,:,1,1),4),2),1));
+        post(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(sess==j),goodcc{z}),spWindow,1,:,:,1,2),4),2),1));
     end
     hold on
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
@@ -1623,9 +1693,9 @@ for z=1%:length(ccvals)
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
     subplot(3,2,2)
-    for j = 1:length(unique(session))
-        pre(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(session==j),goodcc{z}),spWindow,1,:,:,2,1),4),2),1));
-        post(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(session==j),goodcc{z}),spWindow,1,:,:,2,2),4),2),1));
+    for j = 1:length(unique(sess))
+        pre(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(sess==j),goodcc{z}),spWindow,1,:,:,2,1),4),2),1));
+        post(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(sess==j),goodcc{z}),spWindow,1,:,:,2,2),4),2),1));
     end
     hold on
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
@@ -1636,9 +1706,9 @@ for z=1%:length(ccvals)
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
     subplot(3,2,3)
-    for j = 1:length(unique(session))
-        pre(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(session==j),goodcc{z}),spWindow,2,:,:,1,1),4),2),1));
-        post(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(session==j),goodcc{z}),spWindow,2,:,:,1,2),4),2),1));
+    for j = 1:length(unique(sess))
+        pre(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(sess==j),goodcc{z}),spWindow,2,:,:,1,1),4),2),1));
+        post(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(sess==j),goodcc{z}),spWindow,2,:,:,1,2),4),2),1));
     end
     hold on
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
@@ -1649,9 +1719,9 @@ for z=1%:length(ccvals)
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
     subplot(3,2,4)
-    for j = 1:length(unique(session))
-        pre(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(session==j),goodcc{z}),spWindow,2,:,:,2,1),4),2),1));
-        post(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(session==j),goodcc{z}),spWindow,2,:,:,2,2),4),2),1));
+    for j = 1:length(unique(sess))
+        pre(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(sess==j),goodcc{z}),spWindow,2,:,:,2,1),4),2),1));
+        post(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(sess==j),goodcc{z}),spWindow,2,:,:,2,2),4),2),1));
     end
     hold on
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
@@ -1662,9 +1732,9 @@ for z=1%:length(ccvals)
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
     subplot(3,2,5)
-    for j = 1:length(unique(session))
-        pre(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(intersect(find(session==j),goodcc{z}),spWindow,:,:,:,1,1),4),3),2),1));
-        post(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(intersect(find(session==j),goodcc{z}),spWindow,:,:,:,1,2),4),3),2),1));
+    for j = 1:length(unique(sess))
+        pre(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(intersect(find(sess==j),goodcc{z}),spWindow,:,:,:,1,1),4),3),2),1));
+        post(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(intersect(find(sess==j),goodcc{z}),spWindow,:,:,:,1,2),4),3),2),1));
     end
     hold on
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
@@ -1675,9 +1745,9 @@ for z=1%:length(ccvals)
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
     subplot(3,2,6)
-    for j = 1:length(unique(session))
-        pre(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(intersect(find(session==j),goodcc{z}),spWindow,:,:,:,2,1),4),3),2),1));
-        post(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(intersect(find(session==j),goodcc{z}),spWindow,:,:,:,2,2),4),3),2),1));
+    for j = 1:length(unique(sess))
+        pre(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(intersect(find(sess==j),goodcc{z}),spWindow,:,:,:,2,1),4),3),2),1));
+        post(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(intersect(find(sess==j),goodcc{z}),spWindow,:,:,:,2,2),4),3),2),1));
     end
     hold on
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
@@ -1698,9 +1768,9 @@ for z=1%:length(ccvals)
     figure
     subplot(3,2,1)
     pre=nan(numAni,length(sizes));post=pre;
-    for j = 1:length(unique(session))
-        pre(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(session==j),goodcc{z}),spWindow,1,:,:,1,1),4),2),1));
-        post(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(session==j),goodcc{z}),spWindow,1,:,:,1,2),4),2),1));
+    for j = 1:length(unique(sess))
+        pre(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(sess==j),goodcc{z}),spWindow,1,:,:,1,1),4),2),1));
+        post(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(sess==j),goodcc{z}),spWindow,1,:,:,1,2),4),2),1));
         pre(j,:) = pre(j,:)/max(pre(j,:));post(j,:) = post(j,:)/max(post(j,:));
     end
     hold on
@@ -1712,9 +1782,9 @@ for z=1%:length(ccvals)
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
     subplot(3,2,2)
-    for j = 1:length(unique(session))
-        pre(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(session==j),goodcc{z}),spWindow,1,:,:,2,1),4),2),1));
-        post(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(session==j),goodcc{z}),spWindow,1,:,:,2,2),4),2),1));
+    for j = 1:length(unique(sess))
+        pre(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(sess==j),goodcc{z}),spWindow,1,:,:,2,1),4),2),1));
+        post(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(sess==j),goodcc{z}),spWindow,1,:,:,2,2),4),2),1));
         pre(j,:) = pre(j,:)/max(pre(j,:));post(j,:) = post(j,:)/max(post(j,:));
     end
     hold on
@@ -1726,9 +1796,9 @@ for z=1%:length(ccvals)
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
     subplot(3,2,3)
-    for j = 1:length(unique(session))
-        pre(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(session==j),goodcc{z}),spWindow,2,:,:,1,1),4),2),1));
-        post(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(session==j),goodcc{z}),spWindow,2,:,:,1,2),4),2),1));
+    for j = 1:length(unique(sess))
+        pre(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(sess==j),goodcc{z}),spWindow,2,:,:,1,1),4),2),1));
+        post(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(sess==j),goodcc{z}),spWindow,2,:,:,1,2),4),2),1));
         pre(j,:) = pre(j,:)/max(pre(j,:));post(j,:) = post(j,:)/max(post(j,:));
     end
     hold on
@@ -1740,9 +1810,9 @@ for z=1%:length(ccvals)
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
     subplot(3,2,4)
-    for j = 1:length(unique(session))
-        pre(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(session==j),goodcc{z}),spWindow,2,:,:,2,1),4),2),1));
-        post(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(session==j),goodcc{z}),spWindow,2,:,:,2,2),4),2),1));
+    for j = 1:length(unique(sess))
+        pre(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(sess==j),goodcc{z}),spWindow,2,:,:,2,1),4),2),1));
+        post(j,:) = squeeze(nanmean(nanmean(nanmean(grpsptuning(intersect(find(sess==j),goodcc{z}),spWindow,2,:,:,2,2),4),2),1));
         pre(j,:) = pre(j,:)/max(pre(j,:));post(j,:) = post(j,:)/max(post(j,:));
     end
     hold on
@@ -1754,9 +1824,9 @@ for z=1%:length(ccvals)
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
     subplot(3,2,5)
-    for j = 1:length(unique(session))
-        pre(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(intersect(find(session==j),goodcc{z}),spWindow,:,:,:,1,1),4),3),2),1));
-        post(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(intersect(find(session==j),goodcc{z}),spWindow,:,:,:,1,2),4),3),2),1));
+    for j = 1:length(unique(sess))
+        pre(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(intersect(find(sess==j),goodcc{z}),spWindow,:,:,:,1,1),4),3),2),1));
+        post(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(intersect(find(sess==j),goodcc{z}),spWindow,:,:,:,1,2),4),3),2),1));
         pre(j,:) = pre(j,:)/max(pre(j,:));post(j,:) = post(j,:)/max(post(j,:));
     end
     hold on
@@ -1768,9 +1838,9 @@ for z=1%:length(ccvals)
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
     subplot(3,2,6)
-    for j = 1:length(unique(session))
-        pre(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(intersect(find(session==j),goodcc{z}),spWindow,:,:,:,2,1),4),3),2),1));
-        post(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(intersect(find(session==j),goodcc{z}),spWindow,:,:,:,2,2),4),3),2),1));
+    for j = 1:length(unique(sess))
+        pre(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(intersect(find(sess==j),goodcc{z}),spWindow,:,:,:,2,1),4),3),2),1));
+        post(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(intersect(find(sess==j),goodcc{z}),spWindow,:,:,:,2,2),4),3),2),1));
         pre(j,:) = pre(j,:)/max(pre(j,:));post(j,:) = post(j,:)/max(post(j,:));
     end
     hold on
@@ -1788,14 +1858,12 @@ for z=1%:length(ccvals)
     end
     
     
-    %%%%%%fit size curves
-    mycol = {'b','g','r','c','m','y','k','b','g','r','c','m','y','k'};
-    
+    %%%%%%fit size curves by animal
     %%%stationary
-    pre=nan(length(unique(session)),length(sizes));post=pre;
-    for j = 1:length(unique(session))
-        pre(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(session==j),goodcc{z}),spWindow,:,1,1),2),1)); %pre(1)=0; %median of 0 = nan
-        post(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(session==j),goodcc{z}),spWindow,:,1,2),2),1)); %post(1)=0;
+    pre=nan(length(unique(sess)),length(sizes));post=pre;
+    for j = 1:length(unique(sess))
+        pre(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(sess==j),goodcc{z}),spWindow,:,1,1),2),1)); %pre(1)=0; %median of 0 = nan
+        post(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(sess==j),goodcc{z}),spWindow,:,1,2),2),1)); %post(1)=0;
     end
     
     %%%in case there are nans, throw out that ani's fit
@@ -1851,7 +1919,7 @@ for z=1%:length(ccvals)
     hold on
     plot([1 2],[preRD' postRD'],'k.-')
     errorbar([1 2],[nanmean(preRD) nanmean(postRD)],[nanstd(preRD)/sqrt(numAni) nanstd(postRD)/sqrt(numAni)])
-    axis([0 3 0 3])
+    axis([0 3 0 1])
     axis square
     set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
     ylabel('RD')
@@ -1862,7 +1930,7 @@ for z=1%:length(ccvals)
     hold on
     plot([1 2],[preRS' postRS'],'k.-')
     errorbar([1 2],[nanmean(preRS) nanmean(postRS)],[nanstd(preRS)/sqrt(numAni) nanstd(postRS)/sqrt(numAni)])
-    axis([0 3 0 75])
+    axis([0 3 0 40])
     axis square
     set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
     ylabel('RS')
@@ -1907,7 +1975,7 @@ for z=1%:length(ccvals)
     plot(preRD,postRD,'k.')
     errorbarxy(nanmean(preRD),nanmean(postRD),nanstd(preRD)/sqrt(numAni),nanstd(postRD)/sqrt(numAni))
     plot([0 100],[0 100],'m:')
-    axis([0 3 0 3])
+    axis([0 1 0 1])
     axis square
     set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
     xlabel('pre');ylabel('post')
@@ -1918,7 +1986,7 @@ for z=1%:length(ccvals)
     plot(preRS,postRS,'k.')
     errorbarxy(nanmean(preRS),nanmean(postRS),nanstd(preRS)/sqrt(numAni),nanstd(postRS)/sqrt(numAni))
     plot([0 100],[0 100],'m:')
-    axis([0 75 0 75])
+    axis([0 40 0 40])
     axis square
     set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
     xlabel('pre');ylabel('post')
@@ -1965,10 +2033,10 @@ for z=1%:length(ccvals)
     
     
     %%%running
-    pre=nan(length(unique(session)),length(sizes));post=pre;
-    for j = 1:length(unique(session))
-        pre(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(session==j),goodcc{z}),spWindow,:,2,1),2),1)); %pre(1)=0; %median of 0 = nan
-        post(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(session==j),goodcc{z}),spWindow,:,2,2),2),1)); %post(1)=0;
+    pre=nan(length(unique(sess)),length(sizes));post=pre;
+    for j = 1:length(unique(sess))
+        pre(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(sess==j),goodcc{z}),spWindow,:,2,1),2),1)); %pre(1)=0; %median of 0 = nan
+        post(j,:) = squeeze(nanmean(nanmean(grpspsize(intersect(find(sess==j),goodcc{z}),spWindow,:,2,2),2),1)); %post(1)=0;
     end
     
     %%%in case there are nans, throw out that ani's fit
@@ -2138,18 +2206,425 @@ for z=1%:length(ccvals)
     
     
     
+    %%%%%%%%%do size fits by cell
+    %%stationary
+    pre = squeeze(nanmean(grpspsize(:,dfWindow,:,1,1),2));
+    post = squeeze(nanmean(grpspsize(:,dfWindow,:,1,2),2));
+    
+    %%%in case there are nans, throw out that ani's fit
+%     [Ipre,J]=ind2sub(size(pre),find(isnan(pre)));
+%     [Ipost,J]=ind2sub(size(post),find(isnan(post)));
+%     I = unique([Ipre Ipost]);
+%     fitani = 1:size(grpspsize,1);
+%     for j = 1:length(I)
+%         fitani = fitani(find(fitani~=I(j)));
+%     end
+%     pre=pre(fitani,:);post=post(fitani,:);sess=session(fitani);
+    
+    [preRD preRS presigmaD presigmaS prem preresult] = sizeCurveFit(0:6,pre);
+    [postRD postRS postsigmaD postsigmaS postm postresult] = sizeCurveFit(0:6,post);
+    
+    nofit = unique([find(isnan(preRD)) find(isnan(postRD))]); %%cells that wouldn't fit
+    fitani = 1:length(preRD);
+    for j = 1:length(nofit)
+        fitani = fitani(find(fitani~=nofit(j)));
+    end
+    preRD=preRD(fitani);preRS=preRS(fitani);presigmaD=presigmaD(fitani);presigmaS=presigmaS(fitani);prem=prem(fitani);preresult=preresult(fitani);
+    postRD=postRD(fitani);postRS=postRS(fitani);postsigmaD=postsigmaD(fitani);postsigmaS=postsigmaS(fitani);postm=postm(fitani);postresult=postresult(fitani);
+    sessfit=sess(fitani);
+    
+    %%%plot individual fits
+    cnt=1;
+    for i = 1:ceil(length(sessfit)/15)
+        figure
+        for j = 1:15
+            if cnt<=length(sessfit)
+                subplot(3,5,j)
+                hold on
+                plot(0:6,pre(cnt,:),'ko')
+                plot(0:6,post(cnt,:),'ro')
+                plot(preresult{cnt},'k')
+                plot(postresult{cnt},'r')
+                axis([0 6 min([pre(cnt,:) post(cnt,:)])-0.05 max([pre(cnt,:) post(cnt,:)])+0.05])
+                axis square
+                legend off
+                xlabel('size (deg)')
+                ylabel('dfof')
+                title(sprintf('ani %d cell %d',sessfit(cnt),fitani(cnt)))
+                set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',8,'xtick',0:6,'xticklabel',sizes)
+                cnt=cnt+1;
+            else
+                continue
+            end
+        end
+        mtit(sprintf('cell fits stationary %d/%d',i,ceil(length(sessfit)/15)))
+        if exist('psfile','var')
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+            print('-dpsc',psfile,'-append');
+        end
+    end
+    
+    %%%plot stationary fit parameters
+    figure
+    subplot(2,5,1)
+    hold on
+    plot([1 2],[preRD' postRD'],'k.:')
+    errorbar([1 2],[nanmean(preRD) nanmean(postRD)],[nanstd(preRD)/sqrt(numAni) nanstd(postRD)/sqrt(numAni)],'r')
+    axis([0 3 0 1])
+    axis square
+    set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    ylabel('RD')
+    [h p] = ttest(preRD,postRD);
+    title(sprintf('p=%0.3f',p))
+
+    subplot(2,5,2)
+    hold on
+    plot([1 2],[preRS' postRS'],'k.:')
+    errorbar([1 2],[nanmean(preRS) nanmean(postRS)],[nanstd(preRS)/sqrt(numAni) nanstd(postRS)/sqrt(numAni)],'r')
+    axis([0 3 0 40])
+    axis square
+    set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    ylabel('RS')
+    [h p] = ttest(preRS,postRS);
+    title(sprintf('p=%0.3f',p))
+
+    subplot(2,5,3)
+    hold on
+    plot([1 2],[presigmaD' postsigmaD'],'k.:')
+    errorbar([1 2],[nanmean(presigmaD) nanmean(postsigmaD)],[nanstd(presigmaD)/sqrt(numAni) nanstd(postsigmaD)/sqrt(numAni)],'r')
+    axis([0 3 0 3])
+    axis square
+    set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    ylabel('sigmaD')
+    [h p] = ttest(presigmaD,postsigmaD);
+    title(sprintf('p=%0.3f',p))
+
+    subplot(2,5,4)
+    hold on
+    plot([1 2],[presigmaS' postsigmaS'],'k.:')
+    errorbar([1 2],[nanmean(presigmaS) nanmean(postsigmaS)],[nanstd(presigmaS)/sqrt(numAni) nanstd(postsigmaS)/sqrt(numAni)],'r')
+    axis([0 3 0 10])
+    axis square
+    set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    ylabel('sigmaS')
+    [h p] = ttest(presigmaS,postsigmaS);
+    title(sprintf('p=%0.3f',p))
+
+    subplot(2,5,5)
+    hold on
+    plot([1 2],[prem' postm'],'k.:')
+    errorbar([1 2],[nanmean(prem) nanmean(postm)],[nanstd(prem)/sqrt(numAni) nanstd(postm)/sqrt(numAni)],'r')
+    axis([0 3 0 6])
+    axis square
+    set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    ylabel('m')
+    [h p] = ttest(prem,postm);
+    title(sprintf('p=%0.3f',p))
+    
+    subplot(2,5,6)
+    for j = 1:length(unique(sessfit))
+        anipre(j) = nanmean(preRD(find(sessfit==j)));
+        anipost(j) = nanmean(postRD(find(sessfit==j)));
+    end
+    hold on
+    plot(preRD,postRD,'k.')
+    errorbarxy(nanmean(anipre),nanmean(anipost),nanstd(anipre)/sqrt(numAni),nanstd(anipost)/sqrt(numAni))
+    plot([0 100],[0 100],'m:')
+    axis([0 1 0 1])
+    axis square
+    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    xlabel('pre');ylabel('post')
+    [h p] = ttest(anipre,anipost);
+    title(sprintf('RD p=%0.3f',p))
+    
+    subplot(2,5,7)
+    for j = 1:length(unique(sessfit))
+        anipre(j) = nanmean(preRS(find(sessfit==j)));
+        anipost(j) = nanmean(postRS(find(sessfit==j)));
+    end
+    hold on
+    plot(preRS,postRS,'k.')
+    errorbarxy(nanmean(preRS),nanmean(postRS),nanstd(preRS)/sqrt(numAni),nanstd(postRS)/sqrt(numAni))
+    plot([0 100],[0 100],'m:')
+    axis([0 40 0 40])
+    axis square
+    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    xlabel('pre');ylabel('post')
+    [h p] = ttest(anipre,anipost);
+    title(sprintf('RS p=%0.3f',p))
+
+    subplot(2,5,8)
+    for j = 1:length(unique(sessfit))
+        anipre(j) = nanmean(presigmaD(find(sessfit==j)));
+        anipost(j) = nanmean(postsigmaD(find(sessfit==j)));
+    end
+    hold on
+    plot(presigmaD,postsigmaD,'k.')
+    errorbarxy(nanmean(presigmaD),nanmean(postsigmaD),nanstd(presigmaD)/sqrt(numAni),nanstd(postsigmaD)/sqrt(numAni))
+    plot([0 100],[0 100],'m:')
+    axis([0 3 0 3])
+    axis square
+    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    xlabel('pre');ylabel('post')
+    [h p] = ttest(anipre,anipost);
+    title(sprintf('sigmaD p=%0.3f',p))
+
+    subplot(2,5,9)
+    for j = 1:length(unique(sessfit))
+        anipre(j) = nanmean(presigmaS(find(sessfit==j)));
+        anipost(j) = nanmean(postsigmaS(find(sessfit==j)));
+    end
+    hold on
+    plot(presigmaS,postsigmaS,'k.')
+    errorbarxy(nanmean(presigmaS),nanmean(postsigmaS),nanstd(presigmaS)/sqrt(numAni),nanstd(postsigmaS)/sqrt(numAni))
+    plot([0 100],[0 100],'m:')
+    axis([0 10 0 10])
+    axis square
+    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    xlabel('pre');ylabel('post')
+    [h p] = ttest(anipre,anipost);
+    title(sprintf('sigmaS p=%0.3f',p))
+
+    subplot(2,5,10)
+    for j = 1:length(unique(sessfit))
+        anipre(j) = nanmean(prem(find(sessfit==j)));
+        anipost(j) = nanmean(postm(find(sessfit==j)));
+    end
+    hold on
+    plot(prem,postm,'k.')
+    errorbarxy(nanmean(prem),nanmean(postm),nanstd(prem)/sqrt(numAni),nanstd(postm)/sqrt(numAni))
+    plot([0 100],[0 100],'m:')
+    axis([0 6 0 6])
+    axis square
+    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    xlabel('pre');ylabel('post')
+    [h p] = ttest(anipre,anipost);
+    title(sprintf('m p=%0.3f',p))
+    
+    mtit('stationary size curve fit params')
+    if exist('psfile','var')
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+        print('-dpsc',psfile,'-append');
+    end
+    
+
+
+    %%%do size fits by cell
+    %%running
+    pre = squeeze(nanmean(grpspsize(:,dfWindow,:,2,1),2));
+    post = squeeze(nanmean(grpspsize(:,dfWindow,:,2,2),2));
+    
+    %%%in case there are nans, throw out that ani's fit
+%     [Ipre,J]=ind2sub(size(pre),find(isnan(pre)));
+%     [Ipost,J]=ind2sub(size(post),find(isnan(post)));
+%     I = unique([Ipre Ipost]);
+%     fitani = 1:size(grpspsize,1);
+%     for j = 1:length(I)
+%         fitani = fitani(find(fitani~=I(j)));
+%     end
+%     pre=pre(fitani,:);post=post(fitani,:);sess=session(fitani);
+    
+    [preRD preRS presigmaD presigmaS prem preresult] = sizeCurveFit(0:6,pre);
+    [postRD postRS postsigmaD postsigmaS postm postresult] = sizeCurveFit(0:6,post);
+    
+    nofit = unique([find(isnan(preRD)) find(isnan(postRD))]); %%cells that wouldn't fit
+    fitani = 1:length(preRD);
+    for j = 1:length(nofit)
+        fitani = fitani(find(fitani~=nofit(j)));
+    end
+    preRD=preRD(fitani);preRS=preRS(fitani);presigmaD=presigmaD(fitani);presigmaS=presigmaS(fitani);prem=prem(fitani);preresult=preresult(fitani);
+    postRD=postRD(fitani);postRS=postRS(fitani);postsigmaD=postsigmaD(fitani);postsigmaS=postsigmaS(fitani);postm=postm(fitani);postresult=postresult(fitani);
+    sessfit=sess(fitani);
+    
+    %%%plot individual fits
+    cnt=1;
+    for i = 1:ceil(length(sessfit)/15)
+        figure
+        for j = 1:15
+            if cnt<=length(sessfit)
+                subplot(3,5,j)
+                hold on
+                plot(0:6,pre(cnt,:),'ko')
+                plot(0:6,post(cnt,:),'ro')
+                plot(preresult{cnt},'k')
+                plot(postresult{cnt},'r')
+                axis([0 6 min([pre(cnt,:) post(cnt,:)])-0.05 max([pre(cnt,:) post(cnt,:)])+0.05])
+                axis square
+                legend off
+                xlabel('size (deg)')
+                ylabel('dfof')
+                title(sprintf('ani %d cell %d',sessfit(cnt),fitani(cnt)))
+                set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',8,'xtick',0:6,'xticklabel',sizes)
+                cnt=cnt+1;
+            else
+                continue
+            end
+        end
+        mtit(sprintf('cell fits running %d/%d',i,ceil(length(sessfit)/15)))
+        if exist('psfile','var')
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+            print('-dpsc',psfile,'-append');
+        end
+    end
+    
+    %%%plot running fit parameters
+    figure
+    subplot(2,5,1)
+    hold on
+    plot([1 2],[preRD' postRD'],'k.:')
+    errorbar([1 2],[nanmean(preRD) nanmean(postRD)],[nanstd(preRD)/sqrt(numAni) nanstd(postRD)/sqrt(numAni)],'r')
+    axis([0 3 0 1])
+    axis square
+    set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    ylabel('RD')
+    [h p] = ttest(preRD,postRD);
+    title(sprintf('p=%0.3f',p))
+
+    subplot(2,5,2)
+    hold on
+    plot([1 2],[preRS' postRS'],'k.:')
+    errorbar([1 2],[nanmean(preRS) nanmean(postRS)],[nanstd(preRS)/sqrt(numAni) nanstd(postRS)/sqrt(numAni)],'r')
+    axis([0 3 0 40])
+    axis square
+    set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    ylabel('RS')
+    [h p] = ttest(preRS,postRS);
+    title(sprintf('p=%0.3f',p))
+
+    subplot(2,5,3)
+    hold on
+    plot([1 2],[presigmaD' postsigmaD'],'k.:')
+    errorbar([1 2],[nanmean(presigmaD) nanmean(postsigmaD)],[nanstd(presigmaD)/sqrt(numAni) nanstd(postsigmaD)/sqrt(numAni)],'r')
+    axis([0 3 0 3])
+    axis square
+    set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    ylabel('sigmaD')
+    [h p] = ttest(presigmaD,postsigmaD);
+    title(sprintf('p=%0.3f',p))
+
+    subplot(2,5,4)
+    hold on
+    plot([1 2],[presigmaS' postsigmaS'],'k.:')
+    errorbar([1 2],[nanmean(presigmaS) nanmean(postsigmaS)],[nanstd(presigmaS)/sqrt(numAni) nanstd(postsigmaS)/sqrt(numAni)],'r')
+    axis([0 3 0 10])
+    axis square
+    set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    ylabel('sigmaS')
+    [h p] = ttest(presigmaS,postsigmaS);
+    title(sprintf('p=%0.3f',p))
+
+    subplot(2,5,5)
+    hold on
+    plot([1 2],[prem' postm'],'k.:')
+    errorbar([1 2],[nanmean(prem) nanmean(postm)],[nanstd(prem)/sqrt(numAni) nanstd(postm)/sqrt(numAni)],'r')
+    axis([0 3 0 6])
+    axis square
+    set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    ylabel('m')
+    [h p] = ttest(prem,postm);
+    title(sprintf('p=%0.3f',p))
+    
+    subplot(2,5,6)
+    for j = 1:length(unique(sessfit))
+        anipre(j) = nanmean(preRD(find(sessfit==j)));
+        anipost(j) = nanmean(postRD(find(sessfit==j)));
+    end
+    hold on
+    plot(preRD,postRD,'k.')
+    errorbarxy(nanmean(anipre),nanmean(anipost),nanstd(anipre)/sqrt(numAni),nanstd(anipost)/sqrt(numAni))
+    plot([0 100],[0 100],'m:')
+    axis([0 1 0 1])
+    axis square
+    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    xlabel('pre');ylabel('post')
+    [h p] = ttest(anipre,anipost);
+    title(sprintf('RD p=%0.3f',p))
+    
+    subplot(2,5,7)
+    for j = 1:length(unique(sessfit))
+        anipre(j) = nanmean(preRS(find(sessfit==j)));
+        anipost(j) = nanmean(postRS(find(sessfit==j)));
+    end
+    hold on
+    plot(preRS,postRS,'k.')
+    errorbarxy(nanmean(preRS),nanmean(postRS),nanstd(preRS)/sqrt(numAni),nanstd(postRS)/sqrt(numAni))
+    plot([0 100],[0 100],'m:')
+    axis([0 40 0 40])
+    axis square
+    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    xlabel('pre');ylabel('post')
+    [h p] = ttest(anipre,anipost);
+    title(sprintf('RS p=%0.3f',p))
+
+    subplot(2,5,8)
+    for j = 1:length(unique(sessfit))
+        anipre(j) = nanmean(presigmaD(find(sessfit==j)));
+        anipost(j) = nanmean(postsigmaD(find(sessfit==j)));
+    end
+    hold on
+    plot(presigmaD,postsigmaD,'k.')
+    errorbarxy(nanmean(presigmaD),nanmean(postsigmaD),nanstd(presigmaD)/sqrt(numAni),nanstd(postsigmaD)/sqrt(numAni))
+    plot([0 100],[0 100],'m:')
+    axis([0 3 0 3])
+    axis square
+    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    xlabel('pre');ylabel('post')
+    [h p] = ttest(anipre,anipost);
+    title(sprintf('sigmaD p=%0.3f',p))
+
+    subplot(2,5,9)
+    for j = 1:length(unique(sessfit))
+        anipre(j) = nanmean(presigmaS(find(sessfit==j)));
+        anipost(j) = nanmean(postsigmaS(find(sessfit==j)));
+    end
+    hold on
+    plot(presigmaS,postsigmaS,'k.')
+    errorbarxy(nanmean(presigmaS),nanmean(postsigmaS),nanstd(presigmaS)/sqrt(numAni),nanstd(postsigmaS)/sqrt(numAni))
+    plot([0 100],[0 100],'m:')
+    axis([0 10 0 10])
+    axis square
+    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    xlabel('pre');ylabel('post')
+    [h p] = ttest(anipre,anipost);
+    title(sprintf('sigmaS p=%0.3f',p))
+
+    subplot(2,5,10)
+    for j = 1:length(unique(sessfit))
+        anipre(j) = nanmean(prem(find(sessfit==j)));
+        anipost(j) = nanmean(postm(find(sessfit==j)));
+    end
+    hold on
+    plot(prem,postm,'k.')
+    errorbarxy(nanmean(prem),nanmean(postm),nanstd(prem)/sqrt(numAni),nanstd(postm)/sqrt(numAni))
+    plot([0 100],[0 100],'m:')
+    axis([0 6 0 6])
+    axis square
+    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    xlabel('pre');ylabel('post')
+    [h p] = ttest(anipre,anipost);
+    title(sprintf('m p=%0.3f',p))
+    
+    mtit('running size curve fit params')
+    if exist('psfile','var')
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+        print('-dpsc',psfile,'-append');
+    end
+    
+    
+    
+    
     %%%cycle averages
     figure
     for i = 2:length(sizes)
 %         figure
         subplot(2,3,i-1)
         hold on
-        pre=nan(length(unique(session)),15);post=pre;
-        for j = 1:length(unique(session))
-                pre(j,:) = nanmean(grpspsize(intersect(find(session==j),goodcc{z}),:,i,1,1),1);
-                post(j,:) = nanmean(grpspsize(intersect(find(session==j),goodcc{z}),:,i,1,2),1);
+        pre=nan(length(unique(sess)),15);post=pre;
+        for j = 1:length(unique(sess))
+                pre(j,:) = nanmean(grpspsize(intersect(find(sess==j),goodcc{z}),:,i,1,1),1);
+                post(j,:) = nanmean(grpspsize(intersect(find(sess==j),goodcc{z}),:,i,1,2),1);
         end
-        if length(unique(session))==1
+        if length(unique(sess))==1
             plot(timepts,pre,'k')
             plot(timepts,post,'r')
         else
@@ -2171,12 +2646,12 @@ for z=1%:length(ccvals)
     for i = 2:length(sizes)
         subplot(2,3,i-1)
         hold on
-        pre=nan(length(unique(session)),15);post=pre;
-        for j = 1:length(unique(session))
-                pre(j,:) = nanmean(grpspsize(intersect(find(session==j),goodcc{z}),:,i,2,1),1);
-                post(j,:) = nanmean(grpspsize(intersect(find(session==j),goodcc{z}),:,i,2,2),1);
+        pre=nan(length(unique(sess)),15);post=pre;
+        for j = 1:length(unique(sess))
+                pre(j,:) = nanmean(grpspsize(intersect(find(sess==j),goodcc{z}),:,i,2,1),1);
+                post(j,:) = nanmean(grpspsize(intersect(find(sess==j),goodcc{z}),:,i,2,2),1);
         end
-        if length(unique(session))==1
+        if length(unique(sess))==1
             plot(timepts,pre,'k')
             plot(timepts,post,'r')
         else
@@ -2201,7 +2676,7 @@ for z=1%:length(ccvals)
     SIcalc = squeeze(nanmean(nanmean(nanmean(grpsptuning(:,spWindow,:,:,:,:,:),2),3),4));
     indeces = (max(SIcalc(:,:,1,1),[],2)>minresp & max(SIcalc(:,:,1,2),[],2)>minresp);
     SIcalc = SIcalc(indeces,:,:,:);
-    sess = session(indeces);
+    sess = sess(indeces);
     SIavg = nan(size(SIcalc,1),2,2);
     for i = 1:2
         for j = 1:2
@@ -2260,7 +2735,7 @@ for z=1%:length(ccvals)
     SIcalc = squeeze(nanmean(grpspsize(:,spWindow,:,:,:,:,:),2));
     indeces = (max(SIcalc(:,:,1,1),[],2)>minresp & max(SIcalc(:,:,1,2),[],2)>minresp);
     SIcalc = SIcalc(indeces,:,:,:);
-    sess = session(indeces);
+    sess = sess(indeces);
     SIavg = nan(size(SIcalc,1),2,2);
     for i = 1:2
         for j = 1:2
@@ -2361,7 +2836,7 @@ for z=1%:length(ccvals)
     preresp = squeeze(nanmean(grpspsize(:,spWindow,:,1,1),2));
     postresp = squeeze(nanmean(grpspsize(:,spWindow,:,1,2),2));
     indeces = (max(preresp,[],2)>minresp & max(postresp,[],2)>minresp);
-    preresp = preresp(indeces,2:end);postresp = postresp(indeces,2:end);sess = session(indeces);
+    preresp = preresp(indeces,2:end);postresp = postresp(indeces,2:end);sess = sess(indeces);
     for j = 1:length(unique(sess))
         prerespani(j,:) = nanmean(nanmean(preresp(find(sess==j),:),2));
         postrespani(j,:) = nanmean(nanmean(postresp(find(sess==j),:),2));
@@ -2416,7 +2891,7 @@ for z=1%:length(ccvals)
     end
     valpost = valpost';
     indeces = (valpre>minresp & valpost>minresp);
-    valpre = valpre(indeces);valpost = valpost(indeces);sess = session(indeces);
+    valpre = valpre(indeces);valpost = valpost(indeces);sess = sess(indeces);
     
     %%%avg by animal
     for j = 1:length(unique(sess))
@@ -2447,7 +2922,7 @@ for z=1%:length(ccvals)
         valpre(i) = squeeze(nanmean(grpspsize(i,spWindow,idxpost(i),1,1),2));
     end
     indeces = (valpre>minresp & valpost>minresp);
-    valpre = valpre(indeces);valpost = valpost(indeces);sess = session(indeces);
+    valpre = valpre(indeces);valpost = valpost(indeces);sess = sess(indeces);
     
     %%%avg by animal
     for j = 1:length(unique(sess))
@@ -2484,7 +2959,7 @@ for z=1%:length(ccvals)
     
     %%%threshold responses
     indeces = (valpre>minresp & valpost>minresp);
-    valpre = valpre(indeces);valpost = valpost(indeces);sess = session(indeces);
+    valpre = valpre(indeces);valpost = valpost(indeces);sess = sess(indeces);
     idxpre = idxpre(indeces);idxpost = idxpost(indeces);
     
     %%%avg by animal

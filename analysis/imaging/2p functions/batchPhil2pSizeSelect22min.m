@@ -2,9 +2,9 @@ dbstop if error
 pathname = '\\langevin\backup\twophoton\Phil\Compiled2p\';
 n = 0;
 
-% dbstop if error
-% pathname = 'D:\Phil';
-% n = 0;
+% % % dbstop if error
+% % % pathname = 'D:\Phil';
+% % % n = 0;
 
 
 

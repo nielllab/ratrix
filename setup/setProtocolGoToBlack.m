@@ -28,73 +28,73 @@ stim.gain = 0.7 * ones(2,1);
 switch subjIDs{1}
 
          case 'j363lt'  %started 9/13/17
-         requestRewardSizeULorMS = 59; %stop reward
+         requestRewardSizeULorMS = 0; %stop reward
          rewardSizeULorMS        = 219; %doesnt do shit, change in google docs
          msPenalty               =3500;
          percentCorrectionTrials = .5; 
          
         case 'j363rt'  %started 9/13/17
-         requestRewardSizeULorMS = 59;
+         requestRewardSizeULorMS = 0;
          rewardSizeULorMS        = 219;
          msPenalty               =3500;
          percentCorrectionTrials = .5;  
          
           case 'j364lt'  %started 9/13/17
-         requestRewardSizeULorMS = 59;
+         requestRewardSizeULorMS = 0;
          rewardSizeULorMS        = 219;
          msPenalty               =3500;
          percentCorrectionTrials = .5; 
     
          case 'j364rt'  %started 9/13/17
-         requestRewardSizeULorMS = 59;
+         requestRewardSizeULorMS = 0;
          rewardSizeULorMS        = 219;
          msPenalty               =3500;
          percentCorrectionTrials = .5; 
 
          case 'j364tt'  %started 9/13/17
-         requestRewardSizeULorMS = 59;
+         requestRewardSizeULorMS = 0;
          rewardSizeULorMS        = 219;
          msPenalty               =3500;
          percentCorrectionTrials = .5; 
          
         case 'j364nt'  %started 9/13/17
-         requestRewardSizeULorMS = 59;
+         requestRewardSizeULorMS = 0;
          rewardSizeULorMS        = 219;
          msPenalty               =3500;
          percentCorrectionTrials = .5;  
          
           case 'j365lt'  %started 9/13/17
-         requestRewardSizeULorMS = 59;
+         requestRewardSizeULorMS = 0;
          rewardSizeULorMS        = 219;
          msPenalty               =3500;
          percentCorrectionTrials = .5; 
     
          case 'j365rt'  %started 9/13/17
-         requestRewardSizeULorMS = 59;
+         requestRewardSizeULorMS = 0;
          rewardSizeULorMS        = 219;
          msPenalty               =3500;
          percentCorrectionTrials = .5;       
          
          case 'j365tt'  %started 9/13/17
-         requestRewardSizeULorMS = 59;
+         requestRewardSizeULorMS = 0;
          rewardSizeULorMS        = 219;
          msPenalty               =3500;
          percentCorrectionTrials = .5;  
  
           case 'j366lt'  %started 9/13/17
-         requestRewardSizeULorMS = 59;
+         requestRewardSizeULorMS = 0;
          rewardSizeULorMS        = 219;
          msPenalty               =3500;
          percentCorrectionTrials = .5; 
     
          case 'j366rt'  %started 9/13/17
-         requestRewardSizeULorMS = 59;
+         requestRewardSizeULorMS = 0;
          rewardSizeULorMS        = 219;
          msPenalty               =3500;
          percentCorrectionTrials = .5;       
          
          case 'j366tt'  %started 9/13/17
-         requestRewardSizeULorMS = 59;
+         requestRewardSizeULorMS = 0;
          rewardSizeULorMS        = 219;
          msPenalty               =3500;
          percentCorrectionTrials = .5;          

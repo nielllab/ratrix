@@ -1,4 +1,4 @@
-function sizeSelect2pSession(fileName,sessionName,stimobj,psfile)
+function sizeSelect2pSession(fileName,sessionName,psfile)
 dbstop if error
 %%% create session file for passive presentation of behavior (grating patch) stim
 %%% reads raw images, calculates dfof, and aligns to stim sync
@@ -60,8 +60,8 @@ cycLength = cycLength/dt;
 xpos=0;
 sf=0; isi=0; duration=0; theta=0; phase=0; radius=0;
 % moviefname = 'C:\sizeSelect2sf8sz26min.mat';
-moviefname = 'C:\sizeselectBin22min.mat'
-% moviefname = 'C:\sizeselectLongISI22min.mat'
+% moviefname = 'C:\sizeselectBin22min.mat'
+moviefname = 'C:\sizeselectLongISI22min.mat'
 load(moviefname)
 ntrials= floor(min(dt*length(dfofInterp)/(isi+duration),length(sf)))-1
 sf=sf(1:ntrials); theta=theta(1:ntrials); phase=phase(1:ntrials); radius=radius(1:ntrials); xpos=xpos(1:ntrials);

@@ -3,7 +3,7 @@ function spot2pSession(fileName,sessionName,psfile)%%% create session file for t
 
 dt = 0.1; %%% resampled time frame
 framerate=1/dt;
-cycLength=10;
+cycLength=1;
 
 global S2P
 
@@ -15,9 +15,6 @@ else
     cfg.syncToVid=1; cfg.saveDF=0;
 end
 get2pSession_sbx;
-
-nframes = min(size(dfofInterp,3),1920+10);  %%% limit topoY data to 5mins to avoid movie boundaries
-dfofInterp = dfofInterp(:,:,1:nframes);
 
 %%% generate pixel-wise fourier map
 cycLength = cycLength/dt;
@@ -73,10 +70,14 @@ open(vid);
 writeVideo(vid,mov);
 close(vid)
 
-
+xpos=0;
+sf=0; isi=0; duration=0; theta=0; phase=0; radius=0;
 moviefname = 'C:\bigSizeTest.mat'
 load(moviefname)
-ntrials= min(dt*length(dfofInterp)/(isi+duration),length(sf))
+nframes = min(size(dfofInterp,3),length(sf)*10+10);  %%% limit topoY data to 5mins to avoid movie boundaries
+dfofInterp = dfofInterp(:,:,1:nframes);
+ntrials= min(dt*length(dfofInterp)/(isi+duration),length(sf))-1;
+ntrials = length(sf);
 onsets = dt + (0:ntrials-1)*(isi+duration);
 timepts = 1:(2*isi+duration)/dt;
 timepts = (timepts-1)*dt;
@@ -153,19 +154,19 @@ end
 for i = 1:length(freq)
     figure;
     colormap jet
-%     for j = 2:length(sz)
-%         subplot(2,floor(length(sz)/2),j-1)
+    for j = 1:length(sz)
+        subplot(2,ceil(length(sz)/2),j)
         imagesc(frmdata(:,:,i,j,1),[-0.01 0.1])
         set(gca,'ytick',[],'xtick',[])
         axis square
-        xlabel(sprintf('%sdeg',sizes{j}))
-%     end
-%     mtit(sprintf('sit sf=%d',freq(i)))
+        xlabel(sprintf('%ddeg',radiusRange(j)*2))
+    end
+    mtit(sprintf('sit sf=%0.2f',freq(i)))
     if exist('psfile','var')
         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfile,'-append');
     end
 end
 
-save(sessionName,'sbxfilename','-append')
+save(sessionName,'sbxfilename','frmdata','meandfofInterp','xpos','sf','theta','phase','radius','radiusRange','timepts','moviefname','sbxfilename','-append')
 

@@ -20,7 +20,7 @@ fullMov(:,:,:,2) = (img(:,:,:,1) - rangegreen(1))/(rangegreen(2)-rangegreen(1));
 
 mov = immovie(permute(fullMov,[1 2 4 3]));
 vid = VideoWriter(sprintf('%sfullMov.avi',fname(1:end-4)));
-vid.FrameRate=15;
+vid.FrameRate=30;
 
 vid.Quality=80;
 open(vid);

@@ -25,7 +25,7 @@ dfofInterp = dfofInterp(49:end-32,37:end-36,:);
 cycF = mean(diff(stimPulse))/dt;
 nstim = input('num stim per repeat : ');
 totalframes = cycLength*nstim;
-reps = floor(size(dfofInterp,312)/totalframes);
+reps = floor(size(dfofInterp,3)/totalframes);
 
 %%% generate periodic map
 

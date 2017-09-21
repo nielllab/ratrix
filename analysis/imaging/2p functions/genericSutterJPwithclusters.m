@@ -178,9 +178,11 @@ imagesc(dF(perm,:),[-0.1 1]); axis xy ; xlabel('selected traces based on dF'); c
 hold on;
 totalT = size(dF,2);
 ncyc = floor(totalT/cycLength);
-for i = 1:ncyc
-    plot([i*cycLength i*cycLength]+0.5,[1 length(perm)],'k');
-end
+
+% commented out to get rid of black lines
+% for i = 1:ncyc
+%     plot([i*cycLength i*cycLength]+0.5,[1 length(perm)],'k');
+% end
 
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
@@ -233,9 +235,10 @@ for clust = 1:nclust
     title(sprintf('clust %d',clust)); hold on
     totalT = size(dF,2);
     ncyc = floor(totalT/cycLength);
-    for i = 1:ncyc
-        plot([i*cycLength i*cycLength]+0.5,[1 sum(clust==c)],'k');
-    end
+    % commented out to get rid of black lines
+%     for i = 1:ncyc
+%         plot([i*cycLength i*cycLength]+0.5,[1 sum(clust==c)],'k');
+%     end
     colormap jet;freezeColors;colormap gray;
     
     subplot(2,2,4);

@@ -1964,36 +1964,36 @@ for z=1%:length(ccvals)
     end
     pre=pre(fitani,:);post=post(fitani,:);
     
-    [preRD preRS presigmaD presigmaS prem preresult] = sizeCurveFit(0:6,pre);
-    [postRD postRS postsigmaD postsigmaS postm postresult] = sizeCurveFit(0:6,post);
+    [preRD preRS presigmaD presigmaS prem preresult] = sizeCurveFit(radiusRange,pre);
+    [postRD postRS postsigmaD postsigmaS postm postresult] = sizeCurveFit(radiusRange,post);
     
     %%%plot fits over data
     figure;
     subplot(1,2,1)
     hold on
     for i=1:length(preresult)
-        plot(0:6,pre(i,:),'o','color',mycol{i})
+        plot(radiusRange,pre(i,:),'o','color',mycol{i})
         plot(preresult{i},mycol{i})
         legend off
     end
     axis square
-    axis([0 6 -0.05 0.5])
+    axis([0 radiusRange(end) -0.05 0.5])
     xlabel('Stim Size (deg)')
     ylabel('pre dfof')
-    set(gca,'xtick',0:length(radiusRange)-1,'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+    set(gca,'xtick',radiusRange,'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
     
     subplot(1,2,2)
     hold on
     for i=1:length(postresult)
-        plot(0:6,post(i,:),'o','color',mycol{i})
+        plot(radiusRange,post(i,:),'o','color',mycol{i})
         plot(postresult{i},mycol{i})
         legend off
     end
     axis square
-    axis([0 6 -0.05 0.5])
+    axis([0 radiusRange(end) -0.05 0.5])
     xlabel('Stim Size (deg)')
     ylabel('post dfof')
-    set(gca,'xtick',0:length(radiusRange)-1,'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+    set(gca,'xtick',radiusRange,'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
     
     mtit('stationary size curve fits')
     if exist('psfile','var')
@@ -2120,6 +2120,98 @@ for z=1%:length(ccvals)
     end
     
     
+    %%%constrain fit parameters to only fit Rd and Rs for stationary
+    sprintf('doing animal-wise stationary fits with sigmas constrained...')
+    sigmaD = (presigmaD + postsigmaD)/2;sigmaS = (presigmaS + postsigmaS)/2;m = (prem + postm)/2;
+    [preRD preRS preresult] = sizeCurveFitRdRs(radiusRange,pre,sigmaD,sigmaS,m);
+    [postRD postRS postresult] = sizeCurveFitRdRs(radiusRange,post,sigmaD,sigmaS,m);
+    
+    %%%plot fits over data
+    figure;
+    subplot(1,2,1)
+    hold on
+    for i=1:length(preresult)
+        plot(radiusRange,pre(i,:),'o','color',mycol{i})
+        plot(preresult{i},mycol{i})
+        legend off
+    end
+    axis square
+    axis([0 radiusRange(end) -0.05 0.5])
+    xlabel('Stim Size (deg)')
+    ylabel('pre dfof')
+    set(gca,'xtick',radiusRange,'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+    
+    subplot(1,2,2)
+    hold on
+    for i=1:length(postresult)
+        plot(radiusRange,post(i,:),'o','color',mycol{i})
+        plot(postresult{i},mycol{i})
+        legend off
+    end
+    axis square
+    axis([0 radiusRange(end) -0.05 0.5])
+    xlabel('Stim Size (deg)')
+    ylabel('post dfof')
+    set(gca,'xtick',radiusRange,'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+    
+    mtit('constrained stationary size curve fits')
+    if exist('psfile','var')
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+        print('-dpsc',psfile,'-append');
+    end
+    
+    %%%plot stationary fit parameters
+    figure
+    subplot(2,2,1)
+    hold on
+    plot([1 2],[preRD' postRD'],'k.-')
+    errorbar([1 2],[nanmean(preRD) nanmean(postRD)],[nanstd(preRD)/sqrt(numAni) nanstd(postRD)/sqrt(numAni)])
+    axis([0 3 0 3])
+    axis square
+    set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    ylabel('RD')
+    [h p] = ttest(preRD,postRD);
+    title(sprintf('p=%0.3f',p))
+
+    subplot(2,2,2)
+    hold on
+    plot([1 2],[preRS' postRS'],'k.-')
+    errorbar([1 2],[nanmean(preRS) nanmean(postRS)],[nanstd(preRS)/sqrt(numAni) nanstd(postRS)/sqrt(numAni)])
+    axis([0 3 0 80])
+    axis square
+    set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    ylabel('RS')
+    [h p] = ttest(preRS,postRS);
+    title(sprintf('p=%0.3f',p))
+    
+    subplot(2,2,3)
+    hold on
+    plot(preRD,postRD,'k.')
+    errorbarxy(nanmean(preRD),nanmean(postRD),nanstd(preRD)/sqrt(numAni),nanstd(postRD)/sqrt(numAni))
+    plot([0 100],[0 100],'m:')
+    axis([0 3 0 3])
+    axis square
+    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    xlabel('pre');ylabel('post')
+    title('RD')
+    
+    subplot(2,2,4)
+    hold on
+    plot(preRS,postRS,'k.')
+    errorbarxy(nanmean(preRS),nanmean(postRS),nanstd(preRS)/sqrt(numAni),nanstd(postRS)/sqrt(numAni))
+    plot([0 100],[0 100],'m:')
+    axis([0 80 0 80])
+    axis square
+    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    xlabel('pre');ylabel('post')
+    title('RS')
+    
+    mtit('constrained stationary size curve fits')
+    if exist('psfile','var')
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+        print('-dpsc',psfile,'-append');
+    end
+    
     %%%running
     sprintf('doing animal-wise running fits...')
     pre=nan(length(unique(sess)),length(sizes));post=pre;
@@ -2138,36 +2230,36 @@ for z=1%:length(ccvals)
     end
     pre=pre(fitani,:);post=post(fitani,:);
     
-    [preRD preRS presigmaD presigmaS prem preresult] = sizeCurveFit(0:6,pre);
-    [postRD postRS postsigmaD postsigmaS postm postresult] = sizeCurveFit(0:6,post);
+    [preRD preRS presigmaD presigmaS prem preresult] = sizeCurveFit(radiusRange,pre);
+    [postRD postRS postsigmaD postsigmaS postm postresult] = sizeCurveFit(radiusRange,post);
     
     %%%plot fits over data
     figure;
     subplot(1,2,1)
     hold on
     for i=1:length(preresult)
-        plot(0:6,pre(i,:),'o','color',mycol{i})
+        plot(radiusRange,pre(i,:),'o','color',mycol{i})
         plot(preresult{i},mycol{i})
         legend off
     end
     axis square
-    axis([0 6 -0.05 0.5])
+    axis([0 radiusRange(end) -0.05 0.5])
     xlabel('Stim Size (deg)')
     ylabel('pre dfof')
-    set(gca,'xtick',0:length(radiusRange)-1,'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+    set(gca,'xtick',radiusRange,'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
     
     subplot(1,2,2)
     hold on
     for i=1:length(postresult)
-        plot(0:6,post(i,:),'o','color',mycol{i})
+        plot(radiusRange,post(i,:),'o','color',mycol{i})
         plot(postresult{i},mycol{i})
         legend off
     end
     axis square
-    axis([0 6 -0.05 0.5])
+    axis([0 radiusRange(end) -0.05 0.5])
     xlabel('Stim Size (deg)')
     ylabel('post dfof')
-    set(gca,'xtick',0:length(radiusRange)-1,'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+    set(gca,'xtick',radiusRange,'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
     
     mtit('running size curve fits')
     if exist('psfile','var')
@@ -2294,6 +2386,102 @@ for z=1%:length(ccvals)
     end
     
     
+    %%%constrain fit parameters to only fit Rd and Rs for running
+    sprintf('doing animal-wise running fits with sigmas constrained...')
+    sigmaD = (presigmaD + postsigmaD)/2;sigmaS = (presigmaS + postsigmaS)/2;m = (prem + postm)/2;
+    [preRD preRS preresult] = sizeCurveFitRdRs(radiusRange,pre,sigmaD,sigmaS,m);
+    [postRD postRS postresult] = sizeCurveFitRdRs(radiusRange,post,sigmaD,sigmaS,m);
+    
+    %%%plot fits over data
+    figure;
+    subplot(1,2,1)
+    hold on
+    for i=1:length(preresult)
+        plot(radiusRange,pre(i,:),'o','color',mycol{i})
+        plot(preresult{i},mycol{i})
+        legend off
+    end
+    axis square
+    axis([0 radiusRange(end) -0.05 0.5])
+    xlabel('Stim Size (deg)')
+    ylabel('pre dfof')
+    set(gca,'xtick',radiusRange,'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+    
+    subplot(1,2,2)
+    hold on
+    for i=1:length(postresult)
+        plot(radiusRange,post(i,:),'o','color',mycol{i})
+        plot(postresult{i},mycol{i})
+        legend off
+    end
+    axis square
+    axis([0 radiusRange(end) -0.05 0.5])
+    xlabel('Stim Size (deg)')
+    ylabel('post dfof')
+    set(gca,'xtick',radiusRange,'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',7)
+    
+    mtit('constrained running size curve fits')
+    if exist('psfile','var')
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+        print('-dpsc',psfile,'-append');
+    end
+    
+    %%%plot running fit parameters
+    figure
+    subplot(2,2,1)
+    hold on
+    plot([1 2],[preRD' postRD'],'k.-')
+    errorbar([1 2],[nanmean(preRD) nanmean(postRD)],[nanstd(preRD)/sqrt(numAni) nanstd(postRD)/sqrt(numAni)])
+    axis([0 3 0 3])
+    axis square
+    set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    ylabel('RD')
+    [h p] = ttest(preRD,postRD);
+    title(sprintf('p=%0.3f',p))
+
+    subplot(2,2,2)
+    hold on
+    plot([1 2],[preRS' postRS'],'k.-')
+    errorbar([1 2],[nanmean(preRS) nanmean(postRS)],[nanstd(preRS)/sqrt(numAni) nanstd(postRS)/sqrt(numAni)])
+    axis([0 3 0 80])
+    axis square
+    set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    ylabel('RS')
+    [h p] = ttest(preRS,postRS);
+    title(sprintf('p=%0.3f',p))
+    
+    subplot(2,2,3)
+    hold on
+    plot(preRD,postRD,'k.')
+    errorbarxy(nanmean(preRD),nanmean(postRD),nanstd(preRD)/sqrt(numAni),nanstd(postRD)/sqrt(numAni))
+    plot([0 100],[0 100],'m:')
+    axis([0 3 0 3])
+    axis square
+    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    xlabel('pre');ylabel('post')
+    title('RD')
+    
+    subplot(2,2,4)
+    hold on
+    plot(preRS,postRS,'k.')
+    errorbarxy(nanmean(preRS),nanmean(postRS),nanstd(preRS)/sqrt(numAni),nanstd(postRS)/sqrt(numAni))
+    plot([0 100],[0 100],'m:')
+    axis([0 80 0 80])
+    axis square
+    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    xlabel('pre');ylabel('post')
+    title('RS')
+    
+    mtit('constrained running size curve fits')
+    if exist('psfile','var')
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+        print('-dpsc',psfile,'-append');
+    end
+    
+    
+    
+    
+    
     
     %%%%%%%%%do size fits by cell
     %%stationary
@@ -2311,8 +2499,8 @@ for z=1%:length(ccvals)
 %     end
 %     pre=pre(fitani,:);post=post(fitani,:);sess=session(fitani);
     
-    [preRD preRS presigmaD presigmaS prem preresult] = sizeCurveFit(0:6,pre);
-    [postRD postRS postsigmaD postsigmaS postm postresult] = sizeCurveFit(0:6,post);
+    [preRD preRS presigmaD presigmaS prem preresult] = sizeCurveFit(radiusRange,pre);
+    [postRD postRS postsigmaD postsigmaS postm postresult] = sizeCurveFit(radiusRange,post);
     
     nofit = unique([find(isnan(preRD)) find(isnan(postRD))]); %%cells that wouldn't fit
     fitani = 1:length(preRD);
@@ -2331,17 +2519,17 @@ for z=1%:length(ccvals)
             if cnt<=length(sessfit)
                 subplot(3,5,j)
                 hold on
-                plot(0:6,pre(cnt,:),'ko')
-                plot(0:6,post(cnt,:),'ro')
+                plot(radiusRange,pre(cnt,:),'ko')
+                plot(radiusRange,post(cnt,:),'ro')
                 plot(preresult{cnt},'k')
                 plot(postresult{cnt},'r')
-                axis([0 6 min([pre(cnt,:) post(cnt,:)])-0.05 max([pre(cnt,:) post(cnt,:)])+0.05])
+                axis([0 radiusRange(end) min([pre(cnt,:) post(cnt,:)])-0.05 max([pre(cnt,:) post(cnt,:)])+0.05])
                 axis square
                 legend off
                 xlabel('size (deg)')
                 ylabel('dfof')
                 title(sprintf('ani %d cell %d',sessfit(cnt),fitani(cnt)))
-                set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',8,'xtick',0:6,'xticklabel',sizes)
+                set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',8,'xtick',radiusRange,'xticklabel',sizes)
                 cnt=cnt+1;
             else
                 continue
@@ -2498,6 +2686,106 @@ for z=1%:length(ccvals)
     end
     
 
+    %%%constrain fit parameters to only fit Rd and Rs for stationary
+    sprintf('doing cell-wise stationary fits with sigmas constrained...')
+    sigmaD = (presigmaD + postsigmaD)/2;sigmaS = (presigmaS + postsigmaS)/2;m = (prem + postm)/2;
+    [preRD preRS preresult] = sizeCurveFitRdRs(radiusRange,pre,sigmaD,sigmaS,m);
+    [postRD postRS postresult] = sizeCurveFitRdRs(radiusRange,post,sigmaD,sigmaS,m);
+    
+    %%%plot individual fits
+    cnt=1;
+    for i = 1:ceil(length(sessfit)/15)
+        figure
+        for j = 1:15
+            if cnt<=length(sessfit)
+                subplot(3,5,j)
+                hold on
+                plot(radiusRange,pre(cnt,:),'ko')
+                plot(radiusRange,post(cnt,:),'ro')
+                plot(preresult{cnt},'k')
+                plot(postresult{cnt},'r')
+                axis([0 radiusRange(end) min([pre(cnt,:) post(cnt,:)])-0.05 max([pre(cnt,:) post(cnt,:)])+0.05])
+                axis square
+                legend off
+                xlabel('size (deg)')
+                ylabel('dfof')
+                title(sprintf('ani %d cell %d',sessfit(cnt),fitani(cnt)))
+                set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',8,'xtick',radiusRange,'xticklabel',sizes)
+                cnt=cnt+1;
+            else
+                continue
+            end
+        end
+        mtit(sprintf('constrained cell fits stationary %d/%d',i,ceil(length(sessfit)/15)))
+        if exist('psfile','var')
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+            print('-dpsc',psfile,'-append');
+        end
+    end
+    
+    
+    figure
+    subplot(2,2,1)
+    hold on
+    plot([1 2],[preRD' postRD'],'k.:')
+    errorbar([1 2],[nanmean(preRD) nanmean(postRD)],[nanstd(preRD)/sqrt(numAni) nanstd(postRD)/sqrt(numAni)],'r')
+    axis([0 3 0 3])
+    axis square
+    set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    ylabel('RD')
+    [h p] = ttest(preRD,postRD);
+    title(sprintf('p=%0.3f',p))
+
+    subplot(2,2,2)
+    hold on
+    plot([1 2],[preRS' postRS'],'k.:')
+    errorbar([1 2],[nanmean(preRS) nanmean(postRS)],[nanstd(preRS)/sqrt(numAni) nanstd(postRS)/sqrt(numAni)],'r')
+    axis([0 3 0 80])
+    axis square
+    set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    ylabel('RS')
+    [h p] = ttest(preRS,postRS);
+    title(sprintf('p=%0.3f',p))
+    
+    subplot(2,2,3)
+    for j = 1:length(unique(sessfit))
+        anipre(j) = nanmean(preRD(find(sessfit==j)));
+        anipost(j) = nanmean(postRD(find(sessfit==j)));
+    end
+    hold on
+    plot(preRD,postRD,'k.')
+    errorbarxy(nanmean(anipre),nanmean(anipost),nanstd(anipre)/sqrt(numAni),nanstd(anipost)/sqrt(numAni))
+    plot([0 100],[0 100],'m:')
+    axis([0 3 0 3])
+    axis square
+    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    xlabel('pre');ylabel('post')
+    [h p] = ttest(anipre,anipost);
+    title(sprintf('RD p=%0.3f',p))
+    
+    subplot(2,2,4)
+    for j = 1:length(unique(sessfit))
+        anipre(j) = nanmean(preRS(find(sessfit==j)));
+        anipost(j) = nanmean(postRS(find(sessfit==j)));
+    end
+    hold on
+    plot(preRS,postRS,'k.')
+    errorbarxy(nanmean(preRS),nanmean(postRS),nanstd(preRS)/sqrt(numAni),nanstd(postRS)/sqrt(numAni))
+    plot([0 100],[0 100],'m:')
+    axis([0 80 0 80])
+    axis square
+    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    xlabel('pre');ylabel('post')
+    [h p] = ttest(anipre,anipost);
+    title(sprintf('RS p=%0.3f',p))
+    
+    mtit('constrained stationary size curve fit params')
+    if exist('psfile','var')
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+        print('-dpsc',psfile,'-append');
+    end
+    
+    
 
     %%%do size fits by cell
     %%running
@@ -2515,8 +2803,8 @@ for z=1%:length(ccvals)
 %     end
 %     pre=pre(fitani,:);post=post(fitani,:);sess=session(fitani);
     
-    [preRD preRS presigmaD presigmaS prem preresult] = sizeCurveFit(0:6,pre);
-    [postRD postRS postsigmaD postsigmaS postm postresult] = sizeCurveFit(0:6,post);
+    [preRD preRS presigmaD presigmaS prem preresult] = sizeCurveFit(radiusRange,pre);
+    [postRD postRS postsigmaD postsigmaS postm postresult] = sizeCurveFit(radiusRange,post);
     
     nofit = unique([find(isnan(preRD)) find(isnan(postRD))]); %%cells that wouldn't fit
     fitani = 1:length(preRD);
@@ -2535,17 +2823,17 @@ for z=1%:length(ccvals)
             if cnt<=length(sessfit)
                 subplot(3,5,j)
                 hold on
-                plot(0:6,pre(cnt,:),'ko')
-                plot(0:6,post(cnt,:),'ro')
+                plot(radiusRange,pre(cnt,:),'ko')
+                plot(radiusRange,post(cnt,:),'ro')
                 plot(preresult{cnt},'k')
                 plot(postresult{cnt},'r')
-                axis([0 6 min([pre(cnt,:) post(cnt,:)])-0.05 max([pre(cnt,:) post(cnt,:)])+0.05])
+                axis([0 radiusRange(end) min([pre(cnt,:) post(cnt,:)])-0.05 max([pre(cnt,:) post(cnt,:)])+0.05])
                 axis square
                 legend off
                 xlabel('size (deg)')
                 ylabel('dfof')
                 title(sprintf('ani %d cell %d',sessfit(cnt),fitani(cnt)))
-                set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',8,'xtick',0:6,'xticklabel',sizes)
+                set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',8,'xtick',radiusRange,'xticklabel',sizes)
                 cnt=cnt+1;
             else
                 continue
@@ -2700,6 +2988,109 @@ for z=1%:length(ccvals)
         set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfile,'-append');
     end
+    
+    
+    %%%constrain fit parameters to only fit Rd and Rs for running
+    sprintf('doing cell-wise running fits with sigmas constrained...')
+    sigmaD = (presigmaD + postsigmaD)/2;sigmaS = (presigmaS + postsigmaS)/2;m = (prem + postm)/2;
+    [preRD preRS preresult] = sizeCurveFitRdRs(radiusRange,pre,sigmaD,sigmaS,m);
+    [postRD postRS postresult] = sizeCurveFitRdRs(radiusRange,post,sigmaD,sigmaS,m);
+    
+    %%%plot individual fits
+    cnt=1;
+    for i = 1:ceil(length(sessfit)/15)
+        figure
+        for j = 1:15
+            if cnt<=length(sessfit)
+                subplot(3,5,j)
+                hold on
+                plot(radiusRange,pre(cnt,:),'ko')
+                plot(radiusRange,post(cnt,:),'ro')
+                plot(preresult{cnt},'k')
+                plot(postresult{cnt},'r')
+                axis([0 radiusRange(end) min([pre(cnt,:) post(cnt,:)])-0.05 max([pre(cnt,:) post(cnt,:)])+0.05])
+                axis square
+                legend off
+                xlabel('size (deg)')
+                ylabel('dfof')
+                title(sprintf('ani %d cell %d',sessfit(cnt),fitani(cnt)))
+                set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',8,'xtick',radiusRange,'xticklabel',sizes)
+                cnt=cnt+1;
+            else
+                continue
+            end
+        end
+        mtit(sprintf('constrained cell fits running %d/%d',i,ceil(length(sessfit)/15)))
+        if exist('psfile','var')
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+            print('-dpsc',psfile,'-append');
+        end
+    end
+    
+    
+    figure
+    subplot(2,2,1)
+    hold on
+    plot([1 2],[preRD' postRD'],'k.:')
+    errorbar([1 2],[nanmean(preRD) nanmean(postRD)],[nanstd(preRD)/sqrt(numAni) nanstd(postRD)/sqrt(numAni)],'r')
+    axis([0 3 0 3])
+    axis square
+    set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    ylabel('RD')
+    [h p] = ttest(preRD,postRD);
+    title(sprintf('p=%0.3f',p))
+
+    subplot(2,2,2)
+    hold on
+    plot([1 2],[preRS' postRS'],'k.:')
+    errorbar([1 2],[nanmean(preRS) nanmean(postRS)],[nanstd(preRS)/sqrt(numAni) nanstd(postRS)/sqrt(numAni)],'r')
+    axis([0 3 0 80])
+    axis square
+    set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    ylabel('RS')
+    [h p] = ttest(preRS,postRS);
+    title(sprintf('p=%0.3f',p))
+    
+    subplot(2,2,3)
+    for j = 1:length(unique(sessfit))
+        anipre(j) = nanmean(preRD(find(sessfit==j)));
+        anipost(j) = nanmean(postRD(find(sessfit==j)));
+    end
+    hold on
+    plot(preRD,postRD,'k.')
+    errorbarxy(nanmean(anipre),nanmean(anipost),nanstd(anipre)/sqrt(numAni),nanstd(anipost)/sqrt(numAni))
+    plot([0 100],[0 100],'m:')
+    axis([0 3 0 3])
+    axis square
+    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    xlabel('pre');ylabel('post')
+    [h p] = ttest(anipre,anipost);
+    title(sprintf('RD p=%0.3f',p))
+    
+    subplot(2,2,4)
+    for j = 1:length(unique(sessfit))
+        anipre(j) = nanmean(preRS(find(sessfit==j)));
+        anipost(j) = nanmean(postRS(find(sessfit==j)));
+    end
+    hold on
+    plot(preRS,postRS,'k.')
+    errorbarxy(nanmean(preRS),nanmean(postRS),nanstd(preRS)/sqrt(numAni),nanstd(postRS)/sqrt(numAni))
+    plot([0 100],[0 100],'m:')
+    axis([0 80 0 80])
+    axis square
+    set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    xlabel('pre');ylabel('post')
+    [h p] = ttest(anipre,anipost);
+    title(sprintf('RS p=%0.3f',p))
+    
+    mtit('constrained running size curve fit params')
+    if exist('psfile','var')
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+        print('-dpsc',psfile,'-append');
+    end
+    
+    
+    
     
     
     

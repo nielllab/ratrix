@@ -21,7 +21,7 @@ end
 %%% greenframe = mean fluorescence image
 get2pSession
 dfofInterp = dfofInterp(49:end-32,37:end-36,:);
-cycLength = mean(diff(stimPulse));
+cycLength = mean(diff(stimPulse))/dt;
 cycF = mean(diff(stimPulse))/dt;
 nstim = input('num stim per repeat : ');
 totalframes = cycLength*nstim;
@@ -163,6 +163,19 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 figure
 imagesc(dF);
 
+% [coeff score latent] = pca(dF');
+% figure
+% plot(latent(1:10));
+% figure
+% plot(score(:,1:3))
+% figure
+% imagesc(coeff(:,1:10),[-0.25 0.25])
+% 
+% figure
+% imagesc((score*coeff')');
+% figure
+% imagesc(dF)
+
 
 %%% cluster responses from selected traces
 dist = pdist(dF,'correlation');  %%% sort based on correlation coefficient
@@ -214,7 +227,8 @@ plot((0:totalframes-1)/cycLength+1, squeeze(mean(dFrepeats,1)))
 xlabel('stim #'); xlim([1 nstim+1])
 title('mean trace for each repeat');
 hold on; legend('1','2','3','4')
-%plot((0:totalframes-1)/cycLength +1, squeeze(mean(mean(dFrepeats,3),1)),'g','Linewidth',2)
+%plot((0:totalframes-1)/cycLength+1, squeeze(mean(mean(dFrepeats,3),1)),)
+plot((0:totalframes-1)/cycLength +1, squeeze(mean(mean(dFrepeats,3),1)),'g','Linewidth',2)
 for i = 1:nstim;
     plot([i i ],[0.3 0.6],'k:');
 end
@@ -272,6 +286,31 @@ if makeFigs
     end
 end
 
+for i=1:cycLength+1;
+    cycAvg(i) = mean(mean(median(dfofInterp(:,:,i:cycLength:end),3),2),1);
+end
+figure
+plot(cycAvg); title('cycle average'); xlabel('frames')
+
+evRange = 3:5; baseRange = 1;
+figure
+for i = 1:(nstim*reps);
+    trialmean(:,:,i) = mean(dfofInterp(:,:,round(cycLength*(i-1) + evRange)),3)- mean(dfofInterp(:,:,round(cycLength*(i-1) + baseRange)),3);
+end
+
+loc = [1 4 2 5 3 6]; %%% map stim order onto subplot
+figure
+for i = 1:6
+    meanimg = mean(trialmean(:,:,i:nstim:end),3);
+    subplot(2,3,loc(i));
+    imagesc(meanimg,[0 0.25]);
+end
+figure
+for i = 7:12
+    meanimg = mean(trialmean(:,:,i:nstim:end),3);
+    subplot(2,3,loc(i-6));
+    imagesc(meanimg,[0 0.25]);
+end
 
 %%% commented out
 [f p] = uiputfile('*.mat','save results');

@@ -56,7 +56,7 @@ else
         cycAvg(i) = mean(mean(mean(dfofInterp(:,:,i:cycLength/dt:end))));
     end
     figure
-    plot(cycAvg)
+    plot(cycAvg); title('cycle average'); xlabel('frames')
     
 %     [fs ps] = uiputfile('*.mat','session data');
 %     if fs ~=0

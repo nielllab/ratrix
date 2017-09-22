@@ -176,9 +176,15 @@ imagesc(dF);
 % figure
 % imagesc(dF)
 
+clear dFrepeats
+for rep = 1:reps
+    dFrepeats(:,:,rep) = dF(:,(1:totalframes) + round((rep-1)*totalframes));
+end
+dFrepeats(dFrepeats>2)=2;
 
 %%% cluster responses from selected traces
-dist = pdist(dF,'correlation');  %%% sort based on correlation coefficient
+%dist = pdist(dF,'correlation');  %%% sort based on correlation coefficient
+dist = pdist(mean(dFrepeats,3),'correlation');  %%% sort based on correlation coefficient
 display('doing cluster')
 tic, Z = linkage(dist,'ward'); toc
 figure
@@ -197,11 +203,6 @@ end
 
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-
-% %%% plot correlation coefficients
-% figure
-% imagesc(corrcoef(dF'));
-
 nclust =input('# of clusters : '); %%% set to however many you want
 c= cluster(Z,'maxclust',nclust);
 colors = hsv(nclust+1);
@@ -213,14 +214,6 @@ for clust=1:nclust
     plot(x(c==clust),y(c==clust),'o','Color',colors(clust,:));
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
-
-clear dFrepeats
-for rep = 1:reps
-    dFrepeats(:,:,rep) = dF(:,(1:totalframes) + round((rep-1)*totalframes));
-end
-
-dFrepeats(dFrepeats>2)=2;
 
 figure
 plot((0:totalframes-1)/cycLength+1, squeeze(mean(dFrepeats,1)))
@@ -234,6 +227,23 @@ for i = 1:nstim;
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
+clear cycAvgAll cycAvg cycImg
+
+for i=1:cycLength;
+    cycAvgAll(:,i) = mean(dF(:,i:cycLength:end),2);
+    cycAvg(i) = mean(mean(median(dfofInterp(:,:,i:cycLength:end),3),2),1);
+    cycImg(:,:,i) = mean(dfofInterp(:,:,i:cycLength:end),3);
+end
+
+figure
+for i = 1:cycLength
+    subplot(2,5,i);
+    imagesc(cycImg(:,:,i)-min(cycImg,[],3),[0 0.1])
+end
+
+cycAvgAll = cycAvgAll - repmat(cycAvgAll(:,end),[1 size(cycAvgAll,2)]);
+figure
+plot(cycAvg); title('cycle average'); xlabel('frames')
 
 for clust = 1:nclust
     figure
@@ -261,9 +271,12 @@ for clust = 1:nclust
         plot([i i ],[0  0.5],'k:');
     end
     
-    subplot(2,2,3);
-    plot((1:size(dF,2))*dt,dF(c==clust,:)'); hold on;
-    xlim([1 size(dF,2)*dt]); xlabel('secs'); ylim([-0.2 2.1])
+     subplot(2,2,3);
+     plot(cycAvgAll(c==clust,:)');
+     hold on
+     plot(mean(cycAvgAll(c==clust,:),1),'g','Linewidth',2);
+%     plot((1:size(dF,2))*dt,dF(c==clust,:)'); hold on;
+%     xlim([1 size(dF,2)*dt]); xlabel('secs'); ylim([-0.2 2.1])
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
 end
@@ -271,9 +284,77 @@ end
 figure
 hold on
 for clust = 1:nclust
-    plot(mean(dF(c==clust,:),1));
-end; title('mean for each cluster)')
+    plot(mean(cycAvgAll(c==clust,:),1),'Color',colors(clust,:));
+end; title('mean cyc avg for each cluster)')
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+figure
+hold on
+for clust = 1:nclust
+    plot((0:totalframes-1)/cycLength+1,mean(mean(dFrepeats(c==clust,:,:),3),1),'Color',colors(clust,:));
+end; 
+hold on
+for i = 1:nstim;
+    plot([i i ],[0.2 0.4],'k:');
+end
+title('mean resp for each cluster');xlabel('stim #'); xlim([1 nstim+1])
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+
+evRange = 4:6; baseRange = 1:2;
+figure
+for i = 1:(nstim*reps);
+    trialmean(:,:,i) = mean(dfofInterp(:,:,round(cycLength*(i-1) + evRange)),3)- mean(dfofInterp(:,:,round(cycLength*(i-1) + baseRange)),3);
+end
+
+if nstim==12 %%% spots
+    loc = [1 4 2 5 3 6]; %%% map stim order onto subplot
+    figure; set(gcf,'Name','OFF spots');
+    for i = 1:6
+        meanimg = median(trialmean(:,:,i:nstim:end),3);
+        subplot(2,3,loc(i));
+        imagesc(meanimg,[0 0.25]);
+    end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+    figure; set(gcf,'Name','ON spots');
+    for i = 7:12
+        meanimg = median(trialmean(:,:,i:nstim:end),3);
+        subplot(2,3,loc(i-6));
+        imagesc(meanimg,[0 0.25]);
+    end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+end
+
+range = [-0.05 0.25];
+if nstim==14 %%% gratings
+    loc = 1:6; %%% map stim order onto subplot
+    figure; set(gcf,'Name','vert gratings');
+    for i = 1:6
+        meanimg = median(trialmean(:,:,i:nstim:end),3);
+        subplot(2,3,loc(i));
+        imagesc(meanimg,range);
+    end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+    figure;set(gcf,'Name','horiz gratings');
+    for i = 7:12
+        meanimg = median(trialmean(:,:,i:nstim:end),3);
+        subplot(2,3,loc(i-6));
+        imagesc(meanimg,range);
+    end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+    figure
+    for i = 13:14
+          meanimg = median(trialmean(:,:,i:nstim:end),3);
+        subplot(1,2,i-12);
+        imagesc(meanimg,range); if i ==13; title('low tf flicker'); else title('high tf flicker'); end
+    end 
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+end
 
 if makeFigs
     [f p] = uiputfile('*.pdf','save pdf file');
@@ -284,32 +365,6 @@ if makeFigs
     catch
         display('couldnt generate pdf');
     end
-end
-
-for i=1:cycLength+1;
-    cycAvg(i) = mean(mean(median(dfofInterp(:,:,i:cycLength:end),3),2),1);
-end
-figure
-plot(cycAvg); title('cycle average'); xlabel('frames')
-
-evRange = 3:5; baseRange = 1;
-figure
-for i = 1:(nstim*reps);
-    trialmean(:,:,i) = mean(dfofInterp(:,:,round(cycLength*(i-1) + evRange)),3)- mean(dfofInterp(:,:,round(cycLength*(i-1) + baseRange)),3);
-end
-
-loc = [1 4 2 5 3 6]; %%% map stim order onto subplot
-figure
-for i = 1:6
-    meanimg = mean(trialmean(:,:,i:nstim:end),3);
-    subplot(2,3,loc(i));
-    imagesc(meanimg,[0 0.25]);
-end
-figure
-for i = 7:12
-    meanimg = mean(trialmean(:,:,i:nstim:end),3);
-    subplot(2,3,loc(i-6));
-    imagesc(meanimg,[0 0.25]);
 end
 
 %%% commented out

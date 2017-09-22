@@ -19,7 +19,7 @@ else
         plot(1:length(stimPulse),ones(size(stimPulse))*cycLength); ylabel('secs');xlabel('stim #')
         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-        startTime = ceil(stimPulse(1)/dt);
+        startTime = round(stimPulse(1)/dt)-1;
     catch
         display('couldnt read TTLs')
         stimPulse=[]; framePulse=[]; startTime = 1;

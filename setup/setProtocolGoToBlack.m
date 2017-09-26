@@ -11,7 +11,7 @@ end
 sm=makeStandardSoundManager();
 
 rewardSizeULorMS          =171;
-requestRewardSizeULorMS   =0;
+requestRewardSizeULorMS   =0;% start at 75 for 3-4 sessions, until reliably requesting 200trials/hr
 requestMode               ='first';
 msPenalty                 =3500;       %consider changing this also in future
 fractionOpenTimeSoundIsOn =1;
@@ -27,7 +27,33 @@ stim.gain = 0.7 * ones(2,1);
 
 switch subjIDs{1}
 
-         case 'j363lt'  %started 9/13/17
+        
+    case 'pvarch515nt'  %started 9/27/17
+         requestRewardSizeULorMS = 75;
+         rewardSizeULorMS        = 219;
+         msPenalty               =3500;
+         percentCorrectionTrials = .5;  
+    
+    case 'pvarch515tt'  %started 9/27/17
+         requestRewardSizeULorMS = 75;
+         rewardSizeULorMS        = 219;
+         msPenalty               =3500;
+         percentCorrectionTrials = .5;  
+    
+    case 'pvarch5154t'  %started 9/27/17
+         requestRewardSizeULorMS = 75;
+         rewardSizeULorMS        = 219;
+         msPenalty               =3500;
+         percentCorrectionTrials = .5;  
+    
+    case 'pvarch515lt'  %started 9/27/17
+         requestRewardSizeULorMS = 75;
+         rewardSizeULorMS        = 219;
+         msPenalty               =3500;
+         percentCorrectionTrials = .5;  
+    
+    
+    case 'j363lt'  %started 9/13/17
          requestRewardSizeULorMS = 0; %stop reward
          rewardSizeULorMS        = 219; %doesnt do shit, change in google docs
          msPenalty               =3500;

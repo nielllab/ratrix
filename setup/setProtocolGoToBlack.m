@@ -40,7 +40,7 @@ switch subjIDs{1}
          msPenalty               =3500;
          percentCorrectionTrials = .5;  
     
-    case 'pvarch5154t'  %started 9/27/17
+    case 'pvarch515rt'  %started 9/27/17
          requestRewardSizeULorMS = 75;
          rewardSizeULorMS        = 219;
          msPenalty               =3500;

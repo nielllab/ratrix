@@ -98,12 +98,12 @@ for f=1:length(use)
     %%%use manual selection of 10 degree pixelwise response for cell selection
     if mod(f,2)~=0 & (~exist(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing '.mat'])) | reselect==1)
         figure
-        title('select 10deg activated region')
+        title('select 5deg activated region')
         if length(size(frmdata))==5
-            resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,3,1),3)-...
+            resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,2,1),3)-...
                 nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,1,1),3);
         else
-            resp = frmdata(cropx(1):cropx(2),cropy(1):cropy(2),3,1);
+            resp = frmdata(cropx(1):cropx(2),cropy(1):cropy(2),2,1);
         end
         respimg = mat2im(resp,jet,[-0.01 0.1]);
         imshow(respimg)

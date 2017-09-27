@@ -40,7 +40,7 @@ switch subjIDs{1}
     
    case 'testHvVcenter' % 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 59;
+       rewardSizeULorMS        = 420;
        msPenalty               =6300;
 
            case 'j364nt'  %started 9/13/17 %%start hvv center lateral 9/27/17

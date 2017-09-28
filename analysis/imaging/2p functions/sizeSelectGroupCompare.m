@@ -469,9 +469,9 @@ for i = 1:length(grpfiles)
     hold on
     errorbar(1:length(sizes),nanmean(pre),nanstd(pre)/sqrt(numAni),'k')
     errorbar(1:length(sizes),nanmean(post),nanstd(post)/sqrt(numAni),'r')
-    plot(1:length(radiusRange),hvals-0.7,'b*')
+    plot(1:length(radiusRange),hvals-0.5,'b*')
     axis square
-    axis([0 length(sizes)+1 -0.1 0.3])
+    axis([0 length(sizes)+1 -0.1 0.5])
     xlabel('Stim Size (deg)')
     ylabel(sprintf('%s run',grpnames{i}))
     set(gca,'xtick',1:length(sizes),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',8)

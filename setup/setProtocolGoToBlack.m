@@ -88,12 +88,12 @@ switch subjIDs{1}
 %          rewardSizeULorMS        = 219;
 %          msPenalty               =3500;
 %          percentCorrectionTrials = .5;  
-         
-          case 'j365lt'  %started 9/13/17
-         requestRewardSizeULorMS = 0;
-         rewardSizeULorMS        = 219;
-         msPenalty               =3500;
-         percentCorrectionTrials = .5; 
+%          
+%           case 'j365lt'  %started 9/13/17
+%          requestRewardSizeULorMS = 0;
+%          rewardSizeULorMS        = 219;
+%          msPenalty               =3500;
+%          percentCorrectionTrials = .5; 
     
          case 'j365rt'  %started 9/13/17
          requestRewardSizeULorMS = 0;
@@ -112,18 +112,18 @@ switch subjIDs{1}
 %          rewardSizeULorMS        = 219;
 %          msPenalty               =3500;
 %          percentCorrectionTrials = .5; 
-    
-         case 'j366rt'  %started 9/13/17
-         requestRewardSizeULorMS = 0;
-         rewardSizeULorMS        = 219;
-         msPenalty               =3500;
-         percentCorrectionTrials = .5;       
+%     
+%          case 'j366rt'  %started 9/13/17
+%          requestRewardSizeULorMS = 0;
+%          rewardSizeULorMS        = 219;
+%          msPenalty               =3500;
+%          percentCorrectionTrials = .5;       
          
-         case 'j366tt'  %started 9/13/17
-         requestRewardSizeULorMS = 0;
-         rewardSizeULorMS        = 219;
-         msPenalty               =3500;
-         percentCorrectionTrials = .5;          
+%          case 'j366tt'  %started 9/13/17
+%          requestRewardSizeULorMS = 0;
+%          rewardSizeULorMS        = 219;
+%          msPenalty               =3500;
+%          percentCorrectionTrials = .5;          
          
 %          case 'j351tt'  %started 7/26/17
 %          requestRewardSizeULorMS = 0;

@@ -1,19 +1,19 @@
 
-[f p] = uigetfile({'*.mat;*.tif'},'.mat or .tif file');
+[f, p] = uigetfile({'*.mat;*.tif'},'.mat or .tif file');
 cycLength = input('cycle length : ');
 if strcmp(f(end-3:end),'.mat')
-    display('loading data')
+    disp('loading data')
     sessionName = fullfile(p,f);
     load(sessionName)
-    display('done')
+    disp('done')
     if ~exist('cycLength','var')
         cycLength=8;
     end
 else
-    f
-    [ttlf ttlp] = uigetfile('*.mat','ttl file')
+    disp(f);
+    [ttlf, ttlp] = uigetfile('*.mat','ttl file');
     try
-        [stimPulse framePulse] = getTTL(fullfile(ttlp,ttlf));
+        [stimPulse, framePulse] = getTTL(fullfile(ttlp,ttlf));
         figure
         plot(diff(stimPulse)); title('stimPulse cycle time');hold on
         plot(1:length(stimPulse),ones(size(stimPulse))*cycLength); ylabel('secs');xlabel('stim #')
@@ -21,16 +21,16 @@ else
 
         startTime = round(stimPulse(1)/dt)-1;
     catch
-        display('couldnt read TTLs')
+        disp('couldnt read TTLs')
         stimPulse=[]; framePulse=[]; startTime = 1;
     end
     
     ttlFname = fullfile(ttlp,ttlf);
     
     if twocolor
-        [dfofInterp dtRaw redframe greenframe mv] = get2colordata(fullfile(p,f),dt,cycLength);
+        [dfofInterp, dtRaw, redframe, greenframe, mv] = get2colordata(fullfile(p,f),dt,cycLength);
     else
-        [dfofInterp dtRaw greenframe] = get2pdata(fullfile(p,f),dt,cycLength);
+        [dfofInterp, dtRaw, greenframe] = get2pdata(fullfile(p,f),dt,cycLength);
     end
     
     figure
@@ -52,7 +52,8 @@ else
     dfofInterp = dfofInterp(:,:,startTime:end);
     
     clear cycAvg
-    for i = 1:cycLength/dt;
+    cycAvg = zeros(cycLength/dt,1);
+    for i = 1:cycLength/dt
         cycAvg(i) = mean(mean(mean(dfofInterp(:,:,i:cycLength/dt:end))));
     end
     figure

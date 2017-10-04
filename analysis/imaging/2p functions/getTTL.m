@@ -1,4 +1,4 @@
-function [stimPulse framePulse] = getTTL(fname)
+function [stimPulse, framePulse] = getTTL(fname)
 load(fname,'bin','hz','state');
 sprintf('ttl file name %s',state.files.fullFileName)
 stimEdge = diff(bin(:,2));

@@ -1,5 +1,5 @@
-function [dfofInterp im_dt red green mv] = get2colordata(fname,dt,cycLength);
-[imgAll framerate mv] = readAlign2color(fname,1,1,0.5);
+function [dfofInterp, im_dt, red, green, mv] = get2colordata(fname,dt,cycLength)
+[imgAll, framerate, mv] = readAlign2color(fname,1,1,0.5);
 
 red = squeeze(mean(imgAll(:,:,:,2),3));
 green = squeeze(prctile(imgAll(:,:,:,1),95,3));
@@ -48,7 +48,7 @@ rangered = [ 0 prctile(m{2}(:),99)];
 clear mov;
 
 figure
-for f = 1:cycFrames;
+for f = 1:cycFrames
     cycAvg(:,:,f,:) = mean(imgInterp(:,:,f:cycFrames:end,:),3);
     im(:,:,1) = squeeze(cycAvg(:,:,f,2))/rangered(2);
     im(:,:,2) = (squeeze(cycAvg(:,:,f,1)) - range(1))/(range(2)-range(1));

@@ -18,7 +18,7 @@ fractionOpenTimeSoundIsOn =1;
 fractionPenaltySoundIsOn  =1;
 scalar                    =1;
 msAirpuff                 =0;
-radius                 = .35;
+radius                 = .25;
 pixPerCycs                = [200];
 percentCorrectionTrials = .5;
 stim.gain = 0.7 * ones(2,1);
@@ -35,71 +35,126 @@ switch subjIDs{1}
        requestRewardSizeULorMS = 0;
        rewardSizeULorMS        = 219;
        msPenalty               =3500;
-       percentCorrectionTrials = .75; 
+       percentCorrectionTrials = .75;        
         
     
    case 'testHvVcenter' % 
        requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 59;
+       rewardSizeULorMS        = 420;
        msPenalty               =6300;
        
-       
-
-         case 'j351tt'  %started 7/26/17 %%start center 8/17/17
-         requestRewardSizeULorMS = 0;
-         rewardSizeULorMS        = 219;
-         msPenalty               =3500;
-         percentCorrectionTrials = .5;  
          
-         case 'j351rt'  %started 7/26/17 %%start center 8/17/17
+   case 'j365lt'  %started 9/13/17 %%start hvv center squared 10/2/17
          requestRewardSizeULorMS = 0;
          rewardSizeULorMS        = 219;
          msPenalty               =3500;
+         radius                  = .25;
+         percentCorrectionTrials = .5; 
+    
+   case 'j366rt'  %started 9/13/17 %%start hvv center squared with eye patch 10/2/17
+         requestRewardSizeULorMS = 0;
+         rewardSizeULorMS        = 219;
+         msPenalty               =3500;
+         radius                  = .25;
          percentCorrectionTrials = .5;   
          
-         case 'j351lt'  %started 7/26/17 %%start center 8/17/17
+   case 'j366tt'  %started 9/13/17 %%start hvv center lateral 10/2/17
          requestRewardSizeULorMS = 0;
          rewardSizeULorMS        = 219;
          msPenalty               =3500;
-         percentCorrectionTrials = .5;      
-        
-         case 'j352tt'  %started 7/26/17 %%start center 8/17/17
-         requestRewardSizeULorMS = 0;
-         rewardSizeULorMS        = 219;
-         msPenalty               =3500;
-         percentCorrectionTrials = .5;      
-        
-         case 'j352rt'  %started 7/26/17 %%start center 8/17/17
-         requestRewardSizeULorMS = 0;
-         rewardSizeULorMS        = 219;
-         msPenalty               =3500;
-         percentCorrectionTrials = .5;      
+         radius                  = .25;
+         percentCorrectionTrials = .5;        
     
-         case 'j352lt'  %started 7/26/17 %%start center 8/17/17
+    case 'j364tt'  %started 9/13/17 %%start hvv center lateral 9/25/17
          requestRewardSizeULorMS = 0;
          rewardSizeULorMS        = 219;
          msPenalty               =3500;
+         radius                  = .25;
+         percentCorrectionTrials = .5;        
+
+    case 'j366lt'  %started 9/13/17 %%start hvv center squared 9/28/17
+         requestRewardSizeULorMS = 0;
+         rewardSizeULorMS        = 219;
+         msPenalty               =3500;
+         radius                  = .25;
+         percentCorrectionTrials = .5; 
+         
+           case 'j364nt'  %started 9/13/17 %%start hvv center lateral 9/27/17
+         requestRewardSizeULorMS = 0;
+         rewardSizeULorMS        = 219;
+         msPenalty               =3500;
+         radius                  = .25;
+         percentCorrectionTrials = .5;  
+         
+          case 'j364rt'  %started 9/13/17 %%start hvv center squared eye patch 9/27/17
+         requestRewardSizeULorMS = 0;
+         rewardSizeULorMS        = 219;
+         msPenalty               =3500;
+         radius                  = .25;
          percentCorrectionTrials = .5;         
        
-   case 'g62aaa11rt'  %started 4/25/17 %%hvv center 5/10/17
+          case 'j364lt'  %started 9/13/17 %%start hvv center squared 9/27/17
          requestRewardSizeULorMS = 0;
          rewardSizeULorMS        = 219;
          msPenalty               =3500;
-         percentCorrectionTrials = .5;         
-         radius                 = .25;
-         
-%     case 'g62zz9tt'  %started 5/4/17 %%start hvv 5/16/17
+         radius                  = .25;
+         percentCorrectionTrials = .5;        
+
+%          case 'j351tt'  %started 7/26/17 %%start center 8/17/17
 %          requestRewardSizeULorMS = 0;
 %          rewardSizeULorMS        = 219;
 %          msPenalty               =3500;
-%          percentCorrectionTrials = .5;          
-       
-   case 'g62pp9lt' % Started 4/07/17  %%start hvv 4/18/17
-       requestRewardSizeULorMS = 0;
-       rewardSizeULorMS        = 219;
-       msPenalty               =3500;
-       percentCorrectionTrials = .5;   
-       radius                 = .25;   
+%          percentCorrectionTrials = .5;  
+%          
+%          case 'j351rt'  %started 7/26/17 %%start center 8/17/17
+%          requestRewardSizeULorMS = 0;
+%          rewardSizeULorMS        = 219;
+%          msPenalty               =3500;
+%          percentCorrectionTrials = .5;   
+%          
+%          case 'j351lt'  %started 7/26/17 %%start center 8/17/17
+%          requestRewardSizeULorMS = 0;
+%          rewardSizeULorMS        = 219;
+%          msPenalty               =3500;
+%          percentCorrectionTrials = .5;      
+%         
+%          case 'j352tt'  %started 7/26/17 %%start center 8/17/17
+%          requestRewardSizeULorMS = 0;
+%          rewardSizeULorMS        = 219;
+%          msPenalty               =3500;
+%          percentCorrectionTrials = .5;      
+%         
+%          case 'j352rt'  %started 7/26/17 %%start center 8/17/17
+%          requestRewardSizeULorMS = 0;
+%          rewardSizeULorMS        = 219;
+%          msPenalty               =3500;
+%          percentCorrectionTrials = .5;      
+%     
+%          case 'j352lt'  %started 7/26/17 %%start center 8/17/17
+%          requestRewardSizeULorMS = 0;
+%          rewardSizeULorMS        = 219;
+%          msPenalty               =3500;
+%          percentCorrectionTrials = .5;         
+%        
+%    case 'g62aaa11rt'  %started 4/25/17 %%hvv center 5/10/17
+%          requestRewardSizeULorMS = 0;
+%          rewardSizeULorMS        = 219;
+%          msPenalty               =3500;
+%          percentCorrectionTrials = .5;         
+%          radius                 = .25;
+%          
+% %     case 'g62zz9tt'  %started 5/4/17 %%start hvv 5/16/17
+% %          requestRewardSizeULorMS = 0;
+% %          rewardSizeULorMS        = 219;
+% %          msPenalty               =3500;
+% %          percentCorrectionTrials = .5;          
+%        
+%    case 'g62pp9lt' % Started 4/07/17  %%start hvv 4/18/17
+%        requestRewardSizeULorMS = 0;
+%        rewardSizeULorMS        = 219;
+%        msPenalty               =3500;
+%        percentCorrectionTrials = .5;   
+%        radius                 = .25;   
     
 %    case 'g62aaa11lt'  %started 4/25/17 %%start center 5/4/17
 %          requestRewardSizeULorMS = 0;

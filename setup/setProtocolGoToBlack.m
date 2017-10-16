@@ -95,11 +95,11 @@ switch subjIDs{1}
 %          msPenalty               =3500;
 %          percentCorrectionTrials = .5; 
     
-         case 'j365rt'  %started 9/13/17
-         requestRewardSizeULorMS = 0;
-         rewardSizeULorMS        = 219;
-         msPenalty               =3500;
-         percentCorrectionTrials = .5;       
+%          case 'j365rt'  %started 9/13/17
+%          requestRewardSizeULorMS = 0;
+%          rewardSizeULorMS        = 219;
+%          msPenalty               =3500;
+%          percentCorrectionTrials = .5;       
          
          case 'j365tt'  %started 9/13/17
          requestRewardSizeULorMS = 0;

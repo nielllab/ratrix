@@ -26,14 +26,34 @@ get2pSession
 
 %%%crop to get rid of edges that have motion artifact
 dfofInterp = dfofInterp(49:end-32,37:end-36,:);
-
-%%% get duration of each stim (called a cycle) in terms of frames, based on ttl interval
 cycLength = mean(diff(stimPulse))/dt;
-cycF = mean(diff(stimPulse))/dt;
-
-nstim = input('num stim per repeat : '); %%% total number of stimuli in the set
-totalframes = cycLength*nstim;
-reps = floor(size(dfofInterp,3)/totalframes);  %%% number of times the whole stimulus set was repeated
+[f p] = uigetfile('*.mat','stimulus record');
+if f~=0
+    alignRecs =1;
+    load(fullfile(p,f),'stimRec');
+    nCycles = floor(size(dfofInterp,3)/cycLength);
+    stimT = stimRec.ts - stimRec.ts(1);
+    for i = 1:nCycles
+        stimOrder(i) = stimRec.cond(min(find(stimT>((i-1)*cycLength*dt+0.1))));
+    end
+    %stimOrder = stimRec.cond(stimRec.f==2); %%% find second frame of each stim, and see what condition it was (don't use frame 1, because stays at frame=1 at stim end)
+    nstim = max(stimOrder);
+    
+    stimOrder = stimOrder(1:nCycles);
+    for i = 1:nstim
+        nStimRep(i) = sum(stimOrder==i);
+    end
+    totalframes = cycLength*nstim;
+    reps = floor(size(dfofInterp,3)/totalframes);  %%% number of times the whole stimulus set was repeated
+    
+else
+    alignRecs=0;
+    nstim = input('num stim per repeat : '); %%% total number of stimuli in the set
+    totalframes = cycLength*nstim;
+    reps = floor(size(dfofInterp,3)/totalframes);  %%% number of times the whole stimulus set was repeated
+    stimOrder = repmat(1:nstim,[1 reps]); nStimRep(1:nstim)=reps;
+end
+%%% get duration of each stim (called a cycle) in terms of frames, based on ttl interval
 
 %%% generate periodic map
 
@@ -155,9 +175,9 @@ else
     clear dF
     for i = 1:length(x)
         dF(i,:) = mean(mean(dfofInterp(y(i)+range,x(i)+range,:),2),1);
-    end   
+    end
     
-end  %%% if/else 
+end  %%% if/else
 
 
 dF(dF>2)=2; %%% clip abnormally large values
@@ -199,29 +219,41 @@ for rep = 1:reps
 end
 dFrepeats(dFrepeats>2)=2;
 
+dFrepeats=zeros(size(dF,1),floor(cycLength)*nstim,max(nStimRep))+NaN;
+for i = 1:nstim
+    repList = find(stimOrder==i);
+    for r = 1:nStimRep(i)
+        dFrepeats(:,(i-1)*floor(cycLength) + (1:floor(cycLength)),r) = dF(:,round((repList(r)-1)*cycLength)+(1:floor(cycLength))) - repmat(dF(:,round((repList(r)-1)*cycLength)+1),[1 floor(cycLength)]);
+    end
+end
+
+
 %%% average across repetitions, and subtract the minimum value for each
 %%% cell (to correct for baseline offsets)
-dFmean = mean(dFrepeats,3);
-dFmean = dFmean - repmat(min(dFmean,[],2),[1 size(dFmean,2)]);
+dFmean = nanmedian(dFrepeats,3);
+%dFmean = dFmean - repmat(min(dFmean,[],2),[1 size(dFmean,2)]);
 
+figure
+imagesc(dFmean)
 
 %%% cluster responses from selected traces
-%dist = pdist(dF,'correlation');  %%% sort based on whole timecourse 
-dist = pdist(mean(dFrepeats,3),'correlation');  %%% sort based on average across repeats (averages away artifact on individual trials)
+%dist = pdist(dF,'correlation');  %%% sort based on whole timecourse
+dist = pdist(dFmean,'correlation');  %%% sort based on average across repeats (averages away artifact on individual trials)
 display('doing cluster')
 tic, Z = linkage(dist,'ward'); toc
 figure
 subplot(3,4,[1 5 9 ])
 display('doing dendrogram')
-[h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3);
+%leafOrder = optimalleaforder(Z,dist);
+[h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3);%,'reorder',leafOrder);
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-imagesc(dFmean(perm,:),[0 0.4]); axis xy ; xlabel('selected traces based on dF'); colormap jet ;   %%% show sorted data
+imagesc(dFmean(perm,:),[-0.1 0.4]); axis xy ; xlabel('selected traces based on dF'); colormap jet ;   %%% show sorted data
 hold on;
 totalT = size(dF,2);
 ncyc = floor(totalT/cycLength);
 for i = 1:ncyc
-    plot([i*cycLength i*cycLength]+1.5,[1 length(perm)],'k');
+    plot([i*floor(cycLength) i*floor(cycLength)]+0.5,[1 length(perm)],'k');
 end
 
 %%% select number of clusters you want
@@ -244,7 +276,7 @@ xlabel('stim #'); xlim([1 nstim+1])
 title('mean trace for each repeat');
 hold on; legend('1','2','3','4')
 %plot((0:totalframes-1)/cycLength+1, squeeze(mean(mean(dFrepeats,3),1)),)
-plot((0:totalframes-1)/cycLength +1, squeeze(mean(mean(dFrepeats,3),1)),'g','Linewidth',2)
+plot((0:totalframes-1)/cycLength +1, squeeze(mean(nanmedian(dFrepeats,3),1)),'g','Linewidth',2)
 for i = 1:nstim;
     plot([i i ],[0.3 0.6],'k:');
 end
@@ -262,14 +294,18 @@ end
 figure
 for i = 1:cycLength
     subplot(2,5,i);
-    imagesc(cycImg(:,:,i)-min(cycImg,[],3),[0 0.1])
+    imagesc(cycImg(:,:,i)-min(cycImg,[],3),[0 0.1]); axis equal
 end
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
+    
 %%% plot mean timecourse
 cycAvgAll = cycAvgAll - repmat(cycAvgAll(:,end),[1 size(cycAvgAll,2)]);
 figure
 plot(cycAvg); title('cycle average'); xlabel('frames')
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
+    
 %%% summary plots for each cluster
 for clust = 1:nclust
     
@@ -277,7 +313,7 @@ for clust = 1:nclust
     figure
     subplot(2,2,1);
     imagesc(stdImg,[0 prctile(stdImg(:),99)*1.2]); axis equal; hold on;colormap gray;freezeColors;
-    title(sprintf('cluster %d',clust));   
+    title(sprintf('cluster %d',clust));
     plot(x(c==clust),y(c==clust),'go')%%'Color',colors(c));
     subplot(2,2,2);
     imagesc(dF(c==clust,:),[-0.1 1]); axis xy % was df
@@ -292,8 +328,8 @@ for clust = 1:nclust
     %%% timecourse of this cluster, for each repeat
     subplot(2,2,4);
     plot((0:totalframes-1)/cycLength + 1, squeeze(mean(dFrepeats(c==clust,:,:),1))); hold on
-    plot((0:totalframes-1)/cycLength + 1, squeeze(mean(mean(dFrepeats(c==clust,:,:),3),1)),'g','LineWidth',2)
-    xlabel('stim #'); xlim([1 nstim+1])
+    plot((0:totalframes-1)/cycLength + 1, squeeze(mean(nanmedian(dFrepeats(c==clust,:,:),3),1)),'g','LineWidth',2)
+    xlabel('stim #'); xlim([1 nstim+1]); ylim([-0.25 0.5])
     title('mean of cluster, multiple repeats');
     for i = 1:nstim;
         plot([i i ],[0  0.5],'k:');
@@ -327,14 +363,14 @@ for clust = 1:nclust
 end;
 hold on
 for i = 1:nstim;
-    plot([i i ],[0.2 0.4],'k:');
+    plot([i i ],[0 0.25],'k:');
 end
 title('mean resp for each cluster');xlabel('stim #'); xlim([1 nstim+1])
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %%% correlation map (shows how good the clustering is
 figure
-imagesc(corrcoef(dFmean(perm,:)'))
+imagesc(corrcoef(dFmean(perm,:)'),[-1 1]); colormap jet
 title('correlation across cells after clustering')
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
@@ -342,7 +378,7 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 
 evRange = 4:6; baseRange = 1:2; %%% timepoints for evoked and baseline activity
 figure
-for i = 1:(nstim*reps); %%% get pixel-wise evoked activity on each individual stim presentation
+for i = 1:length(stimOrder); %%% get pixel-wise evoked activity on each individual stim presentation
     trialmean(:,:,i) = mean(dfofInterp(:,:,round(cycLength*(i-1) + evRange)),3)- mean(dfofInterp(:,:,round(cycLength*(i-1) + baseRange)),3);
 end
 
@@ -351,17 +387,17 @@ if nstim==12 %%% spots
     loc = [1 4 2 5 3 6]; %%% map stim order onto subplot
     figure; set(gcf,'Name','OFF spots');
     for i = 1:6
-        meanimg = median(trialmean(:,:,i:nstim:end),3);
+        meanimg = median(trialmean(:,:,stimOrder==i),3);
         subplot(2,3,loc(i));
-        imagesc(meanimg,[0 0.25]);
+        imagesc(meanimg,[0 0.25]); axis equal
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     figure; set(gcf,'Name','ON spots');
     for i = 7:12
-        meanimg = median(trialmean(:,:,i:nstim:end),3);
+        meanimg = median(trialmean(:,:,stimOrder==i),3);
         subplot(2,3,loc(i-6));
-        imagesc(meanimg,[0 0.25]);
+        imagesc(meanimg,[0 0.25]); axis equal
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
@@ -372,25 +408,25 @@ if nstim==14 %%% gratings
     loc = 1:6; %%% map stim order onto subplot
     figure; set(gcf,'Name','vert gratings');
     for i = 1:6
-        meanimg = median(trialmean(:,:,i:nstim:end),3);
+        meanimg = median(trialmean(:,:,stimOrder==i),3);
         subplot(2,3,loc(i));
-        imagesc(meanimg,range);
+        imagesc(meanimg,range); axis equal
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     figure;set(gcf,'Name','horiz gratings');
     for i = 7:12
-        meanimg = median(trialmean(:,:,i:nstim:end),3);
+        meanimg = median(trialmean(:,:,stimOrder==i),3);
         subplot(2,3,loc(i-6));
-        imagesc(meanimg,range);
+        imagesc(meanimg,range); axis equal
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     figure; set(gcf,'Name','flicker');
     for i = 13:14
-        meanimg = median(trialmean(:,:,i:nstim:end),3);
+        meanimg = median(trialmean(:,:,stimOrder==i),3);
         subplot(1,2,i-12);
-        imagesc(meanimg,range); if i ==13; title('low tf flicker'); else title('high tf flicker'); end
+        imagesc(meanimg,range); axis equal; if i ==13; title('low tf flicker'); else title('high tf flicker'); end
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     

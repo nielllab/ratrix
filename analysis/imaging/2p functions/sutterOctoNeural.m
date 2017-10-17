@@ -5,8 +5,8 @@ clear all
 close all
 
 %%% frame rate for resampling
-dt = 0.5;
-framerate=1/dt;
+% dt = 0.5;
+% framerate=1/dt;
 
 %%% option of one or two color data (sutter stores 2-color as interleaved frames)
 %twocolor = input('how many colors? 1 / 2 : ')-1;
@@ -26,7 +26,7 @@ end
 get2pSession
 
 %%%crop to get rid of edges that have motion artifact
-dfofInterp = dfofInterp(49:end-32,37:end-36,:);
+% dfofInterp = dfofInterp(49:end-32,37:end-36,:);
 
 %%% get duration of each stim (called a cycle) in terms of frames, based on ttl interval
 cycLength = mean(diff(stimPulse))/dt;

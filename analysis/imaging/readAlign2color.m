@@ -1,4 +1,4 @@
-function [Img_Seq, framerate, mv] = readAlign2color(fname, align, showImg, fwidth)
+function [Aligned_Seq, framerate, mv] = readAlign2color(fname, align, showImg, fwidth)
 
 % Get file info
 Img_Info = imfinfo(fname);
@@ -15,7 +15,11 @@ for iFrame = 1:nframes/2
     Img_Seq(:,:,iFrame,1) = double(imread(fname,(iFrame-1)*2+1)); %Green channel
     Img_Seq(:,:,iFrame,2) = double(imread(fname,(iFrame-1)*2+2)); %Red channel
 end
-        
+
+%Calculate Mean Image for each non-aligned channel
+mn = squeeze(mean(Img_Seq,3));
+GrnMean = mn(:,:,1); %Non-aligned Green Channel Mean
+RedMean = mn(:,:,2); %Non-aligned Red Channel Mean
 if align
     disp('doing alignement')
     rigid = input('Rigid compensation (2) or Non-rigid(1) or Both(0): ');
@@ -39,7 +43,7 @@ if align
                 Img_Seq(:,:,iFrame,1) = imfilter(Img_Seq(:,:,iFrame,1),filt);
                 
                 %Then apply xy rigid translation determined by sbxalign
-                Aligned_Seq(:,:,iFrame,iChannel) = circshift(squeeze(Img_Seq(:,:,iFrame,iChannel)),[r.T(f,1),r.T(f,2)]);
+                Aligned_Seq(:,:,iFrame,iChannel) = circshift(squeeze(Img_Seq(:,:,iFrame,iChannel)),[r.T(iFrame,1),r.T(iFrame,2)]);
             end
         end     
 
@@ -48,14 +52,14 @@ if align
         
     end
     
-    if rigid == 1 || rigid == 0
+    if rigid == 1 
         %% Non-Rigid Compensation        
         % Align full sequence without considering z-displacement
         r = sbxalign_tif_nonrigid(fname,2:2:nframes);
         
         %Add function to find frames in the correct z-plane
         %Output an index matrix of correct-z-plane frames to input into sbxalign_tif_nonrigid
-        FrameIndices = bin_Zplane(Img_Seq, mean(Img_Seq,3));
+        FrameIndices = bin_Zplane(Img_Seq(:,:,:,2), r.m{1,1},2:2:nframes);
         
         % Re-align sequence of frames that are in the correct z-plane
         r = sbxalign_tif_nonrigid(fname,FrameIndices);
@@ -72,41 +76,45 @@ if align
         
         
         
+    elseif rigid == 0
+        %% Non-Rigid Compensation on a Rigidly aligned image seq
+        
+        
     end
     toc
     
     %% Display Aligned Mean Image vs Non-Aligned
     %Calculate the mean over all frames and display non-aligned image
-    mn = squeeze(mean(Img_Seq,3));
+
         
-    if showImg
-        % Display Non-Aligned Mean Image
-        figure
-        
-        for i = 1:2
-            range = [prctile(mn(:),2) prctile(mn(:),98)];
-            imagesc(squeeze(mn(:,:,i)),range);
-            title('non aligned mean img')
-            colormap(gray)
-        end
-        
-        
-        figure
-        for i = 1:2
-            mn=squeeze(mean(Img_Seq(:,:,:,i),3));
-            subplot(1,2,i)
-            range = [prctile(mn(:),2) prctile(mn(:),98)];
-            imagesc(mn,range);
-            title('aligned mean img')
-            colormap(gray)
-            axis equal
-            im(:,:,3-i) = (mn-range(1))/(range(2)-range(1));
-        end
-        im(:,:,3)=0;
-        figure
-        imshow(im)
-        
-    end
+%     if showImg
+%         % Display Non-Aligned Mean Image
+%         figure
+%         
+%         for i = 1:2
+%             range = [prctile(mn(:),2) prctile(mn(:),98)];
+%             imagesc(squeeze(mn(:,:,i)),range);
+%             title('non aligned mean img')
+%             colormap(gray)
+%         end
+%         
+%         
+%         figure
+%         for i = 1:2
+%             mn=squeeze(mean(Img_Seq(:,:,:,i),3));
+%             subplot(1,2,i)
+%             range = [prctile(mn(:),2) prctile(mn(:),98)];
+%             imagesc(mn,range);
+%             title('aligned mean img')
+%             colormap(gray)
+%             axis equal
+%             im(:,:,3-i) = (mn-range(1))/(range(2)-range(1));
+%         end
+%         im(:,:,3)=0;
+%         figure
+%         imshow(im)
+%         
+%     end
 else
     mv = NaN;
 end

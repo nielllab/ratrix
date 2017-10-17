@@ -1,6 +1,13 @@
 
 [f, p] = uigetfile({'*.mat;*.tif'},'.mat or .tif file');
 cycLength = input('cycle length : ');
+
+%Get Image acquisition frame rate
+Img_Info = imfinfo(fullfile(p,f));
+eval(Img_Info(1).ImageDescription);
+framerate = state.acq.frameRate;
+dt = 1/framerate;
+    
 if strcmp(f(end-3:end),'.mat')
     disp('loading data')
     sessionName = fullfile(p,f);
@@ -26,7 +33,7 @@ else
     end
     
     ttlFname = fullfile(ttlp,ttlf);
-    
+
     if twocolor
         [dfofInterp, dtRaw, redframe, greenframe, mv] = get2colordata(fullfile(p,f),dt,cycLength);
     else
@@ -51,13 +58,13 @@ else
     
     dfofInterp = dfofInterp(:,:,startTime:end);
     
-    clear cycAvg
-    cycAvg = zeros(cycLength/dt,1);
-    for i = 1:cycLength/dt
-        cycAvg(i) = mean(mean(mean(dfofInterp(:,:,i:cycLength/dt:end))));
-    end
-    figure
-    plot(cycAvg); title('cycle average'); xlabel('frames')
+%     clear cycAvg
+%     cycAvg = zeros(cycLength/dt,1);
+%     for i = 1:cycLength/dt
+%         cycAvg(i) = mean(mean(mean(dfofInterp(:,:,i:cycLength/dt:end))));
+%     end
+%     figure
+%     plot(cycAvg); title('cycle average'); xlabel('frames')
     
 %     [fs ps] = uiputfile('*.mat','session data');
 %     if fs ~=0

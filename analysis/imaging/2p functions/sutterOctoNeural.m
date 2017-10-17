@@ -9,9 +9,10 @@ dt = 0.5;
 framerate=1/dt;
 
 %%% option of one or two color data (sutter stores 2-color as interleaved frames)
-twocolor = input('how many colors? 1 / 2 : ')-1;
-
-makeFigs = input('make pdf file 0 / 1 :');
+%twocolor = input('how many colors? 1 / 2 : ')-1;
+twocolor = 2;
+%makeFigs = input('make pdf file 0 / 1 :');
+makeFigs = 0;
 if makeFigs
     psfile = 'c:\temp.ps';
     if exist(psfile,'file')==2;delete(psfile);end

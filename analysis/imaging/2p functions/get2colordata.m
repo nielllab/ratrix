@@ -1,4 +1,5 @@
 function [dfofInterp, im_dt, red, green, mv] = get2colordata(fname,dt,cycLength)
+
 [imgAll, framerate, mv] = readAlign2color(fname,1,1,0.5);
 
 red = squeeze(mean(imgAll(:,:,:,2),3));

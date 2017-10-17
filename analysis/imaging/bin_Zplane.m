@@ -6,8 +6,8 @@ function [Indy] = bin_Zplane(Img_Seq, MeanImg)
 
 for iFrame = 1:size(Img_Seq, 3)
    
-   CorrCoeff = corr2(Img_Seq(:,:,iFrame),MeanImg);
-   disp(CorrCoeff);
+   CorrCoeff(iFrame,1) = corr2(Img_Seq(:,:,iFrame),MeanImg);
+
    
 end
 

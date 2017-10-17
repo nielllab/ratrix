@@ -75,12 +75,38 @@ if align
         
     else
         %% Non-Rigid Compensation
+        % Get Image Size
+        Img_Info = imfinfo(fname);
+        nframes = length(Img_Info);
+        
+        % PreAllocate
+        Img_Seq = zeros(Img_Info(1).Height,Img_Info(1).Width,nframes/2);
+        
+        % Read in Green channel
+        for iFrame = 1:nframes/2
+            Img_Seq(:,:,iFrame) = double(imread(fname,(iFrame-1)*2+1));
+        end
+
+        % Align full sequence without considering z-displacement
+        r = sbxalign_tif_nonrigid(fname,2:2:nframes);
+        
+
+        
         %Add function to find frames in the correct z-plane
         %Output an index matrix of correct-z-plane frames to input into sbxalign_tif_nonrigid
+        FrameIndices = bin_Zplane(Img_Seq, mean(Img_Seq,3));
         
-        r = sbxalign_tif_nonrigid(fname,2:2:nframes);
+        % Re-align sequence of frames that are in the correct z-plane
+        r = sbxalign_tif_nonrigid(fname,FrameIndices);
         disp('Oiy');
         
+        % Show Mean image of non-aligned image sequence and aligned 
+        if showImg
+            figure
+            NonAligned_Mean = mean(Img_Seq, 3);
+            imshowpair(NonAligned_Mean, r.M{1}, 'montage')
+            title('Non-Aligned Mean Image vs Aligned Mean Image');
+        end
         
         
         

@@ -11,9 +11,9 @@ if(length(idx)==1)
     A = edgetaper(A,fspecial('gaussian',10,2));
     
     r.m{1} = A; % mean
-    r.m{2} = zeros(size(A)); % 2nd moment
-    r.m{3} = zeros(size(A)); % 3rd moment
-    r.m{4} = zeros(size(A)); % 4th moment
+%     r.m{2} = zeros(size(A)); % 2nd moment
+%     r.m{3} = zeros(size(A)); % 3rd moment
+%     r.m{4} = zeros(size(A)); % 4th moment
     
     r.T = {zeros([size(A) 2])}; % no translation (identity)
     r.n = 1; % # of frames

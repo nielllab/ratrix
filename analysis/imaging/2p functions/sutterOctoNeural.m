@@ -227,58 +227,16 @@ for i = 1:nstim
     end
 end
 
-
-%%% average across repetitions, and subtract the minimum value for each
-%%% cell (to correct for baseline offsets)
-dFmean = nanmedian(dFrepeats,3);
-%dFmean = dFmean - repmat(min(dFmean,[],2),[1 size(dFmean,2)]);
-
-figure
-imagesc(dFmean)
-
-%%% cluster responses from selected traces
-%dist = pdist(dF,'correlation');  %%% sort based on whole timecourse
-dist = pdist(dFmean,'correlation');  %%% sort based on average across repeats (averages away artifact on individual trials)
-display('doing cluster')
-tic, Z = linkage(dist,'ward'); toc
-figure
-subplot(3,4,[1 5 9 ])
-display('doing dendrogram')
-%leafOrder = optimalleaforder(Z,dist);
-[h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3);%,'reorder',leafOrder);
-axis off
-subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-imagesc(dFmean(perm,:),[-0.1 0.4]); axis xy ; xlabel('selected traces based on dF'); colormap jet ;   %%% show sorted data
-hold on;
-totalT = size(dF,2);
-ncyc = floor(totalT/cycLength);
-for i = 1:ncyc
-    plot([i*floor(cycLength) i*floor(cycLength)]+0.5,[1 length(perm)],'k');
-end
-
-%%% select number of clusters you want
-nclust =input('# of clusters : '); %%% set to however many you want
-c= cluster(Z,'maxclust',nclust);
-colors = hsv(nclust+1); %%% color code for each cluster
-
-%%% plot spatial location of cells in each cluster
-figure
-imagesc(stdImg,[0 prctile(stdImg(:),99)*1.2]); colormap gray; axis equal;hold on
-for clust=1:nclust
-    plot(x(c==clust),y(c==clust),'o','Color',colors(clust,:));
-end
-if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
 %%% mean response of whole population, for each repetition
 figure
 plot((0:totalframes-1)/cycLength+1, squeeze(mean(dFrepeats,1)))
-xlabel('stim #'); xlim([1 nstim+1])
+xlabel('stim #'); xlim([1 nstim+1]); ylim([-0.2 0.4])
 title('mean trace for each repeat');
 hold on; legend('1','2','3','4')
 %plot((0:totalframes-1)/cycLength+1, squeeze(mean(mean(dFrepeats,3),1)),)
 plot((0:totalframes-1)/cycLength +1, squeeze(mean(nanmedian(dFrepeats,3),1)),'g','Linewidth',2)
 for i = 1:nstim;
-    plot([i i ],[0.3 0.6],'k:');
+    plot([i i ],[0 0.3],'k:');
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
@@ -305,7 +263,62 @@ figure
 plot(cycAvg); title('cycle average'); xlabel('frames')
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-    
+   
+
+%%% average across repetitions, and subtract the minimum value for each
+%%% cell (to correct for baseline offsets)
+dFmean = nanmedian(dFrepeats,3);
+%dFmean = dFmean - repmat(min(dFmean,[],2),[1 size(dFmean,2)]);
+
+
+dFclust=zeros(size(dF,1),floor(cycLength-4)*nstim,max(nStimRep))+NaN;
+for i = 1:nstim
+    repList = find(stimOrder==i);
+    for r = 1:nStimRep(i)
+        dFclust(:,(i-1)*floor(cycLength-4) + (1:floor(cycLength-4)),r) = dF(:,round((repList(r)-1)*cycLength)+(3:floor(cycLength-2))) - repmat(mean(dF(:,round((repList(r)-1)*cycLength)+(1:2)),2),[1 floor(cycLength-4)]);
+    end
+end
+figure
+imagesc(dFmean)
+dFclust = nanmedian(dFclust,3);
+dFclust = imresize(dFclust,[size(dFclust,1) size(dFclust,2)*0.5]);
+figure
+imagesc(dFclust,[-0.05 0.2])
+
+%%% cluster responses from selected traces
+%dist = pdist(dF,'correlation');  %%% sort based on whole timecourse
+dist = pdist(dFclust,'correlation');  %%% sort based on average across repeats (averages away artifact on individual trials)
+display('doing cluster')
+tic, Z = linkage(dist,'ward'); toc
+figure
+subplot(3,4,[1 5 9 ])
+display('doing dendrogram')
+leafOrder = optimalleaforder(Z,dist);
+[h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3,'reorder',leafOrder);
+axis off
+subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
+imagesc(dFmean(perm,:),[-0.1 0.4]); axis xy ; xlabel('selected traces based on dF'); colormap jet ;   %%% show sorted data
+hold on;
+totalT = size(dF,2);
+ncyc = floor(totalT/cycLength);
+for i = 1:ncyc
+    plot([i*floor(cycLength) i*floor(cycLength)]+0.5,[1 length(perm)],'k');
+end
+
+%%% select number of clusters you want
+nclust =input('# of clusters : '); %%% set to however many you want
+c= cluster(Z,'maxclust',nclust);
+colors = hsv(nclust+1); %%% color code for each cluster
+
+%%% plot spatial location of cells in each cluster
+figure
+imagesc(stdImg,[0 prctile(stdImg(:),99)*1.2]); colormap gray; axis equal;hold on
+for clust=1:nclust
+    plot(x(c==clust),y(c==clust),'o','Color',colors(clust,:));
+end
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+ 
 %%% summary plots for each cluster
 for clust = 1:nclust
     
@@ -329,7 +342,7 @@ for clust = 1:nclust
     subplot(2,2,4);
     plot((0:totalframes-1)/cycLength + 1, squeeze(mean(dFrepeats(c==clust,:,:),1))); hold on
     plot((0:totalframes-1)/cycLength + 1, squeeze(mean(nanmedian(dFrepeats(c==clust,:,:),3),1)),'g','LineWidth',2)
-    xlabel('stim #'); xlim([1 nstim+1]); ylim([-0.25 0.5])
+    xlabel('stim #'); xlim([1 nstim+1]); ylim([-0.1 0.3])
     title('mean of cluster, multiple repeats');
     for i = 1:nstim;
         plot([i i ],[0  0.5],'k:');
@@ -362,21 +375,23 @@ for clust = 1:nclust
     plot((0:totalframes-1)/cycLength+1,mean(dFmean(c==clust,:,:),1),'Color',colors(clust,:));
 end;
 hold on
-for i = 1:nstim;
-    plot([i i ],[0 0.25],'k:');
+for i = 1:nstim;a = 
+    plot([i i ],[0 0.2],'k:');
 end
 title('mean resp for each cluster');xlabel('stim #'); xlim([1 nstim+1])
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %%% correlation map (shows how good the clustering is
 figure
-imagesc(corrcoef(dFmean(perm,:)'),[-1 1]); colormap jet
+imagesc(corrcoef(dFclust(perm,:)'),[0 1]); colormap jet
 title('correlation across cells after clustering')
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
+figure
+hist(max(dFclust,[],2))
 %%% calculate pixel-wise maps of activity for different stim
 
-evRange = 4:6; baseRange = 1:2; %%% timepoints for evoked and baseline activity
+evRange = 5:6; baseRange = 1:2; %%% timepoints for evoked and baseline activity
 figure
 for i = 1:length(stimOrder); %%% get pixel-wise evoked activity on each individual stim presentation
     trialmean(:,:,i) = mean(dfofInterp(:,:,round(cycLength*(i-1) + evRange)),3)- mean(dfofInterp(:,:,round(cycLength*(i-1) + baseRange)),3);
@@ -400,7 +415,12 @@ if nstim==12 %%% spots
         imagesc(meanimg,[0 0.25]); axis equal
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
+        overlay(:,:,1) = median(trialmean(:,:,stimOrder==4),3);
+    overlay(:,:,2) = median(trialmean(:,:,stimOrder==10),3);
+    overlay(:,:,3)= 0
+    overlay(overlay<0)=0; overlay = overlay/0.2;
+    figure
+    imshow(imresize(overlay,2));
 end
 
 range = [-0.05 0.25]; %%% colormap range
@@ -429,8 +449,20 @@ if nstim==14 %%% gratings
         imagesc(meanimg,range); axis equal; if i ==13; title('low tf flicker'); else title('high tf flicker'); end
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
+
+    overlay(:,:,1) = median(trialmean(:,:,stimOrder==1),3);
+    overlay(:,:,2) = median(trialmean(:,:,stimOrder==7),3);
+    overlay(:,:,3)= median(trialmean(:,:,stimOrder==13),3);
+    %overlay(:,:,3)=0;
+    overlay(overlay<0)=0; overlay = overlay/range(2);
+    figure
+    imshow(imresize(overlay,2));
+   
+    figure
+    overlay(:,:,3)=0;
+    imshow(imresize(overlay,2));
 end
+
 
 %%% save out pdf file!
 if makeFigs

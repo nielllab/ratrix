@@ -1,5 +1,5 @@
-
-[f, p] = uigetfile({'*.mat;*.tif'},'.mat or .tif file');
+% Get File Path for tiff Image
+[f,p] = uigetfile({'*.mat;*.tif'},'.mat or .tif file');
 cycLength = input('cycle length : ');
 
 %Get Image acquisition frame rate

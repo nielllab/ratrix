@@ -18,14 +18,86 @@ if makeFigs
     if exist(psfile,'file')==2;delete(psfile);end
 end
 
-%%% get sutter data
-%%% will ask for tif file - performs image registration and resamples at requested framerate
-%%% will ask for ttl .mat file - uses this to find first frame of imaging after stim comes on
-%%% returns dfofInterp(x,y,t) = timeseries at requested framerate, with pre-stim frames clipped off
-%%% greenframe = mean fluorescence image
-get2pSession
+%%  get sutter data 
+% Following ~70 lines of code used to be contained within get2pSession.m script
+% Get File Path for tiff Image
+% [f, p] = uigetfile({'*.mat;*.tif'},'.mat or .tif file');
+% cycLength = input('cycle length : ');
 
-%%%crop to get rid of edges that have motion artifact
+f = '6w_3x2blocks_random008.tif';
+p = 'C:\Users\nlab\Documents\Wyrick\101617_Octopus_Cal520\';
+cycLength = 5.033;
+
+%Get Image acquisition frame rate
+%resampleHZ = input('Resample framerate (enter 0 to keep acquisition framerate) : ');
+resampleHZ = 0;
+if resampleHZ == 0
+    Img_Info = imfinfo(fullfile(p,f));
+    eval(Img_Info(1).ImageDescription);
+    framerate = state.acq.frameRate;
+    dt = 1/framerate;
+else
+    framerate = resampleHZ;
+    dt = 1/framerate;
+end
+    
+if strcmp(f(end-3:end),'.mat')
+    disp('loading data')
+    sessionName = fullfile(p,f);
+    load(sessionName)
+    disp('done')
+    if ~exist('cycLength','var')
+        cycLength=8;
+    end
+else
+    % Uses the ttl file to find first frame of imaging after stim comes on
+%     [ttlf, ttlp] = uigetfile('*.mat','ttl file');
+    ttlf = '6w_3x2blocks_random009-20171016T162728.mat';
+    ttlp = 'C:\Users\nlab\Documents\Wyrick\101617_Octopus_Cal520\';
+    try
+        [stimPulse, framePulse] = getTTL(fullfile(ttlp,ttlf));
+        figure
+        plot(diff(stimPulse)); title('stimPulse cycle time');hold on
+        plot(1:length(stimPulse),ones(size(stimPulse))*cycLength); ylabel('secs');xlabel('stim #')
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+        startTime = round(stimPulse(1)/dt)-1;
+    catch
+        disp('couldnt read TTLs')
+        stimPulse=[]; framePulse=[]; startTime = 1;
+    end
+    
+    ttlFname = fullfile(ttlp,ttlf);
+
+    %% Performs Image registration and resample at requested frame rate
+    % returns dfofInterp(x,y,t) = timeseries at requested framerate, with pre-stim frames clipped off
+    % greenframe = mean fluorescence image
+    if twocolor
+        [dfofInterp, dtRaw, redframe, greenframe, mv] = get2colordata(fullfile(p,f),dt,cycLength);
+    else
+        [dfofInterp, dtRaw, greenframe] = get2pdata(fullfile(p,f),dt,cycLength);
+    end
+    
+    figure
+    timecourse = squeeze(mean(mean(dfofInterp(:,:,1:end),2),1));
+    plot(timecourse);
+        
+    hold on
+    for st = 0:10
+        plot(st*cycLength/dt+ [startTime startTime],[0.2 1],'g:')
+    end
+    
+    sprintf('estimated start time %f',startTime)
+    % startTime = input('start time : ');
+    
+    for st = 0:10
+        plot(st*cycLength+ [startTime*dt startTime*dt],[0.2 1],'k:')
+    end
+    
+    dfofInterp = dfofInterp(:,:,startTime:end);
+end
+
+%% crop to get rid of edges that have motion artifact
 % dfofInterp = dfofInterp(49:end-32,37:end-36,:);
 
 %%% get duration of each stim (called a cycle) in terms of frames, based on ttl interval
@@ -48,7 +120,7 @@ prctile(amp(:),99)
 amp=amp/prctile(amp(:),98); amp(amp>1)=1;
 img = mat2im(mod(angle(map),2*pi),hsv,[pi/2  (2*pi -pi/4)]);
 img = img.*repmat(amp,[1 1 3]);
-mapimg= figure
+mapimg = figure
 figure
 imshow(imresize(img,0.5))
 colormap(hsv); colorbar

@@ -32,12 +32,16 @@ tic
 for f=1:nframes/2
     img(:,:,f,1) = imfilter(double(imread(fname,(f-1)*2+1)),filt);
     img(:,:,f,2) = imfilter(double(imread(fname,(f-1)*2+2)),filt);
+    if f/100 == round(f/100)
+        sprintf('%d / %d frames read&filtered',f,nframes/2)
+    end
 end
 toc
 sprintf('read frame by frame')
 tic
 imjunk = imread(fname);
 toc
+size(imjunk)
 sprintf('read all frames')
 
 mn=squeeze(mean(img,3));

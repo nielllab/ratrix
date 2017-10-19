@@ -27,11 +27,12 @@ get2pSession
 %%%crop to get rid of edges that have motion artifact
 dfofInterp = dfofInterp(49:end-32,37:end-36,:);
 cycLength = mean(diff(stimPulse))/dt;
+cycWindow = round(max(5/dt,cycLength));  %%% number of frames in window around each cycle. min of 4 secs, or actual cycle length + 2
 [f p] = uigetfile('*.mat','stimulus record');
 if f~=0
     alignRecs =1;
     load(fullfile(p,f),'stimRec');
-    nCycles = floor(size(dfofInterp,3)/cycLength);
+    nCycles = floor(size(dfofInterp,3)/cycLength)-1;  %%% trim off last stim to allow window for previous stim
     stimT = stimRec.ts - stimRec.ts(1);
     for i = 1:nCycles
         stimOrder(i) = stimRec.cond(min(find(stimT>((i-1)*cycLength*dt+0.1))));
@@ -213,28 +214,25 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 % imagesc(dF)
 
 %%% sort data into repeats - dFrepeats(cell, time, rep #);
-clear dFrepeats
-for rep = 1:reps
-    dFrepeats(:,:,rep) = dF(:,(1:totalframes) + round((rep-1)*totalframes));
-end
-dFrepeats(dFrepeats>2)=2;
 
-dFrepeats=zeros(size(dF,1),floor(cycLength)*nstim,max(nStimRep))+NaN;
+dFrepeats=zeros(size(dF,1),cycWindow*nstim,max(nStimRep))+NaN;
 for i = 1:nstim
     repList = find(stimOrder==i);
     for r = 1:nStimRep(i)
-        dFrepeats(:,(i-1)*floor(cycLength) + (1:floor(cycLength)),r) = dF(:,round((repList(r)-1)*cycLength)+(1:floor(cycLength))) - repmat(dF(:,round((repList(r)-1)*cycLength)+1),[1 floor(cycLength)]);
+        dFrepeats(:,(i-1)*cycWindow + (1:cycWindow),r) = dF(:,round((repList(r)-1)*cycLength)+(1:cycWindow)) - repmat(dF(:,round((repList(r)-1)*cycLength)+1),[1 floor(cycWindow)]);
     end
 end
+dFrepeats(dFrepeats>1) =1; %%% clip major outliers
+dFrepeats(dFrepeats<-1) = -1;
 
 %%% mean response of whole population, for each repetition
 figure
-plot((0:totalframes-1)/cycLength+1, squeeze(mean(dFrepeats,1)))
+plot((0:size(dFrepeats,2)-1)/cycWindow, squeeze(mean(dFrepeats,1)))
 xlabel('stim #'); xlim([1 nstim+1]); ylim([-0.05 0.15])
 title('mean trace for each repeat');
 hold on; legend('1','2','3','4')
 %plot((0:totalframes-1)/cycLength+1, squeeze(mean(mean(dFrepeats,3),1)),)
-plot((0:totalframes-1)/cycLength +1, squeeze(mean(nanmedian(dFrepeats,3),1)),'g','Linewidth',2)
+plot((0:size(dFrepeats,2)-1)/cycWindow, squeeze(mean(nanmedian(dFrepeats,3),1)),'g','Linewidth',2)
 for i = 1:nstim;
     plot([i i ],[0 0.3],'k:');
 end
@@ -242,7 +240,7 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 
 %%% calculate cycle averages (timecourse for each individual stim)
 clear cycAvgAll cycAvg cycImg
-for i=1:cycLength;
+for i=1:cycWindow;
     cycAvgAll(:,i) = mean(dF(:,i:cycLength:end),2); %%% cell-wise average across all stim
     cycAvg(i) = mean(mean(median(dfofInterp(:,:,i:cycLength:end),3),2),1); %%% average for all cells and stim
     cycImg(:,:,i) = mean(dfofInterp(:,:,i:cycLength:end),3); %%% pixelwise average across all stim
@@ -270,19 +268,21 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 dFmean = nanmedian(dFrepeats,3);
 %dFmean = dFmean - repmat(min(dFmean,[],2),[1 size(dFmean,2)]);
 
+%%% make dF matrix for clustering
 
-dFclust=zeros(size(dF,1),floor(cycLength-4)*nstim,max(nStimRep))+NaN;
+%%% this version trims off two timepoints at beginning and end
+dFclust=zeros(size(dF,1),floor(cycWindow-4)*nstim,max(nStimRep))+NaN;
 for i = 1:nstim
     repList = find(stimOrder==i);
     for r = 1:nStimRep(i)
-        dFclust(:,(i-1)*floor(cycLength-4) + (1:floor(cycLength-4)),r) = dF(:,round((repList(r)-1)*cycLength)+(3:floor(cycLength-2))) - repmat(mean(dF(:,round((repList(r)-1)*cycLength)+(1:2)),2),[1 floor(cycLength-4)]);
+        dFclust(:,(i-1)*floor(cycWindow-4) + (1:floor(cycWindow-4)),r) = dF(:,round((repList(r)-1)*cycLength)+(3:floor(cycWindow-2))) - repmat(mean(dF(:,round((repList(r)-1)*cycLength)+(1:2)),2),[1 floor(cycWindow-4)]);
     end
 end
-figure
-imagesc(dFmean)
+
+%dFclust = dFmean; %%% or just use full dFmean
 dFclust = nanmedian(dFclust,3);
-% dFclust = dFclust./repmat(max(dFclust,[],2),[1 size(dFclust,2)]);
-% dFclust = imresize(dFclust,[size(dFclust,1) size(dFclust,2)*0.5]);
+% dFclust = dFclust./repmat(max(dFclust,[],2),[1 size(dFclust,2)]);  %% normalize by max response
+% dFclust = imresize(dFclust,[size(dFclust,1) size(dFclust,2)*0.5]); %%% downsample to improve SNR
 dFclust(dFclust>0.2) = 0.2; dFclust(dFclust<0)=0;
 figure
 imagesc(dFclust,[-0.05 0.2])
@@ -302,10 +302,9 @@ axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
 imagesc(dFmean(perm,:),[-0.1 0.4]); axis xy ; xlabel('selected traces based on dF'); colormap jet ;   %%% show sorted data
 hold on;
-totalT = size(dF,2);
-ncyc = floor(totalT/cycLength);
-for i = 1:ncyc
-    plot([i*floor(cycLength) i*floor(cycLength)]+0.5,[1 length(perm)],'k');
+
+for i = 1:nstim
+    plot([i*cycWindow i*cycWindow]+0.5,[1 length(perm)],'k');
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
@@ -332,20 +331,21 @@ for clust = 1:nclust
     imagesc(stdImg,[0 prctile(stdImg(:),99)*1.2]); axis equal; hold on;colormap gray;freezeColors;
     title(sprintf('cluster %d',clust));
     plot(x(c==clust),y(c==clust),'go')%%'Color',colors(c));
+    
+    %%% heatmap average timecourse
     subplot(2,2,2);
-    imagesc(dF(c==clust,:),[-0.1 1]); axis xy % was df
+    imagesc(dFmean(c==clust,:),[-0.1 0.4]); axis xy % was df
     title(sprintf('clust %d',clust)); hold on
-    totalT = size(dF,2);
-    ncyc = floor(totalT/cycLength);
-    for i = 1:ncyc
-        plot([i*cycLength i*cycLength]+0.5,[1 sum(clust==c)],'k');
+
+    for i = 1:nstim
+        plot([i*cycWindow i*cycWindow]+0.5,[1 sum(clust==c)],'k');
     end
     colormap jet;freezeColors;colormap gray;
     
     %%% timecourse of this cluster, for each repeat
     subplot(2,2,4);
-    plot((0:totalframes-1)/cycLength + 1, squeeze(mean(dFrepeats(c==clust,:,:),1))); hold on
-    plot((0:totalframes-1)/cycLength + 1, squeeze(mean(nanmedian(dFrepeats(c==clust,:,:),3),1)),'g','LineWidth',2)
+    plot((0:size(dFrepeats,2)-1)/cycWindow + 1, squeeze(mean(dFrepeats(c==clust,:,:),1))); hold on
+    plot((0:size(dFrepeats,2)-1)/cycWindow + 1, squeeze(mean(nanmedian(dFrepeats(c==clust,:,:),3),1)),'g','LineWidth',2)
     xlabel('stim #'); xlim([1 nstim+1]); ylim([-0.05 0.2])
     title('mean of cluster, multiple repeats');
     for i = 1:nstim;
@@ -376,7 +376,7 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 figure
 hold on
 for clust = 1:nclust
-    plot((0:totalframes-1)/cycLength+1,mean(dFmean(c==clust,:,:),1),'Color',colors(clust,:));
+    plot((0:size(dFrepeats,2)-1)/cycWindow+1,mean(dFmean(c==clust,:,:),1),'Color',colors(clust,:));
 end;
 hold on
 for i = 1:nstim;

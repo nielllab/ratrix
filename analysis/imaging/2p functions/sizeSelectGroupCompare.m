@@ -32,6 +32,7 @@ for i = 1:length(contrastRange);contrastlist{i} = num2str(contrastRange(i));end
 for i=1:length(radiusRange); sizes{i} = num2str(radiusRange(i)*2); end
 numtrialtypes = length(sfrange)*length(contrastRange)*length(radiusRange)*length(thetaRange);
 trialtype = nan(numtrialtypes,length(sf)/numtrialtypes);
+asize = 0.05/(length(sizes)-1); %%%significance level for size comparison
 cnt=1;
 for i = 1:length(sfrange)
     for j = 1:length(contrastRange)
@@ -57,10 +58,10 @@ for i = 1:length(grpfiles)
     hold on
     pre=nan(length(unique(session)),length(sizes));post=pre;
     for j = 1:length(unique(session))
-        pre(j,:) = squeeze(nanmean(nanmean(grpspsize(find(session==j),spWindow,:,1,1),2),1));
-        post(j,:) = squeeze(nanmean(nanmean(grpspsize(find(session==j),spWindow,:,1,2),2),1));
+        pre(j,:) = squeeze(nanmean(nanmean(grpspsize(find(session==j),spWindow{1},:,1,1),2),1));
+        post(j,:) = squeeze(nanmean(nanmean(grpspsize(find(session==j),spWindow{1},:,1,2),2),1));
     end
-    [hvals pvals] = ttest(pre,post,'alpha',0.05);
+    [hvals pvals] = ttest(pre,post,'alpha',asize);
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
     plot(1:length(radiusRange),hvals-0.5,'b*')
@@ -77,7 +78,7 @@ for i = 1:length(grpfiles)
         pre(j,:) = squeeze(nanmean(nanmean(grpspsize(find(session==j),6:7,:,1,1),2),1));
         post(j,:) = squeeze(nanmean(nanmean(grpspsize(find(session==j),6:7,:,1,2),2),1));
     end
-    [hvals pvals] = ttest(pre,post,'alpha',0.05);
+    [hvals pvals] = ttest(pre,post,'alpha',asize);
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
     plot(1:length(radiusRange),hvals-0.5,'b*')
@@ -94,7 +95,7 @@ for i = 1:length(grpfiles)
         pre(j,:) = squeeze(nanmean(nanmean(grpspsize(find(session==j),8:10,:,1,1),2),1));
         post(j,:) = squeeze(nanmean(nanmean(grpspsize(find(session==j),8:10,:,1,2),2),1));
     end
-    [hvals pvals] = ttest(pre,post,'alpha',0.05);
+    [hvals pvals] = ttest(pre,post,'alpha',asize);
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
     plot(1:length(radiusRange),hvals-0.5,'b*')
@@ -111,10 +112,10 @@ for i = 1:length(grpfiles)
     hold on
     pre=nan(length(unique(session)),length(sizes));post=pre;
     for j = 1:length(unique(session))
-        pre(j,:) = squeeze(nanmean(nanmean(grpspsize(find(session==j),spWindow,:,2,1),2),1));
-        post(j,:) = squeeze(nanmean(nanmean(grpspsize(find(session==j),spWindow,:,2,2),2),1));
+        pre(j,:) = squeeze(nanmean(nanmean(grpspsize(find(session==j),spWindow{1},:,2,1),2),1));
+        post(j,:) = squeeze(nanmean(nanmean(grpspsize(find(session==j),spWindow{1},:,2,2),2),1));
     end
-    [hvals pvals] = ttest(pre,post,'alpha',0.05);
+    [hvals pvals] = ttest(pre,post,'alpha',asize);
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
     plot(1:length(radiusRange),hvals-0.5,'b*')
@@ -131,7 +132,7 @@ for i = 1:length(grpfiles)
         pre(j,:) = squeeze(nanmean(nanmean(grpspsize(find(session==j),6:7,:,2,1),2),1));
         post(j,:) = squeeze(nanmean(nanmean(grpspsize(find(session==j),6:7,:,2,2),2),1));
     end
-    [hvals pvals] = ttest(pre,post,'alpha',0.05);
+    [hvals pvals] = ttest(pre,post,'alpha',asize);
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
     plot(1:length(radiusRange),hvals-0.5,'b*')
@@ -148,7 +149,7 @@ for i = 1:length(grpfiles)
         pre(j,:) = squeeze(nanmean(nanmean(grpspsize(find(session==j),8:10,:,2,1),2),1));
         post(j,:) = squeeze(nanmean(nanmean(grpspsize(find(session==j),8:10,:,2,2),2),1));
     end
-    [hvals pvals] = ttest(pre,post,'alpha',0.05);
+    [hvals pvals] = ttest(pre,post,'alpha',asize);
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
     plot(1:length(radiusRange),hvals-0.5,'b*')
@@ -164,10 +165,10 @@ for i = 1:length(grpfiles)
     hold on
     pre=nan(length(unique(session)),length(sizes));post=pre;
     for j = 1:length(unique(session))
-        pre(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(find(session==j),spWindow,:,:,:,1,1),4),3),2),1));
-        post(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(find(session==j),spWindow,:,:,:,1,2),4),3),2),1));
+        pre(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(find(session==j),spWindow{1},:,:,:,1,1),4),3),2),1));
+        post(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(find(session==j),spWindow{1},:,:,:,1,2),4),3),2),1));
     end
-    [hvals pvals] = ttest(pre,post,'alpha',0.05);
+    [hvals pvals] = ttest(pre,post,'alpha',asize);
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
     plot(1:length(radiusRange),hvals-0.7,'b*')
@@ -184,7 +185,7 @@ for i = 1:length(grpfiles)
         pre(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(find(session==j),6:7,:,:,:,1,1),4),3),2),1));
         post(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(find(session==j),6:7,:,:,:,1,2),4),3),2),1));
     end
-    [hvals pvals] = ttest(pre,post,'alpha',0.05);
+    [hvals pvals] = ttest(pre,post,'alpha',asize);
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
     plot(1:length(radiusRange),hvals-0.7,'b*')
@@ -201,7 +202,7 @@ for i = 1:length(grpfiles)
         pre(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(find(session==j),8:10,:,:,:,1,1),4),3),2),1));
         post(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(find(session==j),8:10,:,:,:,1,2),4),3),2),1));
     end
-    [hvals pvals] = ttest(pre,post,'alpha',0.05);
+    [hvals pvals] = ttest(pre,post,'alpha',asize);
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
     plot(1:length(radiusRange),hvals-0.7,'b*')
@@ -218,10 +219,10 @@ for i = 1:length(grpfiles)
     hold on
     pre=nan(length(unique(session)),length(sizes));post=pre;
     for j = 1:length(unique(session))
-       pre(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(find(session==j),spWindow,:,:,:,2,1),4),3),2),1));
-        post(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(find(session==j),spWindow,:,:,:,2,2),4),3),2),1));
+       pre(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(find(session==j),spWindow{1},:,:,:,2,1),4),3),2),1));
+        post(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(find(session==j),spWindow{1},:,:,:,2,2),4),3),2),1));
     end
-    [hvals pvals] = ttest(pre,post,'alpha',0.05);
+    [hvals pvals] = ttest(pre,post,'alpha',asize);
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
     plot(1:length(radiusRange),hvals-0.7,'b*')
@@ -238,7 +239,7 @@ for i = 1:length(grpfiles)
        pre(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(find(session==j),6:7,:,:,:,2,1),4),3),2),1));
         post(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(find(session==j),6:7,:,:,:,2,2),4),3),2),1));
     end
-    [hvals pvals] = ttest(pre,post,'alpha',0.05);
+    [hvals pvals] = ttest(pre,post,'alpha',asize);
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
     plot(1:length(radiusRange),hvals-0.7,'b*')
@@ -255,7 +256,7 @@ for i = 1:length(grpfiles)
        pre(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(find(session==j),8:10,:,:,:,2,1),4),3),2),1));
         post(j,:) = squeeze(nanmean(nanmean(nanmean(nanmean(grpsptuning(find(session==j),8:10,:,:,:,2,2),4),3),2),1));
     end
-    [hvals pvals] = ttest(pre,post,'alpha',0.05);
+    [hvals pvals] = ttest(pre,post,'alpha',asize);
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
     plot(1:length(radiusRange),hvals-0.7,'b*')
@@ -280,7 +281,7 @@ for i = 1:length(grpfiles)
     ylabel(sprintf('%s 5deg',grpnames{i}))
     set(gca,'xtick',[0:5:10],'xticklabel',[0:5*binwidth:10*binwidth],'LooseInset',get(gca,'TightInset'),'fontsize',8)
     subplot(4,4,5+i-1)%%20 deg
-    pre=squeeze(grpring(:,:,1,4,1,1)) - zeropre;post=squeeze(grpring(:,:,1,4,1,2)) - zeropost;
+    pre=squeeze(grpring(:,:,1,3,1,1)) - zeropre;post=squeeze(grpring(:,:,1,3,1,2)) - zeropost;
     hold on
     shadedErrorBar(0:79,nanmean(pre),nanstd(pre)/sqrt(numAni),'k',1)
     shadedErrorBar(0:79,nanmean(post),nanstd(post)/sqrt(numAni),'r',1)
@@ -288,7 +289,7 @@ for i = 1:length(grpfiles)
     axis square
     axis([0 10 -0.05 0.2])
     xlabel('dist from cent (um)')
-    ylabel(sprintf('%s 20deg',grpnames{i}))
+    ylabel(sprintf('%s 10deg',grpnames{i}))
     set(gca,'xtick',[0:5:10],'xticklabel',[0:5*binwidth:10*binwidth],'LooseInset',get(gca,'TightInset'),'fontsize',8)
     subplot(4,4,9+i-1)%%50 deg
     pre=squeeze(grpring(:,:,1,7,1,1)) - zeropre;post=squeeze(grpring(:,:,1,7,1,2)) - zeropost;
@@ -307,7 +308,7 @@ for i = 1:length(grpfiles)
         pre(j,:) = pre(j,:)-squeeze(nanmean(nanmean(grpring(j,centwin,:,1,1,1),2),3));
         post(j,:) = post(j,:)-squeeze(nanmean(nanmean(grpring(j,centwin,:,1,1,2),2),3));
     end
-    [hvals pvals] = ttest(pre,post,'alpha',0.05);
+    [hvals pvals] = ttest(pre,post,'alpha',asize);
     hold on
     errorbar(1:length(sizes),nanmean(pre),nanstd(pre)/sqrt(numAni),'k')
     errorbar(1:length(sizes),nanmean(post),nanstd(post)/sqrt(numAni),'r')
@@ -360,7 +361,7 @@ for i = 1:length(grpfiles)
         pre(j,:) = pre(j,:)-squeeze(nanmean(nanmean(grpring(j,centwin,:,1,2,1),2),3));
         post(j,:) = post(j,:)-squeeze(nanmean(nanmean(grpring(j,centwin,:,1,2,2),2),3));
     end
-    [hvals pvals] = ttest(pre,post,'alpha',0.05);
+    [hvals pvals] = ttest(pre,post,'alpha',asize);
     hold on
     errorbar(1:length(sizes),nanmean(pre),nanstd(pre)/sqrt(numAni),'k')
     errorbar(1:length(sizes),nanmean(post),nanstd(post)/sqrt(numAni),'r')
@@ -412,7 +413,7 @@ for i = 1:length(grpfiles)
         pre(j,:) = pre(j,:)-squeeze(nanmean(nanmean(grpring(j,centwin,:,1,1,1),2),3));
         post(j,:) = post(j,:)-squeeze(nanmean(nanmean(grpring(j,centwin,:,1,1,2),2),3));
     end
-    [hvals pvals] = ttest(pre,post,'alpha',0.05);
+    [hvals pvals] = ttest(pre,post,'alpha',asize);
     hold on
     errorbar(1:length(sizes),nanmean(pre),nanstd(pre)/sqrt(numAni),'k')
     errorbar(1:length(sizes),nanmean(post),nanstd(post)/sqrt(numAni),'r')
@@ -465,7 +466,7 @@ for i = 1:length(grpfiles)
         pre(j,:) = pre(j,:)-squeeze(nanmean(nanmean(grpring(j,centwin,:,1,2,1),2),3));
         post(j,:) = post(j,:)-squeeze(nanmean(nanmean(grpring(j,centwin,:,1,2,2),2),3));
     end
-    [hvals pvals] = ttest(pre,post,'alpha',0.05);
+    [hvals pvals] = ttest(pre,post,'alpha',asize);
     hold on
     errorbar(1:length(sizes),nanmean(pre),nanstd(pre)/sqrt(numAni),'k')
     errorbar(1:length(sizes),nanmean(post),nanstd(post)/sqrt(numAni),'r')

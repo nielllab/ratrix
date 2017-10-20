@@ -27,12 +27,12 @@ get2pSession
 %%%crop to get rid of edges that have motion artifact
 dfofInterp = dfofInterp(49:end-32,37:end-36,:);
 cycLength = mean(diff(stimPulse))/dt;
-cycWindow = round(max(5/dt,cycLength));  %%% number of frames in window around each cycle. min of 4 secs, or actual cycle length + 2
+cycWindow = round(max(4/dt,cycLength));  %%% number of frames in window around each cycle. min of 4 secs, or actual cycle length + 2
 [f p] = uigetfile('*.mat','stimulus record');
 if f~=0
     alignRecs =1;
     load(fullfile(p,f),'stimRec');
-    nCycles = floor(size(dfofInterp,3)/cycLength)-1;  %%% trim off last stim to allow window for previous stim
+    nCycles = floor(size(dfofInterp,3)/cycLength)-ceil((cycWindow-cycLength)/cycLength);  %%% trim off last stims to allow window for previous stim
     stimT = stimRec.ts - stimRec.ts(1);
     for i = 1:nCycles
         stimOrder(i) = stimRec.cond(min(find(stimT>((i-1)*cycLength*dt+0.1))));
@@ -57,10 +57,11 @@ end
 %%% get duration of each stim (called a cycle) in terms of frames, based on ttl interval
 
 %%% generate periodic map
+filt = fspecial('gaussian',5,1);
 
 map = 0;
 for i= 1:size(dfofInterp,3);
-    map = map+dfofInterp(:,:,i)*exp(2*pi*sqrt(-1)*i/cycLength);
+    map = map+imfilter(dfofInterp(:,:,i),filt)*exp(2*pi*sqrt(-1)*i/cycLength);
 end
 map = map/size(dfofInterp,3); map(isnan(map))=0;
 amp = abs(map);
@@ -70,9 +71,10 @@ img = mat2im(mod(angle(map),2*pi),hsv,[pi/2  (2*pi -pi/4)]);
 img = img.*repmat(amp,[1 1 3]);
 mapimg= figure
 figure
-imshow(imresize(img,0.5))
+imshow(imresize(img,2))
 colormap(hsv); colorbar
 title(sprintf('fourier map at %d frame cycle',cycLength));
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 
 %%% mean fluorescence of the entire image
@@ -400,6 +402,8 @@ figure
 for i = 1:length(stimOrder); %%% get pixel-wise evoked activity on each individual stim presentation
     trialmean(:,:,i) = mean(dfofInterp(:,:,round(cycLength*(i-1) + evRange)),3)- mean(dfofInterp(:,:,round(cycLength*(i-1) + baseRange)),3);
 end
+filt = fspecial('gaussian',5,1.5);
+trialmean = imfilter(trialmean,filt);
 
 %%% plot mean for each stim condition, with layout corresponding to the stim
 if nstim==12 %%% spots
@@ -465,6 +469,28 @@ if nstim==14 %%% gratings
     figure
     overlay(:,:,3)=0;
     imshow(imresize(overlay,2));
+end
+
+%%% plot mean for each stim condition, with layout corresponding to the stim
+range = [-0.02 0.1];
+if nstim==48 %%% spots
+    loc = [1 7 13 19 2 8 14 20 3 9 15 21 4 10 16 22 5 11 17 23 6 12 18 24]; %%% map stim order onto subplot
+    figure; set(gcf,'Name','OFF spots');
+    for i = 1:24
+        meanimg = median(trialmean(:,:,stimOrder==i),3);
+        subplot(4,6,loc(i));
+        imagesc(meanimg,range); axis equal
+    end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    figure; set(gcf,'Name','ON spots');
+    for i = 25:48
+        meanimg = median(trialmean(:,:,stimOrder==i),3);
+        subplot(4,6,loc(i-24));
+        imagesc(meanimg,range); axis equal
+    end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
 end
 
 

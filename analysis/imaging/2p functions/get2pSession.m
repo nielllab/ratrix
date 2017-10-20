@@ -12,18 +12,17 @@ if strcmp(f(end-3:end),'.mat')
 else
     f
     [ttlf ttlp] = uigetfile('*.mat','ttl file')
+    figure
     try
         [stimPulse framePulse] = getTTL(fullfile(ttlp,ttlf));
-        figure
         plot(diff(stimPulse)); title('stimPulse cycle time');hold on
         plot(1:length(stimPulse),ones(size(stimPulse))*cycLength); ylabel('secs');xlabel('stim #')
-        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
         startTime = round(stimPulse(1)/dt)-1;
     catch
         display('couldnt read TTLs')
         stimPulse=[]; framePulse=[]; startTime = 1;
     end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     ttlFname = fullfile(ttlp,ttlf);
     

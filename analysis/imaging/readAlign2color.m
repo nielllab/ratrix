@@ -2,8 +2,8 @@ function [Aligned_Seq, framerate, mv] = readAlign2color(fname, align, showImg, f
 
 % Get file info
 Img_Info = imfinfo(fname);
-nframes = length(Img_Info);
-eval(Img_Info(1).ImageDescription);
+nframes = length(Img_Info)/2;
+trash = evalc(Img_Info(1).ImageDescription);
 framerate = state.acq.frameRate;
 
 % Construct rotationally symmetric gaussian lowpass filter with a size of
@@ -11,11 +11,11 @@ framerate = state.acq.frameRate;
 filt = fspecial('gaussian',5,fwidth);
 
 %Preallocate 4D array (i.e. two image channel movies)
-Img_Seq = zeros(Img_Info(1).Height,Img_Info(1).Width,nframes/2,2);
-Aligned_Seq = zeros(Img_Info(1).Height,Img_Info(1).Width,nframes/2,2);
+Img_Seq = zeros(Img_Info(1).Height,Img_Info(1).Width,nframes,2);
+Aligned_Seq = zeros(Img_Info(1).Height,Img_Info(1).Width,nframes,2);
 
 %Read in frames
-for iFrame = 1:nframes/2
+for iFrame = 1:nframes
     Img_Seq(:,:,iFrame,1) = double(imread(fname,(iFrame-1)*2+1)); %Green channel
     Img_Seq(:,:,iFrame,2) = double(imread(fname,(iFrame-1)*2+2)); %Red channel
 end
@@ -30,9 +30,9 @@ if align
     rigid = input('Rigid compensation (2) or Non-rigid(1) or Both(0): ');
     channel = input('Red channel(1) or Green channel(0) for alignment?: ');
     if channel
-        alignIndices = 2:2:nframes;
+        alignIndices = 2:2:nframes*2;
     else
-        alignIndices = 1:2:nframes;
+        alignIndices = 1:2:nframes*2;
     end
        
     if rigid == 2 || rigid == 0
@@ -46,7 +46,7 @@ if align
         plot(r.T(:,2),'g');
 
         % Apply translation determined by sbxalign_tif to each frame
-        for iFrame = 1:nframes/2
+        for iFrame = 1:nframes
             for iChannel = 1:2
                 %First apply gaussian filter to non-aligned image
                 Img_Seq(:,:,iFrame,1) = imfilter(Img_Seq(:,:,iFrame,1),filt);
@@ -64,18 +64,29 @@ if align
     if rigid == 1 
         %% Non-Rigid Compensation        
         % Align full sequence without considering z-displacement
-        % r = sbxalign_tif_nonrigid(fname,alignIndices);
+        r = sbxalign_tif(fname,alignIndices);
+        
+        % Apply translation determined by sbxalign_tif to each frame
+        for iFrame = 1:nframes
+            for iChannel = 1:2
+                %First apply gaussian filter to non-aligned image
+                Img_Seq(:,:,iFrame,1) = imfilter(Img_Seq(:,:,iFrame,1),filt);
+                
+                %Then apply xy rigid translation determined by sbxalign
+                Aligned_Seq(:,:,iFrame,iChannel) = circshift(squeeze(Img_Seq(:,:,iFrame,iChannel)),[r.T(iFrame,1),r.T(iFrame,2)]);
+            end
+        end   
         
         %Add function to find frames in the correct z-plane
         %Output an index matrix of correct-z-plane frames to input into sbxalign_tif_nonrigid
-        FrameIndices = bin_Zplane(Img_Seq(:,:,:,2), [] ,alignIndices);
+        FrameIndices = bin_Zplane(Aligned_Seq(:,:,:,2), 2 ,alignIndices);
         
         % Re-align sequence of frames that are in the correct z-plane
         r = sbxalign_tif_nonrigid(fname,FrameIndices);
         disp('Oiy');
         
         % Apply transformation matrix determined by sbxalign_tif_nonrigid to each frame
-        for iFrame = 1:nframes/2
+        for iFrame = 1:nframes
             for iChannel = 1:2
                 %First apply gaussian filter to non-aligned image
                 Img_Seq(:,:,iFrame,1) = imfilter(Img_Seq(:,:,iFrame,1),filt);

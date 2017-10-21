@@ -1,28 +1,32 @@
 function [dfofInterp, im_dt, red, green, mv] = get2colordata(fname,dt,cycLength)
 
+% Display Movies for Non-aligned image sequences for both channels & save
+% the movie if it does not exist already
+% MakeMovieFromTiff(fname);
+
 % Performs Image registration for both channels
 [imgAll, framerate, mv] = readAlign2color(fname,1,1,0.5);
 
 red = squeeze(mean(imgAll(:,:,:,2),3));
 green = squeeze(prctile(imgAll(:,:,:,1),95,3));
-for i = 1:2
-    i
-    img = squeeze(imgAll(:,:,:,i));
+for iChannel = 1:2
+    iChannel
+    img = squeeze(imgAll(:,:,:,iChannel));
     nframes = size(img,3);
     display('doing prctile')
     tic
-    m{i} = prctile(img(:,:,40:40:end),10,3);
+    m{iChannel} = prctile(img(:,:,40:40:end),10,3);
     toc
     figure
-    imagesc(m{i});
+    imagesc(m{iChannel});
     title('10th prctile')
     colormap(gray)
     
     dfof=zeros(size(img));
-    if i==1
+    if iChannel==1
     %if i==2
         for f = 1:nframes
-            dfof(:,:,f)=(img(:,:,f)-m{i})./m{i};
+            dfof(:,:,f)=(img(:,:,f)-m{iChannel})./m{iChannel};
         end
     else
         dfof = img;
@@ -30,12 +34,12 @@ for i = 1:2
        
     im_dt = 1/framerate;
 
-    if i == 1
+    if iChannel == 1
         dfofInterp = interp1(0:im_dt:(nframes-1)*im_dt,shiftdim(dfof,2),0:dt:(nframes-1)*im_dt);
         dfofInterp = shiftdim(dfofInterp,1);
     end
-    imgInterpAll{i} = interp1(0:im_dt:(nframes-1)*im_dt,shiftdim(img,2),0:dt:(nframes-1)*im_dt);
-    imgInterpAll{i} = shiftdim(imgInterpAll{i},1);
+    imgInterpAll{iChannel} = interp1(0:im_dt:(nframes-1)*im_dt,shiftdim(img,2),0:dt:(nframes-1)*im_dt);
+    imgInterpAll{iChannel} = shiftdim(imgInterpAll{iChannel},1);
 end
 imgInterp(:,:,:,1) = imgInterpAll{1};
 imgInterp(:,:,:,2) = imgInterpAll{2};
@@ -58,13 +62,16 @@ for f = 1:cycFrames
     imshow(im);
     mov(:,:,:,f)=im;
 end
-mov = immovie(mov)
-title('raw img frames')
-vid = VideoWriter(sprintf('%sCycleMov.avi',fname(1:end-4)));
-vid.FrameRate=10;
-open(vid);
-writeVideo(vid,mov);
-close(vid)
+
+
+
+% mov = immovie(mov)
+% title('raw img frames')
+% vid = VideoWriter(sprintf('%sCycleMov.avi',fname(1:end-4)));
+% vid.FrameRate=10;
+% open(vid);
+% writeVideo(vid,mov);
+% close(vid)
 
 % fullMov = zeros(size(imgInterp));
 % fullMov(:,:,:,3)=0;

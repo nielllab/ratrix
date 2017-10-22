@@ -1,35 +1,28 @@
-function MakeMovieFromTiff(fname)
+function MakeMovieFromImgSeq(fname, Aligned_Seq)
+%% Input:
+%   fname: Tiff Image filename
+%   Aligned_Seq: 4D image matrix (i.e. two image channel movies)
 
-%Get file info
+%Get Info
 Img_Info = imfinfo(fname);
-nframes = length(Img_Info)/2;
+nframes = size(Aligned_Seq,3);
 trash = evalc(Img_Info(1).ImageDescription);
 framerate = state.acq.frameRate;
 
-%Preallocate 3D arrays 
-RedChannel = zeros(Img_Info(1).Height,Img_Info(1).Width,nframes);
-GrnChannel = zeros(Img_Info(1).Height,Img_Info(1).Width,nframes);
-
-%Read in frames
-for iFrame = 1:nframes
-    GrnChannel(:,:,iFrame) = double(imread(fname,(iFrame-1)*2+1)); %Green channel
-    RedChannel(:,:,iFrame) = double(imread(fname,(iFrame-1)*2+2)); %Red channel
-end
-
 %Movie File Names
-GrnMovieFile = sprintf('%sNonAlignedGreenChannel.avi',fname(1:end-4));
-RedMovieFile = sprintf('%sNonAlignedRedChannel.mp4',fname(1:end-4));
+GrnMovieFile = sprintf('%sAlignedGreenChannel.avi',fname(1:end-4));
+RedMovieFile = sprintf('%sAlignedRedChannel.mp4',fname(1:end-4));
 
 %Calculate Range for scaled image display
 sm = floor(nframes/4) - 1;
 GrnRange = zeros(1,2);
 RedRange = zeros(1,2);
 for iFrame = 1:sm:nframes
-    tmp = GrnChannel(:,:,iFrame);
+    tmp = Aligned_Seq(:,:,iFrame,1);
     GrnRange(1) = GrnRange(1) + prctile(tmp(:),2);
     GrnRange(2) = GrnRange(2) + prctile(tmp(:),98);
     
-    tmp = RedChannel(:,:,iFrame);
+    tmp = Aligned_Seq(:,:,iFrame,2);
     RedRange(1) = RedRange(1) + prctile(tmp(:),2);
     RedRange(2) = RedRange(2) + prctile(tmp(:),98);
 end
@@ -49,7 +42,7 @@ end
 GrnFig = figure;
 colormap gray
 for iFrame = 1:nframes
-    imagesc(GrnChannel(:,:,iFrame),GrnRange);
+    imagesc(Aligned_Seq(:,:,iFrame,1),GrnRange);
     sTitle = sprintf('Non-Aligned Green Channel: Frame %u',iFrame);
     sInfo = sprintf('%2.2f Hz Acquisition, 10x Video',framerate);
     xlabel(sInfo);
@@ -80,7 +73,7 @@ end
 RedFig = figure;
 colormap gray
 for iFrame = 1:nframes
-    imagesc(RedChannel(:,:,iFrame),RedRange);
+    imagesc(Aligned_Seq(:,:,iFrame,2),RedRange);
     sTitle = sprintf('Non-Aligned Red Channel: Frame %u',iFrame);
     sInfo = sprintf('%2.2f Hz Acquisition, 10x Video',framerate);
     xlabel(sInfo);

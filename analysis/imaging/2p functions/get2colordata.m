@@ -2,7 +2,7 @@ function [dfofInterp, im_dt, red, green, mv] = get2colordata(fname,dt,cycLength)
 
 % Display Movies for Non-aligned image sequences for both channels & save
 % the movie if it does not exist already
-% MakeMovieFromTiff(fname);
+MakeMovieFromTiff(fname);
 
 % Performs Image registration for both channels
 [imgAll, framerate, mv] = readAlign2color(fname,1,1,0.5);

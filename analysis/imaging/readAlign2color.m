@@ -21,9 +21,9 @@ for iFrame = 1:nframes
 end
 
 %Calculate Mean Image for each non-aligned channel
-mn = squeeze(mean(Img_Seq,3));
-GrnMean_NA = mn(:,:,1); %Non-aligned Green Channel Mean
-RedMean_NA = mn(:,:,2); %Non-aligned Red Channel Mean
+% mn = squeeze(mean(Img_Seq,3));
+% GrnMean_NA = mn(:,:,1); %Non-aligned Green Channel Mean
+% RedMean_NA = mn(:,:,2); %Non-aligned Red Channel Mean
 
 if align
     disp('doing alignement')
@@ -79,22 +79,27 @@ if align
         
         %Add function to find frames in the correct z-plane
         %Output an index matrix of correct-z-plane frames to input into sbxalign_tif_nonrigid
-        FrameIndices = bin_Zplane(Aligned_Seq(:,:,:,2), 2 ,alignIndices);
+        ZIndices = bin_Zplane(Img_Seq(:,:,:,2), Aligned_Seq(:,:,:,2), alignIndices);
         
         % Re-align sequence of frames that are in the correct z-plane
-        r = sbxalign_tif_nonrigid(fname,FrameIndices);
+        r = sbxalign_tif_nonrigid(fname,ZIndices);
         disp('Oiy');
         
+        %Create New image stack that only takes the subset of images that
+        %were in the same z-plane
+        Aligned_Seq = zeros(Img_Info(1).Height,Img_Info(1).Width,length(ZIndices),2);
+        
         % Apply transformation matrix determined by sbxalign_tif_nonrigid to each frame
-        for iFrame = 1:nframes
+        for iFrame = 1:length(ZIndices)
             for iChannel = 1:2
-                %First apply gaussian filter to non-aligned image
-                Img_Seq(:,:,iFrame,1) = imfilter(Img_Seq(:,:,iFrame,1),filt);
                 
-                %Then apply xy rigid translation determined by sbxalign
-                Aligned_Seq(:,:,iFrame,iChannel) = imwarp(Img_Seq(:,:,iFrame,iChannel),r.T{iFrame,1});
+                %Apply xy rigid translation determined by sbxalign_nonrigid
+                Aligned_Seq(:,:,iFrame,iChannel) = imwarp(Img_Seq(:,:,ZIndices(iFrame)/2,iChannel),r.T{1,iFrame});
             end
         end   
+        
+        % Make an aligned movie from Aligned_Seq
+        MakeMovieFromImgSeq(fname, Aligned_Seq)
         
         % Show Mean image of non-aligned image sequence and aligned
         if showImg
@@ -113,37 +118,7 @@ if align
     
     
     %% Display Aligned Mean Image vs Non-Aligned
-    %Calculate the mean over all frames and display non-aligned image
 
-        
-%     if showImg
-%         % Display Non-Aligned Mean Image
-%         figure
-%         
-%         for i = 1:2
-%             range = [prctile(mn(:),2) prctile(mn(:),98)];
-%             imagesc(squeeze(mn(:,:,i)),range);
-%             title('non aligned mean img')
-%             colormap(gray)
-%         end
-%         
-%         
-%         figure
-%         for i = 1:2
-%             mn=squeeze(mean(Img_Seq(:,:,:,i),3));
-%             subplot(1,2,i)
-%             range = [prctile(mn(:),2) prctile(mn(:),98)];
-%             imagesc(mn,range);
-%             title('aligned mean img')
-%             colormap(gray)
-%             axis equal
-%             im(:,:,3-i) = (mn-range(1))/(range(2)-range(1));
-%         end
-%         im(:,:,3)=0;
-%         figure
-%         imshow(im)
-%         
-%     end
 else
     mv = NaN;
 end

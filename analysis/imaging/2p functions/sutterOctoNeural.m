@@ -24,8 +24,8 @@ end
 % [f, p] = uigetfile({'*.mat;*.tif'},'.mat or .tif file');
 % cycLength = input('cycle length : ');
 
-f = 'blocksrandom006.tif';
-p = 'C:\Users\nlab\Documents\Wyrick\092817_Octopus_Cal520\';
+f = 'DowninZ_Gratings_lowSF_random006.tif';
+p = 'C:\Users\nlab\Documents\Wyrick\101617_Octopus_Cal520\';
 cycLength = 5.033;
 
 %Get Image acquisition frame rate
@@ -52,8 +52,8 @@ if strcmp(f(end-3:end),'.mat')
 else
     % Uses the ttl file to find first frame of imaging after stim comes on
 %     [ttlf, ttlp] = uigetfile('*.mat','ttl file');
-    ttlf = 'blocksrandom007-20170928T164952.mat';
-    ttlp = 'C:\Users\nlab\Documents\Wyrick\092817_Octopus_Cal520\';
+    ttlf = 'DowninZ_Gratings_lowSF_random007-20171016T155504.mat';
+    ttlp = 'C:\Users\nlab\Documents\Wyrick\101617_Octopus_Cal520\';
     try
         [stimPulse, framePulse] = getTTL(fullfile(ttlp,ttlf));
         figure

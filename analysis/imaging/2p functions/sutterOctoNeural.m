@@ -25,7 +25,8 @@ end
 get2pSession
 
 %%%crop to get rid of edges that have motion artifact
-dfofInterp = dfofInterp(49:end-32,37:end-36,:);
+buffer = max(abs(mv(:)))+2; %% what is largest offset?
+dfofInterp = dfofInterp(buffer:end-buffer,buffer:end-buffer,:);
 cycLength = mean(diff(stimPulse))/dt;
 cycWindow = round(max(4/dt,cycLength));  %%% number of frames in window around each cycle. min of 4 secs, or actual cycle length + 2
 [f p] = uigetfile('*.mat','stimulus record');
@@ -93,7 +94,7 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 %%% absolute green fluorescence
 greenFig = figure;
 title('mean')
-stdImg = greenframe(49:end-32,37:end-36);
+stdImg = greenframe(buffer:end-buffer,buffer:end-buffer);
 imagesc(stdImg,[prctile(stdImg(:),1) prctile(stdImg(:),99)*1.2]); hold on; axis equal; colormap gray; title('mean')
 normgreen = (stdImg - prctile(stdImg(:),1))/ (prctile(stdImg(:),99)*1.5 - prctile(stdImg(:),1));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
@@ -406,13 +407,15 @@ filt = fspecial('gaussian',5,1.5);
 trialmean = imfilter(trialmean,filt);
 
 %%% plot mean for each stim condition, with layout corresponding to the stim
+range = [-0.02 0.1];
 if nstim==12 %%% spots
     loc = [1 4 2 5 3 6]; %%% map stim order onto subplot
     figure; set(gcf,'Name','OFF spots');
     for i = 1:6
         meanimg = median(trialmean(:,:,stimOrder==i),3);
         subplot(2,3,loc(i));
-        imagesc(meanimg,[0 0.25]); axis equal
+        imagesc(meanimg,range); axis equal
+        stimImg(:,:,i) = meanimg;
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
@@ -420,18 +423,19 @@ if nstim==12 %%% spots
     for i = 7:12
         meanimg = median(trialmean(:,:,stimOrder==i),3);
         subplot(2,3,loc(i-6));
-        imagesc(meanimg,[0 0.25]); axis equal
+        imagesc(meanimg,range); axis equal
+        stimImg(:,:,i) = meanimg;
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-        overlay(:,:,1) = median(trialmean(:,:,stimOrder==4),3);
-    overlay(:,:,2) = median(trialmean(:,:,stimOrder==10),3);
-    overlay(:,:,3)= 0
-    overlay(overlay<0)=0; overlay = overlay/0.2;
+        overlay(:,:,1) = mean(stimImg(:,:,6),3);
+    overlay(:,:,2) = mean(stimImg(:,:,12),3);
+    overlay(:,:,3)= 0;
+    overlay(overlay<0)=0; overlay = overlay/0.15;
     figure
     imshow(imresize(overlay,2));
 end
 
-range = [-0.05 0.25]; %%% colormap range
+range = [-0.05 0.2]; %%% colormap range
 if nstim==14 %%% gratings
     loc = 1:6; %%% map stim order onto subplot
     figure; set(gcf,'Name','vert gratings');
@@ -479,7 +483,7 @@ if nstim==48 %%% spots
     for i = 1:24
         meanimg = median(trialmean(:,:,stimOrder==i),3);
         subplot(4,6,loc(i));
-        imagesc(meanimg,range); axis equal
+        imagesc(meanimg,range); axis equal; axis off
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
@@ -487,7 +491,7 @@ if nstim==48 %%% spots
     for i = 25:48
         meanimg = median(trialmean(:,:,stimOrder==i),3);
         subplot(4,6,loc(i-24));
-        imagesc(meanimg,range); axis equal
+        imagesc(meanimg,range); axis equal; axis off
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 

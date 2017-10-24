@@ -1,10 +1,11 @@
 close all; clear all;
 
-batch_widefield_eyes;
+batch_widefield_eyes;  %%% load in file that contains information on all experiments
 
-%%% create 
+%%% create .ps file to save figures out to
 psfile = 'c:\connectivity.ps'; if exist(psfile,'file')==2;delete(psfile);end
 
+%%% select sessions
 useSess = 1:length(files); %%% use all files, and select treatments afterwards
 
 load('\\angie\Angie_analysis\DetectionStim2contrast_LOW_7_25min.mat')
@@ -17,7 +18,7 @@ for sess = 1:length(useSess);
     load([pathname '\' files(sess).dir '\' files(sess).detection],'dfof_bg','frameT','cycMap','sp','stimRec','xEye','yEye','xFilt','yFilt','sp','rad','X','Y','R');
     load([pathname '\' files(sess).dir '\' files(sess).detection],'alignTheta','alignZoom','alignLambda');
     
-    %%% align data
+    %%% align/zoom data, based on lambda, midline, and size of headplate ring
     redoAlign=0;
     if ~exist('alignTheta','var') | redoAlign
         blueImg = max(dfof_bg,[],3);
@@ -67,51 +68,37 @@ for sess = 1:length(useSess);
     hold on
     plot(alignLambda(2),alignLambda(1),'g*')
     
+    %%% crop and downsize if needed
     downsamp=1;
     dfof_bg= imresize(dfof_bgAlign(alignLambda(1)-64:alignLambda(1)+63,alignLambda(2)-110:alignLambda(2)+17,:),1/downsamp,'box');
     
+    %%% final image data
     figure
     imagesc(prctile(dfof_bg(:,:,10:10:end),99,3)); axis equal
     hold on
     plot([1 128],[64 64],'r'); plot(109, 64,'g*')
     drawnow
     title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
-        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-        
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
     %%% crop and downsize dF data to make it run faster
     %dfof_bg= dfof_bg(15:160,50:190,:);
     dfof_bg = imresize(dfof_bg,0.25);
-    % contrast = contrast(1:end-5); %%% cut off last few in case imaging stopped early
-    
-    %%% median filter eye and speed data to remove transients
-    %   x = medfilt1(xEye,5); y= medfilt1(yEye,5);
-    %     v = medfilt1(sp,9); r = medfilt1(rad,7);
-    %
-    %     Xfilt = medfilt1(X,5); Yfilt = medfilt1(Y,5);
-    %     %%% show raw and filtered data
-    %     figure
-    %     plot(xEye); hold on; plot(x); title('x'); legend('raw','filtered')
-    %     figure
-    %     plot(rad); hold on; plot(r); title('r'); legend('raw','filtered')
-    %     figure
-    %     plot(sp); hold on; plot(v); title('v'); legend('raw','filtered')
-    %
-    %     %%% normalize eye/speed data (custom function nrm)
-    %     %x = nrm(x); y = nrm(y); r= nrm(r); v = nrm(v);
-    %     x = x/100; y = y/100; r = r/40; v =v/3000;
-    %
+
+    %%% for generality with other code, we call the raw data 'im' from here on ...
     im = dfof_bg;
     clear dfof_bg;
     
+    %%% calculate standard deviation to get rough image of activity
     stdImg = std(im(:,:,10:10:end),[],3);
     figure; imagesc(stdImg,[0 0.1]); colormap jet; axis equal;
     
-    if ~exist('npts','var'); npts=0; end
-    
+    %%% grid points for analysis ...
+    if ~exist('npts','var'); npts=0; end   
     %%% if points weren't loaded in, then select
     if npts ==0;
         npts = input('number of points to select (0=auto grid) : ')
-        if npts>0 %%% manually select point
+        if npts>0 %%% manually select points
             figure
             imagesc(stdImg,[0 0.1]); colormap jet
             hold on
@@ -132,6 +119,7 @@ for sess = 1:length(useSess);
             end
             npts = sum(ptstd>0.015); x = x(ptstd>0.015); y= y(ptstd>0.015);
             
+            %%% remove points you don't want ...
             figure
             imagesc(stdImg,[0 0.1]); colormap gray; hold on
             plot(y,x,'g*')
@@ -158,10 +146,10 @@ for sess = 1:length(useSess);
     end
     
     figure
-       imagesc(stdImg,[0 0.1]); colormap gray; hold on
-       plot(y,x,'g*')
-      title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
-        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    imagesc(stdImg,[0 0.1]); colormap gray; hold on
+    plot(y,x,'g*')
+    title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     col = repmat('bgrcmyk',[1 200]);  %%% color scheme
     clear trace
@@ -174,7 +162,7 @@ for sess = 1:length(useSess);
     obs = reshape(im,size(im,1)*size(im,2),size(im,3));
     sigcol = reshape(stdImg,size(im,1)*size(im,2),1);
     obs(sigcol<0.01,:)=0;  %%% remove pts with low variance to select brain from bkground
-    useTime = sp<10; %%% sp<10
+    useTime = sp<10; %%% only use stationary times .... sp<10
     obs = obs(:,useTime);
     
     %%% PCA
@@ -185,6 +173,8 @@ for sess = 1:length(useSess);
     plot(1:10,latent(1:10)/sum(latent))
     xlabel('component'); ylabel('latent')
     
+    %%% plot 24 spatial components ... these make pretty pictures, not sure
+    %%% what to do with them!
     figure
     for i = 1:24
         subplot(4,6,i);
@@ -192,15 +182,17 @@ for sess = 1:length(useSess);
         imagesc(reshape(coeff(:,i),size(im,1),size(im,2)),[-range range])
         % hold on; plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2)
     end
-          title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
-        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-        
+    title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    %%% timecourse of first 5 temporal components
     figure
     for i = 1:5
         subplot(5,1,i);
         plot(score(:,i)); axis off
     end
     
+    %%% plot speed versus temporal compoenents ..
     if exist('sp','var') && sum(sp~=0)
         figure
         subplot(3,1,1)
@@ -209,8 +201,8 @@ for sess = 1:length(useSess);
         plot(score(:,1)); ylabel('component1')
         subplot(3,1,3)
         plot(sp(useTime)/max(sp(useTime)),'g'); hold on; plot(score(:,1)/max(score(:,1)));
-    
-          title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
+        
+        title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
         for i = 1:3
             figure
@@ -220,6 +212,7 @@ for sess = 1:length(useSess);
         end
     end
     
+    %%% plot pupil radius versus temporal components
     if exist('r','var') && sum(sp~=0)
         figure
         subplot(3,1,1)
@@ -237,52 +230,39 @@ for sess = 1:length(useSess);
         end
     end
     
+    %%% subtract off first pca component (global signal)
     tcourse = coeff(:,1)*score(:,1)' ; %+ coeff(:,2)*score(:,2)' + coeff(:,4)*score(:,4)';
     obs = obs-tcourse;
-    
-    
-    obs_im = reshape(obs,size(im(:,:,useTime)));
+    obs_im = reshape(obs,size(im(:,:,useTime)));  %%% in x, y, t 
     
     %%% calculate correlation coeff matrix for whole frame
     cc = corrcoef(obs');
     
-    %%% plot timecourse for selected points after decorrelation
+    %%% plot timecourse for selected points after decorrelation (aka removal of first pca component)
     % figure; hold on
     clear decorrTrace
     for i = 1:npts
         decorrTrace(:,i) = squeeze(obs_im(x(i),y(i),:));
         %   plot(decorrTrace(:,i)+0.1*i,col(i));
     end
-    %  title(sprintf('%s %s decorr',files(use(f)).subj, files(use(f)).expt));
-    %     set(gcf, 'PaperPositionMode', 'auto');
-    %     print('-dpsc',psfilename,'-append');
-    
-    %%% correlation matrix for selected points
-    %     figure
-    %     imagesc(imresize(corrcoef(decorrTrace),10,'nearest'),[-1 1]); colorbar
-    %     title('area decorrelated')
+
+    %%% correlation coefficient of selected points
     traceCorr = corrcoef(decorrTrace);
     % traceCorr(traceCorr<=0)=0.01;
     
-    %%% convert correlation coeff back into matrix
+    %%% convert correlation coeffs back into matrix
     cc_im = reshape(cc,size(im,1),size(im,2),size(im,1),size(im,2));
     decorrSig = std(obs_im,[],3);
     
     %%% kmeans clustering
     nclust = 6;
     tic
-    idx = kmeans(decorrTrace'+rand(size(decorrTrace'))*10^-4,nclust,'distance','correlation');
+    idx = kmeans(decorrTrace'+rand(size(decorrTrace'))*10^-4,nclust,'distance','correlation'); %%% add some noise so that zero points don't break k-means
     toc
     
     maxim = prctile(im,95,3); %%% 95th percentile makes a good background image
     
-    traceCorr = corrcoef(decorrTrace);
-    %     figure
-    %     imagesc(traceCorr)
-    
-    %%% plot clustered points with connectivity
-    ypts = [];
-    xpts = [];
+    %%% plot clustered points with connectivity, only contralateral (across midline) connections
     clustcol = 'wgrcmyk'; %%% color scheme for clusters
     figure
     imagesc(maxim) ; colormap gray; axis equal
@@ -302,18 +282,16 @@ for sess = 1:length(useSess);
         plot(y(i),x(i),[clustcol(idx(i)) 'o'],'Markersize',8,'Linewidth',2)
         plot(y(i),x(i),[clustcol(idx(i)) '*'],'Markersize',8,'Linewidth',2)
     end
-    plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
     axis ij
     axis equal
-  title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
-        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-        
-    %%% plot clustered points with connectivity
+    title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    %%% plot clustered points with connectivity (only ipsilateral connections)
     clustcol = 'wgrcmyk'; %%% color scheme for clusters
     figure
     imagesc(maxim) ; colormap gray; axis equal
-    hold on
-    
+    hold on   
     for i = 1:npts
         for j= 1:npts
             
@@ -329,29 +307,29 @@ for sess = 1:length(useSess);
     plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
     axis ij
     axis equal
-  title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
-        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
-    decorrTraceAll{sess} =  decorrTrace;
-    
-    
+    %%% save out variables for each loop iteration
+    decorrTraceAll{sess} =  decorrTrace;  
     corrAll(:,:,sess) = traceCorr;
     dist = dist(:);
     traceCorr = traceCorr(:);
     contra = contra(:);
     
+    %%% plot mean correlation as a function of distance
     distbins = gridspace/2:gridspace:60;
     for i = 1:length(distbins)-1;
         meanC(i) = nanmean(traceCorr(dist>distbins(i) & dist<=distbins(i+1) & ~contra));
     end
     meanC(i+1) = nanmean(traceCorr(contra & dist>2*gridspace));
-    
     figure
     bar(meanC)
     xlabel('distance'); ylabel('correlation')
-      title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
-        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-        
+    title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    %%% scatter plot of correlation vs distance for all points
     figure
     hold on
     plot(dist(contra),traceCorr(contra),'r*')
@@ -359,9 +337,11 @@ for sess = 1:length(useSess);
     xlabel('distance'); ylabel('correlation')
     legend('contra','ipsi');
     title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
-        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 end
 
+
+%%% pool data across treatment conditions
 treatment = {'Saline','DOI'};
 for treat = 1:2
     
@@ -405,13 +385,13 @@ for treat = 1:2
         plot(y(i),x(i),[clustcol(idx(i)) 'o'],'Markersize',8,'Linewidth',2)
         plot(y(i),x(i),[clustcol(idx(i)) '*'],'Markersize',8,'Linewidth',2)
     end
-
+    
     axis ij
     axis equal
     title([treatment{treat} ' average'])
-        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-        
-        
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    
     %%% plot clustered points with connectivity
     clustcol = 'wgrcmyk'; %%% color scheme for clusters
     figure
@@ -434,7 +414,7 @@ for treat = 1:2
     axis ij
     axis equal
     title([treatment{treat} ' average'])
-        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     dist = dist(:);
     traceCorr = traceCorr(:);
@@ -451,7 +431,7 @@ for treat = 1:2
     bar(distbins,meanC)
     xlabel('distance'); ylabel('correlation')
     title([treatment{treat} ' average'])
-        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     figure
     hold on
@@ -460,11 +440,11 @@ for treat = 1:2
     xlabel('distance'); ylabel('correlation')
     legend('contra','ipsi');
     title([treatment{treat} ' average'])
-        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-        
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
 end
 
-
+%%% convert .ps file in .pdf file
 [f p] = uiputfile('*.pdf');
 newpdfFile = fullfile(p,f)
 try

@@ -33,17 +33,17 @@ for i = 1:length(files)
 end
 
 
-for p = 1:5
+for p = 1:3
 
+%     if p==1
+%         use = geno == chr & region==full & pwr==11;   use11=use;
+%     elseif p==2
+%         use = geno == chr & region==full& pwr == 22;  use22=use;
     if p==1
-        use = geno == chr & region==full & pwr==11;   use11=use;
-    elseif p==2
-        use = geno == chr & region==full& pwr == 22;  use22=use;
-    elseif p==3
         use = geno == chr & region==full & pwr == 45; use45=use;
-    elseif p ==4
+    elseif p ==2
         use = geno==chr & region ==v1; V1use=use;
-    elseif p==5
+    elseif p==3
         use = geno==gc; gcuse=use;
     end
     
@@ -63,12 +63,92 @@ for p = 1:5
     end
 end
 
-figure
-errorbar([1 2 ; 1 2 ; 1 2; 1 2; 1 2]',correct',err'); ylim([0 1]); legend({'11mW','22mW','45mW','V1','gcamp'}); ylabel('% correct')
+
+%put RT values in matrix where columns are experimental groups for statistical testing
+%%%Light On
+xCorrectOn = nan([3,13]); %fill with nan values so we have same numbers of rows
+xCorrectOn(1,1:length(rt(use45)))=(0.5 * (1 - (resp(1,2,use45)) + (resp(2,2,use45))));
+  xCorrectOn(2,1:length(rt(V1use))) = (0.5 * (1 - (resp(1,2,V1use)) + (resp(2,2,V1use))));
+    xCorrectOn(3,1:length(rt(gcuse)))= (0.5 * (1 - (resp(1,2,gcuse)) + (resp(2,2,gcuse))));
+xCorrectOn = xCorrectOn';
+
+[p,tbl,stats]=kruskalwallis(xCorrectOn)
+c = multcompare(stats)
+
+%%%Light OFF
+xCorrectOff = nan([3,13]); %fill with nan values so we have same numbers of rows
+xCorrectOff(1,1:length(rt(use45)))=(0.5 * (1 - (resp(1,1,use45)) + (resp(2,1,use45))))
+  xCorrectOff(2,1:length(rt(V1use))) = (0.5 * (1 - (resp(1,1,V1use)) + (resp(2,1,V1use))));
+    xCorrectOff(3,1:length(rt(gcuse)))= (0.5 * (1 - (resp(1,1,gcuse)) + (resp(2,1,gcuse))));
+xCorrectOff = xCorrectOff';
+
+[p,tbl,stats]=kruskalwallis(xCorrectOff)
+c = multcompare(stats)
+
+
+%%%%performance by group...light on vs off
+%full window
+[p,tbl,stats]=kruskalwallis([xCorrectOn(:,1) xCorrectOff(:,1)])
+c = multcompare(stats)
+%V1only
+[p,tbl,stats]=kruskalwallis([xCorrectOn(:,2) xCorrectOff(:,2)])
+c = multcompare(stats)
+%GCaMP controls
+[p,tbl,stats]=kruskalwallis([xCorrectOn(:,3) xCorrectOff(:,3)])
+c = multcompare(stats)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%put performance values in matrix where columns are experimental groups for statistical testing
+xRTOff = nan([3,13]); %fill with nan values so we have same numbers of rows
+xRTOff(1,1:length(rt(use45)))=rt(1,use45);   
+  xRTOff(2,1:length(rt(V1use))) = rt(1,V1use);
+    xRTOff(3,1:length(rt(gcuse)))= rt(1,gcuse);
+xRTOff = xRTOff';
+
+[p,tbl,stats]=kruskalwallis(xRTOff)
+c = multcompare(stats)
+
+xRTOn = nan([3,13]); %fill with nan values so we have same numbers of rows
+xRTOn(1,1:length(rt(use45)))=rt(2,use45);   
+  xRTOn(2,1:length(rt(V1use))) = rt(2,V1use);
+    xRTOn(3,1:length(rt(gcuse)))= rt(2,gcuse);
+xRTOn = xRTOn';
 
 figure
-errorbar([1 2 ; 1 2 ; 1 2; 1 2; 1 2]',rtAll',rtErr'); ylim([0 1]); legend({'11mW','22mW','45mW','V1','gcamp'}); ylabel('rt');
+boxplot(xRTOn)
+
+[p,tbl,stats]=kruskalwallis(xRTOn)
+c = multcompare(stats)
+
+%%%%RT by group...light on vs off
+%full window
+[p,tbl,stats]=kruskalwallis([xRTOn(:,1) xRTOff(:,1)])
+c = multcompare(stats)
+%V1only
+[p,tbl,stats]=kruskalwallis([xRTOn(:,2) xRTOff(:,2)])
+c = multcompare(stats)
+%GCaMP controls
+[p,tbl,stats]=kruskalwallis([xRTOn(:,3) xRTOff(:,3)])
+c = multcompare(stats)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 figure
-errorbar([1 2 ; 1 2 ; 1 2; 1 2; 1 2]',bias',biasErr'); ylim([0 1]); legend({'11mW','22mW','45mW','V1','gcamp'}); ylabel('bias');
+errorbar([1 2; 1 2; 1 2]',correct',err'); ylim([0 1]); legend({'45mW','V1','gcamp'}); ylabel('% correct')
+
+figure
+errorbar([1 2; 1 2; 1 2]',rtAll',rtErr'); ylim([0 1]); legend({'45mW','V1','gcamp'}); ylabel('rt');
+
+figure
+errorbar([1 2; 1 2; 1 2]',bias',biasErr'); ylim([0 1]); legend({'45mW','V1','gcamp'}); ylabel('bias');
+
+
+% 
+% figure
+% errorbar([1 2 ; 1 2 ; 1 2; 1 2; 1 2]',correct',err'); ylim([0 1]); legend({'11mW','22mW','45mW','V1','gcamp'}); ylabel('% correct')
+% 
+% figure
+% errorbar([1 2 ; 1 2 ; 1 2; 1 2; 1 2]',rtAll',rtErr'); ylim([0 1]); legend({'11mW','22mW','45mW','V1','gcamp'}); ylabel('rt');
+% 
+% figure
+% errorbar([1 2 ; 1 2 ; 1 2; 1 2; 1 2]',bias',biasErr'); ylim([0 1]); legend({'11mW','22mW','45mW','V1','gcamp'}); ylabel('bias');
 

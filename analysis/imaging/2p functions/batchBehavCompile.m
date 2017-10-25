@@ -5,7 +5,8 @@ batch2pBehaviorFix;
 
 %%% select files to analyze
 %alluse = find(strcmp({files.task},'GTS') & strcmp({files.notes},'good imaging session'))
-alluse = find( strcmp({files.notes},'good imaging session'));
+%alluse = find( strcmp({files.notes},'good imaging session'));
+alluse = find( strcmp({files.notes},'good imaging session')& ~strcmp({files.task},'HvV'));
 
 %%% labels for each condition
 gts = 3; naive=1; naiveTrained=5;  rand =2; hvv = 4;
@@ -176,10 +177,13 @@ for i = 1:length(alluse);
     spontCorr = d(1:end-1,end); %figure; hist(spontCorr,[-0.95:0.1:1]); title('spont corr')
     deltaSpont = mean(spont(:,sp_spont>250),2)-mean(spont(:,sp_spont<250),2);
     % figure; hist(deltaSpont,[-0.95:0.1:1]); title('delta spont')
+    clear d
     d = corrcoef([ev; double(sp_ev>250)]');
     evCorr = d(1:end-1,end); % figure; hist(evCorr,[-0.95:0.1:1]); title('evoked correlation')
     spontCorrAll(cellrange) = spontCorr(1:cutoff);
     evCorrAll(cellrange) = evCorr(1:cutoff);
+    deltaEv = mean(ev(:,sp_ev>250),2)-mean(ev(:,sp_ev<250),2);
+    deltaEvAll(cellrange) = deltaEv (1:cutoff)
     deltaSpontAll(cellrange) =deltaSpont(1:cutoff);
     runFraction(i) = mean(spd>250);  %%% fraction of time running in passive 3x
     
@@ -197,8 +201,9 @@ hist(spontCorrAll,[-0.95:0.1:1]); title('spont correlation');
 figure
 hist(evCorrAll,[-0.95:0.1:1]); title('evoked correlation');
 figure
-hist(deltaSpontAll,[-0.95:0.1:1]); title('evoked correlation');
-
+hist(deltaSpontAll,[-0.95:0.1:1]); title('evoked correlation');  %running - not running
+figure
+hist(eyeCorrAll,[-0.95:0.1:1]); title('pupil correlation');
 
 behavTimepts = -1:0.1:5;
 
@@ -230,8 +235,11 @@ end
 
 %%% get rid of extreme values
 centeredTrialData(centeredTrialData>1)=1;
-centered3x(centeredTrialData>1)=1;
+centered3x(centeredTrialData>1)=1;  %%?
 centered2sf(centeredTrialData>1)=1;
+
+centered3x(centered3x>1)=1;
+centered2sf(centered2sf>1)=1;
 
 %%% choose the ones within 12 deg of center
 centered = (d1<12| d2<12)';
@@ -360,6 +368,12 @@ imagesc(allData(sortCentered' ,:),[0 0.5]); %%% fix
 hold on; for j= 1:8, plot([j*length(behavTimepts) j*length(behavTimepts)]+1,[1 sum(sortCentered' )],'g'); end
 title('all conds')
 
+
+figure
+imagesc(allData(sortCentered' ,1:244),[0 0.5]); %%% fix
+hold on; for j= 1:4, plot([j*length(behavTimepts) j*length(behavTimepts)]+1,[1 sum(sortCentered' )],'g'); end
+title('all conds')
+%keyboard
 
 
 for cond = 1:4
@@ -590,7 +604,7 @@ for s= 1:max(sess)
     close all
 end
 
-keyboard
+%keyboard
 
 % [f p] = uiputfile('*.pdf');
 % newpdfFile = fullfile(p,f)
@@ -610,10 +624,12 @@ subjs = unique(sessSubj)
 trialType = {'correct pref','error pref','correct non-pref','error non-pref'};
 for cond = 1:4
     figure
-    for t = 1:4
+    for t = 1%:4
         subplot(2,2,t);
         for i = 1:max(c)
             d =nanmean(invariantAll(clust==i & allCond==cond ,:),1); plot(d((t-1)*42 + (1:42))-min(d));hold on; ylim([ 0 0.3]); xlim([0.5 42.5])
+   
+       %     d =nanmean(invariantAll(clust==i,:),1); plot(d((t-1)*42 + (1:42))-mean(d(6:10)));hold on;
         end
         title(trialType{t});
     end
@@ -625,7 +641,91 @@ end
 %%%mean activity for session, and each cluster (unweighted)
             %%% s = session, t = trial type (top/bottom,
             %%% correct/incorrect), cond = behavioral condition, timepoints 
-            %%%c/i = cluster
+        %%%c/i = cluster
+        
+          respRateAll{i} = resprate; correctRateAll{i} = correctRate; stopRateAll{i} = stoprate;
+    clear    groupCorrects(count) groupResp(count) groupStop(count)    
+        count = 0;
+ for ss = 1:length(sessionDate)
+  count = count+1;
+  correctsess = correctAll{ss};
+  if ss== 3 
+   respsess = (respRateAll{ss}/10);
+%    elseif ss==23
+%      respsess = (respRateAll{ss}/10);  
+%         elseif ss==25
+%      respsess = (respRateAll{ss}/10); 
+  elseif ss==51
+     respsess = (respRateAll{ss}/10);  
+  else
+  respsess = respRateAll{ss}; %session 3 and 51 look messed up by factor of 10 (maybe23 and 25?)
+  end
+  stopsess = stopRateAll{ss};
+  avgRespSess = (median(respsess)); %correct for stim onset
+% avgRespSess = mean(respsess)
+avgStopSess = (median(stopsess));
+% avgStopSess = mean(stopsess)
+  avgCorrectSess = mean(correctsess);
+  groupCorrects(count)=avgCorrectSess;
+  groupResp(count)=avgRespSess;
+  groupStop(count)=avgStopSess;
+ end  
+ 
+ for j =1:4
+    groupPerformance(j) = mean(groupCorrects(sessCond==j))
+    groupPerformanceSTD(j) = std(groupCorrects(sessCond==j))/sqrt(sum(sessCond==j))
+    groupRespTime(j) = (mean(groupResp(sessCond==j)))
+     groupRespTimeSTD(j) = std(groupResp(sessCond==j))/sqrt(sum(sessCond==j))
+    groupStopTime(j) = mean(groupStop(sessCond==j))
+    groupStopTimeSTD(j) = std(groupStop(sessCond==j))/sqrt(sum(sessCond==j))
+ end
+ %%%%%%%%%%%%%%%%%%%%%5statistical tests
+clear perform
+perform = nan(18,3);
+for j=1:3
+clear respM
+respM=groupCorrects(sessCond==j);
+perform(1:length(respM),j)=respM;
+end
+%%%%stats
+[p,tbl,stats]=kruskalwallis(perform)
+c = multcompare(stats)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+clear RespT
+RespT = nan(18,3);
+for j=1:3
+clear respM
+respM=groupResp(sessCond==j);
+RespT(1:length(respM),j)=respM;
+end
+%%%%stats
+[p,tbl,stats]=kruskalwallis(RespT)
+c = multcompare(stats)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+clear ITI
+ITI = nan(18,3);
+for j=1:3
+clear respM
+respM=groupStop(sessCond==j);
+ITI(1:length(respM),j)=respM;
+end
+%%%%stats
+[p,tbl,stats]=kruskalwallis(ITI)
+c = multcompare(stats)
+ 
+%performance 
+  figure
+barweb(groupPerformance(:)', groupPerformanceSTD(:)',0.8); ylim([-0.05 1.05]); set(gca,'Ytick',0:0.25:1.0);
+legend(condLabel{1:3}); ylabel('performance'); title(['performance all groups'])  
+%response time
+  figure
+barweb(groupRespTime(:)', groupRespTimeSTD(:)',0.8); ylim([0 1.5]); set(gca,'Ytick',0:.25:1.5);
+legend(condLabel{1:3}); ylabel('response time (sec)'); title(['response time all groups'])
+%stop tim
+  figure
+barweb(groupStopTime(:)', groupStopTimeSTD(:)',0.8); ylim([0 3.05]); set(gca,'Ytick',0:1:5.0);
+legend(condLabel{1:3}); ylabel('stop time (sec)'); title(['stop time all groups'])
+            
 for ss = 1:length(sessionDate)
      figure
     for t = 1:4
@@ -722,6 +822,7 @@ for j = 1:4 %%%loop through training conditions
             e = squeeze(nanstd(SessClustData(sessCond==j,t,i,:),[],1)/sqrt(sum(sessCond==j))); 
           NWClustSessData(i,t,j,:) =  d(1:42)-mean(d(6:10));
           NWClustSessErr(i,t,j,:) = e(1:42);
+          
 
                 %%%avg fraction of cells for each group, and fraction time spent running
             fraction(j,i) = nanmean(SessClustFraction(sessCond==j,i));
@@ -787,8 +888,8 @@ for ss = 1:length(sessionDate)
               passDiff(ss,i,:)=-passDiff(ss,i,:); 
           end  
           %remove negative values
-              behavDiff(behavDiff<0)=0;
-              passDiff(passDiff<0)=0;
+              behavDiff(behavDiff<0)=0; passDiff(behavDiff==0)=0;
+              passDiff(passDiff<0)=0; behavDiff(passDiff==0)=0;
               
          % DiffAP(ss,i,:) = squeeze(SessClustData(ss,t,i,2:30)-SessClust3xData(ss,t,i,:));
           %DiffAPMod(ss,i,:) = (squeeze(SessClustData(ss,t,i,2:30)-SessClust3xData(ss,t,i,:)))./(squeeze(SessClustData(ss,t,i,2:30)+SessClust3xData(ss,t,i,:)));
@@ -954,13 +1055,13 @@ end;
 %     respSess(c,:,:,3) = mean(clust2sfSess(c,:,:,range-1),4);
 %     respErrSess(c,:,:,3) = mean(clust2sfErrSess(c,:,:,range-1),4);
 % end
-clustLabel = {'sustain','transient','suppresed','inactive'};
+clustLabel = {'transient','sustain','suppresed','inactive'};
 %%%%%%%%for unweighted
     clear respSess
     clear respErrSess
     clear APDiffResp APDiffRespErr
 for c =1:3
-    if c==2
+    if c==1
         range = 13:14;
     else
         range = 19:20;
@@ -977,6 +1078,228 @@ for c =1:3
     APDiffRespModErr(c,:)=mean(clustDiffAPModErr(c,:,range-1),3);
     
 end
+
+
+%scaterplot
+
+%%%%%%all cells passive vs active peak resp
+ clear passP behavP
+
+for c =0:3
+    for i=1:length(orientInvariant3x(clust==c))
+ 
+    if c==1
+        range = 13:14;
+    else
+        range = 19:20;
+    end
+
+    
+        baseline = (6:10);
+    clear passPeak behavPeak baselinePass baselineBehav
+passPeak = nanmean(orientInvariant3x(clust==c ,range-1,1),2);%pref_loc/cardinal
+baselinePass = nanmean(orientInvariant3x(clust==c ,baseline-1,1),2);
+beselineBehav= nanmean(invariant(clust==c ,baseline,1),2);
+behavPeak = nanmean(invariant(clust==c ,range,1),2); %behave pref/correct
+
+
+passPeak=passPeak-baselinePass;
+behavPeak = behavPeak -beselineBehav;
+
+%     clear passPeak behavPeak d d1
+%     d= (orientInvariant3x(clust==c,(1:29),1));
+%     d = d - mean(d(6:10));
+%     d1=(invariant(clust==c,1:29,1));
+%     d1 = d1 - mean(d1(6:10));
+% passPeak = nanmean(d(range-1),2);   %pref_loc/cardinal
+% behavPeak = nanmean(d1(range),2); %behave pref/correct
+end
+   if c==0
+   passP{4,:}=passPeak' 
+   behavP{4,:}=behavPeak'
+   else
+   passP{c,:}=passPeak' 
+   behavP{c,:}=behavPeak'
+   end
+   
+   if c==3
+      passP{c,:}=-passP{c,:};
+      behavP{c,:}=-behavP{c,:};
+   end
+   
+   passP{1}(passP{1}>1)=1; % dont use extreem values... changed above for next run
+   
+%    figure;
+%    scatter(behavP{c},passP{c}); axis equal; title(clustLabel(c)); xlabel('behav peak resp'); ylabel('passive peak resp');
+%   
+end
+   figure;
+   scatter(behavP{1},passP{1},'b'); hold on; axis equal;  title('all cells'); xlabel('behav peak resp'); ylabel('passive peak resp');
+   scatter(behavP{2},passP{2},'g');
+   scatter(behavP{3},passP{3},'r');
+   scatter(behavP{4},passP{4},'k');legend(clustLabel{1:4});
+  
+   
+   %%%by training condition
+    clear passP behavP TaskDiff TaskMod MeanTaskDiff MeanTaskMod STDTaskDiff STDTaskMod
+   for j=1:3
+   for c =0:3
+    for i=1:length(orientInvariant3x(clust==c))
+    if c==1
+        range = 13:14;
+    else
+        range = 19:20;
+    end
+    baseline = (6:10);
+    clear passPeak behavPeak baselinePass baselineBehav
+passPeak = nanmean(orientInvariant3x(clust==c & allCond==j,range-1,1),2);%pref_loc/cardinal
+baselinePass = nanmean(orientInvariant3x(clust==c & allCond==j,baseline-1,1),2);
+beselineBehav= nanmean(invariant(clust==c & allCond==j,baseline,1),2);
+behavPeak = nanmean(invariant(clust==c & allCond==j,range,1),2); %behave pref/correct
+
+
+passPeak=passPeak-baselinePass;
+behavPeak = behavPeak -beselineBehav;
+
+    end
+    
+       if c==0
+   passP{j,4,:}=passPeak' 
+   behavP{j,4,:}=behavPeak'
+   else
+   passP{j,c,:}=passPeak' ;
+   behavP{j,c,:}=behavPeak';
+       end
+   
+    if c==3
+      passP{j,c,:}=-passP{j,c,:};
+      behavP{j,c,:} = -behavP{j,c,:};
+   end
+   
+   passP{j,1}(passP{j,1}>1)=1; % dont use extreem values... changed above for next run
+  
+%    if c==3
+%     passP{j,c,:}=-passP{j,c,:}; 
+%    behavP{j,c,:}=-behavP{j,c,:};
+%    end
+ 
+
+if c==0
+   TaskDiff{j,4} = (behavP{j,4} - passP{j,4});
+   TaskMod{j,4} = ((behavP{j,4} - passP{j,4})./(behavP{j,4}+passP{j,4}))
+   
+   TaskMod{j,4}(TaskMod{j,4}>1)=1;   %correct for far outliers
+   TaskMod{j,4}(TaskMod{j,4}<-1) = -1;
+   
+   
+   MeanTaskDiff(j,4) = nanmean(TaskDiff{j,4});
+   STDTaskDiff(j,4) = nanstd((TaskDiff{j,4})/sqrt(sum(allCond==j & clust==4))); 
+    MeanTaskMod(j,4) = nanmean(TaskMod{j,4});
+   STDTaskMod(j,4) = nanstd((TaskMod{j,4})/sqrt(sum(allCond==j & clust==4)));  
+else
+   TaskDiff{j,c} = (behavP{j,c} - passP{j,c});
+   TaskMod{j,c} = ((behavP{j,c} - passP{j,c})./(behavP{j,c}+passP{j,c}))
+   
+   TaskMod{j,c}(TaskMod{j,c}>1)=1;   %correct for far outliers
+   TaskMod{j,c}(TaskMod{j,c}<-1) = -1;
+   
+   
+   MeanTaskDiff(j,c) = nanmean(TaskDiff{j,c});
+   STDTaskDiff(j,c) = nanstd((TaskDiff{j,c})/sqrt(sum(allCond==j & clust==c))); 
+    MeanTaskMod(j,c) = nanmean(TaskMod{j,c});
+   STDTaskMod(j,c) = nanstd((TaskMod{j,c})/sqrt(sum(allCond==j & clust==c)));   
+end  
+   
+%    figure;
+%    scatter(behavP{j,c},passP{j,c}); axis equal; title([clustLabel(c) condLabel(j)]); xlabel('behav peak resp'); ylabel('passive peak resp');
+   end
+     figure;
+   scatter(behavP{j,1},passP{j,1},'b'); hold on; axis equal;  title(['all cells' condLabel(j)]); xlabel('behav peak resp'); ylabel('passive peak resp');  
+   scatter(behavP{j,2},passP{j,2},'g');
+   scatter(behavP{j,3},passP{j,3},'r')
+   scatter(behavP{j,4},passP{j,4},'k');;legend(clustLabel{1:4});
+   end
+
+   %by cluster
+for c=1:4
+     figure;
+  
+   scatter(behavP{1,c},passP{1,c},'b'); hold on; axis equal; title(['all cells' clustLabel(c)]); xlabel('behav peak resp'); ylabel('passive peak resp');
+   scatter(behavP{2,c},passP{2,c},'g');
+   scatter(behavP{3,c},passP{3,c},'r');legend(condLabel{1:3});
+ 
+end
+   
+%%%  difference active passive avg by cell
+figure
+barweb(squeeze(MeanTaskDiff(:,1:4)'), squeeze(STDTaskDiff(:,1:4)')); ylim([-0.055 0.15]); set(gca,'Ytick',-0.05:0.025:0.1);
+legend(condLabel{1:4}); ylabel('response diff'); title(['active vs passive - all cells ']);
+%%%%modulation by cell
+figure
+barweb(squeeze(MeanTaskMod(:,1:4)'), squeeze(STDTaskMod(:,1:4)')); ylim([-0.1 0.75]); set(gca,'Ytick',0:0.25:0.85);
+legend(condLabel{1:4}); ylabel('task modulation index'); title(['active vs passive modulation - all cells']);
+%distribution of modulations
+for j=1:3
+figure;
+    subplot(2,2,1)
+    [n b] = hist((TaskMod{j,1})); bar(b,n/sum(n));title([condLabel{j} 'taskmod transient']); ylim([0 0.5]); xlabel('taskmod'); ylabel('fraction');
+    subplot(2,2,2)
+    [n b] = hist((TaskMod{j,2})); bar(b,n/sum(n));title([condLabel{j} 'taskmod sustained']); ylim([0 0.5]); xlabel('taskmod'); ylabel('fraction');
+    subplot(2,2,3)
+    [n b] = hist((TaskMod{j,3})); bar(b,n/sum(n));title([condLabel{j} 'taskmod suppressed']); ylim([0 0.5]); xlabel('taskmod'); ylabel('fraction');
+    subplot(2,2,4)
+    [n b] = hist((TaskMod{j,4})); bar(b,n/sum(n));title([condLabel{j} 'taskmod inactive']); ylim([0 0.5]); xlabel('taskmod'); ylabel('fraction');
+
+end   
+%%%%%%Statistical test on modulationby cell
+clear ModulationTransCell 
+ModulationTransCell = nan(2363,3);
+for j=1:3
+clear respM
+respM=TaskMod{j,1};
+ModulationTransCell(1:length(respM),j)=respM;
+end
+%%%%stats
+[p,tbl,stats]=kruskalwallis(ModulationTransCell)
+c = multcompare(stats)
+%%%%%%%%%%%%%%%%%
+clear ModulationSustCell 
+ModulationSustCell = nan(1154,3);
+for j=1:3
+clear respM
+respM=TaskMod{j,2};
+ModulationSustCell(1:length(respM),j)=respM;
+end
+%%%%stats
+[p,tbl,stats]=kruskalwallis(ModulationSustCell)
+c = multcompare(stats)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+clear ModulationSuppCell 
+ModulationSuppCell = nan(739,3);
+for j=1:3
+clear respM
+respM=TaskMod{j,3};
+ModulationSuppCell(1:length(respM),j)=respM;
+end
+%%%%stats
+[p,tbl,stats]=kruskalwallis(ModulationSuppCell)
+c = multcompare(stats)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  %%%distribution of task diff  
+for j=1:3
+figure;
+    subplot(2,2,1)
+    [n b] = hist((TaskDiff{j,1})); bar(b,n/sum(n));title([condLabel{j} 'taskDiff transient']); ylim([0 0.75]); xlim([-0.5 .5]); xlabel('task diff'); ylabel('fraction');
+    subplot(2,2,2)
+    [n b] = hist((TaskDiff{j,2})); bar(b,n/sum(n));title([condLabel{j} 'taskDiff sustained']); ylim([0 0.75]); xlim([-.5 .5]);xlabel('task diff'); ylabel('fraction');
+    subplot(2,2,3)
+    [n b] = hist((TaskDiff{j,3})); bar(b,n/sum(n));title([condLabel{j} 'taskDiff supressed']); ylim([0 0.75]); xlim([-.5 .5]); xlabel('task diff'); ylabel('fraction');
+       subplot(2,2,4)
+    [n b] = hist((TaskDiff{j,4})); bar(b,n/sum(n));title([condLabel{j} 'taskDiff inactive']); ylim([0 0.75]); xlim([-.5 .5]); xlabel('task diff'); ylabel('fraction');
+   
+end  
+   
 %%%%%%%respSess(clust,stimtype, training cond, t)
 
 %%%%timecorse figs of each trining codition for cluster for each stim
@@ -1111,7 +1434,7 @@ end; legend(condLabel);
 figure; set(gcf,'Name','oblique unweighted');
 for c = 1:3
     subplot(2,2,c)
-    plot(squeeze(NWclust3xSess(c,2,1:3,:))'); xlim([ 1 30]);% ylim([-0.02 0.06])
+    plot(squeeze(NWclust3xSess(c,2,1:3,:))'); xlim([ 1 30]); ylim([-0.15 0.22])
 end; legend(condLabel);
 
 figure; set(gcf,'Name','2sf - high unweighted')
@@ -1123,12 +1446,85 @@ end; legend(condLabel);
 %%% resp(clust,stim, training cond, session)
 %%%w/o hvv
 figure
-barweb(squeeze(respSess(:,1,[1:3],1)), squeeze(respErrSess(:,1,[1:3],1))); %ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
+barweb(squeeze(respSess(:,1,[1:3],1)), squeeze(respErrSess(:,1,[1:3],1))); %ylim([-0.15 0.20]); set(gca,'Ytick',-0.025:0.025:0.075);
 legend(condLabel{1:3}); ylabel('avg response'); title('behavior - preferred')
 
+%statistical test for peak behav resp
+clear BehavRespTrans
+BehavRespTrans = nan(18,3);
+for i=1:3
+clear respT
+respT = mean(SessClustData(sessCond==i,1,1,13:14),4);
+BehavRespTrans(1:length(respT),i)=respT;
+end
+%%%%stats
+[p,tbl,stats]=kruskalwallis(BehavRespTrans)
+c = multcompare(stats)
+
+%statistical test for peak behav resp
+clear BehavRespSust
+BehavRespSust = nan(18,3);
+for i=1:3
+clear respT
+respT = mean(SessClustData(sessCond==i,1,2,19:20),4);
+BehavRespSust(1:length(respT),i)=respT;
+end
+%%%%stats
+[p,tbl,stats]=kruskalwallis(BehavRespSust)
+c = multcompare(stats)
+
+%statistical test for peak behav resp
+clear BehavRespSupp
+BehavRespSupp = nan(18,3);
+for i=1:3
+clear respT
+respT = mean(SessClustData(sessCond==i,1,3,19:20),4);
+BehavRespSupp(1:length(respT),i)=respT;
+end
+%%%%stats
+[p,tbl,stats]=kruskalwallis(BehavRespSupp)
+c = multcompare(stats)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 figure%
-barweb(squeeze(respSess(:,1,[1:3],2)), squeeze(respErrSess(:,1,[1:3],2))); %ylim([-0.01 0.04]); set(gca,'Ytick',-0.01:0.01:0.04);
+barweb(squeeze(respSess(:,1,[1:3],2)), squeeze(respErrSess(:,1,[1:3],2))); ylim([-0.15 0.20]); set(gca,'Ytick',-0.15:0.05:0.20);
 legend(condLabel{1:3}); ylabel('avg response'); title('passive 3x - cardinal')
+
+
+%statistical test for peak Passive resp
+clear PassiveRespTrans
+PassiveRespTrans = nan(18,3);
+for i=1:3
+clear respT
+respT = mean(SessClust3xData(sessCond==i,1,1,12:13),4);
+PassiveRespTrans(1:length(respT),i)=respT;
+end
+%%%%stats
+[p,tbl,stats]=kruskalwallis(PassiveRespTrans)
+c = multcompare(stats)
+
+%statistical test for peak passive resp
+clear PassiveRespSust
+PassiveRespSust = nan(18,3);
+for i=1:3
+clear respT
+respT = mean(SessClust3xData(sessCond==i,1,2,18:19),4);
+PassiveRespSust(1:length(respT),i)=respT;
+end
+%%%%stats
+[p,tbl,stats]=kruskalwallis(PassiveRespSust)
+c = multcompare(stats)
+
+%statistical test for peak Passive resp
+clear PassiveRespSupp
+PassiveRespSupp = nan(18,3);
+for i=1:3
+clear respT
+respT = mean(SessClust3xData(sessCond==i,1,3,18:19),4);
+PassiveRespSupp(1:length(respT),i)=respT;
+end
+%%%%stats
+[p,tbl,stats]=kruskalwallis(PassiveRespSupp)
+c = multcompare(stats)
 
 figure
 barweb(squeeze(respSess(:,2,[1:3],2)), squeeze(respErrSess(:,2,[2 1 3],2))); %ylim([-0.01 0.04]); set(gca,'Ytick',-0.01:0.01:0.04);
@@ -1146,6 +1542,111 @@ figure
 barweb(squeeze(respSess(:,1,2,[1 2])), squeeze(respErrSess(:,1,2,[1 3]))); %ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
 legend('task','passive 3x'); ylabel('avg response'); title('active vs passive rand');
 
+
+
+%statistical test for peak behav resp vs Passive resp within group fig 7
+%%%%%Trained
+clear RespPeakTrainedTrans
+RespPeakTrainedTrans = nan(18,2);
+clear respP respB
+respP = mean(SessClust3xData(sessCond==3,1,1,12:13),4);
+respB = mean(SessClustData(sessCond==3,1,1,13:14),4);
+RespPeakTrainedTrans(1:length(respB),1)=respB;
+RespPeakTrainedTrans(1:length(respP),2)=respP;
+%%%%stats
+[p,tbl,stats]=kruskalwallis(RespPeakTrainedTrans)
+c = multcompare(stats)
+
+clear RespPeakTrainedSust
+RespPeakTrainedSust = nan(18,2);
+clear respP respB
+respP = mean(SessClust3xData(sessCond==3,1,2,18:19),4);
+respB = mean(SessClustData(sessCond==3,1,2,19:20),4);
+RespPeakTrainedSust(1:length(respB),1)=respB;
+RespPeakTrainedSust(1:length(respP),2)=respP;
+%%%%stats
+[p,tbl,stats]=kruskalwallis(RespPeakTrainedSust)
+c = multcompare(stats)
+
+clear RespPeakTrainedSupp
+RespPeakTrainedSupp = nan(18,2);
+clear respP respB
+respP = mean(SessClust3xData(sessCond==3,1,3,18:19),4);
+respB = mean(SessClustData(sessCond==3,1,3,19:20),4);
+RespPeakTrainedSupp(1:length(respB),1)=respB;
+RespPeakTrainedSupp(1:length(respP),2)=respP;
+%%%%stats
+[p,tbl,stats]=kruskalwallis(RespPeakTrainedSupp)
+c = multcompare(stats)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%EXP
+clear RespPeakExpTrans
+RespPeakExpTrans = nan(18,2);
+clear respP respB
+respP = mean(SessClust3xData(sessCond==2,1,1,12:13),4);
+respB = mean(SessClustData(sessCond==2,1,1,13:14),4);
+RespPeakExpTrans(1:length(respB),1)=respB;
+RespPeakExpTrans(1:length(respP),2)=respP;
+%%%%stats
+[p,tbl,stats]=kruskalwallis(RespPeakExpTrans)
+c = multcompare(stats)
+
+clear RespPeakExpSust
+RespPeakExpSust = nan(18,2);
+clear respP respB
+respP = mean(SessClust3xData(sessCond==2,1,2,18:19),4);
+respB = mean(SessClustData(sessCond==2,1,2,19:20),4);
+RespPeakExpSust(1:length(respB),1)=respB;
+RespPeakExpSust(1:length(respP),2)=respP;
+%%%%stats
+[p,tbl,stats]=kruskalwallis(RespPeakExpSust)
+c = multcompare(stats)
+
+clear RespPeakExpSupp
+RespPeakExpSupp = nan(18,2);
+clear respP respB
+respP = mean(SessClust3xData(sessCond==2,1,3,18:19),4);
+respB = mean(SessClustData(sessCond==2,1,3,19:20),4);
+RespPeakExpSupp(1:length(respB),1)=respB;
+RespPeakExpSupp(1:length(respP),2)=respP;
+%%%%stats
+[p,tbl,stats]=kruskalwallis(RespPeakExpSupp)
+c = multcompare(stats)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%Naive
+clear RespPeakNaiveTrans
+RespPeakNaiveTrans = nan(18,2);
+clear respP respB
+respP = mean(SessClust3xData(sessCond==1,1,1,12:13),4);
+respB = mean(SessClustData(sessCond==1,1,1,13:14),4);
+RespPeakNaiveTrans(1:length(respB),1)=respB;
+RespPeakNaiveTrans(1:length(respP),2)=respP;
+%%%%stats
+[p,tbl,stats]=kruskalwallis(RespPeakNaiveTrans)
+c = multcompare(stats)
+
+clear RespPeakNaiveSust
+RespPeakNaiveSust = nan(18,2);
+clear respP respB
+respP = mean(SessClust3xData(sessCond==1,1,2,18:19),4);
+respB = mean(SessClustData(sessCond==1,1,2,19:20),4);
+RespPeakNaiveSust(1:length(respB),1)=respB;
+RespPeakNaiveSust(1:length(respP),2)=respP;
+%%%%stats
+[p,tbl,stats]=kruskalwallis(RespPeakNaiveSust)
+c = multcompare(stats)
+
+clear RespPeakNaiveSupp
+RespPeakNaiveSupp = nan(18,2);
+clear respP respB
+respP = mean(SessClust3xData(sessCond==1,1,3,18:19),4);
+respB = mean(SessClustData(sessCond==1,1,3,19:20),4);
+RespPeakNaiveSupp(1:length(respB),1)=respB;
+RespPeakNaiveSupp(1:length(respP),2)=respP;
+%%%%stats
+[p,tbl,stats]=kruskalwallis(RespPeakNaiveSupp)
+c = multcompare(stats)
 
 % %%%w/ hvv
 % figure
@@ -1229,7 +1730,42 @@ figure
 barweb(squeeze(APDiffRespMod(:,1:3)), squeeze(APDiffRespModErr(:,1:3))); ylim([0 0.85]); set(gca,'Ytick',0:0.25:0.85);
 legend(condLabel{1:4}); ylabel('task modulation index'); title(['active vs passive modulation']);
 
- 
+%%%Signifficance testing on modulation by cell class
+%Trans
+clear ModulationTrans 
+ModulationTrans = nan(18,3);
+for j=1:3
+clear respM
+respM=nanmean(DiffAPMod(sessCond==j,1,12:13),3);
+ModulationTrans(1:length(respM),j)=respM;
+end
+%%%%stats
+[p,tbl,stats]=kruskalwallis(ModulationTrans)
+c = multcompare(stats)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Sust
+clear ModulationSust 
+ModulationSust = nan(18,3);
+for j=1:3
+clear respM
+respM=nanmean(DiffAPMod(sessCond==j,2,18:19),3);
+ModulationSust(1:length(respM),j)=respM;
+end
+%%%%stats
+[p,tbl,stats]=kruskalwallis(ModulationSust)
+c = multcompare(stats)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%Supp
+clear ModulationSupp 
+ModulationSupp = nan(18,3);
+for j=1:3
+clear respM
+respM=nanmean(DiffAPMod(sessCond==j,3,18:19),3);
+ModulationSupp(1:length(respM),j)=respM;
+end
+%%%%stats
+[p,tbl,stats]=kruskalwallis(ModulationSupp)
+c = multcompare(stats)
 
 %%%%%%%compare passive responses from 3x and 2sf stim to behav
 for i=1
@@ -1255,18 +1791,56 @@ for i=1
 end
 
 %%% plot modulation by running (average over all cells)
- clear spontMod spontModErr
+ clear spontMod spontModErr spontModUse
+ spontModUse = nan(3375,3);
 for i= 1:max(clust);
     figure      %(& sesscond~=4)?
     [n b] =hist(deltaSpontAll(clust==i),[-0.5:0.1:0.5]); bar(b,n/sum(n)); title(sprintf('cluster %d',i)); xlim([-0.55 0.55]); ylim([0 0.85]); ylabel('fraction'); xlabel('running modulation (spont)');
     set(gca,'Xtick',-0.5:0.25:0.5); set(gca,'Ytick',0:0.2:0.8); set(gca,'Fontsize',16);
+     spontModUse(1:length(deltaSpontAll(clust==i)),i) =(abs(deltaSpontAll(clust==i)))';
     spontMod(i) = nanmean(abs(deltaSpontAll(clust==i))); spontModErr(i) = nanstd(abs(deltaSpontAll(clust==i)))/sqrt(sum(clust==i));
 end
 figure
 bar(spontMod); hold on; errorbar(1:3,spontMod,spontModErr,'k.','markersize',8,'Linewidth',2);
 ylabel('mean absolute modulation');title('running modulation - all cells'); set(gca,'FontSize',16); ylim([0 0.125]); set(gca,'Xtick',0:0.025:0.125);
 
-%%do by session
+%%%%statistical testing on spontaneous modulation
+% figure
+% boxplot(spontModUse)
+[p,tbl,stats]=kruskalwallis(spontModUse)
+c = multcompare(stats)
+
+ clear evMod evModErr evc  
+for i= 1:max(clust);
+    figure      %(& sesscond~=4)?
+    [n b] =hist(deltaEvAll(clust==i),[-0.5:0.1:0.5]); bar(b,n/sum(n)); title(sprintf('cluster %d',i)); xlim([-0.55 0.55]); ylim([0 0.85]); ylabel('fraction'); xlabel('running modulation (evoked)');
+    set(gca,'Xtick',-0.5:0.25:0.5); set(gca,'Ytick',0:0.2:0.8); set(gca,'Fontsize',16);
+    evMod(i) = nanmean(abs(deltaEvAll(clust==i))); evModErr(i) = nanstd(abs(deltaEvAll(clust==i)))/sqrt(sum(clust==i));
+end
+figure
+bar(evMod); hold on; errorbar(1:3,evMod,evModErr,'k.','markersize',8,'Linewidth',2);
+ylabel('mean absolute modulation');title('Evoked running modulation - all cells'); set(gca,'FontSize',16); ylim([0 0.125]); set(gca,'Xtick',0:0.025:0.125);
+
+
+
+%passive pupil correlation
+figure
+hist(eyeCorrAll,[-0.95:0.1:1]); title('pupil correlation');
+
+ clear pupilMod pupilModErr   
+for i= 1:max(clust);
+    figure      %(& sesscond~=4)?
+    [n b] =hist(eyeCorrAll(clust==i),[-0.5:0.1:0.5]); bar(b,n/sum(n)); title(sprintf('cluster %d',i)); xlim([-0.55 0.55]); ylim([0 0.85]); ylabel('fraction'); xlabel('running modulation (evoked)');
+    set(gca,'Xtick',-0.5:0.25:0.5); set(gca,'Ytick',0:0.2:0.8); set(gca,'Fontsize',16);
+    pupilMod(i) = nanmean(abs(eyeCorrAll(clust==i))); pupilModErr(i) = nanstd(abs(eyeCorrAll(clust==i)))/sqrt(sum(clust==i));
+end
+figure
+bar(pupilMod); hold on; errorbar(1:3,pupilMod,pupilModErr,'k.','markersize',8,'Linewidth',2);
+ylabel('mean pupil correlation');title('Passive pupil correlation - all cells'); set(gca,'FontSize',16); ylim([0 0.125]); set(gca,'Xtick',0:0.025:0.125);
+
+
+
+%%do by session spont
 for ss = 1:length(sessionDate)
     for i= 1:max(clust);
     figure
@@ -1276,11 +1850,41 @@ for ss = 1:length(sessionDate)
     close
     end;
 end;
+%%do by session evoked
+for ss = 1:length(sessionDate)
+    for i= 1:max(clust);
+    figure
+    [n b] =hist(deltaEvAll(sess==ss & clust==i),[-0.5:0.1:0.5]); bar(b,n/sum(n)); title([sprintf('cluster %d ',i) sessSubj{ss} ' ' sessionDate{ss}] ); xlim([-0.55 0.55]); ylim([0 0.85]); ylabel('fraction'); xlabel('running modulation (evoked)');
+    set(gca,'Xtick',-0.5:0.25:0.5); set(gca,'Ytick',0:0.2:0.8); set(gca,'Fontsize',16);
+    evModSess(ss,i) = nanmean(abs(deltaEvAll(sess==ss & clust==i))); evModSessErr(ss,i) = nanstd(abs(deltaEvAll(sess==ss & clust==i)))/sqrt(sum(sess==ss & clust==i));
+    close
+    end;
+end;
+
+%%do by session pupil
+for ss = 1:length(sessionDate)
+    for i= 1:max(clust);
+    figure
+    [n b] =hist(eyeCorrAll(sess==ss & clust==i),[-0.5:0.1:0.5]); bar(b,n/sum(n)); title([sprintf('cluster %d ',i) sessSubj{ss} ' ' sessionDate{ss}] ); xlim([-0.55 0.55]); ylim([0 0.85]); ylabel('fraction'); xlabel('running modulation (evoked)');
+    set(gca,'Xtick',-0.5:0.25:0.5); set(gca,'Ytick',0:0.2:0.8); set(gca,'Fontsize',16);
+    pupilModSess(ss,i) = nanmean(abs(eyeCorrAll(sess==ss & clust==i))); pupilModSessErr(ss,i) = nanstd(abs(eyeCorrAll(sess==ss & clust==i)))/sqrt(sum(sess==ss & clust==i));
+    close
+    end;
+end;
+
 %%combine for training conditions
 for j=1:4
     for i=1:max(clust)
      spontModSessGroup(j,i) = nanmean(spontModSess(sessCond==j,i)); 
-     spontModSessGroupErr(j,i) = nanstd(spontModSess(sessCond==j,i))/sqrt(sum(sessCond==j));  
+     spontModSessGroupErr(j,i) = nanstd(spontModSess(sessCond==j,i))/sqrt(sum(sessCond==j));
+     
+     evModSessGroup(j,i) = nanmean(evModSess(sessCond==j,i)); 
+     evModSessGroupErr(j,i) = nanstd(evModSess(sessCond==j,i))/sqrt(sum(sessCond==j));
+     
+      pupilModSessGroup(j,i) = nanmean(pupilModSess(sessCond==j,i)); 
+     pupilModSessGroupErr(j,i) = nanstd(pupilModSess(sessCond==j,i))/sqrt(sum(sessCond==j));
+     
+     
     end
     
 %     figure
@@ -1291,19 +1895,46 @@ for j=1:4
 %by cluster
 figure;
 barweb(spontModSessGroup(j,:),spontModSessGroupErr(j,:),0.8); ylim([-0.05 .2]);set(gca,'Ytick',0:0.05:0.2);
-legend(clustLabel{1:3}); title([condLabel{j} ' running modulation']); ylabel('mean absolute modulation'); 
+legend(clustLabel{1:3}); title([condLabel{j} ' running modulation (spont)']); ylabel('mean absolute modulation'); 
+
+figure;
+barweb(evModSessGroup(j,:),evModSessGroupErr(j,:),0.8); ylim([-0.05 .2]);set(gca,'Ytick',0:0.05:0.2);
+legend(clustLabel{1:3}); title([condLabel{j} ' running modulation (evoked)']); ylabel('mean absolute modulation'); 
+
+figure;
+barweb(pupilModSessGroup(j,:),pupilModSessGroupErr(j,:),0.8); ylim([-0.05 .2]);set(gca,'Ytick',0:0.05:0.2);
+legend(clustLabel{1:3}); title([condLabel{j} ' pupil modulation (correlation)']); ylabel('mean absolute modulation'); 
+
+
 end
 %by training group
 for i=1:3
 figure;
 barweb(spontModSessGroup(:,i),spontModSessGroupErr(:,i),0.8); ylim([-0.05 .2]);set(gca,'Ytick',0:0.05:0.2);
-legend(condLabel{1:4}); title(['running modulation, Cluster ' num2str(i)]); ylabel('mean absolute modulation'); 
-end 
+legend(condLabel{1:4}); title(['running modulation (spont), Cluster ' num2str(i)]); ylabel('mean absolute modulation');
+
+figure;
+barweb(evModSessGroup(:,i),evModSessGroupErr(:,i),0.8); ylim([-0.05 .2]);set(gca,'Ytick',0:0.05:0.2);
+legend(condLabel{1:4}); title(['running modulation (evoked), Cluster ' num2str(i)]); ylabel('mean absolute modulation');
+
+
+figure;
+barweb(pupilModSessGroup(:,i),pupilModSessGroupErr(:,i),0.8); ylim([-0.05 .2]);set(gca,'Ytick',0:0.05:0.2);
+legend(condLabel{1:4}); title(['pupil modulation (correlation), Cluster ' num2str(i)]); ylabel('mean absolute modulation');
+end ;
 %%%%%all clusters and groups
  figure;
 barweb(spontModSessGroup(1:3,:)',spontModSessGroupErr(1:3,:)',0.8); ylim([-0.05 .2]);set(gca,'Ytick',0:0.05:0.2);
-legend(condLabel{1:3}); title(['running modulation']); ylabel('mean absolute modulation'); 
+legend(condLabel{1:3}); title(['running modulation (spont)']); ylabel('mean absolute modulation'); 
    
+ figure;
+barweb(evModSessGroup(1:3,:)',evModSessGroupErr(1:3,:)',0.8); ylim([-0.05 .2]);set(gca,'Ytick',0:0.05:0.2);
+legend(condLabel{1:3}); title(['running modulation (evoked)']); ylabel('mean absolute modulation'); 
+  
+figure;
+barweb(pupilModSessGroup(1:3,:)',pupilModSessGroupErr(1:3,:)',0.8); ylim([-0.05 .2]);set(gca,'Ytick',0:0.05:0.2);
+legend(condLabel{1:3}); title(['pupil modulation (correlation)']); ylabel('mean absolute modulation'); 
+  
 
 
 
@@ -1359,7 +1990,7 @@ osifigSS(ss) = figure;
     subplot(2,2,4);
     [n b] = hist(abs(sustOSI(peak>0.1))); bar(b,n/sum(n)); title([sessSubj{ss} ' ' sessionDate{ss} 'sust osi ' num2str(i)])
     
-    if i ==2 %for transient cluster
+    if i ==1 %for transient cluster %range = 13:14
         peak = max(transResp,[],2);
         clustOSI = abs(transOSI(peak>0.1));
     else
@@ -1457,7 +2088,7 @@ clear transResp sustResp
     subplot(2,2,4);
     [n b] = hist(abs(sustOSI{j}(peak>0.1))); bar(b,n/sum(n)); title([condLabel(j) 'sust osi ' num2str(i)])
     
-    if i ==2  %for transient cluster
+    if i ==1  %for transient cluster %range = 13:14
         peak = max(transResp{j},[],2);
         clustOSI{j} = abs(transOSI{j}(peak>0.1));
     else
@@ -1522,10 +2153,10 @@ calcOSIinput3x(:,:,8)= centered3x(:,:,4);
 clear tuning  maxresp
 for i = 1:size(calcOSIinput3x);
  %for i = 1:1
-     if clust(i)==2
-        range = 13:14;
+     if clust(i)==1
+        range = 12:13;
         else
-        range = 19:20;
+        range = 18:19;
        end
     tuning(i,:) = squeeze(mean(calcOSIinput3x(i,range,:),2)) - squeeze(mean(calcOSIinput3x(i,6:10,:),2));
     if clust(i)==3;
@@ -1538,9 +2169,12 @@ for i = 1:size(calcOSIinput3x);
     prefTheta(i) = p;
 end
 %average circular varience for each cluster (not by session)
+clear circVarUse
+circVarUse=nan(1310,3);
 for i=1:3 %clusters
 circVarClust(i)=nanmean(cirVar(clust==i & maxresp>0.2));
-circVarClustErr(i) =nanstd(cirVar(clust==i & maxresp>0.2),1)/sqrt(sum(clust==i & maxresp>0.2)); %check this
+circVarUse(1:length(cirVar(clust==i & maxresp>0.2)),i)=cirVar(clust==i & maxresp>0.2);
+circVarClustErr(i) =nanstd(cirVar(clust==i & maxresp>0.2),1)/sqrt(sum(clust==i & maxresp>0.3)); %check this
 end
 figure
 barweb(circVarClust(:), circVarClustErr(:),0.8); ylim([-0.05 1.05]); set(gca,'Ytick',0:0.25:1.0);
@@ -1548,11 +2182,18 @@ legend(clustLabel{1:3}); ylabel('circular varience (OSI)'); title('Cluster OSI 3
 %all cells circvar distribution by cluster
 figure;
     subplot(2,2,1)
-    [n b] = hist(abs(cirVar(clust==1 & maxresp>0.2))); bar(b,n/sum(n));title(['circVar sustained']); ylim([0 0.3]); xlabel('OSI (circVar)'); ylabel('fraction');
+    [n b] = hist(abs(cirVar(clust==1 & maxresp>0.2 ))); bar(b,n/sum(n));title(['circVar transient']); ylim([0 0.3]); xlabel('OSI (circVar)'); ylabel('fraction');
     subplot(2,2,2)
-    [n b] = hist(abs(cirVar(clust==2 & maxresp>0.2))); bar(b,n/sum(n));title(['circVar transient']); ylim([0 0.3]); xlabel('OSI (circVar)'); ylabel('fraction');
+    [n b] = hist(abs(cirVar(clust==2 & maxresp>0.2))); bar(b,n/sum(n));title(['circVar sustained']); ylim([0 0.3]); xlabel('OSI (circVar)'); ylabel('fraction');
     subplot(2,2,3)
     [n b] = hist(abs(cirVar(clust==3 & maxresp>0.2))); bar(b,n/sum(n));title(['circVar supressed']); ylim([0 0.3]); xlabel('OSI (circVar)'); ylabel('fraction');
+  
+%%%%statistical test of orientation selectivity
+[p,tbl,stats]=kruskalwallis(circVarUse)
+c = multcompare(stats)
+  
+figure
+boxplot(circVarUse)
     
 
 % %%%%average circular varience for each training condition (not by session)
@@ -1614,7 +2255,7 @@ legend(condLabel{1:3}); ylabel('circular varience (OSI)'); title(['all clusters 
 %SessClustFraction(ss,i) = sum(clust==i & sess==ss)/sum(sess==ss); %%fraction of each cluster by session 
 %fraction(j,i) = mean(SessClustFraction(sessCond==j,i)); %%session average of.. fraction of each cluster by training condition
             
-for cond =1:4
+for cond =1:3
     for i = 1:4%max(clust);
         %clustfract(cond,i) = mean(SessClustFraction(cond,i));
         %fractionSTD(j,i) = nanstd(SessClustFraction(sessCond==j,i),[],1)/sqrt(sum(sessCond==j));
@@ -1635,8 +2276,68 @@ clustfractErr
 for i=1:4
   figure
 barweb(clustfract(:,i), clustfractErr(:,i), 0.8);% ylim([-0.25 1.05]); set(gca,'Ytick',0:0.25:1.5);
-legend(condLabel{1:4});xlabel('training condition'); ylabel('cluster fraction'); title(['Fraction of ' clustLabel{i} ' cells by group'])     
+legend(condLabel{1:3});xlabel('training condition'); ylabel('cluster fraction'); title(['Fraction of ' clustLabel{i} ' cells by group'])     
 end; 
+
+clear clustFractUseTrans
+clustFractUseTrans=nan(18,3);
+for i=1:3
+clustFractUseTrans(1:length(SessClustFraction(sessCond==i)),i) = SessClustFraction(sessCond==i,1);
+end
+%%%%%%%statistical test for fraction of transient type by training
+%%%%%%%condition (by session)
+%[p,tbl,stats]=kruskalwallis(clustFractUseTrans)
+[p,tbl,stats]=anova1(clustFractUseTrans)
+c = multcompare(stats)
+%c = multcompare(stats,'CType','dunn-sidak')
+% [h,p,ci,stats] = ttest(clustFractUseTrans(:,1),clustFractUseTrans(:,3)) 
+figure
+boxplot(clustFractUseTrans);hold on; title('fraction transient by training group')
+
+clear clustFractUseSust
+clustFractUseSust=nan(18,3);
+for i=1:3
+clustFractUseSust(1:length(SessClustFraction(sessCond==i)),i) = SessClustFraction(sessCond==i,2);
+end
+%%%%%%%statistical test for fraction of sustained type by training
+%%%%%%%condition (by session)
+% [p,tbl,stats]=kruskalwallis(clustFractUseSust)
+[p,tbl,stats]=anova1(clustFractUseSust)
+c = multcompare(stats)
+%c = multcompare(stats,'CType','dunn-sidak')
+%[h,p,ci,stats] = ttest(clustFractUseSust(:,1),clustFractUseSust(:,2)) 
+figure
+boxplot(clustFractUseSust)
+
+
+clear clustFractUseSupp
+clustFractUseSupp=nan(18,3);
+for i=1:3
+clustFractUseSupp(1:length(SessClustFraction(sessCond==i)),i) = SessClustFraction(sessCond==i,3);
+end
+%%%%%%%statistical test for fraction of suppressed type by training
+%%%%%%%condition (by session)
+%[p,tbl,stats]=kruskalwallis(clustFractUseSupp)
+[p,tbl,stats]=anova1(clustFractUseSupp)
+c = multcompare(stats)
+
+figure
+boxplot(clustFractUseSupp);hold on;title('sustained fraction');
+
+clear clustFractUseInact
+clustFractUseInact=nan(18,3);
+for i=1:3
+clustFractUseInact(1:length(SessClustFraction(sessCond==i)),i) = SessClustFraction(sessCond==i,4);
+end
+%%%%%%%statistical test for fraction of inactive type by training
+%%%%%%%condition (by session)
+%[p,tbl,stats]=kruskalwallis(clustFractUseInact)
+[p,tbl,stats]=anova1(clustFractUseInact)
+c = multcompare(stats)
+%c = multcompare(stats,'CType','dunn-sidak')
+
+figure
+boxplot(clustFractUseInact)
 
 % for j=1:4  % (by condition)
 %           figure
@@ -1694,7 +2395,7 @@ for ss = 1:length(sessionDate)
         for i = 1:max(clust)
    clear WeightedOrientData WeightedOrientData1 OrientPref LocationPref
    
-           if i==2 %for transient cluster
+           if i==1 %for transient cluster
             range = 13:14;
         else
             range = 19:20;
@@ -1936,11 +2637,11 @@ end
 % barweb(squeeze(resp(:,1,1,[1 2])), squeeze(respErr(:,1,1,[1 3]))); ylim([-0.025 0.075]); set(gca,'Ytick',-0.025:0.025:0.075);
 % legend('task','passive 3x'); ylabel('weighted response'); title('active vs passive trained');
 % 
-% %%% plot modulation by running
+% %%% plot Modulation by running
 % 
 % for i= 1:max(c);
 %     figure
-%     [n b] =hist(deltaSpontAll(clust==i),[-0.5:0.1:0.5]); bar(b,n/sum(n)); title(sprintf('cluster %d',i)); xlim([-0.55 0.55]); ylim([0 0.85]); ylabel('fraction'); xlabel('running modulation (spont)');
+%     [n b] =hist(deltaSpontAll(clust==i),[-0.5:0.1:0.5]); bar(b,n/sum(n)); title(sprintf('cluster %d',i)); xlim([-0.55 0.55]); ylim([0 0.85]); ylabel('fraction'); xlabel('running Modulation (spont)');
 %     set(gca,'Xtick',-0.5:0.25:0.5); set(gca,'Ytick',0:0.2:0.8); set(gca,'Fontsize',16);
 %     spontMod(i) = nanmean(abs(deltaSpontAll(clust==i))); spontModErr(i) = nanstd(abs(deltaSpontAll(clust==i)))/sqrt(sum(clust==i));
 % end

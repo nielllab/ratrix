@@ -1,5 +1,6 @@
 %%%use this code to analyze the full contrast, 24 rep size select data
 
+%%
 close all
 clear all
 dbstop if error
@@ -69,6 +70,7 @@ moviefname = 'C:\sizeselectBin22min';
 load(moviefname)
 dfWindow = 9:11;
 spWindow = {6:10,6:7,8:10};splabel={'all','early','late'};
+stlb = {'sit','run'};
 spthresh = 0.1;
 dt = 0.1;
 cyclelength = 1/0.1;
@@ -93,7 +95,7 @@ end
 numAni = length(use)/2;
 
 if redogrp
-    binwidth = 20;
+    binwidth = 10;
     ntotframes = 13400;
     shufreps = 1000;
     grpdfsize = nan(10000,15,length(sizes),2,2);grpspsize=grpdfsize;
@@ -331,7 +333,7 @@ else
     load(fullfile(savepath,grpfilename))
 end
 
-% % % keyboard
+%%
 
 
 %%%see how similar responses are for pre and post across the population
@@ -512,7 +514,7 @@ end
 
 
 
-% %%pixelwise analysis
+% %%pixelwise analysis for each animal
 % for z = 1:numAni
 %     %%%plot sit dF
 %     for h = 1:length(sfrange)
@@ -603,83 +605,35 @@ end
 % % % % %             print('-dpsc',psfile,'-append');
 % % % % %         end
 % 
-%%%analysis of spatial spread
-% % figure
-% % for i=2:length(sizes)
-% %     subplot(2,floor(length(sizes)/2),i-1)
-% %     pre=squeeze(grpring(:,:,1,i,1,1)) - squeeze(grpring(:,:,1,1,1,1));post=squeeze(grpring(:,:,1,i,1,2))- squeeze(grpring(:,:,1,1,1,2));
-% %     hold on
-% %     shadedErrorBar(0:79,nanmean(pre),nanstd(pre)/sqrt(numAni),'k',1)
-% %     shadedErrorBar(0:79,nanmean(post),nanstd(post)/sqrt(numAni),'r',1)
-% %     plot([0 10],[0 0],'b:')
-% %     axis square
-% %     axis([0 10 -0.05 0.3])
-% %     xlabel('dist from cent (um)')
-% %     ylabel(sprintf('%sdeg dfof',sizes{i}))
-% %     set(gca,'xtick',[0:5:10],'xticklabel',[0:5*binwidth:10*binwidth])
-% % end
-% % mtit(sprintf('Sit spread from center N=%d animals %0.2fcpd',numAni,sfrange(1)));
-% % if exist('psfile','var')
-% %     set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-% %     print('-dpsc',psfile,'-append');
-% % end
-% % figure
-% % for i=2:length(sizes)
-% %     subplot(2,floor(length(sizes)/2),i-1)
-% %     pre=squeeze(grpring(:,:,2,i,1,1)) - squeeze(grpring(:,:,2,1,1,1));post=squeeze(grpring(:,:,2,i,1,2)) - squeeze(grpring(:,:,2,1,1,2));
-% %     hold on
-% %     shadedErrorBar(0:79,nanmean(pre),nanstd(pre)/sqrt(numAni),'k',1)
-% %     shadedErrorBar(0:79,nanmean(post),nanstd(post)/sqrt(numAni),'r',1)
-% %     plot([0 10],[0 0],'b:')
-% %     axis square
-% %     axis([0 10 -0.05 0.3])
-% %     xlabel('dist from cent (um)')
-% %     ylabel(sprintf('%sdeg dfof',sizes{i}))
-% %     set(gca,'xtick',[0:5:10],'xticklabel',[0:5*binwidth:10*binwidth])
-% % end
-% % mtit(sprintf('Sit spread from center N=%d animals %0.2fcpd',numAni,sfrange(2)));
-% % if exist('psfile','var')
-% %     set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-% %     print('-dpsc',psfile,'-append');
-% % end
-% % figure
-% % for i=2:length(sizes)
-% %     subplot(2,floor(length(sizes)/2),i-1)
-% %     pre=squeeze(grpring(:,:,1,i,2,1)) - squeeze(grpring(:,:,1,1,2,1));post=squeeze(grpring(:,:,1,i,2,2)) - squeeze(grpring(:,:,1,1,2,2));
-% %     hold on
-% %     shadedErrorBar(0:79,nanmean(pre),nanstd(pre)/sqrt(numAni),'k',1)
-% %     shadedErrorBar(0:79,nanmean(post),nanstd(post)/sqrt(numAni),'r',1)
-% %     plot([0 10],[0 0],'b:')
-% %     axis square
-% %     axis([0 10 -0.05 0.3])
-% %     xlabel('dist from cent (um)')
-% %     ylabel(sprintf('%sdeg dfof',sizes{i}))
-% %     set(gca,'xtick',[0:5:10],'xticklabel',[0:5*binwidth:10*binwidth])
-% % end
-% % mtit(sprintf('Run spread from center N=%d animals %0.2fcpd',numAni,sfrange(1)));
-% % if exist('psfile','var')
-% %     set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-% %     print('-dpsc',psfile,'-append');
-% % end
-% % figure
-% % for i=2:length(sizes)
-% %     subplot(2,floor(length(sizes)/2),i-1)
-% %     pre=squeeze(grpring(:,:,2,i,2,1)) - squeeze(grpring(:,:,2,1,2,1));post=squeeze(grpring(:,:,2,i,2,2)) - squeeze(grpring(:,:,2,1,2,2));
-% %     hold on
-% %     shadedErrorBar(0:79,nanmean(pre),nanstd(pre)/sqrt(numAni),'k',1)
-% %     shadedErrorBar(0:79,nanmean(post),nanstd(post)/sqrt(numAni),'r',1)
-% %     plot([0 10],[0 0],'b:')
-% %     axis square
-% %     axis([0 10 -0.05 0.3])
-% %     xlabel('dist from cent (um)')
-% %     ylabel(sprintf('%sdeg dfof',sizes{i}))
-% %     set(gca,'xtick',[0:5:10],'xticklabel',[0:5*binwidth:10*binwidth])
-% % end
-% % mtit(sprintf('Run spread from center N=%d animals %0.2fcpd',numAni,sfrange(2)));
-% % if exist('psfile','var')
-% %     set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-% %     print('-dpsc',psfile,'-append');
-% % end
+
+%%
+%analysis of spatial spread
+sprmax = nanmean(nanmean(nanmean(nanmean(nanmean(grpring,1),3),4),5),6);
+sprmax = length(sprmax(~isnan(sprmax)));
+for j = 1:length(sfrange)
+    for k = 1:2
+        figure
+        for i=2:length(sizes)
+            subplot(2,floor(length(sizes)/2),i-1)
+            pre=squeeze(grpring(:,1:sprmax,j,i,k,1)) - squeeze(grpring(:,1:sprmax,j,1,k,1));post=squeeze(grpring(:,1:sprmax,j,i,k,2))- squeeze(grpring(:,1:sprmax,j,1,k,2));
+            hold on
+            shadedErrorBar(0:(sprmax-1),nanmean(pre),nanstd(pre)/sqrt(numAni),'k',1)
+            shadedErrorBar(0:(sprmax-1),nanmean(post),nanstd(post)/sqrt(numAni),'r',1)
+            plot([0 sprmax-1],[0 0],'b:')
+            axis square
+            axis([0 sprmax-1 -0.05 0.3])
+            xlabel('dist from cent (um)')
+            ylabel(sprintf('%sdeg dfof',sizes{i}))
+            set(gca,'xtick',[0:5:sprmax],'xticklabel',[0:5*binwidth:sprmax*binwidth])
+        end
+        mtit(sprintf('%s spread from center N=%d animals %0.2fcpd',stlb{k},numAni,sfrange(j)));
+        if exist('psfile','var')
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+            print('-dpsc',psfile,'-append');
+        end
+    end
+end
+
 % % % 
 % % % %%%plot zero size (unsubtracted)
 % % % figure
@@ -1125,6 +1079,7 @@ end
 % % % %         print('-dpsc',psfile,'-append');
 % % % %     end
 % % % % end
+%%
     
 
 %%%plot group data for size select averaging over cells

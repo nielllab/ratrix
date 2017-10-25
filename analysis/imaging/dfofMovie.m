@@ -20,7 +20,8 @@ end
 if rig==1
     rigzoom =1; fl=0;
 else
-    rigzoom = 0.859; fl=1;
+%     rigzoom = 0.859; fl=1; %FOR 1.6X OBJECTIVE
+    rigzoom = 1; fl=1; %FOR 1X
 end
 
 datadir = p;

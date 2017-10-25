@@ -1,22 +1,27 @@
-close all; clear all;
+%close all; clear all;
 
-batch_widefield_eyes;  %%% load in file that contains information on all experiments
+%batch_widefield_eyes;  %%% load in file that contains information on all experiments
 
 %%% create .ps file to save figures out to
 psfile = 'c:\connectivity.ps'; if exist(psfile,'file')==2;delete(psfile);end
 
 %%% select sessions
-useSess = 1:length(files); %%% use all files, and select treatments afterwards
+useSess = 1:length(files); %%% use all files, and select injects afterwards
 
-load('\\angie\Angie_analysis\DetectionStim2contrast_LOW_7_25min.mat')
-contrast = contrast(1:end-5); xpos = xpos(1:end-5); ypos=ypos(1:end-5);
+load('\\angie\Angie_analysis\patchonpatch14min.mat')
+%contrast = contrast(1:end-5); xpos = xpos(1:end-5); ypos=ypos(1:end-5);
 
 for sess = 1:length(useSess);
     
     %load([pathname '\' files(i).dir '\' files(i).moviename]);
     clear alignTheta
-    load([pathname '\' files(sess).dir '\' files(sess).detection],'dfof_bg','frameT','cycMap','sp','stimRec','xEye','yEye','xFilt','yFilt','sp','rad','X','Y','R');
-    load([pathname '\' files(sess).dir '\' files(sess).detection],'alignTheta','alignZoom','alignLambda');
+    %load([pathname '\' files(sess).dir '\' files(sess).detection],'dfof_bg','frameT','cycMap','sp','stimRec');%,'xEye','yEye','xFilt','yFilt','sp','rad','X','Y','R');
+    %load([pathname '\' files(sess).dir '\' files(sess).detection],'alignTheta','alignZoom','alignLambda')
+%     load([pathname '\' files(sess).patchonpatch],'dfof_bg','frameT','cycMap','sp','stimRec');%,'xEye','yEye','xFilt','yFilt','sp','rad','X','Y','R');
+%     load([pathname '\' files(sess).patchonpatch],'alignTheta','alignZoom','alignLambda');
+    
+    load([pathname '\' files(sess).darkness],'dfof_bg','frameT','cycMap','sp','stimRec');%,'xEye','yEye','xFilt','yFilt','sp','rad','X','Y','R');
+    load([pathname '\' files(sess).darkness],'alignTheta','alignZoom','alignLambda');
     
     %%% align/zoom data, based on lambda, midline, and size of headplate ring
     redoAlign=0;
@@ -57,7 +62,9 @@ for sess = 1:length(useSess);
         zm = size(dfof_bg,1)/size(blueImg,1);
         ringRadiusZm = zm*ringRadius;
         alignZoom = 128/ringRadiusZm
-        save([pathname '\' files(sess).dir '\' files(useSess(sess)).detection],'alignTheta','alignZoom','alignLambda','-append');
+        %save([pathname '\' files(useSess(sess)).patchonpatch],'alignTheta','alignZoom','alignLambda','-append');
+        save([pathname '\' files(useSess(sess)).darkness],'alignTheta','alignZoom','alignLambda','-append');
+
     end
     
     dfof_bgAlign = imrotate(dfof_bg,alignTheta);
@@ -69,16 +76,16 @@ for sess = 1:length(useSess);
     plot(alignLambda(2),alignLambda(1),'g*')
     
     %%% crop and downsize if needed
-    downsamp=1;
-    dfof_bg= imresize(dfof_bgAlign(alignLambda(1)-64:alignLambda(1)+63,alignLambda(2)-110:alignLambda(2)+17,:),1/downsamp,'box');
-    
+     downsamp=1;
+     dfof_bg= imresize(dfof_bgAlign(alignLambda(1)-64:alignLambda(1)+63,alignLambda(2)-110:alignLambda(2)+17,:),1/downsamp,'box');
+%     
     %%% final image data
     figure
     imagesc(prctile(dfof_bg(:,:,10:10:end),99,3)); axis equal
     hold on
     plot([1 128],[64 64],'r'); plot(109, 64,'g*')
     drawnow
-    title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
+    title([files(useSess(sess)).expt ' ' files(useSess(sess)).inject]);
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% crop and downsize dF data to make it run faster
@@ -148,7 +155,7 @@ for sess = 1:length(useSess);
     figure
     imagesc(stdImg,[0 0.1]); colormap gray; hold on
     plot(y,x,'g*')
-    title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
+    title([files(useSess(sess)).expt ' ' files(useSess(sess)).inject]);
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     col = repmat('bgrcmyk',[1 200]);  %%% color scheme
@@ -182,7 +189,7 @@ for sess = 1:length(useSess);
         imagesc(reshape(coeff(:,i),size(im,1),size(im,2)),[-range range])
         % hold on; plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2)
     end
-    title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
+    title([files(useSess(sess)).expt ' ' files(useSess(sess)).inject]);
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% timecourse of first 5 temporal components
@@ -202,7 +209,7 @@ for sess = 1:length(useSess);
         subplot(3,1,3)
         plot(sp(useTime)/max(sp(useTime)),'g'); hold on; plot(score(:,1)/max(score(:,1)));
         
-        title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
+        title([files(useSess(sess)).expt ' ' files(useSess(sess)).inject]);
         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
         for i = 1:3
             figure
@@ -284,7 +291,7 @@ for sess = 1:length(useSess);
     end
     axis ij
     axis equal
-    title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
+    title([files(useSess(sess)).expt ' ' files(useSess(sess)).inject]);
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% plot clustered points with connectivity (only ipsilateral connections)
@@ -304,10 +311,10 @@ for sess = 1:length(useSess);
         plot(y(i),x(i),[clustcol(idx(i)) 'o'],'Markersize',8,'Linewidth',2)
         plot(y(i),x(i),[clustcol(idx(i)) '*'],'Markersize',8,'Linewidth',2)
     end
-    plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
+%     plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
     axis ij
     axis equal
-    title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
+    title([files(useSess(sess)).expt ' ' files(useSess(sess)).inject]);
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% save out variables for each loop iteration
@@ -326,7 +333,7 @@ for sess = 1:length(useSess);
     figure
     bar(meanC)
     xlabel('distance'); ylabel('correlation')
-    title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
+    title([files(useSess(sess)).expt ' ' files(useSess(sess)).inject]);
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% scatter plot of correlation vs distance for all points
@@ -336,16 +343,16 @@ for sess = 1:length(useSess);
     plot(dist(~contra),traceCorr(~contra),'o');
     xlabel('distance'); ylabel('correlation')
     legend('contra','ipsi');
-    title([files(useSess(sess)).expt ' ' files(useSess(sess)).treatment]);
+    title([files(useSess(sess)).expt ' ' files(useSess(sess)).inject]);
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 end
 
 
-%%% pool data across treatment conditions
-treatment = {'Saline','DOI'};
+%%% pool data across inject conditions
+inject = {'Saline','DOI'};
 for treat = 1:2
     
-    useSess =  find( strcmp({files.treatment},treatment{treat}))
+    useSess =  find( strcmp({files.inject},inject{treat}))
     traceCorr = mean(corrAll(:,:,useSess),3);
     decorrTrace = [];
     for i = 1:length(useSess)
@@ -388,7 +395,7 @@ for treat = 1:2
     
     axis ij
     axis equal
-    title([treatment{treat} ' average'])
+    title([inject{treat} ' average'])
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     
@@ -411,10 +418,10 @@ for treat = 1:2
         plot(y(i),x(i),[clustcol(idx(i)) 'o'],'Markersize',8,'Linewidth',2)
         plot(y(i),x(i),[clustcol(idx(i)) '*'],'Markersize',8,'Linewidth',2)
     end
-    plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
+  %  plot(ypts/downsamp,xpts/downsamp,'k.','Markersize',2);
     axis ij
     axis equal
-    title([treatment{treat} ' average'])
+    title([inject{treat} ' average'])
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     dist = dist(:);
@@ -431,7 +438,7 @@ for treat = 1:2
     figure
     bar(distbins,meanC)
     xlabel('distance'); ylabel('correlation')
-    title([treatment{treat} ' average'])
+    title([inject{treat} ' average'])
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     figure
@@ -440,7 +447,7 @@ for treat = 1:2
     plot(dist(~contra),traceCorr(~contra),'o');
     xlabel('distance'); ylabel('correlation')
     legend('contra','ipsi');
-    title([treatment{treat} ' average'])
+    title([inject{treat} ' average'])
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
 end

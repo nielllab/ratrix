@@ -11,7 +11,7 @@ binning=0.5;
 framerate=10;
 
 choosePix =0; %%% option to manually select pixels for timecourse analysis
-maxGB = 1.50*binning.^2; %%% size to reduce data down to
+maxGB = 16*binning.^2; %%% size to reduce data down to
 binning=1;
 
 if ~exist('in','var') || isempty(in)

@@ -547,7 +547,6 @@ end
 save(mapsfile,'rad','fInterpR','fInterpV', 'R','V','xEye','yEye','contrast','xpos','ypos','X','Y','v','r','dvis','dx','-append')
 %'mx','vc','timecourse','vfit','vcorr'
 % h4 = figure
-% 
 % vidObj = VideoWriter('eyetracking_withfit.avi');
 % vidObj.FrameRate = 60;
 % open(vidObj);

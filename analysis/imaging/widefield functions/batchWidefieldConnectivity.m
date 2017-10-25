@@ -345,7 +345,6 @@ end
 treatment = {'Saline','DOI'};
 for treat = 1:2
     
-    
     useSess =  find( strcmp({files.treatment},treatment{treat}))
     traceCorr = mean(corrAll(:,:,useSess),3);
     decorrTrace = [];
@@ -368,7 +367,8 @@ for treat = 1:2
     xpts = [];
     clustcol = 'wgrcmyk'; %%% color scheme for clusters
     figure
-    imagesc(maxim) ; colormap gray; axis equal
+    imagesc(maxim) ;
+    colormap gray; axis equal
     hold on
     clear dist contra
     for i = 1:npts
@@ -395,7 +395,8 @@ for treat = 1:2
     %%% plot clustered points with connectivity
     clustcol = 'wgrcmyk'; %%% color scheme for clusters
     figure
-    imagesc(maxim) ; colormap gray; axis equal
+%     imagesc(maxim) ;
+    colormap gray; axis equal
     hold on
     
     for i = 1:npts

@@ -3,7 +3,6 @@
 pathname = '\\angie\Angie_analysis\widefield_data';
 n=0;
 
-
 n=n+1;
 files(n).expt = '032917_g62xx1-tt';
 files(n).dir = '032917_g62xx1-tt_blue_DOI';
@@ -17,13 +16,12 @@ files(n).treatment = 'DOI';
 files(n).notes = 'good data'; 
 files(n).misc = ''; 
 
-
 n=n+1;
 files(n).expt = '032917_g62ww2-tt';
 files(n).dir = '032917_g62ww2-tt_blue_DOI';
 %files(n).movieFile = 'C:\Users\Angie Michaiel\Desktop\movie files\cortex\DetectionStim2contrast_LOW_7_25min'
 files(n).cfile = 'g62ww2-tt_run1_detection\03_29_17_g62ww2-tt_detection_2lowcontrasts_DOI_eye'
-files(n).detection = 'g62ww2-tt_run1_detection\g62ww2-tt_run1_detectimaps';
+files(n).detection = 'g62ww2-tt_run1_detection\g62ww2-tt_run1_detectiomaps';
 files(n).dark = '';
 files(n).topox = 'g62ww2-tt_run2_topox\g62ww2-tt_run2_topmaps';
 files(n).topoy = 'g62ww2-tt_run3_topoy\g62ww2-tt_run3_topmaps';  
@@ -44,6 +42,17 @@ files(n).treatment = 'DOI';
 files(n).notes = 'good data'; 
 files(n).misc = ''; 
 
+n=n+1;
+files(n).expt = '032417_g62ss4-lt';
+files(n).dir = '032417_g62ss4-lt_blue';
+%files(n).movieFile = 'C:\Users\Angie Michaiel\Desktop\movie files\cortex\DetectionStim2contrast_LOW_7_25min'
+files(n).cfile = 'g62ss4-lt_run1_detection\03_24_17_g62ss4-lt_detection_eye'
+files(n).detection = 'g62ss4-lt_run1_detection\g62ss4-lt_run1_detectimaps';
+files(n).topox = 'g62ss4-lt_run2_topox\g62ss4-lt_run2_topmaps';
+files(n).topoy = 'g62ss4-lt_run3_topoy\g62ss4-lt_run3_topmaps';  
+files(n).treatment = 'Saline'; 
+files(n).notes = 'good data'; 
+files(n).misc = ''; 
 
 n=n+1;
 files(n).expt = '032017_g62aaa4-tt';
@@ -57,7 +66,6 @@ files(n).treatment = 'Saline';
 files(n).notes = 'good data'; 
 files(n).misc = ''; 
 
-
 n=n+1;
 files(n).expt = '032017_g62ww3-rt';
 files(n).dir = '032017_g62ww3-rt_blue';
@@ -69,7 +77,6 @@ files(n).topoy = 'g62ww3-rt_run3_topoy\g62aaa4-tt_run3_topmaps';
 files(n).treatment = 'Saline'; 
 files(n).notes = 'good data'; 
 files(n).misc = ''; 
-
 
 n=n+1;
 files(n).expt = '022717_g62rr2_tt';

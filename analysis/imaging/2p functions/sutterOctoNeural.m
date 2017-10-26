@@ -475,6 +475,51 @@ if nstim==14 %%% gratings
     imshow(imresize(overlay,2));
 end
 
+
+range = [-0.05 0.2]; %%% colormap range
+if nstim==26 %%% gratings
+    loc = 1:6; %%% map stim order onto subplot
+    figure; set(gcf,'Name','vert gratings');
+    for i = 1:6
+        meanimg = median(trialmean(:,:,stimOrder==i),3);
+        subplot(2,3,loc(i));
+        imagesc(meanimg,range); axis equal
+    end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    figure;set(gcf,'Name','horiz gratings');
+    for i = 7:12
+        meanimg = median(trialmean(:,:,stimOrder==i),3);
+        subplot(2,3,loc(i-6));
+        imagesc(meanimg,range); axis equal
+    end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+      figure; set(gcf,'Name','vert gratings');
+    for i = 13:18
+        meanimg = median(trialmean(:,:,stimOrder==i),3);
+        subplot(2,3,loc(i-12));
+        imagesc(meanimg,range); axis equal
+    end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    figure;set(gcf,'Name','horiz gratings');
+    for i = 19:24
+        meanimg = median(trialmean(:,:,stimOrder==i),3);
+        subplot(2,3,loc(i-18));
+        imagesc(meanimg,range); axis equal
+    end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    figure; set(gcf,'Name','flicker');
+    for i = 25:26
+        meanimg = median(trialmean(:,:,stimOrder==i),3);
+        subplot(1,2,i-24);
+        imagesc(meanimg,range); axis equal; if i ==25; title('low tf flicker'); else title('high tf flicker'); end
+    end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+end
+
 %%% plot mean for each stim condition, with layout corresponding to the stim
 range = [-0.02 0.1];
 if nstim==48 %%% spots

@@ -1,9 +1,18 @@
 %%%doPatchOnPatch
 %%% called from analyzePatchOnPatch for batch analysis of individual sessions
+
+%trial types for patchonpatch
+% 1 = blank
+% 2 = smCent
+% 3 = lgcent
+% 4 = smIsoCross
+% 5 = lgIsoCross
+% 6 = smDonut
+% 7 = lgDonut
 %%
 
-deconvplz = 1 %choose if you want deconvolution
-fully = 1 %choose if you want full frame (260x260), else scales down by 4
+deconvplz = 0 %choose if you want deconvolution
+fully = 0 %choose if you want full frame (260x260), else scales down by 4
 % areas = {'V1','P','LM','AL','RL','AM','PM','RSP'}; %list of all visual areas for points
 
 for f = 1:length(use)
@@ -167,15 +176,10 @@ for f = 1:length(use)
             catch
                 trialspeed(tr)=500;
             end
-        %     trialcourse(tr,:) = squeeze(mean(mean(deconvimg(:,:,t0+(1:20)),2),1));
             trialcyc(:,:,:,tr) = deconvimg(:,:,t0+(1:cyclength+isi*imagerate));%each cycle is frames 6-26, stim comes on at frame 11
         end
-%         sf=sf(1:trials);contrasts=contrasts(1:trials);phase=phase(1:trials);radius=radius(1:trials);
-%         order=order(1:trials);tf=tf(1:trials);theta=theta(1:trials);xpos=xpos(1:trials);
-%         contrastRange = unique(contrasts); sfrange = unique(sf); phaserange = unique(phase);
-%         for i = 1:length(contrastRange);contrastlist{i} = num2str(contrastRange(i));end
-%         for i=1:length(sizeVals); sizes{i} = num2str(sizeVals(i)); end
-        isocross = zeros(size(thetaCent));isocross(thetaCent==thetaSurr)=1;isocross(thetaCent~=thetaSurr)=2;
+
+        isocross = zeros(size(thetaCent));isocross(trialID(2,:)==trialID(3,:))=1;isocross(trialID(2,:)~=trialID(3,:))=2;
         behavState = {'stationary','running'};
     %     xrange = unique(xpos); sfrange=unique(sf); tfrange=unique(tf);
         running = zeros(1,trials); %pull out stationary vs. runnning (0 vs. 1)
@@ -184,62 +188,36 @@ for f = 1:length(use)
         end
 
  
-    %%%CenterOn SurroundOn totalRangeCS
-        trialcycavg=nan(size(trialdata,1),size(trialdata,2),cyclength+cyclength/2,length(sfrange),length(contrastRange),length(radiusRange),2); %%%length(phaserange),
-        for i = 1:length(thetaCent)
-            for j = 1:length(thetaSurr)
-                for k = 1:length(radiusCent)
-                    for l = 1:length(radiusSurr)
-                        for m = 1:2
-                            inds = find(sf==sfrange(i)&contrasts==contrastRange(k)&radius==l&running==(m-1)); %%%&phase==phaserange(j)
-                            trialcycavg(:,:,:,i,k,l,m) = squeeze(nanmean(trialcyc(:,:,:,inds),4));
-                        end
-                    end
+
+        tic
+        trialcycavg=nan(size(trialcyc,1),size(trialcyc,2),size(trialcyc,3),length(unique(trialID)),length(unique(isocross)),2);
+        for i = 1:length(unique(trialID))
+            for j = 1:length(unique(isocross))
+                for k = 1:2
+                    inds = find(trialID(1,:)==i&isocross==j&running==(k-1));
+                    trialcycavg(:,:,:,i,j,k) = squeeze(nanmean(trialcyc(:,:,:,inds),4));
                 end
             end
         end
-
-        %%%update to remove phase from all analysis below
-
+        toc
 
         %%baseline subtraction code
         %get average map with no stimulus
-    %     minmap = zeros(size(deconvimg,1),size(deconvimg,2),2);
         mintrialcyc = zeros(size(deconvimg,1),size(deconvimg,2),cyclength+cyclength/2,2);
         for i = 1:2
-    %         minmap(:,:,i) = squeeze(mean(mean(tuning(:,:,i,1,:,:),5),6));
-            mintrialcyc(:,:,:,i) = squeeze(nanmean(nanmean(trialcycavg(:,:,:,:,:,1,i),4),5)); %min map for stationary and running
+            mintrialcyc(:,:,:,i) = squeeze(nanmean(trialcycavg(:,:,:,1,:,i),5)); %min map for stationary and running
         end
-        %subtract average map with no stimulus from every map in tuning and
-        %trialcycavg
-        for i = 1:length(sfrange)
-                for k = 1:length(contrastRange)
-                    for l = 1:length(radiusRange)
-                        for m = 1:2
-                            trialcycavg(:,:,:,i,k,l,m) = trialcycavg(:,:,:,i,k,l,m)-mintrialcyc(:,:,:,m);
-                            for o = 1:size(trialcycavg,3)
-                                trialcycavg(:,:,o,i,k,l,m) = trialcycavg(:,:,o,i,k,l,m)-nanmean(trialcycavg(:,:,1:cyclength/2,i,k,l,m),3); %subtract baseline
-                            end
-                        end
-                    end
+        %subtract average map with no stimulus from trialcycavg and
+        %baseline each trial
+        for i = 1:length(unique(trialID))
+            for j = 1:length(unique(isocross))
+                for k = 1:2
+                    trialcycavg(:,:,:,i,j,k) = trialcycavg(:,:,:,i,j,k)-mintrialcyc(:,:,:,k);
+                    trialcycavg(:,:,:,i,j,k) = trialcycavg(:,:,:,i,j,k)-nanmean(trialcycavg(:,:,1:cyclength/2,i,j,k),3); %subtract baseline
                 end
+            end
         end
-    %     
-    %     %subtract average map with no stimulus from trialcyc
-    %     for tr=1:trials
-    %         if running(tr)==0
-    %             trialcyc(:,:,:,tr) = trialcyc(:,:,:,tr)-mintrialcyc(:,:,:,1);
-    %         else
-    %             trialcyc(:,:,:,tr) = trialcyc(:,:,:,tr)-mintrialcyc(:,:,:,2);
-    %         end
-    %     end
-    % 
-    %     %zero baseline for each trial
-    %     for  i = 1:size(trialcyc,4)
-    %         for fr=1:size(trialcyc,3)
-    %             trialcyc(:,:,fr,i) = trialcyc(:,:,fr,i) - nanmean(trialcyc(:,:,1:cyclength/2,i),3);
-    %         end
-    %     end        
+    
 %%
         %manual/loading point selection
         files(use(f)).subj
@@ -651,103 +629,6 @@ for f = 1:length(use)
 
 
 
-
-
-        % 
-        % %%% plot sf and tf responses
-        % figure %averages across the two x positiongs
-        % for i = 1:length(sfrange)
-        %     for j=1:length(tfrange)
-        %         subplot(length(tfrange),length(sfrange),length(sfrange)*(j-1)+i)
-        %         imagesc(squeeze(mean(mean(tuning(:,:,:,:,i,j),4),3)),[ -0.005 0.05]); colormap jet;
-        %         title(sprintf('%0.2fcpd %0.0fhz',sfrange(i),tfrange(j)))
-        %         axis off; axis equal
-        %         hold on; plot(ypts,xpts,'w.','Markersize',2)
-        %         set(gca,'LooseInset',get(gca,'TightInset'))
-        %     end
-        % end
-        % if exist('psfilename','var')
-        %     set(gcf, 'PaperPositionMode', 'auto');
-        %     print('-dpsc',psfilename,'-append');
-        % end
-        % 
-        % 
-        % for i = 1:length(xrange)
-        %     figure %one plot for each x position
-        %     for j = 1:length(radiusRange)
-        %         subplot(3,3,j)
-        %         imagesc(squeeze(mean(mean(tuning(:,:,i,j,:,:),5),6)),[ -0.02 0.15]); colormap jet;
-        %         title(sprintf('%0.0frad',radiusRange(j)))
-        %         axis off; axis equal
-        %         hold on; plot(ypts,xpts,'w.','Markersize',2)
-        %         set(gca,'LooseInset',get(gca,'TightInset'))
-        %     end
-        %     if exist('psfilename','var')
-        %         set(gcf, 'PaperPositionMode', 'auto');
-        %         print('-dpsc',psfilename,'-append');
-        %     end
-        % end
-        % 
-        % 
-        % %% get sf and tf tuning curves across sizes
-        % figure
-        % for i = 1:length(xrange)
-        %     subplot(1,length(xrange),i)
-        %     hold on
-        %     plot(1:size(tuning,4),squeeze(tuning(x(i),y(i),i,:,1,1)),'y')
-        %     plot(1:size(tuning,4),squeeze(tuning(x(i),y(i),i,:,2,1)),'c')
-        %     plot(1:size(tuning,4),squeeze(tuning(x(i),y(i),i,:,1,2)),'r')
-        %     plot(1:size(tuning,4),squeeze(tuning(x(i),y(i),i,:,2,2)),'b')
-        %     legend('0.04cpd 0Hz','0.16cpd 0Hz','0.04cpd 2Hz','0.16cpd 2Hz','location','northwest')
-        %     set(gca,'xtick',1:6,'xticklabel',radiusRange)
-        %     axis([1 6 0 0.25])
-        % end
-        % if exist('psfilename','var')
-        %     set(gcf, 'PaperPositionMode', 'auto');
-        %     print('-dpsc',psfilename,'-append');
-        % end
-        % 
-        % %%plot cycle averages for the different radii at the 2 x positions
-        % figure
-        % for i = 1:length(xrange)
-        %     subplot(1,length(xrange),i)
-        %     hold on
-        %     for j = 1:length(radiusRange)
-        %         plot(squeeze(mean(mean(trialcycavg(x(i),y(i),:,i,j,:,:),6),7)))
-        %     end
-        % end
-        % legend('0','1','2','4','8','1000')
-        % if exist('psfilename','var')
-        %     set(gcf, 'PaperPositionMode', 'auto');
-        %     print('-dpsc',psfilename,'-append');
-        % end
-        % 
-        % %%plot cycle averages for the different radii at the 2 x positions run vs.
-        % %%sit
-        % figure
-        % for i = 1:length(xrange)
-        %     subplot(2,length(xrange),i)
-        %     hold on
-        %     for j = 1:length(radiusRange)
-        %         plot(squeeze(mean(mean(trialcycavgRun(x(i),y(i),:,i,j,:,:),6),7)))
-        %     end
-        %     axis([1 cyclength -0.1 0.25])
-        %     title('run')
-        %     hold off
-        %     subplot(2,length(xrange),i+length(xrange))
-        %     hold on
-        %     for j = 1:length(radiusRange)
-        %         plot(squeeze(mean(mean(trialcycavgSit(x(i),y(i),:,i,j,:,:),6),7)))
-        %     end
-        %     axis([1 cyclength -0.1 0.25])
-        %     title('sit')
-        %     hold off
-        % end
-        % legend('0','1','2','4','8','1000')
-        % if exist('psfilename','var')
-        %     set(gcf, 'PaperPositionMode', 'auto');
-        %     print('-dpsc',psfilename,'-append');
-        % end
 
         %%get percent time running
         sp = conv(sp,ones(50,1),'same')/50;

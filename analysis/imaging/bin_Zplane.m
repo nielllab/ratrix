@@ -46,7 +46,7 @@ while ReDo
     %Determine how many frames each cluster has
     %Display figure of cluster vs frame #
     clust = figure;
-    plot(1:1:1000,T,'-.k','LineWidth',2), hold on
+    plot(1:1:length(T),T,'-.k','LineWidth',2), hold on
     ColorPalette = lines(nclust);
     ModeT = zeros(nclust,1);
     for iC = 1:nclust
@@ -72,7 +72,7 @@ while ReDo
     Indy = [];
     clustmov = figure;
     colormap gray
-    for iFrame = 1:1000
+    for iFrame = 1:nframes
         if T(iFrame) == ImgClust
             imagesc(Img_Seq(:,:,iFrame),RedRange)
             drawnow
@@ -81,39 +81,10 @@ while ReDo
         end
     end
     
+    %Give the user the option to reselect which cluster to use
     ReDo = input('Do you want to reselect the # of clusters after watching the movie? (1:yes/0:no): ');
-    close(clustmov,clust)
+    if ReDo == 1, close(clustmov,clust);end
 end
-% figure
-% subplot(3,4,[1 5 9 ])
-% display('doing dendrogram')
-% 
-% axis off
-% subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
-% imagesc(dFmean(perm,:),[0 0.4]); axis xy ; xlabel('selected traces based on dF'); colormap jet ;   %%% show sorted data
-% hold on;
-% totalT = size(dF,2);
-% ncyc = floor(totalT/cycLength);
-% for i = 1:ncyc
-%     plot([i*cycLength i*cycLength]+1.5,[1 length(perm)],'k');
-% end
-% 
-% %%% select number of clusters you want
-% nclust =input('# of clusters : '); %%% set to however many you want
-% c= cluster(Z,'maxclust',nclust);
-% colors = hsv(nclust+1); %%% color code for each cluster
 
-% for iFrame = 1:nFrames
-%     % Downsample from 256x256 to 128x128 to decrease computing time &
-%     % decrease noise that may effect correlation measure
-%     %iiImg = imresize(Img_Seq(:,:,ii),0.5);
-%     iiImg = imfilter(Img_Seq(:,:,iFrame),filt);
-%     % Start at jj = ii because correlation matrix is symmetric
-%     for jj = iFrame:nFrames
-%         %jjImg = imresize(Img_Seq(:,:,jj),0.5);
-%         jjImg = imfilter(Img_Seq(:,:,jj),filt);
-%         CorrCoeff(iFrame,jj) = corr2(iiImg,jjImg);
-%     end
-% end
 end
 

@@ -82,7 +82,7 @@ if align
         ZIndices = bin_Zplane(Img_Seq(:,:,:,2), Aligned_Seq(:,:,:,2), alignIndices);
         
         % Re-align sequence of frames that are in the correct z-plane
-        r = sbxalign_tif_nonrigid(fname,ZIndices);
+        nr = sbxalign_tif_nonrigid(fname,ZIndices);
         disp('Oiy');
         
         %Create New image stack that only takes the subset of images that
@@ -94,7 +94,7 @@ if align
             for iChannel = 1:2
                 
                 %Apply xy rigid translation determined by sbxalign_nonrigid
-                Aligned_Seq(:,:,iFrame,iChannel) = imwarp(Img_Seq(:,:,ZIndices(iFrame)/2,iChannel),r.T{1,iFrame});
+                Aligned_Seq(:,:,iFrame,iChannel) = imwarp(Img_Seq(:,:,iFrame,iChannel),nr.T{1,iFrame});
             end
         end   
         
@@ -102,13 +102,13 @@ if align
         MakeMovieFromImgSeq(fname, Aligned_Seq)
         
         % Show Mean image of non-aligned image sequence and aligned
-        if showImg
-            figure
-            NonAligned_Mean = mean(Img_Seq, 3);
-            imshowpair(NonAligned_Mean, r.M{1}, 'montage')
-            title('Non-Aligned Mean Image vs Aligned Mean Image');
-        end
-        
+%         if showImg
+%             figure
+%             NonAligned_Mean = mean(Img_Seq, 3);
+%             imshowpair(NonAligned_Mean, nr.m{1,1}, 'montage')
+%             title('Non-Aligned Mean Image vs Aligned Mean Image');
+%         end
+        mv = NaN;
            
     elseif rigid == 0
         %% Non-Rigid Compensation on a Rigidly aligned image seq

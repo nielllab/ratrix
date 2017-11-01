@@ -2,7 +2,7 @@ function [dfofInterp, im_dt, red, green, mv] = get2colordata(fname,dt,cycLength)
 
 % Display Movies for Non-aligned image sequences for both channels & save
 % the movie if it does not exist already
-MakeMovieFromTiff(fname);
+% MakeMovieFromTiff(fname);
 
 % Performs Image registration for both channels
 [imgAll, framerate, mv] = readAlign2color(fname,1,1,0.5);
@@ -10,7 +10,7 @@ MakeMovieFromTiff(fname);
 red = squeeze(mean(imgAll(:,:,:,2),3));
 green = squeeze(prctile(imgAll(:,:,:,1),95,3));
 for iChannel = 1:2
-    iChannel
+
     img = squeeze(imgAll(:,:,:,iChannel));
     nframes = size(img,3);
     display('doing prctile')

@@ -4,6 +4,10 @@
 clear all
 close all
 
+%Change filepath to match where you have ratrix
+cd('C:\Users\Freeman\Documents\GitHub\ratrix');
+rmpath('./matlabClub')
+
 %%% frame rate for resampling
 % dt = 0.5;
 % framerate=1/dt;
@@ -24,9 +28,9 @@ end
 % [f, p] = uigetfile({'*.mat;*.tif'},'.mat or .tif file');
 % cycLength = input('cycle length : ');
 
-f = 'DowninZ_Gratings_lowSF_random006.tif';
-p = 'C:\Users\nlab\Documents\Wyrick\101617_Octopus_Cal520\';
-cycLength = 5.033;
+f = 'Loc4_acq2_6x4blocks_downinYbackinXdownZ008.tif';
+p = 'D:\GSchool\Niell\Data\102017_Octopus_Cal520\';
+cycLength = 2.033;
 
 %Get Image acquisition frame rate
 %resampleHZ = input('Resample framerate (enter 0 to keep acquisition framerate) : ');
@@ -52,8 +56,8 @@ if strcmp(f(end-3:end),'.mat')
 else
     % Uses the ttl file to find first frame of imaging after stim comes on
 %     [ttlf, ttlp] = uigetfile('*.mat','ttl file');
-    ttlf = 'DowninZ_Gratings_lowSF_random007-20171016T155504.mat';
-    ttlp = 'C:\Users\nlab\Documents\Wyrick\101617_Octopus_Cal520\';
+    ttlf = 'Loc4_acq2_6x4blocks_downinYbackinXdownZ009-20171020T172449.mat';
+    ttlp = 'D:\GSchool\Niell\Data\102017_Octopus_Cal520\';
     try
         [stimPulse, framePulse] = getTTL(fullfile(ttlp,ttlf));
         figure

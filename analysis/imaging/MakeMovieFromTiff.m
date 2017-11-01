@@ -57,7 +57,7 @@ for iFrame = 1:nframes
     
     drawnow
     if MakeMov == 1
-        frame = getframe;
+        frame = getframe(GrnFig);
         writeVideo(GrnVideo,frame);
     end
 end
@@ -88,7 +88,7 @@ for iFrame = 1:nframes
     
     drawnow
     if MakeMov == 1
-        frame = getframe;
+        frame = getframe(RedFig);
         writeVideo(RedVideo,frame);
     end
 end

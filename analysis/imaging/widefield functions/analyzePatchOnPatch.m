@@ -24,4 +24,7 @@ clear map merge
 x0=0; y0=0; sz=128;
 % doTopography;
 doPatchOnPatch;
+% doFunctionalConnectivity
 end
+
+sprintf('complete')

@@ -1,69 +1,84 @@
-function [dfofInterp, im_dt, red, green, mv] = get2colordata(fname,dt,cycLength)
+function [dfofInterp, im_dt, MeanRedChannel, Grn95Percentile, mv] = get2colordata(fname, dt, cycLength)
 
 % Display Movies for Non-aligned image sequences for both channels & save
 % the movie if it does not exist already
 % MakeMovieFromTiff(fname);
 
 % Performs Image registration for both channels
-[imgAll, framerate, mv] = readAlign2color(fname,1,1,0.5);
+[imgAll, mv] = readAlign2color(fname,1,1,0.5);
 
-red = squeeze(mean(imgAll(:,:,:,2),3));
-green = squeeze(prctile(imgAll(:,:,:,1),95,3));
+%Get Info
+Img_Info = imfinfo(fname);
+trash = evalc(Img_Info(1).ImageDescription);
+framerate = state.acq.frameRate;
+im_dt = 1/framerate;
+
+%Calculate the mean of the red images
+MeanRedChannel = squeeze(mean(imgAll(:,:,:,2),3));
+
+%Calculate the 95% of the green images
+Grn95Percentile = squeeze(prctile(imgAll(:,:,:,1),95,3));
+
+%Preallocate arrays
+imgInterp = zeros(size(imgAll));
+
+%%
+disp('Doing percentile for delta-f/f calculations');
 for iChannel = 1:2
+    %Separate 4D array into a 3D array
+    Aligned_Seq = squeeze(imgAll(:,:,:,iChannel));
+    nframes = size(Aligned_Seq,3);
+    
+    %Calculate the 10th percentile of a representative sample 
+    m{iChannel} = prctile(Aligned_Seq(:,:,40:40:end),10,3);
 
-    img = squeeze(imgAll(:,:,:,iChannel));
-    nframes = size(img,3);
-    display('doing prctile')
-    tic
-    m{iChannel} = prctile(img(:,:,40:40:end),10,3);
-    toc
+    %Display the figure
     figure
     imagesc(m{iChannel});
-    title('10th prctile')
+    title(sprintf('Mean 10th percentile of Channel %u',iChannel))
     colormap(gray)
     
-    dfof=zeros(size(img));
-    if iChannel==1
-    %if i==2
-        for f = 1:nframes
-            dfof(:,:,f)=(img(:,:,f)-m{iChannel})./m{iChannel};
+    dfof = zeros(size(Aligned_Seq));
+    if iChannel==1 %i.e. the green channel
+        for iFrame = 1:nframes
+            dfof(:,:,iFrame)=(Aligned_Seq(:,:,iFrame)-m{iChannel})./m{iChannel};
         end
-    else
-        dfof = img;
+        
+        %Interpolate to desired frame rate if different than acquisition rate
+        if im_dt ~= dt
+            dfofInterp = interp1(0:im_dt:(nframes-1)*im_dt,shiftdim(dfof,2),0:dt:(nframes-1)*im_dt);
+            dfofInterp = shiftdim(dfofInterp,1);
+        else
+            dfofInterp = dfof;
+        end
     end
        
-    im_dt = 1/framerate;
-
-    if iChannel == 1
-        dfofInterp = interp1(0:im_dt:(nframes-1)*im_dt,shiftdim(dfof,2),0:dt:(nframes-1)*im_dt);
-        dfofInterp = shiftdim(dfofInterp,1);
+    %Interpolate to desired frame rate if different than acquisition rate
+    if im_dt ~= dt
+        imgInterpAll{iChannel} = interp1(0:im_dt:(nframes-1)*im_dt,shiftdim(Aligned_Seq,2),0:dt:(nframes-1)*im_dt);
+        imgInterpAll{iChannel} = shiftdim(imgInterpAll{iChannel},1);
+    else
+        imgInterpAll{iChannel} = Aligned_Seq;
     end
-    imgInterpAll{iChannel} = interp1(0:im_dt:(nframes-1)*im_dt,shiftdim(img,2),0:dt:(nframes-1)*im_dt);
-    imgInterpAll{iChannel} = shiftdim(imgInterpAll{iChannel},1);
 end
 imgInterp(:,:,:,1) = imgInterpAll{1};
 imgInterp(:,:,:,2) = imgInterpAll{2};
 
-cycFrames =cycLength/dt;
-map=0; clear cycAvg mov
-
-
-range = [prctile(m{1}(:),2) 2*prctile(m{1}(:),99)];
-redframes = squeeze(imgInterp(:,:,:,2));
-rangered = [ 0 prctile(m{2}(:),99)];
-clear mov;
-
-figure
-for f = 1:cycFrames
-    cycAvg(:,:,f,:) = mean(imgInterp(:,:,f:cycFrames:end,:),3);
-    im(:,:,1) = squeeze(cycAvg(:,:,f,2))/rangered(2);
-    im(:,:,2) = (squeeze(cycAvg(:,:,f,1)) - range(1))/(range(2)-range(1));
-    im(:,:,3) = 0;
-    imshow(im);
-    mov(:,:,:,f)=im;
-end
-
-
+% cycFrames =cycLength/dt;
+% range = [prctile(m{1}(:),2) 2*prctile(m{1}(:),99)];
+% redframes = squeeze(imgInterp(:,:,:,2));
+% rangered = [ 0 prctile(m{2}(:),99)];
+% clear mov;
+% [Range] = clims(Img_Seq, nSample)
+% figure
+% for f = 1:cycFrames
+%     cycAvg(:,:,f,:) = mean(imgInterp(:,:,f:cycFrames:end,:),3);
+%     im(:,:,1) = squeeze(cycAvg(:,:,f,2))/rangered(2);
+%     im(:,:,2) = (squeeze(cycAvg(:,:,f,1)) - range(1))/(range(2)-range(1));
+%     im(:,:,3) = 0;
+%     imshow(im);
+%     mov(:,:,:,f)=im;
+% end
 
 % mov = immovie(mov)
 % title('raw img frames')

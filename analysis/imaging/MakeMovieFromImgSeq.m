@@ -43,7 +43,7 @@ GrnFig = figure;
 colormap gray
 for iFrame = 1:nframes
     imagesc(Aligned_Seq(:,:,iFrame,1),GrnRange);
-    sTitle = sprintf('Non-Aligned Green Channel: Frame %u',iFrame);
+    sTitle = sprintf('Aligned Green Channel: Frame %u',iFrame);
     sInfo = sprintf('%2.2f Hz Acquisition, 10x Video',framerate);
     xlabel(sInfo);
     title(sTitle);

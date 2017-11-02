@@ -1,10 +1,8 @@
-function [Aligned_Seq, framerate, mv] = readAlign2color(fname, align, showImg, fwidth)
+function [Aligned_Seq, mv] = readAlign2color(fname, align, showImg, fwidth)
 
 % Get file info
 Img_Info = imfinfo(fname);
 nframes = length(Img_Info)/2;
-trash = evalc(Img_Info(1).ImageDescription);
-framerate = state.acq.frameRate;
 
 % Construct rotationally symmetric gaussian lowpass filter with a size of
 % sigma of fwidth
@@ -65,6 +63,7 @@ if align
         %% Non-Rigid Compensation        
         % Align full sequence without considering z-displacement
         r = sbxalign_tif(fname,alignIndices);
+        mv = r.T;
         
         % Apply translation determined by sbxalign_tif to each frame
         for iFrame = 1:nframes
@@ -79,7 +78,8 @@ if align
         
         %Add function to find frames in the correct z-plane
         %Output an index matrix of correct-z-plane frames to input into sbxalign_tif_nonrigid
-        ZIndices = bin_Zplane(Img_Seq(:,:,:,2), Aligned_Seq(:,:,:,2), alignIndices);
+%         ZIndices = bin_Zplane(Img_Seq(:,:,:,2), Aligned_Seq(:,:,:,2), alignIndices);
+        ZIndices = alignIndices;
         
         % Re-align sequence of frames that are in the correct z-plane
         nr = sbxalign_tif_nonrigid(fname,ZIndices);
@@ -99,7 +99,7 @@ if align
         end   
         
         % Make an aligned movie from Aligned_Seq
-        MakeMovieFromImgSeq(fname, Aligned_Seq)
+%         MakeMovieFromImgSeq(fname, Aligned_Seq)
         
         % Show Mean image of non-aligned image sequence and aligned
 %         if showImg
@@ -108,7 +108,6 @@ if align
 %             imshowpair(NonAligned_Mean, nr.m{1,1}, 'montage')
 %             title('Non-Aligned Mean Image vs Aligned Mean Image');
 %         end
-        mv = NaN;
            
     elseif rigid == 0
         %% Non-Rigid Compensation on a Rigidly aligned image seq

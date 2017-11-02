@@ -82,6 +82,13 @@ else
         [dfofInterp, dtRaw, greenframe] = get2pdata(fullfile(p,f),dt,cycLength);
     end
     
+    %crop to get rid of edges that have motion artifact
+    buffer = max(abs(mv(:)))+2; %% what is largest offset?
+    dfofInterp = dfofInterp(buffer:end-buffer,buffer:end-buffer,:);
+    cycLength = mean(diff(stimPulse))/dt;
+    cycWindow = round(max(4/dt,cycLength));  %%% number of frames in window around each cycle. min of 4 secs, or actual cycle length + 2
+
+    
     figure
     timecourse = squeeze(mean(mean(dfofInterp(:,:,1:end),2),1));
     plot(timecourse);

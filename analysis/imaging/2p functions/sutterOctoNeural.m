@@ -26,11 +26,8 @@ end
 % Following ~70 lines of code used to be contained within get2pSession.m script
 % Get File Path for tiff Image
 % [f, p] = uigetfile({'*.mat;*.tif'},'.mat or .tif file');
-% cycLength = input('cycle length : ');
-
 f = 'Loc4_acq2_6x4blocks_downinYbackinXdownZ008.tif';
 p = 'D:\GSchool\Niell\Data\102017_Octopus_Cal520\';
-cycLength = 2.033;
 
 %Get Image acquisition frame rate
 %resampleHZ = input('Resample framerate (enter 0 to keep acquisition framerate) : ');
@@ -55,19 +52,23 @@ if strcmp(f(end-3:end),'.mat')
     end
 else
     % Uses the ttl file to find first frame of imaging after stim comes on
+%     ttl_file = input('Do you have a ttl file to read in? (yes:1/no:0): ');
 %     [ttlf, ttlp] = uigetfile('*.mat','ttl file');
     ttlf = 'Loc4_acq2_6x4blocks_downinYbackinXdownZ009-20171020T172449.mat';
     ttlp = 'D:\GSchool\Niell\Data\102017_Octopus_Cal520\';
-    try
+    ttl_file = 1;
+    if ttl_file
         [stimPulse, framePulse] = getTTL(fullfile(ttlp,ttlf));
+        cycLength = mean(diff(stimPulse))/dt; %
+        % # of frames in window around each cycle. min of 4 secs, or actual cycle length + 2
+        cycWindow = round(max(4/dt,cycLength)); 
         figure
         plot(diff(stimPulse)); title('stimPulse cycle time');hold on
         plot(1:length(stimPulse),ones(size(stimPulse))*cycLength); ylabel('secs');xlabel('stim #')
         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
         startTime = round(stimPulse(1)/dt)-1;
-    catch
-        disp('couldnt read TTLs')
+    else
         stimPulse=[]; framePulse=[]; startTime = 1;
     end
     

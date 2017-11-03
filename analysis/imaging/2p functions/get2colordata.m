@@ -1,5 +1,7 @@
-function [dfofInterp, im_dt, MeanRedChannel, Grn95Percentile, mv] = get2colordata(fname, dt, cycLength)
-
+function [dfofInterp, im_dt, MeanRedChannel, Grn95Percentile, mv] = get2colordata(fname, dt, cycLength,makeFigs)
+if makeFigs
+    psfile = 'C:\temp\TempFigs.ps';
+end
 % Display Movies for Non-aligned image sequences for both channels & save
 % the movie if it does not exist already
 % MakeMovieFromTiff(fname);
@@ -37,6 +39,7 @@ for iChannel = 1:2
     imagesc(m{iChannel});
     title(sprintf('Mean 10th percentile of Channel %u',iChannel))
     colormap(gray)
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     dfof = zeros(size(Aligned_Seq));
     if iChannel==1 %i.e. the green channel

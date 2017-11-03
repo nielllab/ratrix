@@ -95,6 +95,9 @@ if align
                 
                 %Apply xy rigid translation determined by sbxalign_nonrigid
                 Aligned_Seq(:,:,iFrame,iChannel) = imwarp(Img_Seq(:,:,iFrame,iChannel),nr.T{1,iFrame});
+                
+                %Replace NaN/Inf values with 0s
+%                 pos = find(Aligned_Seq(:,:,iFrame,iChannel) == NaN || Aligned_Seq(:,:,iFrame,iChannel) == Inf);
             end
         end   
         

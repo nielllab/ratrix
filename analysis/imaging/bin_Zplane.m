@@ -31,7 +31,7 @@ D = pdist(Img_Seq2D,'correlation');
 
 %Create hierarchical cluster tree based on D
 Z = linkage(D,'ward'); 
-
+% leafOrder = optimalleaforder(Z,D);   ,'reorder',leafOrder
 %Create figure of hierarchical cluster tree for visualization purposes
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3);
 

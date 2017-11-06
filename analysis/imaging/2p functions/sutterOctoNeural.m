@@ -5,8 +5,10 @@ clear all
 close all
 
 %Change filepath to match where you have ratrix
+%Remove paths that have functions named after standard matlab functions
 cd('C:\Users\Freeman\Documents\GitHub\ratrix');
-rmpath('./matlabClub')
+rmpath('./matlabClub');
+rmpath('.\analysis\eflister\phys\new');
 
 %%% frame rate for resampling
 % dt = 0.5;
@@ -25,9 +27,7 @@ end
 %%  get sutter data
 % Following ~70 lines of code used to be contained within get2pSession.m script
 % Get File Path for tiff Image
-% [f, p] = uigetfile({'*.mat;*.tif'},'.mat or .tif file');
-f = 'Loc4_acq2_6x4blocks_downinYbackinXdownZ008.tif';
-p = 'D:\GSchool\Niell\Data\102017_Octopus_Cal520\';
+[f, p] = uigetfile({'*.mat;*.tif'},'.mat or .tif file');
 
 %Get Image acquisition frame rate
 %resampleHZ = input('Resample framerate (enter 0 to keep acquisition framerate) : ');
@@ -53,9 +53,8 @@ if strcmp(f(end-3:end),'.mat')
 else
     % Uses the ttl file to find first frame of imaging after stim comes on
     %     ttl_file = input('Do you have a ttl file to read in? (yes:1/no:0): ');
-    %     [ttlf, ttlp] = uigetfile('*.mat','ttl file');
-    ttlf = 'Loc4_acq2_6x4blocks_downinYbackinXdownZ009-20171020T172449.mat';
-    ttlp = 'D:\GSchool\Niell\Data\102017_Octopus_Cal520\';
+    [ttlf, ttlp] = uigetfile('*.mat','ttl file');
+
     ttlFname = fullfile(ttlp,ttlf);
     ttl_file = 1;
     
@@ -98,15 +97,8 @@ end
 buffer = max(abs(mv(:)))+2;
 dfofInterp = dfofInterp(buffer:end-buffer,buffer:end-buffer,:);
 
-% # of frames in each stimulus cycle
-cycLength = mean(diff(stimPulse))/dt;
-% number of frames in window around each cycle. min of 4 secs, or actual cycle length + 2
-cycWindow = round(max(4/dt,cycLength));  
-
 % Load in the stimulus record
-% [fStim, pStim] = uigetfile('*.mat','stimulus record');
-pStim = 'D:\GSchool\Niell\Data\102017_Octopus_Cal520\102017\';
-fStim = 'Loc4_acq2_102017.mat';
+[fStim, pStim] = uigetfile('*.mat','stimulus record');
 
 if fStim ~= 0
     load(fullfile(pStim,fStim),'stimRec');
@@ -152,7 +144,6 @@ imshow(imresize(img,2))
 colormap(hsv); colorbar
 title(sprintf('fourier map at %d frame cycle',cycLength));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
 
 %%% mean fluorescence of the entire image
 figure
@@ -314,7 +305,7 @@ xlabel('stim #'); xlim([1 nstim+1]); ylim([-0.05 0.15])
 title('mean trace for each repeat');
 hold on; legend('1','2','3','4')
 %plot((0:totalframes-1)/cycLength+1, squeeze(mean(mean(dFrepeats,3),1)),'g','Linewidth',2)
-plot((0:size(dFrepeats,2)-1)/cycWindow, squeeze(mean(nanmedian(dFrepeats,3),1)),'g','Linewidth',2)
+plot((0:size(dFrepeats,2)-1)/cycWindow, squeeze(mean(median(dFrepeats,3),1)),'g','Linewidth',2)
 for i = 1:nstim
     plot([i i ],[0 0.3],'k:');
 end
@@ -426,7 +417,7 @@ for clust = 1:nclust
     plot((0:size(dFrepeats,2)-1)/cycWindow + 1, squeeze(mean(nanmedian(dFrepeats(c==clust,:,:),3),1)),'g','LineWidth',2)
     xlabel('stim #'); xlim([1 nstim+1]); ylim([-0.05 0.2])
     title('mean of cluster, multiple repeats');
-    for i = 1:nstim;
+    for i = 1:nstim
         plot([i i ],[0  0.5],'k:');
     end
     
@@ -439,7 +430,7 @@ for clust = 1:nclust
     %     xlim([1 size(dF,2)*dt]); xlabel('secs'); ylim([-0.2 2.1])
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
-end
+end %end of for clust
 
 %%% cycle average timecourse for each cluster
 figure
@@ -455,9 +446,9 @@ figure
 hold on
 for clust = 1:nclust
     plot((0:size(dFrepeats,2)-1)/cycWindow+1,mean(dFmean(c==clust,:,:),1),'Color',colors(clust,:));
-end;
+end
 hold on
-for i = 1:nstim;
+for i = 1:nstim
     plot([i i ],[0 0.2],'k:');
 end
 title('mean resp for each cluster');xlabel('stim #'); xlim([1 nstim+1])
@@ -475,7 +466,7 @@ hist(max(dFclust,[],2))
 
 evRange = 4:5; baseRange = 1:2; %%% timepoints for evoked and baseline activity
 figure
-for i = 1:length(stimOrder); %%% get pixel-wise evoked activity on each individual stim presentation
+for i = 1:length(stimOrder) %%% get pixel-wise evoked activity on each individual stim presentation
     trialmean(:,:,i) = mean(dfofInterp(:,:,round(cycLength*(i-1) + evRange)),3)- mean(dfofInterp(:,:,round(cycLength*(i-1) + baseRange)),3);
 end
 filt = fspecial('gaussian',5,1.5);
@@ -623,7 +614,7 @@ if makeFigs
     [f p] = uiputfile('*.pdf','save pdf file');
     newpdfFile = fullfile(p,f)
     try
-        dos(['ps2pdf ' 'c:\temp.ps "' newpdfFile '"'] )
+        dos(['ps2pdf ' 'c:\temp\TempFigs.ps "' newpdfFile '"'] )
         
     catch
         display('couldnt generate pdf');

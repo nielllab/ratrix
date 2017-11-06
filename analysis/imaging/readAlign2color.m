@@ -1,5 +1,7 @@
-function [Aligned_Seq, mv] = readAlign2color(fname, align, showImg, fwidth)
-
+function [Aligned_Seq, mv] = readAlign2color(fname, align, makeFigs, fwidth)
+if makeFigs
+    psfile = 'C:\temp\TempFigs.ps';
+end
 % Get file info
 Img_Info = imfinfo(fname);
 nframes = length(Img_Info)/2;
@@ -78,8 +80,8 @@ if align
         
         %Add function to find frames in the correct z-plane
         %Output an index matrix of correct-z-plane frames to input into sbxalign_tif_nonrigid
-%         ZIndices = bin_Zplane(Img_Seq(:,:,:,2), Aligned_Seq(:,:,:,2), alignIndices);
-        ZIndices = alignIndices;
+        ZIndices = bin_Zplane(Img_Seq(:,:,:,2), Aligned_Seq(:,:,:,2), alignIndices, makeFigs);
+%         ZIndices = alignIndices;
         
         % Re-align sequence of frames that are in the correct z-plane
         nr = sbxalign_tif_nonrigid(fname,ZIndices);

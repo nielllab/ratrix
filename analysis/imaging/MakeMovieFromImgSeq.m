@@ -74,7 +74,7 @@ RedFig = figure;
 colormap gray
 for iFrame = 1:nframes
     imagesc(Aligned_Seq(:,:,iFrame,2),RedRange);
-    sTitle = sprintf('Non-Aligned Red Channel: Frame %u',iFrame);
+    sTitle = sprintf('Aligned Red Channel: Frame %u',iFrame);
     sInfo = sprintf('%2.2f Hz Acquisition, 10x Video',framerate);
     xlabel(sInfo);
     title(sTitle);

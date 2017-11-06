@@ -1,5 +1,5 @@
 function MakeMovieFromTiff(fname)
-
+MakeMov = 0;
 %Get file info
 Img_Info = imfinfo(fname);
 nframes = length(Img_Info)/2;

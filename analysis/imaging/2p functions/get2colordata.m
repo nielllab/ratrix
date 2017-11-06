@@ -4,7 +4,7 @@ if makeFigs
 end
 % Display Movies for Non-aligned image sequences for both channels & save
 % the movie if it does not exist already
-MakeMovieFromTiff(fname);
+% MakeMovieFromTiff(fname);
 
 % Performs Image registration for both channels
 [imgAll, mv] = readAlign2color(fname,1,1,0.5);

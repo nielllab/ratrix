@@ -158,7 +158,7 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 %% calculate two reference images for choosing points on ...
 %%% absolute green fluorescence, and max df/f of each pixel
 greenFig = figure;
-title('mean')
+title('Mean Green Channel')
 stdImg = greenframe(buffer:end-buffer,buffer:end-buffer);
 imagesc(stdImg,[prctile(stdImg(:),1) prctile(stdImg(:),99)*1.2]); hold on; axis equal; colormap gray; title('mean')
 normgreen = (stdImg - prctile(stdImg(:),1))/ (prctile(stdImg(:),99)*1.5 - prctile(stdImg(:),1));
@@ -224,6 +224,7 @@ else
     plot(x,y,'o');
     
     %%% crop image to avoid points near border that may have artifact
+    disp('Select area in figure to include in the analysis');
     [xrange, yrange] = ginput(2);
     pts = pts(x>xrange(1) & x<xrange(2) & y>yrange(1) & y<yrange(2));
     
@@ -261,14 +262,15 @@ figure
 plot((1:size(dF,2))*dt,dF');
 hold on
 plot((1:size(dF,2))*dt,mean(dF,1),'g','Linewidth',2);
-xlabel('secs'); xlim([0 size(dF,2)*dt]);
+xlabel('secs');ylabel('df/f');title('Fluorescence Traces'); xlim([0 size(dF,2)*dt]);
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %%% plot movement correction trace
 if exist('mv','var')
     figure
     plot(mv);
-    title('alignment')
+    title('Rigid Alignment Values')
+    xlabel('x displacement');ylabel('y displacement');
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
@@ -314,9 +316,9 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 %%% calculate cycle averages (timecourse for each individual stim)
 clear cycAvgAll cycAvg cycImg
 for i=1:cycWindow
-    cycAvgAll(:,i) = mean(dF(:,i:cycLength:end),2); %%% cell-wise average across all stim
-    cycAvg(i) = mean(mean(median(dfofInterp(:,:,i:cycLength:end),3),2),1); %%% average for all cells and stim
-    cycImg(:,:,i) = mean(dfofInterp(:,:,i:cycLength:end),3); %%% pixelwise average across all stim
+    cycAvgAll(:,i) = mean(dF(:,i:round(cycLength):end),2); %%% cell-wise average across all stim
+    cycAvg(i) = mean(mean(median(dfofInterp(:,:,i:round(cycLength):end),3),2),1); %%% average for all cells and stim
+    cycImg(:,:,i) = mean(dfofInterp(:,:,i:round(cycLength):end),3); %%% pixelwise average across all stim
 end
 
 %%% plot pixel-wise cycle average

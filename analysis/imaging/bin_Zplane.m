@@ -1,4 +1,4 @@
-function [Indy] = bin_Zplane(Img_Seq, Aligned_Seq, idx)
+function [Indy] = bin_Zplane(Img_Seq, Aligned_Seq, idx, makeFigs)
 % This function takes a series of 2p images that have motion artifacts in
 % the z-plane and outputs the indices of the largest cluster of frames
 % sorted by pdist, linkage, and cluster functions. 
@@ -11,6 +11,9 @@ function [Indy] = bin_Zplane(Img_Seq, Aligned_Seq, idx)
 % Outputs:
 %   Indy: Vector of frame indices for a subset of images that presumably
 %   are in the same z-plane
+if makeFigs
+    psfile = 'C:\temp\TempFigs.ps';
+end
 
 nframes = size(Aligned_Seq,3);
 % Vectorize each frame in the sequence and create a 2D matrix with each row
@@ -34,6 +37,8 @@ Z = linkage(D,'ward');
 % leafOrder = optimalleaforder(Z,D);   ,'reorder',leafOrder
 %Create figure of hierarchical cluster tree for visualization purposes
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3);
+title('Hierarchical Cluster tree of Image Sequence');
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %Place remaining code in a while loop so user can try different
 %combinations of cluster choices
@@ -57,6 +62,7 @@ while ReDo
     end
     title(sprintf('%u Clusters',nclust));
     xlabel('Frame #'); ylabel('Cluster ID');
+    %if exist('psfile','var'); set(clust, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
         
     %Which cluster should be used?
     ImgClust = input('Which cluster of frames do you want to use?: ');
@@ -83,7 +89,9 @@ while ReDo
     
     %Give the user the option to reselect which cluster to use
     ReDo = input('Do you want to reselect the # of clusters after watching the movie? (1:yes/0:no): ');
-    if ReDo == 1, close(clustmov,clust);end
+    if ReDo == 1 
+        close(clustmov,clust);
+    end
 end
 
 end

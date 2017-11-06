@@ -324,7 +324,7 @@ end
 %%% plot pixel-wise cycle average
 figure
 for i = 1:cycLength
-    subplot(2,5,i);
+    subplot(2,6,i);
     imagesc(cycImg(:,:,i)-min(cycImg,[],3),[0 0.1]); axis equal
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end

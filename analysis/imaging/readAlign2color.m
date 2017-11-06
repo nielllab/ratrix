@@ -104,7 +104,7 @@ if align
         end   
         
         % Make an aligned movie from Aligned_Seq
-%         MakeMovieFromImgSeq(fname, Aligned_Seq)
+        MakeMovieFromImgSeq(fname, Aligned_Seq)
         
         % Show Mean image of non-aligned image sequence and aligned
 %         if showImg

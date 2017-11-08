@@ -17,7 +17,7 @@ for iFrame = 1:nframes
 end
 
 %Movie File Names
-GrnMovieFile = sprintf('%sNonAlignedGreenChannel.avi',fname(1:end-4));
+GrnMovieFile = sprintf('%sNonAlignedGreenChannel.mp4',fname(1:end-4));
 RedMovieFile = sprintf('%sNonAlignedRedChannel.mp4',fname(1:end-4));
 
 %Calculate Range for scaled image display

@@ -19,7 +19,7 @@ nframes = size(Aligned_Seq,3);
 % Vectorize each frame in the sequence and create a 2D matrix with each row
 % corresponding to a frame and each column corresponding to a particular
 % pixel in the image
-Img_Seq2D = zeros(nframes,size(Img_Seq,1)*size(Img_Seq,2));
+Img_Seq2D = zeros(nframes,size(Aligned_Seq,1)*size(Aligned_Seq,2));
 for iFrame = 1:nframes
     % Apply Gaussian Filter to increase SNR
     %iiImg = imfilter(Img_Seq(:,:,iFrame),filt);
@@ -73,14 +73,14 @@ while ReDo
     for iFrame = 1:sm:nframes
         tmp = Img_Seq(:,:,iFrame);
         RedRange(1) = RedRange(1) + prctile(tmp(:),2);
-        RedRange(2) = RedRange(2) + prctile(tmp(:),98);
+        RedRange(2) = RedRange(2) + prctile(tmp(:),90);
     end
     Indy = [];
     clustmov = figure;
     colormap gray
     for iFrame = 1:nframes
         if T(iFrame) == ImgClust
-            imagesc(Img_Seq(:,:,iFrame),RedRange)
+            imagesc(Aligned_Seq(:,:,iFrame),RedRange)
             drawnow
             
             Indy = [Indy, idx(iFrame)];

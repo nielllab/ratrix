@@ -11,7 +11,7 @@ framerate = state.acq.frameRate;
 
 %Movie File Names
 GrnMovieFile = sprintf('%sAlignedGreenChannel.avi',fname(1:end-4));
-RedMovieFile = sprintf('%sAlignedRedChannel.mp4',fname(1:end-4));
+RedMovieFile = sprintf('%sAlignedRedChannel.avi',fname(1:end-4));
 
 %Calculate Range for scaled image display
 sm = floor(nframes/4) - 1;

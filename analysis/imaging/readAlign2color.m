@@ -66,7 +66,8 @@ if align
         % Align full sequence without considering z-displacement
         r = sbxalign_tif(fname,alignIndices);
         mv = r.T;
-        
+        buffer = max(abs(mv(:)))+2;
+          
         % Apply translation determined by sbxalign_tif to each frame
         for iFrame = 1:nframes
             for iChannel = 1:2
@@ -77,6 +78,7 @@ if align
                 Aligned_Seq(:,:,iFrame,iChannel) = circshift(squeeze(Img_Seq(:,:,iFrame,iChannel)),[r.T(iFrame,1),r.T(iFrame,2)]);
             end
         end   
+        Aligned_Seq = Aligned_Seq(buffer:end-buffer,buffer:end-buffer,:,:);
         
         %Add function to find frames in the correct z-plane
         %Output an index matrix of correct-z-plane frames to input into sbxalign_tif_nonrigid

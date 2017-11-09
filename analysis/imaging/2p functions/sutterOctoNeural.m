@@ -6,7 +6,7 @@ close all
 
 %Change filepath to match where you have ratrix
 %Remove paths that have functions named after standard matlab functions
-cd('C:\Users\Freeman\Documents\GitHub\ratrix');
+cd('C:\Users\nlab\Documents\GitHub\ratrix');
 rmpath('./matlabClub');
 rmpath('.\analysis\eflister\phys\new');
 

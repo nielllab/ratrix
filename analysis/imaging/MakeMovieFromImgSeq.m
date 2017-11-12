@@ -1,4 +1,4 @@
-function MakeMovieFromImgSeq(fname, Aligned_Seq)
+function MakeMovieFromImgSeq(fname, Aligned_Seq,FrameIndices)
 %% Input:
 %   fname: Tiff Image filename
 %   Aligned_Seq: 4D image matrix (i.e. two image channel movies)
@@ -14,21 +14,23 @@ GrnMovieFile = sprintf('%sAlignedGreenChannel.avi',fname(1:end-4));
 RedMovieFile = sprintf('%sAlignedRedChannel.avi',fname(1:end-4));
 
 %Calculate Range for scaled image display
-sm = floor(nframes/4) - 1;
+sm = floor(nframes/10) - 1;
 GrnRange = zeros(1,2);
 RedRange = zeros(1,2);
-for iFrame = 1:sm:nframes
-    tmp = Aligned_Seq(:,:,iFrame,1);
-    GrnRange(1) = GrnRange(1) + prctile(tmp(:),2);
-    GrnRange(2) = GrnRange(2) + prctile(tmp(:),98);
+for iFrame = 1:sm:length(FrameIndices)
+    tmp = Aligned_Seq(:,:,FrameIndices(iFrame),1);
+
+    GrnRange(1) = GrnRange(1) + prctile(tmp(:),1);
+    GrnRange(2) = GrnRange(2) + 0.9*max(tmp(:));
     
-    tmp = Aligned_Seq(:,:,iFrame,2);
-    RedRange(1) = RedRange(1) + prctile(tmp(:),2);
-    RedRange(2) = RedRange(2) + prctile(tmp(:),98);
+    tmp = Aligned_Seq(:,:,FrameIndices(iFrame),2);
+    RedRange(1) = RedRange(1) + prctile(tmp(:),1);
+    RedRange(2) = RedRange(2) + 0.9*max(tmp(:));
+    
 end
 
-GrnRange = GrnRange./4;
-RedRange = RedRange./4;
+GrnRange = GrnRange./10;
+RedRange = RedRange./10;
 
 %% Display Green Channel Movie and Save if file doesn't exist already
 if exist(GrnMovieFile) == 0
@@ -41,9 +43,9 @@ end
 
 GrnFig = figure;
 colormap gray
-for iFrame = 1:nframes
-    imagesc(Aligned_Seq(:,:,iFrame,1),GrnRange);
-    sTitle = sprintf('Aligned Green Channel: Frame %u',iFrame);
+for iFrame = 1:length(FrameIndices)
+    imagesc(Aligned_Seq(:,:,FrameIndices(iFrame),1),GrnRange);
+    sTitle = sprintf('Aligned Green Channel: Frame %u',FrameIndices(iFrame));
     sInfo = sprintf('%2.2f Hz Acquisition, 10x Video',framerate);
     xlabel(sInfo);
     title(sTitle);
@@ -72,9 +74,9 @@ end
 
 RedFig = figure;
 colormap gray
-for iFrame = 1:nframes
-    imagesc(Aligned_Seq(:,:,iFrame,2),RedRange);
-    sTitle = sprintf('Aligned Red Channel: Frame %u',iFrame);
+for iFrame = 1:length(FrameIndices)
+    imagesc(Aligned_Seq(:,:,FrameIndices(iFrame),2),RedRange);
+    sTitle = sprintf('Aligned Red Channel: Frame %u',FrameIndices(iFrame));
     sInfo = sprintf('%2.2f Hz Acquisition, 10x Video',framerate);
     xlabel(sInfo);
     title(sTitle);

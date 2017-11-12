@@ -1,4 +1,4 @@
-function [Indy] = bin_Zplane(Img_Seq, Aligned_Seq, idx, makeFigs)
+function [FrameIndices, FrameBool] = bin_Zplane(Img_Seq, Aligned_Seq, makeFigs)
 % This function takes a series of 2p images that have motion artifacts in
 % the z-plane and outputs the indices of the largest cluster of frames
 % sorted by pdist, linkage, and cluster functions. 
@@ -34,7 +34,7 @@ D = pdist(Img_Seq2D,'correlation');
 
 %Create hierarchical cluster tree based on D
 Z = linkage(D,'ward'); 
-% leafOrder = optimalleaforder(Z,D);   ,'reorder',leafOrder
+
 %Create figure of hierarchical cluster tree for visualization purposes
 [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3);
 title('Hierarchical Cluster tree of Image Sequence');
@@ -75,7 +75,9 @@ while ReDo
         RedRange(1) = RedRange(1) + prctile(tmp(:),2);
         RedRange(2) = RedRange(2) + prctile(tmp(:),90);
     end
-    Indy = [];
+    
+    FrameIndices = [];
+    NaNIndices = [];
     clustmov = figure;
     colormap gray
     for iFrame = 1:nframes
@@ -83,7 +85,11 @@ while ReDo
             imagesc(Aligned_Seq(:,:,iFrame),RedRange)
             drawnow
             
-            Indy = [Indy, idx(iFrame)];
+            FrameIndices = [FrameIndices, iFrame];
+            FrameBool(iFrame,1) = 1;
+        else
+            NaNIndices = [NaNIndices, iFrame];
+            FrameBool(iFrame,1) = 0;
         end
     end
     

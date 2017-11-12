@@ -1,12 +1,19 @@
-%%% reads in sutter data, extracts cell traces, and aligns to stim
-%%% optimized for octopus optic lobe with cal520 label
-
+%% reads in sutter data, extracts cell traces, and aligns to stim
+% optimized for octopus optic lobe with cal520 label
 clear all
 close all
 
+%% Edit Following options to match dataset
+% option of one or two color data (sutter stores 2-color as interleaved frames)
+Opt.NumChannels = 2; 
+% option to save figures to pdf file; make sure C:/temp/ folder exists
+Opt.SaveFigs = 1;
+Opt.MakeMov = 0;
+
+
 %Change filepath to match where you have ratrix
 %Remove paths that have functions named after standard matlab functions
-cd('C:\Users\nlab\Documents\GitHub\ratrix');
+cd('C:\Users\Freeman\Documents\GitHub\ratrix');
 rmpath('./matlabClub');
 rmpath('.\analysis\eflister\phys\new');
 
@@ -92,12 +99,7 @@ else
     
 end
 
-%% crop to get rid of edges that have motion artifact
-% what is largest offset? mv(:) is calculated from rigid compensation
-buffer = max(abs(mv(:)))+2;
-dfofInterp = dfofInterp(buffer:end-buffer,buffer:end-buffer,:);
-
-% Load in the stimulus record
+%% Load in the stimulus record
 [fStim, pStim] = uigetfile('*.mat','stimulus record');
 
 if fStim ~= 0
@@ -159,7 +161,7 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 %%% absolute green fluorescence, and max df/f of each pixel
 greenFig = figure;
 title('Mean Green Channel')
-stdImg = greenframe(buffer:end-buffer,buffer:end-buffer);
+stdImg = greenframe;
 imagesc(stdImg,[prctile(stdImg(:),1) prctile(stdImg(:),99)*1.2]); hold on; axis equal; colormap gray; title('mean')
 normgreen = (stdImg - prctile(stdImg(:),1))/ (prctile(stdImg(:),99)*1.5 - prctile(stdImg(:),1));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end

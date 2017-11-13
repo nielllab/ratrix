@@ -72,17 +72,17 @@ if align
     %images stay within a similar z-plane
     if zplane == 1
         [FrameIndices, FrameBool] = bin_Zplane(Img_Seq(:,:,:,AC), RAligned_Seq(:,:,:,AC), makeFigs);
+        
+        %Plot Mean image of rigidly aligned image sequence
+        figure
+        R_Mean = mean(RAligned_Seq(:,:,FrameIndices,1),3);
+        imagesc(R_Mean);colormap gray
+        title(sprintf('Mean Image after Rigid Alignment of %u out of %u total frames',length(FrameIndices),nframes));
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     else
         FrameIndices = 1:1:nframes;
         FrameBool = ones(nframes,1);
     end
-    
-    %Plot Mean image of rigidly aligned image sequence
-    figure
-    R_Mean = mean(RAligned_Seq(:,:,FrameIndices,1),3);
-    imagesc(R_Mean);colormap gray
-    title(sprintf('Mean Image after Rigid Alignment of %u out of %u total frames',length(FrameIndices),nframes));
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %% Now that we have a subset of frames that are presumably in the same 
     % z-plane, re-run the alignment process with only that subset using

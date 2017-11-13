@@ -475,6 +475,22 @@ if nstim==14 %%% gratings
     imshow(imresize(overlay,2));
 end
 
+clear overlay
+overlay(:,:,1) = median(trialmean(:,:,stimOrder==15 | stimOrder==39),3);
+overlay(:,:,2) = median(trialmean(:,:,stimOrder==19 | stimOrder==43),3);
+overlay(:,:,3)=0;
+overlay(overlay<0)=0; overlay= overlay/range(2);
+figure
+imshow(imresize(overlay,2));
+
+clear overlay
+overlay(:,:,1) = median(trialmean(:,:,stimOrder==19),3);
+overlay(:,:,3) = median(trialmean(:,:,stimOrder==43 ),3)*1.5;
+overlay(:,:,2)=0;
+overlay(overlay<0)=0; overlay= 0.5*overlay/range(2);
+figure
+imshow(imresize(overlay,2))
+
 
 range = [-0.05 0.2]; %%% colormap range
 if nstim==26 %%% gratings

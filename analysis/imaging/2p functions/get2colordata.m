@@ -42,7 +42,7 @@ for iChannel = 1:2
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     dfof = zeros(size(Aligned_Seq));
-    if iChannel==1 %i.e. the green channel
+    if iChannel == 1 %i.e. the green channel
         for iFrame = 1:nframes
             dfof(:,:,iFrame)=(Aligned_Seq(:,:,iFrame)-m{iChannel})./m{iChannel};
         end

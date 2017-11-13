@@ -62,7 +62,7 @@ while ReDo
     end
     title(sprintf('%u Clusters',nclust));
     xlabel('Frame #'); ylabel('Cluster ID');
-    %if exist('psfile','var'); set(clust, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    %
         
     %Which cluster should be used?
     ImgClust = input('Which cluster of frames do you want to use?: ');
@@ -78,12 +78,12 @@ while ReDo
     
     FrameIndices = [];
     NaNIndices = [];
-    clustmov = figure;
-    colormap gray
+%     clustmov = figure;
+%     colormap gray
     for iFrame = 1:nframes
         if T(iFrame) == ImgClust
-            imagesc(Aligned_Seq(:,:,iFrame),RedRange)
-            drawnow
+%             imagesc(Aligned_Seq(:,:,iFrame),RedRange)
+%             drawnow
             
             FrameIndices = [FrameIndices, iFrame];
             FrameBool(iFrame,1) = 1;
@@ -96,7 +96,10 @@ while ReDo
     %Give the user the option to reselect which cluster to use
     ReDo = input('Do you want to reselect the # of clusters after watching the movie? (1:yes/0:no): ');
     if ReDo == 1 
-        close(clustmov,clust);
+        close(clust);
+    else 
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+%         close(clustmov);
     end
 end
 

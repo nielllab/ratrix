@@ -64,7 +64,7 @@ if align
     figure
     R_Mean = mean(RAligned_Seq(:,:,:,1),3);
     imagesc(R_Mean);colormap gray
-    title('Mean Image after Rigid  Alignment of full frame sequence');
+    title('Mean Image after Rigid Alignment of full frame sequence');
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     zplane = input('Z-plane Binning? yes(1)/no(0): ');
@@ -109,7 +109,7 @@ if align
         %Plot Mean image of nonrigidly aligned image sequence
         figure
         NR_Mean = mean(Aligned_Seq(:,:,FrameIndices,1),3);
-        imagesc(RR_Mean);colormap gray
+        imagesc(NR_Mean);colormap gray
         title(sprintf('Mean Image after Rigid & NonRigid Alignment of %u out of %u total frames',length(FrameIndices),nframes));
         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
    
@@ -127,7 +127,7 @@ if align
         for iFrame = 1:nframes
             if FrameBool(iFrame) == 1
                 Aligned_Seq(:,:,iFrame,1) = circshift(squeeze(Img_Seq(:,:,iFrame,1)),[rr.T(ii,1),rr.T(ii,2)]);
-                Aligned_Seq(:,:,iFrame,1) = circshift(squeeze(Img_Seq(:,:,iFrame,2)),[rr.T(ii,1),rr.T(ii,2)]);
+                Aligned_Seq(:,:,iFrame,2) = circshift(squeeze(Img_Seq(:,:,iFrame,2)),[rr.T(ii,1),rr.T(ii,2)]);
                 ii = ii + 1;
             else
                 Aligned_Seq(:,:,iFrame,1) = NaN;

@@ -16,6 +16,7 @@ Opt.MakeMov = 0;
 cd('C:\Users\Freeman\Documents\GitHub\ratrix');
 rmpath('./matlabClub');
 rmpath('.\analysis\eflister\phys\new');
+rmpath('.\analysis\eflister\phys\new\helpers');
 
 %%% frame rate for resampling
 % dt = 0.5;
@@ -99,6 +100,20 @@ else
     
 end
 
+% Create index vector of NaN images
+xy = size(dfofInterp(:,:,1));
+FrameBool = zeros(size(dfofInterp,3),1);
+NaNFrameIndices = [];
+ValidFrameIndices = [];
+for iFrame = 1:length(dfofInterp)
+    if ~isnan(dfofInterp(floor(xy(1)/2),floor(xy(2)/2),iFrame))
+        ValidFrameIndices = [ValidFrameIndices, iFrame];
+        FrameBool(iFrame) = 1;
+    else
+        NaNFrameIndices = [NaNFrameIndices, iFrame];
+        FrameBool(iFrame) = 0;
+    end
+end
 %% Load in the stimulus record
 [fStim, pStim] = uigetfile('*.mat','stimulus record');
 
@@ -129,18 +144,22 @@ end
 
 %% generate periodic map
 filt = fspecial('gaussian',5,1);
-
-map = 0;
-for i= 1:size(dfofInterp,3)
-    map = map+imfilter(dfofInterp(:,:,i),filt)*exp(2*pi*sqrt(-1)*i/cycLength);
+xy = size(dfofInterp(:,:,1));
+map = zeros(xy);
+for iFrame = 1:size(dfofInterp,3)
+    %Only include the frames that aren't NaN; i.e. the frames that we kept
+    %after z-plane sorting
+    if ~isnan(dfofInterp(floor(xy(1)/2),floor(xy(2)/2),iFrame))
+        map = map+imfilter(dfofInterp(:,:,iFrame),filt)*exp(2*pi*sqrt(-1)*iFrame/cycLength);
+    end
 end
-map = map/size(dfofInterp,3); map(isnan(map))=0;
+map = map/size(dfofInterp,3); map(isnan(map)) = 0;
 amp = abs(map);
 prctile(amp(:),99)
 amp=amp/prctile(amp(:),98); amp(amp>1)=1;
 img = mat2im(mod(angle(map),2*pi),hsv,[pi/2  (2*pi -pi/4)]);
 img = img.*repmat(amp,[1 1 3]);
-mapimg = figure;
+
 figure
 imshow(imresize(img,2))
 colormap(hsv); colorbar
@@ -149,7 +168,7 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 
 %%% mean fluorescence of the entire image
 figure
-plot((1:size(dfofInterp,3))*dt,squeeze(mean(mean(dfofInterp,2),1)));
+plot((1:size(dfofInterp,3))*dt,squeeze(nanmean(nanmean(dfofInterp,2),1)));
 title('full image mean'); hold on
 for i = 1:reps
     plot([i*nstim*cycLength*dt  i*nstim*cycLength*dt], [0 0.5],'g');
@@ -162,7 +181,7 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 greenFig = figure;
 title('Mean Green Channel')
 stdImg = greenframe;
-imagesc(stdImg,[prctile(stdImg(:),1) prctile(stdImg(:),99)*1.2]); hold on; axis equal; colormap gray; title('mean')
+imagesc(stdImg,[prctile(stdImg(:),1) prctile(stdImg(:),99)*1.2]); hold on; axis equal; colormap gray; title('Green Channel Mean')
 normgreen = (stdImg - prctile(stdImg(:),1))/ (prctile(stdImg(:),99)*1.5 - prctile(stdImg(:),1));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
@@ -178,7 +197,7 @@ merge = zeros(size(stdImg,1),size(stdImg,2),3);
 merge(:,:,1)= normMax;
 merge(:,:,2) = normgreen;
 mergeFig = figure;
-imshow(merge); title('merge')
+imshow(merge); title('Mean/Max Green Channel Merge')
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %% time to select points! either by hand or automatic
@@ -199,14 +218,14 @@ if selectPts
         figure(selectFig); hold on
         [x(i), y(i)] = ginput(1); x=round(x); y = round(y);
         plot(x(i),y(i),'b*');
-        dF(i,:) = squeeze(mean(mean(dfofInterp(y(i)+range,x(i)+range,:),2),1));
+        dF(i,:) = squeeze(nanmean(nanmean(dfofInterp(y(i)+range,x(i)+range,:),2),1));
     end
     
 else
     
     %%% select points based on peaks of max df/f
     %%%calculate max df/f image
-    img = max(dfofInterp,[],3);
+    img = nanmax(dfofInterp,[],3);
     filt = fspecial('gaussian',5,3);
     stdImg = imfilter(img,filt);
     figure
@@ -251,7 +270,7 @@ else
     range = -2:2;
     clear dF
     for i = 1:length(x)
-        dF(i,:) = mean(mean(dfofInterp(y(i)+range,x(i)+range,:),2),1);
+        dF(i,:) = nanmean(nanmean(dfofInterp(y(i)+range,x(i)+range,:),2),1);
     end
     
 end  %%% end of if selectPts
@@ -263,7 +282,7 @@ dF(dF>2)=2; %%% clip abnormally large values
 figure
 plot((1:size(dF,2))*dt,dF');
 hold on
-plot((1:size(dF,2))*dt,mean(dF,1),'g','Linewidth',2);
+plot((1:size(dF,2))*dt,nanmean(dF,1),'g','Linewidth',2);
 xlabel('secs');ylabel('df/f');title('Fluorescence Traces'); xlim([0 size(dF,2)*dt]);
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
@@ -304,12 +323,12 @@ dFrepeats(dFrepeats<-1) = -1;
 
 %%% mean response of whole population, for each repetition
 figure
-plot((0:size(dFrepeats,2)-1)/cycWindow, squeeze(mean(dFrepeats,1)))
+plot((0:size(dFrepeats,2)-1)/cycWindow, squeeze(nanmean(dFrepeats,1)))
 xlabel('stim #'); xlim([1 nstim+1]); ylim([-0.05 0.15])
 title('mean trace for each repeat');
 hold on; legend('1','2','3','4')
 %plot((0:totalframes-1)/cycLength+1, squeeze(mean(mean(dFrepeats,3),1)),'g','Linewidth',2)
-plot((0:size(dFrepeats,2)-1)/cycWindow, squeeze(mean(median(dFrepeats,3),1)),'g','Linewidth',2)
+plot((0:size(dFrepeats,2)-1)/cycWindow, squeeze(nanmean(nanmedian(dFrepeats,3),1)),'g','Linewidth',2)
 for i = 1:nstim
     plot([i i ],[0 0.3],'k:');
 end
@@ -318,9 +337,9 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 %%% calculate cycle averages (timecourse for each individual stim)
 clear cycAvgAll cycAvg cycImg
 for i=1:cycWindow
-    cycAvgAll(:,i) = mean(dF(:,i:round(cycLength):end),2); %%% cell-wise average across all stim
-    cycAvg(i) = mean(mean(median(dfofInterp(:,:,i:round(cycLength):end),3),2),1); %%% average for all cells and stim
-    cycImg(:,:,i) = mean(dfofInterp(:,:,i:round(cycLength):end),3); %%% pixelwise average across all stim
+    cycAvgAll(:,i) = nanmean(dF(:,i:round(cycLength):end),2); %%% cell-wise average across all stim
+    cycAvg(i) = nanmean(nanmean(nanmedian(dfofInterp(:,:,i:round(cycLength):end),3),2),1); %%% average for all cells and stim
+    cycImg(:,:,i) = nanmean(dfofInterp(:,:,i:round(cycLength):end),3); %%% pixelwise average across all stim
 end
 
 %%% plot pixel-wise cycle average
@@ -348,7 +367,7 @@ dFclust=zeros(size(dF,1),floor(cycWindow-4)*nstim,max(nStimRep))+NaN;
 for i = 1:nstim
     repList = find(stimOrder==i);
     for r = 1:nStimRep(i)
-        dFclust(:,(i-1)*floor(cycWindow-4) + (1:floor(cycWindow-4)),r) = dF(:,round((repList(r)-1)*cycLength)+(3:floor(cycWindow-2))) - repmat(mean(dF(:,round((repList(r)-1)*cycLength)+(1:2)),2),[1 floor(cycWindow-4)]);
+        dFclust(:,(i-1)*floor(cycWindow-4) + (1:floor(cycWindow-4)),r) = dF(:,round((repList(r)-1)*cycLength)+(3:floor(cycWindow-2))) - repmat(nanmean(dF(:,round((repList(r)-1)*cycLength)+(1:2)),2),[1 floor(cycWindow-4)]);
     end
 end
 
@@ -392,6 +411,7 @@ imagesc(stdImg,[0 prctile(stdImg(:),99)*1.2]); colormap gray; axis equal;hold on
 for clust=1:nclust
     plot(x(c==clust),y(c==clust),'o','Color',colors(clust,:));
 end
+title(sprintf('%u Clusters',nclust));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 
@@ -417,8 +437,8 @@ for clust = 1:nclust
     
     %%% timecourse of this cluster, for each repeat
     subplot(2,2,4);
-    plot((0:size(dFrepeats,2)-1)/cycWindow + 1, squeeze(mean(dFrepeats(c==clust,:,:),1))); hold on
-    plot((0:size(dFrepeats,2)-1)/cycWindow + 1, squeeze(mean(nanmedian(dFrepeats(c==clust,:,:),3),1)),'g','LineWidth',2)
+    plot((0:size(dFrepeats,2)-1)/cycWindow + 1, squeeze(nanmean(dFrepeats(c==clust,:,:),1))); hold on
+    plot((0:size(dFrepeats,2)-1)/cycWindow + 1, squeeze(nanmean(nanmedian(dFrepeats(c==clust,:,:),3),1)),'g','LineWidth',2)
     xlabel('stim #'); xlim([1 nstim+1]); ylim([-0.05 0.2])
     title('mean of cluster, multiple repeats');
     for i = 1:nstim
@@ -429,7 +449,7 @@ for clust = 1:nclust
     subplot(2,2,3);
     plot(cycAvgAll(c==clust,:)');
     hold on
-    plot(mean(cycAvgAll(c==clust,:),1),'g','Linewidth',2);
+    plot(nanmean(cycAvgAll(c==clust,:),1),'g','Linewidth',2);
     %     plot((1:size(dF,2))*dt,dF(c==clust,:)'); hold on;
     %     xlim([1 size(dF,2)*dt]); xlabel('secs'); ylim([-0.2 2.1])
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
@@ -440,7 +460,7 @@ end %end of for clust
 figure
 hold on
 for clust = 1:nclust
-    plot(mean(cycAvgAll(c==clust,:),1),'Color',colors(clust,:));
+    plot(nanmean(cycAvgAll(c==clust,:),1),'Color',colors(clust,:));
 end; title('mean cyc avg for each cluster)')
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
@@ -449,7 +469,7 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 figure
 hold on
 for clust = 1:nclust
-    plot((0:size(dFrepeats,2)-1)/cycWindow+1,mean(dFmean(c==clust,:,:),1),'Color',colors(clust,:));
+    plot((0:size(dFrepeats,2)-1)/cycWindow+1,nanmean(dFmean(c==clust,:,:),1),'Color',colors(clust,:));
 end
 hold on
 for i = 1:nstim
@@ -471,7 +491,7 @@ hist(max(dFclust,[],2))
 evRange = 4:5; baseRange = 1:2; %%% timepoints for evoked and baseline activity
 figure
 for i = 1:length(stimOrder) %%% get pixel-wise evoked activity on each individual stim presentation
-    trialmean(:,:,i) = mean(dfofInterp(:,:,round(cycLength*(i-1) + evRange)),3)- mean(dfofInterp(:,:,round(cycLength*(i-1) + baseRange)),3);
+    trialmean(:,:,i) = nanmean(dfofInterp(:,:,round(cycLength*(i-1) + evRange)),3)- nanmean(dfofInterp(:,:,round(cycLength*(i-1) + baseRange)),3);
 end
 filt = fspecial('gaussian',5,1.5);
 trialmean = imfilter(trialmean,filt);
@@ -482,7 +502,7 @@ if nstim==12 %%% spots
     loc = [1 4 2 5 3 6]; %%% map stim order onto subplot
     figure; set(gcf,'Name','OFF spots');
     for i = 1:6
-        meanimg = median(trialmean(:,:,stimOrder==i),3);
+        meanimg = nanmedian(trialmean(:,:,stimOrder==i),3);
         subplot(2,3,loc(i));
         imagesc(meanimg,range); axis equal
         stimImg(:,:,i) = meanimg;
@@ -491,14 +511,14 @@ if nstim==12 %%% spots
     
     figure; set(gcf,'Name','ON spots');
     for i = 7:12
-        meanimg = median(trialmean(:,:,stimOrder==i),3);
+        meanimg = nanmedian(trialmean(:,:,stimOrder==i),3);
         subplot(2,3,loc(i-6));
         imagesc(meanimg,range); axis equal
         stimImg(:,:,i) = meanimg;
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    overlay(:,:,1) = mean(stimImg(:,:,6),3);
-    overlay(:,:,2) = mean(stimImg(:,:,12),3);
+    overlay(:,:,1) = nanmean(stimImg(:,:,6),3);
+    overlay(:,:,2) = nanmean(stimImg(:,:,12),3);
     overlay(:,:,3)= 0;
     overlay(overlay<0)=0; overlay = overlay/0.15;
     figure
@@ -510,7 +530,7 @@ if nstim==14 %%% gratings
     loc = 1:6; %%% map stim order onto subplot
     figure; set(gcf,'Name','vert gratings');
     for i = 1:6
-        meanimg = median(trialmean(:,:,stimOrder==i),3);
+        meanimg = nanmedian(trialmean(:,:,stimOrder==i),3);
         subplot(2,3,loc(i));
         imagesc(meanimg,range); axis equal
     end
@@ -518,7 +538,7 @@ if nstim==14 %%% gratings
     
     figure;set(gcf,'Name','horiz gratings');
     for i = 7:12
-        meanimg = median(trialmean(:,:,stimOrder==i),3);
+        meanimg = nanmedian(trialmean(:,:,stimOrder==i),3);
         subplot(2,3,loc(i-6));
         imagesc(meanimg,range); axis equal
     end
@@ -526,15 +546,15 @@ if nstim==14 %%% gratings
     
     figure; set(gcf,'Name','flicker');
     for i = 13:14
-        meanimg = median(trialmean(:,:,stimOrder==i),3);
+        meanimg = nanmedian(trialmean(:,:,stimOrder==i),3);
         subplot(1,2,i-12);
         imagesc(meanimg,range); axis equal; if i ==13; title('low tf flicker'); else title('high tf flicker'); end
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
-    overlay(:,:,1) = median(trialmean(:,:,stimOrder==1),3);
-    overlay(:,:,2) = median(trialmean(:,:,stimOrder==7),3);
-    overlay(:,:,3)= median(trialmean(:,:,stimOrder==13),3);
+    overlay(:,:,1) = nanmedian(trialmean(:,:,stimOrder==1),3);
+    overlay(:,:,2) = nanmedian(trialmean(:,:,stimOrder==7),3);
+    overlay(:,:,3)= nanmedian(trialmean(:,:,stimOrder==13),3);
     %overlay(:,:,3)=0;
     overlay(overlay<0)=0; overlay = overlay/range(2);
     figure
@@ -551,7 +571,7 @@ if nstim==26 %%% gratings
     loc = 1:6; %%% map stim order onto subplot
     figure; set(gcf,'Name','vert gratings');
     for i = 1:6
-        meanimg = median(trialmean(:,:,stimOrder==i),3);
+        meanimg = nanmedian(trialmean(:,:,stimOrder==i),3);
         subplot(2,3,loc(i));
         imagesc(meanimg,range); axis equal
     end
@@ -559,7 +579,7 @@ if nstim==26 %%% gratings
     
     figure;set(gcf,'Name','horiz gratings');
     for i = 7:12
-        meanimg = median(trialmean(:,:,stimOrder==i),3);
+        meanimg = nanmedian(trialmean(:,:,stimOrder==i),3);
         subplot(2,3,loc(i-6));
         imagesc(meanimg,range); axis equal
     end
@@ -567,7 +587,7 @@ if nstim==26 %%% gratings
     
     figure; set(gcf,'Name','vert gratings');
     for i = 13:18
-        meanimg = median(trialmean(:,:,stimOrder==i),3);
+        meanimg = nanmedian(trialmean(:,:,stimOrder==i),3);
         subplot(2,3,loc(i-12));
         imagesc(meanimg,range); axis equal
     end
@@ -575,7 +595,7 @@ if nstim==26 %%% gratings
     
     figure;set(gcf,'Name','horiz gratings');
     for i = 19:24
-        meanimg = median(trialmean(:,:,stimOrder==i),3);
+        meanimg = nanmedian(trialmean(:,:,stimOrder==i),3);
         subplot(2,3,loc(i-18));
         imagesc(meanimg,range); axis equal
     end
@@ -583,7 +603,7 @@ if nstim==26 %%% gratings
     
     figure; set(gcf,'Name','flicker');
     for i = 25:26
-        meanimg = median(trialmean(:,:,stimOrder==i),3);
+        meanimg = nanmedian(trialmean(:,:,stimOrder==i),3);
         subplot(1,2,i-24);
         imagesc(meanimg,range); axis equal; if i ==25; title('low tf flicker'); else title('high tf flicker'); end
     end
@@ -596,7 +616,7 @@ if nstim==48 %%% spots
     loc = [1 7 13 19 2 8 14 20 3 9 15 21 4 10 16 22 5 11 17 23 6 12 18 24]; %%% map stim order onto subplot
     figure; set(gcf,'Name','OFF spots');
     for i = 1:24
-        meanimg = median(trialmean(:,:,stimOrder==i),3);
+        meanimg = nanmedian(trialmean(:,:,stimOrder==i),3);
         subplot(4,6,loc(i));
         imagesc(meanimg,range); axis equal; axis off
     end
@@ -604,7 +624,7 @@ if nstim==48 %%% spots
     
     figure; set(gcf,'Name','ON spots');
     for i = 25:48
-        meanimg = median(trialmean(:,:,stimOrder==i),3);
+        meanimg = nanmedian(trialmean(:,:,stimOrder==i),3);
         subplot(4,6,loc(i-24));
         imagesc(meanimg,range); axis equal; axis off
     end

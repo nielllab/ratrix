@@ -102,6 +102,22 @@ while ReDo
 %         close(clustmov);
     end
 end
+disp('Oiy');
+% SortedIndices = [FrameIndices NaNIndices];
+% CorrCoeff = zeros(length(SortedIndices));
+% for ii = 1:length(SortedIndices)
+%     % Downsample from 256x256 to 128x128 to decrease computing time &
+%     % decrease noise that may effect correlation measure
+%     iiImg = imresize(Aligned_Seq(:,:,SortedIndices(ii)),0.5);
+% 
+%     % Start at jj = ii because correlation matrix is symmetric
+%     for jj = ii:length(SortedIndices)
+%         
+%         jjImg = imresize(Aligned_Seq(:,:,SortedIndices(jj)),0.5);
+%         CorrCoeff(ii,jj) = corr2(iiImg,jjImg);
+%         CorrCoeff(jj,ii) = CorrCoeff(ii,jj);
+%     end
+% end
 
 end
 

@@ -13,7 +13,7 @@ Opt.MakeMov = 0;
 
 %Change filepath to match where you have ratrix
 %Remove paths that have functions named after standard matlab functions
-cd('C:\Users\Freeman\Documents\GitHub\ratrix');
+cd('C:\Users\nlab\Documents\GitHub\ratrix');
 rmpath('./matlabClub');
 rmpath('.\analysis\eflister\phys\new');
 rmpath('.\analysis\eflister\phys\new\helpers');
@@ -179,9 +179,9 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 %% calculate two reference images for choosing points on ...
 %%% absolute green fluorescence, and max df/f of each pixel
 greenFig = figure;
-title('Mean Green Channel')
+title('95th Pct Green Channel')
 stdImg = greenframe;
-imagesc(stdImg,[prctile(stdImg(:),1) prctile(stdImg(:),99)*1.2]); hold on; axis equal; colormap gray; title('Green Channel Mean')
+imagesc(stdImg,[prctile(stdImg(:),1) prctile(stdImg(:),99)*1.2]); hold on; axis equal; colormap gray;
 normgreen = (stdImg - prctile(stdImg(:),1))/ (prctile(stdImg(:),99)*1.5 - prctile(stdImg(:),1));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 

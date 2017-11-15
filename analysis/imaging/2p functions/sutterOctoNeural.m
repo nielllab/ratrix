@@ -8,12 +8,17 @@ close all
 Opt.NumChannels = 2; 
 % option to save figures to pdf file; make sure C:/temp/ folder exists
 Opt.SaveFigs = 1;
+Opt.psfile = 'C:\temp\TempFigs.ps';
+% option to create movies of non-aligned and aligned image sequences
 Opt.MakeMov = 0;
-
+% option for gaussian filter standard deviation
+Opt.fwidth = 0.5;
+% option to align or not
+Opt.align = 1;
 
 %Change filepath to match where you have ratrix
 %Remove paths that have functions named after standard matlab functions
-cd('C:\Users\nlab\Documents\GitHub\ratrix');
+cd('C:\Users\Freeman\Documents\GitHub\ratrix');
 rmpath('./matlabClub');
 rmpath('.\analysis\eflister\phys\new');
 rmpath('.\analysis\eflister\phys\new\helpers');
@@ -22,13 +27,8 @@ rmpath('.\analysis\eflister\phys\new\helpers');
 % dt = 0.5;
 % framerate=1/dt;
 
-%%% option of one or two color data (sutter stores 2-color as interleaved frames)
-%twocolor = input('how many colors? 1 / 2 : ')-1;
-twocolor = 2;
-%makeFigs = input('make pdf file 0 / 1 :');
-makeFigs = 1;
-if makeFigs
-    psfile = 'C:\temp\TempFigs.ps';
+if Opt.SaveFigs
+    psfile = Opt.psfile;
     if exist(psfile,'file')==2;delete(psfile);end
 end
 
@@ -89,8 +89,8 @@ else
     %% Performs Image registration and resample at requested frame rate
     % returns dfofInterp(x,y,t) = timeseries at requested framerate, with pre-stim frames clipped off
     % greenframe = mean fluorescence image
-    if twocolor
-        [dfofInterp, dtRaw, redframe, greenframe, mv] = get2colordata(fullfile(p,f),dt,cycLength, makeFigs);
+    if Opt.NumChannels == 2
+        [dfofInterp, dtRaw, redframe, greenframe, mv] = get2colordata(fullfile(p,f),dt,Opt);
     else
         [dfofInterp, dtRaw, greenframe] = get2pdata(fullfile(p,f),dt,cycLength);
     end
@@ -99,21 +99,20 @@ else
     dfofInterp = dfofInterp(:,:,startTime:end);
     
 end
-
 % Create index vector of NaN images
-xy = size(dfofInterp(:,:,1));
-FrameBool = zeros(size(dfofInterp,3),1);
-NaNFrameIndices = [];
-ValidFrameIndices = [];
-for iFrame = 1:length(dfofInterp)
-    if ~isnan(dfofInterp(floor(xy(1)/2),floor(xy(2)/2),iFrame))
-        ValidFrameIndices = [ValidFrameIndices, iFrame];
-        FrameBool(iFrame) = 1;
-    else
-        NaNFrameIndices = [NaNFrameIndices, iFrame];
-        FrameBool(iFrame) = 0;
-    end
-end
+% xy = size(dfofInterp(:,:,1));
+% FrameBool = zeros(size(dfofInterp,3),1);
+% NaNFrameIndices = [];
+% ValidFrameIndices = [];
+% for iFrame = 1:length(dfofInterp)
+%     if ~isnan(dfofInterp(floor(xy(1)/2),floor(xy(2)/2),iFrame))
+%         ValidFrameIndices = [ValidFrameIndices, iFrame];
+%         FrameBool(iFrame) = 1;
+%     else
+%         NaNFrameIndices = [NaNFrameIndices, iFrame];
+%         FrameBool(iFrame) = 0;
+%     end
+% end
 %% Load in the stimulus record
 [fStim, pStim] = uigetfile('*.mat','stimulus record');
 
@@ -167,21 +166,27 @@ title(sprintf('fourier map at %d frame cycle',cycLength));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %%% mean fluorescence of the entire image
+mfluorescence = zeros(size(dfofInterp,3),1);
+for iFrame = 1:size(dfofInterp,3)
+    frm = dfofInterp(:,:,iFrame);
+    frm = frm(~isinf(frm(:)));
+    mfluorescence(iFrame) = nanmean(frm(~isinf(frm(:))));
+end
 figure
-plot((1:size(dfofInterp,3))*dt,squeeze(nanmean(nanmean(dfofInterp,2),1)));
+plot((1:size(dfofInterp,3))*dt,mfluorescence);
 title('full image mean'); hold on
 for i = 1:reps
     plot([i*nstim*cycLength*dt  i*nstim*cycLength*dt], [0 0.5],'g');
 end
-xlabel('secs')
+xlabel('secs');ylabel('dfof');
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %% calculate two reference images for choosing points on ...
 %%% absolute green fluorescence, and max df/f of each pixel
 greenFig = figure;
-title('95th Pct Green Channel')
 stdImg = greenframe;
 imagesc(stdImg,[prctile(stdImg(:),1) prctile(stdImg(:),99)*1.2]); hold on; axis equal; colormap gray;
+title('95th Pct Green Channel');
 normgreen = (stdImg - prctile(stdImg(:),1))/ (prctile(stdImg(:),99)*1.5 - prctile(stdImg(:),1));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
@@ -189,7 +194,7 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 maxFig = figure;
 stdImg = max(dfofInterp,[],3); stdImg = medfilt2(stdImg);
 imagesc(stdImg,[prctile(stdImg(:),1) 2]); hold on; axis equal; colormap gray; title('max df/f')
-normMax = (stdImg - prctile(stdImg(:),1))/ (prctile(stdImg(:),98) - prctile(stdImg(:),1));
+normMax = (stdImg - prctile(stdImg(:),1))/ (prctile(stdImg(~isinf(stdImg(:))),98) - prctile(stdImg(:),1));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %%% create merge overlay of absolute fluorescence and max change
@@ -197,7 +202,7 @@ merge = zeros(size(stdImg,1),size(stdImg,2),3);
 merge(:,:,1)= normMax;
 merge(:,:,2) = normgreen;
 mergeFig = figure;
-imshow(merge); title('Mean/Max Green Channel Merge')
+imshow(merge); title('95th/Max Green Channel Merge')
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %% time to select points! either by hand or automatic
@@ -226,6 +231,7 @@ else
     %%% select points based on peaks of max df/f
     %%%calculate max df/f image
     img = nanmax(dfofInterp,[],3);
+    img(isnan(img(:))) = 0;
     filt = fspecial('gaussian',5,3);
     stdImg = imfilter(img,filt);
     figure
@@ -326,12 +332,13 @@ figure
 plot((0:size(dFrepeats,2)-1)/cycWindow, squeeze(nanmean(dFrepeats,1)))
 xlabel('stim #'); xlim([1 nstim+1]); ylim([-0.05 0.15])
 title('mean trace for each repeat');
-hold on; legend('1','2','3','4')
+hold on; 
 %plot((0:totalframes-1)/cycLength+1, squeeze(mean(mean(dFrepeats,3),1)),'g','Linewidth',2)
 plot((0:size(dFrepeats,2)-1)/cycWindow, squeeze(nanmean(nanmedian(dFrepeats,3),1)),'g','Linewidth',2)
 for i = 1:nstim
     plot([i i ],[0 0.3],'k:');
 end
+legend('1','2','3','4')
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %%% calculate cycle averages (timecourse for each individual stim)

@@ -1,4 +1,4 @@
-function [FrameIndices, FrameBool] = bin_Zplane(Img_Seq, Aligned_Seq, makeFigs)
+function [FrameIndices, FrameBool] = bin_Zplane(Img_Seq, Aligned_Seq, Opt)
 % This function takes a series of 2p images that have motion artifacts in
 % the z-plane and outputs the indices of the largest cluster of frames
 % sorted by pdist, linkage, and cluster functions. 
@@ -11,8 +11,8 @@ function [FrameIndices, FrameBool] = bin_Zplane(Img_Seq, Aligned_Seq, makeFigs)
 % Outputs:
 %   Indy: Vector of frame indices for a subset of images that presumably
 %   are in the same z-plane
-if makeFigs
-    psfile = 'C:\temp\TempFigs.ps';
+if Opt.SaveFigs
+    psfile = Opt.psfile;
 end
 
 nframes = size(Aligned_Seq,3);
@@ -78,8 +78,8 @@ while ReDo
     
     FrameIndices = [];
     NaNIndices = [];
-%     clustmov = figure;
-%     colormap gray
+    clustmov = figure;
+    colormap gray
     for iFrame = 1:nframes
         if T(iFrame) == ImgClust
 %             imagesc(Aligned_Seq(:,:,iFrame),RedRange)
@@ -93,16 +93,23 @@ while ReDo
         end
     end
     
+    meanclust = figure;
+    R_Mean = mean(Aligned_Seq(:,:,FrameIndices),3);
+    imagesc(R_Mean);colormap gray
+    title(sprintf('Mean Image after Rigid Alignment of %u out of %u total frames',length(FrameIndices),nframes));
+    
     %Give the user the option to reselect which cluster to use
-    ReDo = input('Do you want to reselect the # of clusters after watching the movie? (1:yes/0:no): ');
+    ReDo = input('Do you want to reselect the # of clusters after seeing the mean image? (1:yes/0:no): ');
     if ReDo == 1 
         close(clust);
+        close(meanclust);
     else 
+        close(meanclust);
         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-%         close(clustmov);
     end
 end
 disp('Oiy');
+
 % SortedIndices = [FrameIndices NaNIndices];
 % CorrCoeff = zeros(length(SortedIndices));
 % for ii = 1:length(SortedIndices)

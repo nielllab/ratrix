@@ -1,13 +1,24 @@
-function [dfofInterp, im_dt, MeanRedChannel, Grn95Percentile, mv] = get2colordata(fname, dt, cycLength,makeFigs)
-if makeFigs
-    psfile = 'C:\temp\TempFigs.ps';
+function [dfofInterp, im_dt, MeanRedChannel, Grn95Percentile, mv] = get2colordata(fname, dt, Opt)
+if Opt.SaveFigs
+    psfile = Opt.psfile;
 end
 % Display Movies for Non-aligned image sequences for both channels & save
 % the movie if it does not exist already
-% MakeMovieFromTiff(fname);
+if Opt.MakeMov
+    MakeMovieFromTiff(fname);
+end
 
 % Performs Image registration for both channels
-[imgAll, mv] = readAlign2color(fname,1,1,0.5);
+[imgAll, mv] = readAlign2color(fname,Opt);
+
+%Replace Inf Values with NaN
+for iFrame = 1:size(imgAll,3)
+    for iChannel = 1:2
+       frm = imgAll(:,:,iFrame,iChannel);
+       frm(isinf(frm(:))) = NaN;
+       imgAll(:,:,iFrame,iChannel) = frm;
+    end
+end
 
 %Get Info
 Img_Info = imfinfo(fname);
@@ -20,9 +31,6 @@ MeanRedChannel = squeeze(mean(imgAll(:,:,:,2),3));
 
 %Calculate the 95% of the green images
 Grn95Percentile = squeeze(prctile(imgAll(:,:,:,1),95,3));
-
-%Preallocate arrays
-imgInterp = zeros(size(imgAll));
 
 %%
 disp('Doing percentile for delta-f/f calculations');
@@ -55,62 +63,5 @@ for iChannel = 1:2
             dfofInterp = dfof;
         end
     end
-       
-    %Interpolate to desired frame rate if different than acquisition rate
-    if im_dt ~= dt
-        imgInterpAll{iChannel} = interp1(0:im_dt:(nframes-1)*im_dt,shiftdim(Aligned_Seq,2),0:dt:(nframes-1)*im_dt);
-        imgInterpAll{iChannel} = shiftdim(imgInterpAll{iChannel},1);
-    else
-        imgInterpAll{iChannel} = Aligned_Seq;
-    end
 end
-imgInterp(:,:,:,1) = imgInterpAll{1};
-imgInterp(:,:,:,2) = imgInterpAll{2};
 
-% cycFrames =cycLength/dt;
-% range = [prctile(m{1}(:),2) 2*prctile(m{1}(:),99)];
-% redframes = squeeze(imgInterp(:,:,:,2));
-% rangered = [ 0 prctile(m{2}(:),99)];
-% clear mov;
-% [Range] = clims(Img_Seq, nSample)
-% figure
-% for f = 1:cycFrames
-%     cycAvg(:,:,f,:) = mean(imgInterp(:,:,f:cycFrames:end,:),3);
-%     im(:,:,1) = squeeze(cycAvg(:,:,f,2))/rangered(2);
-%     im(:,:,2) = (squeeze(cycAvg(:,:,f,1)) - range(1))/(range(2)-range(1));
-%     im(:,:,3) = 0;
-%     imshow(im);
-%     mov(:,:,:,f)=im;
-% end
-
-% mov = immovie(mov)
-% title('raw img frames')
-% vid = VideoWriter(sprintf('%sCycleMov.avi',fname(1:end-4)));
-% vid.FrameRate=10;
-% open(vid);
-% writeVideo(vid,mov);
-% close(vid)
-
-% fullMov = zeros(size(imgInterp));
-% fullMov(:,:,:,3)=0;
-%
-%     fullMov(:,:,:,1) = imgInterp(:,:,:,2)/rangered(2);
-%     fullMov(:,:,:,2) = (imgInterp(:,:,:,1)-range(1))/(range(2) - range(1)) ;
-%
-%
-%
-% % fullMov= mat2im(imresize(img(25:end-25,25:end-25,150:550),2),gray,[prctile(m(:),2) 1.5*prctile(m(:),99)]);
-% % %fullMov = squeeze(fullMov(:,:,:,1));
-%  mov = immovie(permute(fullMov,[1 2 4 3]));
-% %mov = immovie(fullMov);
-% vid = VideoWriter(sprintf('%sfullMov.avi',fname(1:end-4)));
-% vid.FrameRate=10;
-%
-% vid.Quality=100;
-% open(vid);
-% writeVideo(vid,mov(50:250));
-% close(vid)
-
-% cycTimecourse = squeeze(mean(mean(cycAvg,2),1));
-% figure
-% plot(cycTimecourse);

@@ -19,7 +19,7 @@ GrnRange = zeros(1,2);
 RedRange = zeros(1,2);
 for iFrame = 1:sm:length(FrameIndices)
     tmp = Aligned_Seq(:,:,FrameIndices(iFrame),1);
-
+    
     GrnRange(1) = GrnRange(1) + prctile(tmp(:),1);
     GrnRange(2) = GrnRange(2) + 0.9*max(tmp(:));
     
@@ -33,13 +33,11 @@ GrnRange = GrnRange./10;
 RedRange = RedRange./10;
 
 %% Display Green Channel Movie and Save if file doesn't exist already
-if exist(GrnMovieFile) == 0
-    GrnVideo = VideoWriter(GrnMovieFile);
-    GrnVideo.FrameRate = framerate*10;
-    GrnVideo.Quality = 100;
-    open(GrnVideo);
-    MakeMov = 1;
-end
+GrnVideo = VideoWriter(GrnMovieFile);
+GrnVideo.FrameRate = framerate*10;
+GrnVideo.Quality = 100;
+open(GrnVideo);
+MakeMov = 1;
 
 GrnFig = figure;
 colormap gray
@@ -51,26 +49,19 @@ for iFrame = 1:length(FrameIndices)
     title(sTitle);
     
     drawnow
-    if MakeMov == 1
-        frame = getframe(GrnFig);
-        writeVideo(GrnVideo,frame);
-    end
+    frame = getframe(GrnFig);
+    writeVideo(GrnVideo,frame);
 end
 
 %Close Video
-if MakeMov == 1
-    close(GrnVideo);
-end
-
+close(GrnVideo);
 close(GrnFig);
 %% Display Red Channel Movie and Save if file doesn't exist already
-if exist(RedMovieFile) == 0
-    RedVideo = VideoWriter(RedMovieFile);
-    RedVideo.FrameRate = framerate*10;
-    RedVideo.Quality = 100;
-    open(RedVideo);
-    MakeMov = 1;
-end
+RedVideo = VideoWriter(RedMovieFile);
+RedVideo.FrameRate = framerate*10;
+RedVideo.Quality = 100;
+open(RedVideo);
+MakeMov = 1;
 
 RedFig = figure;
 colormap gray
@@ -82,16 +73,13 @@ for iFrame = 1:length(FrameIndices)
     title(sTitle);
     
     drawnow
-    if MakeMov == 1
-        frame = getframe(RedFig);
-        writeVideo(RedVideo,frame);
-    end
+    frame = getframe(RedFig);
+    writeVideo(RedVideo,frame);
+    
 end
 
 %Close Video
-if MakeMov == 1
-    close(RedVideo);
-end
+close(RedVideo);
 close(RedFig)
 
 end

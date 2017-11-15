@@ -1,5 +1,5 @@
 function MakeMovieFromTiff(fname)
-MakeMov = 0;
+
 %Get file info
 Img_Info = imfinfo(fname);
 nframes = length(Img_Info)/2;
@@ -38,13 +38,11 @@ GrnRange = GrnRange./4;
 RedRange = RedRange./4;
 
 %% Display Green Channel Movie and Save if file doesn't exist already
-if exist(GrnMovieFile) == 0
-    GrnVideo = VideoWriter(GrnMovieFile);
-    GrnVideo.FrameRate = framerate*10;
-    GrnVideo.Quality = 100;
-    open(GrnVideo);
-    MakeMov = 1;
-end
+GrnVideo = VideoWriter(GrnMovieFile);
+GrnVideo.FrameRate = framerate*10;
+GrnVideo.Quality = 100;
+open(GrnVideo);
+MakeMov = 1;
 
 GrnFig = figure;
 colormap gray
@@ -56,26 +54,19 @@ for iFrame = 1:nframes
     title(sTitle);
     
     drawnow
-    if MakeMov == 1
-        frame = getframe(GrnFig);
-        writeVideo(GrnVideo,frame);
-    end
+    frame = getframe(GrnFig);
+    writeVideo(GrnVideo,frame);
 end
 
 %Close Video
-if MakeMov == 1
-    close(GrnVideo);
-end
-
+close(GrnVideo);
 close(GrnFig);
 %% Display Red Channel Movie and Save if file doesn't exist already
-if exist(RedMovieFile) == 0
-    RedVideo = VideoWriter(RedMovieFile);
-    RedVideo.FrameRate = framerate*10;
-    RedVideo.Quality = 100;
-    open(RedVideo);
-    MakeMov = 1;
-end
+RedVideo = VideoWriter(RedMovieFile);
+RedVideo.FrameRate = framerate*10;
+RedVideo.Quality = 100;
+open(RedVideo);
+MakeMov = 1;
 
 RedFig = figure;
 colormap gray
@@ -87,16 +78,13 @@ for iFrame = 1:nframes
     title(sTitle);
     
     drawnow
-    if MakeMov == 1
-        frame = getframe(RedFig);
-        writeVideo(RedVideo,frame);
-    end
+    frame = getframe(RedFig);
+    writeVideo(RedVideo,frame);
+
 end
 
 %Close Video
-if MakeMov == 1
-    close(RedVideo);
-end
+close(RedVideo);
 close(RedFig)
 
 end

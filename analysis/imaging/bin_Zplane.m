@@ -109,7 +109,7 @@ while ReDo
     end
 end
 disp('Oiy');
-
+%Comment out below 15 lines if you don't want a correlation matrix
 % SortedIndices = [FrameIndices NaNIndices];
 % CorrCoeff = zeros(length(SortedIndices));
 % for ii = 1:length(SortedIndices)

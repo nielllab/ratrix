@@ -251,7 +251,7 @@ end
 
 %%% plot pixel-wise cycle average
 figure
-for i = 1:cycLength
+for i = 1:min(cycLength,10)
     subplot(2,5,i);
     imagesc(cycImg(:,:,i)-min(cycImg,[],3),[0 0.1]); axis equal
 end

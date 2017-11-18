@@ -25,9 +25,9 @@ scale = pixPerFrame/prod(sz);
 % if scale>1
 %    scale = 1;
 % end
-if scale<1
-    sz = round(sqrt(scale)*sz);
-end
+% if scale<1
+%     sz = round(sqrt(scale)*sz);
+% end
 
 mfn = [iPath '_' sprintf('%d_%d_%d',sz(1),sz(2),length(ids)) '.mat'];
 if exist(mfn,'file') 
@@ -52,11 +52,11 @@ if exist(mfn,'file') && exist('maxGBsaved','var') && maxGBsaved==maxGB && false
 else
     fprintf('reading from scratch\n')
     % fprintf('requesting %g GB memory\n',length(ids)*prod(sz)*bytesPerPix/1000/1000/1000)
-    
-    data = zeros(sz(1),sz(2),length(ids),'uint16');
+
+%     data = zeros(sz(1),sz(2),length(ids),'uint16');
     %stamps = zeros(stampHeight,300,length(ids),'uint16'); %%%300?
     stamps = zeros(stampHeight,origW,length(ids),'uint16');
-    
+    data = zeros(sz(1),sz(2),length(ids),'uint16');
     [d,base, ext] = fileparts(iPath);
     tic
     for i=1:length(ids) %something in this loop is leaking
@@ -92,7 +92,7 @@ else
         end
         
         
-        data(:,:,i) = imresize(frm,sz); %is imresize smart about unity?  how do our data depend on method?  (we use default 'bicubic' -- "weighted average of local 4x4" (w/antialiasing) -- we can specify kernel if desired)
+        data(:,:,i) = frm; %imresize(frm,sz); %is imresize smart about unity?  how do our data depend on method?  (we use default 'bicubic' -- "weighted average of local 4x4" (w/antialiasing) -- we can specify kernel if desired)
         
     end
     toc

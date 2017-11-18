@@ -11,7 +11,7 @@ binning=0.5;
 framerate=10;
 
 choosePix =0; %%% option to manually select pixels for timecourse analysis
-maxGB = 1.50*binning.^2; %%% size to reduce data down to
+maxGB = 16*binning.^2; %%% size to reduce data down to
 binning=1;
 
 if ~exist('in','var') || isempty(in)
@@ -50,7 +50,7 @@ end
 %flip image? 1 = yes 0 = no
 
 
-[out frameT idx pca_fig]=readSyncMultiTif_Blue(basename,maxGB,fl,namelength, rigzoom);
+[out frameT idx pca_fig]=readSyncMultiTif_BlueEA(basename,maxGB,fl,namelength, rigzoom);
 
 
 psfilenameFinal = [basename '.ps'];

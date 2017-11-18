@@ -20,7 +20,7 @@ end
 if rig==1
     rigzoom =1; fl=0;
 else
-    rigzoom = 0.859; fl=1;
+    rigzoom =1; fl=1; %0.859; 
 end
 
 datadir = p;

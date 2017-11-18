@@ -12,12 +12,14 @@
 %%
 
 deconvplz = 0 %choose if you want deconvolution
-fully = 0 %choose if you want full frame (260x260), else scales down by 2
+fully = 1 %choose if you want full frame (260x260), else scales down by 2
 pixbin = 5 %choose binning for gaussian analysis of spread
+dfrangesit = [-0.001 0.015]; %%%range for imagesc visualization
+dfrangerun = [-0.001 0.025]; %%%range for imagesc visualization
 
 for f = 1:length(use)
-    filename = sprintf('%s_%s_%s_%s',files(use(f)).expt,files(use(f)).subj,files(use(f)).timing,files(use(f)).inject);
-    if exist([filename '.mat'])==0
+    filename = sprintf('%s_%s_%s_%s_patchonpatch',files(use(f)).expt,files(use(f)).subj,files(use(f)).timing,files(use(f)).inject);
+%     if exist([filename '.mat'])==0
         load('C:\patchonpatch14min')
 %         load('C:\mapoverlay.mat')
 %         load('C:\areamaps.mat')
@@ -104,7 +106,7 @@ for f = 1:length(use)
         for fr=1:cyclength
             cycavg(:,:,fr) = mean(img(:,:,(fr:cyclength:end)),3);
             subplot(nx,nx,p(fr))
-            imagesc(squeeze(cycavg(:,:,fr)),[-0.001 0.01])
+            imagesc(squeeze(cycavg(:,:,fr)),dfrangesit)
             axis off
             set(gca,'LooseInset',get(gca,'TightInset'))
 %             hold on; plot(ypts,xpts,'w.','Markersize',2)
@@ -137,6 +139,7 @@ for f = 1:length(use)
 
 %%
         %deconvolution
+%         keyboard
         if deconvplz == 1
             sprintf('doing deconvolution')
             %do deconvolution on the raw data
@@ -155,6 +158,10 @@ for f = 1:length(use)
             plot(squeeze(img(130,130,:)))
             plot(squeeze(deconvimg(130,130,:)),'g')
             hold off
+            if exist('psfilename','var')
+                set(gcf, 'PaperPositionMode', 'auto');
+                print('-dpsc',psfilename,'-append');
+            end
             delete(pp)
             ncut = 3 %# of trials to cut due to deconvolution cutting off end
             trials=trials-ncut; %deconv cuts off last trial
@@ -244,23 +251,23 @@ for f = 1:length(use)
 %%
         %manual/loading point selection
         [files(use(f)).subj ' ' files(use(f)).inject]
-        if ~exist(files(use(f)).patchpts)
+        if ~exist(fullfile(pathname,files(use(f)).patchpts))
             sprintf('Pick center of visual response')
             
             amos=figure;
             colormap jet
             subplot(2,2,1)
-            imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),[-0.001 0.01])
+            imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),dfrangesit)
             axis off
             title('small center sit')
             subplot(2,2,2)
-            imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,3,:,1),3),5)),[-0.001 0.01])
+            imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,3,:,1),3),5)),dfrangesit)
             axis off
             title('large center sit')
 
             andy=figure;
             colormap jet
-            imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),[-0.001 0.01])
+            imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),dfrangesit)
             axis off
             title('select center point of response')
             [y x] = ginput(1);
@@ -280,7 +287,7 @@ for f = 1:length(use)
             close(amos,andy)
             save(files(use(f)).patchpts,'x','y','dist');
         else
-            load(files(use(f)).patchpts)
+            load(fullfile(pathname,files(use(f)).patchpts))
         end
         
 
@@ -305,19 +312,19 @@ for f = 1:length(use)
         figure
         colormap jet
         subplot(2,2,1)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),[-0.001 0.01])
+        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),dfrangesit)
         axis off
         title('small center sit')
         subplot(2,2,2)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,3,:,1),3),5)),[-0.001 0.01])
+        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,3,:,1),3),5)),dfrangesit)
         axis off
         title('large center sit')
         subplot(2,2,3)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,2),3),5)),[-0.001 0.01])
+        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,2),3),5)), dfrangerun)
         axis off
         title('small center run')
         subplot(2,2,4)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,3,:,2),3),5)),[-0.001 0.01])
+        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,3,:,2),3),5)), dfrangerun)
         axis off
         title('large center run')
         if exist('psfilename','var')
@@ -367,19 +374,19 @@ for f = 1:length(use)
         figure
         colormap jet
         subplot(2,2,1)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,6,:,1),3),5)),[-0.001 0.01])
+        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,6,:,1),3),5)),dfrangesit)
         axis off
         title('small donut sit')
         subplot(2,2,2)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,7,:,1),3),5)),[-0.001 0.01])
+        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,7,:,1),3),5)),dfrangesit)
         axis off
         title('large donut sit')
         subplot(2,2,3)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,6,:,2),3),5)),[-0.001 0.01])
+        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,6,:,2),3),5)), dfrangerun)
         axis off
         title('small donut run')
         subplot(2,2,4)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,7,:,2),3),5)),[-0.001 0.01])
+        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,7,:,2),3),5)), dfrangerun)
         axis off
         title('large donut run')
         if exist('psfilename','var')
@@ -429,19 +436,19 @@ for f = 1:length(use)
         figure
         colormap jet
         subplot(2,2,1)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,4,1,1),3),5)),[-0.001 0.01])
+        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,4,1,1),3),5)),dfrangesit)
         axis off
         title('small iso sit')
         subplot(2,2,2)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,4,2,1),3),5)),[-0.001 0.01])
+        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,4,2,1),3),5)),dfrangesit)
         axis off
         title('small cross sit')
         subplot(2,2,3)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,5,1,1),3),5)),[-0.001 0.01])
+        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,5,1,1),3),5)),dfrangesit)
         axis off
         title('large iso sit')
         subplot(2,2,4)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,5,2,1),3),5)),[-0.001 0.01])
+        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,5,2,1),3),5)),dfrangesit)
         axis off
         title('large cross sit')
         if exist('psfilename','var')
@@ -490,19 +497,19 @@ for f = 1:length(use)
         figure
         colormap jet
         subplot(2,2,1)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,4,1,2),3),5)),[-0.001 0.01])
+        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,4,1,2),3),5)), dfrangerun)
         axis off
         title('small iso run')
         subplot(2,2,2)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,4,2,2),3),5)),[-0.001 0.01])
+        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,4,2,2),3),5)), dfrangerun)
         axis off
         title('small cross run')
         subplot(2,2,3)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,5,1,2),3),5)),[-0.001 0.01])
+        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,5,1,2),3),5)), dfrangerun)
         axis off
         title('large iso run')
         subplot(2,2,4)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,5,2,2),3),5)),[-0.001 0.01])
+        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,5,2,2),3),5)), dfrangerun)
         axis off
         title('large cross run')
         if exist('psfilename','var')
@@ -591,8 +598,8 @@ for f = 1:length(use)
         end
 
         delete(psfilename);
-        close all
-    else
-        sprintf('skipping %s',filename)
-    end
+%         close all
+%     else
+%         sprintf('skipping %s',filename)
+%     end
 end

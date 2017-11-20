@@ -1,4 +1,4 @@
-function [Aligned_Seq, mv] = readAlign2color(fname, Opt)
+function [Aligned_Seq, r, nr] = readAlign2color(fname, Opt)
 if Opt.SaveFigs
     psfile = Opt.psfile;
 end
@@ -24,7 +24,11 @@ if Opt.align
     disp('Doing Alignment!')
     
     %Get Alignment Channel
-    AC = input('Red channel(2) or Green channel(1) for alignment?: ');
+    if isfield(Opt,'AlignmentChannel')
+        AC = Opt.AlignmentChannel;
+    else
+        AC = input('Red channel(2) or Green channel(1) for alignment?: ');
+    end
     
     if AC == 2
         alignIndices = 2:2:nframes*2;
@@ -48,7 +52,7 @@ if Opt.align
     for iFrame = 1:nframes
         for iChannel = 1:2
             %First apply gaussian filter to non-aligned image
-            Img_Seq(:,:,iFrame,1) = imfilter(Img_Seq(:,:,iFrame,1),filt);
+            Img_Seq(:,:,iFrame,iChannel) = imfilter(Img_Seq(:,:,iFrame,iChannel),filt);
             
             %Then apply xy rigid translation determined by sbxalign
             RAligned_Seq(:,:,iFrame,iChannel) = circshift(squeeze(Img_Seq(:,:,iFrame,iChannel)),[r.T(iFrame,1),r.T(iFrame,2)]);
@@ -61,11 +65,17 @@ if Opt.align
     %Plot Mean image of rigidly aligned image sequence
     figure
     R_Mean = mean(RAligned_Seq(:,:,:,1),3);
-    imagesc(R_Mean);colormap gray
-    title('Mean Image after Rigid Alignment of full frame sequence');
+    imagesc(R_Mean,[0, 0.80].*max(R_Mean(:)));colormap gray
+    title('Mean Green Image after Rigid Alignment of full frame sequence');
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
-    zplane = input('Z-plane Binning? yes(1)/no(0): ');
+    %Should we bin for z-motion?
+    if isfield(Opt,'ZBinning')
+        zplane = Opt.ZBinning;
+    else
+        zplane = input('Z-plane Binning? yes(1)/no(0): ');
+    end
+    
     %% Perform cluster analysis on image sequence to determine which
     %images stay within a similar z-plane
     if zplane == 1
@@ -74,7 +84,7 @@ if Opt.align
         %Plot Mean image of rigidly aligned image sequence
         figure
         R_Mean = mean(RAligned_Seq(:,:,FrameIndices,1),3);
-        imagesc(R_Mean);colormap gray
+        imagesc(R_Mean,[0, 0.80].*max(R_Mean(:)));colormap gray
         title(sprintf('Mean Image after Rigid Alignment of %u out of %u total frames',length(FrameIndices),nframes));
         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     else
@@ -83,8 +93,12 @@ if Opt.align
     end
     
     %Get alignment options
-    disp('Keeping in mind that the following algorithm is very computationally intensive (runtime > 10mins for 1000 frames),');
-    rigid = input('Do you want to correct for rotations as well? yes(1)/no(0): ');
+    if isfield(Opt,'Rotation')
+        rigid = Opt.Rotation;
+    else
+        disp('Keeping in mind that the following algorithm is very computationally intensive (runtime > 10mins for 1000 frames),');
+        rigid = input('Do you want to correct for rotations as well? yes(1)/no(0): ');
+    end
     
     %% Now that we have a subset of frames that are presumably in the same 
     % z-plane, re-run the alignment process with only that subset using
@@ -113,41 +127,11 @@ if Opt.align
         %Plot Mean image of nonrigidly aligned image sequence
         figure
         NR_Mean = mean(Aligned_Seq(:,:,FrameIndices,1),3);
-        imagesc(NR_Mean);colormap gray
+        imagesc(NR_Mean,[0, 0.80].*max(NR_Mean(:)));colormap gray
         title(sprintf('Mean Image after Rigid + Rotation Alignment of %u out of %u total frames',length(FrameIndices),nframes));
         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-   
-    elseif (rigid == 0 && zplane == 1)
-        % Only re-run the rigid alignment algorithm, sbxalign_tif, if a
-        % subset of frames were identified in bin_Zplane
-        rr = sbxalign_tif(fname,FrameIndices*2); %Recursive Rigid
-        mv = rr.T;
-        buffer = max(abs(mv(:)))+2;
-    
-        % Apply translation determined by sbxalign_tif to each frame in 
-        % the subset, while setting those not in subset to NaN
-        ii = 1;
-        Aligned_Seq = zeros(Img_Info(1).Height,Img_Info(1).Width,nframes,2);
-        for iFrame = 1:nframes
-            if FrameBool(iFrame) == 1
-                Aligned_Seq(:,:,iFrame,1) = circshift(squeeze(Img_Seq(:,:,iFrame,1)),[rr.T(ii,1),rr.T(ii,2)]);
-                Aligned_Seq(:,:,iFrame,2) = circshift(squeeze(Img_Seq(:,:,iFrame,2)),[rr.T(ii,1),rr.T(ii,2)]);
-                ii = ii + 1;
-            else
-                Aligned_Seq(:,:,iFrame,1) = NaN;
-                Aligned_Seq(:,:,iFrame,2) = NaN;
-            end
-        end
-        Aligned_Seq = Aligned_Seq(buffer:end-buffer,buffer:end-buffer,:,:);
-        
-        %Plot Mean image of recursive rigid aligned image sequence
-        figure
-        RR_Mean = mean(Aligned_Seq(:,:,FrameIndices,1),3);
-        imagesc(RR_Mean);colormap gray
-        title(sprintf('Mean Image after Recursive Rigid Alignment of %u out of %u total frames',length(FrameIndices),nframes));
-        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
-    end
+      
+    else nr = []; end
     
     % Make an aligned movie from Aligned_Seq
     if Opt.MakeMov
@@ -155,6 +139,7 @@ if Opt.align
     end
         
 else
-    mv = NaN;
+    nr = [];
+    r = [];
     Aligned_Seq = Img_Seq;
 end

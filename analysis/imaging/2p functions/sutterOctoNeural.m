@@ -1,24 +1,34 @@
+function varargout = sutterOctoNeural(varargin)
 %% reads in sutter data, extracts cell traces, and aligns to stim
 % optimized for octopus optic lobe with cal520 label
-clear all
-close all
-
-%% Edit Following options to match dataset
-% option of one or two color data (sutter stores 2-color as interleaved frames)
-Opt.NumChannels = 2; 
-% option to save figures to pdf file; make sure C:/temp/ folder exists
-Opt.SaveFigs = 1;
-Opt.psfile = 'C:\temp\TempFigs.ps';
-% option to create movies of non-aligned and aligned image sequences
-Opt.MakeMov = 0;
-% option for gaussian filter standard deviation
-Opt.fwidth = 0.5;
-% option to align or not
-Opt.align = 1;
+% if sutterOctoNeural is called as a function
+if ~isempty(varargin) 
+    Opt = varargin{1};
+else
+    % option of one or two color data (sutter stores 2-color as interleaved frames)
+    Opt.NumChannels = 2; 
+    % option to save figures to pdf file; make sure C:/temp/ folder exists
+    Opt.SaveFigs = 1;
+    Opt.psfile = 'C:\temp\TempFigs.ps';
+    % option to create movies of non-aligned and aligned image sequences
+    Opt.MakeMov = 0;
+    % option for gaussian filter standard deviation
+    Opt.fwidth = 0.5;
+    % option to align or not
+    Opt.align = 1;
+    % Option to resample at a different framerate
+    Opt.Resample = 0;
+    Opt.Resample_dt = 0.5;
+    % Option to read in ttl-file
+    Opt.ttl_file = 1;
+    %Option to output results structure 
+    %Set to 0 if you want to run as script
+    Opt.SaveOutput = 0;
+end
 
 %Change filepath to match where you have ratrix
 %Remove paths that have functions named after standard matlab functions
-cd('C:\Users\nlab\Documents\GitHub\ratrix');
+cd('C:\Users\Freeman\Documents\GitHub\ratrix');
 rmpath('./matlabClub');
 rmpath('.\analysis\eflister\phys\new');
 rmpath('.\analysis\eflister\phys\new\helpers');
@@ -33,91 +43,71 @@ if Opt.SaveFigs
 end
 
 %%  get sutter data
-% Following ~70 lines of code used to be contained within get2pSession.m script
 % Get File Path for tiff Image
-[f, p] = uigetfile({'*.mat;*.tif'},'.mat or .tif file');
+if ~isfield(Opt,'fTif')
+    %Get tif file input
+    [Opt.fTif, Opt.pTif] = uigetfile({'*.tif'},'.tif file');
+end
 
 %Get Image acquisition frame rate
-%resampleHZ = input('Resample framerate (enter 0 to keep acquisition framerate) : ');
-resampleHZ = 0;
-if resampleHZ == 0
-    Img_Info = imfinfo(fullfile(p,f));
+if Opt.Resample == 0
+    Img_Info = imfinfo(fullfile(Opt.pTif,Opt.fTif));
     trash = evalc(Img_Info(1).ImageDescription);
     framerate = state.acq.frameRate;
     dt = 1/framerate;
 else
-    framerate = resampleHZ;
+    framerate = input('Resample framerate? : ');
     dt = 1/framerate;
 end
 
-if strcmp(f(end-3:end),'.mat')
-    disp('loading data')
-    sessionName = fullfile(p,f);
-    load(sessionName)
-    disp('done')
-    if ~exist('cycLength','var')
-        cycLength=8;
+%Read in ttl file if used
+Opt.ttl_file = 1;
+if Opt.ttl_file
+    % Get File Path for ttl Image
+    if ~isfield(Opt,'fTTL')
+        %Get tif file input
+        [Opt.fTTL, Opt.pTTL] = uigetfile('*.mat','ttl file');
     end
+
+    [stimPulse, framePulse] = getTTL(fullfile(Opt.pTTL,Opt.fTTL));
+    
+    % number of frames per cycle
+    cycLength = mean(diff(stimPulse))/dt;
+    % number of frames in window around each cycle. min of 4 secs, or actual cycle length + 2
+    cycWindow = round(max(4/dt,cycLength));
+    
+    %Plot the Cycle Time
+    figure
+    plot(diff(stimPulse)); title('stimPulse cycle time');hold on
+    plot(1:length(stimPulse),ones(size(stimPulse))*cycLength*dt); ylabel('secs');xlabel('stim #')
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    startTime = round(stimPulse(1)/dt)-1;
 else
-    % Uses the ttl file to find first frame of imaging after stim comes on
-    %     ttl_file = input('Do you have a ttl file to read in? (yes:1/no:0): ');
-    [ttlf, ttlp] = uigetfile('*.mat','ttl file');
-
-    ttlFname = fullfile(ttlp,ttlf);
-    ttl_file = 1;
-    
-    if ttl_file
-        [stimPulse, framePulse] = getTTL(fullfile(ttlp,ttlf));
-        
-        % number of frames per cycle
-        cycLength = mean(diff(stimPulse))/dt;
-        % number of frames in window around each cycle. min of 4 secs, or actual cycle length + 2
-        cycWindow = round(max(4/dt,cycLength));
-        
-        %Plot the Cycle Time
-        figure
-        plot(diff(stimPulse)); title('stimPulse cycle time');hold on
-        plot(1:length(stimPulse),ones(size(stimPulse))*cycLength*dt); ylabel('secs');xlabel('stim #')
-        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-        
-        startTime = round(stimPulse(1)/dt)-1;
-    else
-        stimPulse = []; framePulse = []; startTime = 1;
-    end
-    
-    
-    %% Performs Image registration and resample at requested frame rate
-    % returns dfofInterp(x,y,t) = timeseries at requested framerate, with pre-stim frames clipped off
-    % greenframe = mean fluorescence image
-    if Opt.NumChannels == 2
-        [dfofInterp, dtRaw, redframe, greenframe, mv] = get2colordata(fullfile(p,f),dt,Opt);
-    else
-        [dfofInterp, dtRaw, greenframe] = get2pdata(fullfile(p,f),dt,cycLength);
-    end
-    
-    %Reduce Aligned stack to include only the stimulus times
-    dfofInterp = dfofInterp(:,:,startTime:end);
-    
+    stimPulse = []; framePulse = []; startTime = 1;
 end
-% Create index vector of NaN images
-% xy = size(dfofInterp(:,:,1));
-% FrameBool = zeros(size(dfofInterp,3),1);
-% NaNFrameIndices = [];
-% ValidFrameIndices = [];
-% for iFrame = 1:length(dfofInterp)
-%     if ~isnan(dfofInterp(floor(xy(1)/2),floor(xy(2)/2),iFrame))
-%         ValidFrameIndices = [ValidFrameIndices, iFrame];
-%         FrameBool(iFrame) = 1;
-%     else
-%         NaNFrameIndices = [NaNFrameIndices, iFrame];
-%         FrameBool(iFrame) = 0;
-%     end
-% end
-%% Load in the stimulus record
-[fStim, pStim] = uigetfile('*.mat','stimulus record');
 
-if fStim ~= 0
-    load(fullfile(pStim,fStim),'stimRec');
+%% Performs Image registration and resample at requested frame rate
+% returns dfofInterp(x,y,t) = timeseries at requested framerate, with pre-stim frames clipped off
+% greenframe = mean fluorescence image
+if Opt.NumChannels == 2
+    [dfofInterp, dtRaw, greenframe, Rigid, Rotation] = get2colordata(fullfile(Opt.pTif,Opt.fTif),dt,Opt);
+else
+    [dfofInterp, dtRaw, greenframe] = get2pdata(fullfile(Opt.pTif,Opt.fTif),dt,cycLength);
+end
+
+%Reduce Aligned stack to include only the stimulus times
+dfofInterp = dfofInterp(:,:,startTime:end);
+    
+%% Load in the stimulus record
+% Get File Path for stimulus record file
+if ~isfield(Opt,'fStim')
+    %Get tif file input
+    [Opt.fStim, Opt.pStim] = uigetfile('*.mat','stimulus record');
+end
+
+if Opt.fStim ~= 0
+    load(fullfile(Opt.pStim,Opt.fStim),'stimRec');
     nCycles = floor(size(dfofInterp,3)/cycLength)-ceil((cycWindow-cycLength)/cycLength);  %%% trim off last stims to allow window for previous stim
     stimT = stimRec.ts - stimRec.ts(1);
     for i = 1:nCycles
@@ -162,7 +152,7 @@ img = img.*repmat(amp,[1 1 3]);
 figure
 imshow(imresize(img,2))
 colormap(hsv); colorbar
-title(sprintf('fourier map at %d frame cycle',cycLength));
+title(sprintf('fourier map at %.3f frame cycle',cycLength));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %%% mean fluorescence of the entire image
@@ -186,7 +176,7 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 greenFig = figure;
 stdImg = greenframe;
 imagesc(stdImg,[prctile(stdImg(:),1) prctile(stdImg(:),99)*1.2]); hold on; axis equal; colormap gray;
-title('95th Pct Green Channel');
+title('Mean Green Channel');
 normgreen = (stdImg - prctile(stdImg(:),1))/ (prctile(stdImg(:),99)*1.5 - prctile(stdImg(:),1));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
@@ -202,11 +192,16 @@ merge = zeros(size(stdImg,1),size(stdImg,2),3);
 merge(:,:,1)= normMax;
 merge(:,:,2) = normgreen;
 mergeFig = figure;
-imshow(merge); title('95th/Max Green Channel Merge')
+imshow(merge); title('Mean/Max Green Channel Merge')
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %% time to select points! either by hand or automatic
-selectPts = input('select points by hand (1) or automatic (0) : ');
+if isfield(Opt,'selectPts')
+    selectPts = Opt.selectPts;
+else
+    selectPts = input('select points by hand (1) or automatic (0) : ');
+end
+
 if selectPts
     chooseFig = input('select based on 1) mean image, 2) max image, 3) merge image : ');
     if chooseFig==1 
@@ -232,6 +227,7 @@ else
     %%%calculate max df/f image
     img = nanmax(dfofInterp,[],3);
     img(isnan(img(:))) = 0;
+    img(isinf(img(:))) = 0;
     filt = fspecial('gaussian',5,3);
     stdImg = imfilter(img,filt);
     figure
@@ -252,7 +248,14 @@ else
     
     %%% crop image to avoid points near border that may have artifact
     disp('Select area in figure to include in the analysis');
-    [xrange, yrange] = ginput(2);
+    if isfield(Opt,'selectPts')
+        mv = Rigid.T;
+        buffer = floor((max(abs(mv(:)))+2)/2);
+        xrange = [buffer, size(img,2) - buffer];
+        yrange = [buffer, size(img,1) - buffer];
+    else
+        [xrange, yrange] = ginput(2);
+    end
     pts = pts(x>xrange(1) & x<xrange(2) & y>yrange(1) & y<yrange(2));
     
     %%% sort points based on their value (max df/f)
@@ -262,7 +265,11 @@ else
     fprintf('%d points in ROI\n',length(pts))
     
     %%% choose points over a cutoff, to eliminate noise / nonresponsive
-    mindF= input('dF cutoff : ');
+    if isfield(Opt,'mindF')
+        mindF = Opt.mindF;
+    else
+        mindF= input('dF cutoff : ');
+    end
     pts = pts(img(pts)>mindF);
     fprintf('%d points in ROI over cutoff\n',length(pts))
     
@@ -352,7 +359,7 @@ end
 %%% plot pixel-wise cycle average
 figure
 for i = 1:cycLength
-    subplot(2,6,i);
+    subplot(2,ceil(cycLength/2),i);
     imagesc(cycImg(:,:,i)-min(cycImg,[],3),[0 0.1]); axis equal
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
@@ -408,19 +415,23 @@ end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %%% select number of clusters you want
-nclust =input('# of clusters : '); %%% set to however many you want
-c= cluster(Z,'maxclust',nclust);
+if isfield(Opt,'nclust')
+    nclust = Opt.nclust;
+else
+    nclust =input('# of clusters : ');
+end
+    
+c = cluster(Z,'maxclust',nclust);
 colors = hsv(nclust+1); %%% color code for each cluster
 
 %%% plot spatial location of cells in each cluster
 figure
-imagesc(stdImg,[0 prctile(stdImg(:),99)*1.2]); colormap gray; axis equal;hold on
+imagesc(stdImg,[0 prctile(stdImg(:),95)]); colormap gray; axis equal;hold on
 for clust=1:nclust
     plot(x(c==clust),y(c==clust),'o','Color',colors(clust,:));
 end
 title(sprintf('%u Clusters',nclust));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
 
 %%% summary plots for each cluster
 for clust = 1:nclust
@@ -428,7 +439,7 @@ for clust = 1:nclust
     %%% spatial location of cells in this cluster
     figure
     subplot(2,2,1);
-    imagesc(stdImg,[0 prctile(stdImg(:),99)*1.2]); axis equal; hold on;colormap gray;freezeColors;
+    imagesc(stdImg,[0 prctile(stdImg(:),95)]); axis equal; hold on;colormap gray;freezeColors;
     title(sprintf('cluster %d',clust));
     plot(x(c==clust),y(c==clust),'go')%%'Color',colors(c));
     
@@ -471,7 +482,6 @@ for clust = 1:nclust
 end; title('mean cyc avg for each cluster)')
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-
 %%% mean response for each cluster
 figure
 hold on
@@ -512,6 +522,7 @@ if nstim==12 %%% spots
         meanimg = nanmedian(trialmean(:,:,stimOrder==i),3);
         subplot(2,3,loc(i));
         imagesc(meanimg,range); axis equal
+        title('OFF spots');
         stimImg(:,:,i) = meanimg;
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
@@ -521,6 +532,7 @@ if nstim==12 %%% spots
         meanimg = nanmedian(trialmean(:,:,stimOrder==i),3);
         subplot(2,3,loc(i-6));
         imagesc(meanimg,range); axis equal
+        title('ON spots');
         stimImg(:,:,i) = meanimg;
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
@@ -639,15 +651,28 @@ if nstim==48 %%% spots
     
 end
 
-
 %%% save out pdf file!
 if Opt.SaveFigs
-    [f p] = uiputfile('*.pdf','save pdf file');
-    newpdfFile = fullfile(p,f)
+    if ~isfield(Opt,'pPDF')
+        [Opt.fPDF, Opt.pPDF] = uiputfile('*.pdf','save pdf file');
+    end
+    
+    newpdfFile = fullfile(Opt.pPDF,Opt.fPDF);
     try
         dos(['ps2pdf ' 'c:\temp\TempFigs.ps "' newpdfFile '"'] )
         
     catch
         display('couldnt generate pdf');
     end
+end
+
+if Opt.SaveOutput
+    Output.R = Rigid;
+    Output.NR = Rotation;
+    Output.dfof = dfofInterp;
+    Output.dF = dF;
+    varargout{1} = Output;
+end
+close all
+
 end

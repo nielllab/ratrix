@@ -45,7 +45,12 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 ReDo = 1;
 while ReDo
     %Create Clusters from the hierarchical cluster tree Z
-    nclust = input('How many z-plane clusters do you want?: ');
+    if isfield(Opt,'Zclusters')
+        nclust = Opt.Zclusters;
+    else
+        nclust = input('How many z-plane clusters do you want?: ');
+    end
+    
     T = cluster(Z,'maxclust',nclust);
     
     %Determine how many frames each cluster has
@@ -65,7 +70,12 @@ while ReDo
     %
         
     %Which cluster should be used?
-    ImgClust = input('Which cluster of frames do you want to use?: ');
+    if isfield(Opt,'Zclusters')
+        %Automatically chooses the cluster with the most frames
+        [~, ImgClust] = max(ModeT);
+    else
+        ImgClust = input('Which cluster of frames do you want to use?: ');
+    end
     
     %Calculate clims to use for imagesc
     sm = floor(nframes/4) - 1;
@@ -78,13 +88,9 @@ while ReDo
     
     FrameIndices = [];
     NaNIndices = [];
-    clustmov = figure;
-    colormap gray
+
     for iFrame = 1:nframes
-        if T(iFrame) == ImgClust
-%             imagesc(Aligned_Seq(:,:,iFrame),RedRange)
-%             drawnow
-            
+        if T(iFrame) == ImgClust         
             FrameIndices = [FrameIndices, iFrame];
             FrameBool(iFrame,1) = 1;
         else
@@ -99,7 +105,12 @@ while ReDo
     title(sprintf('Mean Image after Rigid Alignment of %u out of %u total frames',length(FrameIndices),nframes));
     
     %Give the user the option to reselect which cluster to use
-    ReDo = input('Do you want to reselect the # of clusters after seeing the mean image? (1:yes/0:no): ');
+    if isfield(Opt,'Zclusters')
+        ReDo = 0;
+    else
+        ReDo = input('Do you want to reselect the # of clusters after seeing the mean image? (1:yes/0:no): ');
+    end
+    
     if ReDo == 1 
         close(clust);
         close(meanclust);

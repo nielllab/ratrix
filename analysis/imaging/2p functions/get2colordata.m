@@ -1,4 +1,4 @@
-function [dfofInterp, im_dt, MeanRedChannel, Grn95Percentile, mv] = get2colordata(fname, dt, Opt)
+function [dfofInterp, im_dt, MeanGrnChannel, Rigid, Rotation] = get2colordata(fname, dt, Opt)
 if Opt.SaveFigs
     psfile = Opt.psfile;
 end
@@ -9,7 +9,7 @@ if Opt.MakeMov
 end
 
 % Performs Image registration for both channels
-[imgAll, mv] = readAlign2color(fname,Opt);
+[imgAll, Rigid, Rotation] = readAlign2color(fname,Opt);
 
 %Replace Inf Values with NaN
 for iFrame = 1:size(imgAll,3)
@@ -26,11 +26,9 @@ trash = evalc(Img_Info(1).ImageDescription);
 framerate = state.acq.frameRate;
 im_dt = 1/framerate;
 
-%Calculate the mean of the red images
-MeanRedChannel = squeeze(mean(imgAll(:,:,:,2),3));
-
-%Calculate the 95% of the green images
-Grn95Percentile = squeeze(prctile(imgAll(:,:,:,1),95,3));
+%Calculate the mean of each channel
+MeanRedChannel = squeeze(nanmean(imgAll(:,:,:,2),3));
+MeanGrnChannel = squeeze(nanmean(imgAll(:,:,:,1),3));
 
 %%
 disp('Doing percentile for delta-f/f calculations');

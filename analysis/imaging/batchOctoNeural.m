@@ -33,7 +33,7 @@ Opt.mindF = 0.5;            %Minimum delta-f value
 Opt.nclust = 5;             %Number of cell population clusters
 
 %% Loop through the filelist and analyze each tif stack
-Output = struct;
+Results = struct;
 for iFile = 1:length(Tif_list)
     Opt.pTif = Tif_list(iFile).folder;
     Opt.fTif = Tif_list(iFile).name;
@@ -78,9 +78,8 @@ for iFile = 1:length(Tif_list)
     end
     
     %% Run sutterOctoNeural
-    tic;
-    Output(iFile) = sutterOctoNeural(Opt);
-    toc;
+    Results(iFile).Input = Opt;
+    Results(iFile).Output = sutterOctoNeural(Opt);
     
 end
 

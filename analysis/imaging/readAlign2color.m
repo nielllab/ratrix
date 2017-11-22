@@ -131,7 +131,10 @@ if Opt.align
         title(sprintf('Mean Image after Rigid + Rotation Alignment of %u out of %u total frames',length(FrameIndices),nframes));
         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
       
-    else nr = []; end
+    else
+        nr = [];
+        Aligned_Seq = RAligned_Seq;
+    end
     
     % Make an aligned movie from Aligned_Seq
     if Opt.MakeMov

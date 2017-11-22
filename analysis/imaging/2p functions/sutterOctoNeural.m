@@ -93,7 +93,7 @@ end
 if Opt.NumChannels == 2
     [dfofInterp, dtRaw, greenframe, Rigid, Rotation] = get2colordata(fullfile(Opt.pTif,Opt.fTif),dt,Opt);
 else
-    [dfofInterp, dtRaw, greenframe] = get2pdata(fullfile(Opt.pTif,Opt.fTif),dt,cycLength);
+    [dfofInterp, dtRaw, greenframe] = get2pdata(fullfile(Opt.pTif,Opt.fTif),dt,Opt);
 end
 
 %Reduce Aligned stack to include only the stimulus times
@@ -358,8 +358,8 @@ end
 
 %%% plot pixel-wise cycle average
 figure
-for i = 1:cycLength
-    subplot(2,ceil(cycLength/2),i);
+for i = 1:min(cycLength,10)
+    subplot(2,5,i);
     imagesc(cycImg(:,:,i)-min(cycImg,[],3),[0 0.1]); axis equal
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end

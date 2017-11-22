@@ -22,10 +22,10 @@ Opt.Resample_dt = 0.5;
 Opt.SaveOutput = 1;
 
 %Options for alignment
-Opt.ZBinning = 1;           %Option to correct for z motion by binning
+Opt.ZBinning = 0;           %Option to correct for z motion by binning
 Opt.Zclusters = 2;          %Number of z-plane clusters to identify
-Opt.Rotation = 1;           %Option to correct for rotation
-Opt.AlignmentChannel = 1;   %What channel do you want to use for alignment?
+Opt.Rotation = 0;           %Option to correct for rotation
+Opt.AlignmentChannel = 1;   %What channel do you want to use for alignment? Green(1)/Red(2)
 
 %Options for finding cells
 Opt.selectPts = 0;          %Select points automatically (0) rather than manually
@@ -37,29 +37,39 @@ Output = struct;
 for iFile = 1:length(Tif_list)
     Opt.pTif = Tif_list(iFile).folder;
     Opt.fTif = Tif_list(iFile).name;
+    fprintf('Processing file %s\n',Opt.fTif);
     
     %Find corresponding ttl file
     LocAcq = Opt.fTif(1:9);
-    pos = strfind({Mat_list(:).name},LocAcq);
+    mainFilename = Opt.fTif(1:end-7);
+    pos = strfind({Mat_list(:).name},mainFilename); Indy = [];
     for i = 1:length(pos)
         if ~isempty(pos{i})
-            pos = i;
-            break;
+            Indy = [Indy, i];
         end
     end
-    Opt.pTTL = Mat_list(pos).folder;
-    Opt.fTTL = Mat_list(pos).name;
+    %Continue onto next tif file if no TTL could be determined
+    if isempty(Indy)
+        fprintf('Could not determine TTL File\n\n');
+        continue;
+    end
+    Opt.pTTL = Mat_list(Indy(end)).folder;
+    Opt.fTTL = Mat_list(Indy(end)).name;
     
     %find corresponding stimulus record file
-    pos = strfind({Stim_list(:).name},LocAcq);
+    pos = strfind({Stim_list(:).name},LocAcq); Indy = [];
     for i = 1:length(pos)
         if ~isempty(pos{i})
-            pos = i;
-            break;
+            Indy = [Indy, i];
         end
     end
-    Opt.pStim = Stim_list(pos).folder; 
-    Opt.fStim = Stim_list(pos).name; 
+    %Continue onto next tif file if no stimulus record could be determined
+    if isempty(Indy)
+        fprintf('Could not determine stimulus record file\n\n');
+        continue;
+    end
+    Opt.pStim = Stim_list(Indy(end)).folder; 
+    Opt.fStim = Stim_list(Indy(end)).name; 
     
     %Name of pdf save file
     if Opt.SaveFigs == 1
@@ -68,7 +78,6 @@ for iFile = 1:length(Tif_list)
     end
     
     %% Run sutterOctoNeural
-    fprintf('Processing file %s\n',Opt.fTif);
     tic;
     Output(iFile) = sutterOctoNeural(Opt);
     toc;

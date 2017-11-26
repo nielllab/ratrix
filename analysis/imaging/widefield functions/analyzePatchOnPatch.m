@@ -2,18 +2,19 @@
 close all
 clear all
 
+%select batch file
 batchPhilIntactSkull
 cd(pathname)
  
-%    alluse = find(strcmp({files.inject},'doi')  & strcmp({files.timing},'pre') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
-   alluse = find(strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')) 
-
+%select animals to use
+alluse = find(strcmp({files.notes},'good darkness and stimulus') | strcmp({files.notes},'good stimulus'))
 sprintf('%d animals',length(alluse)/2)
 allsubj = unique({files(alluse).subj})
 
-% %%% use this one for subject by subject averaging
-% %for s = 1:length(allsubj)
-% %use = intersect(alluse,find(strcmp({files.subj},allsubj{s})))    
+redoani = input('reanalyze individual animal data? 0=no, 1=yes: ')
+if redoani
+    reselect = input('reselect ROI in each experiment? 0=no, 1=yes: ')
+end   
 
 % %%% use this one to average all sessions that meet criteria
 for s=1:1

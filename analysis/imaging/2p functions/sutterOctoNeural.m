@@ -26,6 +26,7 @@ get2pSession
 
 %%%crop to get rid of edges that have motion artifact
 buffer = max(abs(mv(:)))+2; %% what is largest offset?
+buffer = max(buffer,24);
 dfofInterp = dfofInterp(buffer:end-buffer,buffer:end-buffer,:);
 cycLength = mean(diff(stimPulse))/dt;
 cycWindow = round(max(4/dt,cycLength));  %%% number of frames in window around each cycle. min of 4 secs, or actual cycle length + 2
@@ -35,8 +36,14 @@ if f~=0
     load(fullfile(p,f),'stimRec');
     nCycles = floor(size(dfofInterp,3)/cycLength)-ceil((cycWindow-cycLength)/cycLength);  %%% trim off last stims to allow window for previous stim
     stimT = stimRec.ts - stimRec.ts(1);
-    for i = 1:nCycles
+    if min(stimRec.cond)==0  %%% new stimRec style, cond==0 during isi
+        starts = find(diff([0; stimRec.cond])>0);
+        stimOrder = stimRec.cond(starts);
+        stimOrder = stimOrder(1:nCycles);
+    else  %%% old stimRec style
+        for i = 1:nCycles
         stimOrder(i) = stimRec.cond(min(find(stimT>((i-1)*cycLength*dt+0.1))));
+        end
     end
     %stimOrder = stimRec.cond(stimRec.f==2); %%% find second frame of each stim, and see what condition it was (don't use frame 1, because stays at frame=1 at stim end)
     nstim = max(stimOrder);
@@ -284,6 +291,7 @@ end
 
 %dFclust = dFmean; %%% or just use full dFmean
 dFclust = nanmedian(dFclust,3);
+
 % dFclust = dFclust./repmat(max(dFclust,[],2),[1 size(dFclust,2)]);  %% normalize by max response
 % dFclust = imresize(dFclust,[size(dFclust,1) size(dFclust,2)*0.5]); %%% downsample to improve SNR
 dFclust(dFclust>0.2) = 0.2; dFclust(dFclust<0)=0;
@@ -299,8 +307,8 @@ tic, Z = linkage(dist,'ward'); toc
 figure
 subplot(3,4,[1 5 9 ])
 display('doing dendrogram')
-leafOrder = optimalleaforder(Z,dist);
-[h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,1,'reorder',leafOrder);
+%leafOrder = optimalleaforder(Z,dist);
+[h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,1);%,'reorder',leafOrder);
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
 imagesc(dFmean(perm,:),[-0.1 0.4]); axis xy ; xlabel('selected traces based on dF'); colormap jet ;   %%% show sorted data
@@ -398,7 +406,7 @@ figure
 hist(max(dFclust,[],2))
 %%% calculate pixel-wise maps of activity for different stim
 
-evRange = 4:5; baseRange = 1:2; %%% timepoints for evoked and baseline activity
+evRange = 5:6; baseRange = 1:2; %%% timepoints for evoked and baseline activity
 figure
 for i = 1:length(stimOrder); %%% get pixel-wise evoked activity on each individual stim presentation
     trialmean(:,:,i) = mean(dfofInterp(:,:,round(cycLength*(i-1) + evRange)),3)- mean(dfofInterp(:,:,round(cycLength*(i-1) + baseRange)),3);
@@ -562,7 +570,7 @@ end
 %%% save out pdf file!
 if makeFigs
     [f p] = uiputfile('*.pdf','save pdf file');
-    newpdfFile = fullfile(p,f)
+    newpdfFile = fullfile(p,f);
     try
         dos(['ps2pdf ' 'c:\temp.ps "' newpdfFile '"'] )
         

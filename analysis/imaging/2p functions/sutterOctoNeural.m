@@ -26,8 +26,8 @@ get2pSession
 
 %%%crop to get rid of edges that have motion artifact
 buffer = max(abs(mv(:)))+2; %% what is largest offset?
-buffer = max(buffer,24);
-dfofInterp = dfofInterp(buffer:end-buffer,buffer:end-buffer,:);
+topbuffer = buffer+12;
+dfofInterp = dfofInterp(topbuffer:end-buffer,buffer:end-buffer,:);
 cycLength = mean(diff(stimPulse))/dt;
 cycWindow = round(max(4/dt,cycLength));  %%% number of frames in window around each cycle. min of 4 secs, or actual cycle length + 2
 [f p] = uigetfile('*.mat','stimulus record');
@@ -97,11 +97,12 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 
 %%% calculate two reference images for choosing points on ...
 %%% absolute green fluorescence, and max df/f of each pixel
+keyboard
 
 %%% absolute green fluorescence
 greenFig = figure;
 title('mean')
-stdImg = greenframe(buffer:end-buffer,buffer:end-buffer);
+stdImg = greenframe(topbuffer:end-buffer,buffer:end-buffer);
 imagesc(stdImg,[prctile(stdImg(:),1) prctile(stdImg(:),99)*1.2]); hold on; axis equal; colormap gray; title('mean')
 normgreen = (stdImg - prctile(stdImg(:),1))/ (prctile(stdImg(:),99)*1.5 - prctile(stdImg(:),1));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
@@ -260,7 +261,7 @@ end
 figure
 for i = 1:min(cycLength,10)
     subplot(2,5,i);
-    imagesc(cycImg(:,:,i)-min(cycImg,[],3),[0 0.1]); axis equal
+    imagesc(cycImg(:,:,i)-min(cycImg,[],3),[0 0.025]); axis equal
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
@@ -406,7 +407,7 @@ figure
 hist(max(dFclust,[],2))
 %%% calculate pixel-wise maps of activity for different stim
 
-evRange = 5:6; baseRange = 1:2; %%% timepoints for evoked and baseline activity
+evRange = 5:6; baseRange = 2:3; %%% timepoints for evoked and baseline activity
 figure
 for i = 1:length(stimOrder); %%% get pixel-wise evoked activity on each individual stim presentation
     trialmean(:,:,i) = mean(dfofInterp(:,:,round(cycLength*(i-1) + evRange)),3)- mean(dfofInterp(:,:,round(cycLength*(i-1) + baseRange)),3);

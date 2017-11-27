@@ -34,7 +34,7 @@ cycWindow = round(max(4/dt,cycLength));  %%% number of frames in window around e
 if f~=0
     alignRecs =1;
     load(fullfile(p,f),'stimRec');
-    nCycles = floor(size(dfofInterp,3)/cycLength)-ceil((cycWindow-cycLength)/cycLength);  %%% trim off last stims to allow window for previous stim
+    nCycles = floor(size(dfofInterp,3)/cycLength)-ceil((cycWindow-cycLength)/cycLength)-1;  %%% trim off last stims to allow window for previous stim
     stimT = stimRec.ts - stimRec.ts(1);
     if min(stimRec.cond)==0  %%% new stimRec style, cond==0 during isi
         starts = find(diff([0; stimRec.cond])>0);
@@ -42,7 +42,7 @@ if f~=0
         stimOrder = stimOrder(1:nCycles);
     else  %%% old stimRec style
         for i = 1:nCycles
-        stimOrder(i) = stimRec.cond(min(find(stimT>((i-1)*cycLength*dt+0.1))));
+            stimOrder(i) = stimRec.cond(min(find(stimT>((i-1)*cycLength*dt+0.1))));
         end
     end
     %stimOrder = stimRec.cond(stimRec.f==2); %%% find second frame of each stim, and see what condition it was (don't use frame 1, because stays at frame=1 at stim end)
@@ -97,7 +97,6 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 
 %%% calculate two reference images for choosing points on ...
 %%% absolute green fluorescence, and max df/f of each pixel
-keyboard
 
 %%% absolute green fluorescence
 greenFig = figure;
@@ -128,11 +127,15 @@ if selectPts
     chooseFig = input('select based on 1) mean image, 2) max image, 3) merge image : ');
     if chooseFig==1, selectFig = greenFig, elseif chooseFig==2, selectFig=maxFig, else selectFig=mergeFig, end;
     range = -2:2
-    clear x y npts
+    clear x y npts dF
     npts = input('how many points ? ');
     for i =1:npts
         figure(selectFig); hold on
-        [x(i) y(i)] = ginput(1); x=round(x); y = round(y);
+        [x(i) y(i) button] = ginput(1); x=round(x); y = round(y);
+        if button==3
+            x = x(1:end-1); y =y(1:end-1);
+            break
+        end
         plot(x(i),y(i),'b*');
         dF(i,:) = squeeze(mean(mean(dfofInterp(y(i)+range,x(i)+range,:),2),1));
     end
@@ -265,14 +268,14 @@ for i = 1:min(cycLength,10)
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-    
+
 %%% plot mean timecourse
 cycAvgAll = cycAvgAll - repmat(cycAvgAll(:,end),[1 size(cycAvgAll,2)]);
 figure
 plot(cycAvg); title('cycle average'); xlabel('frames')
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-   
+
 
 %%% average across repetitions, and subtract the minimum value for each
 %%% cell (to correct for baseline offsets)
@@ -333,7 +336,7 @@ for clust=1:nclust
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
- 
+
 %%% summary plots for each cluster
 for clust = 1:nclust
     
@@ -348,7 +351,7 @@ for clust = 1:nclust
     subplot(2,2,2);
     imagesc(dFmean(c==clust,:),[-0.1 0.4]); axis xy % was df
     title(sprintf('clust %d',clust)); hold on
-
+    
     for i = 1:nstim
         plot([i*cycWindow i*cycWindow]+0.5,[1 sum(clust==c)],'k');
     end
@@ -436,7 +439,7 @@ if nstim==12 %%% spots
         stimImg(:,:,i) = meanimg;
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-        overlay(:,:,1) = mean(stimImg(:,:,6),3);
+    overlay(:,:,1) = mean(stimImg(:,:,6),3);
     overlay(:,:,2) = mean(stimImg(:,:,12),3);
     overlay(:,:,3)= 0;
     overlay(overlay<0)=0; overlay = overlay/0.15;
@@ -470,7 +473,7 @@ if nstim==14 %%% gratings
         imagesc(meanimg,range); axis equal; if i ==13; title('low tf flicker'); else title('high tf flicker'); end
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
+    
     overlay(:,:,1) = median(trialmean(:,:,stimOrder==1),3);
     overlay(:,:,2) = median(trialmean(:,:,stimOrder==7),3);
     overlay(:,:,3)= median(trialmean(:,:,stimOrder==13),3);
@@ -478,7 +481,7 @@ if nstim==14 %%% gratings
     overlay(overlay<0)=0; overlay = overlay/range(2);
     figure
     imshow(imresize(overlay,2));
-   
+    
     figure
     overlay(:,:,3)=0;
     imshow(imresize(overlay,2));
@@ -520,7 +523,7 @@ if nstim==26 %%% gratings
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
-      figure; set(gcf,'Name','vert gratings');
+    figure; set(gcf,'Name','vert gratings');
     for i = 13:18
         meanimg = median(trialmean(:,:,stimOrder==i),3);
         subplot(2,3,loc(i-12));
@@ -564,7 +567,7 @@ if nstim==48 %%% spots
         imagesc(meanimg,range); axis equal; axis off
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
+    
 end
 
 

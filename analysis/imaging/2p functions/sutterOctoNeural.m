@@ -213,10 +213,11 @@ if selectPts
     end
     range = -2:2;
     clear x y npts
-    npts = input('how many points ? ');
-    for i =1:npts
+    rightclick = 0;
+    fprintf('Select points on image. Rightclick to exit interactive ginput');
+    while rightclick ~= 3
         figure(selectFig); hold on
-        [x(i), y(i)] = ginput(1); x=round(x); y = round(y);
+        [x(i), y(i), rightclick]] = ginput(1); x=round(x); y = round(y);
         plot(x(i),y(i),'b*');
         dF(i,:) = squeeze(nanmean(nanmean(dfofInterp(y(i)+range,x(i)+range,:),2),1));
     end
@@ -402,8 +403,8 @@ Z = linkage(dist,'ward');
 figure
 subplot(3,4,[1 5 9 ])
 disp('doing dendrogram')
-leafOrder = optimalleaforder(Z,dist);
-[h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,1,'reorder',leafOrder);
+% leafOrder = optimalleaforder(Z,dist); 
+[h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,1); %,'reorder',leafOrder
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
 imagesc(dFmean(perm,:),[-0.1 0.4]); axis xy ; xlabel('selected traces based on dF'); colormap jet ;   %%% show sorted data

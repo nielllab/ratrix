@@ -1,8 +1,10 @@
+clear all
+close all
 %% Analyze multiple files using sutterOctoNeural function. Instead of 
 % providing user input interactively, input the parameters below
 % Change the DataDir to the folder containing the files you want analyzed
-DataDir = 'D:\GSchool\Niell\Data\102017_Octopus_Cal520';
-Opt.Date = '102017'; %Folder name for stimrec as well
+DataDir = 'D:\GSchool\Niell\Data\102517_Octopus_Cal520';
+Opt.Date = '102517'; %Folder name for stimrec as well
 
 %Selects only those files that are relevant
 Tif_list = dir(fullfile(DataDir,'Loc*.tif'));
@@ -24,7 +26,7 @@ Opt.SaveOutput = 1;
 %Options for alignment
 Opt.ZBinning = 0;           %Option to correct for z motion by binning
 Opt.Zclusters = 2;          %Number of z-plane clusters to identify
-Opt.Rotation = 0;           %Option to correct for rotation
+Opt.Rotation = 1;           %Option to correct for rotation
 Opt.AlignmentChannel = 1;   %What channel do you want to use for alignment? Green(1)/Red(2)
 
 %Options for finding cells
@@ -34,7 +36,7 @@ Opt.nclust = 5;             %Number of cell population clusters
 
 %% Loop through the filelist and analyze each tif stack
 Results = struct;
-for iFile = 1:length(Tif_list)
+for iFile = 7:length(Tif_list)
     Opt.pTif = Tif_list(iFile).folder;
     Opt.fTif = Tif_list(iFile).name;
     fprintf('Processing file %s\n',Opt.fTif);
@@ -79,7 +81,12 @@ for iFile = 1:length(Tif_list)
     
     %% Run sutterOctoNeural
     Results(iFile).Input = Opt;
-    Results(iFile).Output = sutterOctoNeural(Opt);
+    try
+        Results(iFile).Output = sutterOctoNeural(Opt);
+    catch
+        fprintf('Error in sutterOctoNeural script - Continuing onto next file');
+        Results(iFile).Output = [];
+    end
     
 end
 

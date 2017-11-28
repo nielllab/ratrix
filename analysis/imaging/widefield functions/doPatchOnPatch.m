@@ -3,28 +3,30 @@
 
 %trial types for patchonpatch
 % 1 = blank
-% 2 = smCent
-% 3 = lgcent
-% 4 = smIsoCross
-% 5 = lgIsoCross
-% 6 = smDonut
-% 7 = lgDonut
+% 2 = center only
+% 3 = surround only
+% 4 = both, iso or cross
+
 %%
 
-deconvplz = 0 %choose if you want deconvolution
-fully = 0 %choose if you want full frame (260x260), else scales down by 2
+deconvplz = 1 %choose if you want deconvolution
+fully = 0 %choose if you want full frame, else scales down by 2
 pixbin = 5 %choose binning for gaussian analysis of spread
+dfrangesit = [-0.001 0.015]; %%%range for imagesc visualization
+dfrangerun = [-0.001 0.025]; %%%range for imagesc visualization
 
 for f = 1:length(use)
-    filename = sprintf('%s_%s_%s_%s',files(use(f)).expt,files(use(f)).subj,files(use(f)).timing,files(use(f)).inject);
-    if exist([filename '.mat'])==0
-        load('C:\patchonpatch14min')
+    filename = sprintf('%s_%s_%s_%s_patchonpatch.mat',files(use(f)).expt,files(use(f)).subj,files(use(f)).timing,files(use(f)).inject);
+    if (exist(filename)==0 | redoani==1)
+        load('C:\patchonpatch16min')
+%         load('C:\patchonpatch14min')
 %         load('C:\mapoverlay.mat')
 %         load('C:\areamaps.mat')
         imagerate=10;
         cyclength = imagerate*(isi+duration);
         base = isi*imagerate-4:isi*imagerate-1;
         peakWindow = base(end):base(end)+duration*imagerate-1;
+        timepts = 0:1/imagerate:(2*isi+duration);timepts = timepts - isi;timepts = timepts(1:end-1);
         psfilename = 'c:\tempPhilWF.ps';
         if exist(psfilename,'file')==2;delete(psfilename);end
         
@@ -104,7 +106,7 @@ for f = 1:length(use)
         for fr=1:cyclength
             cycavg(:,:,fr) = mean(img(:,:,(fr:cyclength:end)),3);
             subplot(nx,nx,p(fr))
-            imagesc(squeeze(cycavg(:,:,fr)),[-0.001 0.01])
+            imagesc(squeeze(cycavg(:,:,fr)),dfrangesit)
             axis off
             set(gca,'LooseInset',get(gca,'TightInset'))
 %             hold on; plot(ypts,xpts,'w.','Markersize',2)
@@ -137,6 +139,7 @@ for f = 1:length(use)
 
 %%
         %deconvolution
+%         keyboard
         if deconvplz == 1
             sprintf('doing deconvolution')
             %do deconvolution on the raw data
@@ -155,6 +158,10 @@ for f = 1:length(use)
             plot(squeeze(img(130,130,:)))
             plot(squeeze(deconvimg(130,130,:)),'g')
             hold off
+            if exist('psfilename','var')
+                set(gcf, 'PaperPositionMode', 'auto');
+                print('-dpsc',psfilename,'-append');
+            end
             delete(pp)
             ncut = 3 %# of trials to cut due to deconvolution cutting off end
             trials=trials-ncut; %deconv cuts off last trial
@@ -166,7 +173,7 @@ for f = 1:length(use)
 %%
         %%% separate responses by trials
         sprintf('separating responses by trial')
-        speedcut = 500;
+        speedcut = 20;
         trialdata = zeros(size(deconvimg,1),size(deconvimg,2),trials);
         trialspeed = zeros(trials,1);
         trialcyc = zeros(size(deconvimg,1),size(deconvimg,2),cyclength+isi*imagerate,trials);
@@ -177,7 +184,7 @@ for f = 1:length(use)
             try
                 trialspeed(tr) = mean(sp(peakWindow+t0));
             catch
-                trialspeed(tr)=500;
+                trialspeed(tr)=20;
             end
             trialcyc(:,:,:,tr) = deconvimg(:,:,t0+(1:cyclength+isi*imagerate));%each cycle is frames 6-26, stim comes on at frame 11
         end
@@ -192,8 +199,8 @@ for f = 1:length(use)
         trialtypes = length(unique(trialID));
         
         %%plot percent time running
-        sp = conv(sp,ones(50,1),'same')/50;
-        mv = sum(sp>500)/length(sp);
+        sp = conv(sp,ones(50,1),'same')/20;
+        mv = sum(sp>20)/length(sp);
         figure
         subplot(1,2,1)
         bar(mv);
@@ -220,7 +227,7 @@ for f = 1:length(use)
                 end
             end
         end
-        toc
+
 
         %%%baseline and zero trial subtraction
         %get average map with no stimulus
@@ -244,43 +251,44 @@ for f = 1:length(use)
 %%
         %manual/loading point selection
         [files(use(f)).subj ' ' files(use(f)).inject]
-        if ~exist(files(use(f)).patchpts)
+        if (~exist(fullfile(pathname,files(use(f)).patchpts)) | reselect==1)
             sprintf('Pick center of visual response')
             
-            amos=figure;
+            figure;
             colormap jet
-            subplot(2,2,1)
-            imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),[-0.001 0.01])
-            axis off
-            title('small center sit')
-            subplot(2,2,2)
-            imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,3,:,1),3),5)),[-0.001 0.01])
-            axis off
-            title('large center sit')
+            subplot(1,2,1)
+            imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),dfrangesit)
+            axis off; axis equal
+            title('center sit')
+            subplot(1,2,2)
+            imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,3,:,1),3),5)),dfrangesit)
+            axis off; axis equal
+            title('surround sit')
 
-            andy=figure;
+            figure;
             colormap jet
-            imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),[-0.001 0.01])
-            axis off
+            subplot(1,2,1)
+            imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),dfrangesit)
+            axis off; axis equal
             title('select center point of response')
             [y x] = ginput(1);
             hold on
             plot(y,x,'wo','MarkerSize',15)
+            x=round(x); y=round(y);
+
+            [X,Y] = meshgrid(1:size(trialcycavg,2),1:size(trialcycavg,1));X=X/2; %divide X by two for cortical magnification factor
+            dist =sqrt((X - y/2).^2 + (Y - x).^2);
+            subplot(1,2,2)
+            imagesc(dist)
+            axis off;axis equal
             if exist('psfilename','var')
                 set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
                 print('-dpsc',psfilename,'-append');
             end
-            x=round(x); y=round(y);
-            pause(1)
-            [X,Y] = meshgrid(1:size(trialcycavg,1),1:size(trialcycavg,2));X=X/2; %divide X by two for cortical magnification factor
-            dist =sqrt((X - x/2).^2 + (Y - y).^2);
-            hold off
-            imagesc(dist)
-            pause(1)
-            close(amos,andy)
+            
             save(files(use(f)).patchpts,'x','y','dist');
         else
-            load(files(use(f)).patchpts)
+            load(fullfile(pathname,files(use(f)).patchpts))
         end
         
 
@@ -301,25 +309,60 @@ for f = 1:length(use)
 %%
         %%%plot averages for the different stimulus parameters
         sprintf('plotting responses')
-        %%%center stimuli
+        
+        %%%center or surround only
         figure
         colormap jet
         subplot(2,2,1)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),[-0.001 0.01])
+        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),dfrangesit)
         axis off
-        title('small center sit')
+        title('center sit')
         subplot(2,2,2)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,3,:,1),3),5)),[-0.001 0.01])
+        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,2),3),5)),dfrangesit)
         axis off
-        title('large center sit')
+        title('center run')
         subplot(2,2,3)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,2),3),5)),[-0.001 0.01])
+        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,3,:,1),3),5)), dfrangerun)
         axis off
-        title('small center run')
+        title('surround sit')
         subplot(2,2,4)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,3,:,2),3),5)),[-0.001 0.01])
+        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,3,:,2),3),5)), dfrangerun)
         axis off
-        title('large center run')
+        title('surround run')
+        if exist('psfilename','var')
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+            print('-dpsc',psfilename,'-append');
+        end
+        
+        figure
+        subplot(2,2,1)
+        plot(timepts,squeeze(nanmean(nanmean(nanmean(trialcycavg(x-2:x+2,y-2:y+2,:,2,:,1),1),2),5)))
+        ylabel('dfof')
+        xlabel('time(s)')
+        axis([timepts(1) timepts(end) -0.01 0.1])
+        axis square
+        title('center sit')
+        subplot(2,2,2)
+        plot(timepts,squeeze(nanmean(nanmean(nanmean(trialcycavg(x-2:x+2,y-2:y+2,:,2,:,2),1),2),5)))
+        ylabel('dfof')
+        xlabel('time(s)')
+        axis([timepts(1) timepts(end) -0.01 0.1])
+        axis square
+        title('center run')
+        subplot(2,2,3)
+        plot(timepts,squeeze(nanmean(nanmean(nanmean(trialcycavg(x-2:x+2,y-2:y+2,:,3,:,1),1),2),5)))
+        ylabel('dfof')
+        xlabel('time(s)')
+        axis([timepts(1) timepts(end) -0.01 0.1])
+        axis square
+        title('surround sit')
+        subplot(2,2,4)
+        plot(timepts,squeeze(nanmean(nanmean(nanmean(trialcycavg(x-2:x+2,y-2:y+2,:,3,:,2),1),2),5)))
+        ylabel('dfof')
+        xlabel('time(s)')
+        axis([timepts(1) timepts(end) -0.01 0.1])
+        axis square
+        title('surround run')
         if exist('psfilename','var')
             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
             print('-dpsc',psfilename,'-append');
@@ -333,23 +376,23 @@ for f = 1:length(use)
         axis([0 ceil(size(ring,1)/10)*10 -0.001 0.1])
         set(gca,'xtick',0:10:ceil(size(ring,1)/10)*10,'xticklabel',0:10*pixbin:ceil(size(ring,1)/10)*10*pixbin)
         axis square
-        title('small center sit')
+        title('center sit')
         subplot(2,2,2)
-        plot(1:size(ring,1),squeeze(nanmean(ring(:,3,:,1),3)))
-        ylabel('dfof')
-        xlabel('distance from cent (pix)')
-        axis([0 ceil(size(ring,1)/10)*10 -0.001 0.1])
-        set(gca,'xtick',0:10:ceil(size(ring,1)/10)*10,'xticklabel',0:10*pixbin:ceil(size(ring,1)/10)*10*pixbin)
-        axis square
-        title('large center sit')
-        subplot(2,2,3)
         plot(1:size(ring,1),squeeze(nanmean(ring(:,2,:,2),3)))
         ylabel('dfof')
         xlabel('distance from cent (pix)')
         axis([0 ceil(size(ring,1)/10)*10 -0.001 0.1])
         set(gca,'xtick',0:10:ceil(size(ring,1)/10)*10,'xticklabel',0:10*pixbin:ceil(size(ring,1)/10)*10*pixbin)
         axis square
-        title('small center run')
+        title('center run')
+        subplot(2,2,3)
+        plot(1:size(ring,1),squeeze(nanmean(ring(:,3,:,1),3)))
+        ylabel('dfof')
+        xlabel('distance from cent (pix)')
+        axis([0 ceil(size(ring,1)/10)*10 -0.001 0.1])
+        set(gca,'xtick',0:10:ceil(size(ring,1)/10)*10,'xticklabel',0:10*pixbin:ceil(size(ring,1)/10)*10*pixbin)
+        axis square
+        title('surround sit')
         subplot(2,2,4)
         plot(1:size(ring,1),squeeze(nanmean(ring(:,3,:,2),3)))
         ylabel('dfof')
@@ -357,93 +400,66 @@ for f = 1:length(use)
         axis([0 ceil(size(ring,1)/10)*10 -0.001 0.1])
         set(gca,'xtick',0:10:ceil(size(ring,1)/10)*10,'xticklabel',0:10*pixbin:ceil(size(ring,1)/10)*10*pixbin)
         axis square
-        title('large center run')
+        title('surround run')
         if exist('psfilename','var')
             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
             print('-dpsc',psfilename,'-append');
         end
-        
-        %%%surround stimuli
-        figure
-        colormap jet
-        subplot(2,2,1)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,6,:,1),3),5)),[-0.001 0.01])
-        axis off
-        title('small donut sit')
-        subplot(2,2,2)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,7,:,1),3),5)),[-0.001 0.01])
-        axis off
-        title('large donut sit')
-        subplot(2,2,3)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,6,:,2),3),5)),[-0.001 0.01])
-        axis off
-        title('small donut run')
-        subplot(2,2,4)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,7,:,2),3),5)),[-0.001 0.01])
-        axis off
-        title('large donut run')
-        if exist('psfilename','var')
-            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-            print('-dpsc',psfilename,'-append');
-        end
-        
-        figure
-        subplot(2,2,1)
-        plot(1:size(ring,1),squeeze(nanmean(ring(:,6,:,1),3)))
-        ylabel('dfof')
-        xlabel('distance from cent (pix)')
-        axis([0 ceil(size(ring,1)/10)*10 -0.001 0.1])
-        set(gca,'xtick',0:10:ceil(size(ring,1)/10)*10,'xticklabel',0:10*pixbin:ceil(size(ring,1)/10)*10*pixbin)
-        axis square
-        title('small donut sit')
-        subplot(2,2,2)
-        plot(1:size(ring,1),squeeze(nanmean(ring(:,7,:,1),3)))
-        ylabel('dfof')
-        xlabel('distance from cent (pix)')
-        axis([0 ceil(size(ring,1)/10)*10 -0.001 0.1])
-        set(gca,'xtick',0:10:ceil(size(ring,1)/10)*10,'xticklabel',0:10*pixbin:ceil(size(ring,1)/10)*10*pixbin)
-        axis square
-        title('large donut sit')
-        subplot(2,2,3)
-        plot(1:size(ring,1),squeeze(nanmean(ring(:,6,:,2),3)))
-        ylabel('dfof')
-        xlabel('distance from cent (pix)')
-        axis([0 ceil(size(ring,1)/10)*10 -0.001 0.1])
-        set(gca,'xtick',0:10:ceil(size(ring,1)/10)*10,'xticklabel',0:10*pixbin:ceil(size(ring,1)/10)*10*pixbin)
-        axis square
-        title('small donut run')
-        subplot(2,2,4)
-        plot(1:size(ring,1),squeeze(nanmean(ring(:,7,:,2),3)))
-        ylabel('dfof')
-        xlabel('distance from cent (pix)')
-        axis([0 ceil(size(ring,1)/10)*10 -0.001 0.1])
-        set(gca,'xtick',0:10:ceil(size(ring,1)/10)*10,'xticklabel',0:10*pixbin:ceil(size(ring,1)/10)*10*pixbin)
-        axis square
-        title('large donut run')
-        if exist('psfilename','var')
-            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-            print('-dpsc',psfilename,'-append');
-        end
+
         
         %%%iso and cross oriented stimuli
         figure
         colormap jet
         subplot(2,2,1)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,4,1,1),3),5)),[-0.001 0.01])
+        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,4,1,1),3),5)),dfrangesit)
         axis off
-        title('small iso sit')
+        title('iso sit')
         subplot(2,2,2)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,4,2,1),3),5)),[-0.001 0.01])
+        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,4,1,2),3),5)),dfrangesit)
         axis off
-        title('small cross sit')
+        title('iso run')
         subplot(2,2,3)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,5,1,1),3),5)),[-0.001 0.01])
+        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,4,2,1),3),5)),dfrangesit)
         axis off
-        title('large iso sit')
+        title('cross sit')
         subplot(2,2,4)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,5,2,1),3),5)),[-0.001 0.01])
+        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,4,2,2),3),5)),dfrangesit)
         axis off
-        title('large cross sit')
+        title('cross run')
+        if exist('psfilename','var')
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+            print('-dpsc',psfilename,'-append');
+        end
+        
+        figure
+        subplot(2,2,1)
+        plot(timepts,squeeze(nanmean(nanmean(nanmean(trialcycavg(x-2:x+2,y-2:y+2,:,4,1,1),1),2),5)))
+        ylabel('dfof')
+        xlabel('time(s)')
+        axis([timepts(1) timepts(end) -0.01 0.1])
+        axis square
+        title('iso sit')
+        subplot(2,2,2)
+        plot(timepts,squeeze(nanmean(nanmean(nanmean(trialcycavg(x-2:x+2,y-2:y+2,:,4,1,2),1),2),5)))
+        ylabel('dfof')
+        xlabel('time(s)')
+        axis([timepts(1) timepts(end) -0.01 0.1])
+        axis square
+        title('iso run')
+        subplot(2,2,3)
+        plot(timepts,squeeze(nanmean(nanmean(nanmean(trialcycavg(x-2:x+2,y-2:y+2,:,4,2,1),1),2),5)))
+        ylabel('dfof')
+        xlabel('time(s)')
+        axis([timepts(1) timepts(end) -0.01 0.1])
+        axis square
+        title('cross sit')
+        subplot(2,2,4)
+        plot(timepts,squeeze(nanmean(nanmean(nanmean(trialcycavg(x-2:x+2,y-2:y+2,:,4,2,2),1),2),5)))
+        ylabel('dfof')
+        xlabel('time(s)')
+        axis([timepts(1) timepts(end) -0.01 0.1])
+        axis square
+        title('cross run')
         if exist('psfilename','var')
             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
             print('-dpsc',psfilename,'-append');
@@ -457,124 +473,36 @@ for f = 1:length(use)
         axis([0 ceil(size(ring,1)/10)*10 -0.001 0.1])
         set(gca,'xtick',0:10:ceil(size(ring,1)/10)*10,'xticklabel',0:10*pixbin:ceil(size(ring,1)/10)*10*pixbin)
         axis square
-        title('small iso sit')
+        title('iso sit')
         subplot(2,2,2)
-        plot(1:size(ring,1),squeeze(ring(:,4,2,1)))
-        ylabel('dfof')
-        xlabel('distance from cent (pix)')
-        axis([0 ceil(size(ring,1)/10)*10 -0.001 0.1])
-        set(gca,'xtick',0:10:ceil(size(ring,1)/10)*10,'xticklabel',0:10*pixbin:ceil(size(ring,1)/10)*10*pixbin)
-        axis square
-        title('small cross sit')
-        subplot(2,2,3)
-        plot(1:size(ring,1),squeeze(ring(:,5,1,1)))
-        ylabel('dfof')
-        xlabel('distance from cent (pix)')
-        axis([0 ceil(size(ring,1)/10)*10 -0.001 0.1])
-        set(gca,'xtick',0:10:ceil(size(ring,1)/10)*10,'xticklabel',0:10*pixbin:ceil(size(ring,1)/10)*10*pixbin)
-        axis square
-        title('large iso sit')
-        subplot(2,2,4)
-        plot(1:size(ring,1),squeeze(ring(:,5,2,1)))
-        ylabel('dfof')
-        xlabel('distance from cent (pix)')
-        axis([0 ceil(size(ring,1)/10)*10 -0.001 0.1])
-        set(gca,'xtick',0:10:ceil(size(ring,1)/10)*10,'xticklabel',0:10*pixbin:ceil(size(ring,1)/10)*10*pixbin)
-        axis square
-        title('large cross sit')
-        if exist('psfilename','var')
-            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-            print('-dpsc',psfilename,'-append');
-        end
-        
-        figure
-        colormap jet
-        subplot(2,2,1)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,4,1,2),3),5)),[-0.001 0.01])
-        axis off
-        title('small iso run')
-        subplot(2,2,2)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,4,2,2),3),5)),[-0.001 0.01])
-        axis off
-        title('small cross run')
-        subplot(2,2,3)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,5,1,2),3),5)),[-0.001 0.01])
-        axis off
-        title('large iso run')
-        subplot(2,2,4)
-        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,5,2,2),3),5)),[-0.001 0.01])
-        axis off
-        title('large cross run')
-        if exist('psfilename','var')
-            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-            print('-dpsc',psfilename,'-append');
-        end
-        
-        figure
-        subplot(2,2,1)
         plot(1:size(ring,1),squeeze(ring(:,4,1,2)))
         ylabel('dfof')
         xlabel('distance from cent (pix)')
         axis([0 ceil(size(ring,1)/10)*10 -0.001 0.1])
         set(gca,'xtick',0:10:ceil(size(ring,1)/10)*10,'xticklabel',0:10*pixbin:ceil(size(ring,1)/10)*10*pixbin)
         axis square
-        title('small iso run')
-        subplot(2,2,2)
+        title('iso run')
+        subplot(2,2,3)
+        plot(1:size(ring,1),squeeze(ring(:,4,2,1)))
+        ylabel('dfof')
+        xlabel('distance from cent (pix)')
+        axis([0 ceil(size(ring,1)/10)*10 -0.001 0.1])
+        set(gca,'xtick',0:10:ceil(size(ring,1)/10)*10,'xticklabel',0:10*pixbin:ceil(size(ring,1)/10)*10*pixbin)
+        axis square
+        title('cross sit')
+        subplot(2,2,4)
         plot(1:size(ring,1),squeeze(ring(:,4,2,2)))
         ylabel('dfof')
         xlabel('distance from cent (pix)')
         axis([0 ceil(size(ring,1)/10)*10 -0.001 0.1])
         set(gca,'xtick',0:10:ceil(size(ring,1)/10)*10,'xticklabel',0:10*pixbin:ceil(size(ring,1)/10)*10*pixbin)
         axis square
-        title('small cross run')
-        subplot(2,2,3)
-        plot(1:size(ring,1),squeeze(ring(:,5,1,2)))
-        ylabel('dfof')
-        xlabel('distance from cent (pix)')
-        axis([0 ceil(size(ring,1)/10)*10 -0.001 0.1])
-        set(gca,'xtick',0:10:ceil(size(ring,1)/10)*10,'xticklabel',0:10*pixbin:ceil(size(ring,1)/10)*10*pixbin)
-        axis square
-        title('large iso run')
-        subplot(2,2,4)
-        plot(1:size(ring,1),squeeze(ring(:,5,2,2)))
-        ylabel('dfof')
-        xlabel('distance from cent (pix)')
-        axis([0 ceil(size(ring,1)/10)*10 -0.001 0.1])
-        set(gca,'xtick',0:10:ceil(size(ring,1)/10)*10,'xticklabel',0:10*pixbin:ceil(size(ring,1)/10)*10*pixbin)
-        axis square
-        title('large cross run')
+        title('cross run')
         if exist('psfilename','var')
             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
             print('-dpsc',psfilename,'-append');
         end
         
- %%       
-        sprintf('plotting cycle averages for response types')
-%         %plot traces for responses to each stim type
-%         xstim = [cyclength/2 cyclength/2];
-%         ystim = [-0.1 0.5];
-%         for i=1:length(contrastRange)
-%             figure
-%             cnt=1;
-%             for k=1:length(radiusRange)
-%                 subplot(ceil(length(radiusRange)/4),ceil(length(radiusRange)/2),cnt)
-%                 hold on
-%                 shadedErrorBar([1:cyclength+cyclength/2]',squeeze(nanmean(nanmean(nanmean(trialcycavg(y(1)-2:y(1)+2,x(1)-2:x(1)+2,:,:,i,k,1),1),2),4)),...
-%                     squeeze(nanstd(nanstd(nanstd(trialcycavg(y(1)-2:y(1)+2,x(1)-2:x(1)+2,:,:,i,k,1),1),2),4))/sqrt(length(find(radius==k&running==0))),'k')
-%                 shadedErrorBar([1:cyclength+cyclength/2]',squeeze(nanmean(nanmean(nanmean(trialcycavg(y(1)-2:y(1)+2,x(1)-2:x(1)+2,:,:,i,k,2),1),2),4)),...
-%                     squeeze(nanstd(nanstd(nanstd(trialcycavg(y(1)-2:y(1)+2,x(1)-2:x(1)+2,:,:,i,k,2),1),2),4))/sqrt(length(find(radius==k&running==1))),'r')
-%                 plot(xstim,ystim,'g-')
-%                 set(gca,'LooseInset',get(gca,'TightInset'))
-%                 cnt=cnt+1;
-%                 axis([1 cyclength+cyclength/2 -0.1 0.5])
-%                 legend(sprintf('%sdeg stationary',sizes{k}),sprintf('%sdeg running',sizes{k}),'Location','northeast')
-%             end
-%             mtit(sprintf('%s %scontrast',[files(use(f)).subj ' ' files(use(f)).expt],contrastlist{i}))
-%             if exist('psfilename','var')
-%                 set(gcf, 'PaperPositionMode', 'auto');
-%                 print('-dpsc',psfilename,'-append');
-%             end
-%         end
   
 %%
         try
@@ -591,7 +519,7 @@ for f = 1:length(use)
         end
 
         delete(psfilename);
-        close all
+%         close all
     else
         sprintf('skipping %s',filename)
     end

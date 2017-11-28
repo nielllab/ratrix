@@ -8,7 +8,7 @@ psfile = 'c:\connectivity.ps'; if exist(psfile,'file')==2;delete(psfile);end
 %%% select sessions
 useSess = 1:length(files); %%% use all files, and select injects afterwards
 
-load('\\angie\Angie_analysis\patchonpatch14min.mat')
+load('D:\Elliott\DOIwidefield\patchonpatch14min.mat')
 %contrast = contrast(1:end-5); xpos = xpos(1:end-5); ypos=ypos(1:end-5);
 
 for sess = 1:length(useSess);
@@ -77,7 +77,8 @@ for sess = 1:length(useSess);
     
     %%% crop and downsize if needed
      downsamp=1;
-     dfof_bg= imresize(dfof_bgAlign(alignLambda(1)-64:alignLambda(1)+63,alignLambda(2)-110:alignLambda(2)+17,:),1/downsamp,'box');
+%      dfof_bg= imresize(dfof_bgAlign(alignLambda(1)-64:alignLambda(1)+63,alignLambda(2)-110:alignLambda(2)+17,:),1/downsamp,'box');
+%      dfof_bg= imresize(dfof_bgAlign(alignLambda(1)-64:alignLambda(1)+63,alignLambda(2)-110:alignLambda(2)+17,:),1/downsamp,'box');
 %     
     %%% final image data
     figure

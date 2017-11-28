@@ -42,16 +42,17 @@ for f=1:length(use)
     %%%scale spikes
     if (exist('S2P','var')&S2P==1)
         spikes = spikes/2;
+        cellCutoff = size(spikes,1)
     else
         spikes = spikes*10;
+        cellCutoff = files(use(f)).cutoff
     end
 
     if exist(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing '.mat']))==0 | rerun%%comment for redo
         % load size select points file and stim object and align to stim
         sprintf('realigning to onsets')
         
-        dfspcells = min([size(dF,1) size(spikes,1)]);
-        dF = dF(1:dfspcells,:);spikes = spikes(1:dfspcells,:);
+        dF = dF(1:cellCutoff,:);spikes = spikes(1:cellCutoff,:);
 
         dFout = align2onsets(dF,onsets,dt,timepts);
         spikesOut = align2onsets(spikes,onsets,dt,timepts);
@@ -80,13 +81,15 @@ for f=1:length(use)
     end
     timepts = timepts - isi;%%%shift for plotting to stim onset
     
+%%
+    
     %%%pixel-wise suppression plots
     load(files(use(f)).sizesession,'frmdata')
 
     figure
     for i = 1:length(sizes)
         subplot(2,ceil(length(sizes)/2),i)
-        resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,i,1),3);
+        resp = imresize(nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,i,1),3),0.5);
         respimg = mat2im(resp,jet,[-0.01 0.1]);
         imshow(respimg)
         set(gca,'ytick',[],'xtick',[])
@@ -97,76 +100,71 @@ for f=1:length(use)
 
     %%%use manual selection of 10 degree pixelwise response for cell selection
     if mod(f,2)~=0 & (~exist(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing '.mat'])) | reselect==1)
-        figure
-        title('select 5deg activated region')
-        if length(size(frmdata))==5
-            resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,2,1),3)-...
-                nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,1,1),3);
-        else
-            resp = frmdata(cropx(1):cropx(2),cropy(1):cropy(2),2,1);
-        end
-        respimg = mat2im(resp,jet,[-0.01 0.1]);
-        imshow(respimg)
-        set(gca,'ytick',[],'xtick',[])
-        [limy limx] = ginput(2);
-        limx = sort(round(limx)); limy= sort(round(limy));
-        hold on
-        plot([limy(1) limy(1) limy(2) limy(2) limy(1)], [limx(1) limx(2) limx(2) limx(1) limx(1)],'g','linewidth',2);
-        if exist('psfilei','var')
-            set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfilei,'-append');
-        end
 
-        goodprints = zeros(length(usePts),1);
-        for i = 1:length(usePts)
-            [xpt ypt] = ind2sub(size(meanShiftImg),usePts{i});
-            xpt=mean(xpt);ypt=mean(ypt);
-            if xpt>limx(1)&xpt<limx(2)&ypt>limy(1)&ypt<limy(2)
+        resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,2,1),3);%-...
+                %nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,1,1),3);
+
+        [gpLUT,P,etheta] = neuropilEllipse(resp,psfilei);
+        
+        figure;subplot(1,2,1);imshow(gpLUT);hold on;;set(gca,'ytick',[],'xtick',[]);plot(P(1,2),P(1,1),'ro')
+        goodprints = zeros(cellCutoff,1);
+        for i = 1:cellCutoff
+            [xpt,ypt] = ind2sub(size(meanShiftImg),usePts{i});
+            mnxpt=round(mean(xpt));mnypt=round(mean(ypt));
+            if gpLUT(mnxpt,mnypt)==1
                 goodprints(i) = 1;
+                plot(ypt,xpt,'g*')
+            else
+                plot(ypt,xpt,'r*')
             end
         end
-        
-        if (exist('S2P','var')&S2P==1)
-            cellCutoff = size(spikes,1)
-        else
-            cellCutoff = files(use(f)).cutoff;
-        end
-        
-        usecells = find(goodprints==1);usecells = usecells(usecells<cellCutoff);
+        usecells = find(goodprints==1); %%%pick only cells w/centers inside the ellipse
         
         %%%calculate response as a function of distance from center
-        y0 = round(mean(limy))+cropy(1);x0 = round(mean(limx))+cropx(1);
-        limy=limy+cropy(1);limx=limx+cropx(1);
-        [X,Y] = meshgrid(1:size(frmdata,1),1:size(frmdata,2));Y=Y/2;
-        dist =sqrt((Y - x0/2).^2 + (X - y0).^2);
-        
-        goodprints = zeros(length(usePts),1);goodprints(usecells)=1;
-        
+        y0 = P(1,2)+cropy(1);x0 = P(1,1)+cropx(1);
+        rx = sqrt((P(1,1)-P(2,1))^2+(P(1,2)-P(2,2))^2);ry = 2*rx;
+        [X,Y] = meshgrid(1:size(frmdata,1),1:size(frmdata,2));%%%Y=Y/2;
+%         rx = sqrt((X-x0).^2);ry = sqrt((Y-y0).^2);
+%         rx = 20;ry=20;
+%         dist = ((cos(etheta)*(X-y0)+sin(etheta)*(Y-x0)).^2)./rx.^2+(((sin(etheta)*(X-y0)-cos(etheta)*(Y-x0))).^2)./ry.^2;
+        dist = sqrt(((cos(etheta)*(X-y0)+sin(etheta)*(Y-x0)).^2)+(((sin(etheta)*(X-y0)-cos(etheta)*(Y-x0))).^2)/2^2);
+        subplot(1,2,2);imshow(mat2im(dist,jet,[0 300]));set(gca,'ytick',[],'xtick',[]);hold on;plot(y0,x0,'ro')
+        if exist('psfilei','var')
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+            print('-dpsc',psfilei,'-append');
+        end 
+                
         save(fullfile(pathname,filename),...
-            'usecells','limx','limy','x0','y0','dist','goodprints','-append')
+            'usecells','gpLUT','P','etheta','x0','y0','dist','goodprints','-append')
         save(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing]),...
-            'usecells','limx','limy','x0','y0','dist','goodprints','-append')
+            'usecells','gpLUT','P','etheta','x0','y0','dist','goodprints','-append')
         
     else
         load(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_pre']),...
-            'usecells','limx','limy','x0','y0','dist','goodprints')
-        figure
-        title('select 10deg activated region')
-        resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,3,1),3);
-        respimg = mat2im(resp,jet,[-0.01 0.1]);
-        imshow(respimg)
-        set(gca,'ytick',[],'xtick',[])
-        hold on
-        plot([limy(1) limy(1) limy(2) limy(2) limy(1)]-cropy(1), [limx(1) limx(2) limx(2) limx(1) limx(1)]-cropx(1),'g','linewidth',2);
-        if exist('psfilei','var')
-            set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfilei,'-append');
+            'usecells','gpLUT','P','etheta','x0','y0','dist','goodprints')
+        figure;subplot(1,2,1);imshow(gpLUT);hold on;;set(gca,'ytick',[],'xtick',[]);plot(P(1,2),P(1,1),'ro')
+        for i = 1:cellCutoff
+            [xpt,ypt] = ind2sub(size(meanShiftImg),usePts{i});
+            mnxpt=round(mean(xpt));mnypt=round(mean(ypt));
+            if gpLUT(mnxpt,mnypt)==1
+                plot(ypt,xpt,'g*')
+            else
+                plot(ypt,xpt,'r*')
+            end
         end
+        subplot(1,2,2);imshow(mat2im(dist,jet,[0 300]));set(gca,'ytick',[],'xtick',[]);hold on;plot(y0,x0,'ro')
+        if exist('psfilei','var')
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+            print('-dpsc',psfilei,'-append');
+        end 
+    
         save(fullfile(pathname,filename),...
-            'usecells','limx','limy','x0','y0','dist','goodprints','-append')
+            'usecells','gpLUT','P','etheta','x0','y0','dist','goodprints','-append')
         save(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing]),...
-            'usecells','limx','limy','x0','y0','dist','goodprints','-append')
+            'usecells','gpLUT','P','etheta','x0','y0','dist','goodprints','-append')
     end
+    
+%%
         
         
     %create array w/average responses per stim type
@@ -275,17 +273,28 @@ for f=1:length(use)
         end
     end
 
+%%
+    %%%plot ellipse over image
+    N = 100;        %default: 100 points
+    th = [0 2*pi];  %default: full ellipse
+    th = linspace(th(1),th(2),N);
+    rx = sqrt((P(1,1)-P(2,1))^2+(P(1,2)-P(2,2))^2);
+    ry = 2*rx;
+    %calculate x and y points
+    ex = y0 + rx*cos(th)*cos(etheta) - ry*sin(th)*sin(etheta);
+    ey = x0 + rx*cos(th)*sin(etheta) + ry*sin(th)*cos(etheta);
+
     figure
     subplot(1,2,1);imagesc(nanmean(frmdata(:,:,:,3,1),3),[-0.01 0.1]);axis equal;
     hold on
-    plot([limy(1) limy(1) limy(2) limy(2) limy(1)], [limx(1) limx(2) limx(2) limx(1) limx(1)],'g','linewidth',2);
+    plot(ex,ey,'g','linewidth',2);
     plot(y0,x0,'ro')
     subplot(1,2,2);imagesc(dist);axis equal;hold on;plot(y0,x0,'ro')
     if exist('psfilei','var')
-        set(gcf, 'PaperPositionMode', 'auto');
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilei,'-append');
-    end
-
+    end 
+    
     %%%compare 5/10deg pixel vs cell footprints
     figure
     subplot(1,3,1)
@@ -307,7 +316,7 @@ for f=1:length(use)
 %         for i=1:length(usecells)
 %             prints{i} = usePts{usecells(i)};
 %         end
-    draw2pSegs(usePts,goodprints,parula,size(meanShiftImg),1:length(usePts),[0 2])
+    draw2pSegs(usePts,goodprints,parula,size(meanShiftImg),1:cellCutoff,[0 2])
     colorbar off
     xlabel('center footprints')
     set(gca,'LooseInset',get(gca,'TightInset'))
@@ -315,9 +324,8 @@ for f=1:length(use)
     if exist('psfilei','var')
         set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilei,'-append');
-    end       
-
-
+    end  
+%%
     %%%plot sit dF
     for h = 1:length(sfrange)
         figure;
@@ -392,7 +400,7 @@ for f=1:length(use)
         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfilei,'-append');
     end
-
+%%
 
     %%%plot rasters for dfof and spikes
     load(files(use(f)).sizepts,'dF','spikes');

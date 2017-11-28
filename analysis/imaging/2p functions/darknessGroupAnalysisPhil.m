@@ -48,18 +48,40 @@ if redogrp
     cut=nan(1,numAni);
     sig = nan(numAni,5);
     ensshuf = nan(numAni,reps,2);
-    grpensmtx = nan(anicnt,500,500,2);
-    enspks = nan(anicnt,500,2);
-    enslocs = nan(anicnt,500,2);
+    grpensmtx = nan(numAni,500,500,2);
+    enspks = nan(numAni,500,2);
+    enslocs = nan(numAni,500,2);
     grpenssimIdx = nan(numAni,500,500,2);
     anicnt = 1;
     
     for i = 1:2:length(use)
+        
+        filename = sprintf('%s_%s_%s_%s_darkness',files(use(i)).expt,files(use(i)).subj,files(use(i)).timing,files(use(i)).inject);
+        anipsfile = 'c:\tempPhil2p.ps';
+        if exist(anipsfile,'file')==2;delete(anipsfile);end
 
         %%%darkness data pre
         aniFile = files(use(i)).darknesspts; load(aniFile,'spikes');
         cut(anicnt) = files(use(i)).cutoff;
         spikes = spikes(1:cut(anicnt),end-2999:end);
+        
+        %%%plot pre spikes
+        j=0;
+        f1 = figure
+        while j<cut(anicnt)
+            subplot(3,ceil(cut(anicnt)/(3*10)),j/10+1)
+            hold on
+            for k = 1:10
+                try
+                    plot(spikes(j+k,:)+0.5*k,'k')
+                catch
+                    continue
+                end
+            end
+            axis([0 3000 0 6])
+            j=j+10;
+        end
+        premn = sum(spikes>0,2)./size(spikes,2);
         
         %%%pairwise coactivity
         coamtx = nan(size(spikes,1),size(spikes,1));
@@ -162,6 +184,48 @@ if redogrp
         aniFile = files(use(i+1)).darknesspts; load(aniFile,'spikes');
         spikes = spikes(1:cut(anicnt),end-2999:end);
 
+        %%%plot post spikes
+        j=0;
+        figure(f1)
+        while j<cut(anicnt)
+            subplot(3,ceil(cut(anicnt)/(3*10)),j/10+1)
+            hold on
+            for k = 1:10
+                try
+                    plot(spikes(j+k,:)+0.5*k,'r')
+                catch
+                    continue
+                end
+            end
+            axis([0 3000 0 6])
+            j=j+10;
+        end
+        mtit('spikes pre (black) post (red)')
+        postmn = sum(spikes>0,2)./size(spikes,2);
+        if exist('anipsfile','var')
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+            print('-dpsc',anipsfile,'-append');
+        end
+
+        %%% percent active frames
+        figure
+        hold on
+        for k = 1:length(premn)
+            if premn(k)>nanmean(premn)
+                plot([1 2],[premn(k) postmn(k)],'b.-')
+            else
+                plot([1 2],[premn(k) postmn(k)],'k.-')
+            end
+        end
+        errorbar([1 2],[nanmean(premn) nanmean(postmn)],[nanstd(premn) nanstd(postmn)],'r')
+        [h p] = ttest(premn,postmn);
+        title(sprintf('percent active frames p=%0.4f',p))
+        set(gca,'xtick',[1 2],'xticklabel',{'pre','post'})
+        if exist('anipsfile','var')
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+            print('-dpsc',anipsfile,'-append');
+        end
+    
         %%%pairwise coactivity
         coamtx = nan(size(spikes,1),size(spikes,1));
         for j = 1:size(spikes,1)
@@ -210,6 +274,14 @@ if redogrp
         
         anicnt=anicnt+1;
         sprintf('%0.0f/%0.0f done',anicnt-1,numAni)
+        
+        try
+            dos(['ps2pdf ' anipsfile ' "' [fullfile(pathname,filename) '.pdf'] '"'] )
+        catch
+            display('couldnt generate pdf');
+        end
+        delete(anipsfile);
+        close all
     end
     
 
@@ -262,7 +334,7 @@ plot(1:5,sig','b.-','MarkerSize',5)
 %     plot(1:5,sig(i,:),'b.-')
 % end
 axis square
-axis([0 6 0 0.1])
+axis([0 6 0 0.5])
 ylabel('percent of cell pairs')
 set(gca,'xtick',1:5,'xticklabel',{'pre','post','pre&post','pre~post','~prepost'},'fontsize',6)
 title('percent of cells coactive')

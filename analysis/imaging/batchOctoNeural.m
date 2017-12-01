@@ -3,8 +3,8 @@ close all
 %% Analyze multiple files using sutterOctoNeural function. Instead of 
 % providing user input interactively, input the parameters below
 % Change the DataDir to the folder containing the files you want analyzed
-DataDir = 'D:\GSchool\Niell\Data\102517_Octopus_Cal520';
-Opt.Date = '102517'; %Folder name for stimrec as well
+DataDir = 'D:\GSchool\Niell\Data\112517_Octopus_Cal520';
+Opt.Date = '112517'; %Folder name for stimrec as well
 
 %Selects only those files that are relevant
 Tif_list = dir(fullfile(DataDir,'Loc*.tif'));
@@ -36,7 +36,7 @@ Opt.nclust = 5;             %Number of cell population clusters
 
 %% Loop through the filelist and analyze each tif stack
 Results = struct;
-for iFile = 7:length(Tif_list)
+for iFile = 1:length(Tif_list)
     Opt.pTif = Tif_list(iFile).folder;
     Opt.fTif = Tif_list(iFile).name;
     fprintf('Processing file %s\n',Opt.fTif);
@@ -81,12 +81,12 @@ for iFile = 7:length(Tif_list)
     
     %% Run sutterOctoNeural
     Results(iFile).Input = Opt;
-    try
-        Results(iFile).Output = sutterOctoNeural(Opt);
-    catch
-        fprintf('Error in sutterOctoNeural script - Continuing onto next file');
-        Results(iFile).Output = [];
-    end
+%     try
+%         Results(iFile).Output = sutterOctoNeural(Opt);
+%     catch
+%         fprintf('Error in sutterOctoNeural script - Continuing onto next file');
+%         Results(iFile).Output = [];
+%     end
     
 end
 

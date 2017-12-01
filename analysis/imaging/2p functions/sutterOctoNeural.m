@@ -110,6 +110,15 @@ if Opt.fStim ~= 0
     load(fullfile(Opt.pStim,Opt.fStim),'stimRec');
     nCycles = floor(size(dfofInterp,3)/cycLength)-ceil((cycWindow-cycLength)/cycLength);  %%% trim off last stims to allow window for previous stim
     stimT = stimRec.ts - stimRec.ts(1);
+    
+    %Temporary fix 
+    for i = 1:length(stimRec.cond)
+       if stimRec.cond(i) == 0
+           stimRec.cond(i) = pastCond;
+       else
+           pastCond = stimRec.cond(i);
+       end
+    end
     for i = 1:nCycles
         stimOrder(i) = stimRec.cond(min(find(stimT>((i-1)*cycLength*dt+0.1))));
     end
@@ -217,7 +226,7 @@ if selectPts
     fprintf('Select points on image. Rightclick to exit interactive ginput');
     while rightclick ~= 3
         figure(selectFig); hold on
-        [x(i), y(i), rightclick]] = ginput(1); x=round(x); y = round(y);
+        [x(i), y(i), rightclick] = ginput(1); x=round(x); y = round(y);
         plot(x(i),y(i),'b*');
         dF(i,:) = squeeze(nanmean(nanmean(dfofInterp(y(i)+range,x(i)+range,:),2),1));
     end

@@ -65,7 +65,7 @@ if Opt.align
     %Plot Mean image of rigidly aligned image sequence
     figure
     R_Mean = mean(RAligned_Seq(:,:,:,1),3);
-    imagesc(R_Mean,[0, 0.80].*max(R_Mean(:)));colormap gray
+    imagesc(R_Mean,[0, 0.70].*max(R_Mean(:)));colormap gray
     title('Mean Green Image after Rigid Alignment of full frame sequence');
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
@@ -84,7 +84,7 @@ if Opt.align
         %Plot Mean image of rigidly aligned image sequence
         figure
         R_Mean = mean(RAligned_Seq(:,:,FrameIndices,1),3);
-        imagesc(R_Mean,[0, 0.80].*max(R_Mean(:)));colormap gray
+        imagesc(R_Mean,[0, 0.70].*max(R_Mean(:)));colormap gray
         title(sprintf('Mean Image after Rigid Alignment of %u out of %u total frames',length(FrameIndices),nframes));
         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     else

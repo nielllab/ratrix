@@ -112,13 +112,13 @@ if Opt.fStim ~= 0
     stimT = stimRec.ts - stimRec.ts(1);
     
     %Temporary fix 
-    for i = 1:length(stimRec.cond)
-       if stimRec.cond(i) == 0
-           stimRec.cond(i) = pastCond;
-       else
-           pastCond = stimRec.cond(i);
-       end
-    end
+%     for i = 1:length(stimRec.cond)
+%        if stimRec.cond(i) == 0
+%            stimRec.cond(i) = pastCond;
+%        else
+%            pastCond = stimRec.cond(i);
+%        end
+%     end
     for i = 1:nCycles
         stimOrder(i) = stimRec.cond(min(find(stimT>((i-1)*cycLength*dt+0.1))));
     end

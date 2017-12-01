@@ -101,7 +101,7 @@ while ReDo
     
     meanclust = figure;
     R_Mean = mean(Aligned_Seq(:,:,FrameIndices),3);
-    imagesc(R_Mean);colormap gray
+    imagesc(R_Mean,[0, 0.70].*max(R_Mean(:)));colormap gray
     title(sprintf('Mean Image after Rigid Alignment of %u out of %u total frames',length(FrameIndices),nframes));
     
     %Give the user the option to reselect which cluster to use

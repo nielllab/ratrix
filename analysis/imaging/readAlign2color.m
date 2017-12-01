@@ -20,6 +20,14 @@ for iFrame = 1:nframes
     Img_Seq(:,:,iFrame,2) = double(imread(fname,(iFrame-1)*2+2)); %Red channel
 end
 
+%Display non-aligned mean image
+figure
+NA_Mean = mean(Img_Seq(:,:,:,1),3);
+imagesc(NA_Mean,[0, 0.70].*max(NA_Mean(:)));colormap gray
+title('Mean Green Image of Non-Aligned full frame sequence');
+ax = gca; ax.XTick = []; ax.YTick = [];
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
 if Opt.align
     disp('Doing Alignment!')
     
@@ -65,8 +73,9 @@ if Opt.align
     %Plot Mean image of rigidly aligned image sequence
     figure
     R_Mean = mean(RAligned_Seq(:,:,:,1),3);
-    imagesc(R_Mean,[0, 0.70].*max(R_Mean(:)));colormap gray
+    imagesc(R_Mean,[0, 0.70].*max(R_Mean(:)));colormap pink
     title('Mean Green Image after Rigid Alignment of full frame sequence');
+    ax = gca; ax.XTick = []; ax.YTick = [];
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %Should we bin for z-motion?
@@ -86,6 +95,7 @@ if Opt.align
         R_Mean = mean(RAligned_Seq(:,:,FrameIndices,1),3);
         imagesc(R_Mean,[0, 0.70].*max(R_Mean(:)));colormap gray
         title(sprintf('Mean Image after Rigid Alignment of %u out of %u total frames',length(FrameIndices),nframes));
+        ax = gca; ax.XTick = []; ax.YTick = [];
         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     else
         FrameIndices = 1:1:nframes;
@@ -129,6 +139,7 @@ if Opt.align
         NR_Mean = mean(Aligned_Seq(:,:,FrameIndices,1),3);
         imagesc(NR_Mean,[0, 0.80].*max(NR_Mean(:)));colormap gray
         title(sprintf('Mean Image after Rigid + Rotation Alignment of %u out of %u total frames',length(FrameIndices),nframes));
+        ax = gca; ax.XTick = []; ax.YTick = [];
         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
       
     else

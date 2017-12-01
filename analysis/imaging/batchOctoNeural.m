@@ -42,7 +42,7 @@ for iFile = 1:length(Tif_list)
     fprintf('Processing file %s\n',Opt.fTif);
     
     %Find corresponding ttl file
-    LocAcq = Opt.fTif(1:9);
+    LocAcq = Opt.fTif(1:10);
     mainFilename = Opt.fTif(1:end-7);
     pos = strfind({Mat_list(:).name},mainFilename); Indy = [];
     for i = 1:length(pos)

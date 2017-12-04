@@ -119,6 +119,7 @@ if Opt.fStim ~= 0
 %            pastCond = stimRec.cond(i);
 %        end
 %     end
+
     for i = 1:nCycles
         stimOrder(i) = stimRec.cond(min(find(stimT>((i-1)*cycLength*dt+0.1))));
     end
@@ -448,39 +449,42 @@ for clust = 1:nclust
     
     %%% spatial location of cells in this cluster
     figure
-    subplot(2,2,1);
-    imagesc(stdImg,[0 prctile(stdImg(:),95)]); axis equal; hold on;colormap gray;freezeColors;
-    title(sprintf('cluster %d',clust));
-    plot(x(c==clust),y(c==clust),'go')%%'Color',colors(c));
+    subplot(2,3,1);
+    imagesc(stdImg,[0 prctile(stdImg(:),97.5)]); axis equal; hold on;colormap gray;freezeColors;
+    ax = gca; ax.XTick = []; ax.YTick = [];
+    xlim([10 210]);ylim([10 210])
+    title(sprintf('Cluster %d',clust));
+    plot(x(c==clust),y(c==clust),'o','Color',colors(clust,:))%%'Color',colors(c));
     
     %%% heatmap average timecourse
-    subplot(2,2,2);
+    subplot(2,3,4:6);
     imagesc(dFmean(c==clust,:),[-0.1 0.4]); axis xy % was df
-    title(sprintf('clust %d',clust)); hold on
-    
+    title(sprintf('Mean df/f',clust)); hold on
+    ylabel('Cell ID');xlabel('Stim #'); xticks([])
     for i = 1:nstim
-        plot([i*cycWindow i*cycWindow]+0.5,[1 sum(clust==c)],'k');
+        plot([i*cycWindow i*cycWindow]+0.5,[1 sum(clust==c)],'y');
     end
     colormap jet;freezeColors;colormap gray;
     
-    %%% timecourse of this cluster, for each repeat
-    subplot(2,2,4);
-    plot((0:size(dFrepeats,2)-1)/cycWindow + 1, squeeze(nanmean(dFrepeats(c==clust,:,:),1))); hold on
-    plot((0:size(dFrepeats,2)-1)/cycWindow + 1, squeeze(nanmean(nanmedian(dFrepeats(c==clust,:,:),3),1)),'g','LineWidth',2)
-    xlabel('stim #'); xlim([1 nstim+1]); ylim([-0.05 0.2])
-    title('mean of cluster, multiple repeats');
-    for i = 1:nstim
-        plot([i i ],[0  0.5],'k:');
-    end
-    
-    %%% cycleaverage timecourse for each cell in this cluster
-    subplot(2,2,3);
-    plot(cycAvgAll(c==clust,:)');
-    hold on
-    plot(nanmean(cycAvgAll(c==clust,:),1),'g','Linewidth',2);
-    %     plot((1:size(dF,2))*dt,dF(c==clust,:)'); hold on;
-    %     xlim([1 size(dF,2)*dt]); xlabel('secs'); ylim([-0.2 2.1])
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+%     %%% timecourse of this cluster, for each repeat  xlim([150 400])
+%     subplot(2,2,4);
+%     plot((0:size(dFrepeats,2)-1)/cycWindow + 1, squeeze(nanmean(dFrepeats(c==clust,:,:),1))); hold on
+%     plot((0:size(dFrepeats,2)-1)/cycWindow + 1, squeeze(nanmean(nanmedian(dFrepeats(c==clust,:,:),3),1)),'g','LineWidth',2)
+%     xlabel('stim #'); xlim([1 nstim+1]); ylim([-0.05 0.2])
+%     title('Mean of cluster, multiple repeats');
+%     for i = 1:nstim
+%         plot([i i ],[0  0.5],'k:');
+%     end
+%     
+%     %%% cycleaverage timecourse for each cell in this cluster
+%     subplot(2,2,3);
+%     plot(cycAvgAll(c==clust,:)');
+%     hold on
+%     plot(nanmean(cycAvgAll(c==clust,:),1),'g','Linewidth',2);
+%     title('Cycle Average Timecourse');
+%     %     plot((1:size(dF,2))*dt,dF(c==clust,:)'); hold on;
+%     %     xlim([1 size(dF,2)*dt]); xlabel('secs'); ylim([-0.2 2.1])
+%     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
 end %end of for clust
 

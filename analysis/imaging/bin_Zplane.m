@@ -67,7 +67,6 @@ while ReDo
     end
     title(sprintf('%u Clusters',nclust));
     xlabel('Frame #'); ylabel('Cluster ID');
-    %
         
     %Which cluster should be used?
     if isfield(Opt,'Zclusters')

@@ -73,7 +73,7 @@ if Opt.align
     %Plot Mean image of rigidly aligned image sequence
     figure
     R_Mean = mean(RAligned_Seq(:,:,:,1),3);
-    imagesc(R_Mean,[0, 0.70].*max(R_Mean(:)));colormap pink
+    imagesc(R_Mean,[0, 0.70].*max(R_Mean(:)));colormap gray
     title('Mean Green Image after Rigid Alignment of full frame sequence');
     ax = gca; ax.XTick = []; ax.YTick = [];
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
@@ -147,7 +147,53 @@ if Opt.align
         Aligned_Seq = RAligned_Seq;
     end
     
-    % Make an aligned movie from Aligned_Seq
+    %% Quantify alignment quality
+%     NA_Mean = mean(Img_Seq(:,:,:,1),3);
+%     for iFrame = 1:size(Img_Seq,3)
+%         iiImg = Img_Seq(:,:,iFrame,1);
+%         NACorrCoeff(iFrame,1) = corr2(iiImg,NA_Mean);
+%         
+%     end
+%         
+%     R_Mean = mean(RAligned_Seq(:,:,:,1),3);
+%     for iFrame = 1:size(RAligned_Seq,3)
+%         iiImg = RAligned_Seq(:,:,iFrame,1);
+%         RigidCorrCoeff(iFrame,1) = corr2(iiImg,R_Mean);
+%         
+%     end
+%         
+%     RZ_Mean = mean(RAligned_Seq(:,:,FrameIndices,1),3);
+%     for iFrame = 1:length(FrameIndices)
+%         iiImg = RAligned_Seq(:,:,FrameIndices(iFrame),1);
+%         RigidZBin_CorrCoeff(iFrame,1) = corr2(iiImg,RZ_Mean);
+%         
+%     end
+%         
+%     NR_Mean = mean(Aligned_Seq(:,:,FrameIndices,1),3);
+%     for iFrame = 1:length(FrameIndices)
+%         iiImg = Aligned_Seq(:,:,FrameIndices(iFrame),1);
+%         RigidRotationZbin_CorrCoeff(iFrame,1) = corr2(iiImg,NR_Mean);
+%         
+%     end
+%     
+%     %Plot Correlation Coefficients for various alignment methods
+%     CorrCoeff_Align = [mean(NACorrCoeff), mean(RigidCorrCoeff), mean(RigidZBin_CorrCoeff), mean(RigidRotationZbin_CorrCoeff)];
+%     figure
+%     plot(1:1:4,CorrCoeff_Align,'ob','MarkerFaceColor','b')
+%     ax = gca; ax.XLim = [0.5 4.5];
+%     ax.YLabel.String = '2D Correlation Coefficient';
+%     ax.YLabel.FontSize = 12;
+%     ax.YLabel.FontWeight = 'bold';
+%     ax.TickLabelInterpreter = 'latex';
+%     ax.YLim = [0.82 1];
+%     ax.XTick = [1 2 3 4];
+%     ax.XTickLabel = {'\bf Non-Aligned','\bf Rigid Alignment','\bf Z-Binning','\bf Rotation'};
+%     ax.XTickLabelRotation = 45;
+%     ax.XGrid = 'on';
+%     ax.YGrid = 'on';
+%     title('Mean Correlation Coefficient');
+
+    %% Make an aligned movie from Aligned_Seq
     if Opt.MakeMov
         MakeMovieFromImgSeq(fname, Aligned_Seq,FrameIndices);
     end

@@ -63,3 +63,10 @@ for iChannel = 1:2
     end
 end
 
+%Replace Inf Values with NaN
+for iFrame = 1:size(dfofInterp,3)
+    frm = dfofInterp(:,:,iFrame);
+    frm(isinf(frm(:))) = NaN;
+    dfofInterp(:,:,iFrame) = frm; 
+end
+

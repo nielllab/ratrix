@@ -45,7 +45,7 @@ open(GrnVideo);
 MakeMov = 1;
 
 GrnFig = figure;
-colormap gray
+colormap pink
 for iFrame = 1:nframes
     imagesc(GrnChannel(:,:,iFrame),GrnRange);
     sTitle = sprintf('Non-Aligned Green Channel: Frame %u',iFrame);
@@ -54,7 +54,7 @@ for iFrame = 1:nframes
     title(sTitle);
     
     drawnow
-    frame = getframe(GrnFig);
+    frame = getframe;
     writeVideo(GrnVideo,frame);
 end
 
@@ -78,7 +78,7 @@ for iFrame = 1:nframes
     title(sTitle);
     
     drawnow
-    frame = getframe(RedFig);
+    frame = getframe;
     writeVideo(RedVideo,frame);
 
 end

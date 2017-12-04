@@ -21,7 +21,7 @@ for iFrame = 1:sm:length(FrameIndices)
     tmp = Aligned_Seq(:,:,FrameIndices(iFrame),1);
     
     GrnRange(1) = GrnRange(1) + prctile(tmp(:),1);
-    GrnRange(2) = GrnRange(2) + 0.9*max(tmp(:));
+    GrnRange(2) = GrnRange(2) + 0.85*max(tmp(:));
     
     tmp = Aligned_Seq(:,:,FrameIndices(iFrame),2);
     RedRange(1) = RedRange(1) + prctile(tmp(:),1);
@@ -49,7 +49,7 @@ for iFrame = 1:length(FrameIndices)
     title(sTitle);
     
     drawnow
-    frame = getframe(GrnFig);
+    frame = getframe;
     writeVideo(GrnVideo,frame);
 end
 
@@ -73,7 +73,7 @@ for iFrame = 1:length(FrameIndices)
     title(sTitle);
     
     drawnow
-    frame = getframe(RedFig);
+    frame = getframe;
     writeVideo(RedVideo,frame);
     
 end

@@ -24,15 +24,15 @@ Opt.Resample_dt = 0.5;
 Opt.SaveOutput = 1;
 
 %Options for alignment
-Opt.ZBinning = 0;           %Option to correct for z motion by binning
+Opt.ZBinning = 1;           %Option to correct for z motion by binning
 Opt.Zclusters = 2;          %Number of z-plane clusters to identify
 Opt.Rotation = 1;           %Option to correct for rotation
-Opt.AlignmentChannel = 1;   %What channel do you want to use for alignment? Green(1)/Red(2)
+Opt.AlignmentChannel = 2;   %What channel do you want to use for alignment? Green(1)/Red(2)
 
 %Options for finding cells
 Opt.selectPts = 0;          %Select points automatically (0) rather than manually
 Opt.mindF = 0.5;            %Minimum delta-f value 
-Opt.nclust = 5;             %Number of cell population clusters
+Opt.nclust = 10;             %Number of cell population clusters
 
 %% Loop through the filelist and analyze each tif stack
 Results = struct;
@@ -81,12 +81,12 @@ for iFile = 1:length(Tif_list)
     
     %% Run sutterOctoNeural
     Results(iFile).Input = Opt;
-%     try
-%         Results(iFile).Output = sutterOctoNeural(Opt);
-%     catch
-%         fprintf('Error in sutterOctoNeural script - Continuing onto next file');
-%         Results(iFile).Output = [];
-%     end
+    try
+        Results(iFile).Output = sutterOctoNeural(Opt);
+    catch
+        fprintf('Error in sutterOctoNeural script - Continuing onto next file');
+        Results(iFile).Output = [];
+    end
     
 end
 

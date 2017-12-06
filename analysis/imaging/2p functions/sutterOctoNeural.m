@@ -45,6 +45,9 @@ if f~=0
             stimOrder(i) = stimRec.cond(min(find(stimT>((i-1)*cycLength*dt+0.1))));
         end
     end
+    stimTimes = stimPulse-stimPulse(1);
+    stimTimes = stimTimes(1:nCycles);
+    
     %stimOrder = stimRec.cond(stimRec.f==2); %%% find second frame of each stim, and see what condition it was (don't use frame 1, because stays at frame=1 at stim end)
     nstim = max(stimOrder);
     
@@ -233,7 +236,9 @@ dFrepeats=zeros(size(dF,1),cycWindow*nstim,max(nStimRep))+NaN;
 for i = 1:nstim
     repList = find(stimOrder==i);
     for r = 1:nStimRep(i)
-        dFrepeats(:,(i-1)*cycWindow + (1:cycWindow),r) = dF(:,round((repList(r)-1)*cycLength)+(1:cycWindow)) - repmat(dF(:,round((repList(r)-1)*cycLength)+1),[1 floor(cycWindow)]);
+        startFrame = stimTimes(repList(r))/dt;
+        dFrepeats(:,(i-1)*cycWindow + (1:cycWindow),r) = dF(:,round(startFrame+(1:cycWindow))) - repmat(dF(:,round(startFrame+1)),[1 floor(cycWindow)]);
+        %dFrepeats(:,(i-1)*cycWindow + (1:cycWindow),r) = dF(:,round((repList(r)-1)*cycLength)+(1:cycWindow)) - repmat(dF(:,round((repList(r)-1)*cycLength)+1),[1 floor(cycWindow)]);
     end
 end
 dFrepeats(dFrepeats>1) =1; %%% clip major outliers
@@ -252,12 +257,13 @@ for i = 1:nstim;
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
+startFrames = round(stimTimes/dt);
 %%% calculate cycle averages (timecourse for each individual stim)
 clear cycAvgAll cycAvg cycImg
 for i=1:cycWindow;
-    cycAvgAll(:,i) = mean(dF(:,i:cycLength:end),2); %%% cell-wise average across all stim
-    cycAvg(i) = mean(mean(median(dfofInterp(:,:,i:cycLength:end),3),2),1); %%% average for all cells and stim
-    cycImg(:,:,i) = mean(dfofInterp(:,:,i:cycLength:end),3); %%% pixelwise average across all stim
+    cycAvgAll(:,i) = mean(dF(:,startFrames+i),2); %%% cell-wise average across all stim
+    cycAvg(i) = mean(mean(median(dfofInterp(:,:,startFrames+i),3),2),1); %%% average for all cells and stim
+    cycImg(:,:,i) = mean(dfofInterp(:,:,startFrames+i),3); %%% pixelwise average across all stim
 end
 
 %%% plot pixel-wise cycle average
@@ -265,6 +271,7 @@ figure
 for i = 1:min(cycLength,10)
     subplot(2,5,i);
     imagesc(cycImg(:,:,i)-min(cycImg,[],3),[0 0.025]); axis equal
+    imagesc(cycImg(:,:,i)-mean(cycImg(:,:,1:2),3),[0 0.025]); axis equal
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
@@ -410,10 +417,11 @@ figure
 hist(max(dFclust,[],2))
 %%% calculate pixel-wise maps of activity for different stim
 
-evRange = 5:6; baseRange = 2:3; %%% timepoints for evoked and baseline activity
+evRange = 4:5; baseRange = 1:2; %%% timepoints for evoked and baseline activity
 figure
 for i = 1:length(stimOrder); %%% get pixel-wise evoked activity on each individual stim presentation
-    trialmean(:,:,i) = mean(dfofInterp(:,:,round(cycLength*(i-1) + evRange)),3)- mean(dfofInterp(:,:,round(cycLength*(i-1) + baseRange)),3);
+    startFrame = stimTimes(i)/dt;
+    trialmean(:,:,i) = mean(dfofInterp(:,:,round(startFrame + evRange)),3)- mean(dfofInterp(:,:,round(startFrame + baseRange)),3);
 end
 filt = fspecial('gaussian',5,1.5);
 trialmean = imfilter(trialmean,filt);
@@ -487,21 +495,21 @@ if nstim==14 %%% gratings
     imshow(imresize(overlay,2));
 end
 
-clear overlay
-overlay(:,:,1) = median(trialmean(:,:,stimOrder==15 | stimOrder==39),3);
-overlay(:,:,2) = median(trialmean(:,:,stimOrder==19 | stimOrder==43),3);
-overlay(:,:,3)=0;
-overlay(overlay<0)=0; overlay= overlay/range(2);
-figure
-imshow(imresize(overlay,2));
-
-clear overlay
-overlay(:,:,1) = median(trialmean(:,:,stimOrder==19),3);
-overlay(:,:,3) = median(trialmean(:,:,stimOrder==43 ),3)*1.5;
-overlay(:,:,2)=0;
-overlay(overlay<0)=0; overlay= 0.5*overlay/range(2);
-figure
-imshow(imresize(overlay,2))
+% clear overlay
+% overlay(:,:,1) = median(trialmean(:,:,stimOrder==15 | stimOrder==39),3);
+% overlay(:,:,2) = median(trialmean(:,:,stimOrder==19 | stimOrder==43),3);
+% overlay(:,:,3)=0;
+% overlay(overlay<0)=0; overlay= overlay/range(2);
+% figure
+% imshow(imresize(overlay,2));
+% 
+% clear overlay
+% overlay(:,:,1) = median(trialmean(:,:,stimOrder==19),3);
+% overlay(:,:,3) = median(trialmean(:,:,stimOrder==43 ),3)*1.5;
+% overlay(:,:,2)=0;
+% overlay(overlay<0)=0; overlay= 0.5*overlay/range(2);
+% figure
+% imshow(imresize(overlay,2))
 
 
 range = [-0.05 0.2]; %%% colormap range
@@ -547,6 +555,31 @@ if nstim==26 %%% gratings
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 end
+
+
+
+range = [-0.025 0.1]; %%% colormap range
+if nstim==13 %%% gratings 1 tf
+    loc = [1 5 9 2 6 10 3 7 11 4 8 12]; %%% map stim order onto subplot
+    figure; set(gcf,'Name','gratings');
+    for i = 1:12
+        meanimg = median(trialmean(:,:,stimOrder==i),3);
+        subplot(3,4,loc(i));
+        imagesc(meanimg,range); axis equal
+    end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    figure;set(gcf,'Name','horiz gratings');
+    for i = 13
+        meanimg = median(trialmean(:,:,stimOrder==i),3);
+        
+        imagesc(meanimg,range); axis equal
+    end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+end
+
 
 %%% plot mean for each stim condition, with layout corresponding to the stim
 range = [-0.02 0.1];

@@ -1,27 +1,43 @@
 clear all
 
 [f p] = uigetfile('*.mat','topo x');
-load(fullfile(p,f),'map');
-data(:,:,1) = (map{3});
-size(map{3})
+load(fullfile(p,f),'map','rigzoom');
+if length(map)==3
+    data(:,:,1) = (map{3});
+    size(map{3})
+else
+    map{1} = imresize(map{1},225/size(map{1},1));
+    data(:,:,1) = (map{1});
+    size(map{1})
+end
 [f p] = uigetfile('*.mat','topo y');
 load(fullfile(p,f),'map');
-data(:,:,2) = (map{3});
-size(map{3})
+if length(map)==3
+    data(:,:,2) = (map{3});
+    size(map{3})
+else
+    map{1} = imresize(map{1},225/size(map{1},1));
+    data(:,:,2) = (map{1});
+    size(map{1})
+end
 
-for multipleTifs=1:3
+% for multipleTifs=1:3
 
 [f p] = uigetfile('*.tif', 'overlay tif');
 overlayImg = imread(fullfile(p,f));
 rig = input('widefield rig 1 or 2 ? ');
 if rig==2
-    overlayImg = flip(overlayImg,2);
+    overlayImg = flip(overlayImg(20:end,:),2);
+    s = size(overlayImg); news = round(s*rigzoom);
+    overlayImg = overlayImg(round(s(1)/2 - news(1)/2) + 1:news(1), round(s(2)/2 - news(2)/2) + 1:news(2));
+    overlayImg = imresize(overlayImg,rigzoom);
 end
 
 ph = angle(data);
 ph(ph<0)= ph(ph<0)+2*pi;
 
 resamp=4;
+
 for i = 1:2;
     [x y] = gradient(imresize(ph(:,:,i),1/resamp));
     dx(:,:,i) = imresize(x,[size(ph,1) size(ph,2)])  ; dy(:,:,i)=imresize(y,[size(ph,1) size(ph,2)]);
@@ -64,4 +80,4 @@ subplot(2,2,2+i);
 imshow(im.*repmat(amp,[1 1 3]) *alpha + repmat(overlayImg,[1 1 3])*beta);
 end
 
-end
+% end

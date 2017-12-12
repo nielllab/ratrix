@@ -25,7 +25,7 @@ for f = 1:length(use)
         imagerate=10;
         cyclength = imagerate*(isi+duration);
         base = isi*imagerate-4:isi*imagerate-1;
-        peakWindow = base(end):base(end)+duration*imagerate-1;
+        peakWindow = isi*imagerate+1:isi*imagerate+3;
         timepts = 0:1/imagerate:(2*isi+duration);timepts = timepts - isi;timepts = timepts(1:end-1);
         psfilename = 'c:\tempPhilWF.ps';
         if exist(psfilename,'file')==2;delete(psfilename);end
@@ -174,13 +174,13 @@ for f = 1:length(use)
         %%% separate responses by trials
         sprintf('separating responses by trial')
         speedcut = 20;
-        trialdata = zeros(size(deconvimg,1),size(deconvimg,2),trials);
+%         trialdata = zeros(size(deconvimg,1),size(deconvimg,2),trials);
         trialspeed = zeros(trials,1);
         trialcyc = zeros(size(deconvimg,1),size(deconvimg,2),cyclength+isi*imagerate,trials);
         for tr=1:trials-1;
             t0 = round((tr-1)*cyclength);
             baseframes = base+t0; baseframes=baseframes(baseframes>0);
-            trialdata(:,:,tr)=mean(deconvimg(:,:,peakWindow+t0),3) -mean(deconvimg(:,:,baseframes),3);
+%             trialdata(:,:,tr)=mean(deconvimg(:,:,peakWindow+t0),3) -mean(deconvimg(:,:,baseframes),3);
             try
                 trialspeed(tr) = mean(sp(peakWindow+t0));
             catch
@@ -189,7 +189,8 @@ for f = 1:length(use)
             trialcyc(:,:,:,tr) = deconvimg(:,:,t0+(1:cyclength+isi*imagerate));%each cycle is frames 6-26, stim comes on at frame 11
         end
 
-        isocross = zeros(size(thetaCent));isocross(trialID(2,:)==trialID(3,:))=1;isocross(trialID(2,:)~=trialID(3,:))=2;
+        trialID = trialID(:,1:trials);
+        isocross = zeros(1,trials);isocross(trialID(2,:)==trialID(3,:))=1;isocross(trialID(2,:)~=trialID(3,:))=2;
         behavState = {'stationary','running'};
     %     xrange = unique(xpos); sfrange=unique(sf); tfrange=unique(tf);
         running = zeros(1,trials); %pull out stationary vs. runnning (0 vs. 1)

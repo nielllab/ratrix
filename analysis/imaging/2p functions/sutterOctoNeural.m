@@ -422,6 +422,7 @@ figure
 for i = 1:length(stimOrder); %%% get pixel-wise evoked activity on each individual stim presentation
     startFrame = stimTimes(i)/dt;
     trialmean(:,:,i) = mean(dfofInterp(:,:,round(startFrame + evRange)),3)- mean(dfofInterp(:,:,round(startFrame + baseRange)),3);
+    trialTcourse(:,i) = squeeze(mean(mean(dfofInterp(:,:,round(startFrame + (1:8))),2),1)) - mean(mean(dfofInterp(:,:,round(startFrame + 1)),2),1) ;
 end
 filt = fspecial('gaussian',5,1.5);
 trialmean = imfilter(trialmean,filt);
@@ -556,51 +557,43 @@ if nstim==26 %%% gratings
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 end
 
-
-
-range = [-0.025 0.1]; %%% colormap range
 if nstim==13 %%% gratings 1 tf
+    range = [-0.025 0.1]; %%% colormap range
     loc = [1 5 9 2 6 10 3 7 11 4 8 12]; %%% map stim order onto subplot
-    figure; set(gcf,'Name','gratings');
-    for i = 1:12
-        meanimg = median(trialmean(:,:,stimOrder==i),3);
-        subplot(3,4,loc(i));
-        imagesc(meanimg,range); axis equal
-    end
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    figLabel = 'gratings';
+    npanel = 12; nrow = 3; ncol = 4; offset = 0;
+    pixPlot;
     
-    figure;set(gcf,'Name','horiz gratings');
-    for i = 13
-        meanimg = median(trialmean(:,:,stimOrder==i),3);
-        
-        imagesc(meanimg,range); axis equal
-    end
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    figLabel = 'flicker';
+    npanel = 1; nrow = 1; ncol = 1; offset = 12;
+    pixPlot;
 end
 
 
-%%% plot mean for each stim condition, with layout corresponding to the stim
-range = [-0.02 0.1];
-if nstim==48 %%% spots
-    loc = [1 7 13 19 2 8 14 20 3 9 15 21 4 10 16 22 5 11 17 23 6 12 18 24]; %%% map stim order onto subplot
-    figure; set(gcf,'Name','OFF spots');
-    for i = 1:24
-        meanimg = median(trialmean(:,:,stimOrder==i),3);
-        subplot(4,6,loc(i));
-        imagesc(meanimg,range); axis equal; axis off
-    end
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+if nstim==48 %%% 4x6 spots
+ range = [-0.02 0.1];
+ loc = [1 7 13 19 2 8 14 20 3 9 15 21 4 10 16 22 5 11 17 23 6 12 18 24]; %%% map stim order onto subplot
+
+    figLabel = 'OFF spots';
+    npanel = 24; nrow = 4; ncol = 6; offset = 0;
+    pixPlot;
     
-    figure; set(gcf,'Name','ON spots');
-    for i = 25:48
-        meanimg = median(trialmean(:,:,stimOrder==i),3);
-        subplot(4,6,loc(i-24));
-        imagesc(meanimg,range); axis equal; axis off
-    end
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    figLabel = 'ON spots';
+    npanel = 24; nrow = 4; ncol = 6; offset = 24;
+    pixPlot;   
+end
+
+if nstim==50 %%% 5x5 spots
+ range = [-0.02 0.1];
+ loc = [1 6 11 16 21 2 7 12 17 22 3 8 13 18 23 4 9 14 19 24 5 10 15 20 25]; %%% map stim order onto subplot
+loc = [21 16 11 6 1 22 17 12 7 2 23 18 13 8 3 24 19 14 9 4 25 20 15 10 5]; %%% flipped direction
+    figLabel = 'OFF spots';
+    npanel = 25; nrow = 5; ncol = 5; offset = 0;
+    pixPlot;
     
+    figLabel = 'ON spots';
+    npanel = 25; nrow = 5; ncol = 5; offset = 25;
+    pixPlot;   
 end
 
 

@@ -417,8 +417,7 @@ figure
 hist(max(dFclust,[],2))
 %%% calculate pixel-wise maps of activity for different stim
 
-evRange = 4:5; baseRange = 1:2; %%% timepoints for evoked and baseline activity
-figure
+evRange = 4:6; baseRange = 1:2; %%% timepoints for evoked and baseline activity
 for i = 1:length(stimOrder); %%% get pixel-wise evoked activity on each individual stim presentation
     startFrame = stimTimes(i)/dt;
     trialmean(:,:,i) = mean(dfofInterp(:,:,round(startFrame + evRange)),3)- mean(dfofInterp(:,:,round(startFrame + baseRange)),3);

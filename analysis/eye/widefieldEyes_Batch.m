@@ -3,8 +3,8 @@ close all; clear all;
 batch_widefield_eyes;
 %useSess = 1:length(files);
 % useSess =  find(strcmp({files.notes},'good data'))
-% useSess =  find( strcmp({files.treatment},'DOI') & strcmp({files.notes},'good data'))
-useSess =  find(strcmp({files.notes},'good data') & strcmp({files.expt},'032917_g62ww2-tt'))
+useSess =  find( strcmp({files.treatment},'DOI') & strcmp({files.notes},'good data'))
+%useSess =  find(strcmp({files.notes},'good data')) & strcmp({files.expt},'032917_g62ww2-tt'))
 
 load('\\angie\Angie_analysis\DetectionStim2contrast_LOW_7_25min.mat')
 contrast = contrast(1:end-5); xpos = xpos(1:end-5); ypos=ypos(1:end-5);

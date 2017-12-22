@@ -1,6 +1,6 @@
 %close all; clear all;
 
-%batch_widefield_eyes;  %%% load in file that contains information on all experiments
+batch_widefield_eyes;  %%% load in file that contains information on all experiments
 
 %%% create .ps file to save figures out to
 psfile = 'c:\connectivity.ps'; if exist(psfile,'file')==2;delete(psfile);end
@@ -8,7 +8,7 @@ psfile = 'c:\connectivity.ps'; if exist(psfile,'file')==2;delete(psfile);end
 %%% select sessions
 useSess = 1:length(files); %%% use all files, and select injects afterwards
 
-load('\\angie\Angie_analysis\patchonpatch14min.mat')
+%load('\\angie\Angie_analysis\patchonpatch16min.mat')
 %contrast = contrast(1:end-5); xpos = xpos(1:end-5); ypos=ypos(1:end-5);
 
 for sess = 1:length(useSess);
@@ -20,8 +20,8 @@ for sess = 1:length(useSess);
 %     load([pathname '\' files(sess).patchonpatch],'dfof_bg','frameT','cycMap','sp','stimRec');%,'xEye','yEye','xFilt','yFilt','sp','rad','X','Y','R');
 %     load([pathname '\' files(sess).patchonpatch],'alignTheta','alignZoom','alignLambda');
     
-    load([pathname '\' files(sess).darkness],'dfof_bg','frameT','cycMap','sp','stimRec');%,'xEye','yEye','xFilt','yFilt','sp','rad','X','Y','R');
-    load([pathname '\' files(sess).darkness],'alignTheta','alignZoom','alignLambda');
+    load([pathname '\' files(sess).dark],'dfof_bg','frameT','cycMap','sp','stimRec');%,'xEye','yEye','xFilt','yFilt','sp','rad','X','Y','R');
+    load([pathname '\' files(sess).dark],'alignTheta','alignZoom','alignLambda');
     
     %%% align/zoom data, based on lambda, midline, and size of headplate ring
     redoAlign=0;
@@ -77,7 +77,7 @@ for sess = 1:length(useSess);
     
     %%% crop and downsize if needed
      downsamp=1;
-     dfof_bg= imresize(dfof_bgAlign(alignLambda(1)-64:alignLambda(1)+63,alignLambda(2)-110:alignLambda(2)+17,:),1/downsamp,'box');
+     %dfof_bg= imresize(dfof_bgAlign(alignLambda(1)-64:alignLambda(1)+63,alignLambda(2)-110:alignLambda(2)+17,:),1/downsamp,'box');
 %     
     %%% final image data
     figure
@@ -90,7 +90,7 @@ for sess = 1:length(useSess);
     
     %%% crop and downsize dF data to make it run faster
     %dfof_bg= dfof_bg(15:160,50:190,:);
-    dfof_bg = imresize(dfof_bg,0.25);
+    dfof_bg = imresize(dfof_bg,0.5);
 
     %%% for generality with other code, we call the raw data 'im' from here on ...
     im = dfof_bg;

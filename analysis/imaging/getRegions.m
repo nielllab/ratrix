@@ -23,7 +23,11 @@ for m = 1:2
     if exist('mapNorm','var')
         map=mapNorm;
     end
-    map = map{3};
+    if length(map)==3
+        map = map{3};
+    else
+        map = map{1};
+    end
     if m==1
         oldmap = map;
     elseif m==2

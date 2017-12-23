@@ -10,16 +10,16 @@
 %%
 
 deconvplz = 1 %choose if you want deconvolution
-fully = 0 %choose if you want full frame, else scales down by 2
+downsample = 0.5; %downsample ratio
 pixbin = 5 %choose binning for gaussian analysis of spread
-dfrangesit = [-0.001 0.015]; %%%range for imagesc visualization
-dfrangerun = [-0.001 0.025]; %%%range for imagesc visualization
+dfrangesit = [-0.01 0.05]; %%%range for imagesc visualization
+dfrangerun = [-0.01 0.15]; %%%range for imagesc visualization
 
 for f = 1:length(use)
+    clear x y dist trialcycavg ring deconvimg
     filename = sprintf('%s_%s_%s_%s_patchonpatch.mat',files(use(f)).expt,files(use(f)).subj,files(use(f)).timing,files(use(f)).inject);
-    if (exist(filename)==0 | redoani==1)
+    if (exist(fullfile(outpathname,filename),'file')==0 | redoani==1)
         load('C:\patchonpatch16min')
-%         load('C:\patchonpatch14min')
 %         load('C:\mapoverlay.mat')
 %         load('C:\areamaps.mat')
         imagerate=10;
@@ -49,16 +49,15 @@ for f = 1:length(use)
 %         end
 
 
-        if ~isempty(files(use(f)).patchonpatch)
-            load([pathname files(use(f)).patchonpatch], 'dfof_bg','sp','stimRec','frameT')
-%             zoom = 260/size(dfof_bg,1);
-            if ~exist('sp','var')
-                sp =0;stimRec=[];
-            end
-%             dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
-            if ~fully %scale down image if you chose to
-                dfof_bg = imresize(dfof_bg,0.5);
-            end
+        load(fullfile(pathname,files(use(f)).patchonpatch),'dfof_bg','sp','stimRec','frameT')
+%         load(fullfile(outpathname,filename),'img')
+        
+        zoom = 260/size(dfof_bg,1);
+        dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
+        img = imresize(double(dfof_bg),downsample,'method','box');
+        
+        if ~exist('sp','var')
+            sp =0;stimRec=[];
         end
 
 %%
@@ -88,8 +87,7 @@ for f = 1:length(use)
         slipframes = round(slip(f)*10)
         title(sprintf('slip = %f',slip(f)));
 
-        imageT=(1:size(dfof_bg,3))/imagerate;
-        img = imresize(double(dfof_bg),1,'method','box');
+        imageT=(1:size(img,3))/imagerate;
         if slipframes<1 %%%cut frames from beginning to account for slippage
             slipframes=1
         elseif slipframes>5
@@ -107,7 +105,7 @@ for f = 1:length(use)
             cycavg(:,:,fr) = mean(img(:,:,(fr:cyclength:end)),3);
             subplot(nx,nx,p(fr))
             imagesc(squeeze(cycavg(:,:,fr)),dfrangesit)
-            axis off
+            axis off; axis square
             set(gca,'LooseInset',get(gca,'TightInset'))
 %             hold on; plot(ypts,xpts,'w.','Markersize',2)
             map = map+squeeze(cycavg(:,:,fr))*exp(2*pi*sqrt(-1)*(0.5 +fr/cyclength));
@@ -137,38 +135,50 @@ for f = 1:length(use)
             print('-dpsc',psfilename,'-append');
         end
 
-%%
-        %deconvolution
-%         keyboard
+%% do deconvolution
         if deconvplz == 1
-            sprintf('doing deconvolution')
-            %do deconvolution on the raw data
-            img = shiftdim(img+0.2,2); %shift dimesions for decon lucy and add 0.2 to get away from 0
-            tic
-            pp = gcp %start parallel pool
-            deconvimg = deconvg6sParallel(img,0.1); %deconvolve
-            toc
-            deconvimg = shiftdim(deconvimg,1); %shift back
-            deconvimg = deconvimg - mean(mean(mean(deconvimg))); %subtract min value
-            img = shiftdim(img,1); %shift img back
-            img = img - 0.2; %subtract 0.2 back off
-            %check deconvolution success on one pixel
-            figure
-            hold on
-            plot(squeeze(img(130,130,:)))
-            plot(squeeze(deconvimg(130,130,:)),'g')
-            hold off
-            if exist('psfilename','var')
-                set(gcf, 'PaperPositionMode', 'auto');
-                print('-dpsc',psfilename,'-append');
+            try
+                load(fullfile(outpathname,filename),'deconvimg')
+                size(deconvimg)
+            catch
+                sprintf('doing deconvolution')
+                %do deconvolution on the raw data
+                img = shiftdim(img+0.2,2); %shift dimesions for decon lucy and add 0.2 to get away from 0
+                tic
+                pp = gcp %start parallel pool
+                deconvimg = deconvg6sParallel(img,0.1); %deconvolve
+                toc
+                deconvimg = shiftdim(deconvimg,1); %shift back
+                deconvimg = deconvimg - mean(mean(mean(deconvimg))); %subtract min value
+                img = shiftdim(img,1); %shift img back
+                img = img - 0.2; %subtract 0.2 back off
+                %check deconvolution success on one pixel
+                figure
+                hold on
+                plot(squeeze(img(130,130,:)))
+                plot(squeeze(deconvimg(130,130,:)),'g')
+                hold off
+                if exist('psfilename','var')
+                    set(gcf, 'PaperPositionMode', 'auto');
+                    print('-dpsc',psfilename,'-append');
+                end
+                delete(pp)
+                ncut = 3 %# of trials to cut due to deconvolution cutting off end
+                trials=trials-ncut; %deconv cuts off last trial
+                deconvimg = deconvimg(:,:,1:trials*cyclength);
+                
+                sprintf('saving...')
+                try
+                    save(fullfile(outpathname,filename),'deconvimg','-append','-v7.3');
+                catch
+                    save(fullfile(outpathname,filename),'deconvimg','-v7.3');
+                end
             end
-            delete(pp)
-            ncut = 3 %# of trials to cut due to deconvolution cutting off end
-            trials=trials-ncut; %deconv cuts off last trial
-            deconvimg = deconvimg(:,:,1:trials*cyclength);
         else
             deconvimg = img;
         end
+        
+        
         
 %%
         %%% separate responses by trials
@@ -248,48 +258,147 @@ for f = 1:length(use)
             end
         end
         
+        
     
 %%
         %manual/loading point selection
         [files(use(f)).subj ' ' files(use(f)).inject]
-        if (~exist(fullfile(pathname,files(use(f)).patchpts)) | reselect==1)
-            sprintf('Pick center of visual response')
-            
-            figure;
-            colormap jet
-            subplot(1,2,1)
-            imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),dfrangesit)
-            axis off; axis equal
-            title('center sit')
-            subplot(1,2,2)
-            imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,3,:,1),3),5)),dfrangesit)
-            axis off; axis equal
-            title('surround sit')
+        if mod(f,2)==1
+            if reselect==1
+                sprintf('Pick center of visual response')
 
-            figure;
-            colormap jet
-            subplot(1,2,1)
-            imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),dfrangesit)
-            axis off; axis equal
-            title('select center point of response')
-            [y x] = ginput(1);
-            hold on
-            plot(y,x,'wo','MarkerSize',15)
-            x=round(x); y=round(y);
+                figure;
+                colormap jet
+                subplot(1,2,1)
+                imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),dfrangesit)
+                axis off; axis equal
+                title('center sit')
+                subplot(1,2,2)
+                imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,3,:,1),3),5)),dfrangesit)
+                axis off; axis equal
+                title('surround sit')
 
-            [X,Y] = meshgrid(1:size(trialcycavg,2),1:size(trialcycavg,1));X=X/2; %divide X by two for cortical magnification factor
-            dist =sqrt((X - y/2).^2 + (Y - x).^2);
-            subplot(1,2,2)
-            imagesc(dist)
-            axis off;axis equal
-            if exist('psfilename','var')
-                set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-                print('-dpsc',psfilename,'-append');
+                figure;
+                colormap jet
+                subplot(1,2,1)
+                imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),dfrangesit)
+                axis off; axis equal
+                title('select center point of response')
+                [y x] = ginput(1);
+                hold on
+                plot(y,x,'wo','MarkerSize',15)
+                x=round(x); y=round(y);
+
+                [X,Y] = meshgrid(1:size(trialcycavg,2),1:size(trialcycavg,1));X=X/2; %divide X by two for cortical magnification factor
+                dist =sqrt((X - y/2).^2 + (Y - x).^2);
+                subplot(1,2,2)
+                imagesc(dist)
+                axis off;axis equal
+                if exist('psfilename','var')
+                    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+                    print('-dpsc',psfilename,'-append');
+                end
+
+                save(fullfile(outpathname,filename),'x','y','dist','-append','-v7.3');
+            else
+                try
+                    load(fullfile(outpathname,filename),'x','y','dist')
+                    figure;
+                    colormap jet
+                    subplot(1,2,1)
+                    imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),dfrangesit)
+                    axis off; axis equal
+                    title('select center point of response')
+                    hold on
+                    plot(y,x,'wo','MarkerSize',15)
+
+                    subplot(1,2,2)
+                    imagesc(dist)
+                    axis off;axis equal
+                    if exist('psfilename','var')
+                        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+                        print('-dpsc',psfilename,'-append');
+                    end
+                catch
+                    sprintf('Pick center of visual response')
+
+                    figure;
+                    colormap jet
+                    subplot(1,2,1)
+                    imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),dfrangesit)
+                    axis off; axis equal
+                    title('center sit')
+                    subplot(1,2,2)
+                    imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,3,:,1),3),5)),dfrangesit)
+                    axis off; axis equal
+                    title('surround sit')
+
+                    figure;
+                    colormap jet
+                    subplot(1,2,1)
+                    imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),dfrangesit)
+                    axis off; axis equal
+                    title('select center point of response')
+                    [y x] = ginput(1);
+                    hold on
+                    plot(y,x,'wo','MarkerSize',15)
+                    x=round(x); y=round(y);
+
+                    [X,Y] = meshgrid(1:size(trialcycavg,2),1:size(trialcycavg,1));X=X/2; %divide X by two for cortical magnification factor
+                    dist =sqrt((X - y/2).^2 + (Y - x).^2);
+                    subplot(1,2,2)
+                    imagesc(dist)
+                    axis off;axis equal
+                    if exist('psfilename','var')
+                        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+                        print('-dpsc',psfilename,'-append');
+                    end
+
+                    save(fullfile(outpathname,filename),'x','y','dist','-append','-v7.3');
+                end
             end
-            
-            save(files(use(f)).patchpts,'x','y','dist');
         else
-            load(fullfile(pathname,files(use(f)).patchpts))
+            try
+                load(fullfile(outpathname,filename),'x','y','dist')
+                figure;
+                colormap jet
+                subplot(1,2,1)
+                imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),dfrangesit)
+                axis off; axis equal
+                title('select center point of response')
+                hold on
+                plot(y,x,'wo','MarkerSize',15)
+
+                subplot(1,2,2)
+                imagesc(dist)
+                axis off;axis equal
+                if exist('psfilename','var')
+                    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+                    print('-dpsc',psfilename,'-append');
+                end
+            catch
+                load(fullfile(outpathname,sprintf('%s_%s_%s_%s_patchonpatch.mat',files(use(f)).expt,files(use(f)).subj,files(use(f-1)).timing,files(use(f)).inject)),...
+                    'x','y','dist')
+                
+                figure;
+                colormap jet
+                subplot(1,2,1)
+                imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),dfrangesit)
+                axis off; axis equal
+                title('select center point of response')
+                hold on
+                plot(y,x,'wo','MarkerSize',15)
+
+                subplot(1,2,2)
+                imagesc(dist)
+                axis off;axis equal
+                if exist('psfilename','var')
+                    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+                    print('-dpsc',psfilename,'-append');
+                end
+
+                save(fullfile(outpathname,filename),'x','y','dist','-append','-v7.3');
+            end
         end
         
 
@@ -307,8 +416,14 @@ for f = 1:length(use)
                 end
             end
         end
-%%
-        %%%plot averages for the different stimulus parameters
+        
+%% save data
+        try
+            save(fullfile(outpathname,filename),'trialcycavg','ring','-v7.3','-append');
+        catch
+            save(fullfile(outpathname,filename),'trialcycavg','ring','-v7.3');
+        end
+%% plot averages for the different stimulus parameters
         sprintf('plotting responses')
         
         %%%center or surround only
@@ -316,19 +431,19 @@ for f = 1:length(use)
         colormap jet
         subplot(2,2,1)
         imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),dfrangesit)
-        axis off
+        axis off;axis square;
         title('center sit')
         subplot(2,2,2)
         imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,2),3),5)),dfrangesit)
-        axis off
+        axis off;axis square;
         title('center run')
         subplot(2,2,3)
         imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,3,:,1),3),5)), dfrangerun)
-        axis off
+        axis off;axis square;
         title('surround sit')
         subplot(2,2,4)
         imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,3,:,2),3),5)), dfrangerun)
-        axis off
+        axis off;axis square;
         title('surround run')
         if exist('psfilename','var')
             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
@@ -413,19 +528,19 @@ for f = 1:length(use)
         colormap jet
         subplot(2,2,1)
         imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,4,1,1),3),5)),dfrangesit)
-        axis off
+        axis off;axis square;
         title('iso sit')
         subplot(2,2,2)
         imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,4,1,2),3),5)),dfrangesit)
-        axis off
+        axis off;axis square;
         title('iso run')
         subplot(2,2,3)
         imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,4,2,1),3),5)),dfrangesit)
-        axis off
+        axis off;axis square;
         title('cross sit')
         subplot(2,2,4)
         imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,4,2,2),3),5)),dfrangesit)
-        axis off
+        axis off;axis square;
         title('cross run')
         if exist('psfilename','var')
             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
@@ -505,22 +620,14 @@ for f = 1:length(use)
         end
         
   
-%%
+%% save pdf
         try
-            save(fullfile(outpathname,filename),'trialcycavg','ring','-v7.3','-append');
-        catch
-            save(fullfile(outpathname,filename),'trialcycavg','ring','-v7.3');
-        end
-
-        try
-            dos(['ps2pdf ' psfilename ' "' [filename '.pdf'] '"'])
-
+            dos(['ps2pdf ' psfilename ' "' [fullfile(outpathname,filename) '.pdf'] '"'])
         catch
             display('couldnt generate pdf');
         end
-
         delete(psfilename);
-%         close all
+
     else
         sprintf('skipping %s',filename)
     end

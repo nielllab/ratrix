@@ -53,7 +53,8 @@ im  = mat2im(-dx(:,:,2),blue,[0 lim]) + mat2im(-mapsign,redgreen,[-0.01 0.01]);
 
 %figure
 imshow(im.*repmat(amp,[1 1 3]));
-hold on; plot(ypts,xpts,'w.','Markersize',2)
+% hold on; plot(ypts,xpts,'w.','Markersize',2) %%%prlp commented these out
+% for full skull, need to soft code
 
 allwhite = ones(size(im));
 gradamp = repmat(gradamp,[1 1 3])/0.12;
@@ -61,7 +62,8 @@ gradamp(gradamp>1)=1;
 
 
 imshow((im.*gradamp + allwhite.*(1-gradamp)).*repmat(amp,[1 1 3]));
-hold on; plot(ypts,xpts,'w.','Markersize',2)
+% hold on; plot(ypts,xpts,'w.','Markersize',2)%%%prlp commented these out
+% for full skull, need to soft code
 
 
 

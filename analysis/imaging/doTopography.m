@@ -25,7 +25,7 @@ end
 
 %%% need to max shiftImage return full array (260 across after zoom?), then fit it into a space of
 %%% appropriate size
-useReference=1;
+useReference=0;
 if useReference
     load('C:/referenceMap.mat','avgmap4d','avgmap');
 end
@@ -82,10 +82,18 @@ for f= 1:length(use) ;
         try
             imblue = imread([datapathname files(use(f)).topoxdata '_0001.tif']);
             imgreen = imread([datapathname files(use(f)).topoxdata '_0004.tif']);
+            if strcmp(files(use(f)).rignum,'rig2')
+                imblue = flip(imblue,2);
+                imgreen = flip(imgreen,2);
+            end
         catch
             try
                 imblue = imread([datapathname files(use(f)).topoxdata '_000001.tif']);
                 imgreen = imread([datapathname files(use(f)).topoxdata '_000004.tif']);
+                if strcmp(files(use(f)).rignum,'rig2')
+                    imblue = flip(imblue,2);
+                    imgreen = flip(imgreen,2);
+                end
             catch
                 display('cant find images')
             end
@@ -186,7 +194,7 @@ end
 % frame(:,31:290,:)=avgmap;
 % avgmap=frame;
 
-load('C:/mapoverlay.mat')
+load('C:/mapoverlay.mat') %%%need to fix this, only hard coded for 5mm
 
 
 for m=1:2
@@ -201,15 +209,15 @@ for m=1:2
     imshow(polarMap(meanpolar{m},95));
     title(allsubj{s})
     hold on
-    plot(ypts,xpts,'w.','Markersize',2)
+%     plot(ypts,xpts,'w.','Markersize',2)
     %     im = polarMap(meanpolar{m},80);
     %     imwrite(im,sprintf('polarmap%d%s', m,'.tif'), 'tif')
 end
 subplot(2,2,3)
 imshow(avgmap);
 title('average topo  map');
-hold on
-plot(ypts,xpts,'w.','Markersize',2)
+% hold on
+% plot(ypts,xpts,'w.','Markersize',2)
 
 subplot(2,2,4);
 

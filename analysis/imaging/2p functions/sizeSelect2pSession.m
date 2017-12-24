@@ -166,7 +166,7 @@ for i = 1:length(freq)
         axis square
         xlabel(sprintf('%sdeg',sizes{j}))
     end
-    mtit(sprintf('sit sf=%d',freq(i)))
+    mtit(sprintf('sit sf=%0.2f',freq(i)))
     if exist('psfile','var')
         set(gcf, 'PaperPositionMode', 'auto');
         print('-dpsc',psfile,'-append');

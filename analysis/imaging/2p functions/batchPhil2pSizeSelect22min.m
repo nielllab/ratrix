@@ -2,7 +2,7 @@ dbstop if error
 pathname = '\\langevin\backup\twophoton\Phil\Compiled2p\';
 n = 0;
 
-
+%%
 n=n+1;
 files(n).subj = 'G62BB6RT';
 files(n).expt = '022017';
@@ -63,7 +63,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'naive';
 files(n).cutoff = 375;
 
-
+%%
 n=n+1;
 files(n).subj = 'G62GG10LT';
 files(n).expt = '022117';
@@ -124,7 +124,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'trained';
 files(n).cutoff = 200;
 
-
+%%
 n=n+1;
 files(n).subj = 'G62BB6RT';
 files(n).expt = '022317';
@@ -185,7 +185,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'naive';
 files(n).cutoff = 200;
 
-
+%%
 n=n+1;
 files(n).subj = 'G62Y3LT';
 files(n).expt = '022717';
@@ -246,7 +246,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'trained';
 files(n).cutoff = 250;
 
-
+%%
 n=n+1;
 files(n).subj = 'G62W9RT';
 files(n).expt = '022817';
@@ -307,7 +307,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'trained';
 files(n).cutoff = 225;
 
-
+%%
 n=n+1;
 files(n).subj = 'G62GG10LT';
 files(n).expt = '030117';
@@ -368,7 +368,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'trained';
 files(n).cutoff = 250;
 
-
+%%
 n=n+1;
 files(n).subj = 'G62Y3LT';
 files(n).expt = '030217';
@@ -429,7 +429,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'trained';
 files(n).cutoff = 200;
 
-
+%%
 % % % %%%not well centered
 % % % n=n+1;
 % % % files(n).subj = 'G62QQ2LT';
@@ -492,7 +492,7 @@ files(n).cutoff = 200;
 % % % files(n).cutoff = 250;
 
 
-
+%%
 n=n+1;
 files(n).subj = 'G62W9RT';
 files(n).expt = '030817';
@@ -553,7 +553,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'trained';
 files(n).cutoff = 300;
 
-
+%%
 % % % %%%not well centered
 % % % n=n+1;
 % % % files(n).subj = 'G62QQ2LT';
@@ -616,7 +616,7 @@ files(n).cutoff = 300;
 % % % files(n).cutoff = 250;
 
 
-
+%%
 n=n+1;
 files(n).subj = 'G62BB10LT';
 files(n).expt = '031417';
@@ -678,7 +678,7 @@ files(n).training = 'trained';
 files(n).cutoff = 200;
 
 
-
+%% not centered that great but acceptable
 n=n+1;
 files(n).subj = 'G62BB2RT';
 files(n).expt = '031517';
@@ -739,7 +739,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'naive';
 files(n).cutoff = 250;
 
-
+%%
 n=n+1;
 files(n).subj = 'G62BB2RT';
 files(n).expt = '031717';
@@ -800,7 +800,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'naive';
 files(n).cutoff = 250;
 
-
+%%
 n=n+1;
 files(n).subj = 'G62GGG1LT';
 files(n).expt = '060117';
@@ -861,7 +861,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'naive';
 files(n).cutoff = 250;
 
-
+%%
 n=n+1;
 files(n).subj = 'G62GGG3LT';
 files(n).expt = '060117';
@@ -922,7 +922,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'naive';
 files(n).cutoff = 250;
 
-
+%%
 n=n+1;
 files(n).subj = 'G62GGG1LT';
 files(n).expt = '060617';
@@ -983,7 +983,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'naive';
 files(n).cutoff = 250;
 
-
+%%
 n=n+1;
 files(n).subj = 'G62GGG3LT';
 files(n).expt = '060617';
@@ -1044,7 +1044,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'naive';
 files(n).cutoff = 150;
 
-
+%%
 n=n+1;
 files(n).subj = 'CG48LN';
 files(n).expt = '060717';
@@ -1105,7 +1105,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'naive';
 files(n).cutoff = 250;
 
-
+%%
 n=n+1;
 files(n).subj = 'CG48LN';
 files(n).expt = '060917';
@@ -1166,7 +1166,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'naive';
 files(n).cutoff = 275;
 
-
+%%
 n=n+1;
 files(n).subj = 'G62RR4LT';
 files(n).expt = '071017';
@@ -1227,6 +1227,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'naive';
 files(n).cutoff = 150;
 
+%%
 % % % %%%NOT WELL CENTERED
 % % % n=n+1;
 % % % files(n).subj = 'G62FFF1RT';
@@ -1288,6 +1289,7 @@ files(n).cutoff = 150;
 % % % files(n).training = 'naive';
 % % % files(n).cutoff = 150;
 
+%%
 n=n+1;
 files(n).subj = 'G62FFF1RT';
 files(n).expt = '071217';
@@ -1348,7 +1350,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'naive';
 files(n).cutoff = 150;
 
-
+%%
 n=n+1;
 files(n).subj = 'G62JJ2RT';
 files(n).expt = '071317';
@@ -1409,7 +1411,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'trained';
 files(n).cutoff = 50;
 
-
+%%
 n=n+1;
 files(n).subj = 'G62RR4LT';
 files(n).expt = '071717';
@@ -1470,6 +1472,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'naive';
 files(n).cutoff = 150;
 
+%%
 %%%crappy session
 % % % n=n+1;
 % % % files(n).subj = 'G62JJ2RT';
@@ -1531,6 +1534,7 @@ files(n).cutoff = 150;
 % % % files(n).training = 'trained';
 % % % files(n).cutoff = 50;
 
+%%
 %%%crappy session
 % % % n=n+1;
 % % % files(n).subj = 'G62TT1LT';
@@ -1593,7 +1597,7 @@ files(n).cutoff = 150;
 % % % files(n).cutoff = 100;
 
 
-
+%%
 n=n+1;
 files(n).subj = 'G62AAA11LT';
 files(n).expt = '091317';
@@ -1654,7 +1658,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'trained';
 files(n).cutoff = 200;
 
-
+%%
 n=n+1;
 files(n).subj = 'G62GGG6TT';
 files(n).expt = '091317';
@@ -1715,7 +1719,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'trained';
 files(n).cutoff = 350;
 
-
+%%
 % % % %%%first half doesn't have running info
 % % % n=n+1;
 % % % files(n).subj = 'G62DDD3TT';
@@ -1777,7 +1781,7 @@ files(n).cutoff = 350;
 % % % files(n).training = 'trained';
 % % % files(n).cutoff = 150;
 
-
+%%
 n=n+1;
 files(n).subj = 'G62ZZ9TT';
 files(n).expt = '091517';
@@ -1838,7 +1842,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'trained';
 files(n).cutoff = 200;
 
-
+%%
 n=n+1;
 files(n).subj = 'G62GGG6TT';
 files(n).expt = '091517';
@@ -1899,7 +1903,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'trained';
 files(n).cutoff = 250;
 
-
+%%
 n=n+1;
 files(n).subj = 'G62DDD3TT';
 files(n).expt = '091817';
@@ -1960,6 +1964,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'trained';
 files(n).cutoff = 175;
 
+%%
 % % % %%%no running data post!
 % % % n=n+1;
 % % % files(n).subj = 'G62ZZ9TT';
@@ -2022,7 +2027,7 @@ files(n).cutoff = 175;
 % % % files(n).cutoff = 200;
 
 
-
+%%
 n=n+1;
 files(n).subj = 'G62AAA11LT';
 files(n).expt = '092117';
@@ -2083,7 +2088,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'trained';
 files(n).cutoff = 225;
 
-
+%%
 n=n+1;
 files(n).subj = 'G62ZZ9TT';
 files(n).expt = '092217';
@@ -2144,7 +2149,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'trained';
 files(n).cutoff = 200;
 
-
+%%
 n=n+1;
 files(n).subj = 'G62TT1LT';
 files(n).expt = '092417';
@@ -2205,7 +2210,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'trained';
 files(n).cutoff = 250;
 
-
+%%
 n=n+1;
 files(n).subj = 'G62DDD3TT';
 files(n).expt = '092417';
@@ -2266,7 +2271,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'trained';
 files(n).cutoff = 200;
 
-
+%%
 n=n+1;
 files(n).subj = 'G62BB10LT';
 files(n).expt = '092517';
@@ -2327,7 +2332,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'trained';
 files(n).cutoff = 250;
 
-
+%%
 n=n+1;
 files(n).subj = 'G62QQ1RT';
 files(n).expt = '092617';
@@ -2388,7 +2393,7 @@ files(n).notes = 'good imaging session';
 files(n).training = 'trained';
 files(n).cutoff = 225;
 
-
+%%
 n=n+1;
 files(n).subj = 'G62QQ1RT';
 files(n).expt = '092717';
@@ -2448,3 +2453,499 @@ files(n).label = 'camk2 gc6'; %%% or 'calb2'
 files(n).notes = 'good imaging session'; 
 files(n).training = 'trained';
 files(n).cutoff = 175;
+
+
+%% screen shifted during this session
+% % % n=n+1;
+% % % files(n).subj = 'G6H310RT';
+% % % files(n).expt = '121217';
+% % % files(n).topoxdata =  '121217 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RT_001_001';
+% % % files(n).topoxsession = '121217 G6H310RT DOI sizeselect22min\G6H310RT\topoXsession_V2';
+% % % files(n).topoxpts = '121217 G6H310RT DOI sizeselect22min\G6H310RT\topoXsession_V2__allfiles_PTS_dF';
+% % % files(n).topoxstimObj = '121217 G6H310RT DOI sizeselect22min\G6H310RT\stim_obj_001_001';
+% % % files(n).topoydata =  '121217 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RT_001_002';
+% % % files(n).topoysession = '121217 G6H310RT DOI sizeselect22min\G6H310RT\topoYsession_V2';
+% % % files(n).topoypts = '121217 G6H310RT DOI sizeselect22min\G6H310RT\topoYsession_V2__allfiles_PTS_dF';
+% % % files(n).topoystimObj = '121217 G6H310RT DOI sizeselect22min\G6H310RT\stim_obj_001_002';
+% % % files(n).darknessdata =  '121217 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RT_001_003';
+% % % files(n).darknesssession = '121217 G6H310RT DOI sizeselect22min\G6H310RT\darkness_PRE_V2';
+% % % files(n).darknesspts = '121217 G6H310RT DOI sizeselect22min\G6H310RT\darkness_PRE_V2__allfiles_PTS_dF';
+% % % files(n).darknessstimObj = '121217 G6H310RT DOI sizeselect22min\G6H310RT\stim_obj_001_003';
+% % % files(n).darknessanalysis = '121217 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RTdarknessPRE';
+% % % files(n).sizedata =  '121217 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RT_001_004';
+% % % files(n).sizesession = '121217 G6H310RT DOI sizeselect22min\G6H310RT\sizeSession_PRE_V2';
+% % % files(n).sizepts = '121217 G6H310RT DOI sizeselect22min\G6H310RT\sizeSession_PRE_V2__allfiles_PTS_dF';
+% % % files(n).sizestimObj = '121217 G6H310RT DOI sizeselect22min\G6H310RT\stim_obj_001_004';
+% % % files(n).sizeanalysis = '121217 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RTsizePRE';
+% % % files(n).sizeeye = '121217 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RT_001_004_eye';
+% % % files(n).inject = 'doi';%%% 'doi' or 'lisuride' or 'saline'
+% % % files(n).timing = 'pre'; %%%pre or post
+% % % files(n).monitor = 'vert'; %%% for topox and y
+% % % files(n).label = 'camk2 gc6'; %%% or 'calb2'
+% % % files(n).notes = 'good imaging session'; 
+% % % files(n).training = 'naive';
+% % % files(n).cutoff = 200;
+% % % 
+% % % n=n+1;
+% % % files(n).subj = 'G6H310RT';
+% % % files(n).expt = '121217';
+% % % files(n).topoxdata =  '121217 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RT_001_001';
+% % % files(n).topoxsession = '121217 G6H310RT DOI sizeselect22min\G6H310RT\topoXsession_V2';
+% % % files(n).topoxpts = '121217 G6H310RT DOI sizeselect22min\G6H310RT\topoXsession_V2__allfiles_PTS_dF';
+% % % files(n).topoxstimObj = '121217 G6H310RT DOI sizeselect22min\G6H310RT\stim_obj_001_001';
+% % % files(n).topoydata =  '121217 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RT_001_002';
+% % % files(n).topoysession = '121217 G6H310RT DOI sizeselect22min\G6H310RT\topoYsession_V2';
+% % % files(n).topoypts = '121217 G6H310RT DOI sizeselect22min\G6H310RT\topoYsession_V2__allfiles_PTS_dF';
+% % % files(n).topoystimObj = '121217 G6H310RT DOI sizeselect22min\G6H310RT\stim_obj_001_002';
+% % % files(n).sizedata =  '121217 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RT_001_005';
+% % % files(n).sizesession = '121217 G6H310RT DOI sizeselect22min\G6H310RT\sizeSession_POST_V2';
+% % % files(n).sizepts = '121217 G6H310RT DOI sizeselect22min\G6H310RT\sizeSession_POST_V2__allfiles_PTS_dF';
+% % % files(n).sizestimObj = '121217 G6H310RT DOI sizeselect22min\G6H310RT\stim_obj_001_005';
+% % % files(n).sizeanalysis = '121217 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RTsizePOST';
+% % % files(n).sizeeye = '121217 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RT_001_005_eye';
+% % % files(n).darknessdata =  '121217 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RT_001_006';
+% % % files(n).darknesssession = '121217 G6H310RT DOI sizeselect22min\G6H310RT\darkness_POST_V2';
+% % % files(n).darknesspts = '121217 G6H310RT DOI sizeselect22min\G6H310RT\darkness_POST_V2__allfiles_PTS_dF';
+% % % files(n).darknessstimObj = '121217 G6H310RT DOI sizeselect22min\G6H310RT\stim_obj_001_006';
+% % % files(n).darknessanalysis = '121217 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RTdarknessPOST';
+% % % files(n).inject = 'doi';%%% 'doi' or 'lisuride' or 'saline'
+% % % files(n).timing = 'post'; %%%pre or post
+% % % files(n).monitor = 'vert'; %%% for topox and y
+% % % files(n).label = 'camk2 gc6'; %%% or 'calb2'
+% % % files(n).notes = 'good imaging session'; 
+% % % files(n).training = 'naive';
+% % % files(n).cutoff = 200;
+
+
+%%
+n=n+1;
+files(n).subj = 'G6H28LT';
+files(n).expt = '121217';
+files(n).topoxdata =  '121217 G6H28LT DOI sizeselect22min\G6H28LT\G6H28LT_001_001';
+files(n).topoxsession = '121217 G6H28LT DOI sizeselect22min\G6H28LT\topoXsession_V2';
+files(n).topoxpts = '121217 G6H28LT DOI sizeselect22min\G6H28LT\topoXsession_V2__allfiles_PTS_dF';
+files(n).topoxstimObj = '121217 G6H28LT DOI sizeselect22min\G6H28LT\stim_obj_001_001';
+files(n).topoydata =  '121217 G6H28LT DOI sizeselect22min\G6H28LT\G6H28LT_001_002';
+files(n).topoysession = '121217 G6H28LT DOI sizeselect22min\G6H28LT\topoYsession_V2';
+files(n).topoypts = '121217 G6H28LT DOI sizeselect22min\G6H28LT\topoYsession_V2__allfiles_PTS_dF';
+files(n).topoystimObj = '121217 G6H28LT DOI sizeselect22min\G6H28LT\stim_obj_001_002';
+files(n).darknessdata =  '121217 G6H28LT DOI sizeselect22min\G6H28LT\G6H28LT_001_003';
+files(n).darknesssession = '121217 G6H28LT DOI sizeselect22min\G6H28LT\darkness_PRE_V2';
+files(n).darknesspts = '121217 G6H28LT DOI sizeselect22min\G6H28LT\darkness_PRE_V2__allfiles_PTS_dF';
+files(n).darknessstimObj = '121217 G6H28LT DOI sizeselect22min\G6H28LT\stim_obj_001_003';
+files(n).darknessanalysis = '121217 G6H28LT DOI sizeselect22min\G6H28LT\G6H28LTdarknessPRE';
+files(n).sizedata =  '121217 G6H28LT DOI sizeselect22min\G6H28LT\G6H28LT_001_004';
+files(n).sizesession = '121217 G6H28LT DOI sizeselect22min\G6H28LT\sizeSession_PRE_V2';
+files(n).sizepts = '121217 G6H28LT DOI sizeselect22min\G6H28LT\sizeSession_PRE_V2__allfiles_PTS_dF';
+files(n).sizestimObj = '121217 G6H28LT DOI sizeselect22min\G6H28LT\stim_obj_001_004';
+files(n).sizeanalysis = '121217 G6H28LT DOI sizeselect22min\G6H28LT\G6H28LTsizePRE';
+files(n).sizeeye = '121217 G6H28LT DOI sizeselect22min\G6H28LT\G6H28LT_001_004_eye';
+files(n).inject = 'doi';%%% 'doi' or 'lisuride' or 'saline'
+files(n).timing = 'pre'; %%%pre or post
+files(n).monitor = 'vert'; %%% for topox and y
+files(n).label = 'camk2 gc6'; %%% or 'calb2'
+files(n).notes = 'good imaging session'; 
+files(n).training = 'naive';
+files(n).cutoff = 125;
+
+n=n+1;
+files(n).subj = 'G6H28LT';
+files(n).expt = '121217';
+files(n).topoxdata =  '121217 G6H28LT DOI sizeselect22min\G6H28LT\G6H28LT_001_001';
+files(n).topoxsession = '121217 G6H28LT DOI sizeselect22min\G6H28LT\topoXsession_V2';
+files(n).topoxpts = '121217 G6H28LT DOI sizeselect22min\G6H28LT\topoXsession_V2__allfiles_PTS_dF';
+files(n).topoxstimObj = '121217 G6H28LT DOI sizeselect22min\G6H28LT\stim_obj_001_001';
+files(n).topoydata =  '121217 G6H28LT DOI sizeselect22min\G6H28LT\G6H28LT_001_002';
+files(n).topoysession = '121217 G6H28LT DOI sizeselect22min\G6H28LT\topoYsession_V2';
+files(n).topoypts = '121217 G6H28LT DOI sizeselect22min\G6H28LT\topoYsession_V2__allfiles_PTS_dF';
+files(n).topoystimObj = '121217 G6H28LT DOI sizeselect22min\G6H28LT\stim_obj_001_002';
+files(n).sizedata =  '121217 G6H28LT DOI sizeselect22min\G6H28LT\G6H28LT_001_005';
+files(n).sizesession = '121217 G6H28LT DOI sizeselect22min\G6H28LT\sizeSession_POST_V2';
+files(n).sizepts = '121217 G6H28LT DOI sizeselect22min\G6H28LT\sizeSession_POST_V2__allfiles_PTS_dF';
+files(n).sizestimObj = '121217 G6H28LT DOI sizeselect22min\G6H28LT\stim_obj_001_005';
+files(n).sizeanalysis = '121217 G6H28LT DOI sizeselect22min\G6H28LT\G6H28LTsizePOST';
+files(n).sizeeye = '121217 G6H28LT DOI sizeselect22min\G6H28LT\G6H28LT_001_005_eye';
+files(n).darknessdata =  '121217 G6H28LT DOI sizeselect22min\G6H28LT\G6H28LT_001_006';
+files(n).darknesssession = '121217 G6H28LT DOI sizeselect22min\G6H28LT\darkness_POST_V2';
+files(n).darknesspts = '121217 G6H28LT DOI sizeselect22min\G6H28LT\darkness_POST_V2__allfiles_PTS_dF';
+files(n).darknessstimObj = '121217 G6H28LT DOI sizeselect22min\G6H28LT\stim_obj_001_006';
+files(n).darknessanalysis = '121217 G6H28LT DOI sizeselect22min\G6H28LT\G6H28LTdarknessPOST';
+files(n).inject = 'doi';%%% 'doi' or 'lisuride' or 'saline'
+files(n).timing = 'post'; %%%pre or post
+files(n).monitor = 'vert'; %%% for topox and y
+files(n).label = 'camk2 gc6'; %%% or 'calb2'
+files(n).notes = 'good imaging session'; 
+files(n).training = 'naive';
+files(n).cutoff = 125;
+
+
+%%
+n=n+1;
+files(n).subj = 'G6H39LT';
+files(n).expt = '121217';
+files(n).topoxdata =  '121217 G6H39LT saline sizeselect22min\G6H39LT\G6H39LT_001_001';
+files(n).topoxsession = '121217 G6H39LT saline sizeselect22min\G6H39LT\topoXsession_V2';
+files(n).topoxpts = '121217 G6H39LT saline sizeselect22min\G6H39LT\topoXsession_V2__allfiles_PTS_dF';
+files(n).topoxstimObj = '121217 G6H39LT saline sizeselect22min\G6H39LT\stim_obj_001_001';
+files(n).topoydata =  '121217 G6H39LT saline sizeselect22min\G6H39LT\G6H39LT_001_002';
+files(n).topoysession = '121217 G6H39LT saline sizeselect22min\G6H39LT\topoYsession_V2';
+files(n).topoypts = '121217 G6H39LT saline sizeselect22min\G6H39LT\topoYsession_V2__allfiles_PTS_dF';
+files(n).topoystimObj = '121217 G6H39LT saline sizeselect22min\G6H39LT\stim_obj_001_002';
+files(n).darknessdata =  '121217 G6H39LT saline sizeselect22min\G6H39LT\G6H39LT_001_003';
+files(n).darknesssession = '121217 G6H39LT saline sizeselect22min\G6H39LT\darkness_PRE_V2';
+files(n).darknesspts = '121217 G6H39LT saline sizeselect22min\G6H39LT\darkness_PRE_V2__allfiles_PTS_dF';
+files(n).darknessstimObj = '121217 G6H39LT saline sizeselect22min\G6H39LT\stim_obj_001_003';
+files(n).darknessanalysis = '121217 G6H39LT saline sizeselect22min\G6H39LT\G6H39LTdarknessPRE';
+files(n).sizedata =  '121217 G6H39LT saline sizeselect22min\G6H39LT\G6H39LT_001_004';
+files(n).sizesession = '121217 G6H39LT saline sizeselect22min\G6H39LT\sizeSession_PRE_V2';
+files(n).sizepts = '121217 G6H39LT saline sizeselect22min\G6H39LT\sizeSession_PRE_V2__allfiles_PTS_dF';
+files(n).sizestimObj = '121217 G6H39LT saline sizeselect22min\G6H39LT\stim_obj_001_004';
+files(n).sizeanalysis = '121217 G6H39LT saline sizeselect22min\G6H39LT\G6H39LTsizePRE';
+files(n).sizeeye = '121217 G6H39LT saline sizeselect22min\G6H39LT\G6H39LT_001_004_eye';
+files(n).inject = 'saline';%%% 'doi' or 'lisuride' or 'saline'
+files(n).timing = 'pre'; %%%pre or post
+files(n).monitor = 'vert'; %%% for topox and y
+files(n).label = 'camk2 gc6'; %%% or 'calb2'
+files(n).notes = 'good imaging session'; 
+files(n).training = 'naive';
+files(n).cutoff = 200;
+
+n=n+1;
+files(n).subj = 'G6H39LT';
+files(n).expt = '121217';
+files(n).topoxdata =  '121217 G6H39LT saline sizeselect22min\G6H39LT\G6H39LT_001_001';
+files(n).topoxsession = '121217 G6H39LT saline sizeselect22min\G6H39LT\topoXsession_V2';
+files(n).topoxpts = '121217 G6H39LT saline sizeselect22min\G6H39LT\topoXsession_V2__allfiles_PTS_dF';
+files(n).topoxstimObj = '121217 G6H39LT saline sizeselect22min\G6H39LT\stim_obj_001_001';
+files(n).topoydata =  '121217 G6H39LT saline sizeselect22min\G6H39LT\G6H39LT_001_002';
+files(n).topoysession = '121217 G6H39LT saline sizeselect22min\G6H39LT\topoYsession_V2';
+files(n).topoypts = '121217 G6H39LT saline sizeselect22min\G6H39LT\topoYsession_V2__allfiles_PTS_dF';
+files(n).topoystimObj = '121217 G6H39LT saline sizeselect22min\G6H39LT\stim_obj_001_002';
+files(n).sizedata =  '121217 G6H39LT saline sizeselect22min\G6H39LT\G6H39LT_001_005';
+files(n).sizesession = '121217 G6H39LT saline sizeselect22min\G6H39LT\sizeSession_POST_V2';
+files(n).sizepts = '121217 G6H39LT saline sizeselect22min\G6H39LT\sizeSession_POST_V2__allfiles_PTS_dF';
+files(n).sizestimObj = '121217 G6H39LT saline sizeselect22min\G6H39LT\stim_obj_001_005';
+files(n).sizeanalysis = '121217 G6H39LT saline sizeselect22min\G6H39LT\G6H39LTsizePOST';
+files(n).sizeeye = '121217 G6H39LT saline sizeselect22min\G6H39LT\G6H39LT_001_005_eye';
+files(n).darknessdata =  '121217 G6H39LT saline sizeselect22min\G6H39LT\G6H39LT_001_006';
+files(n).darknesssession = '121217 G6H39LT saline sizeselect22min\G6H39LT\darkness_POST_V2';
+files(n).darknesspts = '121217 G6H39LT saline sizeselect22min\G6H39LT\darkness_POST_V2__allfiles_PTS_dF';
+files(n).darknessstimObj = '121217 G6H39LT saline sizeselect22min\G6H39LT\stim_obj_001_006';
+files(n).darknessanalysis = '121217 G6H39LT saline sizeselect22min\G6H39LT\G6H39LTdarknessPOST';
+files(n).inject = 'saline';%%% 'doi' or 'lisuride' or 'saline'
+files(n).timing = 'post'; %%%pre or post
+files(n).monitor = 'vert'; %%% for topox and y
+files(n).label = 'camk2 gc6'; %%% or 'calb2'
+files(n).notes = 'good imaging session'; 
+files(n).training = 'naive';
+files(n).cutoff = 200;
+
+
+%% screen shifted during this session
+% % % n=n+1;
+% % % files(n).subj = 'G6H39LT';
+% % % files(n).expt = '121417';
+% % % files(n).topoxdata =  '121417 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LT_001_001';
+% % % files(n).topoxsession = '121417 G6H39LT DOI sizeselect22min\G6H39LT\topoXsession_V2';
+% % % files(n).topoxpts = '121417 G6H39LT DOI sizeselect22min\G6H39LT\topoXsession_V2__allfiles_PTS_dF';
+% % % files(n).topoxstimObj = '121417 G6H39LT DOI sizeselect22min\G6H39LT\stim_obj_001_001';
+% % % files(n).topoydata =  '121417 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LT_001_002';
+% % % files(n).topoysession = '121417 G6H39LT DOI sizeselect22min\G6H39LT\topoYsession_V2';
+% % % files(n).topoypts = '121417 G6H39LT DOI sizeselect22min\G6H39LT\topoYsession_V2__allfiles_PTS_dF';
+% % % files(n).topoystimObj = '121417 G6H39LT DOI sizeselect22min\G6H39LT\stim_obj_001_002';
+% % % files(n).darknessdata =  '121417 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LT_001_003';
+% % % files(n).darknesssession = '121417 G6H39LT DOI sizeselect22min\G6H39LT\darkness_PRE_V2';
+% % % files(n).darknesspts = '121417 G6H39LT DOI sizeselect22min\G6H39LT\darkness_PRE_V2__allfiles_PTS_dF';
+% % % files(n).darknessstimObj = '121417 G6H39LT DOI sizeselect22min\G6H39LT\stim_obj_001_003';
+% % % files(n).darknessanalysis = '121417 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LTdarknessPRE';
+% % % files(n).sizedata =  '121417 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LT_001_004';
+% % % files(n).sizesession = '121417 G6H39LT DOI sizeselect22min\G6H39LT\sizeSession_PRE_V2';
+% % % files(n).sizepts = '121417 G6H39LT DOI sizeselect22min\G6H39LT\sizeSession_PRE_V2__allfiles_PTS_dF';
+% % % files(n).sizestimObj = '121417 G6H39LT DOI sizeselect22min\G6H39LT\stim_obj_001_004';
+% % % files(n).sizeanalysis = '121417 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LTsizePRE';
+% % % files(n).sizeeye = '121417 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LT_001_004_eye';
+% % % files(n).inject = 'doi';%%% 'doi' or 'lisuride' or 'DOI'
+% % % files(n).timing = 'pre'; %%%pre or post
+% % % files(n).monitor = 'vert'; %%% for topox and y
+% % % files(n).label = 'camk2 gc6'; %%% or 'calb2'
+% % % files(n).notes = 'good imaging session'; 
+% % % files(n).training = 'naive';
+% % % files(n).cutoff = 150;
+% % % 
+% % % n=n+1;
+% % % files(n).subj = 'G6H39LT';
+% % % files(n).expt = '121417';
+% % % files(n).topoxdata =  '121417 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LT_001_001';
+% % % files(n).topoxsession = '121417 G6H39LT DOI sizeselect22min\G6H39LT\topoXsession_V2';
+% % % files(n).topoxpts = '121417 G6H39LT DOI sizeselect22min\G6H39LT\topoXsession_V2__allfiles_PTS_dF';
+% % % files(n).topoxstimObj = '121417 G6H39LT DOI sizeselect22min\G6H39LT\stim_obj_001_001';
+% % % files(n).topoydata =  '121417 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LT_001_002';
+% % % files(n).topoysession = '121417 G6H39LT DOI sizeselect22min\G6H39LT\topoYsession_V2';
+% % % files(n).topoypts = '121417 G6H39LT DOI sizeselect22min\G6H39LT\topoYsession_V2__allfiles_PTS_dF';
+% % % files(n).topoystimObj = '121417 G6H39LT DOI sizeselect22min\G6H39LT\stim_obj_001_002';
+% % % files(n).sizedata =  '121417 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LT_001_005';
+% % % files(n).sizesession = '121417 G6H39LT DOI sizeselect22min\G6H39LT\sizeSession_POST_V2';
+% % % files(n).sizepts = '121417 G6H39LT DOI sizeselect22min\G6H39LT\sizeSession_POST_V2__allfiles_PTS_dF';
+% % % files(n).sizestimObj = '121417 G6H39LT DOI sizeselect22min\G6H39LT\stim_obj_001_005';
+% % % files(n).sizeanalysis = '121417 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LTsizePOST';
+% % % files(n).sizeeye = '121417 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LT_001_005_eye';
+% % % files(n).darknessdata =  '121417 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LT_001_006';
+% % % files(n).darknesssession = '121417 G6H39LT DOI sizeselect22min\G6H39LT\darkness_POST_V2';
+% % % files(n).darknesspts = '121417 G6H39LT DOI sizeselect22min\G6H39LT\darkness_POST_V2__allfiles_PTS_dF';
+% % % files(n).darknessstimObj = '121417 G6H39LT DOI sizeselect22min\G6H39LT\stim_obj_001_006';
+% % % files(n).darknessanalysis = '121417 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LTdarknessPOST';
+% % % files(n).inject = 'doi';%%% 'doi' or 'lisuride' or 'DOI'
+% % % files(n).timing = 'post'; %%%pre or post
+% % % files(n).monitor = 'vert'; %%% for topox and y
+% % % files(n).label = 'camk2 gc6'; %%% or 'calb2'
+% % % files(n).notes = 'good imaging session'; 
+% % % files(n).training = 'naive';
+% % % files(n).cutoff = 150;
+
+
+%%
+n=n+1;
+files(n).subj = 'G6H310RT';
+files(n).expt = '121517';
+files(n).topoxdata =  '121517 G6H310RT saline sizeselect22min\G6H310RT\G6H310RT_001_001';
+files(n).topoxsession = '121517 G6H310RT saline sizeselect22min\G6H310RT\topoXsession_V2';
+files(n).topoxpts = '121517 G6H310RT saline sizeselect22min\G6H310RT\topoXsession_V2__allfiles_PTS_dF';
+files(n).topoxstimObj = '121517 G6H310RT saline sizeselect22min\G6H310RT\stim_obj_001_001';
+files(n).topoydata =  '121517 G6H310RT saline sizeselect22min\G6H310RT\G6H310RT_001_002';
+files(n).topoysession = '121517 G6H310RT saline sizeselect22min\G6H310RT\topoYsession_V2';
+files(n).topoypts = '121517 G6H310RT saline sizeselect22min\G6H310RT\topoYsession_V2__allfiles_PTS_dF';
+files(n).topoystimObj = '121517 G6H310RT saline sizeselect22min\G6H310RT\stim_obj_001_002';
+files(n).darknessdata =  '121517 G6H310RT saline sizeselect22min\G6H310RT\G6H310RT_001_003';
+files(n).darknesssession = '121517 G6H310RT saline sizeselect22min\G6H310RT\darkness_PRE_V2';
+files(n).darknesspts = '121517 G6H310RT saline sizeselect22min\G6H310RT\darkness_PRE_V2__allfiles_PTS_dF';
+files(n).darknessstimObj = '121517 G6H310RT saline sizeselect22min\G6H310RT\stim_obj_001_003';
+files(n).darknessanalysis = '121517 G6H310RT saline sizeselect22min\G6H310RT\G6H310RTdarknessPRE';
+files(n).sizedata =  '121517 G6H310RT saline sizeselect22min\G6H310RT\G6H310RT_001_004';
+files(n).sizesession = '121517 G6H310RT saline sizeselect22min\G6H310RT\sizeSession_PRE_V2';
+files(n).sizepts = '121517 G6H310RT saline sizeselect22min\G6H310RT\sizeSession_PRE_V2__allfiles_PTS_dF';
+files(n).sizestimObj = '121517 G6H310RT saline sizeselect22min\G6H310RT\stim_obj_001_004';
+files(n).sizeanalysis = '121517 G6H310RT saline sizeselect22min\G6H310RT\G6H310RTsizePRE';
+files(n).sizeeye = '121517 G6H310RT saline sizeselect22min\G6H310RT\G6H310RT_001_004_eye';
+files(n).inject = 'saline';%%% 'saline' or 'lisuride' or 'saline'
+files(n).timing = 'pre'; %%%pre or post
+files(n).monitor = 'vert'; %%% for topox and y
+files(n).label = 'camk2 gc6'; %%% or 'calb2'
+files(n).notes = 'good imaging session'; 
+files(n).training = 'naive';
+files(n).cutoff = 200;
+
+n=n+1;
+files(n).subj = 'G6H310RT';
+files(n).expt = '121517';
+files(n).topoxdata =  '121517 G6H310RT saline sizeselect22min\G6H310RT\G6H310RT_001_001';
+files(n).topoxsession = '121517 G6H310RT saline sizeselect22min\G6H310RT\topoXsession_V2';
+files(n).topoxpts = '121517 G6H310RT saline sizeselect22min\G6H310RT\topoXsession_V2__allfiles_PTS_dF';
+files(n).topoxstimObj = '121517 G6H310RT saline sizeselect22min\G6H310RT\stim_obj_001_001';
+files(n).topoydata =  '121517 G6H310RT saline sizeselect22min\G6H310RT\G6H310RT_001_002';
+files(n).topoysession = '121517 G6H310RT saline sizeselect22min\G6H310RT\topoYsession_V2';
+files(n).topoypts = '121517 G6H310RT saline sizeselect22min\G6H310RT\topoYsession_V2__allfiles_PTS_dF';
+files(n).topoystimObj = '121517 G6H310RT saline sizeselect22min\G6H310RT\stim_obj_001_002';
+files(n).sizedata =  '121517 G6H310RT saline sizeselect22min\G6H310RT\G6H310RT_001_005';
+files(n).sizesession = '121517 G6H310RT saline sizeselect22min\G6H310RT\sizeSession_POST_V2';
+files(n).sizepts = '121517 G6H310RT saline sizeselect22min\G6H310RT\sizeSession_POST_V2__allfiles_PTS_dF';
+files(n).sizestimObj = '121517 G6H310RT saline sizeselect22min\G6H310RT\stim_obj_001_005';
+files(n).sizeanalysis = '121517 G6H310RT saline sizeselect22min\G6H310RT\G6H310RTsizePOST';
+files(n).sizeeye = '121517 G6H310RT saline sizeselect22min\G6H310RT\G6H310RT_001_005_eye';
+files(n).darknessdata =  '121517 G6H310RT saline sizeselect22min\G6H310RT\G6H310RT_001_006';
+files(n).darknesssession = '121517 G6H310RT saline sizeselect22min\G6H310RT\darkness_POST_V2';
+files(n).darknesspts = '121517 G6H310RT saline sizeselect22min\G6H310RT\darkness_POST_V2__allfiles_PTS_dF';
+files(n).darknessstimObj = '121517 G6H310RT saline sizeselect22min\G6H310RT\stim_obj_001_006';
+files(n).darknessanalysis = '121517 G6H310RT saline sizeselect22min\G6H310RT\G6H310RTdarknessPOST';
+files(n).inject = 'saline';%%% 'saline' or 'lisuride' or 'saline'
+files(n).timing = 'post'; %%%pre or post
+files(n).monitor = 'vert'; %%% for topox and y
+files(n).label = 'camk2 gc6'; %%% or 'calb2'
+files(n).notes = 'good imaging session'; 
+files(n).training = 'naive';
+files(n).cutoff = 200;
+
+
+%%
+n=n+1;
+files(n).subj = 'G6H28LT';
+files(n).expt = '121517';
+files(n).topoxdata =  '121517 G6H28LT saline sizeselect22min\G6H28LT\G6H28LT_001_001';
+files(n).topoxsession = '121517 G6H28LT saline sizeselect22min\G6H28LT\topoXsession_V2';
+files(n).topoxpts = '121517 G6H28LT saline sizeselect22min\G6H28LT\topoXsession_V2__allfiles_PTS_dF';
+files(n).topoxstimObj = '121517 G6H28LT saline sizeselect22min\G6H28LT\stim_obj_001_001';
+files(n).topoydata =  '121517 G6H28LT saline sizeselect22min\G6H28LT\G6H28LT_001_002';
+files(n).topoysession = '121517 G6H28LT saline sizeselect22min\G6H28LT\topoYsession_V2';
+files(n).topoypts = '121517 G6H28LT saline sizeselect22min\G6H28LT\topoYsession_V2__allfiles_PTS_dF';
+files(n).topoystimObj = '121517 G6H28LT saline sizeselect22min\G6H28LT\stim_obj_001_002';
+files(n).darknessdata =  '121517 G6H28LT saline sizeselect22min\G6H28LT\G6H28LT_001_003';
+files(n).darknesssession = '121517 G6H28LT saline sizeselect22min\G6H28LT\darkness_PRE_V2';
+files(n).darknesspts = '121517 G6H28LT saline sizeselect22min\G6H28LT\darkness_PRE_V2__allfiles_PTS_dF';
+files(n).darknessstimObj = '121517 G6H28LT saline sizeselect22min\G6H28LT\stim_obj_001_003';
+files(n).darknessanalysis = '121517 G6H28LT saline sizeselect22min\G6H28LT\G6H28LTdarknessPRE';
+files(n).sizedata =  '121517 G6H28LT saline sizeselect22min\G6H28LT\G6H28LT_001_004';
+files(n).sizesession = '121517 G6H28LT saline sizeselect22min\G6H28LT\sizeSession_PRE_V2';
+files(n).sizepts = '121517 G6H28LT saline sizeselect22min\G6H28LT\sizeSession_PRE_V2__allfiles_PTS_dF';
+files(n).sizestimObj = '121517 G6H28LT saline sizeselect22min\G6H28LT\stim_obj_001_004';
+files(n).sizeanalysis = '121517 G6H28LT saline sizeselect22min\G6H28LT\G6H28LTsizePRE';
+files(n).sizeeye = '121517 G6H28LT saline sizeselect22min\G6H28LT\G6H28LT_001_004_eye';
+files(n).inject = 'saline';%%% 'saline' or 'lisuride' or 'saline'
+files(n).timing = 'pre'; %%%pre or post
+files(n).monitor = 'vert'; %%% for topox and y
+files(n).label = 'camk2 gc6'; %%% or 'calb2'
+files(n).notes = 'good imaging session'; 
+files(n).training = 'naive';
+files(n).cutoff = 150;
+
+n=n+1;
+files(n).subj = 'G6H28LT';
+files(n).expt = '121517';
+files(n).topoxdata =  '121517 G6H28LT saline sizeselect22min\G6H28LT\G6H28LT_001_001';
+files(n).topoxsession = '121517 G6H28LT saline sizeselect22min\G6H28LT\topoXsession_V2';
+files(n).topoxpts = '121517 G6H28LT saline sizeselect22min\G6H28LT\topoXsession_V2__allfiles_PTS_dF';
+files(n).topoxstimObj = '121517 G6H28LT saline sizeselect22min\G6H28LT\stim_obj_001_001';
+files(n).topoydata =  '121517 G6H28LT saline sizeselect22min\G6H28LT\G6H28LT_001_002';
+files(n).topoysession = '121517 G6H28LT saline sizeselect22min\G6H28LT\topoYsession_V2';
+files(n).topoypts = '121517 G6H28LT saline sizeselect22min\G6H28LT\topoYsession_V2__allfiles_PTS_dF';
+files(n).topoystimObj = '121517 G6H28LT saline sizeselect22min\G6H28LT\stim_obj_001_002';
+files(n).sizedata =  '121517 G6H28LT saline sizeselect22min\G6H28LT\G6H28LT_001_005';
+files(n).sizesession = '121517 G6H28LT saline sizeselect22min\G6H28LT\sizeSession_POST_V2';
+files(n).sizepts = '121517 G6H28LT saline sizeselect22min\G6H28LT\sizeSession_POST_V2__allfiles_PTS_dF';
+files(n).sizestimObj = '121517 G6H28LT saline sizeselect22min\G6H28LT\stim_obj_001_005';
+files(n).sizeanalysis = '121517 G6H28LT saline sizeselect22min\G6H28LT\G6H28LTsizePOST';
+files(n).sizeeye = '121517 G6H28LT saline sizeselect22min\G6H28LT\G6H28LT_001_005_eye';
+files(n).darknessdata =  '121517 G6H28LT saline sizeselect22min\G6H28LT\G6H28LT_001_006';
+files(n).darknesssession = '121517 G6H28LT saline sizeselect22min\G6H28LT\darkness_POST_V2';
+files(n).darknesspts = '121517 G6H28LT saline sizeselect22min\G6H28LT\darkness_POST_V2__allfiles_PTS_dF';
+files(n).darknessstimObj = '121517 G6H28LT saline sizeselect22min\G6H28LT\stim_obj_001_006';
+files(n).darknessanalysis = '121517 G6H28LT saline sizeselect22min\G6H28LT\G6H28LTdarknessPOST';
+files(n).inject = 'saline';%%% 'saline' or 'lisuride' or 'saline'
+files(n).timing = 'post'; %%%pre or post
+files(n).monitor = 'vert'; %%% for topox and y
+files(n).label = 'camk2 gc6'; %%% or 'calb2'
+files(n).notes = 'good imaging session'; 
+files(n).training = 'naive';
+files(n).cutoff = 150;
+
+
+%% appears to have moved again, maybe eyes instead of monitor drift?
+% n=n+1;
+% files(n).subj = 'G6H39LT';
+% files(n).expt = '121817';
+% files(n).topoxdata =  '121817 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LT_001_001';
+% files(n).topoxsession = '121817 G6H39LT DOI sizeselect22min\G6H39LT\topoXsession_V2';
+% files(n).topoxpts = '121817 G6H39LT DOI sizeselect22min\G6H39LT\topoXsession_V2__allfiles_PTS_dF';
+% files(n).topoxstimObj = '121817 G6H39LT DOI sizeselect22min\G6H39LT\stim_obj_001_001';
+% files(n).topoydata =  '121817 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LT_001_002';
+% files(n).topoysession = '121817 G6H39LT DOI sizeselect22min\G6H39LT\topoYsession_V2';
+% files(n).topoypts = '121817 G6H39LT DOI sizeselect22min\G6H39LT\topoYsession_V2__allfiles_PTS_dF';
+% files(n).topoystimObj = '121817 G6H39LT DOI sizeselect22min\G6H39LT\stim_obj_001_002';
+% files(n).darknessdata =  '121817 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LT_001_003';
+% files(n).darknesssession = '121817 G6H39LT DOI sizeselect22min\G6H39LT\darkness_PRE_V2';
+% files(n).darknesspts = '121817 G6H39LT DOI sizeselect22min\G6H39LT\darkness_PRE_V2__allfiles_PTS_dF';
+% files(n).darknessstimObj = '121817 G6H39LT DOI sizeselect22min\G6H39LT\stim_obj_001_003';
+% files(n).darknessanalysis = '121817 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LTdarknessPRE';
+% files(n).sizedata =  '121817 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LT_001_004';
+% files(n).sizesession = '121817 G6H39LT DOI sizeselect22min\G6H39LT\sizeSession_PRE_V2';
+% files(n).sizepts = '121817 G6H39LT DOI sizeselect22min\G6H39LT\sizeSession_PRE_V2__allfiles_PTS_dF';
+% files(n).sizestimObj = '121817 G6H39LT DOI sizeselect22min\G6H39LT\stim_obj_001_004';
+% files(n).sizeanalysis = '121817 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LTsizePRE';
+% files(n).sizeeye = '121817 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LT_001_004_eye';
+% files(n).inject = 'doi';%%% 'doi' or 'lisuride' or 'DOI'
+% files(n).timing = 'pre'; %%%pre or post
+% files(n).monitor = 'vert'; %%% for topox and y
+% files(n).label = 'camk2 gc6'; %%% or 'calb2'
+% files(n).notes = 'good imaging session'; 
+% files(n).training = 'naive';
+% files(n).cutoff = 250;
+% 
+% n=n+1;
+% files(n).subj = 'G6H39LT';
+% files(n).expt = '121817';
+% files(n).topoxdata =  '121817 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LT_001_001';
+% files(n).topoxsession = '121817 G6H39LT DOI sizeselect22min\G6H39LT\topoXsession_V2';
+% files(n).topoxpts = '121817 G6H39LT DOI sizeselect22min\G6H39LT\topoXsession_V2__allfiles_PTS_dF';
+% files(n).topoxstimObj = '121817 G6H39LT DOI sizeselect22min\G6H39LT\stim_obj_001_001';
+% files(n).topoydata =  '121817 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LT_001_002';
+% files(n).topoysession = '121817 G6H39LT DOI sizeselect22min\G6H39LT\topoYsession_V2';
+% files(n).topoypts = '121817 G6H39LT DOI sizeselect22min\G6H39LT\topoYsession_V2__allfiles_PTS_dF';
+% files(n).topoystimObj = '121817 G6H39LT DOI sizeselect22min\G6H39LT\stim_obj_001_002';
+% files(n).sizedata =  '121817 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LT_001_005';
+% files(n).sizesession = '121817 G6H39LT DOI sizeselect22min\G6H39LT\sizeSession_POST_V2';
+% files(n).sizepts = '121817 G6H39LT DOI sizeselect22min\G6H39LT\sizeSession_POST_V2__allfiles_PTS_dF';
+% files(n).sizestimObj = '121817 G6H39LT DOI sizeselect22min\G6H39LT\stim_obj_001_005';
+% files(n).sizeanalysis = '121817 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LTsizePOST';
+% files(n).sizeeye = '121817 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LT_001_005_eye';
+% files(n).darknessdata =  '121817 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LT_001_006';
+% files(n).darknesssession = '121817 G6H39LT DOI sizeselect22min\G6H39LT\darkness_POST_V2';
+% files(n).darknesspts = '121817 G6H39LT DOI sizeselect22min\G6H39LT\darkness_POST_V2__allfiles_PTS_dF';
+% files(n).darknessstimObj = '121817 G6H39LT DOI sizeselect22min\G6H39LT\stim_obj_001_006';
+% files(n).darknessanalysis = '121817 G6H39LT DOI sizeselect22min\G6H39LT\G6H39LTdarknessPOST';
+% files(n).inject = 'doi';%%% 'doi' or 'lisuride' or 'DOI'
+% files(n).timing = 'post'; %%%pre or post
+% files(n).monitor = 'vert'; %%% for topox and y
+% files(n).label = 'camk2 gc6'; %%% or 'calb2'
+% files(n).notes = 'good imaging session'; 
+% files(n).training = 'naive';
+% files(n).cutoff = 250;
+
+
+%% also appears to have drift, this animal is weird too?
+% n=n+1;
+% files(n).subj = 'G6H310RT';
+% files(n).expt = '121817';
+% files(n).topoxdata =  '121817 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RT_001_001';
+% files(n).topoxsession = '121817 G6H310RT DOI sizeselect22min\G6H310RT\topoXsession_V2';
+% files(n).topoxpts = '121817 G6H310RT DOI sizeselect22min\G6H310RT\topoXsession_V2__allfiles_PTS_dF';
+% files(n).topoxstimObj = '121817 G6H310RT DOI sizeselect22min\G6H310RT\stim_obj_001_001';
+% files(n).topoydata =  '121817 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RT_001_002';
+% files(n).topoysession = '121817 G6H310RT DOI sizeselect22min\G6H310RT\topoYsession_V2';
+% files(n).topoypts = '121817 G6H310RT DOI sizeselect22min\G6H310RT\topoYsession_V2__allfiles_PTS_dF';
+% files(n).topoystimObj = '121817 G6H310RT DOI sizeselect22min\G6H310RT\stim_obj_001_002';
+% files(n).darknessdata =  '121817 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RT_001_003';
+% files(n).darknesssession = '121817 G6H310RT DOI sizeselect22min\G6H310RT\darkness_PRE_V2';
+% files(n).darknesspts = '121817 G6H310RT DOI sizeselect22min\G6H310RT\darkness_PRE_V2__allfiles_PTS_dF';
+% files(n).darknessstimObj = '121817 G6H310RT DOI sizeselect22min\G6H310RT\stim_obj_001_003';
+% files(n).darknessanalysis = '121817 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RTdarknessPRE';
+% files(n).sizedata =  '121817 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RT_001_004';
+% files(n).sizesession = '121817 G6H310RT DOI sizeselect22min\G6H310RT\sizeSession_PRE_V2';
+% files(n).sizepts = '121817 G6H310RT DOI sizeselect22min\G6H310RT\sizeSession_PRE_V2__allfiles_PTS_dF';
+% files(n).sizestimObj = '121817 G6H310RT DOI sizeselect22min\G6H310RT\stim_obj_001_004';
+% files(n).sizeanalysis = '121817 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RTsizePRE';
+% files(n).sizeeye = '121817 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RT_001_004_eye';
+% files(n).inject = 'doi';%%% 'doi' or 'lisuride' or 'DOI'
+% files(n).timing = 'pre'; %%%pre or post
+% files(n).monitor = 'vert'; %%% for topox and y
+% files(n).label = 'camk2 gc6'; %%% or 'calb2'
+% files(n).notes = 'good imaging session'; 
+% files(n).training = 'naive';
+% files(n).cutoff = 150;
+% 
+% n=n+1;
+% files(n).subj = 'G6H310RT';
+% files(n).expt = '121817';
+% files(n).topoxdata =  '121817 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RT_001_001';
+% files(n).topoxsession = '121817 G6H310RT DOI sizeselect22min\G6H310RT\topoXsession_V2';
+% files(n).topoxpts = '121817 G6H310RT DOI sizeselect22min\G6H310RT\topoXsession_V2__allfiles_PTS_dF';
+% files(n).topoxstimObj = '121817 G6H310RT DOI sizeselect22min\G6H310RT\stim_obj_001_001';
+% files(n).topoydata =  '121817 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RT_001_002';
+% files(n).topoysession = '121817 G6H310RT DOI sizeselect22min\G6H310RT\topoYsession_V2';
+% files(n).topoypts = '121817 G6H310RT DOI sizeselect22min\G6H310RT\topoYsession_V2__allfiles_PTS_dF';
+% files(n).topoystimObj = '121817 G6H310RT DOI sizeselect22min\G6H310RT\stim_obj_001_002';
+% files(n).sizedata =  '121817 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RT_001_005';
+% files(n).sizesession = '121817 G6H310RT DOI sizeselect22min\G6H310RT\sizeSession_POST_V2';
+% files(n).sizepts = '121817 G6H310RT DOI sizeselect22min\G6H310RT\sizeSession_POST_V2__allfiles_PTS_dF';
+% files(n).sizestimObj = '121817 G6H310RT DOI sizeselect22min\G6H310RT\stim_obj_001_005';
+% files(n).sizeanalysis = '121817 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RTsizePOST';
+% files(n).sizeeye = '121817 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RT_001_005_eye';
+% files(n).darknessdata =  '121817 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RT_001_006';
+% files(n).darknesssession = '121817 G6H310RT DOI sizeselect22min\G6H310RT\darkness_POST_V2';
+% files(n).darknesspts = '121817 G6H310RT DOI sizeselect22min\G6H310RT\darkness_POST_V2__allfiles_PTS_dF';
+% files(n).darknessstimObj = '121817 G6H310RT DOI sizeselect22min\G6H310RT\stim_obj_001_006';
+% files(n).darknessanalysis = '121817 G6H310RT DOI sizeselect22min\G6H310RT\G6H310RTdarknessPOST';
+% files(n).inject = 'doi';%%% 'doi' or 'lisuride' or 'DOI'
+% files(n).timing = 'post'; %%%pre or post
+% files(n).monitor = 'vert'; %%% for topox and y
+% files(n).label = 'camk2 gc6'; %%% or 'calb2'
+% files(n).notes = 'good imaging session'; 
+% files(n).training = 'naive';
+% files(n).cutoff = 150;

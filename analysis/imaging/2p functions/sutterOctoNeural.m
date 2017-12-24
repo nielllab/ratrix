@@ -26,18 +26,28 @@ get2pSession
 
 %%%crop to get rid of edges that have motion artifact
 buffer = max(abs(mv(:)))+2; %% what is largest offset?
-dfofInterp = dfofInterp(buffer:end-buffer,buffer:end-buffer,:);
+topbuffer = buffer+12;
+dfofInterp = dfofInterp(topbuffer:end-buffer,buffer:end-buffer,:);
 cycLength = mean(diff(stimPulse))/dt;
 cycWindow = round(max(4/dt,cycLength));  %%% number of frames in window around each cycle. min of 4 secs, or actual cycle length + 2
 [f p] = uigetfile('*.mat','stimulus record');
 if f~=0
     alignRecs =1;
     load(fullfile(p,f),'stimRec');
-    nCycles = floor(size(dfofInterp,3)/cycLength)-ceil((cycWindow-cycLength)/cycLength);  %%% trim off last stims to allow window for previous stim
+    nCycles = floor(size(dfofInterp,3)/cycLength)-ceil((cycWindow-cycLength)/cycLength)-1;  %%% trim off last stims to allow window for previous stim
     stimT = stimRec.ts - stimRec.ts(1);
-    for i = 1:nCycles
-        stimOrder(i) = stimRec.cond(min(find(stimT>((i-1)*cycLength*dt+0.1))));
+    if min(stimRec.cond)==0  %%% new stimRec style, cond==0 during isi
+        starts = find(diff([0; stimRec.cond])>0);
+        stimOrder = stimRec.cond(starts);
+        stimOrder = stimOrder(1:nCycles);
+    else  %%% old stimRec style
+        for i = 1:nCycles
+            stimOrder(i) = stimRec.cond(min(find(stimT>((i-1)*cycLength*dt+0.1))));
+        end
     end
+    stimTimes = stimPulse-stimPulse(1);
+    stimTimes = stimTimes(1:nCycles);
+    
     %stimOrder = stimRec.cond(stimRec.f==2); %%% find second frame of each stim, and see what condition it was (don't use frame 1, because stays at frame=1 at stim end)
     nstim = max(stimOrder);
     
@@ -94,7 +104,7 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 %%% absolute green fluorescence
 greenFig = figure;
 title('mean')
-stdImg = greenframe(buffer:end-buffer,buffer:end-buffer);
+stdImg = greenframe(topbuffer:end-buffer,buffer:end-buffer);
 imagesc(stdImg,[prctile(stdImg(:),1) prctile(stdImg(:),99)*1.2]); hold on; axis equal; colormap gray; title('mean')
 normgreen = (stdImg - prctile(stdImg(:),1))/ (prctile(stdImg(:),99)*1.5 - prctile(stdImg(:),1));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
@@ -120,11 +130,15 @@ if selectPts
     chooseFig = input('select based on 1) mean image, 2) max image, 3) merge image : ');
     if chooseFig==1, selectFig = greenFig, elseif chooseFig==2, selectFig=maxFig, else selectFig=mergeFig, end;
     range = -2:2
-    clear x y npts
+    clear x y npts dF
     npts = input('how many points ? ');
     for i =1:npts
         figure(selectFig); hold on
-        [x(i) y(i)] = ginput(1); x=round(x); y = round(y);
+        [x(i) y(i) button] = ginput(1); x=round(x); y = round(y);
+        if button==3
+            x = x(1:end-1); y =y(1:end-1);
+            break
+        end
         plot(x(i),y(i),'b*');
         dF(i,:) = squeeze(mean(mean(dfofInterp(y(i)+range,x(i)+range,:),2),1));
     end
@@ -222,7 +236,9 @@ dFrepeats=zeros(size(dF,1),cycWindow*nstim,max(nStimRep))+NaN;
 for i = 1:nstim
     repList = find(stimOrder==i);
     for r = 1:nStimRep(i)
-        dFrepeats(:,(i-1)*cycWindow + (1:cycWindow),r) = dF(:,round((repList(r)-1)*cycLength)+(1:cycWindow)) - repmat(dF(:,round((repList(r)-1)*cycLength)+1),[1 floor(cycWindow)]);
+        startFrame = stimTimes(repList(r))/dt;
+        dFrepeats(:,(i-1)*cycWindow + (1:cycWindow),r) = dF(:,round(startFrame+(1:cycWindow))) - repmat(dF(:,round(startFrame+1)),[1 floor(cycWindow)]);
+        %dFrepeats(:,(i-1)*cycWindow + (1:cycWindow),r) = dF(:,round((repList(r)-1)*cycLength)+(1:cycWindow)) - repmat(dF(:,round((repList(r)-1)*cycLength)+1),[1 floor(cycWindow)]);
     end
 end
 dFrepeats(dFrepeats>1) =1; %%% clip major outliers
@@ -241,30 +257,32 @@ for i = 1:nstim;
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
+startFrames = round(stimTimes/dt);
 %%% calculate cycle averages (timecourse for each individual stim)
 clear cycAvgAll cycAvg cycImg
 for i=1:cycWindow;
-    cycAvgAll(:,i) = mean(dF(:,i:cycLength:end),2); %%% cell-wise average across all stim
-    cycAvg(i) = mean(mean(median(dfofInterp(:,:,i:cycLength:end),3),2),1); %%% average for all cells and stim
-    cycImg(:,:,i) = mean(dfofInterp(:,:,i:cycLength:end),3); %%% pixelwise average across all stim
+    cycAvgAll(:,i) = mean(dF(:,startFrames+i),2); %%% cell-wise average across all stim
+    cycAvg(i) = mean(mean(median(dfofInterp(:,:,startFrames+i),3),2),1); %%% average for all cells and stim
+    cycImg(:,:,i) = mean(dfofInterp(:,:,startFrames+i),3); %%% pixelwise average across all stim
 end
 
 %%% plot pixel-wise cycle average
 figure
-for i = 1:cycLength
+for i = 1:min(cycLength,10)
     subplot(2,5,i);
-    imagesc(cycImg(:,:,i)-min(cycImg,[],3),[0 0.1]); axis equal
+    imagesc(cycImg(:,:,i)-min(cycImg,[],3),[0 0.025]); axis equal
+    imagesc(cycImg(:,:,i)-mean(cycImg(:,:,1:2),3),[0 0.025]); axis equal
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-    
+
 %%% plot mean timecourse
 cycAvgAll = cycAvgAll - repmat(cycAvgAll(:,end),[1 size(cycAvgAll,2)]);
 figure
 plot(cycAvg); title('cycle average'); xlabel('frames')
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-   
+
 
 %%% average across repetitions, and subtract the minimum value for each
 %%% cell (to correct for baseline offsets)
@@ -284,6 +302,7 @@ end
 
 %dFclust = dFmean; %%% or just use full dFmean
 dFclust = nanmedian(dFclust,3);
+
 % dFclust = dFclust./repmat(max(dFclust,[],2),[1 size(dFclust,2)]);  %% normalize by max response
 % dFclust = imresize(dFclust,[size(dFclust,1) size(dFclust,2)*0.5]); %%% downsample to improve SNR
 dFclust(dFclust>0.2) = 0.2; dFclust(dFclust<0)=0;
@@ -299,8 +318,8 @@ tic, Z = linkage(dist,'ward'); toc
 figure
 subplot(3,4,[1 5 9 ])
 display('doing dendrogram')
-leafOrder = optimalleaforder(Z,dist);
-[h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,1,'reorder',leafOrder);
+%leafOrder = optimalleaforder(Z,dist);
+[h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,1);%,'reorder',leafOrder);
 axis off
 subplot(3,4,[2 3 4 6 7 8 10 11 12 ]);
 imagesc(dFmean(perm,:),[-0.1 0.4]); axis xy ; xlabel('selected traces based on dF'); colormap jet ;   %%% show sorted data
@@ -324,7 +343,7 @@ for clust=1:nclust
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
- 
+
 %%% summary plots for each cluster
 for clust = 1:nclust
     
@@ -339,7 +358,7 @@ for clust = 1:nclust
     subplot(2,2,2);
     imagesc(dFmean(c==clust,:),[-0.1 0.4]); axis xy % was df
     title(sprintf('clust %d',clust)); hold on
-
+    
     for i = 1:nstim
         plot([i*cycWindow i*cycWindow]+0.5,[1 sum(clust==c)],'k');
     end
@@ -398,10 +417,11 @@ figure
 hist(max(dFclust,[],2))
 %%% calculate pixel-wise maps of activity for different stim
 
-evRange = 4:5; baseRange = 1:2; %%% timepoints for evoked and baseline activity
-figure
+evRange = 4:6; baseRange = 1:2; %%% timepoints for evoked and baseline activity
 for i = 1:length(stimOrder); %%% get pixel-wise evoked activity on each individual stim presentation
-    trialmean(:,:,i) = mean(dfofInterp(:,:,round(cycLength*(i-1) + evRange)),3)- mean(dfofInterp(:,:,round(cycLength*(i-1) + baseRange)),3);
+    startFrame = stimTimes(i)/dt;
+    trialmean(:,:,i) = mean(dfofInterp(:,:,round(startFrame + evRange)),3)- mean(dfofInterp(:,:,round(startFrame + baseRange)),3);
+    trialTcourse(:,i) = squeeze(mean(mean(dfofInterp(:,:,round(startFrame + (1:8))),2),1)) - mean(mean(dfofInterp(:,:,round(startFrame + 1)),2),1) ;
 end
 filt = fspecial('gaussian',5,1.5);
 trialmean = imfilter(trialmean,filt);
@@ -427,7 +447,7 @@ if nstim==12 %%% spots
         stimImg(:,:,i) = meanimg;
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-        overlay(:,:,1) = mean(stimImg(:,:,6),3);
+    overlay(:,:,1) = mean(stimImg(:,:,6),3);
     overlay(:,:,2) = mean(stimImg(:,:,12),3);
     overlay(:,:,3)= 0;
     overlay(overlay<0)=0; overlay = overlay/0.15;
@@ -461,7 +481,7 @@ if nstim==14 %%% gratings
         imagesc(meanimg,range); axis equal; if i ==13; title('low tf flicker'); else title('high tf flicker'); end
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
+    
     overlay(:,:,1) = median(trialmean(:,:,stimOrder==1),3);
     overlay(:,:,2) = median(trialmean(:,:,stimOrder==7),3);
     overlay(:,:,3)= median(trialmean(:,:,stimOrder==13),3);
@@ -469,39 +489,117 @@ if nstim==14 %%% gratings
     overlay(overlay<0)=0; overlay = overlay/range(2);
     figure
     imshow(imresize(overlay,2));
-   
+    
     figure
     overlay(:,:,3)=0;
     imshow(imresize(overlay,2));
 end
 
-%%% plot mean for each stim condition, with layout corresponding to the stim
-range = [-0.02 0.1];
-if nstim==48 %%% spots
-    loc = [1 7 13 19 2 8 14 20 3 9 15 21 4 10 16 22 5 11 17 23 6 12 18 24]; %%% map stim order onto subplot
-    figure; set(gcf,'Name','OFF spots');
-    for i = 1:24
+% clear overlay
+% overlay(:,:,1) = median(trialmean(:,:,stimOrder==15 | stimOrder==39),3);
+% overlay(:,:,2) = median(trialmean(:,:,stimOrder==19 | stimOrder==43),3);
+% overlay(:,:,3)=0;
+% overlay(overlay<0)=0; overlay= overlay/range(2);
+% figure
+% imshow(imresize(overlay,2));
+% 
+% clear overlay
+% overlay(:,:,1) = median(trialmean(:,:,stimOrder==19),3);
+% overlay(:,:,3) = median(trialmean(:,:,stimOrder==43 ),3)*1.5;
+% overlay(:,:,2)=0;
+% overlay(overlay<0)=0; overlay= 0.5*overlay/range(2);
+% figure
+% imshow(imresize(overlay,2))
+
+
+range = [-0.05 0.2]; %%% colormap range
+if nstim==26 %%% gratings
+    loc = 1:6; %%% map stim order onto subplot
+    figure; set(gcf,'Name','vert gratings');
+    for i = 1:6
         meanimg = median(trialmean(:,:,stimOrder==i),3);
-        subplot(4,6,loc(i));
-        imagesc(meanimg,range); axis equal; axis off
+        subplot(2,3,loc(i));
+        imagesc(meanimg,range); axis equal
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
-    figure; set(gcf,'Name','ON spots');
-    for i = 25:48
+    figure;set(gcf,'Name','horiz gratings');
+    for i = 7:12
         meanimg = median(trialmean(:,:,stimOrder==i),3);
-        subplot(4,6,loc(i-24));
-        imagesc(meanimg,range); axis equal; axis off
+        subplot(2,3,loc(i-6));
+        imagesc(meanimg,range); axis equal
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    figure; set(gcf,'Name','vert gratings');
+    for i = 13:18
+        meanimg = median(trialmean(:,:,stimOrder==i),3);
+        subplot(2,3,loc(i-12));
+        imagesc(meanimg,range); axis equal
+    end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    figure;set(gcf,'Name','horiz gratings');
+    for i = 19:24
+        meanimg = median(trialmean(:,:,stimOrder==i),3);
+        subplot(2,3,loc(i-18));
+        imagesc(meanimg,range); axis equal
+    end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    figure; set(gcf,'Name','flicker');
+    for i = 25:26
+        meanimg = median(trialmean(:,:,stimOrder==i),3);
+        subplot(1,2,i-24);
+        imagesc(meanimg,range); axis equal; if i ==25; title('low tf flicker'); else title('high tf flicker'); end
+    end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+end
 
+if nstim==13 %%% gratings 1 tf
+    range = [-0.025 0.1]; %%% colormap range
+    loc = [1 5 9 2 6 10 3 7 11 4 8 12]; %%% map stim order onto subplot
+    figLabel = 'gratings';
+    npanel = 12; nrow = 3; ncol = 4; offset = 0;
+    pixPlot;
+    
+    figLabel = 'flicker';
+    npanel = 1; nrow = 1; ncol = 1; offset = 12;
+    pixPlot;
+end
+
+
+if nstim==48 %%% 4x6 spots
+ range = [-0.02 0.1];
+ loc = [1 7 13 19 2 8 14 20 3 9 15 21 4 10 16 22 5 11 17 23 6 12 18 24]; %%% map stim order onto subplot
+
+    figLabel = 'OFF spots';
+    npanel = 24; nrow = 4; ncol = 6; offset = 0;
+    pixPlot;
+    
+    figLabel = 'ON spots';
+    npanel = 24; nrow = 4; ncol = 6; offset = 24;
+    pixPlot;   
+end
+
+if nstim==50 %%% 5x5 spots
+ range = [-0.02 0.1];
+ loc = [1 6 11 16 21 2 7 12 17 22 3 8 13 18 23 4 9 14 19 24 5 10 15 20 25]; %%% map stim order onto subplot
+loc = [21 16 11 6 1 22 17 12 7 2 23 18 13 8 3 24 19 14 9 4 25 20 15 10 5]; %%% flipped direction
+    figLabel = 'OFF spots';
+    npanel = 25; nrow = 5; ncol = 5; offset = 0;
+    pixPlot;
+    
+    figLabel = 'ON spots';
+    npanel = 25; nrow = 5; ncol = 5; offset = 25;
+    pixPlot;   
 end
 
 
 %%% save out pdf file!
 if makeFigs
     [f p] = uiputfile('*.pdf','save pdf file');
-    newpdfFile = fullfile(p,f)
+    newpdfFile = fullfile(p,f);
     try
         dos(['ps2pdf ' 'c:\temp.ps "' newpdfFile '"'] )
         

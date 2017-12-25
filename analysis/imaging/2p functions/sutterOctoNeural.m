@@ -570,7 +570,7 @@ end
 
 
 if nstim==48 %%% 4x6 spots
- range = [-0.02 0.1];
+ range = [-0.05 0.2];
  loc = [1 7 13 19 2 8 14 20 3 9 15 21 4 10 16 22 5 11 17 23 6 12 18 24]; %%% map stim order onto subplot
 
     figLabel = 'OFF spots';
@@ -585,7 +585,7 @@ end
 if nstim==50 %%% 5x5 spots
  range = [-0.02 0.1];
  loc = [1 6 11 16 21 2 7 12 17 22 3 8 13 18 23 4 9 14 19 24 5 10 15 20 25]; %%% map stim order onto subplot
-loc = [21 16 11 6 1 22 17 12 7 2 23 18 13 8 3 24 19 14 9 4 25 20 15 10 5]; %%% flipped direction
+%loc = [21 16 11 6 1 22 17 12 7 2 23 18 13 8 3 24 19 14 9 4 25 20 15 10 5]; %%% flipped direction
     figLabel = 'OFF spots';
     npanel = 25; nrow = 5; ncol = 5; offset = 0;
     pixPlot;

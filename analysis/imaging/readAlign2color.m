@@ -14,8 +14,12 @@ filt = fspecial('gaussian',5,Opt.fwidth);
 Img_Seq = zeros(Img_Info(1).Height,Img_Info(1).Width,nframes,2);
 RAligned_Seq = zeros(Img_Info(1).Height,Img_Info(1).Width,nframes,2);
 
+display('reading frames')
 %Read in frames
 for iFrame = 1:nframes
+    if iFrame/100 == round(iFrame/100)
+        sprintf('%d / %d read',iFrame,nframes)        
+    end
     Img_Seq(:,:,iFrame,1) = double(imread(fname,(iFrame-1)*2+1)); %Green channel
     Img_Seq(:,:,iFrame,2) = double(imread(fname,(iFrame-1)*2+2)); %Red channel
 end
@@ -29,7 +33,7 @@ ax = gca; ax.XTick = []; ax.YTick = [];
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 if Opt.align
-    disp('Doing Alignment!')
+    disp('Doing x-y translation Alignment!')
     
     %Get Alignment Channel
     if isfield(Opt,'AlignmentChannel')
@@ -45,8 +49,10 @@ if Opt.align
     end
 
     %% Perform Rigid Compensation regardless
-    r = sbxalign_tif(fname,alignIndices);
-    mv = r.T;
+  tic
+  r = sbxalign_tif(fname,alignIndices);
+  toc
+  mv = r.T;
     buffer = max(abs(mv(:)))+2;
     
     %Plot xy translations for each frame
@@ -69,7 +75,7 @@ if Opt.align
     end
     % what is largest offset? Clip image edges by buffer value to remove
     % rigid translation artifacts
-    RAligned_Seq = RAligned_Seq(buffer:end-buffer,buffer:end-buffer,:,:);
+    RAligned_Seq = RAligned_Seq((buffer+12):end-buffer,buffer:end-buffer,:,:); %%% +12 removes strip at top
     
     %Plot Mean image of rigidly aligned image sequence
     figure
@@ -89,8 +95,9 @@ if Opt.align
     %% Perform cluster analysis on image sequence to determine which
     %images stay within a similar z-plane
     if zplane == 1
-        [FrameIndices, FrameBool] = bin_Zplane(Img_Seq(:,:,:,AC), RAligned_Seq(:,:,:,AC), Opt);
-        
+       tic
+       [FrameIndices, FrameBool] = bin_Zplane(Img_Seq(:,:,:,AC), RAligned_Seq(:,:,:,AC), Opt);
+       toc 
         %Plot Mean image of rigidly aligned image sequence
         figure
         R_Mean = mean(RAligned_Seq(:,:,FrameIndices,1),3);
@@ -134,7 +141,6 @@ if Opt.align
                 Aligned_Seq(:,:,iFrame,2) = NaN;
             end
         end
-        
         %Plot Mean image of nonrigidly aligned image sequence
         figure
         NR_Mean = mean(Aligned_Seq(:,:,FrameIndices,1),3);

@@ -2,11 +2,11 @@ function varargout = sutterOctoNeural(varargin)
 %% reads in sutter data, extracts cell traces, and aligns to stim
 % optimized for octopus optic lobe with cal520 label
 % if sutterOctoNeural is called as a function
-if ~isempty(varargin) 
+if ~isempty(varargin)
     Opt = varargin{1};
 else
     % option of one or two color data (sutter stores 2-color as interleaved frames)
-    Opt.NumChannels = 2; 
+    Opt.NumChannels = 2;
     % option to save figures to pdf file; make sure C:/temp/ folder exists
     Opt.SaveFigs = 1;
     Opt.psfile = 'C:\temp\TempFigs.ps';
@@ -16,22 +16,18 @@ else
     Opt.fwidth = 0.5;
     % option to align or not
     Opt.align = 1;
+    % channel for alignment
+    Opt.AlignmentChannel=2;
     % Option to resample at a different framerate
-    Opt.Resample = 0;
+    Opt.Resample = 1;
     Opt.Resample_dt = 0.5;
     % Option to read in ttl-file
     Opt.ttl_file = 1;
-    %Option to output results structure 
+    %Option to output results structure
     %Set to 0 if you want to run as script
     Opt.SaveOutput = 0;
 end
 
-%Change filepath to match where you have ratrix
-%Remove paths that have functions named after standard matlab functions
-cd('C:\Users\Freeman\Documents\GitHub\ratrix');
-rmpath('./matlabClub');
-rmpath('.\analysis\eflister\phys\new');
-rmpath('.\analysis\eflister\phys\new\helpers');
 
 %%% frame rate for resampling
 % dt = 0.5;
@@ -56,8 +52,8 @@ if Opt.Resample == 0
     framerate = state.acq.frameRate;
     dt = 1/framerate;
 else
-    framerate = input('Resample framerate? : ');
-    dt = 1/framerate;
+    dt = Opt.Resample_dt;
+    framerate = 1/dt;
 end
 
 %Read in ttl file if used
@@ -68,7 +64,7 @@ if Opt.ttl_file
         %Get tif file input
         [Opt.fTTL, Opt.pTTL] = uigetfile('*.mat','ttl file');
     end
-
+    
     [stimPulse, framePulse] = getTTL(fullfile(Opt.pTTL,Opt.fTTL));
     
     % number of frames per cycle
@@ -98,7 +94,7 @@ end
 
 %Reduce Aligned stack to include only the stimulus times
 dfofInterp = dfofInterp(:,:,startTime:end);
-    
+
 %% Load in the stimulus record
 % Get File Path for stimulus record file
 if ~isfield(Opt,'fStim')
@@ -108,21 +104,21 @@ end
 
 if Opt.fStim ~= 0
     load(fullfile(Opt.pStim,Opt.fStim),'stimRec');
-    nCycles = floor(size(dfofInterp,3)/cycLength)-ceil((cycWindow-cycLength)/cycLength);  %%% trim off last stims to allow window for previous stim
+  alignRecs =1;
+    nCycles = floor(size(dfofInterp,3)/cycLength)-ceil((cycWindow-cycLength)/cycLength)-1;  %%% trim off last stims to allow window for previous stim
     stimT = stimRec.ts - stimRec.ts(1);
-    
-    %Temporary fix 
-%     for i = 1:length(stimRec.cond)
-%        if stimRec.cond(i) == 0
-%            stimRec.cond(i) = pastCond;
-%        else
-%            pastCond = stimRec.cond(i);
-%        end
-%     end
-
-    for i = 1:nCycles
-        stimOrder(i) = stimRec.cond(min(find(stimT>((i-1)*cycLength*dt+0.1))));
+    if min(stimRec.cond)==0  %%% new stimRec style, cond==0 during isi
+        starts = find(diff([0; stimRec.cond])>0);
+        stimOrder = stimRec.cond(starts);
+        stimOrder = stimOrder(1:nCycles);
+    else  %%% old stimRec style
+        for i = 1:nCycles
+            stimOrder(i) = stimRec.cond(min(find(stimT>((i-1)*cycLength*dt+0.1))));
+        end
     end
+    stimTimes = stimPulse-stimPulse(1);
+    stimTimes = stimTimes(1:nCycles);
+    
     %stimOrder = stimRec.cond(stimRec.f==2); %%% find second frame of each stim, and see what condition it was (don't use frame 1, because stays at frame=1 at stim end)
     nstim = max(stimOrder);
     
@@ -168,12 +164,7 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 
 
 %%% mean fluorescence of the entire image
-mfluorescence = zeros(size(dfofInterp,3),1);
-for iFrame = 1:size(dfofInterp,3)
-    frm = dfofInterp(:,:,iFrame);
-    frm = frm(~isinf(frm(:)));
-    mfluorescence(iFrame) = nanmean(frm(~isinf(frm(:))));
-end
+mfluorescence = squeeze(mean(mean(dfofInterp,2),1));
 figure
 plot((1:size(dfofInterp,3))*dt,mfluorescence);
 title('full image mean'); hold on
@@ -218,13 +209,13 @@ end
 
 if selectPts
     chooseFig = input('select based on 1) mean image, 2) max image, 3) merge image : ');
-
-    if chooseFig==1 
+    
+    if chooseFig==1
         selectFig = greenFig;
     elseif chooseFig==2
         selectFig = maxFig;
     else
-        selectFig = mergeFig; 
+        selectFig = mergeFig;
     end
     range = -2:2;
     clear x y npts
@@ -348,7 +339,7 @@ for i = 1:nstim
         startFrame = stimTimes(repList(r))/dt;
         dFrepeats(:,(i-1)*cycWindow + (1:cycWindow),r) = dF(:,round(startFrame+(1:cycWindow))) - repmat(dF(:,round(startFrame+1)),[1 floor(cycWindow)]);
         %dFrepeats(:,(i-1)*cycWindow + (1:cycWindow),r) = dF(:,round((repList(r)-1)*cycLength)+(1:cycWindow)) - repmat(dF(:,round((repList(r)-1)*cycLength)+1),[1 floor(cycWindow)]);
-
+        
     end
 end
 dFrepeats(dFrepeats>1) =1; %%% clip major outliers
@@ -371,10 +362,10 @@ startFrames = round(stimTimes/dt);
 %%% calculate cycle averages (timecourse for each individual stim)
 clear cycAvgAll cycAvg cycImg
 for i=1:cycWindow;
-    cycAvgAll(:,i) = mean(dF(:,startFrames+i),2); %%% cell-wise average across all stim
-    cycAvg(i) = mean(mean(median(dfofInterp(:,:,startFrames+i),3),2),1); %%% average for all cells and stim
-    cycImg(:,:,i) = mean(dfofInterp(:,:,startFrames+i),3); %%% pixelwise average across all stim
-
+    cycAvgAll(:,i) = nanmean(dF(:,startFrames+i),2); %%% cell-wise average across all stim
+    cycAvg(i) = mean(mean(nanmean(dfofInterp(:,:,startFrames+i),3),2),1); %%% average for all cells and stim
+    cycImg(:,:,i) = nanmean(dfofInterp(:,:,startFrames+i),3); %%% pixelwise average across all stim
+    
 end
 
 %%% plot pixel-wise cycle average
@@ -388,7 +379,7 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 
 
 %%% plot mean timecourse
-cycAvgAll = cycAvgAll - repmat(cycAvgAll(:,end),[1 size(cycAvgAll,2)]);
+cycAvgAll = cycAvgAll - repmat(cycAvgAll(:,1),[1 size(cycAvgAll,2)]);
 figure
 plot(cycAvg); title('cycle average'); xlabel('frames')
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
@@ -423,7 +414,6 @@ imagesc(dFclust,[-0.05 0.2])
 %%% cluster responses from selected traces
 %dist = pdist(dF,'correlation');  %%% sort based on whole timecourse
 dist = pdist(dFclust,'euclidean');  %%% sort based on average across repeats (averages away artifact on individual trials)
-
 display('doing cluster')
 tic, Z = linkage(dist,'ward'); toc
 figure
@@ -448,7 +438,7 @@ if isfield(Opt,'nclust')
 else
     nclust =input('# of clusters : ');
 end
-    
+
 c = cluster(Z,'maxclust',nclust);
 colors = hsv(nclust+1); %%% color code for each cluster
 
@@ -466,7 +456,7 @@ for clust = 1:nclust
     
     %%% spatial location of cells in this cluster
     figure
-
+    
     subplot(2,2,1);
     imagesc(stdImg,[0 prctile(stdImg(:),99)*1.2]); axis equal; hold on;colormap gray;freezeColors;
     title(sprintf('cluster %d',clust));
@@ -489,30 +479,19 @@ for clust = 1:nclust
     xlabel('stim #'); xlim([1 nstim+1]); ylim([-0.05 0.2])
     title('mean of cluster, multiple repeats');
     for i = 1:nstim;
-        plot([i i ],[0  0.5],'k:');
-
+        plot([i i ],[0  0.5],'k:');        
     end
     colormap jet;freezeColors;colormap gray;
-    
-%     %%% timecourse of this cluster, for each repeat  xlim([150 400])
-%     subplot(2,2,4);
-%     plot((0:size(dFrepeats,2)-1)/cycWindow + 1, squeeze(nanmean(dFrepeats(c==clust,:,:),1))); hold on
-%     plot((0:size(dFrepeats,2)-1)/cycWindow + 1, squeeze(nanmean(nanmedian(dFrepeats(c==clust,:,:),3),1)),'g','LineWidth',2)
-%     xlabel('stim #'); xlim([1 nstim+1]); ylim([-0.05 0.2])
-%     title('Mean of cluster, multiple repeats');
-%     for i = 1:nstim
-%         plot([i i ],[0  0.5],'k:');
-%     end
-%     
-%     %%% cycleaverage timecourse for each cell in this cluster
-%     subplot(2,2,3);
-%     plot(cycAvgAll(c==clust,:)');
-%     hold on
-%     plot(nanmean(cycAvgAll(c==clust,:),1),'g','Linewidth',2);
-%     title('Cycle Average Timecourse');
-%     %     plot((1:size(dF,2))*dt,dF(c==clust,:)'); hold on;
-%     %     xlim([1 size(dF,2)*dt]); xlabel('secs'); ylim([-0.2 2.1])
-%     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+        %%% cycleaverage timecourse for each cell in this cluster
+        subplot(2,2,3);
+        plot(cycAvgAll(c==clust,:)');
+        hold on
+        plot(nanmean(cycAvgAll(c==clust,:),1),'g','Linewidth',2);
+        title('Cycle Average Timecourse');
+        %     plot((1:size(dF,2))*dt,dF(c==clust,:)'); hold on;
+        %     xlim([1 size(dF,2)*dt]); xlabel('secs'); ylim([-0.2 2.1])
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
 end %end of for clust
 
@@ -550,9 +529,9 @@ hist(max(dFclust,[],2))
 evRange = 4:6; baseRange = 1:2; %%% timepoints for evoked and baseline activity
 for i = 1:length(stimOrder); %%% get pixel-wise evoked activity on each individual stim presentation
     startFrame = stimTimes(i)/dt;
-    trialmean(:,:,i) = mean(dfofInterp(:,:,round(startFrame + evRange)),3)- mean(dfofInterp(:,:,round(startFrame + baseRange)),3);
+    trialmean(:,:,i) = nanmean(dfofInterp(:,:,round(startFrame + evRange)),3)- nanmean(dfofInterp(:,:,round(startFrame + baseRange)),3);
     trialTcourse(:,i) = squeeze(mean(mean(dfofInterp(:,:,round(startFrame + (1:8))),2),1)) - mean(mean(dfofInterp(:,:,round(startFrame + 1)),2),1) ;
-
+    
 end
 filt = fspecial('gaussian',5,1.5);
 trialmean = imfilter(trialmean,filt);
@@ -566,7 +545,7 @@ if nstim==12 %%% spots
         meanimg = median(trialmean(:,:,stimOrder==i),3);
         subplot(2,3,loc(i));
         imagesc(meanimg,range); axis equal
-
+        
         stimImg(:,:,i) = meanimg;
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
@@ -581,7 +560,7 @@ if nstim==12 %%% spots
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     overlay(:,:,1) = mean(stimImg(:,:,6),3);
     overlay(:,:,2) = mean(stimImg(:,:,12),3);
-
+    
     overlay(:,:,3)= 0;
     overlay(overlay<0)=0; overlay = overlay/0.15;
     figure
@@ -644,29 +623,29 @@ end
 
 
 if nstim==48 %%% 4x6 spots
- range = [-0.05 0.2];
- loc = [1 7 13 19 2 8 14 20 3 9 15 21 4 10 16 22 5 11 17 23 6 12 18 24]; %%% map stim order onto subplot
-
+    range = [-0.05 0.2];
+    loc = [1 7 13 19 2 8 14 20 3 9 15 21 4 10 16 22 5 11 17 23 6 12 18 24]; %%% map stim order onto subplot
+    
     figLabel = 'OFF spots';
     npanel = 24; nrow = 4; ncol = 6; offset = 0;
     pixPlot;
     
     figLabel = 'ON spots';
     npanel = 24; nrow = 4; ncol = 6; offset = 24;
-    pixPlot;   
+    pixPlot;
 end
 
 if nstim==50 %%% 5x5 spots
- range = [-0.02 0.1];
- loc = [1 6 11 16 21 2 7 12 17 22 3 8 13 18 23 4 9 14 19 24 5 10 15 20 25]; %%% map stim order onto subplot
-%loc = [21 16 11 6 1 22 17 12 7 2 23 18 13 8 3 24 19 14 9 4 25 20 15 10 5]; %%% flipped direction
+    range = [-0.02 0.1];
+    loc = [1 6 11 16 21 2 7 12 17 22 3 8 13 18 23 4 9 14 19 24 5 10 15 20 25]; %%% map stim order onto subplot
+    %loc = [21 16 11 6 1 22 17 12 7 2 23 18 13 8 3 24 19 14 9 4 25 20 15 10 5]; %%% flipped direction
     figLabel = 'OFF spots';
     npanel = 25; nrow = 5; ncol = 5; offset = 0;
     pixPlot;
     
     figLabel = 'ON spots';
     npanel = 25; nrow = 5; ncol = 5; offset = 25;
-    pixPlot;   
+    pixPlot;
 end
 
 

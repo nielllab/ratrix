@@ -135,29 +135,29 @@ if redogrp
             cellprintpre{cellcnt+j-1} = cellprint{j};
         end
         
-        %remove cell footprints from pixel-wise analysis
-        pts = usePts(1:cut);
-        frm = squeeze(frmdata(:,:,1,1,1));
-%         lfrm = reshape(frm,1,size(frm,1)*size(frm,2));
-        cnt=1;
-        for j = 1:length(pts)
-            nanpts = pts{j};
-        %     nanptsind=nan(1,length(nanpts));
-            for k = 1:length(nanpts)
-                [I, J] = ind2sub(size(meanShiftImg),nanpts(k));
-                Inan(cnt) = I + cropx(1);Jnan(cnt) = J + cropy(1);
-        %         nanptsind(1,j) = I;nanptsind(2,j) = J;
-%                 NANpts(cnt) = sub2ind(size(frm),I,J);
-                cnt=cnt+1;
-            end
-%             lfrm(nanpts) = NaN;
-        end
-        for j = 1:length(Inan)
-            frm(Inan(j),Jnan(j)) = NaN;
-        end
-        figure
-        imagesc(frm)
-        IJnan = isnan(frm);%%apply this to ring
+%         %remove cell footprints from pixel-wise analysis
+%         pts = usePts(1:cut);
+%         frm = squeeze(frmdata(:,:,1,1,1));
+% %         lfrm = reshape(frm,1,size(frm,1)*size(frm,2));
+%         cnt=1;
+%         for j = 1:length(pts)
+%             nanpts = pts{j};
+%         %     nanptsind=nan(1,length(nanpts));
+%             for k = 1:length(nanpts)
+%                 [I, J] = ind2sub(size(meanShiftImg),nanpts(k));
+%                 Inan(cnt) = I + cropx(1);Jnan(cnt) = J + cropy(1);
+%         %         nanptsind(1,j) = I;nanptsind(2,j) = J;
+% %                 NANpts(cnt) = sub2ind(size(frm),I,J);
+%                 cnt=cnt+1;
+%             end
+% %             lfrm(nanpts) = NaN;
+%         end
+%         for j = 1:length(Inan)
+%             frm(Inan(j),Jnan(j)) = NaN;
+%         end
+%         figure
+%         imagesc(frm)
+%         IJnan = isnan(frm);%%apply this to ring
         
         X0(anicnt) = x0;Y0(anicnt) = y0;
         if size(dist,2)==398;dist=dist(:,25:375);end
@@ -167,11 +167,11 @@ if redogrp
                 for l = 1:size(frmdata,5)
                     if size(frmdata,2)==398
                         resp = squeeze(frmdata(:,:,j,k,l));
-                        resp(IJnan) = NaN;
+%                         resp(IJnan) = NaN;
                         resp = resp(:,25:375);
                     else
                         resp = squeeze(frmdata(:,:,j,k,l));
-                        resp(IJnan) = NaN;
+%                         resp(IJnan) = NaN;
                     end
                     for m = 1:ceil(max(max(dist)))/binwidth
                         ring(m,j,k,l) = nanmean(resp(dist>(binwidth*(m-1)) & dist<binwidth*m));
@@ -184,7 +184,7 @@ if redogrp
         for j = 1:size(frmdata,3) %%%remove footprints from frmdata
             for k = 1:size(frmdata,4)
                 for l = 1:size(frmdata,5)
-                    frm = squeeze(frmdata(:,:,j,k,l));frm(IJnan) = NaN;frmdata(:,:,j,k,l) = frm;
+                    frm = squeeze(frmdata(:,:,j,k,l));frmdata(:,:,j,k,l) = frm;%%frm(IJnan) = NaN;
                 end
             end
         end
@@ -218,11 +218,11 @@ if redogrp
                 for l = 1:size(frmdata,5)
                     if size(frmdata,2)==398
                         resp = squeeze(frmdata(:,:,j,k,l));
-                        resp(IJnan) = NaN;
+%                         resp(IJnan) = NaN;
                         resp = resp(:,25:375);
                     else
                         resp = squeeze(frmdata(:,:,j,k,l));
-                        resp(IJnan) = NaN;
+%                         resp(IJnan) = NaN;
                     end
                     for m = 1:ceil(max(max(dist)))/binwidth
                         ring(m,j,k,l) = nanmean(resp(dist>(binwidth*(m-1)) & dist<binwidth*m));
@@ -235,7 +235,7 @@ if redogrp
         for j = 1:size(frmdata,3) %%%remove footprints from frmdata
             for k = 1:size(frmdata,4)
                 for l = 1:size(frmdata,5)
-                    frm = squeeze(frmdata(:,:,j,k,l));frm(IJnan) = NaN;frmdata(:,:,j,k,l) = frm;
+                    frm = squeeze(frmdata(:,:,j,k,l));frmdata(:,:,j,k,l) = frm;%frm(IJnan) = NaN;
                 end
             end
         end
@@ -602,6 +602,36 @@ for z = 1:numAni
         end
     end
     
+    figure
+    subplot(1,2,1)
+    pre = squeeze(nanmean(nanmean(grpspsize(find(sess==z),spWindow{1},:,1,1),2),1)); %pre(1)=0; %median of 0 = nan
+    post = squeeze(nanmean(nanmean(grpspsize(find(sess==z),spWindow{1},:,1,2),2),1)); %post(1)=0;
+    hold on
+    plot(pre,'k.-')
+    plot(post,'r.-')
+    xlabel('Stim Size (deg)')
+    ylabel('dF/F sit')
+    axis([0 length(radiusRange)+1 -0.05 0.75])
+    axis square
+    set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+    subplot(1,2,2)
+    pre = squeeze(nanmean(nanmean(grpspsize(find(sess==z),spWindow{1},:,2,1),2),1)); %pre(1)=0; %median of 0 = nan
+    post = squeeze(nanmean(nanmean(grpspsize(find(sess==z),spWindow{1},:,2,2),2),1)); %post(1)=0;
+    hold on
+    plot(pre,'k.-')
+    plot(post,'r.-')
+    xlabel('Stim Size (deg)')
+    ylabel('dF/F run')
+    axis([0 length(radiusRange)+1 -0.05 0.75])
+    axis square
+    set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+    
+    mtit(sprintf('%s %s',files(use(z*2)).subj,files(use(z*2)).expt))
+    if exist('psfile','var')
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+        print('-dpsc',psfile,'-append');
+    end
+        
 % % %     figure
 % % %     subplot(2,2,1)
 % % %     resp = squeeze(nanmean(grpfrmdata(z,:,:,:,1,1,1),4));

@@ -11,7 +11,7 @@ while satis==0
     for i = 1:2
         [dy(i) dx(i)] = ginput(1);
         plot(dy(i),dx(i),'g*'); 
-        dy(i)=dy(i)*2;,dx(i)=dx(i)*2
+        dy(i)=dy(i)*2;dx(i)=dx(i)*2;
         P(i,:) = round([dx(i),dy(i)]);
     end
     hold off;respimg = mat2im(resp,jet,[-0.01 0.05]);

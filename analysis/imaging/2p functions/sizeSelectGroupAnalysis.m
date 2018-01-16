@@ -2403,8 +2403,8 @@ for z=1%:length(ccvals)
         end
         
         %%%save params into group variable for stationary
-        allparams(:,1,1,1) = preRD;allparams(:,1,1,2) = postRD;
-        allparams(:,2,1,1) = preRS;allparams(:,2,1,2) = postRS;
+        allparams(fitani,1,1,1) = preRD;allparams(fitani,1,1,2) = postRD;
+        allparams(fitani,2,1,1) = preRS;allparams(fitani,2,1,2) = postRS;
 
         %%%running
         sprintf('doing animal-wise running fits %s...',splabel{win})
@@ -2689,8 +2689,8 @@ for z=1%:length(ccvals)
         end
         
         %%%save params into group variable for running
-        allparams(:,1,2,1) = preRD;allparams(:,1,2,2) = postRD;
-        allparams(:,2,2,1) = preRS;allparams(:,2,2,2) = postRS;
+        allparams(fitani,1,2,1) = preRD;allparams(fitani,1,2,2) = postRD;
+        allparams(fitani,2,2,1) = preRS;allparams(fitani,2,2,2) = postRS;
         
         figure
         subplot(1,2,1)
@@ -2698,9 +2698,9 @@ for z=1%:length(ccvals)
         plot(allparams(:,1,1,1),allparams(:,1,2,1),'k.')
         plot(allparams(:,1,1,2),allparams(:,1,2,2),'r.')
         errorbarxy(nanmean(allparams(:,1,1,1)),nanmean(allparams(:,1,2,1)),...
-            std(allparams(:,1,1,1))/sqrt(numAni),std(allparams(:,1,2,1))/sqrt(numAni),{'k','k','k'})
+            nanstd(allparams(:,1,1,1))/sqrt(numAni),nanstd(allparams(:,1,2,1))/sqrt(numAni),{'k','k','k'})
         errorbarxy(nanmean(allparams(:,1,1,2)),nanmean(allparams(:,1,2,2)),...
-            std(allparams(:,1,1,2))/sqrt(numAni),std(allparams(:,1,2,2))/sqrt(numAni),{'r','r','r'})
+            nanstd(allparams(:,1,1,2))/sqrt(numAni),nanstd(allparams(:,1,2,2))/sqrt(numAni),{'r','r','r'})
         plot([0 100],[0 100],'m:')
         title('Rd');xlabel('sit Rd');ylabel('run Rd');
         axis([0 3 0 3]);axis square
@@ -2709,9 +2709,9 @@ for z=1%:length(ccvals)
         plot(allparams(:,2,1,1),allparams(:,2,2,1),'k.')
         plot(allparams(:,2,1,2),allparams(:,2,2,2),'r.')
         errorbarxy(nanmean(allparams(:,2,1,1)),nanmean(allparams(:,2,2,1)),...
-            std(allparams(:,2,1,1))/sqrt(numAni),std(allparams(:,2,2,1))/sqrt(numAni),{'k','k','k'})
+            nanstd(allparams(:,2,1,1))/sqrt(numAni),nanstd(allparams(:,2,2,1))/sqrt(numAni),{'k','k','k'})
         errorbarxy(nanmean(allparams(:,2,1,2)),nanmean(allparams(:,2,2,2)),...
-            std(allparams(:,2,1,2))/sqrt(numAni),std(allparams(:,2,2,2))/sqrt(numAni),{'r','r','r'})
+            nanstd(allparams(:,2,1,2))/sqrt(numAni),nanstd(allparams(:,2,2,2))/sqrt(numAni),{'r','r','r'})
         plot([0 100],[0 100],'m:')
         title('Rs');xlabel('sit Rs');ylabel('run Rs');
         axis([0 80 0 80]);axis square

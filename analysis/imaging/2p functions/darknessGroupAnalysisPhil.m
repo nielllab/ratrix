@@ -53,6 +53,7 @@ if redogrp
     enslocs = nan(numAni,500,2);
     grpenssimIdx = nan(numAni,500,500,2);
     anicnt = 1;
+    grpd = nan(numAni,2,2);
     
     for i = 1:2:length(use)
         
@@ -64,6 +65,7 @@ if redogrp
         aniFile = files(use(i)).darknesspts; load(aniFile,'spikes');
         cut(anicnt) = files(use(i)).cutoff;
         spikes = spikes(1:cut(anicnt),end-2999:end);
+        spikespre = spikes;
         
         %%%plot pre spikes
         j=0;
@@ -183,6 +185,7 @@ if redogrp
         %%%darkness data post
         aniFile = files(use(i+1)).darknesspts; load(aniFile,'spikes');
         spikes = spikes(1:cut(anicnt),end-2999:end);
+        spikespost = spikes;
 
         %%%plot post spikes
         j=0;
@@ -272,6 +275,37 @@ if redogrp
         sig(anicnt,4) = sum(pre(:)&~post(:))/(cut(anicnt)^2);sprintf('percent coactive pre and not post: %0.2f',sig(anicnt,4))
         sig(anicnt,5) = sum(~pre(:)&post(:))/(cut(anicnt)^2);sprintf('percent coactive not pre and post: %0.2f',sig(anicnt,5))
         
+        
+        %%%get dimensionality pre/post
+        R = corr(spikespre'); %correlation pre
+        [u,s,v] = svd(R);
+        s = diag(s);
+        s = s/sum(s);
+        d = 1/sum(s.^2);
+        grpd(anicnt,1,1) = d;
+        
+        R = cov(spikespre'); %covariance pre
+        [u,s,v] = svd(R);
+        s = diag(s);
+        s = s/sum(s);
+        d = 1/sum(s.^2);
+        grpd(anicnt,2,1) = d;
+        
+        R = corr(spikespost'); %correlation post
+        [u,s,v] = svd(R);
+        s = diag(s);
+        s = s/sum(s);
+        d = 1/sum(s.^2);
+        grpd(anicnt,1,2) = d;
+        
+        R = cov(spikespost'); %covariance post
+        [u,s,v] = svd(R);
+        s = diag(s);
+        s = s/sum(s);
+        d = 1/sum(s.^2);
+        grpd(anicnt,2,2) = d;    
+        
+        
         anicnt=anicnt+1;
         sprintf('%0.0f/%0.0f done',anicnt-1,numAni)
         
@@ -338,6 +372,35 @@ axis([0 6 0 0.5])
 ylabel('percent of cell pairs')
 set(gca,'xtick',1:5,'xticklabel',{'pre','post','pre&post','pre~post','~prepost'},'fontsize',6)
 title('percent of cells coactive')
+if exist('psfile','var')
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    print('-dpsc',psfile,'-append');
+end
+
+%%%dimensionality
+figure;
+subplot(1,2,1)
+hold on
+pre = grpd(:,1,1);post = grpd(:,1,2);
+plot([1 2],[pre post],'k.-')
+errorbar([1 2],[nanmean(pre) nanmean(post)],[nanstd(pre)/sqrt(numAni) nanstd(post)/sqrt(numAni)])
+set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'tickdir','out','fontsize',8)
+ylabel('corr dimensionality')
+axis([0 3 0 350])
+axis square
+[hvals pvals] = ttest(pre,post,'alpha',0.05);
+title(sprintf('p=%0.2f',pvals'))
+subplot(1,2,2)
+hold on
+pre = grpd(:,2,1);post = grpd(:,2,2);
+plot([1 2],[pre post],'k.-')
+errorbar([1 2],[nanmean(pre) nanmean(post)],[nanstd(pre)/sqrt(numAni) nanstd(post)/sqrt(numAni)])
+set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'tickdir','out','fontsize',8)
+ylabel('cov dimensionality')
+axis([0 3 0 350])
+axis square
+[hvals pvals] = ttest(pre,post,'alpha',0.05);
+title(sprintf('p=%0.2f',pvals'))
 if exist('psfile','var')
     set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
     print('-dpsc',psfile,'-append');

@@ -112,6 +112,8 @@ if redogrp
     anisig = nan(numAni,2);anisigtr = nan(numAni,1);
 %     grpshufdist = nan(numAni,numtrialtypes);
     grpsimmtx = nan(numAni,shufreps,ntotframes);grpsimmtxcent = grpsimmtx;grpsimmtxtr = nan(numAni,shufreps,numtrialtypes);
+    grprun = nan(numAni,2);
+    grpd = nan(numAni,2,2); %ani, corr/cov, pre/post
     cellcnt=1;
     anicnt = 1;
     for i = 1:2:length(use)
@@ -189,9 +191,10 @@ if redogrp
             end
         end
         grpfrmdata(anicnt,:,:,:,:,:,1) = frmdata;
+        grprun(anicnt,1) = mean(running);
         
-% % %         load(fullfile(pathname,files(use(i)).sizepts),'spikes')
-% % %         spikespre = spikes;
+        load(fullfile(pathname,files(use(i)).sizepts),'spikes')
+        spikespre = spikes(1:cut,1:ntotframes);
 % % %         spikes1 = spikes(1:cut,1:ntotframes);
 % % %         spikescent1 = spikes(usecells,1:ntotframes);
         
@@ -240,11 +243,44 @@ if redogrp
             end
         end
         grpfrmdata(anicnt,:,:,:,:,:,2) = frmdata;
+        grprun(anicnt,2) = mean(running);
         
-% % %         load(fullfile(pathname,files(use(i+1)).sizepts),'spikes')
-% % %         spikespost = spikes;
+        load(fullfile(pathname,files(use(i+1)).sizepts),'spikes')
+        spikespost = spikes(1:cut,1:ntotframes);
 % % %         spikes2 = spikes(1:cut,1:ntotframes);
 % % %         spikescent2 = spikes(usecells,1:ntotframes);
+
+        %%%get dimensionality pre/post
+        R = corr(spikespre'); %correlation pre
+        [u,s,v] = svd(R);
+        s = diag(s);
+        s = s/sum(s);
+        d = 1/sum(s.^2);
+        grpd(anicnt,1,1) = d;
+        
+        R = cov(spikespre'); %covariance pre
+        [u,s,v] = svd(R);
+        s = diag(s);
+        s = s/sum(s);
+        d = 1/sum(s.^2);
+        grpd(anicnt,2,1) = d;
+        
+        R = corr(spikespost'); %correlation post
+        [u,s,v] = svd(R);
+        s = diag(s);
+        s = s/sum(s);
+        d = 1/sum(s.^2);
+        grpd(anicnt,1,2) = d;
+        
+        R = cov(spikespost'); %covariance post
+        [u,s,v] = svd(R);
+        s = diag(s);
+        s = s/sum(s);
+        d = 1/sum(s.^2);
+        grpd(anicnt,2,2) = d;
+
+
+
 % % %         
 % % %         sptrpre = imresize(spikespre(1:cut,:),[cut size(spikespre,2)/10]);
 % % %         sptrpost = imresize(spikespost(1:cut,:),[cut size(spikespost,2)/10]);
@@ -528,9 +564,36 @@ end
 % % % % % % end
 
 
-%%%eye analysis
-figure
+%% dimensionality
+
+figure;
 subplot(1,2,1)
+hold on
+pre = grpd(:,1,1);post = grpd(:,1,2);
+plot([1 2],[pre post],'k.-')
+errorbar([1 2],[nanmean(pre) nanmean(post)],[nanstd(pre)/sqrt(numAni) nanstd(post)/sqrt(numAni)])
+set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'tickdir','out','fontsize',8)
+ylabel('corr dimensionality')
+axis([0 3 0 350])
+axis square
+subplot(1,2,2)
+hold on
+pre = grpd(:,2,1);post = grpd(:,2,2);
+plot([1 2],[pre post],'k.-')
+errorbar([1 2],[nanmean(pre) nanmean(post)],[nanstd(pre)/sqrt(numAni) nanstd(post)/sqrt(numAni)])
+set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'tickdir','out','fontsize',8)
+ylabel('cov dimensionality')
+axis([0 3 0 350])
+axis square
+if exist('psfile','var')
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    print('-dpsc',psfile,'-append');
+end
+
+
+%% eye analysis
+figure
+subplot(1,3,1)
 pre = grpavgrad(:,1);post = grpavgrad(:,2);
 hold on
 errorbar([1 2],[nanmean(pre) nanmean(post)],[nanstd(pre)/sqrt(numAni) nanstd(post)/sqrt(numAni)],'ko-','linewidth',2)
@@ -541,7 +604,7 @@ ylabel('pupil diameter')
 axis square
 [h p] = ttest(pre,post);
 title(sprintf('p = %0.3f',p))
-subplot(1,2,2)
+subplot(1,3,2)
 pre = grphistrad(:,:,1);post = grphistrad(:,:,2);
 hold on
 shadedErrorBar(1:11,nanmean(pre),nanstd(pre)/sqrt(numAni),'k',1)
@@ -552,7 +615,16 @@ ylabel('number of frames')
 legend('pre','post')
 axis([0 11 0 10000])
 axis square
-mtit('pupil pre vs. post')
+subplot(1,3,3)
+pre = grprun(:,1);post = grprun(:,2);
+hold on
+plot([1 2],[pre post],'k.-')
+errorbar([1 2],[nanmean(pre) nanmean(post)],[nanstd(pre)/sqrt(numAni) nanstd(post)/sqrt(numAni)])
+set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'ytick',0:0.25:1,'tickdir','out','fontsize',8)
+ylabel('% time')
+axis([0 3 0 1])
+axis square
+mtit('behav state pre vs. post')
 if exist('psfile','var')
     set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
     print('-dpsc',psfile,'-append');
@@ -601,9 +673,8 @@ for z = 1:numAni
             print('-dpsc',psfile,'-append');
         end
     end
-    
     figure
-    subplot(1,2,1)
+    subplot(1,3,1)
     pre = squeeze(nanmean(nanmean(grpspsize(find(sess==z),spWindow{1},:,1,1),2),1)); %pre(1)=0; %median of 0 = nan
     post = squeeze(nanmean(nanmean(grpspsize(find(sess==z),spWindow{1},:,1,2),2),1)); %post(1)=0;
     hold on
@@ -614,7 +685,7 @@ for z = 1:numAni
     axis([0 length(radiusRange)+1 -0.05 0.75])
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
-    subplot(1,2,2)
+    subplot(1,3,2)
     pre = squeeze(nanmean(nanmean(grpspsize(find(sess==z),spWindow{1},:,2,1),2),1)); %pre(1)=0; %median of 0 = nan
     post = squeeze(nanmean(nanmean(grpspsize(find(sess==z),spWindow{1},:,2,2),2),1)); %post(1)=0;
     hold on
@@ -625,8 +696,18 @@ for z = 1:numAni
     axis([0 length(radiusRange)+1 -0.05 0.75])
     axis square
     set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+    subplot(1,3,3)
+    pre = grprun(z,1);
+    post = grprun(z,2);
+    hold on
+    plot([1 2],[pre post],'k.-')
+    ylabel('% time run')
+    axis([0 3 0 1])
+    axis square
+    set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'))
     
     mtit(sprintf('%s %s',files(use(z*2)).subj,files(use(z*2)).expt))
+    
     if exist('psfile','var')
         set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfile,'-append');

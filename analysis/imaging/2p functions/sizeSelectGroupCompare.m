@@ -45,13 +45,14 @@ for i = 1:length(sfrange)
         end
     end
 end
+grps = length(grpfiles);
 
 f1=figure;f2=figure;f3=figure;f4=figure;f5=figure;f6=figure;f7=figure;f8=figure;
+grpchange = nan(grps,length(sizes),2); %group,size,sit/run
 for i = 1:length(grpfiles)
     sprintf('loading %s data',grpnames{i})
     load(fullfile(grppath,grpfiles{i}))
     session = sess;
-    grps = length(grpfiles);
     
     figure(f1)%%%stationary size curves
     subplot(3,grps,i)
@@ -61,6 +62,7 @@ for i = 1:length(grpfiles)
         pre(j,:) = squeeze(nanmean(nanmean(grpspsize(find(session==j),spWindow{1},:,1,1),2),1));
         post(j,:) = squeeze(nanmean(nanmean(grpspsize(find(session==j),spWindow{1},:,1,2),2),1));
     end
+    grpchange(i,:,1) = (nanmean(pre)-nanmean(post))./nanmean(pre);
     [hvals pvals] = ttest(pre,post,'alpha',asize);
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
@@ -115,6 +117,7 @@ for i = 1:length(grpfiles)
         pre(j,:) = squeeze(nanmean(nanmean(grpspsize(find(session==j),spWindow{1},:,2,1),2),1));
         post(j,:) = squeeze(nanmean(nanmean(grpspsize(find(session==j),spWindow{1},:,2,2),2),1));
     end
+    grpchange(i,:,2) = (nanmean(pre)-nanmean(post))./nanmean(pre);
     [hvals pvals] = ttest(pre,post,'alpha',asize);
     errorbar(1:length(radiusRange),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k-o','Markersize',5)
     errorbar(1:length(radiusRange),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r-o','Markersize',5)
@@ -534,6 +537,15 @@ if exist('psfile','var')
     set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
     print('-dpsc',psfile,'-append');
 end
+
+% figure;
+% hold on
+% for i = 1:grps
+%     plot(1:length(sizes),grpchange(i,:,1))
+% end
+% axis([1 length(sizes) -0.5 1])
+% axis square
+% legend(grpnames)
 
 try
     dos(['ps2pdf ' psfile ' "' [fullfile(grppath,'2pSizeSummary') '.pdf'] '"'] )

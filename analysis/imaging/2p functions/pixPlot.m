@@ -9,5 +9,7 @@ for i = (1:npanel)+offset
     
 end
 
-figure(pixFig);colorbar; if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+figure(pixFig);
+%colorbar; 
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 figure(traceFig); if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end

@@ -107,15 +107,18 @@ if Opt.fStim ~= 0
   alignRecs =1;
     nCycles = floor(size(dfofInterp,3)/cycLength)-ceil((cycWindow-cycLength)/cycLength)-1;  %%% trim off last stims to allow window for previous stim
     stimT = stimRec.ts - stimRec.ts(1);
-    if min(stimRec.cond)==0  %%% new stimRec style, cond==0 during isi
-        starts = find(diff([0; stimRec.cond])>0);
-        stimOrder = stimRec.cond(starts);
-        stimOrder = stimOrder(1:nCycles);
-    else  %%% old stimRec style
-        for i = 1:nCycles
-            stimOrder(i) = stimRec.cond(min(find(stimT>((i-1)*cycLength*dt+0.1))));
+    for i = 1:length(stimRec.cond)
+        if stimRec.cond(i) == 0
+            stimRec.cond(i) = pastCond;
+        else
+            pastCond = stimRec.cond(i);
         end
     end
+
+    for i = 1:nCycles
+        stimOrder(i) = stimRec.cond(min(find(stimT>((i-1)*cycLength*dt+0.1))));
+    end
+    
     stimTimes = stimPulse-stimPulse(1);
     stimTimes = stimTimes(1:nCycles);
     

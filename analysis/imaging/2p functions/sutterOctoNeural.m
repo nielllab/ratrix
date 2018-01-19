@@ -224,12 +224,14 @@ if selectPts
     clear x y npts
     rightclick = 0;
     fprintf('Select points on image. Rightclick to exit interactive ginput');
+    i=0;
     while rightclick ~= 3
+        i = i+1;
         figure(selectFig); hold on
         [x(i), y(i), rightclick] = ginput(1); x=round(x); y = round(y);
         plot(x(i),y(i),'b*');
         dF(i,:) = squeeze(nanmean(nanmean(dfofInterp(y(i)+range,x(i)+range,:),2),1));
-    end
+     end
     
 else
     
@@ -571,31 +573,21 @@ if nstim==12 %%% spots
 end
 
 range = [-0.05 0.2]; %%% colormap range
-if nstim==14 %%% gratings
-    loc = 1:6; %%% map stim order onto subplot
-    figure; set(gcf,'Name','vert gratings');
-    for i = 1:6
-        meanimg = median(trialmean(:,:,stimOrder==i),3);
-        subplot(2,3,loc(i));
-        imagesc(meanimg,range); axis equal
-    end
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+if nstim==14 %%% gratings , horiz/vert, 3sf, 2tf
+    loc = 1:6 %%% map stim order onto subplot
+    figLabel = 'vert gratings';
+    npanel = 6; nrow = 2; ncol = 3; offset = 0;
+    pixPlot;
     
-    figure;set(gcf,'Name','horiz gratings');
-    for i = 7:12
-        meanimg = nanmedian(trialmean(:,:,stimOrder==i),3);
-        subplot(2,3,loc(i-6));
-        imagesc(meanimg,range); axis equal
-    end
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    loc = 1:6 %%% map stim order onto subplot
+    figLabel = 'horiz gratings';
+    npanel = 6; nrow = 2; ncol = 3; offset = 6;
+    pixPlot;
     
-    figure; set(gcf,'Name','flicker');
-    for i = 13:14
-        meanimg = nanmedian(trialmean(:,:,stimOrder==i),3);
-        subplot(1,2,i-12);
-        imagesc(meanimg,range); axis equal; if i ==13; title('low tf flicker'); else title('high tf flicker'); end
-    end
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+       loc = 1:2 %%% map stim order onto subplot
+    figLabel = 'flicker';
+    npanel = 2; nrow = 1; ncol = 2; offset = 12;
+    pixPlot;
     
     overlay(:,:,1) = nanmedian(trialmean(:,:,stimOrder==1),3);
     overlay(:,:,2) = nanmedian(trialmean(:,:,stimOrder==7),3);
@@ -608,6 +600,36 @@ if nstim==14 %%% gratings
     figure
     overlay(:,:,3)=0;
     imshow(imresize(overlay,2));
+end
+
+
+range = [-0.05 0.2]; %%% colormap range
+if nstim==26 %%% gratings , up/down/left/right, 3sf, 2tf
+    loc = 1:6 %%% map stim order onto subplot
+    figLabel = 'vert1 gratings';
+    npanel = 6; nrow = 2; ncol = 3; offset = 0;
+    pixPlot;
+    
+    loc = 1:6 %%% map stim order onto subplot
+    figLabel = 'horiz1 gratings';
+    npanel = 6; nrow = 2; ncol = 3; offset = 6;
+    pixPlot;
+    
+       loc = 1:6 %%% map stim order onto subplot
+    figLabel = 'vert2 gratings';
+    npanel = 6; nrow = 2; ncol = 3; offset = 12;
+    pixPlot;
+    
+    loc = 1:6 %%% map stim order onto subplot
+    figLabel = 'horiz2 gratings';
+    npanel = 6; nrow = 2; ncol = 3; offset = 18;
+    pixPlot;
+  
+       loc = 1:2 %%% map stim order onto subplot
+    figLabel = 'flicker';
+    npanel = 2; nrow = 1; ncol = 2; offset = 24;
+    pixPlot;
+   
 end
 
 

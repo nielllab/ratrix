@@ -113,12 +113,16 @@ if redogrp
 %     grpshufdist = nan(numAni,numtrialtypes);
     grpsimmtx = nan(numAni,shufreps,ntotframes);grpsimmtxcent = grpsimmtx;grpsimmtxtr = nan(numAni,shufreps,numtrialtypes);
     grprun = nan(numAni,2);
-    grpd = nan(numAni,2,2); %ani, corr/cov, pre/post
+    grpd = nan(numAni,2,2,2); %ani, corr/cov, base/stim, pre/post
     cellcnt=1;
     anicnt = 1;
+    threshcellsall = {};
     for i = 1:2:length(use)
         %%%pre
 %         aniFile = files(use(i)).sizeanalysis; load(aniFile);
+
+        clear spikesprebase spikesprestim spikespostbase spikespoststim
+
         aniFile = [files(use(i)).subj '_' files(use(i)).expt '_' files(use(i)).inject '_pre']; load(aniFile);
         load(files(use(i)).sizepts,'usePts','meanShiftImg','cropx','cropy')
         cut=files(use(i)).cutoff;
@@ -136,6 +140,7 @@ if redogrp
         for j = 1:length(cellprint)
             cellprintpre{cellcnt+j-1} = cellprint{j};
         end
+        valpre = max(squeeze(nanmean(spsizeall(:,spWindow{1},:,1),2)),[],2);
         
 %         %remove cell footprints from pixel-wise analysis
 %         pts = usePts(1:cut);
@@ -250,45 +255,133 @@ if redogrp
 % % %         spikes2 = spikes(1:cut,1:ntotframes);
 % % %         spikescent2 = spikes(usecells,1:ntotframes);
 
-        %%%get dimensionality pre/post
-        R = corr(spikespre'); %correlation pre
-        [u,s,v] = svd(R);
-        s = diag(s);
-        s = s/sum(s);
-        d = 1/sum(s.^2);
-        grpd(anicnt,1,1) = d;
-        
-        R = cov(spikespre'); %covariance pre
-        [u,s,v] = svd(R);
-        s = diag(s);
-        s = s/sum(s);
-        d = 1/sum(s.^2);
-        grpd(anicnt,2,1) = d;
-        
-        R = corr(spikespost'); %correlation post
-        [u,s,v] = svd(R);
-        s = diag(s);
-        s = s/sum(s);
-        d = 1/sum(s.^2);
-        grpd(anicnt,1,2) = d;
-        
-        R = cov(spikespost'); %covariance post
-        [u,s,v] = svd(R);
-        s = diag(s);
-        s = s/sum(s);
-        d = 1/sum(s.^2);
-        grpd(anicnt,2,2) = d;
+%         %%%get dimensionality pre/post all frames
+%         R = corr(spikespre'); %correlation pre
+%         [u,s,v] = svd(R);
+%         s = diag(s);
+%         s = s/sum(s);
+%         d = 1/sum(s.^2);
+%         grpd(anicnt,1,1) = d;
+%         
+%         R = cov(spikespre'); %covariance pre
+%         [u,s,v] = svd(R);
+%         s = diag(s);
+%         s = s/sum(s);
+%         d = 1/sum(s.^2);
+%         grpd(anicnt,2,1) = d;
+%         
+%         R = corr(spikespost'); %correlation post
+%         [u,s,v] = svd(R);
+%         s = diag(s);
+%         s = s/sum(s);
+%         d = 1/sum(s.^2);
+%         grpd(anicnt,1,2) = d;
+%         
+%         R = cov(spikespost'); %covariance post
+%         [u,s,v] = svd(R);
+%         s = diag(s);
+%         s = s/sum(s);
+%         d = 1/sum(s.^2);
+%         grpd(anicnt,2,2) = d;
 
+        %pull out only cells w/0.1 or greater spikes, sketchy bc averages
+        %over baseline plus stim
+%         sptrpre = imresize(spikespre(1:cut,:),[cut size(spikespre,2)/10]);
+%         sptrpost = imresize(spikespost(1:cut,:),[cut size(spikespost,2)/10]);
+%         pre = nan(cut,size(trialtype,1));post=pre;
+%         for j = 1:size(trialtype,1)
+%             pre(:,j) = nanmean(sptrpre(:,trialtype(j,trialtype(j,:)<size(sptrpre,2))),2);
+%             post(:,j) = nanmean(sptrpost(:,trialtype(j,trialtype(j,:)<size(sptrpre,2))),2);
+%         end
+%         valpre = max(sptrpre,[],2);
+%         valpost = max(sptrpost,[],2);
+%         threshcells = (valpre>spthresh)&(valpost>spthresh);
+%         spikespre = spikespre(threshcells,:);spikespost = spikespost(threshcells,:);
 
-
-% % %         
-% % %         sptrpre = imresize(spikespre(1:cut,:),[cut size(spikespre,2)/10]);
-% % %         sptrpost = imresize(spikespost(1:cut,:),[cut size(spikespost,2)/10]);
-% % %         pre = nan(cut,size(trialtype,1));post=pre;
-% % %         for j = 1:size(trialtype,1)
-% % %             pre(:,j) = nanmean(sptrpre(:,trialtype(j,trialtype(j,:)<size(sptrpre,2))),2);
-% % %             post(:,j) = nanmean(sptrpost(:,trialtype(j,trialtype(j,:)<size(sptrpre,2))),2);
-% % %         end
+        
+        valpost = max(squeeze(nanmean(spsizeall(:,spWindow{1},:,1),2)),[],2);
+        threshcellsall{anicnt} = (valpre>spthresh)&(valpost>spthresh);
+        spikespre = spikespre(threshcellsall{anicnt},:);spikespost = spikespost(threshcellsall{anicnt},:);
+        percnt = 1;
+        for per = 1:cyclelength*2:size(spikespre,2)
+            spikesprebase(:,percnt:percnt+cyclelength-1) = spikespre(:,per:per+cyclelength-1);
+            spikesprestim(:,percnt:percnt+cyclelength-1) = spikespre(:,per+cyclelength:per+cyclelength*2-1);
+            spikespostbase(:,percnt:percnt+cyclelength-1) = spikespost(:,per:per+cyclelength-1);
+            spikespoststim(:,percnt:percnt+cyclelength-1) = spikespost(:,per+cyclelength:per+cyclelength*2-1);
+            percnt = percnt + cyclelength;
+        end
+            
+        
+        %%%get dimensionality pre/post by trial
+        R = corr(spikesprebase'); %correlation pre
+        [u,s,v] = svd(R);
+        s = diag(s);
+        s = s/sum(s);
+        d = 1/sum(s.^2);
+        grpd(anicnt,1,1,1) = d;
+        R = corr(spikesprestim'); %correlation pre
+        [u,s,v] = svd(R);
+        s = diag(s);
+        s = s/sum(s);
+        d = 1/sum(s.^2);
+        grpd(anicnt,1,2,1) = d;
+        
+        R = corr(spikespostbase'); %correlation pre
+        [u,s,v] = svd(R);
+        s = diag(s);
+        s = s/sum(s);
+        d = 1/sum(s.^2);
+        grpd(anicnt,1,1,2) = d;
+        R = corr(spikespoststim'); %correlation pre
+        [u,s,v] = svd(R);
+        s = diag(s);
+        s = s/sum(s);
+        d = 1/sum(s.^2);
+        grpd(anicnt,1,2,2) = d;
+        
+        R = cov(spikesprebase'); %correlation pre
+        [u,s,v] = svd(R);
+        s = diag(s);
+        s = s/sum(s);
+        d = 1/sum(s.^2);
+        grpd(anicnt,2,1,1) = d;
+        R = cov(spikesprestim'); %correlation pre
+        [u,s,v] = svd(R);
+        s = diag(s);
+        s = s/sum(s);
+        d = 1/sum(s.^2);
+        grpd(anicnt,2,2,1) = d;
+        
+        R = cov(spikespostbase'); %correlation pre
+        [u,s,v] = svd(R);
+        s = diag(s);
+        s = s/sum(s);
+        d = 1/sum(s.^2);
+        grpd(anicnt,2,1,2) = d;
+        R = cov(spikespoststim'); %correlation pre
+        [u,s,v] = svd(R);
+        s = diag(s);
+        s = s/sum(s);
+        d = 1/sum(s.^2);
+        grpd(anicnt,2,2,2) = d;
+        
+%         parfor j=1:shufreps
+%             shuf1 = spikespre;shuf2 = spikespost;
+%             for k = 1:size(shuf1,1)
+%                 tshf = randi([1 size(shuf1,2)],1,1);
+%                 shuf1(k,:) = circshift(shuf1(k,:),tshf,2);
+%                 tshf = randi([1 size(shuf1,2)],1,1);
+%                 shuf2(k,:) = circshift(shuf2(k,:),tshf,2);
+%             end
+%             R = corr(shuf1'); %correlation pre
+%             [u,s,v] = svd(R);
+%             s = diag(s);
+%             s = s/sum(s);
+%             d = 1/sum(s.^2);
+%             grpd(anicnt,1,1) = d;
+%         end
+        
+        
 % % %             
 % % %         
 % % %         simmtx = nan(1,size(spikes1,2));simmtxcent=simmtx;simmtxtr=nan(1,size(pre,2));
@@ -394,6 +487,8 @@ if redogrp
     grpspsize = grpspsize(threshcells,:,:,:,:);grpsptuning = grpsptuning(threshcells,:,:,:,:,:,:);
 %     grpdfsize = grpdfsize(threshcells,:,:,:,:);grpdftuning = grpdftuning(threshcells,:,:,:,:,:,:);
     sess = session(threshcells);
+    
+    %%%do dimensionality here
     
 % % %     prcanisig = nan(numAni,2);
 % % %     for j = 1:numAni
@@ -569,27 +664,38 @@ end
 figure;
 subplot(1,2,1)
 hold on
-pre = grpd(:,1,1);post = grpd(:,1,2);
-plot([1 2],[pre post],'k.-')
-errorbar([1 2],[nanmean(pre) nanmean(post)],[nanstd(pre)/sqrt(numAni) nanstd(post)/sqrt(numAni)])
-set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'tickdir','out','fontsize',8)
+prebase = grpd(:,1,1,1);prestim = grpd(:,1,2,1);postbase = grpd(:,1,1,2);poststim = grpd(:,1,2,2);
+plot([1 2],[prebase prestim],'k.:')
+plot([1 2],[postbase poststim],'r.:')
+errorbar([1 2],[nanmean(prebase) nanmean(prestim)],[nanstd(prebase)/sqrt(numAni) nanstd(prestim)/sqrt(numAni)],'k')
+errorbar([1 2],[nanmean(postbase) nanmean(poststim)],[nanstd(postbase)/sqrt(numAni) nanstd(poststim)/sqrt(numAni)],'r')
+set(gca,'xtick',1:2,'xticklabel',{'base','stim'},'tickdir','out','fontsize',8)
 ylabel('corr dimensionality')
-axis([0 3 0 350])
+axis([0 3 0 100])
 axis square
+[hvals pvalspre] = ttest(prebase,prestim,'alpha',0.05);
+[hvals pvalspost] = ttest(postbase,poststim,'alpha',0.05);
+title(sprintf('pre p=%0.3f, post p=%0.3f',pvalspre,pvalspost))
 subplot(1,2,2)
 hold on
-pre = grpd(:,2,1);post = grpd(:,2,2);
-plot([1 2],[pre post],'k.-')
-errorbar([1 2],[nanmean(pre) nanmean(post)],[nanstd(pre)/sqrt(numAni) nanstd(post)/sqrt(numAni)])
-set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'tickdir','out','fontsize',8)
+prebase = grpd(:,2,1,1);prestim = grpd(:,2,2,1);postbase = grpd(:,2,1,2);poststim = grpd(:,2,2,2);
+plot([1 2],[prebase prestim],'k.:')
+plot([1 2],[postbase poststim],'r.:')
+errorbar([1 2],[nanmean(prebase) nanmean(prestim)],[nanstd(prebase)/sqrt(numAni) nanstd(prestim)/sqrt(numAni)],'k')
+errorbar([1 2],[nanmean(postbase) nanmean(poststim)],[nanstd(postbase)/sqrt(numAni) nanstd(poststim)/sqrt(numAni)],'r')
+set(gca,'xtick',1:2,'xticklabel',{'base','stim'},'tickdir','out','fontsize',8)
 ylabel('cov dimensionality')
-axis([0 3 0 350])
+axis([0 3 0 50])
 axis square
+[hvals pvalspre] = ttest(prebase,prestim,'alpha',0.05);
+[hvals pvalspost] = ttest(postbase,poststim,'alpha',0.05);
+title(sprintf('pre p=%0.3f, post p=%0.3f',pvalspre,pvalspost))
 if exist('psfile','var')
     set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
     print('-dpsc',psfile,'-append');
 end
 
+keyboard
 
 %% eye analysis
 figure

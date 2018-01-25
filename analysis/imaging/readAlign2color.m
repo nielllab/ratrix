@@ -75,8 +75,9 @@ if Opt.align
     end
     % what is largest offset? Clip image edges by buffer value to remove
     % rigid translation artifacts
-    RAligned_Seq = RAligned_Seq((buffer+12):end-buffer,buffer:end-buffer,:,:); %%% +12 removes strip at top
-    
+    if ~isfield(Opt,'clip') | (isfield(Opt,'clip') & Opt.clip==1)
+        RAligned_Seq = RAligned_Seq((buffer+12):end-buffer,buffer:end-buffer,:,:); %%% +12 removes strip at top
+    end
     %Plot Mean image of rigidly aligned image sequence
     figure
     R_Mean = mean(RAligned_Seq(:,:,:,1),3);

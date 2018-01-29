@@ -57,6 +57,7 @@ if redogrp
     enslocs = nan(numAni,500,2);
     grpenssimIdx = nan(numAni,500,500,2);
     anicnt = 1;
+    dwnsmp = 5;
     grpd = nan(numAni,2,2);
     load(fullfile(grpsizep,grpsizef{group}),'threshcellsall');
     
@@ -73,7 +74,7 @@ if redogrp
         cut(anicnt) = files(use(i)).cutoff;
         spikes = spikes(1:cut(anicnt),end-2999:end);
         spikes = spikes(threshcellsall{anicnt},:);
-        spikespre = spikes;
+        spikespre = imresize(spikes,[length(threshcellsall{anicnt}) size(spikes,2)/dwnsmp]);
         
         %%%plot pre spikes
         j=0;
@@ -194,7 +195,7 @@ if redogrp
         aniFile = files(use(i+1)).darknesspts; load(aniFile,'spikes');
         spikes = spikes(1:cut(anicnt),end-2999:end);
         spikes = spikes(threshcellsall{anicnt},:);
-        spikespost = spikes;
+        spikespost = imresize(spikes,[length(threshcellsall{anicnt}) size(spikes,2)/dwnsmp]);
 
         %%%plot post spikes
         j=0;

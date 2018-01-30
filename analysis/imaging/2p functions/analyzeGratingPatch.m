@@ -8,8 +8,8 @@ batchDeniseEnrichment
 cd(pathname)
  
 %select animals to use
-use = find(strcmp({files.notes},'good darkness and stimulus') | strcmp({files.notes},'good stimulus'))
-sprintf('%d experiments for individual analysis',length(use)/2)
+use = find(strcmp({files.notes},'good imaging session'))
+sprintf('%d experiments for individual analysis',length(use))
 
 indani = input('analyze individual data? 0=no 1=yes: ')
 if indani
@@ -19,6 +19,8 @@ if indani
     else
         reselect = 0;
     end
+else
+    redoani = 0;
 end   
 
 alluse = use;%needed for doTopography
@@ -39,10 +41,10 @@ redogrp=1
 for group=1:2
 
     if group==1
-        use = (strcmp({files.cond},'control') & strcmp({files.label},'camk2 gc6') & (strcmp({files.notes},'good darkness and stimulus') | strcmp({files.notes},'good stimulus'))  ) 
+        use = (strcmp({files.cond},'control') & strcmp({files.notes},'good imaging session')) 
         grpfilename = 'ControlGratingPatchWF'
     elseif group==2
-        use = (strcmp({files.cond},'enrichment') & strcmp({files.label},'camk2 gc6') & (strcmp({files.notes},'good darkness and stimulus') | strcmp({files.notes},'good stimulus'))  ) 
+        use = (strcmp({files.cond},'enrichment') & strcmp({files.notes},'good imaging session'))
         grpfilename = 'EnrichmentGratingPatchWF'
     end
 
@@ -62,19 +64,19 @@ for group=1:2
     base = isi*imagerate-4:isi*imagerate-1;
     peakWindow = isi*imagerate+1:isi*imagerate+3;
     timepts = 0:1/imagerate:(2*isi+duration);timepts = timepts - isi;timepts = timepts(1:end-1);
-    numAni = length(use)/2;
+    numAni = length(use);
 
     %% concatenate individual experiments into group data
     if redogrp
         cd(outpathname)
-        load(sprintf('%s_%s_%s_%s_patchgratings.mat',files(use(1)).expt,files(use(1)).subj,files(use(1)).cond));
-        grpring = nan(numAni,50,size(ring,2),size(ring,3),size(ring,4),2);
-        grpcyc = nan(numAni,size(trialcycavg,1),size(trialcycavg,2),size(trialcycavg,3),size(trialcycavg,4),size(trialcycavg,5),size(trialcycavg,6),2);
-        grptrace = nan(numAni,size(trialcycavg,3),size(trialcycavg,4),size(trialcycavg,5),size(trialcycavg,6),2);
+        load(sprintf('%s_%s_%s_gratingpatch.mat',files(use(1)).expt,files(use(1)).subj,files(use(1)).cond));
+        grpring = nan(numAni,50,size(ring,2),size(ring,3),size(ring,4),size(ring,5),2);
+        grpcyc = nan(numAni,size(trialcycavg,1),size(trialcycavg,2),size(trialcycavg,3),size(trialcycavg,4),size(trialcycavg,5),size(trialcycavg,6),size(trialcycavg,7),2);
+        grptrace = nan(numAni,size(trialcycavg,3),size(trialcycavg,4),size(trialcycavg,5),size(trialcycavg,6),size(trialcycavg,7),2);
 
         anicnt = 1;
         for f = 1:2:length(use)
-            aniFile = sprintf('%s_%s_%s_%s_patchgratings.mat',files(use(f)).expt,files(use(f)).subj,files(use(f)).cond);
+            aniFile = sprintf('%s_%s_%s_gratingpatch.mat',files(use(f)).expt,files(use(f)).subj,files(use(f)).cond);
             load(aniFile,'ring','trialcycavg','x','y')
             grpcyc(anicnt,:,:,:,:,:,:,:,:) = trialcycavg;
             for i = 1:length(xrange)
@@ -107,8 +109,8 @@ for group=1:2
             for j = 1:length(sfrange)
                 for k = 1:length(tfrange)
                     subplot(length(sfrange),length(tfrange),figcnt)
-                    imagesc(squeeze(nanmean(nanmean(nanmean(grpcyc(:,:,:,peakWindow,i,j,k,:,m),8),4),1)),dfrange(m,:))
-                    axis off;axis square;
+                    imagesc(squeeze(nanmean(nanmean(nanmean(grpcyc(:,:,:,peakWindow,i,j,k,:,m),8),4),1)),dfrange(1,:))
+                    axis off;axis equal;
                     title(sprintf('%0.2fcpd %dHz',sfrange(j),tfrange(k)))
                     figcnt=figcnt+1;
                 end
@@ -118,13 +120,7 @@ for group=1:2
                 set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
                 print('-dpsc',psfilename,'-append');
             end
-        end
-    end
-
-
-    %%%plot selected pixel cycle average
-    for m = 1:2 %sit/run
-        for i = 1:length(xrange)
+            
             figure;colormap jet
             figcnt=1;
             for j = 1:length(sfrange)
@@ -133,7 +129,7 @@ for group=1:2
                     plot(timepts,squeeze(nanmean(nanmean(grptrace(:,:,i,j,k,:,m),6),1)))
                     ylabel('dfof')
                     xlabel('time(s)')
-                    axis([timepts(1) timepts(end) -0.01 0.25])
+                    axis([timepts(1) timepts(end) -0.01 0.1])
                     axis square
                     title(sprintf('%0.2fcpd %dHz',sfrange(j),tfrange(k)))
                     figcnt=figcnt+1;
@@ -144,24 +140,20 @@ for group=1:2
                 set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
                 print('-dpsc',psfilename,'-append');
             end
-        end
-    end
-
-    %%%plot spread of response
-    for m = 1:2 %sit/run
-        for i = 1:length(xrange)
+            
             figure;
             figcnt=1;
             for j = 1:length(sfrange)
                 for k = 1:length(tfrange)
                     subplot(length(sfrange),length(tfrange),figcnt)
-                    plot(1:size(ring,2),squeeze(nanmean(nanmean(grpring(:,:,i,j,k,:,m),6),1)))
+                    plot(1:size(grpring,2),squeeze(nanmean(nanmean(grpring(:,:,i,j,k,:,m),6),1)))
                     ylabel('dfof')
                     xlabel('distance from cent (pix)')
-                    axis([0 ceil(size(ring,1)/10)*10 -0.001 0.1])
-                    set(gca,'xtick',0:10:ceil(size(ring,1)/10)*10,'xticklabel',0:10*pixbin:ceil(size(ring,1)/10)*10*pixbin)
+                    axis([0 ceil(size(grpring,2)/10)*5 -0.001 0.1])
+                    set(gca,'xtick',0:10:ceil(size(grpring,1)/10)*5,'xticklabel',0:10*pixbin:ceil(size(grpring,1)/10)*5*pixbin)
                     axis square
                     title(sprintf('%0.2fcpd %dHz',sfrange(j),tfrange(k)))
+                    figcnt = figcnt+1;
                 end
             end
             mtit(sprintf('%s spread xpos%d %s',grpfilename,i,behavState{m}))
@@ -171,7 +163,6 @@ for group=1:2
             end
         end
     end
-
 
 
     %% save pdf

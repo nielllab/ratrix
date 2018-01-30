@@ -39,18 +39,18 @@ for f = 1:length(files)
         sprintf('skipping %s',files(f).topoy)
     end
     
-    if redo || isempty([pathname files(f).patchonpatch]) || ~exist([pathname files(f).patchonpatch],'file')
-        try
-            dfofMovie_Blue([datapathname files(f).patchonpatchdata],rig);
-        catch exc
-            sprintf('couldnt do %s',files(f).patchonpatchdata)
-            nerr=nerr+1;
-            errmsg{nerr}=sprintf('couldnt do %s',files(f).patchonpatchdata)
-            errRpt{nerr}=getReport(exc,'extended')
-        end
-    else
-        sprintf('skipping %s',files(f).patchonpatchdata)
-    end
+%     if redo || isempty([pathname files(f).patchonpatch]) || ~exist([pathname files(f).patchonpatch],'file')
+%         try
+%             dfofMovie_Blue([datapathname files(f).patchonpatchdata],rig);
+%         catch exc
+%             sprintf('couldnt do %s',files(f).patchonpatchdata)
+%             nerr=nerr+1;
+%             errmsg{nerr}=sprintf('couldnt do %s',files(f).patchonpatchdata)
+%             errRpt{nerr}=getReport(exc,'extended')
+%         end
+%     else
+%         sprintf('skipping %s',files(f).patchonpatchdata)
+%     end
     
     if redo || isempty([pathname files(f).darkness]) || ~exist([pathname files(f).darkness],'file')
         try

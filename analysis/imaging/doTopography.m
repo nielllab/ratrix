@@ -25,9 +25,9 @@ end
 
 %%% need to max shiftImage return full array (260 across after zoom?), then fit it into a space of
 %%% appropriate size
-useReference=0;
+useReference=1;
 if useReference
-    load('C:/referenceMap.mat','avgmap4d','avgmap');
+    load('\\langevin\backup\widefield\DOIpaper\referenceMapFullSkull.mat','avgmap4d','avgmap');
 end
 display('aligning')
 
@@ -64,7 +64,6 @@ for f= 1:length(use) ;
     
     if allxshift(f)>-100
         m = shiftImageRotate(merge{f},allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz);
-        
         
         sum(isnan(m(:)))
         
@@ -154,8 +153,8 @@ for f= 1:length(use) ;
 end
 avgmap4d=avgmap4d/length(use);
 avgmap = avgmap/length(use);
-avgmapfig = figure
 
+avgmapfig = figure
 imshow(avgmap);
 title('average topo  map');
 meangrad{1} = meangrad{1}/length(use); meangrad{2} = meangrad{2}/length(use);
@@ -207,7 +206,7 @@ for m=1:2
     subplot(2,2,m);
     
     imshow(polarMap(meanpolar{m},95));
-    title(allsubj{s})
+   % title(allsubj{s})
     hold on
 %     plot(ypts,xpts,'w.','Markersize',2)
     %     im = polarMap(meanpolar{m},80);

@@ -806,13 +806,41 @@ makeSbxMoviesBatch
 % sizeSelect2pSession('G6H39LT_001_005.sbx','sizeSession_POST_V2.mat',psfilename);
 % topo2pSession('G6H39LT_001_006.sbx','darkness_POST_V2.mat',psfilename);
 
-%%121817
-topo2pSession('G6H310RT_001_001.sbx','topoXsession_V2.mat',psfilename);
-topo2pSession('G6H310RT_001_002.sbx','topoYsession_V2.mat',psfilename);
-topo2pSession('G6H310RT_001_003.sbx','darkness_PRE_V2.mat',psfilename);
-sizeSelect2pSession('G6H310RT_001_004.sbx','sizeSession_PRE_V2.mat',psfilename);
-sizeSelect2pSession('G6H310RT_001_005.sbx','sizeSession_POST_V2.mat',psfilename);
-topo2pSession('G6H310RT_001_006.sbx','darkness_POST_V2.mat',psfilename);
+% %%121817
+% topo2pSession('G6H310RT_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('G6H310RT_001_002.sbx','topoYsession_V2.mat',psfilename);
+% topo2pSession('G6H310RT_001_003.sbx','darkness_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G6H310RT_001_004.sbx','sizeSession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G6H310RT_001_005.sbx','sizeSession_POST_V2.mat',psfilename);
+% topo2pSession('G6H310RT_001_006.sbx','darkness_POST_V2.mat',psfilename);
+
+% %%010318
+% topo2pSession('G6H28TT_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('G6H28TT_001_002.sbx','topoYsession_V2.mat',psfilename);
+% topo2pSession('G6H28TT_001_003.sbx','darkness_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G6H28TT_001_004.sbx','sizeSession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G6H28TT_001_005.sbx','sizeSession_POST_V2.mat',psfilename);
+% topo2pSession('G6H28TT_001_006.sbx','darkness_POST_V2.mat',psfilename);
+
+%%010518
+topo2pSession('G6H28TT_001_001.sbx','topoXsession_V2.mat',psfilename);
+topo2pSession('G6H28TT_001_002.sbx','topoYsession_V2.mat',psfilename);
+topo2pSession('G6H28TT_001_003.sbx','darkness_PRE_V2.mat',psfilename);
+sizeSelect2pSession('G6H28TT_001_004.sbx','sizeSession_PRE_V2.mat',psfilename);
+sizeSelect2pSession('G6H28TT_001_005.sbx','sizeSession_POST_V2.mat',psfilename);
+topo2pSession('G6H28TT_001_006.sbx','darkness_POST_V2.mat',psfilename);
+
+
+
+
+
+
+
+
+
+
+
+
 
 %%%%%testing stuff
 

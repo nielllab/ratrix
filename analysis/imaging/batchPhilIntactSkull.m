@@ -4,7 +4,7 @@ n = 0;
 
 pathname = '\\langevin\backup\widefield\DOIpaper\';
 datapathname = '\\langevin\backup\widefield\DOIpaper\';  
-outpathname = 'D:\Phil\patchonpatch\';
+ outpathname = 'D:\Angie\darkness\';
 
 % pathname = 'C:\Users\nlab\Desktop\widefield\'
 % datapathname = 'C:\Users\nlab\Desktop\widefield\'
@@ -13,56 +13,56 @@ outpathname = 'D:\Phil\patchonpatch\';
 % pathname = 'D:\Elliott\DOIwidefield\';
 % datapathname = 'D:\Elliott\DOIwidefield\';
 % outpathname = 'D:\Elliott\DOIwidefield\';
-
+% 
 % pathname = 'D:\Angie\';
 % datapathname = 'D:\Angie\';
 % outpathname = 'D:\Angie\';
 
-%% doesn't have good stimulus, redo?
-n=n+1;
-files(n).subj = 'G62QQ10LN';
-files(n).expt = '110717';
-files(n).topox= '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_TOPOX\110717_G62QQ10LN_SALINE_RIG2_TOPOXmaps.mat';
-files(n).topoxdata = '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_TOPOX\110717_G62QQ10LN_SALINE_RIG2_TOPOX';
-files(n).topoy = '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_TOPOY\110717_G62QQ10LN_SALINE_RIG2_TOPOYmaps.mat';
-files(n).topoydata = '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_TOPOY\110717_G62QQ10LN_SALINE_RIG2_TOPOY';
-files(n).darkness =  '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_PRE_DARKNESS\110717_G62QQ10LN_SALINE_RIG2_PRE_DARKNESSmaps.mat';
-files(n).darknessdata = '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_PRE_DARKNESS\110717_G62QQ10LN_SALINE_RIG2_PRE_DARKNESS';
-files(n).patchonpatch =  '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_PRE_PATCHONPATCH\110717_G62QQ10LN_SALINE_RIG2_PRE_PATCHONPATCHmaps.mat';
-files(n).patchonpatchdata = '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_PRE_PATCHONPATCH\110717_G62QQ10LN_SALINE_RIG2_PRE_PATCHONPATCH';
-files(n).inject = 'saline';
-files(n).training = 'naive';
-files(n).rignum = 'rig2';
-files(n).monitor = 'land';
-files(n).label = 'camk2 gc6';
-files(n).notes = 'good darkness';
-files(n).timing = 'pre';
-files(n).patchpts = '110717_G62QQ10LN_SALINE_RIG2\G62QQ10LNpatchpts.mat';
-files(n).circpts = '110717_G62QQ10LN_SALINE_RIG2\G62QQ10LNcircpts.mat';
+% doesn't have good stimulus, redo?
+% n=n+1;
+% files(n).subj = 'G62QQ10LN';
+% files(n).expt = '110717';
+% files(n).topox= '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_TOPOX\110717_G62QQ10LN_SALINE_RIG2_TOPOXmaps.mat';
+% files(n).topoxdata = '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_TOPOX\110717_G62QQ10LN_SALINE_RIG2_TOPOX';
+% files(n).topoy = '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_TOPOY\110717_G62QQ10LN_SALINE_RIG2_TOPOYmaps.mat';
+% files(n).topoydata = '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_TOPOY\110717_G62QQ10LN_SALINE_RIG2_TOPOY';
+% files(n).darkness =  '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_PRE_DARKNESS\110717_G62QQ10LN_SALINE_RIG2_PRE_DARKNESSmaps.mat';
+% files(n).darknessdata = '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_PRE_DARKNESS\110717_G62QQ10LN_SALINE_RIG2_PRE_DARKNESS';
+% files(n).patchonpatch =  '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_PRE_PATCHONPATCH\110717_G62QQ10LN_SALINE_RIG2_PRE_PATCHONPATCHmaps.mat';
+% files(n).patchonpatchdata = '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_PRE_PATCHONPATCH\110717_G62QQ10LN_SALINE_RIG2_PRE_PATCHONPATCH';
+% files(n).inject = 'saline';
+% files(n).training = 'naive';
+% files(n).rignum = 'rig2';
+% files(n).monitor = 'land';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good darkness';
+% files(n).timing = 'pre';
+% files(n).patchpts = '110717_G62QQ10LN_SALINE_RIG2\G62QQ10LNpatchpts.mat';
+% files(n).circpts = '110717_G62QQ10LN_SALINE_RIG2\G62QQ10LNcircpts.mat';
+% 
+% n=n+1;
+% files(n).subj = 'G62QQ10LN';
+% files(n).expt = '110717';
+% files(n).topox= '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_TOPOX\110717_G62QQ10LN_SALINE_RIG2_TOPOXmaps.mat';
+% files(n).topoxdata = '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_TOPOX\110717_G62QQ10LN_SALINE_RIG2_TOPOX';
+% files(n).topoy = '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_TOPOY\110717_G62QQ10LN_SALINE_RIG2_TOPOYmaps.mat';
+% files(n).topoydata = '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_TOPOY\110717_G62QQ10LN_SALINE_RIG2_TOPOY';
+% files(n).darkness =  '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_POST_DARKNESS\110717_G62QQ10LN_SALINE_RIG2_POST_DARKNESSmaps.mat';
+% files(n).darknessdata = '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_POST_DARKNESS\110717_G62QQ10LN_SALINE_RIG2_POST_DARKNESS';
+% files(n).patchonpatch =  '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_POST_PATCHONPATCH\110717_G62QQ10LN_SALINE_RIG2_POST_PATCHONPATCHmaps.mat';
+% files(n).patchonpatchdata = '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_POST_PATCHONPATCH\110717_G62QQ10LN_SALINE_RIG2_POST_PATCHONPATCH';
+% files(n).inject = 'saline';
+% files(n).training = 'naive';
+% files(n).rignum = 'rig2';
+% files(n).monitor = 'land';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good darkness';
+% files(n).timing = 'post';
+% files(n).patchpts = '110717_G62QQ10LN_SALINE_RIG2\G62QQ10LNpatchpts.mat';
+% files(n).circpts = '110717_G62QQ10LN_SALINE_RIG2\G62QQ10LNcircpts.mat';
 
-n=n+1;
-files(n).subj = 'G62QQ10LN';
-files(n).expt = '110717';
-files(n).topox= '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_TOPOX\110717_G62QQ10LN_SALINE_RIG2_TOPOXmaps.mat';
-files(n).topoxdata = '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_TOPOX\110717_G62QQ10LN_SALINE_RIG2_TOPOX';
-files(n).topoy = '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_TOPOY\110717_G62QQ10LN_SALINE_RIG2_TOPOYmaps.mat';
-files(n).topoydata = '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_TOPOY\110717_G62QQ10LN_SALINE_RIG2_TOPOY';
-files(n).darkness =  '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_POST_DARKNESS\110717_G62QQ10LN_SALINE_RIG2_POST_DARKNESSmaps.mat';
-files(n).darknessdata = '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_POST_DARKNESS\110717_G62QQ10LN_SALINE_RIG2_POST_DARKNESS';
-files(n).patchonpatch =  '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_POST_PATCHONPATCH\110717_G62QQ10LN_SALINE_RIG2_POST_PATCHONPATCHmaps.mat';
-files(n).patchonpatchdata = '110717_G62QQ10LN_SALINE_RIG2\110717_G62QQ10LN_SALINE_RIG2_POST_PATCHONPATCH\110717_G62QQ10LN_SALINE_RIG2_POST_PATCHONPATCH';
-files(n).inject = 'saline';
-files(n).training = 'naive';
-files(n).rignum = 'rig2';
-files(n).monitor = 'land';
-files(n).label = 'camk2 gc6';
-files(n).notes = 'good darkness';
-files(n).timing = 'post';
-files(n).patchpts = '110717_G62QQ10LN_SALINE_RIG2\G62QQ10LNpatchpts.mat';
-files(n).circpts = '110717_G62QQ10LN_SALINE_RIG2\G62QQ10LNcircpts.mat';
 
-
-%% experiment redone w/proper patch stimulus
+% experiment redone w/proper patch stimulus
 % n=n+1;
 % files(n).subj = 'G62FFF_TT';
 % files(n).expt = '111017';
@@ -104,9 +104,9 @@ files(n).circpts = '110717_G62QQ10LN_SALINE_RIG2\G62QQ10LNcircpts.mat';
 % files(n).timing = 'post';
 % files(n).patchpts = '111017_G62FFF_TT_DOI_RIG2\G62FFF7TTpatchpts.mat';
 % files(n).circpts = '111017_G62FFF_TT_DOI_RIG2\G62FFF7TTcircpts.mat';
+% 
 
-
-%%
+%
 n=n+1;
 files(n).subj = 'G6H3.1_LT';
 files(n).expt = '111017';
@@ -150,7 +150,7 @@ files(n).patchpts = '111017_G6H3.1_LT_SALINE_RIG2\G6H3.1_LTpatchpts.mat';
 files(n).circpts = '111017_G6H3.1_LT_SALINE_RIG2\G6H3.1_LTcircpts.mat';
 
 
-%%
+%
 
 n=n+1;
 files(n).subj = 'G62QQ10LT';
@@ -195,7 +195,7 @@ files(n).patchpts = '111617_G62QQ10LT_DOI_RIG2\G62QQ10LTpatchpts.mat';
 files(n).circpts = '111617_G62QQ10LT_DOI_RIG2\G62QQ10LTcircpts.mat';
 
 
-%%
+%
 n=n+1;
 files(n).subj = 'G62FFF7TT';
 files(n).expt = '112917';
@@ -238,7 +238,7 @@ files(n).timing = 'post';
 files(n).patchpts = '112917_G62FFF7TT_SALINE_RIG2\G62FFF7TTpatchpts.mat';
 files(n).circpts = '112917_G62FFF7TT_SALINE_RIG2\G62FFF7TTcircpts.mat';
 
-%%
+%
 n=n+1;
 files(n).subj = 'G6H3.1LT';
 files(n).expt = '112917';
@@ -281,7 +281,7 @@ files(n).timing = 'post';
 files(n).patchpts = '112917_G6H3.1LT_DOI_RIG2\G6H3.1LTpatchpts.mat';
 files(n).circpts = '112917_G6H3.1LT_DOI_RIG2\G6H3.1LTcircpts.mat';
 
-%%
+%
 n=n+1;
 files(n).subj = 'G62QQ10LT';
 files(n).expt = '113017';
@@ -324,7 +324,7 @@ files(n).timing = 'post';
 files(n).patchpts = '113017_G62QQ10LT_SALINE_RIG2\G62QQ10LTpatchpts.mat';
 files(n).circpts = '113017_G62QQ10LT_SALINE_RIG2\G62QQ10LTcircpts.mat';
 
-%%
+%
 n=n+1;
 files(n).subj = 'G62QQ10LN';
 files(n).expt = '120117';
@@ -367,7 +367,7 @@ files(n).timing = 'post';
 files(n).patchpts = '120117_G62QQ10LN_DOI_RIG2\G62QQ10LNpatchpts.mat';
 files(n).circpts = '120117_G62QQ10LN_DOI_RIG2\G62QQ10LNcircpts.mat';
 
-%%
+%
 n=n+1;
 files(n).subj = 'G6H3.3TT';
 files(n).expt = '120617';
@@ -410,7 +410,7 @@ files(n).timing = 'post';
 files(n).patchpts = '120617_G62H3.3TT_SALINE_RIG2\G62H3.3TTpatchpts.mat';
 files(n).circpts = '120617_G62H3.3TT_SALINE_RIG2\G62H3.3TTcircpts.mat';
 
-%%
+%
 n=n+1;
 files(n).subj = 'G6H3.4TT';
 files(n).expt = '121217';
@@ -452,7 +452,7 @@ files(n).notes = 'good darkness and stimulus';
 files(n).timing = 'post';
 files(n).patchpts = '121217_G6H3.4LN_DOI_RIG2\G6H3.4LNpatchpts.mat';
 files(n).circpts = '121217_G6H3.4LN_DOI_RIG2\G6H3.4LNcircpts.mat';
-%%
+%
 n=n+1;
 files(n).subj = 'G62WW3RT';
 files(n).expt = '121217';
@@ -495,7 +495,7 @@ files(n).timing = 'post';
 files(n).patchpts = '121217_G62WW3RT_DOI_RIG2\G62WW3RTpatchpts.mat';
 files(n).circpts = '121217_G62WW3RT_DOI_RIG2\G62WW3RTcircpts.mat';
 
-%%
+%
 n=n+1;
 files(n).subj = 'G62XX1TT';
 files(n).expt = '121317';
@@ -539,7 +539,7 @@ files(n).patchpts = '121317_G62XX1TT_SALINE_RIG2\G62XX1TTpatchpts.mat';
 files(n).circpts = '121317_G62XX1TT_SALINE_RIG2\G62XX1TTcircpts.mat';
 
 
-%%
+%
 n=n+1;
 files(n).subj = 'G62SS4LT';
 files(n).expt = '121317';
@@ -583,7 +583,7 @@ files(n).patchpts = '121317_G62SS4LT_SALINE_RIG2\G62SS4LTpatchpts.mat';
 files(n).circpts = '121317_G62SS4LT_SALINE_RIG2\G62SS4LTcircpts.mat';
 
 
-%% file name is labeled incorrectly, this is a saline experiment not DOI
+% file name is labeled incorrectly, this is a saline experiment not DOI
 n=n+1;
 files(n).subj = 'G62WW2TT';
 files(n).expt = '121317';
@@ -715,7 +715,6 @@ files(n).patchpts = '121417_G62AAA.4TT_DOI_RIG2\G62AAA.4TTpatchpts.mat';
 files(n).circpts = '121417_G62AAA.4TT_DOI_RIG2\G62AAA.4TTcircpts.mat';
 
 %%
-
 n=n+1;
 files(n).subj = 'G62FFF7TT';
 files(n).expt = '121417';
@@ -757,8 +756,8 @@ files(n).notes = 'good darkness and stimulus';
 files(n).timing = 'post';
 files(n).patchpts = '121417_G62FFF7TT_DOI_RIG2\G62FFF7TTpatchpts.mat';
 files(n).circpts = '121417_G62FFF7TT_DOI_RIG2\G62FFF7TTcircpts.mat';
-%%
 
+%%
 n=n+1;
 files(n).subj = 'G6H3.4LN';
 files(n).expt = '121517';
@@ -844,7 +843,6 @@ files(n).timing = 'post';
 files(n).patchpts = '121817_G62WW3RT_SALINE_RIG2\G62WW3RTpatchpts.mat';
 files(n).circpts = '121817_G62WW3RT_SALINE_RIG2\G62WW3RTcircpts.mat';
 
-
 %%
 n=n+1;
 files(n).subj = 'G62AAA4TT';
@@ -887,7 +885,6 @@ files(n).notes = 'good darkness and stimulus';
 files(n).timing = 'post';
 files(n).patchpts = '121817_G62AAA4TT_SALINE_RIG2\G62AAA4TTpatchpts.mat';
 files(n).circpts = '121817_G62AAA4TT_SALINE_RIG2\G62AAA4TTcircpts.mat';
-
 
 %%
 n=n+1;
@@ -1018,3 +1015,694 @@ files(n).notes = 'good darkness and stimulus';
 files(n).timing = 'post';
 files(n).patchpts = '121917_G62XX1_TT_DOI_RIG2\G62XX1_TTpatchpts.mat';
 files(n).circpts = '121917_G62XX1_TT_DOI_RIG2\G62XX1_TTcircpts.mat';
+
+%%
+n=n+1;
+files(n).subj = 'G62FFF7TT';
+files(n).expt = '010418';
+files(n).topox= '010418_G62FFF7TT_DOI_RIG2\010418_G62FFF7TT_DOI_RIG2_TOPOX\010418_G62FFF7TT_DOI_RIG2_TOPOXmaps.mat';
+files(n).topoxdata = '010418_G62FFF7TT_DOI_RIG2\010418_G62FFF7TT_DOI_RIG2_TOPOX\010418_G62FFF7TT_DOI_RIG2_TOPOX';
+files(n).topoy = '010418_G62FFF7TT_DOI_RIG2\010418_G62FFF7TT_DOI_RIG2_TOPOY\010418_G62FFF7TT_DOI_RIG2_TOPOYmaps.mat';
+files(n).topoydata = '010418_G62FFF7TT_DOI_RIG2\010418_G62FFF7TT_DOI_RIG2_TOPOY\010418_G62FFF7TT_DOI_RIG2_TOPOY';
+files(n).darkness =  '';
+files(n).darknessdata = '';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'doi';
+files(n).training = 'naive';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only'; 
+files(n).timing = 'pre';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+n=n+1;
+files(n).subj = 'G62FFF7TT';
+files(n).expt = '010418';
+files(n).topox= '010418_G62FFF7TT_DOI_RIG2\010418_G62FFF7TT_DOI_RIG2_POST_TOPOX\010418_G62FFF7TT_DOI_RIG2_POST_TOPOXmaps.mat';
+files(n).topoxdata = '010418_G62FFF7TT_DOI_RIG2\010418_G62FFF7TT_DOI_RIG2_POST_TOPOX\010418_G62FFF7TT_DOI_RIG2_POST_TOPOX';
+files(n).topoy = '010418_G62FFF7TT_DOI_RIG2\010418_G62FFF7TT_DOI_RIG2_POST_TOPOY\010418_G62FFF7TT_DOI_RIG2_POST_TOPOYmaps.mat';
+files(n).topoydata = '010418_G62FFF7TT_DOI_RIG2\010418_G62FFF7TT_DOI_RIG2_POST_TOPOY\010418_G62FFF7TT_DOI_RIG2_POST_TOPOY';
+files(n).darkness =  '';
+files(n).darknessdata = '';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'doi';
+files(n).training = 'naive';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only';
+files(n).timing = 'post';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+%%
+n=n+1;
+files(n).subj = 'G6H3.1LT';
+files(n).expt = '010418';
+files(n).topox= '010418_G6H3.1LT_SALINE_RIG2\010418_G6H3.1LT_SALINE_RIG2_TOPOX\010418_G6H3.1LT_SALINE_RIG2_TOPOXmaps.mat';
+files(n).topoxdata = '010418_G6H3.1LT_SALINE_RIG2\010418_G6H3.1LT_SALINE_RIG2_TOPOX\010418_G6H3.1LT_SALINE_RIG2_TOPOX';
+files(n).topoy = '010418_G6H3.1LT_SALINE_RIG2\010418_G6H3.1LT_SALINE_RIG2_TOPOY\010418_G6H3.1LT_SALINE_RIG2_TOPOYmaps.mat';
+files(n).topoydata = '010418_G6H3.1LT_SALINE_RIG2\010418_G6H3.1LT_SALINE_RIG2_TOPOY\010418_G6H3.1LT_SALINE_RIG2_TOPOY';
+files(n).darkness =  '';
+files(n).darknessdata = '';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'saline';
+files(n).training = 'naive';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only'; 
+files(n).timing = 'pre';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+n=n+1;
+files(n).subj = 'G6H3.1LT';
+files(n).expt = '010418';
+files(n).topox= '010418_G6H3.1LT_SALINE_RIG2\010418_G6H3.1LT_SALINE_RIG2_POST_TOPOX\010418_G6H3.1LT_SALINE_RIG2_POST_TOPOXmaps.mat';
+files(n).topoxdata = '010418_G6H3.1LT_SALINE_RIG2\010418_G6H3.1LT_SALINE_RIG2_POST_TOPOX\010418_G6H3.1LT_SALINE_RIG2_POST_TOPOX';
+files(n).topoy = '010418_G6H3.1LT_SALINE_RIG2\010418_G6H3.1LT_SALINE_RIG2_POST_TOPOY\010418_G6H3.1LT_SALINE_RIG2_POST_TOPOYmaps.mat';
+files(n).topoydata = '010418_G6H3.1LT_SALINE_RIG2\010418_G6H3.1LT_SALINE_RIG2_POST_TOPOY\010418_G6H3.1LT_SALINE_RIG2_POST_TOPOY';
+files(n).darkness =  '';
+files(n).darknessdata = '';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'saline';
+files(n).training = 'naive';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only';
+files(n).timing = 'post';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+%%
+n=n+1;
+files(n).subj = 'G62AAA4TT';
+files(n).expt = '010418';
+files(n).topox= '010418_G62AAA4TT_DOI_RIG2\010418_G62AAA4TT_DOI_RIG2_TOPOX\010418_G62AAA4TT_DOI_RIG2_TOPOXmaps.mat';
+files(n).topoxdata = '010418_G62AAA4TT_DOI_RIG2\010418_G62AAA4TT_DOI_RIG2_TOPOX\010418_G62AAA4TT_DOI_RIG2_TOPOX';
+files(n).topoy = '010418_G62AAA4TT_DOI_RIG2\010418_G62AAA4TT_DOI_RIG2_TOPOY\010418_G62AAA4TT_DOI_RIG2_TOPOYmaps.mat';
+files(n).topoydata = '010418_G62AAA4TT_DOI_RIG2\010418_G62AAA4TT_DOI_RIG2_TOPOY\010418_G62AAA4TT_DOI_RIG2_TOPOY';
+files(n).darkness =  '010418_G62AAA4TT_DOI_RIG2\010418_G62AAA4TT_DOI_RIG2_INJECTION_DARKNESS\010418_G62AAA4TT_DOI_RIG2_INJECTION_DARKNESSmaps.mat';
+files(n).darknessdata = '010418_G62AAA4TT_DOI_RIG2\010418_G62AAA4TT_DOI_RIG2_INJECTION_DARKNESS\010418_G62AAA4TT_DOI_RIG2_INJECTION_DARKNESS';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'doi';
+files(n).training = 'trained';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only'; 
+files(n).timing = 'pre';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+n=n+1;
+files(n).subj = 'G62AAA4TT';
+files(n).expt = '010418';
+files(n).topox= '010418_G62AAA4TT_DOI_RIG2\010418_G62AAA4TT_DOI_RIG2_POST_TOPOX\010418_G62AAA4TT_DOI_RIG2_POST_TOPOXmaps.mat';
+files(n).topoxdata = '010418_G62AAA4TT_DOI_RIG2\010418_G62AAA4TT_DOI_RIG2_POST_TOPOX\010418_G62AAA4TT_DOI_RIG2_POST_TOPOX';
+files(n).topoy = '010418_G62AAA4TT_DOI_RIG2\010418_G62AAA4TT_DOI_RIG2_POST_TOPOY\010418_G62AAA4TT_DOI_RIG2_POST_TOPOYmaps.mat';
+files(n).topoydata = '010418_G62AAA4TT_DOI_RIG2\010418_G62AAA4TT_DOI_RIG2_POST_TOPOY\010418_G62AAA4TT_DOI_RIG2_POST_TOPOY';
+files(n).darkness =  '';
+files(n).darknessdata = '';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'doi';
+files(n).training = 'trained';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only';
+files(n).timing = 'post';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+%%
+n=n+1;
+files(n).subj = 'G62WW3RT';
+files(n).expt = '010418';
+files(n).topox= '010418_G62WW3RT_DOI_RIG2\010418_G62WW3RT_DOI_RIG2_TOPOX\010418_G62WW3RT_DOI_RIG2_TOPOXmaps.mat';
+files(n).topoxdata = '010418_G62WW3RT_DOI_RIG2\010418_G62WW3RT_DOI_RIG2_TOPOX\010418_G62WW3RT_DOI_RIG2_TOPOX';
+files(n).topoy = '010418_G62WW3RT_DOI_RIG2\010418_G62WW3RT_DOI_RIG2_TOPOY\010418_G62WW3RT_DOI_RIG2_TOPOYmaps.mat';
+files(n).topoydata = '010418_G62WW3RT_DOI_RIG2\010418_G62WW3RT_DOI_RIG2_TOPOY\010418_G62WW3RT_DOI_RIG2_TOPOY';
+files(n).darkness =  '010418_G62WW3RT_DOI_RIG2\010418_G62WW3RT_DOI_RIG2_INJECTION_DARKNESS\010418_G62WW3RT_DOI_RIG2_INJECTION_DARKNESSmaps.mat';
+files(n).darknessdata = '010418_G62WW3RT_DOI_RIG2\010418_G62WW3RT_DOI_RIG2_INJECTION_DARKNESS\010418_G62WW3RT_DOI_RIG2_INJECTION_DARKNESS';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'doi';
+files(n).training = 'trained';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only'; 
+files(n).timing = 'pre';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+n=n+1;
+files(n).subj = 'G62WW3RT';
+files(n).expt = '010418';
+files(n).topox= '010418_G62WW3RT_DOI_RIG2\010418_G62WW3RT_DOI_RIG2_POST_TOPOX\010418_G62WW3RT_DOI_RIG2_POST_TOPOXmaps.mat';
+files(n).topoxdata = '010418_G62WW3RT_DOI_RIG2\010418_G62WW3RT_DOI_RIG2_POST_TOPOX\010418_G62WW3RT_DOI_RIG2_POST_TOPOX';
+files(n).topoy = '010418_G62WW3RT_DOI_RIG2\010418_G62WW3RT_DOI_RIG2_POST_TOPOY\010418_G62WW3RT_DOI_RIG2_POST_TOPOYmaps.mat';
+files(n).topoydata = '010418_G62WW3RT_DOI_RIG2\010418_G62WW3RT_DOI_RIG2_POST_TOPOY\010418_G62WW3RT_DOI_RIG2_POST_TOPOY';
+files(n).darkness =  '';
+files(n).darknessdata = '';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'doi';
+files(n).training = 'trained';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only';
+files(n).timing = 'post';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+
+%%
+n=n+1;
+files(n).subj = 'G6H3.3TT';
+files(n).expt = '010518';
+files(n).topox= '010518_G6H3.3TT_DOI_RIG2\010518_G6H3.3TT_DOI_RIG2_TOPOX\010518_G6H3.3TT_DOI_RIG2_TOPOXmaps.mat';
+files(n).topoxdata = '010518_G6H3.3TT_DOI_RIG2\010518_G6H3.3TT_DOI_RIG2_TOPOX\010518_G6H3.3TT_DOI_RIG2_TOPOX';
+files(n).topoy = '010518_G6H3.3TT_DOI_RIG2\010518_G6H3.3TT_DOI_RIG2_TOPOY\010518_G6H3.3TT_DOI_RIG2_TOPOYmaps.mat';
+files(n).topoydata = '010518_G6H3.3TT_DOI_RIG2\010518_G6H3.3TT_DOI_RIG2_TOPOY\010518_G6H3.3TT_DOI_RIG2_TOPOY';
+files(n).darkness =  '010518_G6H3.3TT_DOI_RIG2\010518_G6H3.3TT_DOI_RIG2_INJECTION_DARKNESS\010518_G6H3.3TT_DOI_RIG2_INJECTION_DARKNESSmaps.mat';
+files(n).darknessdata = '010518_G6H3.3TT_DOI_RIG2\010518_G6H3.3TT_DOI_RIG2_INJECTION_DARKNESS\010518_G6H3.3TT_DOI_RIG2_INJECTION_DARKNESS';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'doi';
+files(n).training = 'naive';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only'; 
+files(n).timing = 'pre';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+n=n+1;
+files(n).subj = 'G6H3.3TT';
+files(n).expt = '010518';
+files(n).topox= '010518_G6H3.3TT_DOI_RIG2\010518_G6H3.3TT_DOI_RIG2_POST_TOPOX\010518_G6H3.3TT_DOI_RIG2_POST_TOPOXmaps.mat';
+files(n).topoxdata = '010518_G6H3.3TT_DOI_RIG2\010518_G6H3.3TT_DOI_RIG2_POST_TOPOX\010518_G6H3.3TT_DOI_RIG2_POST_TOPOX';
+files(n).topoy = '010518_G6H3.3TT_DOI_RIG2\010518_G6H3.3TT_DOI_RIG2_POST_TOPOY\010518_G6H3.3TT_DOI_RIG2_POST_TOPOYmaps.mat';
+files(n).topoydata = '010518_G6H3.3TT_DOI_RIG2\010518_G6H3.3TT_DOI_RIG2_POST_TOPOY\010518_G6H3.3TT_DOI_RIG2_POST_TOPOY';
+files(n).darkness =  '';
+files(n).darknessdata = '';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'doi';
+files(n).training = 'naive';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only';
+files(n).timing = 'post';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+
+%%
+n=n+1;
+files(n).subj = 'G6H3.4LN';
+files(n).expt = '010518';
+files(n).topox= '010518_G6H3.4LN_SALINE_RIG2\010518_G6H3.4LN_SALINE_RIG2_TOPOX\010518_G6H3.4LN_SALINE_RIG2_TOPOXmaps.mat';
+files(n).topoxdata = '010518_G6H3.4LN_SALINE_RIG2\010518_G6H3.4LN_SALINE_RIG2_TOPOX\010518_G6H3.4LN_SALINE_RIG2_TOPOX';
+files(n).topoy = '010518_G6H3.4LN_SALINE_RIG2\010518_G6H3.4LN_SALINE_RIG2_TOPOY\010518_G6H3.4LN_SALINE_RIG2_TOPOYmaps.mat';
+files(n).topoydata = '010518_G6H3.4LN_SALINE_RIG2\010518_G6H3.4LN_SALINE_RIG2_TOPOY\010518_G6H3.4LN_SALINE_RIG2_TOPOY';
+files(n).darkness =  '010518_G6H3.4LN_SALINE_RIG2\010518_G6H3.4LN_SALINE_RIG2_INJECTION_DARKNESS\010518_G6H3.4LN_SALINE_RIG2_INJECTION_DARKNESSmaps.mat';
+files(n).darknessdata = '010518_G6H3.4LN_SALINE_RIG2\010518_G6H3.4LN_SALINE_RIG2_INJECTION_DARKNESS\010518_G6H3.4LN_SALINE_RIG2_INJECTION_DARKNESS';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'saline';
+files(n).training = 'naive';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only'; 
+files(n).timing = 'pre';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+n=n+1;
+files(n).subj = 'G6H3.4LN';
+files(n).expt = '010518';
+files(n).topox= '010518_G6H3.4LN_SALINE_RIG2\010518_G6H3.4LN_SALINE_RIG2_POST_TOPOX\010518_G6H3.4LN_SALINE_RIG2_POST_TOPOXmaps.mat';
+files(n).topoxdata = '010518_G6H3.4LN_SALINE_RIG2\010518_G6H3.4LN_SALINE_RIG2_POST_TOPOX\010518_G6H3.4LN_SALINE_RIG2_POST_TOPOX';
+files(n).topoy = '010518_G6H3.4LN_SALINE_RIG2\010518_G6H3.4LN_SALINE_RIG2_POST_TOPOY\010518_G6H3.4LN_SALINE_RIG2_POST_TOPOYmaps.mat';
+files(n).topoydata = '010518_G6H3.4LN_SALINE_RIG2\010518_G6H3.4LN_SALINE_RIG2_POST_TOPOY\010518_G6H3.4LN_SALINE_RIG2_POST_TOPOY';
+files(n).darkness =  '';
+files(n).darknessdata = '';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'saline';
+files(n).training = 'naive';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only';
+files(n).timing = 'post';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+%%
+n=n+1;
+files(n).subj = 'G62SS4LT';
+files(n).expt = '010518';
+files(n).topox= '010518_G62SS4LT_SALINE_RIG2\010518_G62SS4LT_SALINE_RIG2_TOPOX\010518_G62SS4LT_SALINE_RIG2_TOPOXmaps.mat';
+files(n).topoxdata = '010518_G62SS4LT_SALINE_RIG2\010518_G62SS4LT_SALINE_RIG2_TOPOX\010518_G62SS4LT_SALINE_RIG2_TOPOX';
+files(n).topoy = '010518_G62SS4LT_SALINE_RIG2\010518_G62SS4LT_SALINE_RIG2_TOPOY\010518_G62SS4LT_SALINE_RIG2_TOPOYmaps.mat';
+files(n).topoydata = '010518_G62SS4LT_SALINE_RIG2\010518_G62SS4LT_SALINE_RIG2_TOPOY\010518_G62SS4LT_SALINE_RIG2_TOPOY';
+files(n).darkness =  '010518_G62SS4LT_SALINE_RIG2\010518_G62SS4LT_SALINE_RIG2_INJECTION_DARKNESS\010518_G62SS4LT_SALINE_RIG2_INJECTION_DARKNESSmaps.mat';
+files(n).darknessdata = '010518_G62SS4LT_SALINE_RIG2\010518_G62SS4LT_SALINE_RIG2_INJECTION_DARKNESS\010518_G62SS4LT_SALINE_RIG2_INJECTION_DARKNESS';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'saline';
+files(n).training = 'trained';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only'; 
+files(n).timing = 'pre';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+n=n+1;
+files(n).subj = 'G62SS4LT';
+files(n).expt = '010518';
+files(n).topox= '010518_G62SS4LT_SALINE_RIG2\010518_G62SS4LT_SALINE_RIG2_POST_TOPOX\010518_G62SS4LT_SALINE_RIG2_POST_TOPOXmaps.mat';
+files(n).topoxdata = '010518_G62SS4LT_SALINE_RIG2\010518_G62SS4LT_SALINE_RIG2_POST_TOPOX\010518_G62SS4LT_SALINE_RIG2_POST_TOPOX';
+files(n).topoy = '010518_G62SS4LT_SALINE_RIG2\010518_G62SS4LT_SALINE_RIG2_POST_TOPOY\010518_G62SS4LT_SALINE_RIG2_POST_TOPOYmaps.mat';
+files(n).topoydata = '010518_G62SS4LT_SALINE_RIG2\010518_G62SS4LT_SALINE_RIG2_POST_TOPOY\010518_G62SS4LT_SALINE_RIG2_POST_TOPOY';
+files(n).darkness =  '';
+files(n).darknessdata = '';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'saline';
+files(n).training = 'trained';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only';
+files(n).timing = 'post';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+
+%%
+n=n+1;
+files(n).subj = 'G62XX1TT';
+files(n).expt = '010518';
+files(n).topox= '010518_G62XX1TT_DOI_RIG2\010518_G62XX1TT_DOI_RIG2_TOPOX\010518_G62XX1TT_DOI_RIG2_TOPOXmaps.mat';
+files(n).topoxdata = '010518_G62XX1TT_DOI_RIG2\010518_G62XX1TT_DOI_RIG2_TOPOX\010518_G62XX1TT_DOI_RIG2_TOPOX';
+files(n).topoy = '010518_G62XX1TT_DOI_RIG2\010518_G62XX1TT_DOI_RIG2_TOPOY\010518_G62XX1TT_DOI_RIG2_TOPOYmaps.mat';
+files(n).topoydata = '010518_G62XX1TT_DOI_RIG2\010518_G62XX1TT_DOI_RIG2_TOPOY\010518_G62XX1TT_DOI_RIG2_TOPOY';
+files(n).darkness =  '010518_G62XX1TT_DOI_RIG2\010518_G62XX1TT_DOI_RIG2_INJECTION_DARKNESS\010518_G62XX1TT_DOI_RIG2_INJECTION_DARKNESSmaps.mat';
+files(n).darknessdata = '010518_G62XX1TT_DOI_RIG2\010518_G62XX1TT_DOI_RIG2_INJECTION_DARKNESS\010518_G62XX1TT_DOI_RIG2_INJECTION_DARKNESS';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'doi';
+files(n).training = 'trained';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only'; 
+files(n).timing = 'pre';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+n=n+1;
+files(n).subj = 'G62XX1TT';
+files(n).expt = '010518';
+files(n).topox= '010518_G62XX1TT_DOI_RIG2\010518_G62XX1TT_DOI_RIG2_POST_TOPOX\010518_G62XX1TT_DOI_RIG2_POST_TOPOXmaps.mat';
+files(n).topoxdata = '010518_G62XX1TT_DOI_RIG2\010518_G62XX1TT_DOI_RIG2_POST_TOPOX\010518_G62XX1TT_DOI_RIG2_POST_TOPOX';
+files(n).topoy = '010518_G62XX1TT_DOI_RIG2\010518_G62XX1TT_DOI_RIG2_POST_TOPOY\010518_G62XX1TT_DOI_RIG2_POST_TOPOYmaps.mat';
+files(n).topoydata = '010518_G62XX1TT_DOI_RIG2\010518_G62XX1TT_DOI_RIG2_POST_TOPOY\010518_G62XX1TT_DOI_RIG2_POST_TOPOY';
+files(n).darkness =  '';
+files(n).darknessdata = '';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'doi';
+files(n).training = 'trained';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only';
+files(n).timing = 'post';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+%%
+n=n+1;
+files(n).subj = 'G6H3.1LT';
+files(n).expt = '010818';
+files(n).topox= '010818_G6H3.1LT_DOI_RIG2\010818_G6H3.1LT_DOI_RIG2_TOPOX\010818_G6H3.1LT_DOI_RIG2_TOPOXmaps.mat';
+files(n).topoxdata = '010818_G6H3.1LT_DOI_RIG2\010818_G6H3.1LT_DOI_RIG2_TOPOX\010818_G6H3.1LT_DOI_RIG2_TOPOX';
+files(n).topoy = '010818_G6H3.1LT_DOI_RIG2\010818_G6H3.1LT_DOI_RIG2_TOPOY\010818_G6H3.1LT_DOI_RIG2_TOPOYmaps.mat';
+files(n).topoydata = '010818_G6H3.1LT_DOI_RIG2\010818_G6H3.1LT_DOI_RIG2_TOPOY\010818_G6H3.1LT_DOI_RIG2_TOPOY';
+files(n).darkness =  '010818_G6H3.1LT_DOI_RIG2\010818_G6H3.1LT_DOI_RIG2_INJECTION_DARKNESS\010818_G6H3.1LT_DOI_RIG2_INJECTION_DARKNESSmaps.mat';
+files(n).darknessdata = '010818_G6H3.1LT_DOI_RIG2\010818_G6H3.1LT_DOI_RIG2_INJECTION_DARKNESS\010818_G6H3.1LT_DOI_RIG2_INJECTION_DARKNESS';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'doi';
+files(n).training = 'naive';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only'; 
+files(n).timing = 'pre';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+n=n+1;
+files(n).subj = 'G6H3.1LT';
+files(n).expt = '010818';
+files(n).topox= '010818_G6H3.1LT_DOI_RIG2\010818_G6H3.1LT_DOI_RIG2_POST_TOPOX\010818_G6H3.1LT_DOI_RIG2_POST_TOPOXmaps.mat';
+files(n).topoxdata = '010818_G6H3.1LT_DOI_RIG2\010818_G6H3.1LT_DOI_RIG2_POST_TOPOX\010818_G6H3.1LT_DOI_RIG2_POST_TOPOX';
+files(n).topoy = '010818_G6H3.1LT_DOI_RIG2\010818_G6H3.1LT_DOI_RIG2_POST_TOPOY\010818_G6H3.1LT_DOI_RIG2_POST_TOPOYmaps.mat';
+files(n).topoydata = '010818_G6H3.1LT_DOI_RIG2\010818_G6H3.1LT_DOI_RIG2_POST_TOPOY\010818_G6H3.1LT_DOI_RIG2_POST_TOPOY';
+files(n).darkness =  '';
+files(n).darknessdata = '';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'doi';
+files(n).training = 'naive';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only';
+files(n).timing = 'post';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+%%
+n=n+1;
+files(n).subj = 'G62FFF7TT';
+files(n).expt = '010818';
+files(n).topox= '010818_G62FFF7TT_SALINE_RIG2\010818_G62FFF7TT_SALINE_RIG2_TOPOX\010818_G62FFF7TT_SALINE_RIG2_TOPOXmaps.mat';
+files(n).topoxdata = '010818_G62FFF7TT_SALINE_RIG2\010818_G62FFF7TT_SALINE_RIG2_TOPOX\010818_G62FFF7TT_SALINE_RIG2_TOPOX';
+files(n).topoy = '010818_G62FFF7TT_SALINE_RIG2\010818_G62FFF7TT_SALINE_RIG2_TOPOY\010818_G62FFF7TT_SALINE_RIG2_TOPOYmaps.mat';
+files(n).topoydata = '010818_G62FFF7TT_SALINE_RIG2\010818_G62FFF7TT_SALINE_RIG2_TOPOY\010818_G62FFF7TT_SALINE_RIG2_TOPOY';
+files(n).darkness =  '010818_G62FFF7TT_SALINE_RIG2\010818_G62FFF7TT_SALINE_RIG2_INJECTION_DARKNESS\010818_G62FFF7TT_SALINE_RIG2_INJECTION_DARKNESSmaps.mat';
+files(n).darknessdata = '010818_G62FFF7TT_SALINE_RIG2\010818_G62FFF7TT_SALINE_RIG2_INJECTION_DARKNESS\010818_G62FFF7TT_SALINE_RIG2_INJECTION_DARKNESS';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'saline';
+files(n).training = 'naive';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only'; 
+files(n).timing = 'pre';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+n=n+1;
+files(n).subj = 'G62FFF7TT';
+files(n).expt = '010818';
+files(n).topox= '010818_G62FFF7TT_SALINE_RIG2\010818_G62FFF7TT_SALINE_RIG2_POST_TOPOX\010818_G62FFF7TT_SALINE_RIG2_POST_TOPOXmaps.mat';
+files(n).topoxdata = '010818_G62FFF7TT_SALINE_RIG2\010818_G62FFF7TT_SALINE_RIG2_POST_TOPOX\010818_G62FFF7TT_SALINE_RIG2_POST_TOPOX';
+files(n).topoy = '010818_G62FFF7TT_SALINE_RIG2\010818_G62FFF7TT_SALINE_RIG2_POST_TOPOY\010818_G62FFF7TT_SALINE_RIG2_POST_TOPOYmaps.mat';
+files(n).topoydata = '010818_G62FFF7TT_SALINE_RIG2\010818_G62FFF7TT_SALINE_RIG2_POST_TOPOY\010818_G62FFF7TT_SALINE_RIG2_POST_TOPOY';
+files(n).darkness =  '';
+files(n).darknessdata = '';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'saline';
+files(n).training = 'naive';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only';
+files(n).timing = 'post';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+%%
+n=n+1;
+files(n).subj = 'G62AAA4TT';
+files(n).expt = '010918';
+files(n).topox= '010918_G62AAA4TT_SALINE_RIG2\010918_G62AAA4TT_SALINE_RIG2_TOPOX\010918_G62AAA4TT_SALINE_RIG2_TOPOXmaps.mat';
+files(n).topoxdata = '010918_G62AAA4TT_SALINE_RIG2\010918_G62AAA4TT_SALINE_RIG2_TOPOX\010918_G62AAA4TT_SALINE_RIG2_TOPOX';
+files(n).topoy = '010918_G62AAA4TT_SALINE_RIG2\010918_G62AAA4TT_SALINE_RIG2_TOPOY\010918_G62AAA4TT_SALINE_RIG2_TOPOYmaps.mat';
+files(n).topoydata = '010918_G62AAA4TT_SALINE_RIG2\010918_G62AAA4TT_SALINE_RIG2_TOPOY\010918_G62AAA4TT_SALINE_RIG2_TOPOY';
+files(n).darkness =  '010918_G62AAA4TT_SALINE_RIG2\010918_G62AAA4TT_SALINE_RIG2_INJECTION_DARKNESS\010918_G62AAA4TT_SALINE_RIG2_INJECTION_DARKNESSmaps.mat';
+files(n).darknessdata = '010918_G62AAA4TT_SALINE_RIG2\010918_G62AAA4TT_SALINE_RIG2_INJECTION_DARKNESS\010918_G62AAA4TT_SALINE_RIG2_INJECTION_DARKNESS';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'saline';
+files(n).training = 'trained';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only'; 
+files(n).timing = 'pre';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+n=n+1;
+files(n).subj = 'G62AAA4TT';
+files(n).expt = '010918';
+files(n).topox= '010918_G62AAA4TT_SALINE_RIG2\010918_G62AAA4TT_SALINE_RIG2_POST_TOPOX\010918_G62AAA4TT_SALINE_RIG2_POST_TOPOXmaps.mat';
+files(n).topoxdata = '010918_G62AAA4TT_SALINE_RIG2\010918_G62AAA4TT_SALINE_RIG2_POST_TOPOX\010918_G62AAA4TT_SALINE_RIG2_POST_TOPOX';
+files(n).topoy = '010918_G62AAA4TT_SALINE_RIG2\010918_G62AAA4TT_SALINE_RIG2_POST_TOPOY\010918_G62AAA4TT_SALINE_RIG2_POST_TOPOYmaps.mat';
+files(n).topoydata = '010918_G62AAA4TT_SALINE_RIG2\010918_G62AAA4TT_SALINE_RIG2_POST_TOPOY\010918_G62AAA4TT_SALINE_RIG2_POST_TOPOY';
+files(n).darkness =  '';
+files(n).darknessdata = '';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'saline';
+files(n).training = 'trained';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only';
+files(n).timing = 'post';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+%%
+n=n+1;
+files(n).subj = 'G62XX1TT';
+files(n).expt = '010918';
+files(n).topox= '010918_G62XX1TT_SALINE_RIG2\010918_G62XX1TT_SALINE_RIG2_TOPOX\010918_G62XX1TT_SALINE_RIG2_TOPOXmaps.mat';
+files(n).topoxdata = '010918_G62XX1TT_SALINE_RIG2\010918_G62XX1TT_SALINE_RIG2_TOPOX\010918_G62XX1TT_SALINE_RIG2_TOPOX';
+files(n).topoy = '010918_G62XX1TT_SALINE_RIG2\010918_G62XX1TT_SALINE_RIG2_TOPOY\010918_G62XX1TT_SALINE_RIG2_TOPOYmaps.mat';
+files(n).topoydata = '010918_G62XX1TT_SALINE_RIG2\010918_G62XX1TT_SALINE_RIG2_TOPOY\010918_G62XX1TT_SALINE_RIG2_TOPOY';
+files(n).darkness =  '010918_G62XX1TT_SALINE_RIG2\010918_G62XX1TT_SALINE_RIG2_INJECTION_DARKNESS\010918_G62XX1TT_SALINE_RIG2_INJECTION_DARKNESSmaps.mat';
+files(n).darknessdata = '010918_G62XX1TT_SALINE_RIG2\010918_G62XX1TT_SALINE_RIG2_INJECTION_DARKNESS\010918_G62XX1TT_SALINE_RIG2_INJECTION_DARKNESS';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'saline';
+files(n).training = 'trained';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only'; 
+files(n).timing = 'pre';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+n=n+1;
+files(n).subj = 'G62XX1TT';
+files(n).expt = '010918';
+files(n).topox= '010918_G62XX1TT_SALINE_RIG2\010918_G62XX1TT_SALINE_RIG2_POST_TOPOX\010918_G62XX1TT_SALINE_RIG2_POST_TOPOXmaps.mat';
+files(n).topoxdata = '010918_G62XX1TT_SALINE_RIG2\010918_G62XX1TT_SALINE_RIG2_POST_TOPOX\010918_G62XX1TT_SALINE_RIG2_POST_TOPOX';
+files(n).topoy = '010918_G62XX1TT_SALINE_RIG2\010918_G62XX1TT_SALINE_RIG2_POST_TOPOY\010918_G62XX1TT_SALINE_RIG2_POST_TOPOYmaps.mat';
+files(n).topoydata = '010918_G62XX1TT_SALINE_RIG2\010918_G62XX1TT_SALINE_RIG2_POST_TOPOY\010918_G62XX1TT_SALINE_RIG2_POST_TOPOY';
+files(n).darkness =  '';
+files(n).darknessdata = '';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'saline';
+files(n).training = 'trained';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only';
+files(n).timing = 'post';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+%%
+n=n+1;
+files(n).subj = 'G6H3.3TT';
+files(n).expt = '011018';
+files(n).topox= '011018_G6H3.3TT_SALINE_RIG2\011018_G6H3.3TT_SALINE_RIG2_TOPOX\011018_G6H3.3TT_SALINE_RIG2_TOPOXmaps.mat';
+files(n).topoxdata = '011018_G6H3.3TT_SALINE_RIG2\011018_G6H3.3TT_SALINE_RIG2_TOPOX\011018_G6H3.3TT_SALINE_RIG2_TOPOX';
+files(n).topoy = '011018_G6H3.3TT_SALINE_RIG2\011018_G6H3.3TT_SALINE_RIG2_TOPOY\011018_G6H3.3TT_SALINE_RIG2_TOPOYmaps.mat';
+files(n).topoydata = '011018_G6H3.3TT_SALINE_RIG2\011018_G6H3.3TT_SALINE_RIG2_TOPOY\011018_G6H3.3TT_SALINE_RIG2_TOPOY';
+files(n).darkness =  '011018_G6H3.3TT_SALINE_RIG2\011018_G6H3.3TT_SALINE_RIG2_INJECTION_DARKNESS\011018_G6H3.3TT_SALINE_RIG2_INJECTION_DARKNESSmaps.mat';
+files(n).darknessdata = '011018_G6H3.3TT_SALINE_RIG2\011018_G6H3.3TT_SALINE_RIG2_INJECTION_DARKNESS\011018_G6H3.3TT_SALINE_RIG2_INJECTION_DARKNESS';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'saline';
+files(n).training = 'naive';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only'; 
+files(n).timing = 'pre';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+n=n+1;
+files(n).subj = 'G6H3.3TT';
+files(n).expt = '011018';
+files(n).topox= '011018_G6H3.3TT_SALINE_RIG2\011018_G6H3.3TT_SALINE_RIG2_POST_TOPOX\011018_G6H3.3TT_SALINE_RIG2_POST_TOPOXmaps.mat';
+files(n).topoxdata = '011018_G6H3.3TT_SALINE_RIG2\011018_G6H3.3TT_SALINE_RIG2_POST_TOPOX\011018_G6H3.3TT_SALINE_RIG2_POST_TOPOX';
+files(n).topoy = '011018_G6H3.3TT_SALINE_RIG2\011018_G6H3.3TT_SALINE_RIG2_POST_TOPOY\011018_G6H3.3TT_SALINE_RIG2_POST_TOPOYmaps.mat';
+files(n).topoydata = '011018_G6H3.3TT_SALINE_RIG2\011018_G6H3.3TT_SALINE_RIG2_POST_TOPOY\011018_G6H3.3TT_SALINE_RIG2_POST_TOPOY';
+files(n).darkness =  '';
+files(n).darknessdata = '';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'saline';
+files(n).training = 'naive';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only';
+files(n).timing = 'post';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+%%
+n=n+1;
+files(n).subj = 'G6H3.4LN';
+files(n).expt = '011018';
+files(n).topox= '011018_G6H3.4LN_DOI_RIG2\011018_G6H3.4LN_DOI_RIG2_TOPOX\011018_G6H3.4LN_DOI_RIG2_TOPOXmaps.mat';
+files(n).topoxdata = '011018_G6H3.4LN_DOI_RIG2\011018_G6H3.4LN_DOI_RIG2_TOPOX\011018_G6H3.4LN_DOI_RIG2_TOPOX';
+files(n).topoy = '011018_G6H3.4LN_DOI_RIG2\011018_G6H3.4LN_DOI_RIG2_TOPOY\011018_G6H3.4LN_DOI_RIG2_TOPOYmaps.mat';
+files(n).topoydata = '011018_G6H3.4LN_DOI_RIG2\011018_G6H3.4LN_DOI_RIG2_TOPOY\011018_G6H3.4LN_DOI_RIG2_TOPOY';
+files(n).darkness =  '011018_G6H3.4LN_DOI_RIG2\011018_G6H3.4LN_DOI_RIG2_INJECTION_DARKNESS\011018_G6H3.4LN_DOI_RIG2_INJECTION_DARKNESSmaps.mat';
+files(n).darknessdata = '011018_G6H3.4LN_DOI_RIG2\011018_G6H3.4LN_DOI_RIG2_INJECTION_DARKNESS\011018_G6H3.4LN_DOI_RIG2_INJECTION_DARKNESS';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'doi';
+files(n).training = 'naive';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only'; 
+files(n).timing = 'pre';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+n=n+1;
+files(n).subj = 'G6H3.4LN';
+files(n).expt = '011018';
+files(n).topox= '011018_G6H3.4LN_DOI_RIG2\011018_G6H3.4LN_DOI_RIG2_POST_TOPOX\011018_G6H3.4LN_DOI_RIG2_POST_TOPOXmaps.mat';
+files(n).topoxdata = '011018_G6H3.4LN_DOI_RIG2\011018_G6H3.4LN_DOI_RIG2_POST_TOPOX\011018_G6H3.4LN_DOI_RIG2_POST_TOPOX';
+files(n).topoy = '011018_G6H3.4LN_DOI_RIG2\011018_G6H3.4LN_DOI_RIG2_POST_TOPOY\011018_G6H3.4LN_DOI_RIG2_POST_TOPOYmaps.mat';
+files(n).topoydata = '011018_G6H3.4LN_DOI_RIG2\011018_G6H3.4LN_DOI_RIG2_POST_TOPOY\011018_G6H3.4LN_DOI_RIG2_POST_TOPOY';
+files(n).darkness =  '';
+files(n).darknessdata = '';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'doi';
+files(n).training = 'naive';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only';
+files(n).timing = 'post';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+%%
+n=n+1;
+files(n).subj = 'G62SS4LT';
+files(n).expt = '011018';
+files(n).topox= '011018_G62SS4LT_DOI_RIG2\011018_G62SS4LT_DOI_RIG2_TOPOX\011018_G62SS4LT_DOI_RIG2_TOPOXmaps.mat';
+files(n).topoxdata = '011018_G62SS4LT_DOI_RIG2\011018_G62SS4LT_DOI_RIG2_TOPOX\011018_G62SS4LT_DOI_RIG2_TOPOX';
+files(n).topoy = '011018_G62SS4LT_DOI_RIG2\011018_G62SS4LT_DOI_RIG2_TOPOY\011018_G62SS4LT_DOI_RIG2_TOPOYmaps.mat';
+files(n).topoydata = '011018_G62SS4LT_DOI_RIG2\011018_G62SS4LT_DOI_RIG2_TOPOY\011018_G62SS4LT_DOI_RIG2_TOPOY';
+files(n).darkness =  '011018_G62SS4LT_DOI_RIG2\011018_G62SS4LT_DOI_RIG2_INJECTION_DARKNESS\011018_G62SS4LT_DOI_RIG2_INJECTION_DARKNESSmaps.mat';
+files(n).darknessdata = '011018_G62SS4LT_DOI_RIG2\011018_G62SS4LT_DOI_RIG2_INJECTION_DARKNESS\011018_G62SS4LT_DOI_RIG2_INJECTION_DARKNESS';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'doi';
+files(n).training = 'trained';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only'; 
+files(n).timing = 'pre';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+n=n+1;
+files(n).subj = 'G62SS4LT';
+files(n).expt = '011018';
+files(n).topox= '011018_G62SS4LT_DOI_RIG2\011018_G62SS4LT_DOI_RIG2_POST_TOPOX\011018_G62SS4LT_DOI_RIG2_POST_TOPOXmaps.mat';
+files(n).topoxdata = '011018_G62SS4LT_DOI_RIG2\011018_G62SS4LT_DOI_RIG2_POST_TOPOX\011018_G62SS4LT_DOI_RIG2_POST_TOPOX';
+files(n).topoy = '011018_G62SS4LT_DOI_RIG2\011018_G62SS4LT_DOI_RIG2_POST_TOPOY\011018_G62SS4LT_DOI_RIG2_POST_TOPOYmaps.mat';
+files(n).topoydata = '011018_G62SS4LT_DOI_RIG2\011018_G62SS4LT_DOI_RIG2_POST_TOPOY\011018_G62SS4LT_DOI_RIG2_POST_TOPOY';
+files(n).darkness =  '';
+files(n).darknessdata = '';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'doi';
+files(n).training = 'trained';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only';
+files(n).timing = 'post';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+%%
+n=n+1;
+files(n).subj = 'G62WW3RT';
+files(n).expt = '011018';
+files(n).topox= '011018_G62WW3RT_SALINE_RIG2\011018_G62WW3RT_SALINE_RIG2_TOPOX\011018_G62WW3RT_SALINE_RIG2_TOPOXmaps.mat';
+files(n).topoxdata = '011018_G62WW3RT_SALINE_RIG2\011018_G62WW3RT_SALINE_RIG2_TOPOX\011018_G62WW3RT_SALINE_RIG2_TOPOX';
+files(n).topoy = '011018_G62WW3RT_SALINE_RIG2\011018_G62WW3RT_SALINE_RIG2_TOPOY\011018_G62WW3RT_SALINE_RIG2_TOPOYmaps.mat';
+files(n).topoydata = '011018_G62WW3RT_SALINE_RIG2\011018_G62WW3RT_SALINE_RIG2_TOPOY\011018_G62WW3RT_SALINE_RIG2_TOPOY';
+files(n).darkness =  '011018_G62WW3RT_SALINE_RIG2\011018_G62WW3RT_SALINE_RIG2_INJECTION_DARKNESS\011018_G62WW3RT_SALINE_RIG2_INJECTION_DARKNESSmaps.mat';
+files(n).darknessdata = '011018_G62WW3RT_SALINE_RIG2\011018_G62WW3RT_SALINE_RIG2_INJECTION_DARKNESS\011018_G62WW3RT_SALINE_RIG2_INJECTION_DARKNESS';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'saline';
+files(n).training = 'trained';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only'; 
+files(n).timing = 'pre';
+files(n).patchpts = '';
+files(n).circpts = '';
+
+n=n+1;
+files(n).subj = 'G62WW3RT';
+files(n).expt = '011018';
+files(n).topox= '011018_G62WW3RT_SALINE_RIG2\011018_G62WW3RT_SALINE_RIG2_POST_TOPOX\011018_G62WW3RT_SALINE_RIG2_POST_TOPOXmaps.mat';
+files(n).topoxdata = '011018_G62WW3RT_SALINE_RIG2\011018_G62WW3RT_SALINE_RIG2_POST_TOPOX\011018_G62WW3RT_SALINE_RIG2_POST_TOPOX';
+files(n).topoy = '011018_G62WW3RT_SALINE_RIG2\011018_G62WW3RT_SALINE_RIG2_POST_TOPOY\011018_G62WW3RT_SALINE_RIG2_POST_TOPOYmaps.mat';
+files(n).topoydata = '011018_G62WW3RT_SALINE_RIG2\011018_G62WW3RT_SALINE_RIG2_POST_TOPOY\011018_G62WW3RT_SALINE_RIG2_POST_TOPOY';
+files(n).darkness =  '';
+files(n).darknessdata = '';
+files(n).patchonpatch =  '';
+files(n).patchonpatchdata = '';
+files(n).inject = 'saline';
+files(n).training = 'trained';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'topo only';
+files(n).timing = 'post';
+files(n).patchpts = '';
+files(n).circpts = '';

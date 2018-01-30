@@ -8,7 +8,7 @@ psfile = 'c:\connectivity.ps'; if exist(psfile,'file')==2;delete(psfile);end
 %%% select sessions
 useSess = 1:length(files); %%% use all files, and select injects afterwards
 
-load('D:\Elliott\DOIwidefield\patchonpatch14min.mat')
+load('C:\patchonpatch16min.mat')
 %contrast = contrast(1:end-5); xpos = xpos(1:end-5); ypos=ypos(1:end-5);
 
 for sess = 1:length(useSess);

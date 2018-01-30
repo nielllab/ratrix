@@ -1,3 +1,4 @@
+
 pixFig = figure; set(gcf,'Name',figLabel);
 traceFig = figure; set(gcf,'Name',figLabel);
 for i = (1:npanel)+offset
@@ -10,6 +11,6 @@ for i = (1:npanel)+offset
 end
 
 figure(pixFig);
-%colorbar; 
+% colorbar;
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 figure(traceFig); if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end

@@ -29,6 +29,7 @@ figure
 hist(x,0.01:0.02:1); title('x position')
 % figure
 % hist(Xfilt,0.01:0.02:1)
+
 %%% plot a lot of comparisons!
 
 left=unique(xpos(3))

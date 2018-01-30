@@ -40,6 +40,10 @@ if isempty(use)
     return
 end
 
+grpsizep = 'C:\Users\nlab\Box Sync\Phil Niell Lab\2pData';
+grpsizef = {'SalineNaive2pSizeSelectEff','SalineTrained2pSizeSelectEff',...
+    'DOINaive2pSizeSelectEff','DOITrained2pSizeSelectEff'};
+
 if redogrp
     reps=10;
     numAni = length(use)/2;
@@ -53,23 +57,30 @@ if redogrp
     enslocs = nan(numAni,500,2);
     grpenssimIdx = nan(numAni,500,500,2);
     anicnt = 1;
+    dwnsmp = 5;
+    grpd = nan(numAni,2,2);
+    load(fullfile(grpsizep,grpsizef{group}),'threshcellsall');
     
     for i = 1:2:length(use)
         
         filename = sprintf('%s_%s_%s_%s_darkness',files(use(i)).expt,files(use(i)).subj,files(use(i)).timing,files(use(i)).inject);
         anipsfile = 'c:\tempPhil2p.ps';
         if exist(anipsfile,'file')==2;delete(anipsfile);end
+        
+        ncells = sum(threshcellsall{anicnt});
 
         %%%darkness data pre
         aniFile = files(use(i)).darknesspts; load(aniFile,'spikes');
         cut(anicnt) = files(use(i)).cutoff;
         spikes = spikes(1:cut(anicnt),end-2999:end);
+        spikes = spikes(threshcellsall{anicnt},:);
+        spikespre = imresize(spikes,[length(threshcellsall{anicnt}) size(spikes,2)/dwnsmp]);
         
         %%%plot pre spikes
         j=0;
         f1 = figure
-        while j<cut(anicnt)
-            subplot(3,ceil(cut(anicnt)/(3*10)),j/10+1)
+        while j<ncells
+            subplot(3,ceil(ncells/(3*10)),j/10+1)
             hold on
             for k = 1:10
                 try
@@ -91,7 +102,7 @@ if redogrp
                 coamtx(j,k) = (Ca.*Cb)/((Ca.^2 + Cb.^2)/2);
             end
         end
-        grpcoamtx(anicnt,1:cut(anicnt),1:cut(anicnt),1) = coamtx;
+        grpcoamtx(anicnt,1:ncells,1:ncells,1) = coamtx;
         
 
         %%%bootstrap to get significance threshold for each cell pair
@@ -129,7 +140,7 @@ if redogrp
         end
         sigmtx = coamtx>simIdx;
         pre=sigmtx;
-        grpsimIdx(anicnt,1:cut(anicnt),1:cut(anicnt),1) = simIdx;
+        grpsimIdx(anicnt,1:ncells,1:ncells,1) = simIdx;
         
         
         %%%ensemble analysis
@@ -183,12 +194,14 @@ if redogrp
         %%%darkness data post
         aniFile = files(use(i+1)).darknesspts; load(aniFile,'spikes');
         spikes = spikes(1:cut(anicnt),end-2999:end);
+        spikes = spikes(threshcellsall{anicnt},:);
+        spikespost = imresize(spikes,[length(threshcellsall{anicnt}) size(spikes,2)/dwnsmp]);
 
         %%%plot post spikes
         j=0;
         figure(f1)
-        while j<cut(anicnt)
-            subplot(3,ceil(cut(anicnt)/(3*10)),j/10+1)
+        while j<ncells
+            subplot(3,ceil(ncells/(3*10)),j/10+1)
             hold on
             for k = 1:10
                 try
@@ -234,7 +247,7 @@ if redogrp
                 coamtx(j,k) = (Ca.*Cb)/((Ca.^2 + Cb.^2)/2);
             end
         end
-        grpcoamtx(anicnt,1:cut(anicnt),1:cut(anicnt),2) = coamtx;
+        grpcoamtx(anicnt,1:ncells,1:ncells,2) = coamtx;
 
         %%%bootstrap to get significance threshold for each cell pair
         simind = nan(size(spikes,1),size(spikes,1),reps);
@@ -264,13 +277,44 @@ if redogrp
         end
         sigmtx = coamtx>simIdx;
         post=sigmtx;
-        grpsimIdx(anicnt,1:cut(anicnt),1:cut(anicnt),2) = simIdx;
+        grpsimIdx(anicnt,1:ncells,1:ncells,2) = simIdx;
         
-        sig(anicnt,1) = sum(pre(:))/(cut(anicnt)^2);sprintf('percent coactive pre: %0.2f',sig(anicnt,1))
-        sig(anicnt,2) = sum(post(:))/(cut(anicnt)^2);sprintf('percent coactive post: %0.2f',sig(anicnt,2))
-        sig(anicnt,3) = sum(pre(:)&post(:))/(cut(anicnt)^2);sprintf('percent coactive pre and post: %0.2f',sig(anicnt,3))
-        sig(anicnt,4) = sum(pre(:)&~post(:))/(cut(anicnt)^2);sprintf('percent coactive pre and not post: %0.2f',sig(anicnt,4))
-        sig(anicnt,5) = sum(~pre(:)&post(:))/(cut(anicnt)^2);sprintf('percent coactive not pre and post: %0.2f',sig(anicnt,5))
+        sig(anicnt,1) = sum(pre(:))/(ncells^2);sprintf('percent coactive pre: %0.2f',sig(anicnt,1))
+        sig(anicnt,2) = sum(post(:))/(ncells^2);sprintf('percent coactive post: %0.2f',sig(anicnt,2))
+        sig(anicnt,3) = sum(pre(:)&post(:))/(ncells^2);sprintf('percent coactive pre and post: %0.2f',sig(anicnt,3))
+        sig(anicnt,4) = sum(pre(:)&~post(:))/(ncells^2);sprintf('percent coactive pre and not post: %0.2f',sig(anicnt,4))
+        sig(anicnt,5) = sum(~pre(:)&post(:))/(ncells^2);sprintf('percent coactive not pre and post: %0.2f',sig(anicnt,5))
+        
+        
+        %%%get dimensionality pre/post
+        R = corr(spikespre'); %correlation pre
+        [u,s,v] = svd(R);
+        s = diag(s);
+        s = s/sum(s);
+        d = 1/sum(s.^2);
+        grpd(anicnt,1,1) = d;
+        
+        R = cov(spikespre'); %covariance pre
+        [u,s,v] = svd(R);
+        s = diag(s);
+        s = s/sum(s);
+        d = 1/sum(s.^2);
+        grpd(anicnt,2,1) = d;
+        
+        R = corr(spikespost'); %correlation post
+        [u,s,v] = svd(R);
+        s = diag(s);
+        s = s/sum(s);
+        d = 1/sum(s.^2);
+        grpd(anicnt,1,2) = d;
+        
+        R = cov(spikespost'); %covariance post
+        [u,s,v] = svd(R);
+        s = diag(s);
+        s = s/sum(s);
+        d = 1/sum(s.^2);
+        grpd(anicnt,2,2) = d;    
+        
         
         anicnt=anicnt+1;
         sprintf('%0.0f/%0.0f done',anicnt-1,numAni)
@@ -294,26 +338,27 @@ end
 
 %%%plotting
 for i = 1:numAni
+    ncells = sum(threshcellsall{i});
     figure
-	subplot(2,2,1);imagesc(squeeze(grpcoamtx(i,1:cut(i),1:cut(i),1)),[-0.01 0.5]);colormap jet;colorbar
+	subplot(2,2,1);imagesc(squeeze(grpcoamtx(i,1:ncells,1:ncells,1)),[-0.01 0.5]);colormap jet;colorbar
     xlabel(sprintf('coact matrix %s',[files(use(i*2-1)).timing]))
     ylabel('cell #')
     set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',6)
     axis equal
     
-    subplot(2,2,2);imagesc(squeeze(grpsimIdx(i,1:cut(i),1:cut(i),1)),[0 1]);colormap jet;colorbar
+    subplot(2,2,2);imagesc(squeeze(grpsimIdx(i,1:ncells,1:ncells,1)),[0 1]);colormap jet;colorbar
     xlabel(sprintf('coact sig %s',[files(use(i*2-1)).timing]))
     ylabel('cell #')
     set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',6)
     axis equal
     
-    subplot(2,2,3);imagesc(squeeze(grpcoamtx(i,1:cut(i),1:cut(i),2)),[-0.01 0.5]);colormap jet;colorbar
+    subplot(2,2,3);imagesc(squeeze(grpcoamtx(i,1:ncells,1:ncells,2)),[-0.01 0.5]);colormap jet;colorbar
     xlabel(sprintf('coact matrix %s',[files(use(i*2)).timing]))
     ylabel('cell #')
     set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',6)
     axis equal
     
-    subplot(2,2,4);imagesc(squeeze(grpsimIdx(i,1:cut(i),1:cut(i),2)),[0 1]);colormap jet;colorbar
+    subplot(2,2,4);imagesc(squeeze(grpsimIdx(i,1:ncells,1:ncells,2)),[0 1]);colormap jet;colorbar
     xlabel(sprintf('coact sig %s',[files(use(i*2)).timing]))
     ylabel('cell #')
     set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',6)
@@ -338,6 +383,35 @@ axis([0 6 0 0.5])
 ylabel('percent of cell pairs')
 set(gca,'xtick',1:5,'xticklabel',{'pre','post','pre&post','pre~post','~prepost'},'fontsize',6)
 title('percent of cells coactive')
+if exist('psfile','var')
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    print('-dpsc',psfile,'-append');
+end
+
+%%%dimensionality
+figure;
+subplot(1,2,1)
+hold on
+pre = grpd(:,1,1);post = grpd(:,1,2);
+plot([1 2],[pre post],'k.-')
+errorbar([1 2],[nanmean(pre) nanmean(post)],[nanstd(pre)/sqrt(numAni) nanstd(post)/sqrt(numAni)])
+set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'tickdir','out','fontsize',8)
+ylabel('corr dimensionality')
+axis([0 3 0 100])
+axis square
+[hvals pvals] = ttest(pre,post,'alpha',0.05);
+title(sprintf('p=%0.3f',pvals'))
+subplot(1,2,2)
+hold on
+pre = grpd(:,2,1);post = grpd(:,2,2);
+plot([1 2],[pre post],'k.-')
+errorbar([1 2],[nanmean(pre) nanmean(post)],[nanstd(pre)/sqrt(numAni) nanstd(post)/sqrt(numAni)])
+set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'tickdir','out','fontsize',8)
+ylabel('cov dimensionality')
+axis([0 3 0 100])
+axis square
+[hvals pvals] = ttest(pre,post,'alpha',0.05);
+title(sprintf('p=%0.3f',pvals'))
 if exist('psfile','var')
     set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
     print('-dpsc',psfile,'-append');

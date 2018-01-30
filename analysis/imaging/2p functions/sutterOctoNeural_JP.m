@@ -107,21 +107,35 @@ if Opt.fStim ~= 0
   alignRecs =1;
     nCycles = floor(size(dfofInterp,3)/cycLength)-ceil((cycWindow-cycLength)/cycLength)-1;  %%% trim off last stims to allow window for previous stim
     stimT = stimRec.ts - stimRec.ts(1);
+    
+    % David's original
+      
+    %Temporary fix 
     for i = 1:length(stimRec.cond)
-        if stimRec.cond(i) == 0
-            stimRec.cond(i) = pastCond;
-        else
-            pastCond = stimRec.cond(i);
-        end
+       if stimRec.cond(i) == 0
+           stimRec.cond(i) = pastCond;
+       else
+           pastCond = stimRec.cond(i);
+       end
     end
 
     for i = 1:nCycles
         stimOrder(i) = stimRec.cond(min(find(stimT>((i-1)*cycLength*dt+0.1))));
     end
     
-    stimTimes = stimPulse-stimPulse(1);
-    stimTimes = stimTimes(1:nCycles);
-    
+% Cris's fix
+%if min(stimRec.cond)==0  %%% new stimRec style, cond==0 during isi
+%         starts = find(diff([0; stimRec.cond])>0);
+%         stimOrder = stimRec.cond(starts);
+%         stimOrder = stimOrder(1:nCycles);
+%     else  %%% old stimRec style
+%         for i = 1:nCycles
+%             stimOrder(i) = stimRec.cond(min(find(stimT>((i-1)*cycLength*dt+0.1))));
+%         end
+%     end
+%     stimTimes = stimPulse-stimPulse(1);
+%     stimTimes = stimTimes(1:nCycles);
+%     
     %stimOrder = stimRec.cond(stimRec.f==2); %%% find second frame of each stim, and see what condition it was (don't use frame 1, because stays at frame=1 at stim end)
     nstim = max(stimOrder);
     
@@ -224,14 +238,12 @@ if selectPts
     clear x y npts
     rightclick = 0;
     fprintf('Select points on image. Rightclick to exit interactive ginput');
-    i=0;
     while rightclick ~= 3
-        i = i+1;
         figure(selectFig); hold on
         [x(i), y(i), rightclick] = ginput(1); x=round(x); y = round(y);
         plot(x(i),y(i),'b*');
         dF(i,:) = squeeze(nanmean(nanmean(dfofInterp(y(i)+range,x(i)+range,:),2),1));
-     end
+    end
     
 else
     
@@ -341,9 +353,12 @@ dFrepeats=zeros(size(dF,1),cycWindow*nstim,max(nStimRep))+NaN;
 for i = 1:nstim
     repList = find(stimOrder==i);
     for r = 1:nStimRep(i)
-        startFrame = stimTimes(repList(r))/dt;
-        dFrepeats(:,(i-1)*cycWindow + (1:cycWindow),r) = dF(:,round(startFrame+(1:cycWindow))) - repmat(dF(:,round(startFrame+1)),[1 floor(cycWindow)]);
-        %dFrepeats(:,(i-1)*cycWindow + (1:cycWindow),r) = dF(:,round((repList(r)-1)*cycLength)+(1:cycWindow)) - repmat(dF(:,round((repList(r)-1)*cycLength)+1),[1 floor(cycWindow)]);
+       %trying to comment out
+       %startFrame = stimTimes(repList(r))/dt;
+       %dFrepeats(:,(i-1)*cycWindow + (1:cycWindow),r) = dF(:,round(startFrame+(1:cycWindow))) - repmat(dF(:,round(startFrame+1)),[1 floor(cycWindow)]);
+        % 
+        %old code 
+        dFrepeats(:,(i-1)*cycWindow + (1:cycWindow),r) = dF(:,round((repList(r)-1)*cycLength)+(1:cycWindow)) - repmat(dF(:,round((repList(r)-1)*cycLength)+1),[1 floor(cycWindow)]);
         
     end
 end
@@ -362,15 +377,21 @@ for i = 1:nstim;
     plot([i i ],[0 0.3],'k:');
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
-startFrames = round(stimTimes/dt);
+% cris's code
+%startFrames = round(stimTimes/dt);
 %%% calculate cycle averages (timecourse for each individual stim)
 clear cycAvgAll cycAvg cycImg
 for i=1:cycWindow;
-    cycAvgAll(:,i) = nanmean(dF(:,startFrames+i),2); %%% cell-wise average across all stim
-    cycAvg(i) = mean(mean(nanmean(dfofInterp(:,:,startFrames+i),3),2),1); %%% average for all cells and stim
-    cycImg(:,:,i) = nanmean(dfofInterp(:,:,startFrames+i),3); %%% pixelwise average across all stim
+      cycAvgAll(:,i) = nanmean(dF(:,i:round(cycLength):end),2); %%% cell-wise average across all stim
+    cycAvg(i) = nanmean(nanmean(nanmedian(dfofInterp(:,:,i:round(cycLength):end),3),2),1); %%% average for all cells and stim
+    cycImg(:,:,i) = nanmean(dfofInterp(:,:,i:round(cycLength):end),3); %%% pixelwise average across all stim
+
     
+%   cris's code
+%cycAvgAll(:,i) = nanmean(dF(:,startFrames+i),2); %%% cell-wise average across all stim
+%     cycAvg(i) = mean(mean(nanmean(dfofInterp(:,:,startFrames+i),3),2),1); %%% average for all cells and stim
+%     cycImg(:,:,i) = nanmean(dfofInterp(:,:,startFrames+i),3); %%% pixelwise average across all stim
+%     
 end
 
 %%% plot pixel-wise cycle average
@@ -533,9 +554,12 @@ hist(max(dFclust,[],2))
 
 evRange = 4:6; baseRange = 1:2; %%% timepoints for evoked and baseline activity
 for i = 1:length(stimOrder); %%% get pixel-wise evoked activity on each individual stim presentation
-    startFrame = stimTimes(i)/dt;
-    trialmean(:,:,i) = nanmean(dfofInterp(:,:,round(startFrame + evRange)),3)- nanmean(dfofInterp(:,:,round(startFrame + baseRange)),3);
-    trialTcourse(:,i) = squeeze(mean(mean(dfofInterp(:,:,round(startFrame + (1:8))),2),1)) - mean(mean(dfofInterp(:,:,round(startFrame + 1)),2),1) ;
+    %cris's code startFrame = stimTimes(i)/dt;
+        trialmean(:,:,i) = nanmean(dfofInterp(:,:,round(cycLength*(i-1) + evRange)),3)- nanmean(dfofInterp(:,:,round(cycLength*(i-1) + baseRange)),3);
+%cris's code
+    %trialmean(:,:,i) = nanmean(dfofInterp(:,:,round(startFrame + evRange)),3)- nanmean(dfofInterp(:,:,round(startFrame + baseRange)),3);
+   % trialTcourse(:,i) = squeeze(mean(mean(dfofInterp(:,:,round(startFrame + (1:8))),2),1)) - mean(mean(dfofInterp(:,:,round(startFrame + 1)),2),1) ;
+   trialTcourse(:,i) = squeeze(mean(mean(dfofInterp(:,:,round(cycLength*(i-1) + (1:8))),2),1)) - mean(mean(dfofInterp(:,:,round(cycLength*(i-1) + 1)),2),1) ;
     
 end
 filt = fspecial('gaussian',5,1.5);
@@ -573,21 +597,31 @@ if nstim==12 %%% spots
 end
 
 range = [-0.05 0.2]; %%% colormap range
-if nstim==14 %%% gratings , horiz/vert, 3sf, 2tf
-    loc = 1:6 %%% map stim order onto subplot
-    figLabel = 'vert gratings';
-    npanel = 6; nrow = 2; ncol = 3; offset = 0;
-    pixPlot;
+if nstim==14 %%% gratings
+    loc = 1:6; %%% map stim order onto subplot
+    figure; set(gcf,'Name','vert gratings');
+    for i = 1:6
+        meanimg = median(trialmean(:,:,stimOrder==i),3);
+        subplot(2,3,loc(i));
+        imagesc(meanimg,range); axis equal
+    end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
-    loc = 1:6 %%% map stim order onto subplot
-    figLabel = 'horiz gratings';
-    npanel = 6; nrow = 2; ncol = 3; offset = 6;
-    pixPlot;
+    figure;set(gcf,'Name','horiz gratings');
+    for i = 7:12
+        meanimg = nanmedian(trialmean(:,:,stimOrder==i),3);
+        subplot(2,3,loc(i-6));
+        imagesc(meanimg,range); axis equal
+    end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
-       loc = 1:2 %%% map stim order onto subplot
-    figLabel = 'flicker';
-    npanel = 2; nrow = 1; ncol = 2; offset = 12;
-    pixPlot;
+    figure; set(gcf,'Name','flicker');
+    for i = 13:14
+        meanimg = nanmedian(trialmean(:,:,stimOrder==i),3);
+        subplot(1,2,i-12);
+        imagesc(meanimg,range); axis equal; if i ==13; title('low tf flicker'); else title('high tf flicker'); end
+    end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     overlay(:,:,1) = nanmedian(trialmean(:,:,stimOrder==1),3);
     overlay(:,:,2) = nanmedian(trialmean(:,:,stimOrder==7),3);
@@ -603,47 +637,17 @@ if nstim==14 %%% gratings , horiz/vert, 3sf, 2tf
 end
 
 
-range = [-0.05 0.2]; %%% colormap range
-if nstim==26 %%% gratings , up/down/left/right, 3sf, 2tf
-    loc = 1:6 %%% map stim order onto subplot
-    figLabel = 'vert1 gratings';
-    npanel = 6; nrow = 2; ncol = 3; offset = 0;
-    pixPlot;
-    
-    loc = 1:6 %%% map stim order onto subplot
-    figLabel = 'horiz1 gratings';
-    npanel = 6; nrow = 2; ncol = 3; offset = 6;
-    pixPlot;
-    
-       loc = 1:6 %%% map stim order onto subplot
-    figLabel = 'vert2 gratings';
-    npanel = 6; nrow = 2; ncol = 3; offset = 12;
-    pixPlot;
-    
-    loc = 1:6 %%% map stim order onto subplot
-    figLabel = 'horiz2 gratings';
-    npanel = 6; nrow = 2; ncol = 3; offset = 18;
-    pixPlot;
-  
-       loc = 1:2 %%% map stim order onto subplot
-    figLabel = 'flicker';
-    npanel = 2; nrow = 1; ncol = 2; offset = 24;
-    pixPlot;
-   
-end
-
-
 
 if nstim==13 %%% gratings 1 tf
     range = [-0.025 0.1]; %%% colormap range
     loc = [1 5 9 2 6 10 3 7 11 4 8 12]; %%% map stim order onto subplot
     figLabel = 'gratings';
     npanel = 12; nrow = 3; ncol = 4; offset = 0;
-    pixPlot;
+    pixPlotJP;
     
     figLabel = 'flicker';
     npanel = 1; nrow = 1; ncol = 1; offset = 12;
-    pixPlot;
+    pixPlotJP;
 end
 
 
@@ -653,11 +657,11 @@ if nstim==48 %%% 4x6 spots
     
     figLabel = 'OFF spots';
     npanel = 24; nrow = 4; ncol = 6; offset = 0;
-    pixPlot;
+    pixPlotJP;
     
     figLabel = 'ON spots';
     npanel = 24; nrow = 4; ncol = 6; offset = 24;
-    pixPlot;
+    pixPlotJP;
 end
 
 if nstim==50 %%% 5x5 spots
@@ -666,11 +670,11 @@ if nstim==50 %%% 5x5 spots
     %loc = [21 16 11 6 1 22 17 12 7 2 23 18 13 8 3 24 19 14 9 4 25 20 15 10 5]; %%% flipped direction
     figLabel = 'OFF spots';
     npanel = 25; nrow = 5; ncol = 5; offset = 0;
-    pixPlot;
+    pixPlotJP;
     
     figLabel = 'ON spots';
     npanel = 25; nrow = 5; ncol = 5; offset = 25;
-    pixPlot;
+    pixPlotJP;
 end
 
 

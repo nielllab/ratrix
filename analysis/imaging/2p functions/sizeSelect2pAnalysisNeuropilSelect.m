@@ -20,7 +20,7 @@ thetaRange = unique(theta);
 
 for f=1:length(use)
     filename = files(use(f)).sizeanalysis
-    if exist([filename '.mat'])==0 %%comment for redo
+%     if exist([filename '.mat'])==0 %%comment for redo
         files(use(f)).subj
         psfilei = 'c:\tempPhil2pi.ps';
         if exist(psfilei,'file')==2;delete(psfilei);end
@@ -205,6 +205,44 @@ for f=1:length(use)
 
         dftuning = dftuning2;
         sptuning = sptuning2;
+        
+        %create array w/average responses per stim type (all cells)
+        dftuningall = zeros(size(dFout2,1),size(dFout2,2),length(sfrange),length(thetaRange),length(radiusRange),2);
+        sptuningall = zeros(size(spikesOut2,1),size(spikesOut2,2),length(sfrange),length(thetaRange),length(radiusRange),2);
+        for h = 1:size(spikesOut2,1)
+            for i = 1:length(sfrange)
+                for j = 1:length(thetaRange)
+                    for k = 1:length(radiusRange)
+                        for l = 1:2
+                            dftuningall(h,1:size(dFout2,2),i,j,k,l) = nanmean(dFout2(h,:,find(sf==sfrange(i)&theta==thetaRange(j)&radius==k&running==(l-1))),3);
+                            sptuningall(h,1:size(spikesOut2,2),i,j,k,l) = nanmean(spikesOut2(h,:,find(sf==sfrange(i)&theta==thetaRange(j)&radius==k&running==(l-1))),3);
+                        end
+                    end
+                end
+            end
+        end
+
+
+        %%%subtract size zero trials
+        dftuningall2 = dftuningall;sptuningall2 = sptuningall;
+        ztrialdf = nan(size(dftuningall,1),size(dftuningall,2),2);ztrialsp=ztrialdf;
+        for i = 1:2
+            ztrialdf(:,:,i) = nanmean(nanmean(dftuningall(:,:,:,:,1,i),3),4);
+            ztrialsp(:,:,i) = nanmean(nanmean(sptuningall(:,:,:,:,1,i),3),4);
+        end
+        for i = 1:length(sfrange)
+            for j = 1:length(thetaRange)
+                for k = 1:length(radiusRange)
+                    for l = 1:2
+                        dftuningall2(:,:,i,j,k,l) = dftuningall(:,:,i,j,k,l) - ztrialdf(:,:,l);
+                        sptuningall2(:,:,i,j,k,l) = sptuningall(:,:,i,j,k,l) - ztrialsp(:,:,l);
+                    end
+                end
+            end
+        end
+
+        dftuningall = dftuningall2;
+        sptuningall = sptuningall2;
 
 
         if mod(f,2)~=0 & (~exist(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing '.mat'])) | reselect==1)    
@@ -257,6 +295,46 @@ for f=1:length(use)
 
         dfsize = dfsize2;
         spsize = spsize2;
+        
+        %%%do same thing for all cells
+        sizebestsfdfall=nan(size(dftuningall,1),2);sizebestsfspall=sizebestsfdfall;sizebestthetadfall=sizebestsfdfall;sizebestthetaspall=sizebestsfdfall;
+        for i = 1:size(sptuningall,1)
+            for j=1:2
+                [tmp, sizebestsfdfall(i,j)] = max(squeeze(nanmean(nanmean(dftuningall(i,dfWindow,:,:,3,j),2),4))); %index of best sf
+                [tmp, sizebestsfspall(i,j)] = max(squeeze(nanmean(nanmean(sptuningall(i,spWindow,:,:,3,j),2),4)));
+                [tmp, sizebestthetadfall(i,j)] = max(squeeze(nanmean(nanmean(dftuningall(i,dfWindow,:,:,3,j),2),3))); %index of best thetaQuad
+                [tmp, sizebestthetaspall(i,j)] = max(squeeze(nanmean(nanmean(sptuningall(i,spWindow,:,:,3,j),2),3)));
+            end
+        end
+        
+        dfsizeall = nan(size(dftuningall,1),size(dftuningall,2),length(radiusRange),2);spsizeall=dfsizeall;
+        for i = 1:size(dftuningall,1)
+            for k = 1:length(sizes)
+                for l = 1:2
+                dfsizeall(i,:,k,l) = squeeze(dftuningall(i,:,sizebestsfdfall(i,1),...
+                    sizebestthetadfall(i,1),k,l));
+                spsizeall(i,:,k,l) = squeeze(sptuningall(i,:,sizebestsfspall(i,1),...
+                    sizebestthetaspall(i,1),k,l));
+                end
+            end
+        end
+
+        dfsizeall2 = dfsizeall;spsizeall2 = spsizeall;
+        ztrialdf = nan(size(dfsizeall,1),size(dftuningall,2),2);ztrialsp=ztrialdf;
+        for i = 1:2
+            ztrialdf(:,:,i) = squeeze(dfsizeall(:,:,1,i));
+            ztrialsp(:,:,i) = squeeze(spsizeall(:,:,1,i));
+        end
+        for i = 1:length(radiusRange)
+            for j = 1:2
+                dfsizeall2(:,:,i,j) = dfsizeall(:,:,i,j) - ztrialdf(:,:,j);
+                spsizeall2(:,:,i,j) = spsizeall(:,:,i,j) - ztrialsp(:,:,j);
+            end
+        end
+
+        dfsizeall = dfsizeall2;
+        spsizeall = spsizeall2;
+        
 
 
         %%%calculate response as a function of distance from center
@@ -629,9 +707,9 @@ for f=1:length(use)
 
         %%%saving
         save(fullfile(pathname,filename),...
-            'avgrad','histrad','spInterp','running','timepts','ntrials','onsets','dt','ring','frmdata','dfsize','spsize','cellprint','SIdf','SIsp','dftuning','sptuning','dfsize','spsize','sizebestsfdf','sizebestsfsp','sizebestthetadf','sizebestthetasp','-append')
+            'avgrad','histrad','spInterp','running','timepts','ntrials','onsets','dt','ring','frmdata','dfsize','spsize','dfsizeall','spsizeall','cellprint','SIdf','SIsp','dftuning','sptuning','dftuningall','sptuningall','sizebestsfdfall','sizebestsfspall','sizebestthetadfall','sizebestthetaspall','-append')
         save(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing]),...
-            'avgrad','histrad','spInterp','running','timepts','ntrials','onsets','dt','ring','frmdata','dfsize','spsize','cellprint','SIdf','SIsp','dftuning','sptuning','dfsize','spsize','sizebestsfdf','sizebestsfsp','sizebestthetadf','sizebestthetasp','-append')
+            'avgrad','histrad','spInterp','running','timepts','ntrials','onsets','dt','ring','frmdata','dfsize','spsize','dfsizeall','spsizeall','cellprint','SIdf','SIsp','dftuning','sptuning','dftuningall','sptuningall','sizebestsfdfall','sizebestsfspall','sizebestthetadfall','sizebestthetaspall','-append')
         try
             dos(['ps2pdf ' psfilei ' "' [fullfile(pathname,filename) '.pdf'] '"'] )
             dos(['ps2pdf ' psfilei ' "' [fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing]) '.pdf'] '"'] )
@@ -641,7 +719,7 @@ for f=1:length(use)
 
         delete(psfilei);
         close all
-    else
-        sprintf('skipping %s',filename)
-    end
+%     else
+%         sprintf('skipping %s',filename)
+%     end
 end

@@ -17,7 +17,7 @@ for f = 1:length(use)
         imagerate=10;
         cyclength = imagerate*(isi+duration);
         timepts = 0:1/imagerate:(2*isi+duration);timepts = timepts - isi;timepts = timepts(1:end-1);
-        psfilename = 'c:\tempDeniseWF.ps';
+        psfilename = 'C:\Users\nlab\Documents\MATLAB\tempDeniseWF.ps';
         if exist(psfilename,'file')==2;delete(psfilename);end
         
 %         figure
@@ -159,6 +159,7 @@ for f = 1:length(use)
                     ncut = 3 %# of trials to cut due to deconvolution cutting off end
                     trials=trials-ncut; %deconv cuts off last trial
                     deconvimg = deconvimg(:,:,1:trials*cyclength);
+                    xpos=xpos(1:trials);sf=sf(1:trials);tf=tf(1:trials);theta=theta(1:trials);
 
                     base = isi*imagerate-4:isi*imagerate-1;
                     peakWindow = isi*imagerate+1:isi*imagerate+3;
@@ -196,6 +197,7 @@ for f = 1:length(use)
                 ncut = 3 %# of trials to cut due to deconvolution cutting off end
                 trials=trials-ncut; %deconv cuts off last trial
                 deconvimg = deconvimg(:,:,1:trials*cyclength);
+                xpos=xpos(1:trials);sf=sf(1:trials);tf=tf(1:trials);theta=theta(1:trials);
 
                 base = isi*imagerate-4:isi*imagerate-1;
                 peakWindow = isi*imagerate+1:isi*imagerate+3;

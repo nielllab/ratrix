@@ -53,7 +53,7 @@ for group=1:2
         return
     end
 
-    psfilename = 'c:\tempDeniseWF.ps';
+    psfilename = 'C:\Users\nlab\Documents\MATLAB\tempDeniseWF.ps';
     if exist(psfilename,'file')==2;delete(psfilename);end
 
     %%%load stimulus info

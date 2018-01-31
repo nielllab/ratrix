@@ -193,13 +193,13 @@ end
 % frame(:,31:290,:)=avgmap;
 % avgmap=frame;
 
-load('C:/mapoverlay.mat') %%%need to fix this, only hard coded for 5mm
+% % % load('C:/mapoverlay.mat') %%%need to fix this, only hard coded for 5mm
 
 
-for m=1:2
-    figure
-    imshow(polarMap(meanpolar{m},92));
-end
+% for m=1:2
+%     figure
+%     imshow(polarMap(meanpolar{m},92));
+% end
 
 figure
 for m=1:2
@@ -223,7 +223,7 @@ subplot(2,2,4);
 imAmp = max(abs(meanpolar{1}),abs(meanpolar{2}));
 imAmp=imAmp/(prctile(imAmp(:),90));
 imAmp(imAmp>1)=1;imAmp = imAmp.^1.5;
-showGradient(allPhase,imAmp,xpts,ypts);
+% showGradient(allPhase,imAmp,xpts,ypts);
 figure
 showGradient(allPhase,imAmp,0,0);
 

@@ -2,13 +2,13 @@
 
 dbstop if error
 
-pathname = 'C:\Users\nlab\Desktop\Data\Denise\';
-datapathname = 'C:\Users\nlab\Desktop\Data\Denise\';  
-outpathname = 'C:\Users\nlab\Desktop\Data\Denise\';
+% pathname = 'C:\Users\nlab\Desktop\Data\Denise\';
+% datapathname = 'C:\Users\nlab\Desktop\Data\Denise\';  
+% outpathname = 'C:\Users\nlab\Desktop\Data\Denise\';
 
-% pathname = '\\langevin\backup\widefield\Denise\Enrichment\';
-% datapathname = '\\langevin\backup\widefield\Denise\Enrichment\';  
-% outpathname = '\\langevin\backup\widefield\Denise\Enrichment\';
+pathname = '\\langevin\backup\widefield\Denise\Enrichment\';
+datapathname = '\\langevin\backup\widefield\Denise\Enrichment\';  
+outpathname = '\\langevin\backup\widefield\Denise\Enrichment\';
 
 n=0; %%%start counting sessions
 
@@ -50,7 +50,7 @@ n=n+1;
 files(n).subj = '42RT';
 files(n).expt = '012518';
 files(n).topox= '012518_42RT_RIG2\012518_42RT_RIG2_TOPOX\012518_42RT_RIG2_TOPOXmaps.mat';
-files(n).topoxdata = '012518_42RT_RIG2\012518_42RTT_RIG2_TOPOX\012518_42RT_RIG2_TOPOX';
+files(n).topoxdata = '012518_42RT_RIG2\012518_42RT_RIG2_TOPOX\012518_42RT_RIG2_TOPOX';
 files(n).topoy = '012518_42RT_RIG2\012518_42RT_RIG2_TOPOY\012518_42RT_RIG2_TOPOYmaps.mat';
 files(n).topoydata = '012518_42RT_RIG2\012518_42RT_RIG2_TOPOY\012518_42RT_RIG2_TOPOY';
 files(n).darkness =  '012518_42RT_RIG2\012518_42RT_RIG2_DARKNESS\012518_42RT_RIG2_DARKNESSmaps.mat';
@@ -67,7 +67,7 @@ n=n+1;
 files(n).subj = 'DDD8RT';
 files(n).expt = '012518';
 files(n).topox= '012518_DDD8RT_RIG2\012518_DDD8RT_RIG2_TOPOX\012518_DDD8RT_RIG2_TOPOXmaps.mat';
-files(n).topoxdata = '012518_DDD8RT_RIG2\012518_DDD8RTT_RIG2_TOPOX\012518_DDD8RT_RIG2_TOPOX';
+files(n).topoxdata = '012518_DDD8RT_RIG2\012518_DDD8RT_RIG2_TOPOX\012518_DDD8RT_RIG2_TOPOX';
 files(n).topoy = '012518_DDD8RT_RIG2\012518_DDD8RT_RIG2_TOPOY\012518_DDD8RT_RIG2_TOPOYmaps.mat';
 files(n).topoydata = '012518_DDD8RT_RIG2\012518_DDD8RT_RIG2_TOPOY\012518_DDD8RT_RIG2_TOPOY';
 files(n).darkness =  '012518_DDD8RT_RIG2\012518_DDD8RT_RIG2_DARKNESS\012518_DDD8RT_RIG2_DARKNESSmaps.mat';

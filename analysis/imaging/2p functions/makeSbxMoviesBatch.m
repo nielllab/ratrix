@@ -6,11 +6,14 @@ if ~exist('spatialBin','var')
     fullMovie = 1;
 end
 
+tic
+
 d = dir('*.sbx');
 for i=1:length(d)
 
+
     fn = strtok(d(i).name,'.');
- 
+    
     avifname = [fn '_FULL.avi'];
     if ~exist(avifname,'file')
         sprintf('making %s',avifname)
@@ -41,9 +44,14 @@ for i=1:length(d)
         
         dimg = img(5:5:end,5:5:end,5:5:end);
         figure
-        hist(dimg(:),100);
-        lb = 0.8*prctile(dimg(:),1); ub = 1.5*prctile(dimg(:),99.9);
-        
+        hist(dimg(:),100); hold on
+        lb = prctile(dimg(:),1); ub = prctile(dimg(:),99.5);
+        plot(lb,0,'g*'); plot(ub,0,'g*');
+        figure
+        mn = mean(img,3);
+        imshow(mat2im(mn,gray,[lb ub]));
+       title(fn);
+                
         if fullMovie
             display('converting to movie')
             cycMov= mat2im(img,gray,[lb ub]);
@@ -62,3 +70,5 @@ for i=1:length(d)
     end
     
 end
+
+toc

@@ -1,6 +1,5 @@
 % this script runs a quick test for topox or topoy to get cycavg and
 % fourier map
-
 %%add pixel-wise, thresholded histogram of phase
 
 % %%% reads raw images, calculates dfof, and aligns to stim sync
@@ -23,7 +22,7 @@ sf=0; isi=0; duration=0; theta=0; phase=0; radius=0;
 % moviefname = 'C:\sizeSelect2sf8sz26min.mat';
 moviefname = 'C:\sizeTest.mat'
 load(moviefname)
-ntrials= min(dt*length(dfofInterp)/(isi+duration),length(sf))
+ntrials= floor(min(dt*length(dfofInterp)/(isi+duration),length(sf)))
 onsets = dt + (0:ntrials-1)*(isi+duration);
 timepts = 1:(2*isi+duration)/dt;
 timepts = (timepts-1)*dt;
@@ -35,10 +34,9 @@ meandfofInterp = squeeze(mean(mean(dfofInterp,1),2))';
 
 sz = unique(radius);
 freq = unique(sf);
-x=unique(xpos);
 for i=1:length(radiusRange); sizes{i} = num2str(radiusRange(i)); end
 
-
+radius=radius(1:ntrials);
 frmdata = nan(size(dFout,1),size(dFout,2),length(sz));
 for s = 1:length(sz);
         frmdata(:,:,s) = nanmean(nanmean(dFout(:,:,9:11,radius==sz(s)),4),3)-...

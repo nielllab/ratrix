@@ -6,12 +6,21 @@ dbstop if error
 %select batch file
 batchDeniseEnrichment
 cd(pathname)
+grpnames = {'ControlGratingPatchWF','EnrichmentGratingPatchWF'};
  
 %select animals to use
 use = find(strcmp({files.notes},'good imaging session'))
 sprintf('%d experiments for individual analysis',length(use))
 
-indani = input('analyze individual data? 0=no 1=yes: ')
+%%%user settings
+deconvplz = 1 %choose if you want deconvolution
+downsample = 0.5; %downsample ratio
+pixbin = 5 %choose binning for gaussian analysis of spread
+dfrange = [-0.01 0.05;-0.01 0.15]; %%%range for imagesc visualization, row is running/stationary
+behavState = {'stationary','running'};
+
+
+indani = input('analyze individual data? 0=no 1=yes: ');
 if indani
     redoani = input('reanalyze old experiments? 0=no, 1=yes: ');
     if redoani
@@ -22,6 +31,8 @@ if indani
 else
     redoani = 0;
 end   
+
+redogrp = input('redo group analysis? 0=no 1=yes: ');
 
 alluse = use;%needed for doTopography
 allsubj = unique({files(alluse).subj}); %needed for doTopography
@@ -34,18 +45,31 @@ if indani
     sprintf('individual analysis complete, starting group...')
 end
 
-% group = input('which group? 1=saline naive, 2=saline trained, 3=DOI naive, 4=DOI trained: ')
-% redogrp = input('reanalyze group data? 0=no, 1=yes: ')
+%%%load stimulus info
+load('C:\gratingpatch3sf2tf8dir')
+sfrange = unique(sf);tfrange = unique(tf);thetarange = unique(theta);xrange = unique(xpos);
+imagerate=10;
+cyclength = imagerate*(isi+duration);
+timepts = 0:1/imagerate:(2*isi+duration);timepts = timepts - isi;timepts = timepts(1:end-1);
+numAni = length(use);
 
-redogrp=1
+if deconvplz
+    base = isi*imagerate-4:isi*imagerate-1;
+    peakWindow = isi*imagerate+1:isi*imagerate+3;
+else
+    base = isi*imagerate-4:isi*imagerate-1;
+    peakWindow = isi*imagerate+8:isi*imagerate+10;
+end
+
+% redogrp=1
 for group=1:2
 
     if group==1
-        use = (strcmp({files.cond},'control') & strcmp({files.notes},'good imaging session')) 
-        grpfilename = 'ControlGratingPatchWF'
+        use = find((strcmp({files.cond},'control') & strcmp({files.notes},'good imaging session')))
+        grpfilename = grpnames{1}
     elseif group==2
-        use = (strcmp({files.cond},'enrichment') & strcmp({files.notes},'good imaging session'))
-        grpfilename = 'EnrichmentGratingPatchWF'
+        use = find((strcmp({files.cond},'enrichment') & strcmp({files.notes},'good imaging session')))
+        grpfilename = grpnames{2}
     end
 
     if isempty(use)
@@ -55,16 +79,6 @@ for group=1:2
 
     psfilename = 'C:\Users\nlab\Documents\MATLAB\tempDeniseWF.ps';
     if exist(psfilename,'file')==2;delete(psfilename);end
-
-    %%%load stimulus info
-    load('C:\gratingpatch3sf2tf8dir')
-    sfrange = unique(sf);tfrange = unique(tf);thetarange = unique(theta);xrange = unique(xpos);
-    imagerate=10;
-    cyclength = imagerate*(isi+duration);
-    base = isi*imagerate-4:isi*imagerate-1;
-    peakWindow = isi*imagerate+1:isi*imagerate+3;
-    timepts = 0:1/imagerate:(2*isi+duration);timepts = timepts - isi;timepts = timepts(1:end-1);
-    numAni = length(use);
 
     %% concatenate individual experiments into group data
     if redogrp
@@ -109,7 +123,7 @@ for group=1:2
             for j = 1:length(sfrange)
                 for k = 1:length(tfrange)
                     subplot(length(sfrange),length(tfrange),figcnt)
-                    imagesc(squeeze(nanmean(nanmean(nanmean(grpcyc(:,:,:,peakWindow,i,j,k,:,m),8),4),1)),dfrange(1,:))
+                    imagesc(squeeze(nanmean(nanmean(nanmean(grpcyc(2:end,:,:,peakWindow,i,j,k,:,m),8),4),1)),dfrange(1,:))
                     axis off;axis equal;
                     title(sprintf('%0.2fcpd %dHz',sfrange(j),tfrange(k)))
                     figcnt=figcnt+1;
@@ -121,7 +135,7 @@ for group=1:2
                 print('-dpsc',psfilename,'-append');
             end
             
-            figure;colormap jet
+            figure;
             figcnt=1;
             for j = 1:length(sfrange)
                 for k = 1:length(tfrange)
@@ -168,12 +182,123 @@ for group=1:2
     %% save pdf
 
     try
-        dos(['ps2pdf ' psfilename ' "' [grpfilename '.pdf'] '"'])
+        dos(['ps2pdf ' psfilename ' "' fullfile(outpathname,grpfilename) '.pdf' '"'])
     catch
         display('couldnt generate pdf');
     end
 
     delete(psfilename);
+    close all
 end
 
 
+%% overlay group data
+
+psfilename = 'C:\Users\nlab\Documents\MATLAB\tempDeniseWF.ps';
+if exist(psfilename,'file')==2;delete(psfilename);end
+
+for i = 1:length(xrange)*3*length(grpnames)
+    figlist{i} = figure;
+end
+plotcol = {'k','r'};
+
+for group=1:2
+    load(fullfile(outpathname,grpnames{group}))
+    f = 1;
+    for m = 1:2 %sit/run
+        for i = 1:length(xrange)
+            
+            figure(figlist{f});colormap jet
+            figcnt=1+length(sfrange)*length(tfrange)*(group-1);
+            for j = 1:length(sfrange)
+                for k = 1:length(tfrange)
+                    subplot(2,length(tfrange)*length(sfrange),figcnt)
+                    frm = squeeze(nanmean(nanmean(nanmean(grpcyc(2:end,:,:,peakWindow,i,j,k,:,m),8),4),1));
+                    imagesc(frm,dfrange(1,:))
+                    axis off; axis equal
+                    title(sprintf('%0.2fcpd %dHz',sfrange(j),tfrange(k)))
+                    figcnt=figcnt+1;
+                end
+            end
+            
+            f=f+1;
+                        
+            figure(figlist{f})
+            figcnt=1;
+            for j = 1:length(sfrange)
+                for k = 1:length(tfrange)
+                    subplot(length(sfrange),length(tfrange),figcnt)
+                    hold on
+                    vals = squeeze(nanmean(grptrace(:,:,i,j,k,:,m),6));
+                    shadedErrorBar(timepts,nanmean(vals,1),nanstd(vals,[],1)/sqrt(size(vals,1)),plotcol{group},1)
+                    ylabel('dfof')
+                    xlabel('time(s)')
+                    axis([timepts(1) timepts(end) -0.01 0.1])
+                    axis square
+                    title(sprintf('%0.2fcpd %dHz',sfrange(j),tfrange(k)))
+                    set(gca,'LooseInset',get(gca,'TightInset'))
+                    figcnt=figcnt+1;
+                end
+            end
+            
+            f=f+1;
+            
+            figure(figlist{f})
+            figcnt=1;
+            for j = 1:length(sfrange)
+                for k = 1:length(tfrange)
+                    subplot(length(sfrange),length(tfrange),figcnt)
+                    hold on
+                    vals = squeeze(nanmean(grpring(:,:,i,j,k,:,m),6));
+                    shadedErrorBar(1:size(grpring,2),nanmean(vals,1),nanstd(vals,[],1)/sqrt(size(vals,1)),plotcol{group},1)
+                    ylabel('dfof')
+                    xlabel('distance from cent (pix)')
+                    axis([0 ceil(size(grpring,2)/10)*5 -0.001 0.1])
+                    set(gca,'LooseInset',get(gca,'TightInset'),'xtick',0:10:ceil(size(grpring,1)/10)*5,'xticklabel',0:10*pixbin:ceil(size(grpring,1)/10)*5*pixbin)
+                    axis square
+                    title(sprintf('%0.2fcpd %dHz',sfrange(j),tfrange(k)))
+                    figcnt = figcnt+1;
+                end
+            end
+            
+            f=f+1;
+        end
+    end
+end
+
+f = 1;
+for m = 1:2 %sit/run
+    for i = 1:length(xrange)
+        figure(figlist{f})
+        mtit(sprintf('pixelwise xpos%d %s',i,behavState{m}))
+        if exist('psfilename','var')
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+            print('-dpsc',psfilename,'-append');
+        end
+        f=f+1;
+            
+        figure(figlist{f})
+        mtit(sprintf('cycavg xpos%d %s',i,behavState{m}))
+        if exist('psfilename','var')
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+            print('-dpsc',psfilename,'-append');
+        end
+        f=f+1;
+
+        figure(figlist{f})
+        mtit(sprintf('spread xpos%d %s',i,behavState{m}))
+        if exist('psfilename','var')
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+            print('-dpsc',psfilename,'-append');
+        end
+        f=f+1;
+    end
+end
+
+try
+    dos(['ps2pdf ' psfilename ' "' fullfile(outpathname,'EnrichmentCompare.pdf') '"'])
+catch
+    display('couldnt generate pdf');
+end
+
+delete(psfilename);

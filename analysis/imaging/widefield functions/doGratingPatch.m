@@ -1,12 +1,7 @@
 %%%doGratingPatch
 %%% called from analyzeGratingPatch for batch analysis of individual sessions
 
-%%
-
-deconvplz = 1 %choose if you want deconvolution
-downsample = 0.5; %downsample ratio
-pixbin = 5 %choose binning for gaussian analysis of spread
-dfrange = [-0.01 0.05;-0.01 0.15]; %%%range for imagesc visualization, row is running/stationary
+%% load data and check quality
 
 for f = 1:length(use)
     clear x y dist trialcycavg ring deconvimg
@@ -133,6 +128,7 @@ for f = 1:length(use)
                     size(deconvimg)
                     base = isi*imagerate-4:isi*imagerate-1;
                     peakWindow = isi*imagerate+1:isi*imagerate+3;
+                    sprintf('loading data')
                 catch
                     sprintf('doing deconvolution')
                     %do deconvolution on the raw data
@@ -213,9 +209,14 @@ for f = 1:length(use)
             deconvimg = img;
             base = isi*imagerate-4:isi*imagerate-1;
             peakWindow = isi*imagerate+8:isi*imagerate+10;
+            sprintf('saving...')
+            try
+                save(fullfile(outpathname,filename),'deconvimg','-append','-v7.3');
+            catch
+                save(fullfile(outpathname,filename),'deconvimg','-v7.3');
+            end
         end
-        
-        
+
         
 %%
         %%% separate responses by trials
@@ -231,22 +232,34 @@ for f = 1:length(use)
             try
                 trialspeed(tr) = mean(sp(peakWindow+t0));
             catch
-                trialspeed(tr)=20;
+                trialspeed(tr)=speedcut;
             end
             trialcyc(:,:,:,tr) = deconvimg(:,:,t0+(1:cyclength+isi*imagerate));%each cycle is frames 6-26, stim comes on at frame 11
         end
 
-        behavState = {'stationary','running'};
+        
     %     xrange = unique(xpos); sfrange=unique(sf); tfrange=unique(tf);
         running = zeros(1,trials); %pull out stationary vs. runnning (0 vs. 1)
         for i = 1:trials
             running(i) = trialspeed(i)>speedcut;
         end
         
+        figure
+        hold on
+        plot(sp,'g')
+        plot(squeeze(mean(mean(deconvimg,2),1))*1000+100,'b')
+        plot(1:cyclength:length(running)*cyclength,running*500,'r.')
+        xlabel('frame')
+        ylabel('running vs. dfof')
+        legend('dfof','running','run trials')
+        axis([0 length(sp) 0 500])
+        if exist('psfilename','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfilename,'-append');
+        end
         
         %%plot percent time running
-        sp = conv(sp,ones(50,1),'same')/20;
-        mv = sum(sp>20)/length(sp);
+        mv = sum(running)/length(running);
         figure
         subplot(1,2,1)
         bar(mv);
@@ -310,24 +323,25 @@ for f = 1:length(use)
             satisfied = 0;
             while satisfied==0
                 dist = nan(size(trialcycavg,1),size(trialcycavg,2),length(xrange));
+                figs={};
                 for i = 1:length(xrange)
                     sprintf('Pick center of visual response')
 
                     figure;
                     colormap jet
                     subplot(1,2,1)
-                    imagesc(squeeze(nanmean(nanmean(nanmean(nanmean(trialcycavg(:,:,peakWindow,i,:,:,:,1),3),5),6),7)),dfrange(1,:))
+                    imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,i,1,1,:,1),3),7)),dfrange(1,:))
                     axis off; axis equal
                     title('stationary')
                     subplot(1,2,2)
-                    imagesc(squeeze(nanmean(nanmean(nanmean(nanmean(trialcycavg(:,:,peakWindow,i,:,:,:,2),3),5),6),7)),dfrange(1,:))
+                    imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,i,1,1,:,2),3),7)),dfrange(1,:))
                     axis off; axis equal
                     title('running')
 
-                    figure;
+                    figs{i} = figure;
                     colormap jet
                     subplot(1,2,1)
-                    imagesc(squeeze(nanmean(nanmean(nanmean(nanmean(trialcycavg(:,:,peakWindow,i,:,:,:,1),3),5),6),7)),dfrange(1,:))
+                    imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,i,1,1,:,1),3),7)),dfrange(1,:))
                     axis off; axis equal
                     title('select center point of response')
                     [y(i) x(i)] = ginput(1);
@@ -346,9 +360,12 @@ for f = 1:length(use)
                     satisfied = input('try again: satisfied with your selection? 0=heck no!, 1=booya!: ')
                 end
             end
-            if exist('psfilename','var')
-                set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-                print('-dpsc',psfilename,'-append');
+            for i = 1:length(xrange)
+                figure(figs{i})
+                if exist('psfilename','var')
+                    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+                    print('-dpsc',psfilename,'-append');
+                end
             end
             save(fullfile(outpathname,filename),'x','y','dist','-append','-v7.3');
         else
@@ -358,7 +375,7 @@ for f = 1:length(use)
                     figure;
                     colormap jet
                     subplot(1,2,1)
-                    imagesc(squeeze(nanmean(nanmean(nanmean(nanmean(trialcycavg(:,:,peakWindow,i,:,:,:,1),3),5),6),7)),dfrange(1,:))
+                    imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,i,1,1,:,1),3),7)),dfrange(1,:))
                     axis off; axis equal
                     title('select center point of response')
                     hold on
@@ -376,24 +393,25 @@ for f = 1:length(use)
                 satisfied = 0;
                 while satisfied==0
                     dist = nan(size(trialcycavg,1),size(trialcycavg,2),length(xrange));
+                    figs={};
                     for i = 1:length(xrange)
                         sprintf('Pick center of visual response')
 
                         figure;
                         colormap jet
                         subplot(1,2,1)
-                        imagesc(squeeze(nanmean(nanmean(nanmean(nanmean(trialcycavg(:,:,peakWindow,i,:,:,:,1),3),5),6),7)),dfrange(1,:))
+                        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,i,1,1,:,1),3),7)),dfrange(1,:))
                         axis off; axis equal
                         title('stationary')
                         subplot(1,2,2)
-                        imagesc(squeeze(nanmean(nanmean(nanmean(nanmean(trialcycavg(:,:,peakWindow,i,:,:,:,2),3),5),6),7)),dfrange(1,:))
+                        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,i,1,1,:,2),3),7)),dfrange(1,:))
                         axis off; axis equal
                         title('running')
 
-                        figure;
+                        figs{i} = figure;
                         colormap jet
                         subplot(1,2,1)
-                        imagesc(squeeze(nanmean(nanmean(nanmean(nanmean(trialcycavg(:,:,peakWindow,i,:,:,:,1),3),5),6),7)),dfrange(1,:))
+                        imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,i,1,1,:,1),3),7)),dfrange(1,:))
                         axis off; axis equal
                         title('select center point of response')
                         [y(i) x(i)] = ginput(1);
@@ -412,10 +430,13 @@ for f = 1:length(use)
                         satisfied = input('try again: satisfied with your selection? 0=heck no!, 1=booya!: ')
                     end
                 end
+            for i = 1:length(xrange)
+                figure(figs{i})
                 if exist('psfilename','var')
                     set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
                     print('-dpsc',psfilename,'-append');
                 end
+            end
                 save(fullfile(outpathname,filename),'x','y','dist','-append','-v7.3');
             end
         end
@@ -443,9 +464,9 @@ for f = 1:length(use)
         
 %% save data
         try
-            save(fullfile(outpathname,filename),'trialcycavg','ring','-v7.3','-append');
+            save(fullfile(outpathname,filename),'sp','running','trialcycavg','ring','-v7.3','-append');
         catch
-            save(fullfile(outpathname,filename),'trialcycavg','ring','-v7.3');
+            save(fullfile(outpathname,filename),'sp','running','trialcycavg','ring','-v7.3');
         end
 %% plot averages for the different stimulus parameters
         sprintf('plotting responses')

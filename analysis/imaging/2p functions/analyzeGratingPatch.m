@@ -51,13 +51,12 @@ sfrange = unique(sf);tfrange = unique(tf);thetarange = unique(theta);xrange = un
 imagerate=10;
 cyclength = imagerate*(isi+duration);
 timepts = 0:1/imagerate:(2*isi+duration);timepts = timepts - isi;timepts = timepts(1:end-1);
-numAni = length(use);
 
 if deconvplz
-    base = isi*imagerate-4:isi*imagerate-1;
+    base = isi*imagerate-2:isi*imagerate;
     peakWindow = isi*imagerate+1:isi*imagerate+3;
 else
-    base = isi*imagerate-4:isi*imagerate-1;
+    base = isi*imagerate-2:isi*imagerate;
     peakWindow = isi*imagerate+8:isi*imagerate+10;
 end
 
@@ -71,7 +70,8 @@ for group=1:2
         use = find((strcmp({files.cond},'enrichment') & strcmp({files.notes},'good imaging session')))
         grpfilename = grpnames{2}
     end
-
+    numAni = length(use);
+    
     if isempty(use)
         sprintf('No animals in %s',grpfilename)
         return
@@ -89,7 +89,7 @@ for group=1:2
         grptrace = nan(numAni,size(trialcycavg,3),size(trialcycavg,4),size(trialcycavg,5),size(trialcycavg,6),size(trialcycavg,7),2);
 
         anicnt = 1;
-        for f = 1:2:length(use)
+        for f = 1:length(use)
             aniFile = sprintf('%s_%s_%s_gratingpatch.mat',files(use(f)).expt,files(use(f)).subj,files(use(f)).cond);
             load(aniFile,'ring','trialcycavg','x','y')
             grpcyc(anicnt,:,:,:,:,:,:,:,:) = trialcycavg;
@@ -123,7 +123,7 @@ for group=1:2
             for j = 1:length(sfrange)
                 for k = 1:length(tfrange)
                     subplot(length(sfrange),length(tfrange),figcnt)
-                    imagesc(squeeze(nanmean(nanmean(nanmean(grpcyc(2:end,:,:,peakWindow,i,j,k,:,m),8),4),1)),dfrange(1,:))
+                    imagesc(squeeze(nanmean(nanmean(nanmean(grpcyc(:,:,:,peakWindow,i,j,k,:,m),8),4),1)),dfrange(1,:))
                     axis off;axis equal;
                     title(sprintf('%0.2fcpd %dHz',sfrange(j),tfrange(k)))
                     figcnt=figcnt+1;
@@ -140,10 +140,11 @@ for group=1:2
             for j = 1:length(sfrange)
                 for k = 1:length(tfrange)
                     subplot(length(sfrange),length(tfrange),figcnt)
-                    plot(timepts,squeeze(nanmean(nanmean(grptrace(:,:,i,j,k,:,m),6),1)))
+                    vals = bsxfun(@minus,squeeze(nanmean(grptrace(:,:,i,j,k,:,m),6)),squeeze(nanmean(nanmean(grptrace(:,base,i,j,k,:,m),6),2)));
+                    shadedErrorBar(timepts,nanmean(vals,1),nanstd(vals,[],1)/sqrt(size(vals,1)))
                     ylabel('dfof')
                     xlabel('time(s)')
-                    axis([timepts(1) timepts(end) -0.01 0.1])
+                    axis([timepts(base(1)) timepts(end) -0.025 0.15])
                     axis square
                     title(sprintf('%0.2fcpd %dHz',sfrange(j),tfrange(k)))
                     figcnt=figcnt+1;
@@ -163,8 +164,8 @@ for group=1:2
                     plot(1:size(grpring,2),squeeze(nanmean(nanmean(grpring(:,:,i,j,k,:,m),6),1)))
                     ylabel('dfof')
                     xlabel('distance from cent (pix)')
-                    axis([0 ceil(size(grpring,2)/10)*5 -0.001 0.1])
-                    set(gca,'xtick',0:10:ceil(size(grpring,1)/10)*5,'xticklabel',0:10*pixbin:ceil(size(grpring,1)/10)*5*pixbin)
+                    axis([0 ceil(size(grpring,2)/10)*3 -0.025 0.15])
+                    set(gca,'xtick',0:3:ceil(size(grpring,1)/3)*3,'xticklabel',0:3*pixbin:ceil(size(grpring,1)/3)*3*pixbin)
                     axis square
                     title(sprintf('%0.2fcpd %dHz',sfrange(j),tfrange(k)))
                     figcnt = figcnt+1;
@@ -197,7 +198,7 @@ end
 psfilename = 'C:\Users\nlab\Documents\MATLAB\tempDeniseWF.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
-for i = 1:length(xrange)*3*length(grpnames)
+for i = 1:(length(xrange)*3*length(grpnames)+4)
     figlist{i} = figure;
 end
 plotcol = {'k','r'};
@@ -206,6 +207,47 @@ for group=1:2
     load(fullfile(outpathname,grpnames{group}))
     f = 1;
     for m = 1:2 %sit/run
+        
+        figure(figlist{f})
+        figcnt=1;
+        for j = 1:length(sfrange)
+            for k = 1:length(tfrange)
+                subplot(length(sfrange),length(tfrange),figcnt)
+                hold on
+                vals = bsxfun(@minus,squeeze(nanmean(nanmean(grptrace(:,:,:,j,k,:,m),6),3)),squeeze(nanmean(nanmean(nanmean(grptrace(:,base,:,j,k,:,m),6),3),2)));
+                shadedErrorBar(timepts,nanmean(vals,1),nanstd(vals,[],1)/sqrt(size(vals,1)),plotcol{group},1)
+                ylabel('dfof')
+                xlabel('time(s)')
+                axis([timepts(base(1)) timepts(end) -0.025 0.15])
+                axis square
+                title(sprintf('%0.2fcpd %dHz',sfrange(j),tfrange(k)))
+                set(gca,'LooseInset',get(gca,'TightInset'))
+                figcnt=figcnt+1;
+            end
+        end
+
+        f=f+1;
+
+        figure(figlist{f})
+        figcnt=1;
+        for j = 1:length(sfrange)
+            for k = 1:length(tfrange)
+                subplot(length(sfrange),length(tfrange),figcnt)
+                hold on
+                vals = squeeze(nanmean(nanmean(grpring(:,:,:,j,k,:,m),6),3));
+                shadedErrorBar(1:size(grpring,2),nanmean(vals,1),nanstd(vals,[],1)/sqrt(size(vals,1)),plotcol{group},1)
+                ylabel('dfof')
+                xlabel('distance from cent (pix)')
+                axis([0 ceil(size(grpring,2)/10)*3 -0.025 0.15])
+                set(gca,'LooseInset',get(gca,'TightInset'),'xtick',0:3:ceil(size(grpring,1)/3)*3,'xticklabel',0:3*pixbin:ceil(size(grpring,1)/3)*3*pixbin)
+                axis square
+                title(sprintf('%0.2fcpd %dHz',sfrange(j),tfrange(k)))
+                figcnt = figcnt+1;
+            end
+        end
+
+        f=f+1;
+        
         for i = 1:length(xrange)
             
             figure(figlist{f});colormap jet
@@ -213,7 +255,7 @@ for group=1:2
             for j = 1:length(sfrange)
                 for k = 1:length(tfrange)
                     subplot(2,length(tfrange)*length(sfrange),figcnt)
-                    frm = squeeze(nanmean(nanmean(nanmean(grpcyc(2:end,:,:,peakWindow,i,j,k,:,m),8),4),1));
+                    frm = squeeze(nanmean(nanmean(nanmean(grpcyc(:,:,:,peakWindow,i,j,k,:,m),8),4),1));
                     imagesc(frm,dfrange(1,:))
                     axis off; axis equal
                     title(sprintf('%0.2fcpd %dHz',sfrange(j),tfrange(k)))
@@ -229,11 +271,11 @@ for group=1:2
                 for k = 1:length(tfrange)
                     subplot(length(sfrange),length(tfrange),figcnt)
                     hold on
-                    vals = squeeze(nanmean(grptrace(:,:,i,j,k,:,m),6));
+                    vals = bsxfun(@minus,squeeze(nanmean(grptrace(:,:,i,j,k,:,m),6)),squeeze(nanmean(nanmean(grptrace(:,base,i,j,k,:,m),6),2)));
                     shadedErrorBar(timepts,nanmean(vals,1),nanstd(vals,[],1)/sqrt(size(vals,1)),plotcol{group},1)
                     ylabel('dfof')
                     xlabel('time(s)')
-                    axis([timepts(1) timepts(end) -0.01 0.1])
+                    axis([timepts(base(1)) timepts(end) -0.025 0.15])
                     axis square
                     title(sprintf('%0.2fcpd %dHz',sfrange(j),tfrange(k)))
                     set(gca,'LooseInset',get(gca,'TightInset'))
@@ -253,8 +295,8 @@ for group=1:2
                     shadedErrorBar(1:size(grpring,2),nanmean(vals,1),nanstd(vals,[],1)/sqrt(size(vals,1)),plotcol{group},1)
                     ylabel('dfof')
                     xlabel('distance from cent (pix)')
-                    axis([0 ceil(size(grpring,2)/10)*5 -0.001 0.1])
-                    set(gca,'LooseInset',get(gca,'TightInset'),'xtick',0:10:ceil(size(grpring,1)/10)*5,'xticklabel',0:10*pixbin:ceil(size(grpring,1)/10)*5*pixbin)
+                    axis([0 ceil(size(grpring,2)/10)*3 -0.025 0.15])
+                    set(gca,'LooseInset',get(gca,'TightInset'),'xtick',0:3:ceil(size(grpring,1)/3)*3,'xticklabel',0:3*pixbin:ceil(size(grpring,1)/3)*3*pixbin)
                     axis square
                     title(sprintf('%0.2fcpd %dHz',sfrange(j),tfrange(k)))
                     figcnt = figcnt+1;
@@ -268,6 +310,23 @@ end
 
 f = 1;
 for m = 1:2 %sit/run
+    
+    figure(figlist{f})
+    mtit(sprintf('all pos cycavg %s',behavState{m}))
+    if exist('psfilename','var')
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+        print('-dpsc',psfilename,'-append');
+    end
+    f=f+1;
+
+    figure(figlist{f})
+    mtit(sprintf('all pos spread %s',behavState{m}))
+    if exist('psfilename','var')
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+        print('-dpsc',psfilename,'-append');
+    end
+    f=f+1;
+
     for i = 1:length(xrange)
         figure(figlist{f})
         mtit(sprintf('pixelwise xpos%d %s',i,behavState{m}))

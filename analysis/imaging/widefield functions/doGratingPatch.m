@@ -124,11 +124,14 @@ for f = 1:length(use)
         if deconvplz == 1
             if redoani==0
                 try
+                    sprintf('loading data')
                     load(fullfile(outpathname,filename),'deconvimg')
                     size(deconvimg)
                     base = isi*imagerate-4:isi*imagerate-1;
                     peakWindow = isi*imagerate+1:isi*imagerate+3;
-                    sprintf('loading data')
+                    ncut = 3 %# of trials to cut due to deconvolution cutting off end
+                    trials=trials-ncut; %deconv cuts off last trial
+                    xpos=xpos(1:trials);sf=sf(1:trials);tf=tf(1:trials);theta=theta(1:trials);
                 catch
                     sprintf('doing deconvolution')
                     %do deconvolution on the raw data
@@ -141,6 +144,10 @@ for f = 1:length(use)
                     deconvimg = deconvimg - mean(mean(mean(deconvimg))); %subtract min value
                     img = shiftdim(img,1); %shift img back
                     img = img - 0.2; %subtract 0.2 back off
+                    delete(pp)
+                    ncut = 3 %# of trials to cut due to deconvolution cutting off end
+                    trials=trials-ncut; %deconv cuts off last trial
+                    deconvimg = deconvimg(:,:,1:trials*cyclength);
                     %check deconvolution success on one pixel
                     figure
                     hold on
@@ -151,12 +158,8 @@ for f = 1:length(use)
                         set(gcf, 'PaperPositionMode', 'auto');
                         print('-dpsc',psfilename,'-append');
                     end
-                    delete(pp)
-                    ncut = 3 %# of trials to cut due to deconvolution cutting off end
-                    trials=trials-ncut; %deconv cuts off last trial
-                    deconvimg = deconvimg(:,:,1:trials*cyclength);
+                    
                     xpos=xpos(1:trials);sf=sf(1:trials);tf=tf(1:trials);theta=theta(1:trials);
-
                     base = isi*imagerate-4:isi*imagerate-1;
                     peakWindow = isi*imagerate+1:isi*imagerate+3;
 
@@ -168,41 +171,52 @@ for f = 1:length(use)
                     end
                 end
             else
-                sprintf('doing deconvolution')
-                %do deconvolution on the raw data
-                img = shiftdim(img+0.2,2); %shift dimesions for decon lucy and add 0.2 to get away from 0
-                tic
-                pp = gcp %start parallel pool
-                deconvimg = deconvg6sParallel(img,0.1); %deconvolve
-                toc
-                deconvimg = shiftdim(deconvimg,1); %shift back
-                deconvimg = deconvimg - mean(mean(mean(deconvimg))); %subtract min value
-                img = shiftdim(img,1); %shift img back
-                img = img - 0.2; %subtract 0.2 back off
-                %check deconvolution success on one pixel
-                figure
-                hold on
-                plot(squeeze(img(130,130,:)))
-                plot(squeeze(deconvimg(130,130,:)),'g')
-                hold off
-                if exist('psfilename','var')
-                    set(gcf, 'PaperPositionMode', 'auto');
-                    print('-dpsc',psfilename,'-append');
-                end
-                delete(pp)
-                ncut = 3 %# of trials to cut due to deconvolution cutting off end
-                trials=trials-ncut; %deconv cuts off last trial
-                deconvimg = deconvimg(:,:,1:trials*cyclength);
-                xpos=xpos(1:trials);sf=sf(1:trials);tf=tf(1:trials);theta=theta(1:trials);
-
-                base = isi*imagerate-4:isi*imagerate-1;
-                peakWindow = isi*imagerate+1:isi*imagerate+3;
-
-                sprintf('saving...')
                 try
-                    save(fullfile(outpathname,filename),'deconvimg','-append','-v7.3');
+                    sprintf('loading data')
+                    load(fullfile(outpathname,filename),'deconvimg')
+                    size(deconvimg)
+                    base = isi*imagerate-4:isi*imagerate-1;
+                    peakWindow = isi*imagerate+1:isi*imagerate+3;
+                    ncut = 3 %# of trials to cut due to deconvolution cutting off end
+                    trials=trials-ncut; %deconv cuts off last trial
+                    xpos=xpos(1:trials);sf=sf(1:trials);tf=tf(1:trials);theta=theta(1:trials);
                 catch
-                    save(fullfile(outpathname,filename),'deconvimg','-v7.3');
+                    sprintf('doing deconvolution')
+                    %do deconvolution on the raw data
+                    img = shiftdim(img+0.2,2); %shift dimesions for decon lucy and add 0.2 to get away from 0
+                    tic
+                    pp = gcp %start parallel pool
+                    deconvimg = deconvg6sParallel(img,0.1); %deconvolve
+                    toc
+                    deconvimg = shiftdim(deconvimg,1); %shift back
+                    deconvimg = deconvimg - mean(mean(mean(deconvimg))); %subtract min value
+                    img = shiftdim(img,1); %shift img back
+                    img = img - 0.2; %subtract 0.2 back off
+                    delete(pp)
+                    ncut = 3 %# of trials to cut due to deconvolution cutting off end
+                    trials=trials-ncut; %deconv cuts off last trial
+                    deconvimg = deconvimg(:,:,1:trials*cyclength);
+                    %check deconvolution success on one pixel
+                    figure
+                    hold on
+                    plot(squeeze(img(130,130,:)))
+                    plot(squeeze(deconvimg(130,130,:)),'g')
+                    hold off
+                    if exist('psfilename','var')
+                        set(gcf, 'PaperPositionMode', 'auto');
+                        print('-dpsc',psfilename,'-append');
+                    end
+                    
+                    xpos=xpos(1:trials);sf=sf(1:trials);tf=tf(1:trials);theta=theta(1:trials);
+                    base = isi*imagerate-4:isi*imagerate-1;
+                    peakWindow = isi*imagerate+1:isi*imagerate+3;
+
+                    sprintf('saving...')
+                    try
+                        save(fullfile(outpathname,filename),'deconvimg','-append','-v7.3');
+                    catch
+                        save(fullfile(outpathname,filename),'deconvimg','-v7.3');
+                    end
                 end
             end
         else
@@ -296,8 +310,10 @@ for f = 1:length(use)
         %get average map with no stimulus
         mintrialcyc = zeros(size(trialcyc,1),size(trialcyc,2),size(trialcyc,3),2);
         for i = 1:2
-            mintrialcyc(:,:,:,i) = squeeze(nanmean(nanmean(nanmean(trialcycavg(:,:,:,:,:,:,end,i),4),5),6)); %min map for stationary and running
+            inds = find(theta==thetarange(end)&running==(m-1));
+            mintrialcyc(:,:,:,i) = squeeze(nanmean(trialcyc(:,:,:,inds),4));
         end
+        
         %subtract average map with no stimulus from trialcycavg and baseline each trial
         for i = 1:length(xrange)
             for j = 1:length(sfrange)
@@ -371,6 +387,7 @@ for f = 1:length(use)
         else
             try
                 load(fullfile(outpathname,filename),'x','y','dist')
+%                 load(fullfile(altpathname,filename),'x','y','dist')
                 for i = 1:length(xrange)
                     figure;
                     colormap jet
@@ -389,6 +406,7 @@ for f = 1:length(use)
                         print('-dpsc',psfilename,'-append');
                     end
                 end
+                save(fullfile(outpathname,filename),'x','y','dist','-append','-v7.3');
             catch
                 satisfied = 0;
                 while satisfied==0

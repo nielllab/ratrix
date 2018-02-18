@@ -373,6 +373,7 @@ dFclust = nanmedian(dFclust,3);
 
 % dFclust = dFclust./repmat(max(dFclust,[],2),[1 size(dFclust,2)]);  %% normalize by max response
 % dFclust = imresize(dFclust,[size(dFclust,1) size(dFclust,2)*0.5]); %%% downsample to improve SNR
+dFclust = imresize(dFclust,[size(dFclust,1) 0.5*size(dFclust,2)])   %%% downsample to improve SNR
 dFclust(dFclust>0.2) = 0.2; dFclust(dFclust<0)=0;
 figure
 imagesc(dFclust,[-0.05 0.2])

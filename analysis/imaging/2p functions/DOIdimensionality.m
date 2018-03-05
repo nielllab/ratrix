@@ -368,8 +368,14 @@ for grp=1:length(grpnames)
     save(fullfile(savepath,grpnames{grp}))
     sprintf('done')
     
-    %% stimulus dimensionality
-
+    %% stimulus dimensionality    
+    mincells = 500;
+    for ani = 1:length(tcells)
+        if length(tcells{ani})<mincells
+            mincells = length(tcells{ani});
+        end
+    end
+    
     %%%plot individual animal dimensionality vs. # cells
     for ani = 1:numAni
         figure;
@@ -400,7 +406,7 @@ for grp=1:length(grpnames)
         title('pre vs. post stim');xlabel('# cells');ylabel('dimensionality');
         axis square
         
-        mtit(sprintf('%s %s',files(use(ani)).subj,files(use(ani)).inject))
+        mtit(sprintf('%s %s',files(use(ani*2)).subj,files(use(ani*2)).inject))
         if exist('psfile','var')
             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
             print('-dpsc',psfile,'-append');
@@ -417,24 +423,28 @@ for grp=1:length(grpnames)
     shadedErrorBar(1:500,nanmean(prestim,1),nanstd(prestim,1)/sqrt(numAni),'r',1)
     title('pre base vs. stim');xlabel('# cells');ylabel('dimensionality');
     axis square
+    xlim([0 mincells])
     subplot(2,2,2)
     hold on
     shadedErrorBar(1:500,nanmean(postbase,1),nanstd(postbase,1)/sqrt(numAni),'k',1)
     shadedErrorBar(1:500,nanmean(poststim,1),nanstd(poststim,1)/sqrt(numAni),'r',1)
     title('post base vs. stim');xlabel('# cells');ylabel('dimensionality');
     axis square
+    xlim([0 mincells])
     subplot(2,2,3)
     hold on
     shadedErrorBar(1:500,nanmean(prebase,1),nanstd(prebase,1)/sqrt(numAni),'k',1)
     shadedErrorBar(1:500,nanmean(postbase,1),nanstd(postbase,1)/sqrt(numAni),'r',1)
     title('pre vs. post base');xlabel('# cells');ylabel('dimensionality');
     axis square
+    xlim([0 mincells])
     subplot(2,2,4)
     hold on
     shadedErrorBar(1:500,nanmean(prestim,1),nanstd(prestim,1)/sqrt(numAni),'k',1)
     shadedErrorBar(1:500,nanmean(poststim,1),nanstd(poststim,1)/sqrt(numAni),'r',1)
     title('pre vs. post stim');xlabel('# cells');ylabel('dimensionality');
     axis square
+    xlim([0 mincells])
 
     mtit(sprintf('%s',grpnames{grp}))
     if exist('psfile','var')
@@ -517,15 +527,15 @@ for grp=1:length(grpnames)
     hold on
     shadedErrorBar(1:500,nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k',1)
     shadedErrorBar(1:500,nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r',1)
-    title('pre base vs. stim');xlabel('# cells');ylabel('corr dim');
-    axis square
+    title('pre vs. post');xlabel('# cells');ylabel('corr dim');
+    axis square; xlim([0 mincells])
     pre = squeeze(nanmean(dDarkCurve(:,1,1,:,:),5));post = squeeze(nanmean(dDarkCurve(:,1,2,:,:),5));
     subplot(1,2,2)
     hold on
     shadedErrorBar(1:500,nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k',1)
     shadedErrorBar(1:500,nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r',1)
-    title('pre base vs. stim');xlabel('# cells');ylabel('cov dim');
-    axis square
+    title('pre vs. post');xlabel('# cells');ylabel('cov dim');
+    axis square; xlim([0 mincells])
 
     mtit(sprintf('%s darkness',grpnames{grp}))
     if exist('psfile','var')

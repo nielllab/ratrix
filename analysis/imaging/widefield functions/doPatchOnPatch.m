@@ -9,7 +9,6 @@
 
 %%
 
-deconvplz = 1 %choose if you want deconvolution
 downsample = 0.5; %downsample ratio
 pixbin = 5 %choose binning for gaussian analysis of spread
 dfrangesit = [-0.01 0.05]; %%%range for imagesc visualization
@@ -19,13 +18,9 @@ for f = 1:length(use)
     clear x y dist trialcycavg ring deconvimg
     filename = sprintf('%s_%s_%s_%s_patchonpatch.mat',files(use(f)).expt,files(use(f)).subj,files(use(f)).timing,files(use(f)).inject);
     if (exist(fullfile(outpathname,filename),'file')==0 | redoani==1)
-        load('C:\patchonpatch16min')
-%         load('C:\mapoverlay.mat')
-%         load('C:\areamaps.mat')
+        load(moviename)
         imagerate=10;
         cyclength = imagerate*(isi+duration);
-        base = isi*imagerate-4:isi*imagerate-1;
-        peakWindow = isi*imagerate+1:isi*imagerate+3;
         timepts = 0:1/imagerate:(2*isi+duration);timepts = timepts - isi;timepts = timepts(1:end-1);
         psfilename = 'c:\tempPhilWF.ps';
         if exist(psfilename,'file')==2;delete(psfilename);end
@@ -138,8 +133,11 @@ for f = 1:length(use)
 %% do deconvolution
         if deconvplz == 1
             try
+                sprintf('loading data...')
                 load(fullfile(outpathname,filename),'deconvimg')
                 size(deconvimg)
+                ncut = 3 %# of trials to cut due to deconvolution cutting off end
+                trials=trials-ncut; %deconv cuts off last trial
             catch
                 sprintf('doing deconvolution')
                 %do deconvolution on the raw data
@@ -152,6 +150,10 @@ for f = 1:length(use)
                 deconvimg = deconvimg - mean(mean(mean(deconvimg))); %subtract min value
                 img = shiftdim(img,1); %shift img back
                 img = img - 0.2; %subtract 0.2 back off
+                delete(pp)
+                ncut = 3 %# of trials to cut due to deconvolution cutting off end
+                trials=trials-ncut; %deconv cuts off last trial
+                deconvimg = deconvimg(:,:,1:trials*cyclength);
                 %check deconvolution success on one pixel
                 figure
                 hold on
@@ -162,10 +164,6 @@ for f = 1:length(use)
                     set(gcf, 'PaperPositionMode', 'auto');
                     print('-dpsc',psfilename,'-append');
                 end
-                delete(pp)
-                ncut = 3 %# of trials to cut due to deconvolution cutting off end
-                trials=trials-ncut; %deconv cuts off last trial
-                deconvimg = deconvimg(:,:,1:trials*cyclength);
                 
                 sprintf('saving...')
                 try
@@ -176,6 +174,11 @@ for f = 1:length(use)
             end
         else
             deconvimg = img;
+            try
+                save(fullfile(outpathname,filename),'deconvimg','-append','-v7.3');
+            catch
+                save(fullfile(outpathname,filename),'deconvimg','-v7.3');
+            end
         end
         
         
@@ -303,6 +306,7 @@ for f = 1:length(use)
             else
                 try
                     load(fullfile(outpathname,filename),'x','y','dist')
+%                     load(fullfile(altpathname,filename),'x','y','dist')
                     figure;
                     colormap jet
                     subplot(1,2,1)
@@ -379,7 +383,7 @@ for f = 1:length(use)
             catch
                 load(fullfile(outpathname,sprintf('%s_%s_%s_%s_patchonpatch.mat',files(use(f)).expt,files(use(f)).subj,files(use(f-1)).timing,files(use(f)).inject)),...
                     'x','y','dist')
-                
+%                 load(fullfile(altpathname,filename),'x','y','dist')
                 figure;
                 colormap jet
                 subplot(1,2,1)

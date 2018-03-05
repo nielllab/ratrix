@@ -29,7 +29,7 @@ if exist(psfile,'file')==2;delete(psfile);end
 cd(pathname);
 % cd(altpath);
 
-group = input('which group? 1=saline naive, 2=saline trained, 3=DOI naive, 4=DOI trained: ')
+group = input('which group? 1=saline naive, 2=saline trained, 3=DOI naive, 4=DOI trained, 5=saline, 6=DOI: ')
 redoani = input('reanalyze individual animal data? 0=no, 1=yes: ')
 if redoani
     rerun = input('rerun entire analysis with stim align? 0=no, 1=yes: ')
@@ -49,8 +49,14 @@ elseif group==3
 elseif group==4
     use = find(strcmp({files.inject},'doi')  & strcmp({files.training},'trained') & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
     grpfilename = 'DOITrained2pSizeSelectEff'
+elseif group==5
+    use = find(strcmp({files.inject},'saline')  & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
+    grpfilename = 'Saline2pSizeSelectEff'
+elseif group==6
+    use = find(strcmp({files.inject},'doi')  & strcmp({files.label},'camk2 gc6') & strcmp({files.notes},'good imaging session')  ) 
+    grpfilename = 'DOI2pSizeSelectEff'
 else
-    sprintf('please restart and choose a number 1-4')
+    sprintf('please restart and choose a number 1-6')
 end
 
 if isempty(use)
@@ -65,7 +71,7 @@ end
 
 % % % keyboard
 
-mycol = {'b','g','r','c','m','y','k','b','g','r','c','m','y','k'};
+mycol = {'b','g','r','c','m','y','k','b','g','r','c','m','y','k'};mycol = [mycol mycol];
 moviefname = 'C:\sizeselectBin22min';
 load(moviefname)
 dfWindow = 9:11;
@@ -725,7 +731,7 @@ if exist('psfile','var')
     print('-dpsc',psfile,'-append');
 end
 
-keyboard
+% keyboard
 
 %% eye analysis
 figure
@@ -879,6 +885,32 @@ for z = 1:numAni
 % % %         set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
 % % %         print('-dpsc',psfile,'-append');
 % % %     end
+end
+
+%%%plot the average pixelwise response for entire frame across sizes
+figure
+for st = 1:2
+    subplot(1,2,st)
+    hold on
+    pre = bsxfun(@minus,squeeze(nanmean(nanmean(nanmean(grpfrmdata(:,:,25:375,:,:,st,1),4),3),2)),...
+        squeeze(nanmean(nanmean(nanmean(grpfrmdata(:,:,25:375,:,1,st,1),4),3),2)));
+    post = bsxfun(@minus,squeeze(nanmean(nanmean(nanmean(grpfrmdata(:,:,25:375,:,:,st,2),4),3),2)),...
+        squeeze(nanmean(nanmean(nanmean(grpfrmdata(:,:,25:375,:,1,st,2),4),3),2)));
+%     for ani = 1:numAni
+%         plot(1:length(sizes),pre(ani,:),'k.:')
+%         plot(1:length(sizes),post(ani,:),'r.:')
+%     end
+    errorbar(1:length(sizes),nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k')
+    errorbar(1:length(sizes),nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r')
+    set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'))
+    xlabel('Stim size (deg)')
+    ylabel(sprintf('average frame dF/F %s',stlb{st}))
+    axis square
+end
+mtit('Mean pixelwise response');
+if exist('psfile','var')
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    print('-dpsc',psfile,'-append');
 end
 
 % 
@@ -3768,6 +3800,8 @@ for z=1%:length(ccvals)
     end
 
 end
+
+%%
 
 
 % %%%individual cell plotting

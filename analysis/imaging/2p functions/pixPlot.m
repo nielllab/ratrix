@@ -1,11 +1,13 @@
 pixFig = figure; set(gcf,'Name',figLabel);
 traceFig = figure; set(gcf,'Name',figLabel);
+tl = size(trialTcourse,1);
+
 for i = (1:npanel)+offset
     meanimg = nanmean(trialmean(:,:,stimOrder==i),3);
     figure(pixFig); subplot(nrow,ncol,loc(i-offset));
     imagesc(meanimg,range); axis equal; axis off; colormap jet
     figure(traceFig); subplot(nrow,ncol,loc(i-offset));
-    plot(1:30, trialTcourse(:,stimOrder==i)); hold on; plot(nanmedian(trialTcourse(:,stimOrder==i),2),'g','Linewidth',2); xlim([1 30]);ylim(range)
+    plot(1:tl, trialTcourse(:,stimOrder==i)); hold on; plot(nanmedian(trialTcourse(:,stimOrder==i),2),'g','Linewidth',2); xlim([1 tl]);ylim(range)
     
 end
 

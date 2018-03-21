@@ -141,7 +141,7 @@ for z=1:length(db)
 
         %%%plot dF/F data
         figure
-        imagesc(dF,[0 1])
+        imagesc(dF,[0 10])
         title(sprintf('dF/F %s',db(z).expname{j}))
         if exist('psfilename','var')
             set(gcf, 'PaperPositionMode', 'auto');
@@ -150,8 +150,8 @@ for z=1:length(db)
 
         %%%load in green frame from sbx data and save out results
         thisSession = fullfile(db(z).expdir,[db(z).expname{j}(1:strfind(db(z).expname{j},'V2')+1) '.mat']);
-        load(thisSession,'greenframe');
-        save(db(z).expname{j},'dF','greenframe','meanImg','usePts','spikes','meanShiftImg','cropx','cropy','thisSession','cImage')
+%         load(thisSession,'greenframe');
+        save(db(z).expname{j},'dF','meanImg','usePts','spikes','meanShiftImg','cropx','cropy','thisSession','cImage');%'greenframe',
     end
 
     %%%make pdf file for this session

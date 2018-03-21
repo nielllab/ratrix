@@ -14,11 +14,11 @@ deconvplz = 1 %choose if you want deconvolution
 if deconvplz
     base = isi*imagerate-2:isi*imagerate;
     peakWindow = isi*imagerate+1:isi*imagerate+3;
-%         outpathname = '\\langevin\backup\widefield\DOIpaper\patchonpatch\';
+%     outpathname = '\\langevin\backup\widefield\DOIpaper\patchonpatch\';
 else
     base = isi*imagerate-2:isi*imagerate;
     peakWindow = isi*imagerate+8:isi*imagerate+10;
-%         outpathname = '\\langevin\backup\widefield\DOIpaper\patchonpatch\';
+%     outpathname = '\\langevin\backup\widefield\DOIpaper\patchonpatch\';
 end
 
  

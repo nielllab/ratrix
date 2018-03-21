@@ -362,25 +362,25 @@ for f = 1:length(use)
                 end
             end
         else
-            try
-                load(fullfile(outpathname,filename),'x','y','dist')
-                figure;
-                colormap jet
-                subplot(1,2,1)
-                imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),dfrangesit)
-                axis off; axis equal
-                title('select center point of response')
-                hold on
-                plot(y,x,'wo','MarkerSize',15)
-
-                subplot(1,2,2)
-                imagesc(dist)
-                axis off;axis equal
-                if exist('psfilename','var')
-                    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-                    print('-dpsc',psfilename,'-append');
-                end
-            catch
+%             try
+%                 load(fullfile(outpathname,filename),'x','y','dist')
+%                 figure;
+%                 colormap jet
+%                 subplot(1,2,1)
+%                 imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),dfrangesit)
+%                 axis off; axis equal
+%                 title('select center point of response')
+%                 hold on
+%                 plot(y,x,'wo','MarkerSize',15)
+% 
+%                 subplot(1,2,2)
+%                 imagesc(dist)
+%                 axis off;axis equal
+%                 if exist('psfilename','var')
+%                     set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+%                     print('-dpsc',psfilename,'-append');
+%                 end
+%             catch
                 load(fullfile(outpathname,sprintf('%s_%s_%s_%s_patchonpatch.mat',files(use(f)).expt,files(use(f)).subj,files(use(f-1)).timing,files(use(f)).inject)),...
                     'x','y','dist')
 %                 load(fullfile(altpathname,filename),'x','y','dist')
@@ -402,7 +402,7 @@ for f = 1:length(use)
                 end
 
                 save(fullfile(outpathname,filename),'x','y','dist','-append','-v7.3');
-            end
+%             end
         end
         
 

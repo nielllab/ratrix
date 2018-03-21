@@ -5,9 +5,9 @@
 
 for f = 1:length(use)
     clear x y dist trialcycavg ring deconvimg
-    filename = sprintf('%s_%s_%s_gratingpatch.mat',files(use(f)).expt,files(use(f)).subj,files(use(f)).cond);
+    filename = sprintf('%s_%s_%s_%s_gratingpatch.mat',files(use(f)).expt,files(use(f)).subj,files(use(f)).cond,files(use(f)).timing);
     if (exist(fullfile(outpathname,filename),'file')==0 | redoani==1)
-        load('C:\gratingpatch3sf2tf8dir')
+        load(moviename)
         sfrange = unique(sf);tfrange = unique(tf);thetarange = unique(theta);xrange = unique(xpos);
         imagerate=10;
         cyclength = imagerate*(isi+duration);
@@ -33,7 +33,7 @@ for f = 1:length(use)
 %             set(gca,'LooseInset',get(gca,'TightInset'))
 %         end
 
-
+        sprintf('loading dfof data...')
         load(fullfile(pathname,files(use(f)).patchgratings),'dfof_bg','sp','stimRec','frameT')
 %         load(fullfile(outpathname,filename),'img')
         
@@ -127,8 +127,6 @@ for f = 1:length(use)
                     sprintf('loading data')
                     load(fullfile(outpathname,filename),'deconvimg')
                     size(deconvimg)
-                    base = isi*imagerate-4:isi*imagerate-1;
-                    peakWindow = isi*imagerate+1:isi*imagerate+3;
                     ncut = 3 %# of trials to cut due to deconvolution cutting off end
                     trials=trials-ncut; %deconv cuts off last trial
                     xpos=xpos(1:trials);sf=sf(1:trials);tf=tf(1:trials);theta=theta(1:trials);
@@ -160,8 +158,6 @@ for f = 1:length(use)
                     end
                     
                     xpos=xpos(1:trials);sf=sf(1:trials);tf=tf(1:trials);theta=theta(1:trials);
-                    base = isi*imagerate-4:isi*imagerate-1;
-                    peakWindow = isi*imagerate+1:isi*imagerate+3;
 
                     sprintf('saving...')
                     try
@@ -175,8 +171,6 @@ for f = 1:length(use)
                     sprintf('loading data')
                     load(fullfile(outpathname,filename),'deconvimg')
                     size(deconvimg)
-                    base = isi*imagerate-4:isi*imagerate-1;
-                    peakWindow = isi*imagerate+1:isi*imagerate+3;
                     ncut = 3 %# of trials to cut due to deconvolution cutting off end
                     trials=trials-ncut; %deconv cuts off last trial
                     xpos=xpos(1:trials);sf=sf(1:trials);tf=tf(1:trials);theta=theta(1:trials);
@@ -208,8 +202,6 @@ for f = 1:length(use)
                     end
                     
                     xpos=xpos(1:trials);sf=sf(1:trials);tf=tf(1:trials);theta=theta(1:trials);
-                    base = isi*imagerate-4:isi*imagerate-1;
-                    peakWindow = isi*imagerate+1:isi*imagerate+3;
 
                     sprintf('saving...')
                     try
@@ -221,8 +213,6 @@ for f = 1:length(use)
             end
         else
             deconvimg = img;
-            base = isi*imagerate-4:isi*imagerate-1;
-            peakWindow = isi*imagerate+8:isi*imagerate+10;
             sprintf('saving...')
             try
                 save(fullfile(outpathname,filename),'deconvimg','-append','-v7.3');
@@ -383,11 +373,12 @@ for f = 1:length(use)
                     print('-dpsc',psfilename,'-append');
                 end
             end
-            save(fullfile(outpathname,filename),'x','y','dist','-append','-v7.3');
+%             save(fullfile(outpathname,filename),'x','y','dist','-append','-v7.3');
+            save(files(n).gratingpatchpts,'x','y','dist');
         else
             try
-                load(fullfile(outpathname,filename),'x','y','dist')
-%                 load(fullfile(altpathname,filename),'x','y','dist')
+%                 load(fullfile(outpathname,filename),'x','y','dist')
+                load(files(n).gratingpatchpts,'x','y','dist');
                 for i = 1:length(xrange)
                     figure;
                     colormap jet
@@ -406,7 +397,7 @@ for f = 1:length(use)
                         print('-dpsc',psfilename,'-append');
                     end
                 end
-                save(fullfile(outpathname,filename),'x','y','dist','-append','-v7.3');
+%                 save(fullfile(outpathname,filename),'x','y','dist','-append','-v7.3');
             catch
                 satisfied = 0;
                 while satisfied==0
@@ -455,7 +446,8 @@ for f = 1:length(use)
                     print('-dpsc',psfilename,'-append');
                 end
             end
-                save(fullfile(outpathname,filename),'x','y','dist','-append','-v7.3');
+%                 save(fullfile(outpathname,filename),'x','y','dist','-append','-v7.3');
+            save(files(n).gratingpatchpts,'x','y','dist');
             end
         end
         

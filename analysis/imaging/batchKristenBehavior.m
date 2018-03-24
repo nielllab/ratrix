@@ -131,68 +131,138 @@ outpathname = '\\langevin\backup\widefield\Kristen\Behavior\';
 % files(n).label = 'camk2 gc6';
 % files(n).notes = 'good imaging session';
 
-%%
-n=n+1;
-files(n).subj = 'G6H67LT';
-files(n).expt = '031717';
-files(n).topox= '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_TOPOX\031717_G6H67LT_RIG1_TOPOXmaps.mat';
-files(n).topoxdata = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_TOPOX\031717_G6H67LT_RIG1_TOPOX';
-files(n).topoy = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_TOPOY\031717_G6H67LT_RIG1_TOPOYmaps.mat';
-files(n).topoydata = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_TOPOY\031717_G6H67LT_RIG1_TOPOY';
-files(n).patchgratings = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_GRATING_PRE_CLOZ\031717_G6H67LT_RIG1_GRATING_PREmaps.mat';
-files(n).patchgratingsdata = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_GRATING_PRE_CLOZ\031717_G6H67LT_RIG1_GRATING_PRE';
-files(n).cond = 'clozapine';
-files(n).dose = '0.1'; %mg/kg
-files(n).dreadds = 'lgn';
-files(n).timing = 'pre'; 
-files(n).rignum = 'rig1';
-files(n).monitor = 'land';
-files(n).monitorloc = 'center';
-files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
-files(n).gratingpatchpts = fullfile(outpathname,'031717_G6H67LT_RIG1_gratingpatchpts.mat');
+% %%
+% n=n+1;
+% files(n).subj = 'G6H67LT';
+% files(n).expt = '031717';
+% files(n).topox= '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_TOPOX\031717_G6H67LT_RIG1_TOPOXmaps.mat';
+% files(n).topoxdata = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_TOPOX\031717_G6H67LT_RIG1_TOPOX';
+% files(n).topoy = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_TOPOY\031717_G6H67LT_RIG1_TOPOYmaps.mat';
+% files(n).topoydata = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_TOPOY\031717_G6H67LT_RIG1_TOPOY';
+% files(n).patchgratings = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_GRATING_PRE_CLOZ\031717_G6H67LT_RIG1_GRATING_PREmaps.mat';
+% files(n).patchgratingsdata = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_GRATING_PRE_CLOZ\031717_G6H67LT_RIG1_GRATING_PRE';
+% files(n).cond = 'clozapine';
+% files(n).dose = '0.1'; %mg/kg
+% files(n).dreadds = 'lgn';
+% files(n).timing = 'pre'; 
+% files(n).rignum = 'rig1';
+% files(n).monitor = 'land';
+% files(n).monitorloc = 'center';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good imaging session';
+% files(n).gratingpatchpts = fullfile(outpathname,'031717_G6H67LT_RIG1_gratingpatchpts.mat');
+% 
+% n=n+1;
+% files(n).subj = 'G6H67LT';
+% files(n).expt = '031717';
+% files(n).topox= '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_TOPOX\031717_G6H67LT_RIG1_TOPOXmaps.mat';
+% files(n).topoxdata = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_TOPOX\031717_G6H67LT_RIG1_TOPOX';
+% files(n).topoy = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_TOPOY\031717_G6H67LT_RIG1_TOPOYmaps.mat';
+% files(n).topoydata = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_TOPOY\031717_G6H67LT_RIG1_TOPOY';
+% files(n).patchgratings = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_GRATING_POST_CLOZ\031717_G6H67LT_RIG1_GRATING_POSTmaps.mat';
+% files(n).patchgratingsdata = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_GRATING_POST_CLOZ\031717_G6H67LT_RIG1_GRATING_POST';
+% files(n).cond = 'clozapine';
+% files(n).dose = '0.1'; %mg/kg
+% files(n).dreadds = 'lgn';
+% files(n).timing = 'post'; 
+% files(n).rignum = 'rig1';
+% files(n).monitor = 'land';
+% files(n).monitorloc = 'center';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good imaging session';
+% files(n).gratingpatchpts = fullfile(outpathname,'031717_G6H67LT_RIG1_gratingpatchpts.mat');
+% 
+% n=n+1;
+% files(n).subj = 'G6H67LT';
+% files(n).expt = '031717';
+% files(n).topox= '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_TOPOX\031717_G6H67LT_RIG1_TOPOXmaps.mat';
+% files(n).topoxdata = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_TOPOX\031717_G6H67LT_RIG1_TOPOX';
+% files(n).topoy = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_TOPOY\031717_G6H67LT_RIG1_TOPOYmaps.mat';
+% files(n).topoydata = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_TOPOY\031717_G6H67LT_RIG1_TOPOY';
+% files(n).patchgratings = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_GRATING_SUPERPOST_CLOZ\031717_G6H67LT_RIG1_GRATING_SUPERPOSTmaps.mat';
+% files(n).patchgratingsdata = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_GRATING_SUPERPOST_CLOZ\031717_G6H67LT_RIG1_GRATING_SUPERPOST';
+% files(n).cond = 'clozapine';
+% files(n).dose = '0.1'; %mg/kg
+% files(n).dreadds = 'lgn';
+% files(n).timing = 'superpost'; 
+% files(n).rignum = 'rig1';
+% files(n).monitor = 'land';
+% files(n).monitorloc = 'center';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good imaging session';
+% files(n).gratingpatchpts = fullfile(outpathname,'031717_G6H67LT_RIG1_gratingpatchpts.mat');
+
+%% LP gcamp mouse
+
+% pre, grating
 
 n=n+1;
-files(n).subj = 'G6H67LT';
-files(n).expt = '031717';
-files(n).topox= '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_TOPOX\031717_G6H67LT_RIG1_TOPOXmaps.mat';
-files(n).topoxdata = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_TOPOX\031717_G6H67LT_RIG1_TOPOX';
-files(n).topoy = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_TOPOY\031717_G6H67LT_RIG1_TOPOYmaps.mat';
-files(n).topoydata = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_TOPOY\031717_G6H67LT_RIG1_TOPOY';
-files(n).patchgratings = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_GRATING_POST_CLOZ\031717_G6H67LT_RIG1_GRATING_POSTmaps.mat';
-files(n).patchgratingsdata = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_GRATING_POST_CLOZ\031717_G6H67LT_RIG1_GRATING_POST';
+files(n).subj = 'G6H316TT';
+files(n).expt = '031817';
+files(n).topox= '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_TOPOX\031817_G6H316TT_RIG1_TOPOXmaps.mat';
+files(n).topoxdata = '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_TOPOX\031817_G6H316TT_RIG1_TOPOX';
+files(n).topoy = '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_TOPOY\031817_G6H316TT_RIG1_TOPOYmaps.mat';
+files(n).topoydata = '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_TOPOY\031817_G6H316TT_RIG1_TOPOY';
+files(n).patchgratings = '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_GRATING_PRE_CLOZ\031817_G6H316TT_RIG1_GRATING_PREmaps.mat';
+files(n).patchgratingsdata = '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_GRATING_PRE_CLOZ\031817_G6H316TT_RIG1_GRATING_PRE';
 files(n).cond = 'clozapine';
 files(n).dose = '0.1'; %mg/kg
-files(n).dreadds = 'lgn';
+files(n).dreadds = 'lp';
 files(n).timing = 'post'; 
 files(n).rignum = 'rig1';
 files(n).monitor = 'land';
 files(n).monitorloc = 'center';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).gratingpatchpts = fullfile(outpathname,'031717_G6H67LT_RIG1_gratingpatchpts.mat');
+files(n).gratingpatchpts = fullfile(outpathname,'032218_G6H112RT_RIG1_gratingpatchpts.mat');
+
+% post, grating
 
 n=n+1;
-files(n).subj = 'G6H67LT';
-files(n).expt = '031717';
-files(n).topox= '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_TOPOX\031717_G6H67LT_RIG1_TOPOXmaps.mat';
-files(n).topoxdata = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_TOPOX\031717_G6H67LT_RIG1_TOPOX';
-files(n).topoy = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_TOPOY\031717_G6H67LT_RIG1_TOPOYmaps.mat';
-files(n).topoydata = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_TOPOY\031717_G6H67LT_RIG1_TOPOY';
-files(n).patchgratings = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_GRATING_SUPERPOST_CLOZ\031717_G6H67LT_RIG1_GRATING_SUPERPOSTmaps.mat';
-files(n).patchgratingsdata = '031717_G6H67LT_RIG1\031717_G6H67LT_RIG1_GRATING_SUPERPOST_CLOZ\031717_G6H67LT_RIG1_GRATING_SUPERPOST';
+files(n).subj = 'G6H316TT';
+files(n).expt = '031817';
+files(n).topox= '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_TOPOX\031817_G6H316TT_RIG1_TOPOXmaps.mat';
+files(n).topoxdata = '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_TOPOX\031817_G6H316TT_RIG1_TOPOX';
+files(n).topoy = '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_TOPOY\031817_G6H316TT_RIG1_TOPOYmaps.mat';
+files(n).topoydata = '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_TOPOY\031817_G6H316TT_RIG1_TOPOY';
+files(n).patchgratings = '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_GRATING_POST_CLOZ\031817_G6H316TT_RIG1_GRATING_POSTmaps.mat';
+files(n).patchgratingsdata = '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_GRATING_POST_CLOZ\031817_G6H316TT_RIG1_GRATING_POST';
 files(n).cond = 'clozapine';
 files(n).dose = '0.1'; %mg/kg
-files(n).dreadds = 'lgn';
-files(n).timing = 'superpost'; 
+files(n).dreadds = 'lp';
+files(n).timing = 'pre'; 
 files(n).rignum = 'rig1';
 files(n).monitor = 'land';
 files(n).monitorloc = 'center';
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
-files(n).gratingpatchpts = fullfile(outpathname,'031717_G6H67LT_RIG1_gratingpatchpts.mat');
+files(n).gratingpatchpts = fullfile(outpathname,'032218_G6H112RT_RIG1_gratingpatchpts.mat');
+ 
+% superpost, grating
 
-%%
+n=n+1;
+files(n).subj = 'G6H316TT';
+files(n).expt = '031817';
+files(n).topox= '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_TOPOX\031817_G6H316TT_RIG1_TOPOXmaps.mat';
+files(n).topoxdata = '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_TOPOX\031817_G6H316TT_RIG1_TOPOX';
+files(n).topoy = '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_TOPOY\031817_G6H316TT_RIG1_TOPOYmaps.mat';
+files(n).topoydata = '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_TOPOY\031817_G6H316TT_RIG1_TOPOY';
+files(n).patchgratings = '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_GRATING_SUPERPOST_CLOZ\031817_G6H316TT_RIG1_GRATING_SUPERPOSTmaps.mat';
+files(n).patchgratingsdata = '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_GRATING_SUPERPOST_CLOZ\031817_G6H316TT_RIG1_GRATING_SUPERPOST';
+files(n).cond = 'clozapine';
+files(n).dose = '0.1'; %mg/kg
+files(n).dreadds = 'lp';
+files(n).timing = 'pre'; 
+files(n).rignum = 'rig1';
+files(n).monitor = 'land';
+files(n).monitorloc = 'center';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'good imaging session';
+files(n).gratingpatchpts = fullfile(outpathname,'032218_G6H112RT_RIG1_gratingpatchpts.mat');
+
+% NO superpost topox % topoy were done for this guy
+% pre, topox & topoy
+
 % n=n+1;
 % files(n).subj = 'G6H316TT';
 % files(n).expt = '031817';
@@ -200,112 +270,137 @@ files(n).gratingpatchpts = fullfile(outpathname,'031717_G6H67LT_RIG1_gratingpatc
 % files(n).topoxdata = '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_TOPOX\031817_G6H316TT_RIG1_TOPOX';
 % files(n).topoy = '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_TOPOY\031817_G6H316TT_RIG1_TOPOYmaps.mat';
 % files(n).topoydata = '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_TOPOY\031817_G6H316TT_RIG1_TOPOY';
-% files(n).fullflanker = '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_FULLFLANKER\031817_G6H316TT_RIG1_FULLFLANKERmaps.mat';
-% files(n).fullflankerdata = '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_FULLFLANKER\031817_G6H316TT_RIG1_FULLFLANKER';
-% files(n).inject = 'none';
-% files(n).timing = 'none'; 
+% files(n).cond = 'clozapine';
+% files(n).dose = '0.1'; %mg/kg
+% files(n).dreadds = 'lp';
+% files(n).timing = 'pre'; 
 % files(n).rignum = 'rig1';
-% files(n).monitor = 'landscape';
+% files(n).monitor = 'land';
+% files(n).monitorloc = 'center';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'topo only';
+% 
+% % superpost, topox & topoy
+% 
+% n=n+1;
+% files(n).subj = 'G6H316TT';
+% files(n).expt = '031817';
+% files(n).topox= '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_GRATING_SUPERPOST_TOPOX\031817_G6H316TT_RIG1_GRATING_SUPERPOST_TOPOXmaps.mat';
+% files(n).topoxdata = '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_GRATING_SUPERPOST_TOPOX\031817_G6H316TT_RIG1_GRATING_SUPERPOST_TOPOX';
+% files(n).topoy = '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_GRATING_SUPERPOST_TOPOY\031817_G6H316TT_RIG1_GRATING_SUPERPOST_TOPOYmaps.mat';
+% files(n).topoydata = '031817_G6H316TT_RIG1\031817_G6H316TT_RIG1_GRATING_SUPERPOST_TOPOY\031817_G6H316TT_RIG1_GRATING_SUPERPOST_TOPOY';
+% files(n).cond = 'clozapine';
+% files(n).dose = '0.1'; %mg/kg
+% files(n).dreadds = 'lp';
+% files(n).timing = 'post'; 
+% files(n).rignum = 'rig1';
+% files(n).monitor = 'land';
+% files(n).monitorloc = 'center';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'topo only';
+
+%%
+
+% pre, grating
+
+% n=n+1;
+% files(n).subj = 'G6H112RT';
+% files(n).expt = '032218';
+% files(n).topox= '032218_G6H112RT_RIG2\032218_G6H112RT_RIG2_TOPOX\032218_G6H112RT_RIG2_TOPOXmaps.mat';
+% files(n).topoxdata = '032218_G6H112RT_RIG2\032218_G6H112RT_RIG2_TOPOX\032218_G6H112RT_RIG2_TOPOX';
+% files(n).topoy = '032218_G6H112RT_RIG2\032218_G6H112RT_RIG2_TOPOY\032218_G6H112RT_RIG2_TOPOYmaps.mat';
+% files(n).topoydata = '032218_G6H112RT_RIG2\032218_G6H112RT_RIG2_TOPOY\032218_G6H112RT_RIG2_TOPOY';
+% files(n).patchgratings = '032218_G6H112RT_RIG2\032218_G6H112RT_RIG2_PRE_CLOZ_GRATING\032218_G6H112RT_RIG2_PRE_CLOZ_GRATINGmaps.mat';
+% files(n).patchgratingsdata = '032218_G6H112RT_RIG2\032218_G6H112RT_RIG2_PRE_CLOZ_GRATING\032218_G6H112RT_RIG2_PRE_CLOZ_GRATING';
+% files(n).cond = 'CNO';
+% files(n).dose = '10'; %mg/kg
+% files(n).dreadds = 'lgn';
+% files(n).timing = 'pre'; 
+% files(n).rignum = 'rig2';
+% files(n).monitor = 'land';
 % files(n).monitorloc = 'center';
 % files(n).label = 'camk2 gc6';
 % files(n).notes = 'good imaging session';
-
-%%
-n=n+1;
-files(n).subj = 'G6H316RT';
-files(n).expt = '032018';
-files(n).topox= '032018_G6H316RT_RIG2\032018_G6H316RT_RIG2_TOPOX\032018_G6H316RT_RIG2_TOPOXmaps.mat';
-files(n).topoxdata = '032018_G6H316RT_RIG2\032018_G6H316RT_RIG2_TOPOX\032018_G6H316RT_RIG2_TOPOX';
-files(n).topoy = '032018_G6H316RT_RIG2\032018_G6H316RT_RIG2_TOPOY\032018_G6H316RT_RIG2_TOPOYmaps.mat';
-files(n).topoydata = '032018_G6H316RT_RIG2\032018_G6H316RT_RIG2_TOPOY\032018_G6H316RT_RIG2_TOPOY';
-files(n).patchgratings = '032018_G6H316RT_RIG2\032018_G6H316RT_RIG2_GRATING_PRE_CLOZ\032018_G6H316RT_RIG2_GRATING_PREmaps.mat';
-files(n).patchgratingsdata = '032018_G6H316RT_RIG2\032018_G6H316RT_RIG2_GRATING_PRE_CLOZ\032018_G6H316RT_RIG2_GRATING_PRE';
-files(n).cond = 'clozapine';
-files(n).dose = '1'; %mg/kg
-files(n).dreadds = 'lgn';
-files(n).timing = 'pre'; 
-files(n).rignum = 'RIG2';
-files(n).monitor = 'land';
-files(n).monitorloc = 'center';
-files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
-files(n).gratingpatchpts = fullfile(outpathname,'032018_G6H316RT_RIG2_gratingpatchpts.mat');
-
-n=n+1;
-files(n).subj = 'G6H316RT';
-files(n).expt = '032018';
-files(n).topox= '032018_G6H316RT_RIG2\032018_G6H316RT_RIG2_TOPOX\032018_G6H316RT_RIG2_TOPOXmaps.mat';
-files(n).topoxdata = '032018_G6H316RT_RIG2\032018_G6H316RT_RIG2_TOPOX\032018_G6H316RT_RIG2_TOPOX';
-files(n).topoy = '032018_G6H316RT_RIG2\032018_G6H316RT_RIG2_TOPOY\032018_G6H316RT_RIG2_TOPOYmaps.mat';
-files(n).topoydata = '032018_G6H316RT_RIG2\032018_G6H316RT_RIG2_TOPOY\032018_G6H316RT_RIG2_TOPOY';
-files(n).patchgratings = '032018_G6H316RT_RIG2\032018_G6H316RT_RIG2_GRATING_POST_CLOZ\032018_G6H316RT_RIG2_GRATING_POSTmaps.mat';
-files(n).patchgratingsdata = '032018_G6H316RT_RIG2\032018_G6H316RT_RIG2_GRATING_POST_CLOZ\032018_G6H316RT_RIG2_GRATING_POST';
-files(n).cond = 'clozapine';
-files(n).dose = '1'; %mg/kg
-files(n).dreadds = 'lgn';
-files(n).timing = 'post'; 
-files(n).rignum = 'RIG2';
-files(n).monitor = 'land';
-files(n).monitorloc = 'center';
-files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
-files(n).gratingpatchpts = fullfile(outpathname,'032018_G6H316RT_RIG2_gratingpatchpts.mat');
-
-n=n+1;
-files(n).subj = 'G6H316RT';
-files(n).expt = '032018';
-files(n).topox= '032018_G6H316RT_RIG2\032018_G6H316RT_RIG2_TOPOX\032018_G6H316RT_RIG2_TOPOXmaps.mat';
-files(n).topoxdata = '032018_G6H316RT_RIG2\032018_G6H316RT_RIG2_TOPOX\032018_G6H316RT_RIG2_TOPOX';
-files(n).topoy = '032018_G6H316RT_RIG2\032018_G6H316RT_RIG2_TOPOY\032018_G6H316RT_RIG2_TOPOYmaps.mat';
-files(n).topoydata = '032018_G6H316RT_RIG2\032018_G6H316RT_RIG2_TOPOY\032018_G6H316RT_RIG2_TOPOY';
-files(n).patchgratings = '032018_G6H316RT_RIG2\032018_G6H316RT_RIG2_GRATING_SUPERPOST_CLOZ\032018_G6H316RT_RIG2_GRATING_SUPERPOSTmaps.mat';
-files(n).patchgratingsdata = '032018_G6H316RT_RIG2\032018_G6H316RT_RIG2_GRATING_SUPERPOST_CLOZ\032018_G6H316RT_RIG2_GRATING_SUPERPOST';
-files(n).cond = 'clozapine';
-files(n).dose = '1'; %mg/kg
-files(n).dreadds = 'lgn';
-files(n).timing = 'superpost'; 
-files(n).rignum = 'RIG2';
-files(n).monitor = 'land';
-files(n).monitorloc = 'center';
-files(n).label = 'camk2 gc6';
-files(n).notes = 'good imaging session';
-files(n).gratingpatchpts = fullfile(outpathname,'032018_G6H316RT_RIG2_gratingpatchpts.mat');
-
-
-%%
-n=n+1;
-files(n).subj = 'G6H316RT';
-files(n).expt = '032018';
-files(n).topox= '032018_G6H316RT_RIG2\032018_G6H316RT_RIG2_TOPOX\032018_G6H316RT_RIG2_TOPOXmaps.mat';
-files(n).topoxdata = '032018_G6H316RT_RIG2\032018_G6H316RT_RIG2_TOPOX\032018_G6H316RT_RIG2_TOPOX';
-files(n).topoy = '032018_G6H316RT_RIG2\032018_G6H316RT_RIG2_TOPOY\032018_G6H316RT_RIG2_TOPOYmaps.mat';
-files(n).topoydata = '032018_G6H316RT_RIG2\032018_G6H316RT_RIG2_TOPOY\032018_G6H316RT_RIG2_TOPOY';
-files(n).cond = 'clozapine';
-files(n).dose = '1'; %mg/kg
-files(n).dreadds = 'lgn';
-files(n).timing = 'pre'; 
-files(n).rignum = 'RIG2';
-files(n).monitor = 'land';
-files(n).monitorloc = 'center';
-files(n).label = 'camk2 gc6';
-files(n).notes = 'topo only';
-
-n=n+1;
-files(n).subj = 'G6H316RT';
-files(n).expt = '032018';
-files(n).topox= '032018_G6H316RT_RIG2\032018_G6H316RT_RIG2_GRATING_SUPERPOST_TOPOX\032018_G6H316RT_RIG2_GRATING_SUPERPOST_TOPOXmaps.mat';
-files(n).topoxdata = '032018_G6H316RT_RIG2\032018_G6H316RT_RIG2_GRATING_SUPERPOST_TOPOX\032018_G6H316RT_RIG2_GRATING_SUPERPOST_TOPOX';
-files(n).topoy = '032018_G6H316RT_RIG2\032018_G6H316RT_RIG2_GRATING_SUPERPOST_TOPOY\032018_G6H316RT_RIG2_GRATING_SUPERPOST_TOPOYmaps.mat';
-files(n).topoydata = '032018_G6H316RT_RIG2\032018_G6H316RT_RIG2_GRATING_SUPERPOST_TOPOY\032018_G6H316RT_RIG2_GRATING_SUPERPOST_TOPOY';
-files(n).cond = 'clozapine';
-files(n).dose = '1'; %mg/kg
-files(n).dreadds = 'lgn';
-files(n).timing = 'post'; 
-files(n).rignum = 'RIG2';
-files(n).monitor = 'land';
-files(n).monitorloc = 'center';
-files(n).label = 'camk2 gc6';
-files(n).notes = 'topo only';
-
-
-%%
+% files(n).gratingpatchpts = fullfile(outpathname,'032218_G6H112RT_RIG2_gratingpatchpts.mat');
+% 
+% % post, grating
+% 
+% n=n+1;
+% files(n).subj = 'G6H112RT';
+% files(n).expt = '032218';
+% files(n).topox= '032218_G6H112RT_RIG2\032218_G6H112RT_RIG2_TOPOX\032218_G6H112RT_RIG2_TOPOXmaps.mat';
+% files(n).topoxdata = '032218_G6H112RT_RIG2\032218_G6H112RT_RIG2_TOPOX\032218_G6H112RT_RIG2_TOPOX';
+% files(n).topoy = '032218_G6H112RT_RIG2\032218_G6H112RT_RIG2_TOPOY\032218_G6H112RT_RIG2_TOPOYmaps.mat';
+% files(n).topoydata = '032218_G6H112RT_RIG2\032218_G6H112RT_RIG2_TOPOY\032218_G6H112RT_RIG2_TOPOY';
+% files(n).patchgratings = '032218_G6H112RT_RIG2\032218_G6H112RT_RIG2_POST_CLOZ_GRATING\032218_G6H112RT_RIG2_POST_CLOZ_GRATINGmaps.mat';
+% files(n).patchgratingsdata = '032218_G6H112RT_RIG2\032218_G6H112RT_RIG2_POST_CLOZ_GRATING\032218_G6H112RT_RIG2_POST_CLOZ_GRATING';
+% files(n).cond = 'CNO';
+% files(n).dose = '10'; %mg/kg
+% files(n).dreadds = 'lgn';
+% files(n).timing = 'post'; 
+% files(n).rignum = 'rig2';
+% files(n).monitor = 'land';
+% files(n).monitorloc = 'center';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good imaging session';
+% files(n).gratingpatchpts = fullfile(outpathname,'032218_G6H112RT_RIG2_gratingpatchpts.mat');
+% 
+% % superpost, grating
+% 
+% n=n+1;
+% files(n).subj = 'G6H112RT';
+% files(n).expt = '032218';
+% files(n).topox= '032218_G6H112RT_RIG2\032218_G6H112RT_RIG2_TOPOX\032218_G6H112RT_RIG2_TOPOXmaps.mat';
+% files(n).topoxdata = '032218_G6H112RT_RIG2\032218_G6H112RT_RIG2_TOPOX\032218_G6H112RT_RIG2_TOPOX';
+% files(n).topoy = '032218_G6H112RT_RIG2\032218_G6H112RT_RIG2_TOPOY\032218_G6H112RT_RIG2_TOPOYmaps.mat';
+% files(n).topoydata = '032218_G6H112RT_RIG2\032218_G6H112RT_RIG2_TOPOY\032218_G6H112RT_RIG2_TOPOY';
+% files(n).patchgratings = '032218_G6H112RT_RIG2\032218_G6H112RT_RIG2_SUPERPOST_CLOZ_GRATING\032218_G6H112RT_RIG2_SUPERPOST_CLOZ_GRATINGmaps.mat';
+% files(n).patchgratingsdata = '032218_G6H112RT_RIG2\032218_G6H112RT_RIG2_SUPERPOST_CLOZ_GRATING\032218_G6H112RT_RIG2_SUPERPOST_CLOZ_GRATING';
+% files(n).cond = 'CNO';
+% files(n).dose = '10'; %mg/kg
+% files(n).dreadds = 'lgn';
+% files(n).timing = 'superpost'; 
+% files(n).rignum = 'rig2';
+% files(n).monitor = 'land';
+% files(n).monitorloc = 'center';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good imaging session';
+% files(n).gratingpatchpts = fullfile(outpathname,'032218_G6H112RT_RIG2_gratingpatchpts.mat');
+% 
+% % pre, topox & topoy
+% 
+% n=n+1;
+% files(n).subj = 'G6H112RT';
+% files(n).expt = '032218';
+% files(n).topox= '032218_G6H112RT_RIG2\032218_G6H112RT_RIG2_TOPOX\032218_G6H112RT_RIG2_TOPOXmaps.mat';
+% files(n).topoxdata = '032218_G6H112RT_RIG2\032218_G6H112RT_RIG2_TOPOX\032218_G6H112RT_RIG2_TOPOX';
+% files(n).topoy = '032218_G6H112RT_RIG2\032218_G6H112RT_RIG2_TOPOY\032218_G6H112RT_RIG2_TOPOYmaps.mat';
+% files(n).topoydata = '032218_G6H112RT_RIG2\032218_G6H112RT_RIG2_TOPOY\032218_G6H112RT_RIG2_TOPOY';
+% files(n).cond = 'CNO';
+% files(n).dose = '10'; %mg/kg
+% files(n).dreadds = 'lgn';
+% files(n).timing = 'pre'; 
+% files(n).rignum = 'rig2';
+% files(n).monitor = 'land';
+% files(n).monitorloc = 'center';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'topo only';
+% 
+% % superpost, topox & topoy
+% 
+% n=n+1;
+% files(n).subj = 'G6H112RT';
+% files(n).expt = '032218';
+% files(n).topox= '032218_G6H112RT_RIG2\032218_G6H112RT_RIG2_SUPERPOST_CLOZ_TOPOX\032218_G6H112RT_RIG2_SUPERPOST_CLOZ_TOPOXmaps.mat';
+% files(n).topoxdata = '032218_G6H112RT_RIG2\032218_G6H112RT_RIG2_SUPERPOST_CLOZ_TOPOX\032218_G6H112RT_RIG2_SUPERPOST_CLOZ_TOPOX';
+% files(n).topoy = '032218_G6H112RT_RIG2\032218_G6H112RT_RIG2_SUPERPOST_CLOZ_TOPOY\032218_G6H112RT_RIG2_SUPERPOST_CLOZ_TOPOYmaps.mat';
+% files(n).topoydata = '032218_G6H112RT_RIG2\032218_G6H112RT_RIG2_SUPERPOST_CLOZ_TOPOY\032218_G6H112RT_RIG2_SUPERPOST_CLOZ_TOPOY';
+% files(n).cond = 'CNO';
+% files(n).dose = '10'; %mg/kg
+% files(n).dreadds = 'lgn';
+% files(n).timing = 'post'; 
+% files(n).rignum = 'rig2';
+% files(n).monitor = 'land';
+% files(n).monitorloc = 'center';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'topo only';

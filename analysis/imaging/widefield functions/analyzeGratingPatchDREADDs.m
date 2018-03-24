@@ -12,7 +12,7 @@ cd(pathname)
 load(moviename)
  
 %select animals to use
-use = find(strcmp({files.notes},'good imaging session') & strcmp({files.dose},'1'))
+use = find(strcmp({files.notes},'good imaging session') & strcmp({files.dose},'0.1'))
 sprintf('%d experiments for individual analysis',length(use))
 
 %%%user settings

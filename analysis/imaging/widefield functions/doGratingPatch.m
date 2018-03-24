@@ -374,11 +374,11 @@ for f = 1:length(use)
                 end
             end
 %             save(fullfile(outpathname,filename),'x','y','dist','-append','-v7.3');
-            save(files(n).gratingpatchpts,'x','y','dist');
+            save(files(use(f)).gratingpatchpts,'x','y','dist');
         else
             try
 %                 load(fullfile(outpathname,filename),'x','y','dist')
-                load(files(n).gratingpatchpts,'x','y','dist');
+                load(files(use(f)).gratingpatchpts,'x','y','dist');
                 for i = 1:length(xrange)
                     figure;
                     colormap jet
@@ -447,7 +447,7 @@ for f = 1:length(use)
                 end
             end
 %                 save(fullfile(outpathname,filename),'x','y','dist','-append','-v7.3');
-            save(files(n).gratingpatchpts,'x','y','dist');
+            save(files(use(f)).gratingpatchpts,'x','y','dist');
             end
         end
         

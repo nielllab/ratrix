@@ -12,6 +12,7 @@ for f = 1:length(files)
         rig=1;
     end   
     
+    
     if redo  || isempty([pathname files(f).topox]) || ~exist([pathname files(f).topox],'file')
         try
             dfofMovie_Blue([datapathname files(f).topoxdata],rig);
@@ -25,7 +26,7 @@ for f = 1:length(files)
         sprintf('skipping %s',files(f).topox)
     end
     
-
+ 
     if redo || isempty([pathname files(f).topoy]) || ~exist([pathname files(f).topoy],'file')
         try
             dfofMovie_Blue([datapathname files(f).topoydata],rig);
@@ -51,10 +52,10 @@ for f = 1:length(files)
 %     else
 %         sprintf('skipping %s',files(f).fullflanker)
 %     end
-    
+
     if redo || isempty([pathname files(f).patchgratings]) || ~exist([pathname files(f).patchgratings],'file')
         try
-            dfofMovie_Blue([datapathname files(f).patchgratingsdata],rig);
+            dfofMovie([datapathname files(f).patchgratingsdata],rig);
         catch exc
             sprintf('couldnt do %s',files(f).patchgratingsdata)
             nerr=nerr+1;
@@ -64,8 +65,7 @@ for f = 1:length(files)
     else
         sprintf('skipping %s',files(f).patchgratings)
     end
-    
-%     
+      
 %     if redo || isempty([pathname files(f).patchonpatch]) || ~exist([pathname files(f).patchonpatch],'file')
 %         try
 %             dfofMovie([datapathname files(f).patchonpatchdata],rig);

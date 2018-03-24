@@ -4,7 +4,7 @@ n = 0;
 
 pathname = '\\langevin\backup\widefield\DOIpaper\';
 datapathname = '\\langevin\backup\widefield\DOIpaper\';  
-outpathname = 'D:\Angie\darkness\';
+outpathname = '\\langevin\backup\widefield\DOIpaper\patchonpatch\decon\';
 
 % pathname = 'C:\Users\nlab\Desktop\widefield\'
 % datapathname = 'C:\Users\nlab\Desktop\widefield\'

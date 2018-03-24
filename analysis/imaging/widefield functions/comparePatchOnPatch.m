@@ -182,6 +182,7 @@ for i = 1:4
     post = squeeze(nanmean(nanmean(grptrace(:,peakWindow,2,:,1,2),4),2))-squeeze(nanmean(nanmean(grptrace(:,base,2,:,1,2),4),2)); %center only
 %     pre = squeeze(nanmean(nanmean(grptrace(:,peakWindow,4,:,1,1),4),2)); %iso+cross
 %     post = squeeze(nanmean(nanmean(grptrace(:,peakWindow,4,:,1,2),4),2)); %iso+cross
+    pre(pre<0)=0;post(post<0)=0;
     diff = 2*post./(post+pre);
     
 %     subplot(1,2,1)
@@ -224,9 +225,9 @@ end
 
 figure(grpfig)
 plot(0:5,ones(1,6),':','Color',[0.5 0.5 0.5])
-axis([0 5 0 2])
+axis([0 5 0 1.5])
 axis square
-ylabel('post/(pre+post)')
+ylabel('normalized change')
 set(gca,'xtick',1:4,'xticklabel',grpnames(1:4),'ytick',0:0.5:2,'fontsize',12,'tickdir','out')
 
 % if exist('psfile','var')

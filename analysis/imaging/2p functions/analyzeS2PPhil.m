@@ -98,7 +98,7 @@ for z=1:length(db)
     title('Mean Image')
     axis off
     if exist('psfilename','var')
-        set(gcf, 'PaperPositionMode', 'auto');
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilename,'-append');
     end
 
@@ -108,7 +108,7 @@ for z=1:length(db)
     draw2pSegs(usePts,1:length(usecells),jet,size(meanShiftImg),1:length(usecells),[1 length(usecells)])
     title('Cell Footprints')
     if exist('psfilename','var')
-        set(gcf, 'PaperPositionMode', 'auto');
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilename,'-append');
     end
 
@@ -134,8 +134,9 @@ for z=1:length(db)
         figure
         imagesc(spikes,[0 10])
         title(sprintf('spikes %s',db(z).expname{j}))
+        colorbar
         if exist('psfilename','var')
-            set(gcf, 'PaperPositionMode', 'auto');
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
             print('-dpsc',psfilename,'-append');
         end
 
@@ -143,8 +144,9 @@ for z=1:length(db)
         figure
         imagesc(dF,[0 10])
         title(sprintf('dF/F %s',db(z).expname{j}))
+        colorbar
         if exist('psfilename','var')
-            set(gcf, 'PaperPositionMode', 'auto');
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
             print('-dpsc',psfilename,'-append');
         end
 

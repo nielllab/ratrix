@@ -22,6 +22,7 @@ for f = 1:length(use)
         imagerate=10;
         cyclength = imagerate*(isi+duration);
         timepts = 0:1/imagerate:(2*isi+duration);timepts = timepts - isi;timepts = timepts(1:end-1);
+        trnames = {'blank','center','surround','iso/cross'};aniState={'sit','run'};
         psfilename = 'c:\tempPhilWF.ps';
         if exist(psfilename,'file')==2;delete(psfilename);end
         
@@ -232,12 +233,14 @@ for f = 1:length(use)
         end
 
         %%%create array w/responses for trial types
+        allinds = {};cnt=1;
         trialcycavg=nan(size(trialcyc,1),size(trialcyc,2),size(trialcyc,3),trialtypes,length(unique(isocross)),2);
         for i = 1:trialtypes
             for j = 1:length(unique(isocross))
                 for k = 1:2
-                    inds = find(trialID(1,:)==i&isocross==j&running==(k-1));
+                    inds = find(trialID(1,:)==i&isocross==j&running==(k-1));allinds{cnt} = inds;
                     trialcycavg(:,:,:,i,j,k) = squeeze(nanmean(trialcyc(:,:,:,inds),4));
+                    cnt=cnt+1;
                 end
             end
         end
@@ -421,13 +424,49 @@ for f = 1:length(use)
             end
         end
         
+
 %% save data
         try
             save(fullfile(outpathname,filename),'trialcycavg','ring','-v7.3','-append');
         catch
             save(fullfile(outpathname,filename),'trialcycavg','ring','-v7.3');
         end
-%% plot averages for the different stimulus parameters
+        
+%% plot all trials for all stimuli
+        cnt=1;
+        figure
+        for i = 1:trialtypes
+            for j = 1:length(unique(isocross))
+                for k = 1:2
+                    subplot(4,4,cnt)
+                    resp = squeeze(nanmean(nanmean(trialcyc(x-2:x+2,y-2:y+2,:,allinds{cnt}),2),1));
+                    hold on
+                    plot(resp)
+                    plot(nanmean(resp,2),'r','linewidth',3)
+                    xlabel(sprintf('%s theta%d %s',trnames{i},j,aniState{k}))
+                    axis([1 30 -0.2 0.6]);axis square
+                    cnt=cnt+1;
+                end
+            end
+        end
+        if exist('psfilename','var')
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+            print('-dpsc',psfilename,'-append');
+        end
+        
+        figure;
+        hold on
+        plot(squeeze(nanmean(nanmean(mintrialcyc(x-2:x+2,y-2:y+2,:,1),2),1)),'k')
+        plot(squeeze(nanmean(nanmean(mintrialcyc(x-2:x+2,y-2:y+2,:,2),2),1)),'r')
+        legend('sit','run')
+        axis([1 30 -0.2 0.6]);axis square
+        title('zero trial for subtraction')
+        if exist('psfilename','var')
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+            print('-dpsc',psfilename,'-append');
+        end
+
+        %% plot averages for the different stimulus parameters
         sprintf('plotting responses')
         
         %%%center or surround only
@@ -459,7 +498,7 @@ for f = 1:length(use)
         plot(timepts,squeeze(nanmean(nanmean(nanmean(trialcycavg(x-2:x+2,y-2:y+2,:,2,:,1),1),2),5)))
         ylabel('dfof')
         xlabel('time(s)')
-        axis([timepts(1) timepts(end) -0.01 0.1])
+        axis([timepts(1) timepts(end) -0.1 0.1])
         axis square
         title('center sit')
         subplot(2,2,2)

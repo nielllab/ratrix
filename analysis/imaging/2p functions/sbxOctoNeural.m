@@ -53,12 +53,12 @@ dfof = dfofInterp;
 dfofInterp= dfof(buffer(1,1):(end-buffer(1,2)),buffer(2,1):(end-buffer(2,2)),:);
 
 %%% remove if this messes things up!
-stdImg = imresize(greenframe,1/cfg.spatialBin);
-stdImg= stdImg(buffer(1,1):(end-buffer(1,2)),buffer(2,1):(end-buffer(2,2)),:);
-thresh = 0.1*prctile(stdImg,99);
-for i = 1:size(dfofInterp,3);
-    dfofInterp(:,:,i) = dfofInterp(:,:,i).*(stdImg>thresh);
-end
+% stdImg = imresize(greenframe,1/cfg.spatialBin);
+% stdImg= stdImg(buffer(1,1):(end-buffer(1,2)),buffer(2,1):(end-buffer(2,2)),:);
+% thresh = 0.1*prctile(stdImg(:),99);
+% for i = 1:size(dfofInterp,3);
+%     dfofInterp(:,:,i) = dfofInterp(:,:,i).*(stdImg>thresh);
+% end
 
 
 % number of frames per cycle

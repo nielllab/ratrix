@@ -5,6 +5,7 @@ deconvplz = 1;
 
 ctlg = 5; %select control group from grpfiles list
 expg = 6; %select experimental group
+runstate = 2; %1=stationary, 2=running
 
 grpfiles = {'SalineNaiveIsoCrossWF'...
             'SalineTrainedIsoCrossWF'...
@@ -30,7 +31,7 @@ dfrangerun = [-0.01 0.03]; %%%range for imagesc visualization
 if deconvplz
 %     base = isi*imagerate-2:isi*imagerate;
     base = 5:isi*imagerate-1;
-    peakWindow = 11:20;%peakWindow = isi*imagerate+1:isi*imagerate+3;
+    peakWindow = 11:20;%peakWindow = isi*imagerate:isi*imagerate+2;
     pathname = '\\langevin\backup\widefield\DOIpaper\patchonpatch\decon\';
 else
     base = isi*imagerate-2:isi*imagerate;
@@ -39,13 +40,13 @@ else
 end
 cd(pathname)
 
-psfile = 'c:\tempPhilWF.ps';
-if exist(psfile,'file')==2;delete(psfile);end
+% psfile = 'c:\tempPhilWF.ps';
+% if exist(psfile,'file')==2;delete(psfile);end
 
 %% Figure 1 - pixelwise response
 % figure;set(gcf,'color','w');colormap jet
 load(grpfiles{ctlg},'grpcyc') %control group
-resp = squeeze(nanmean(nanmean(nanmean(grpcyc(:,:,:,peakWindow,2,:,1,1),4),6),1));
+resp = squeeze(nanmean(nanmean(nanmean(grpcyc(:,:,:,peakWindow,2,:,runstate,1),4),6),1));
 % satisfied=0;
 % while satisfied~=1
 %     figure;colormap jet
@@ -89,17 +90,17 @@ imagesc(resp,dfrangesit)
 axis off
 title('saline pre')
 figure;set(gcf,'color','w');colormap jet%subplot(2,2,2)
-imagesc(squeeze(nanmean(nanmean(nanmean(grpcyc(:,:,:,peakWindow,2,:,1,2),4),6),1)),dfrangesit)
+imagesc(squeeze(nanmean(nanmean(nanmean(grpcyc(:,:,:,peakWindow,2,:,runstate,2),4),6),1)),dfrangesit)
 axis off
 title('saline post')
 
 load(grpfiles{expg},'grpcyc') %control group
 figure;set(gcf,'color','w');colormap jet%subplot(2,2,3)
-imagesc(squeeze(nanmean(nanmean(nanmean(grpcyc(:,:,:,peakWindow,2,:,1,1),4),6),1)),dfrangesit)
+imagesc(squeeze(nanmean(nanmean(nanmean(grpcyc(:,:,:,peakWindow,2,:,runstate,1),4),6),1)),dfrangesit)
 axis off
 title('DOI pre')
 figure;set(gcf,'color','w');colormap jet%subplot(2,2,4)
-imagesc(squeeze(nanmean(nanmean(nanmean(grpcyc(:,:,:,peakWindow,2,:,1,2),4),6),1)),dfrangesit)
+imagesc(squeeze(nanmean(nanmean(nanmean(grpcyc(:,:,:,peakWindow,2,:,runstate,2),4),6),1)),dfrangesit)
 axis off
 title('DOI post')
 
@@ -115,7 +116,7 @@ subplot(2,2,1)
 load(grpfiles{ctlg},'grptrace','grpring') %control group
 ringx = size(grpring,2);pixbin=5;ringxrange=4;%1X obj is 50 microns/pixel
 numAni = size(grptrace,1);
-pre = squeeze(nanmean(grptrace(:,:,2,:,1,1),4));post = squeeze(nanmean(grptrace(:,:,2,:,1,2),4));
+pre = squeeze(nanmean(grptrace(:,:,2,:,runstate,1),4));post = squeeze(nanmean(grptrace(:,:,2,:,runstate,2),4));
 hold on
 shadedErrorBar(timepts,nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k',1)
 shadedErrorBar(timepts,nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r',1)
@@ -127,7 +128,7 @@ title('saline cyc avg')
 set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',12,'tickdir','out')
 
 subplot(2,2,3)
-pre = squeeze(nanmean(grpring(:,:,2,:,1,1),4));post = squeeze(nanmean(grpring(:,:,2,:,1,2),4));
+pre = squeeze(nanmean(grpring(:,:,2,:,runstate,1),4));post = squeeze(nanmean(grpring(:,:,2,:,runstate,2),4));
 hold on
 shadedErrorBar(0:ringx-1,nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k',1)
 shadedErrorBar(0:ringx-1,nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r',1)
@@ -142,7 +143,7 @@ set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',12,'tickdir','out')
 subplot(2,2,2)
 load(grpfiles{expg},'grptrace','grpring') %control group
 numAni = size(grptrace,1);
-pre = squeeze(nanmean(grptrace(:,:,2,:,1,1),4));post = squeeze(nanmean(grptrace(:,:,2,:,1,2),4));
+pre = squeeze(nanmean(grptrace(:,:,2,:,runstate,1),4));post = squeeze(nanmean(grptrace(:,:,2,:,runstate,2),4));
 hold on
 shadedErrorBar(timepts,nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k',1)
 shadedErrorBar(timepts,nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r',1)
@@ -154,7 +155,7 @@ title('DOI cyc avg')
 set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',12,'tickdir','out')
 
 subplot(2,2,4)
-pre = squeeze(nanmean(grpring(:,:,2,:,1,1),4));post = squeeze(nanmean(grpring(:,:,2,:,1,2),4));
+pre = squeeze(nanmean(grpring(:,:,2,:,runstate,1),4));post = squeeze(nanmean(grpring(:,:,2,:,runstate,2),4));
 hold on
 shadedErrorBar(0:ringx-1,nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k',1)
 shadedErrorBar(0:ringx-1,nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r',1)
@@ -178,8 +179,8 @@ grpfig=figure;set(gcf,'color','w');
 for i = 1:4
     load(grpfiles{i},'grptrace')
     numAni = size(grptrace,1);
-    pre = squeeze(nanmean(nanmean(grptrace(:,peakWindow,2,:,1,1),4),2))-squeeze(nanmean(nanmean(grptrace(:,base,2,:,1,1),4),2)); %center only
-    post = squeeze(nanmean(nanmean(grptrace(:,peakWindow,2,:,1,2),4),2))-squeeze(nanmean(nanmean(grptrace(:,base,2,:,1,2),4),2)); %center only
+    pre = squeeze(nanmean(nanmean(grptrace(:,peakWindow,2,:,runstate,1),4),2))-squeeze(nanmean(nanmean(grptrace(:,base,2,:,runstate,1),4),2)); %center only
+    post = squeeze(nanmean(nanmean(grptrace(:,peakWindow,2,:,runstate,2),4),2))-squeeze(nanmean(nanmean(grptrace(:,base,2,:,runstate,2),4),2)); %center only
 %     pre = squeeze(nanmean(nanmean(grptrace(:,peakWindow,4,:,1,1),4),2)); %iso+cross
 %     post = squeeze(nanmean(nanmean(grptrace(:,peakWindow,4,:,1,2),4),2)); %iso+cross
     pre(pre<0)=0;post(post<0)=0;
@@ -210,8 +211,8 @@ for i = 1:4
     figure;
     for j = 1:numAni
         subplot(2,3,j)
-        pre = squeeze(nanmean(grptrace(j,:,2,:,1,1),4));
-        post = squeeze(nanmean(grptrace(j,:,2,:,1,2),4));
+        pre = squeeze(nanmean(grptrace(j,:,2,:,runstate,1),4));
+        post = squeeze(nanmean(grptrace(j,:,2,:,runstate,2),4));
         hold on
         plot(timepts,pre,'k')
         plot(timepts,post,'r')
@@ -256,10 +257,10 @@ end
 
 %% save pdf
 
-try
-    dos(['ps2pdf ' psfile ' "' 'comparePatchOnPatch.pdf' '"'])
-catch
-    display('couldnt generate pdf');
-end
-
-delete(psfile);
+% try
+%     dos(['ps2pdf ' psfile ' "' 'comparePatchOnPatch.pdf' '"'])
+% catch
+%     display('couldnt generate pdf');
+% end
+% 
+% delete(psfile);

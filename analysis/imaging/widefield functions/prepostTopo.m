@@ -126,7 +126,7 @@ for grp=1:4
         imagesc(squeeze(grpmaps(grp,ani,:,:,2)),[-0.01 0.05]);axis off;axis image;
         title(sprintf('post cc=%0.3f',cc))
         set(gca,'LooseInset',get(gca,'TightInset'))
-        mtit(sprintf('%s %s %s',files(use(ani)).subj,files(use(ani)).inject,files(use(ani)).training))
+        mtit(sprintf('%s %s %s',files(use(f)).subj,files(use(f)).inject,files(use(f)).training))
         
         if exist('psfile','var')
             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');

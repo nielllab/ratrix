@@ -103,9 +103,9 @@ else
     end
     maxGBsaved = maxGB;
     fprintf('saving...\n')
-    tic
-    save(mfn,'data','t','maxGBsaved','-v7.3') %7.3 required for >2GB vars
-    toc
+%     tic
+%     save(mfn,'data','t','maxGBsaved','-v7.3') %7.3 required for >2GB vars
+%     toc
     
     clear stamps
 end

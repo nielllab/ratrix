@@ -55,10 +55,10 @@ dfofInterp= dfof(buffer(1,1):(end-buffer(1,2)),buffer(2,1):(end-buffer(2,2)),:);
 %%% remove if this messes things up!
 stdImg = imresize(greenframe,1/cfg.spatialBin);
 stdImg= stdImg(buffer(1,1):(end-buffer(1,2)),buffer(2,1):(end-buffer(2,2)),:);
-thresh = 0.1*prctile(stdImg,99);
-for i = 1:size(dfofInterp,3);
-    dfofInterp(:,:,i) = dfofInterp(:,:,i).*(stdImg>thresh);
-end
+% thresh = 0.1*prctile(stdImg,99);
+% for i = 1:size(dfofInterp,3);
+%     dfofInterp(:,:,i) = dfofInterp(:,:,i).*(stdImg>thresh);
+% end
 
 
 % number of frames per cycle
@@ -153,9 +153,11 @@ stdImg= stdImg(buffer(1,1):(end-buffer(1,2)),buffer(2,1):(end-buffer(2,2)),:);
 greencrop = stdImg;
 imagesc(stdImg,[prctile(stdImg(:),1) prctile(stdImg(:),99)*1.2]); hold on; axis equal; colormap gray;
 title('Mean Green Channel');
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
 
 normgreen = (stdImg - prctile(stdImg(:),1))/ (prctile(stdImg(:),99)*1.5 - prctile(stdImg(:),1));
-if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+normgreen(normgreen<0)=0; normgreen(normgreen>1)=1;
 
 %%% max df/f of each pixel
 maxFig = figure;
@@ -325,7 +327,7 @@ figure
 plot((0:size(dFrepeats,2)-1)/cycWindow, squeeze(mean(dFrepeats,1)))
 xlabel('stim #'); xlim([1 nstim+1]); ylim([-0.05 0.15])
 title('mean trace for each repeat');
-hold on; legend('1','2','3','4')
+hold on; 
 %plot((0:totalframes-1)/cycLength+1, squeeze(mean(mean(dFrepeats,3),1)),)
 plot((0:size(dFrepeats,2)-1)/cycWindow, squeeze(mean(nanmedian(dFrepeats,3),1)),'g','Linewidth',2)
 for i = 1:nstim;
@@ -352,8 +354,20 @@ for i = 1:min(cycLength,30)
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
+%%% plot weighted pixel-wise cycle average
+figure
+for i = 1:min(cycLength,30)
+    subplot(5,6,i);
+    % imagesc(cycImg(:,:,i)-min(cycImg,[],3),[0 0.1]); axis equal
+    data_im = mat2im((cycImg(:,:,i)-mean(cycImg(:,:,1:10),3)),[0 0.1],jet);
+    imshow(data_im.*normgreen);
+    axis equal; axis off
+end
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-%%% plot mean timecourse
+
+
+%%% plot  mean timecourse
 cycAvgAll = cycAvgAll - repmat(cycAvgAll(:,1),[1 size(cycAvgAll,2)]);
 figure
 plot((1:length(cycAvg))*dt,cycAvg); title('cycle average all cells'); xlabel('time'); ylabel('dF')

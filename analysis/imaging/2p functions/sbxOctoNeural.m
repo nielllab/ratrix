@@ -157,9 +157,11 @@ imagesc(stdImg,[prctile(stdImg(:),1) prctile(stdImg(:),99)*1.2]); hold on; axis 
 title('Mean Green Channel');
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-
+stdImg = double(stdImg);
 normgreen = (stdImg - prctile(stdImg(:),1))/ (prctile(stdImg(:),99)*1.5 - prctile(stdImg(:),1));
+normgreen = normgreen*2;
 normgreen(normgreen<0)=0; normgreen(normgreen>1)=1;
+normgreen = repmat(normgreen,[1 1 3]);
 
 %%% max df/f of each pixel
 maxFig = figure;
@@ -352,7 +354,9 @@ figure
 for i = 1:min(cycLength,30)
     subplot(5,6,i);
     % imagesc(cycImg(:,:,i)-min(cycImg,[],3),[0 0.1]); axis equal
-    imagesc(cycImg(:,:,i)-mean(cycImg(:,:,1:10),3),[0 0.1]); axis equal; axis off
+     data = cycImg(:,:,i)-mean(cycImg(:,:,1:10),3);
+    datafilt = imfilter(data,fspecial('gaussian',[10 10],2));
+    imagesc(datafilt,[0 0.1]); axis equal; axis off
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
@@ -361,13 +365,16 @@ figure
 for i = 1:min(cycLength,30)
     subplot(5,6,i);
     % imagesc(cycImg(:,:,i)-min(cycImg,[],3),[0 0.1]); axis equal
-    data_im = mat2im((cycImg(:,:,i)-mean(cycImg(:,:,1:10),3)),[0 0.1],jet);
+    data = cycImg(:,:,i)-mean(cycImg(:,:,1:10),3);
+    datafilt = imfilter(data,fspecial('gaussian',[10 10],2));
+    data_im = mat2im(datafilt,jet,[0 0.05]);
     imshow(data_im.*normgreen);
     axis equal; axis off
 end
+
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-
+keyboard
 
 %%% plot  mean timecourse
 cycAvgAll = cycAvgAll - repmat(cycAvgAll(:,1),[1 size(cycAvgAll,2)]);
@@ -518,15 +525,18 @@ figure
 hist(max(dFclust,[],2))
 %%% calculate pixel-wise maps of activity for different stim
 
-evRange = 6:20; baseRange = 1:5; %%% timepoints for evoked and baseline activity
+evRange = 10:20; baseRange = 1:5; %%% timepoints for evoked and baseline activity
+dfInterpsm = imresize(dfofInterp,0.25);
+dfWeight = dfInterpsm.* repmat(imresize(normgreen(:,:,1),0.25),[1 1 size(dfofInterp,3)]);
 for i = 1:length(stimOrder); %%% get pixel-wise evoked activity on each individual stim presentation
     startFrame = (stimTimes(i)-0.5)/dt;
     trialmean(:,:,i) = nanmean(dfofInterp(:,:,round(startFrame + evRange)),3)- nanmean(dfofInterp(:,:,round(startFrame + baseRange)),3);
     trialTcourse(:,i) = squeeze(mean(mean(dfofInterp(:,:,round(startFrame + (1:30))),2),1)) - mean(mean(dfofInterp(:,:,round(startFrame + 1)),2),1) ;
-    
+    weightTcourse(:,i) = (squeeze(mean(mean(dfWeight(:,:,round(startFrame + (1:30))),2),1)) - mean(mean(mean(dfWeight(:,:,round(startFrame + baseRange)),3),2),1))/mean(normgreen(:)) ;
 end
 filt = fspecial('gaussian',5,1.5);
 trialmean = imfilter(trialmean,filt);
+
 
 %%% plot mean for each stim condition, with layout corresponding to the stim
 range = [-0.02 0.1];
@@ -622,15 +632,17 @@ end
 
 
 if nstim==13 %%% gratings 1 tf
-    range = [-0.025 0.15]; %%% colormap range
+    range = [-0.01 0.1]; %%% colormap range
     loc = [1 5 9 2 6 10 3 7 11 4 8 12]; %%% map stim order onto subplot
     figLabel = 'gratings';
     npanel = 12; nrow = 3; ncol = 4; offset = 0;
     pixPlot;
+    pixPlotWeight;
     
     figLabel = 'flicker';
     npanel = 1; nrow = 1; ncol = 1; offset = 12;
     pixPlot;
+    pixPlotWeight;
 end
 
 

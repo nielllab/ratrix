@@ -159,6 +159,8 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 
 stdImg = double(stdImg);
 normgreen = (stdImg - prctile(stdImg(:),1))/ (prctile(stdImg(:),99)*1.5 - prctile(stdImg(:),1));
+normgreenraw = normgreen;
+
 normgreen = normgreen*2;
 normgreen(normgreen<0)=0; normgreen(normgreen>1)=1;
 normgreen = repmat(normgreen,[1 1 3]);
@@ -173,7 +175,7 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 %%% create merge overlay of absolute fluorescence and max change
 merge = zeros(size(stdImg,1),size(stdImg,2),3);
 merge(:,:,1)= normMax;
-merge(:,:,2) = normgreen;
+merge(:,:,2) = normgreenraw;
 mergeFig = figure;
 imshow(merge); title('Mean/Max Green Channel Merge')
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
@@ -374,7 +376,6 @@ end
 
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-keyboard
 
 %%% plot  mean timecourse
 cycAvgAll = cycAvgAll - repmat(cycAvgAll(:,1),[1 size(cycAvgAll,2)]);
@@ -653,10 +654,12 @@ if nstim==48 %%% 4x6 spots
     figLabel = 'OFF spots';
     npanel = 24; nrow = 4; ncol = 6; offset = 0;
     pixPlot;
+      pixPlotWeight;
     
     figLabel = 'ON spots';
     npanel = 24; nrow = 4; ncol = 6; offset = 24;
     pixPlot;
+      pixPlotWeight;
 end
 
 if nstim==50 %%% 5x5 spots

@@ -94,16 +94,18 @@ for z=1:length(db)
     end
 
     %%%make mean image of entire recording session
-    figure;imagesc(meanImg)
+    figure;
+    subplot(1,2,1)
+    imagesc(meanImg)
     title('Mean Image')
-    axis off
-    if exist('psfilename','var')
-        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-        print('-dpsc',psfilename,'-append');
-    end
+    axis off;axis image
+%     if exist('psfilename','var')
+%         set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+%         print('-dpsc',psfilename,'-append');
+%     end
 
     %%%draw footprints of all classified cells
-    figure
+    subplot(1,2,2)
     usecells = usePts;
     draw2pSegs(usePts,1:length(usecells),jet,size(meanShiftImg),1:length(usecells),[1 length(usecells)])
     title('Cell Footprints')

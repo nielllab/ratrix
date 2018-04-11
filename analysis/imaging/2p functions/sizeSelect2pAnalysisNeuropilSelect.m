@@ -70,8 +70,12 @@ for f=1:length(use)
             end
 
             %%%get eye data
-            [eyeAlign] = get2pEyes(files(use(f)).sizeeye,0,dt);
-            eyes = align2onsets(eyeAlign',onsets,dt,timepts);
+            try
+                [eyeAlign] = get2pEyes(files(use(f)).sizeeye,0,dt);
+                eyes = align2onsets(eyeAlign',onsets,dt,timepts);
+            catch
+                eyeAlign = nan(1,1,1);eyes=NaN;avgrad=NaN;histrad=NaN;
+            end
 
             save(fullfile(pathname,filename),'dFout2','spikesOut2','eyes','eyeAlign')
             save(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing]),...
@@ -671,38 +675,40 @@ for f=1:length(use)
         end
 
         %%%plot eye data
-        figure
-        plot(eyeAlign); legend('x','y','r');
-        xlabel('frame')
-        ylabel('position/diameter')
-        title('eye data')
-        if exist('psfilei','var')
-            set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfilei,'-append');
-        end
-        %%%calculate running/eye correlation
-        rad = squeeze(eyeAlign(:,3));
-        radbins = [0:5:50];
-        avgrad = nanmean(rad);
-        histrad = hist(rad,radbins);
-        rad(find(isnan(rad))) = nanmean(rad);
-        speed = spInterp';
-        speed(find(isnan(speed))) = 0;
-        cut = min(length(speed),length(rad));
-        speed = speed(1:cut);rad = rad(1:cut);
-        radsp = corr(rad,speed);
-        %%%plot running vs. pupil diameter
-        figure
-        hold on
-        plot(eyeAlign(:,3),'r')
-        plot(spInterp,'b')
-        set(gca,'ylim',[0 50],'ytick',[0:10:50])
-        xlabel('frame')
-        legend('pupil diam','speed')
-        title(sprintf('pupil vs. running corr=%0.3f',radsp))
-        if exist('psfilei','var')
-            set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfilei,'-append');
+        if length(eyes)~=1
+            figure
+            plot(eyeAlign); legend('x','y','r');
+            xlabel('frame')
+            ylabel('position/diameter')
+            title('eye data')
+            if exist('psfilei','var')
+                set(gcf, 'PaperPositionMode', 'auto');
+                print('-dpsc',psfilei,'-append');
+            end
+            %%%calculate running/eye correlation
+            rad = squeeze(eyeAlign(:,3));
+            radbins = [0:5:50];
+            avgrad = nanmean(rad);
+            histrad = hist(rad,radbins);
+            rad(find(isnan(rad))) = nanmean(rad);
+            speed = spInterp';
+            speed(find(isnan(speed))) = 0;
+            cut = min(length(speed),length(rad));
+            speed = speed(1:cut);rad = rad(1:cut);
+            radsp = corr(rad,speed);
+            %%%plot running vs. pupil diameter
+            figure
+            hold on
+            plot(eyeAlign(:,3),'r')
+            plot(spInterp,'b')
+            set(gca,'ylim',[0 50],'ytick',[0:10:50])
+            xlabel('frame')
+            legend('pupil diam','speed')
+            title(sprintf('pupil vs. running corr=%0.3f',radsp))
+            if exist('psfilei','var')
+                set(gcf, 'PaperPositionMode', 'auto');
+                print('-dpsc',psfilei,'-append');
+            end
         end
 
         %%%saving

@@ -44,19 +44,19 @@ ops0.doRegistration         = 1; % skip (0) if data is already registered
 ops0.showTargetRegistration = 1; % shows the image targets for all planes to be registered
 ops0.PhaseCorrelation       = 1; % set to 0 for non-whitened cross-correlation
 ops0.SubPixel               = Inf; % 2 is alignment by 0.5 pixel, Inf is the exact number from phase correlation
-ops0.NimgFirstRegistration  = 100; % number of images to include in the first registration pass 
-ops0.nimgbegend             = 100; % frames to average at beginning and end of blocks
+ops0.NimgFirstRegistration  = 50; % number of images to include in the first registration pass 
+ops0.nimgbegend             = 50; % frames to average at beginning and end of blocks
 ops0.dobidi                 = 0; % infer and apply bidirectional phase offset
 
 % cell detection options
 ops0.ShowCellMap            = 1; % during optimization, show a figure of the clusters
 ops0.sig                    = 1;  % spatial smoothing length in pixels; encourages localized clusters
 ops0.nSVDforROI             = 50; % how many SVD components for cell clustering
-ops0.NavgFramesSVD          = 500; % how many (binned) timepoints to do the SVD based on
+ops0.NavgFramesSVD          = 50; % how many (binned) timepoints to do the SVD based on
 ops0.signalExtraction       = 'raw'; % how to extract ROI and neuropil signals: 'raw', 'regression'
 
 % spike deconvolution options
-ops0.imageRate              = 3;   % imaging rate (cumulative over planes!). Approximate, for initialization of deconvolution kernel.
+ops0.imageRate              = 0.37;   % imaging rate (cumulative over planes!). Approximate, for initialization of deconvolution kernel.
 ops0.sensorTau              = 2; % decay half-life (or timescale). Approximate, for initialization of deconvolution kernel.
 ops0.maxNeurop              = Inf; % for the neuropil contamination to be less than this (sometimes good, i.e. for interneurons)
 ops0.recomputeKernel        = 1; % whether to re-estimate kernel during optimization (default kernel is "reasonable", if you give good timescales)

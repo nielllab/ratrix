@@ -734,43 +734,43 @@ end
 % keyboard
 
 %% eye analysis
-figure
-subplot(1,3,1)
-pre = grpavgrad(:,1);post = grpavgrad(:,2);
-hold on
-errorbar([1 2],[nanmean(pre) nanmean(post)],[nanstd(pre)/sqrt(numAni) nanstd(post)/sqrt(numAni)],'ko-','linewidth',2)
-plot([1 2],grpavgrad,'b.-')
-axis([0 3 0 30])
-set(gca,'xtick',[1 2],'xticklabel',{'pre','post'},'tickdir','out','fontsize',8)
-ylabel('pupil diameter')
-axis square
-[h p] = ttest(pre,post);
-title(sprintf('p = %0.3f',p))
-subplot(1,3,2)
-pre = grphistrad(:,:,1);post = grphistrad(:,:,2);
-hold on
-shadedErrorBar(1:11,nanmean(pre),nanstd(pre)/sqrt(numAni),'k',1)
-shadedErrorBar(1:11,nanmean(post),nanstd(post)/sqrt(numAni),'r',1)
-set(gca,'xtick',1:2:10,'xticklabel',[0:10:50],'ytick',0:2000:10000,'tickdir','out','fontsize',8)
-xlabel('pupil diameter')
-ylabel('number of frames')
-legend('pre','post')
-axis([0 11 0 10000])
-axis square
-subplot(1,3,3)
-pre = grprun(:,1);post = grprun(:,2);
-hold on
-plot([1 2],[pre post],'k.-')
-errorbar([1 2],[nanmean(pre) nanmean(post)],[nanstd(pre)/sqrt(numAni) nanstd(post)/sqrt(numAni)])
-set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'ytick',0:0.25:1,'tickdir','out','fontsize',8)
-ylabel('% time')
-axis([0 3 0 1])
-axis square
-mtit('behav state pre vs. post')
-if exist('psfile','var')
-    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-    print('-dpsc',psfile,'-append');
-end
+% figure
+% subplot(1,3,1)
+% pre = grpavgrad(:,1);post = grpavgrad(:,2);
+% hold on
+% errorbar([1 2],[nanmean(pre) nanmean(post)],[nanstd(pre)/sqrt(numAni) nanstd(post)/sqrt(numAni)],'ko-','linewidth',2)
+% plot([1 2],grpavgrad,'b.-')
+% axis([0 3 0 30])
+% set(gca,'xtick',[1 2],'xticklabel',{'pre','post'},'tickdir','out','fontsize',8)
+% ylabel('pupil diameter')
+% axis square
+% [h p] = ttest(pre,post);
+% title(sprintf('p = %0.3f',p))
+% subplot(1,3,2)
+% pre = grphistrad(:,:,1);post = grphistrad(:,:,2);
+% hold on
+% shadedErrorBar(1:11,nanmean(pre),nanstd(pre)/sqrt(numAni),'k',1)
+% shadedErrorBar(1:11,nanmean(post),nanstd(post)/sqrt(numAni),'r',1)
+% set(gca,'xtick',1:2:10,'xticklabel',[0:10:50],'ytick',0:2000:10000,'tickdir','out','fontsize',8)
+% xlabel('pupil diameter')
+% ylabel('number of frames')
+% legend('pre','post')
+% axis([0 11 0 10000])
+% axis square
+% subplot(1,3,3)
+% pre = grprun(:,1);post = grprun(:,2);
+% hold on
+% plot([1 2],[pre post],'k.-')
+% errorbar([1 2],[nanmean(pre) nanmean(post)],[nanstd(pre)/sqrt(numAni) nanstd(post)/sqrt(numAni)])
+% set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'ytick',0:0.25:1,'tickdir','out','fontsize',8)
+% ylabel('% time')
+% axis([0 3 0 1])
+% axis square
+% mtit('behav state pre vs. post')
+% if exist('psfile','var')
+%     set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+%     print('-dpsc',psfile,'-append');
+% end
 %% 
 
 
@@ -971,8 +971,8 @@ for j = 1:length(sfrange)
         figure(WHMfig)
         subplot(2,2,figcnt)
         hold on
-        errorbar(1:length(sizes),nanmean(WHM(:,j,:,k,1),1),nanstd(WHM(:,j,:,k,1),1)/numAni,'ko')
-        errorbar(1:length(sizes),nanmean(WHM(:,j,:,k,2),1),nanstd(WHM(:,j,:,k,2),1)/numAni,'ro')
+        errorbar(1:length(sizes),squeeze(nanmean(WHM(:,j,:,k,1),1)),squeeze(nanstd(WHM(:,j,:,k,1),1))/numAni,'ko')
+        errorbar(1:length(sizes),squeeze(nanmean(WHM(:,j,:,k,2),1)),squeeze(nanstd(WHM(:,j,:,k,2),1))/numAni,'ro')
         axis([0 length(sizes) 0 300]);axis square;
         set(gca,'xtick',1:length(sizes),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'Fontsize',8)
         xlabel('size (deg)');ylabel('WHM (microns)')
@@ -3609,7 +3609,6 @@ for z=1%:length(ccvals)
 %%
         %%%%%%calculate two suppression indeces, one w/pref stim one avg across
         %%%%%%all stim where SI = (peak - 50deg)/(peak + 50deg)
-
         %%%avg across stim parameters
         SIcalc = squeeze(nanmean(nanmean(nanmean(grpsptuning(:,spWindow{win},:,:,:,:,:),2),3),4));
     %     indeces = (max(SIcalc(:,:,1,1),[],2)>minresp & max(SIcalc(:,:,1,2),[],2)>minresp);
@@ -3727,6 +3726,118 @@ for z=1%:length(ccvals)
             print('-dpsc',psfile,'-append');
         end
         
+%%
+        %%%same suppression index calculation, but by animal instead of cell, one w/pref stim one avg across
+        %%%%%%all stim where SI = (peak - 50deg)/(peak + 50deg)
+        
+        %%%avg across stim parameters
+        SIcalc = squeeze(nanmean(nanmean(nanmean(grpsptuning(:,spWindow{win},:,:,:,:,:),2),3),4));
+        SIani = nan(numAni,length(sizes),2,2);
+        for j = 1:numAni
+            SIani(j,:,:,:) = squeeze(nanmean(SIcalc(find(sess==j),:,:,:),1));
+        end
+        
+        SIavg = nan(numAni,2,2);
+        for i = 1:2
+            for j = 1:2
+                A = SIani(:,:,i,j);
+                B = min(SIani(:,:,i,j),[],2);
+                SIani(:,:,i,j) = bsxfun(@minus,A,B);
+                [SIpks, SIinds] = max(squeeze(SIani(:,:,i,j)),[],2);
+                SI50 = squeeze(SIani(:,end,i,j));
+                SIavg(:,i,j) = (SIpks - SI50)./(SIpks + SI50);
+            end
+        end
+
+        figure
+        subplot(1,2,1)
+        hold on
+        preSI = squeeze(SIavg(:,1,1));
+        postSI = squeeze(SIavg(:,1,2));
+        plot(preSI,postSI,'bo')
+        errorbarxy(nanmean(preSI),nanmean(postSI),nanstd(preSI)/sqrt(numAni),nanstd(postSI)/sqrt(numAni))
+        plot([0 1],[0 1],'k--')
+        axis square
+        axis([0 1 0 1])
+        xlabel('pre SI')
+        ylabel('post SI')
+        [h p] = ttest(preSI,postSI);
+        title(sprintf('sit SI p=%0.3f',p))
+
+        subplot(1,2,2)
+        hold on
+        preSI = squeeze(SIavg(:,2,1));
+        postSI = squeeze(SIavg(:,2,2));
+        plot(preSI,postSI,'bo')
+        errorbarxy(nanmean(preSI),nanmean(postSI),nanstd(preSI)/sqrt(numAni),nanstd(postSI)/sqrt(numAni))
+        plot([0 1],[0 1],'k--')
+        axis square
+        axis([0 1 0 1])
+        xlabel('pre SI')
+        ylabel('post SI')
+        [h p] = ttest(preSI,postSI);
+        title(sprintf('run SI p=%0.3f',p))
+
+        mtit('animal SI all stim')
+        if exist('psfile','var')
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+            print('-dpsc',psfile,'-append');
+        end
+
+
+        %%%SI for preferred SF and ori
+        SIcalc = squeeze(nanmean(grpspsize(:,spWindow{win},:,:,:),2));
+        SIani = nan(numAni,length(sizes),2,2);
+        for j = 1:numAni
+            SIani(j,:,:,:) = squeeze(nanmean(SIcalc(find(sess==j),:,:,:),1));
+        end
+        
+        SIavg = nan(numAni,2,2);
+        for i = 1:2
+            for j = 1:2
+                A = SIani(:,:,i,j);
+                B = min(SIani(:,:,i,j),[],2);
+                SIani(:,:,i,j) = bsxfun(@minus,A,B);
+                [SIpks, SIinds] = max(squeeze(SIani(:,:,i,j)),[],2);
+                SI50 = squeeze(SIani(:,end,i,j));
+                SIavg(:,i,j) = (SIpks - SI50)./(SIpks + SI50);
+            end
+        end
+
+        figure
+        subplot(1,2,1)
+        hold on
+        preSI = squeeze(SIavg(:,1,1));
+        postSI = squeeze(SIavg(:,1,2));
+        plot(preSI,postSI,'bo')
+        errorbarxy(nanmean(preSI),nanmean(postSI),nanstd(preSI)/sqrt(numAni),nanstd(postSI)/sqrt(numAni))
+        plot([0 1],[0 1],'k--')
+        axis square
+        axis([0 1 0 1])
+        xlabel('pre SI')
+        ylabel('post SI')
+        [h p] = ttest(preSI,postSI);
+        title(sprintf('sit SI p=%0.3f',p))
+
+        subplot(1,2,2)
+        hold on
+        preSI = squeeze(SIavg(:,2,1));
+        postSI = squeeze(SIavg(:,2,2));
+        plot(preSI,postSI,'bo')
+        errorbarxy(nanmean(preSI),nanmean(postSI),nanstd(preSI)/sqrt(numAni),nanstd(postSI)/sqrt(numAni))
+        plot([0 1],[0 1],'k--')
+        axis square
+        axis([0 1 0 1])
+        xlabel('pre SI')
+        ylabel('post SI')
+        [h p] = ttest(preSI,postSI);
+        title(sprintf('run SI p=%0.3f',p))
+
+        mtit('animal SI pref stim')
+        if exist('psfile','var')
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+            print('-dpsc',psfile,'-append');
+        end
 
 %%
         %%%pull out max response

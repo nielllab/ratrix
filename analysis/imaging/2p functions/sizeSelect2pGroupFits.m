@@ -80,7 +80,7 @@ end
 %% fits
 grpdata = nan(numAni,length(sizes),2,2);
 allparams = nan(numAni,2,2,2);allcc = nan(numAni,2,2);
-allfit = cell(numAni,2,2);
+allfit = cell(numAni,2,2);grpfitcurve = nan(numAni,1001,2,2,2);nfit = zeros(2,2);
 for i = 1:2 %sit/run
     pre=nan(length(unique(sess)),length(sizes));post=pre;
     for j = 1:length(unique(sess))
@@ -125,19 +125,86 @@ for i = 1:2 %sit/run
         
     %calculate SI from fits
     for j = 1:2 %pre/post
+        cnt=0;
         for k = 1:length(fitani)
-            scur = allfit{fitani(k),i,j}(radiusRange);
+            h1=figure;
+            ft = plot(allfit{fitani(k),i,j});%(radiusRange);
+            xdata = ft.XData;ydata = ft.YData;
+            close(h1)
             try
-                SIfit(fitani(k),i,j) = (max(scur)-scur(end))/(max(scur)+scur(end));
+                SIfit(fitani(k),i,j) = (max(ydata)-ydata(end))/(max(ydata)+ydata(end));
+                grpfitcurve(fitani(k),:,1,i,j) = xdata;
+                grpfitcurve(fitani(k),:,2,i,j) = ydata;
+                cnt=cnt+1;
             catch
                 SIfit(fitani(k),i,j) = 0;
             end
         end
+        nfit(i,j) = cnt;
     end
 
 end
 
-%% plot group data
+%% plot group fit data   
+figure;set(gcf,'color','w')
+for j = 1:2 %sit/run
+    subplot(2,2,j)
+    hold on
+    A=plot(radiusRange,nanmean(grpdata(:,:,j,1),1),'ko:');
+    B=plot(radiusRange,nanmean(grpdata(:,:,j,2),1),'ro:');
+    C=shadedErrorBar(nanmean(grpfitcurve(:,:,1,j,1),1),nanmean(grpfitcurve(:,:,2,j,1),1),...
+        nanstd(grpfitcurve(:,:,2,j,1),1)/sqrt(nfit(j,1)),'k',1);   
+    D=shadedErrorBar(nanmean(grpfitcurve(:,:,1,j,2),1),nanmean(grpfitcurve(:,:,2,j,2),1),...
+        nanstd(grpfitcurve(:,:,2,j,2),1)/sqrt(nfit(j,2)),'r',1);   
+    axis square;axis([0 radiusRange(end) -0.05 1])
+    xlabel('Stim Size (deg)');ylabel(sprintf('%s dfof',stlb{j}));
+    title(sprintf('%s Data vs. Fits',stlb{j}))
+    legend([A,B,C.mainLine,D.mainLine],'predata','postdata','prefit','postfit')
+    set(gca,'xtick',radiusRange,'xticklabel',sizes,'ytick',0:0.25:1,...
+        'LooseInset',get(gca,'TightInset'),'fontsize',10)
+    
+    sprintf('%s Rsquared pre=%0.3f post=%0.3f',stlb{j},nanmean(allcc(:,j,1),1),nanmean(allcc(:,j,2),1))
+end
+
+for j = 1:2 %sit/run
+    subplot(2,2,j+2)
+    hold on
+    pre=squeeze(allparams(:,1,j,1));post=squeeze(allparams(:,1,j,2));
+    plot(pre,post,'bo')
+    errorbarxy(nanmean(pre,1),nanmean(post,1),nanstd(pre,[],1)/sqrt(nfit(j,1)),nanstd(post,[],1)/sqrt(nfit(j,2)),{'b','b','b'})
+    plot([0 max([pre' post'])],[0 max([pre' post'])],'k:')
+    axis([0 max([pre' post']) 0 max([pre' post'])])
+    ax1 = gca;ax1.XColor = 'b';ax1.YColor = 'b';ax1_pos = ax1.Position; % position of first axes
+    axis square
+    xlabel(sprintf('%s Rd pre',stlb{j}));ylabel(sprintf('%s Rd post',stlb{j}));
+    hold off
+    ax2 = axes('Position',ax1_pos,'XAxisLocation','top','YAxisLocation','right','Color','none');
+    ax2.XColor = 'm';ax2.YColor = 'm';
+    
+    [h p] = ttest(pre,post);
+    sprintf('%s Rd pre=%0.2f post=%0.2f p=%0.3f',stlb{j},nanmean(pre),nanmean(post),p)
+    
+    axes(ax2)
+    pre=squeeze(allparams(:,2,j,1));post=squeeze(allparams(:,2,j,2));
+    hold on
+    plot(pre,post,'mo')
+    errorbarxy(nanmean(pre,1),nanmean(post,1),nanstd(pre,[],1)/sqrt(nfit(j,1)),nanstd(post,[],1)/sqrt(nfit(j,2)),{'m','m','m'})
+    plot([0 max([pre' post'])],[0 max([pre' post'])],'k:')
+    axis([0 max([pre' post']) 0 max([pre' post'])])
+    axis square
+    xlabel(sprintf('%s Rs pre',stlb{j}));ylabel(sprintf('%s Rs post',stlb{j}));
+    
+    [h p] = ttest(pre,post);
+    sprintf('%s Rs pre=%0.2f post=%0.2f p=%0.3f',stlb{j},nanmean(pre),nanmean(post),p)
+end
+
+mtit(sprintf('Fits %s',grpfilename(1:end-15)))
+if exist('psfile','var')
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    print('-dpsc',psfile,'-append');
+end
+
+%% plot group SI data
 figure
 for i = 1:2 %sit/run
     subplot(2,2,i)
@@ -154,13 +221,15 @@ for i = 1:2 %sit/run
     [h p] = ttest(preSI,postSI);
     title(sprintf('%s raw SI p=%0.3f',stlb{i},p))
     set(gca,'xtick',0:0.25:1,'ytick',0:0.25:1)
+    
+    sprintf('%s SIraw pre=%0.2f post=0.2%f p=%0.3f',stlb{i},nanmean(preSI),nanmean(postSI),p)
 
     subplot(2,2,i+2)
     hold on
     preSI = squeeze(SIfit(:,i,1));
     postSI = squeeze(SIfit(:,i,2));
     plot(preSI,postSI,'bo')
-    errorbarxy(nanmean(preSI),nanmean(postSI),nanstd(preSI)/sqrt(numAni),nanstd(postSI)/sqrt(numAni))
+    errorbarxy(nanmean(preSI),nanmean(postSI),nanstd(preSI)/sqrt(nfit(i,1)),nanstd(postSI)/sqrt(nfit(i,2)))
     plot([0 1],[0 1],'k--')
     axis square
     axis([0 1 0 1])
@@ -169,6 +238,8 @@ for i = 1:2 %sit/run
     [h p] = ttest(preSI,postSI);
     title(sprintf('%s fit SI p=%0.3f',stlb{i},p))
     set(gca,'xtick',0:0.25:1,'ytick',0:0.25:1)
+    
+    sprintf('%s SIfit pre=%0.2f post=0.2%f p=%0.3f',stlb{i},nanmean(preSI),nanmean(postSI),p)
 end
 
 mtit(sprintf('SI %s',grpfilename(1:end-15)))

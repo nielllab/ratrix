@@ -5,7 +5,7 @@ deconvplz = 1;
 
 ctlg = 5; %select control group from grpfiles list
 expg = 6; %select experimental group
-runstate = 2; %1=stationary, 2=running
+runstate = 1; %1=stationary, 2=running
 
 grpfiles = {'SalineNaiveIsoCrossWF'...
             'SalineTrainedIsoCrossWF'...

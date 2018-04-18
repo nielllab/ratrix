@@ -11,18 +11,20 @@ grpnames = {'saline naive'...
             'saline trained'...
             'doi naive'...
             'doi trained'};
+        
+pplb = {'pre','post'};
 
 %select subset of animals
 use = find(strcmp({files.notes},'topo only')&strcmp({files.timing},'pre'));alluse=use;
 allsubj = unique({files(alluse).subj}); %needed for doTopography
-s=1:1;doTopography
-
-for f = 1:length(use)
-    xshift = allxshift(f);
-    yshift = allyshift(f);
-    tshift = allthetashift(f);
-    save(files(use(f)).topox,'xshift','yshift','tshift','-append')
-end
+% s=1:1;doTopography
+% 
+% for f = 1:length(use)
+%     xshift = allxshift(f);
+%     yshift = allyshift(f);
+%     tshift = allthetashift(f);
+%     save(files(use(f)).topox,'xshift','yshift','tshift','x0','y0','sz','-append')
+% end
 
 psfile = 'c:\tempPhilWF.ps';
 if exist(psfile,'file')==2;delete(psfile);end
@@ -33,8 +35,8 @@ resamp=2; %how much to downsample maps by
 ampthresh = 0.005; %threshold for phase correlation/display for topox/y
 mrng = [-0.01 0.05]; %display range for imagesc of maps
 grpmaps = zeros(4,10,size(map{1},1)/resamp,size(map{1},2)/resamp,2);grpamp=grpmaps;
-grptx = zeros(4,10,size(map{1},1)/resamp,size(map{1},2)/resamp,3,2);grpty=grptx;
-grpcc = zeros(4,10); %correlation coefficients
+grptx = zeros(4,10,size(map{1},1)/resamp,size(map{1},2)/resamp,2);grpty=grptx;
+grpcc = zeros(4,10);grpccx=grpcc;grpccy=grpcc;combcc=grpcc; %correlation coefficients
 zoom = 1;%260/size(dfof_bg,1); should be same as in doTopography
 f1=figure;set(gcf,'color','w');
 for grp=1:4
@@ -58,11 +60,13 @@ for grp=1:4
 
     for f = 1:2:length(use) %across animals
         ani = round(f/2);
+        figure;set(gcf,'color','w')
+        cnt=1;
         for pp = 0:1 %pre/post
             if pp==1
                 load(files(use(f+pp)).topox,'map');
             else
-                load(files(use(f+pp)).topox,'map','xshift','yshift','tshift');
+                load(files(use(f+pp)).topox,'map','xshift','yshift','tshift','x0','y0','sz');
             end
             clear data
             if length(map)==3
@@ -120,49 +124,44 @@ for grp=1:4
                         
             %get x/y phase and threshold only above min amp
             %correlate raw phase, also plot each one
-            tx = squeeze(data(:,:,1));xamp = abs(tx);tx=polarMap(tx);%tx(dist>90) = NaN;
-            ty = squeeze(data(:,:,2));yamp = abs(ty);ty=polarMap(ty);%ty(dist>90) = NaN;
-            for i = 1:size(tx,3)
-                tmp = tx(:,:,i);tmp(dist>90) = NaN;tx(:,:,i) = tmp;%tmp(xamp<ampthresh) = NaN;
-                tmp = ty(:,:,i);tmp(dist>90) = NaN;ty(:,:,i) = tmp;%tmp(yamp<ampthresh) = NaN;
-            end
-            grptx(grp,ani,:,:,:,pp+1) = tx;
-            grpty(grp,ani,:,:,:,pp+1) = ty;
+            tx = squeeze(data(:,:,1));grptx(grp,ani,:,:,pp+1) = tx;%tx(dist>90) = NaN;
+            xamp = abs(tx);tx=polarMap(tx);%tx(dist>90) = NaN;
+            ty = squeeze(data(:,:,2));grpty(grp,ani,:,:,pp+1) = ty;%ty(dist>90) = NaN;
+            yamp = abs(ty);ty=polarMap(ty);%ty(dist>90) = NaN;           
             
+            subplot(2,3,cnt)
+            imshow(img);axis off;axis image;
+            title(sprintf('%s sign',pplb{pp+1}))
+            set(gca,'LooseInset',get(gca,'TightInset'))
+            cnt=cnt+1;
+            subplot(2,3,cnt)
+            imshow(tx);axis off;axis image;
+            title(sprintf('%s topox',pplb{pp+1}))
+            set(gca,'LooseInset',get(gca,'TightInset'))
+            cnt=cnt+1;
+            subplot(2,3,cnt)
+            imshow(ty);axis off;axis image;
+            title(sprintf('%s topoy',pplb{pp+1}))
+            set(gca,'LooseInset',get(gca,'TightInset'))
+            cnt=cnt+1;
             
         end
-        pre = squeeze(grpmaps(grp,ani,:,:,1));pre=pre(:);pre=pre(~isnan(pre));
-        post = squeeze(grpmaps(grp,ani,:,:,2));post=post(:);post=post(~isnan(post));
+        pre = squeeze(grpmaps(grp,ani,:,:,1));pre(dist>90) = NaN;pre=pre(:);pre=pre(~isnan(pre));
+        post = squeeze(grpmaps(grp,ani,:,:,2));post(dist>90) = NaN;post=post(:);post=post(~isnan(post));
         cc = corr(pre,post);
         grpcc(grp,ani) = cc;
         
-        %%%individual animal plot
-        figure;set(gcf,'color','w')
-        subplot(2,3,1)
-        imshow(squeeze(grpmaps(grp,ani,:,:,1)),mrng);axis off;axis image;
-        title('pre sign')
-        set(gca,'LooseInset',get(gca,'TightInset'))
-        subplot(2,3,4)
-        imshow(squeeze(grpmaps(grp,ani,:,:,2)),mrng);axis off;axis image;
-        title(sprintf('post sign cc=%0.3f',cc))
-        set(gca,'LooseInset',get(gca,'TightInset'))
-        subplot(2,3,2)
-        imshow(squeeze(grptx(grp,ani,:,:,:,1)),mrng);axis off;axis image;
-        title('pre topox')
-        set(gca,'LooseInset',get(gca,'TightInset'))
-        subplot(2,3,5)
-        imshow(squeeze(grptx(grp,ani,:,:,:,2)),mrng);axis off;axis image;
-        title('post topox')
-        set(gca,'LooseInset',get(gca,'TightInset'))
-        subplot(2,3,3)
-        imshow(squeeze(grpty(grp,ani,:,:,:,1)),mrng);axis off;axis image;
-        title('pre topoy')
-        set(gca,'LooseInset',get(gca,'TightInset'))
-        subplot(2,3,6)
-        imshow(squeeze(grpty(grp,ani,:,:,:,2)),mrng);axis off;axis image;
-        title('post topoy')
-        set(gca,'LooseInset',get(gca,'TightInset'))
-        mtit(sprintf('%s %s %s',files(use(f)).subj,files(use(f)).inject,files(use(f)).training))
+        pre = squeeze(grptx(grp,ani,:,:,1));pre=pre(:);pre=pre(~isnan(pre));
+        post = squeeze(grptx(grp,ani,:,:,2));post=post(:);post=post(~isnan(post));
+        xcc = corr(pre,post);
+        grpccx(grp,ani) = abs(xcc);
+        
+        pre = squeeze(grpty(grp,ani,:,:,1));pre=pre(:);pre=pre(~isnan(pre));
+        post = squeeze(grpty(grp,ani,:,:,2));post=post(:);post=post(~isnan(post));
+        ycc = corr(pre,post);
+        grpccy(grp,ani) = abs(ycc);
+        
+        mtit(sprintf('%s %s %s signcc=%0.3f xcc=%0.3f ycc=%0.3f',files(use(f)).subj,files(use(f)).inject,files(use(f)).training,cc,xcc,ycc))
         
         if exist('psfile','var')
             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
@@ -173,28 +172,32 @@ for grp=1:4
     %%%group plot
     figure;set(gcf,'color','w')
     subplot(2,3,1)
-    imshow(squeeze(nanmean(grpmaps(grp,ani,:,:,1),2)),mrng);axis off;axis image;
+    imshow(squeeze(nanmean(grpmaps(grp,:,:,:,1),2)),mrng);axis off;axis image;
     title('pre sign')
     set(gca,'LooseInset',get(gca,'TightInset'))
     subplot(2,3,4)
-    imshow(squeeze(nanmean(grpmaps(grp,ani,:,:,2),2)),mrng);axis off;axis image;
+    imshow(squeeze(nanmean(grpmaps(grp,:,:,:,2),2)),mrng);axis off;axis image;
     title(sprintf('post sign cc=%0.3f',cc))
     set(gca,'LooseInset',get(gca,'TightInset'))
     subplot(2,3,2)
-    imshow(squeeze(nanmean(grptx(grp,ani,:,:,:,1),2)),mrng);axis off;axis image;
+    tx = squeeze(nanmean(grptx(grp,:,:,:,1),2));tx=polarMap(tx);
+    imshow(tx);axis off;axis image;
     title('pre topox')
     set(gca,'LooseInset',get(gca,'TightInset'))
     subplot(2,3,5)
-    imshow(squeeze(nanmean(grptx(grp,ani,:,:,:,2),2)),mrng);axis off;axis image;
-    title('post topox')
+    tx = squeeze(nanmean(grptx(grp,:,:,:,2),2));tx=polarMap(tx);
+    imshow(tx);axis off;axis image;
+    title(sprintf('post topox cc=%0.3f',nanmean(grpccx(grp,:))))
     set(gca,'LooseInset',get(gca,'TightInset'))
     subplot(2,3,3)
-    imshow(squeeze(nanmean(grpty(grp,ani,:,:,:,1),2)),mrng);axis off;axis image;
+    ty = squeeze(nanmean(grpty(grp,:,:,:,1),2));ty=polarMap(ty);
+    imshow(ty);axis off;axis image;
     title('pre topoy')
     set(gca,'LooseInset',get(gca,'TightInset'))
     subplot(2,3,6)
-    imshow(squeeze(nanmean(grpty(grp,ani,:,:,:,2),2)),mrng);axis off;axis image;
-    title('post topoy')
+    ty = squeeze(nanmean(grpty(grp,:,:,:,2),2));ty=polarMap(ty);
+    imshow(ty);axis off;axis image;
+    title(sprintf('post topox cc=%0.3f',nanmean(grpccy(grp,:))))
     set(gca,'LooseInset',get(gca,'TightInset'))
     mtit(sprintf('%s',grpnames{grp}))
     if exist('psfile','var')
@@ -204,12 +207,47 @@ for grp=1:4
     
     %%%group quanitification
     figure(f1)
+    subplot(2,2,1)
     hold on
     plot(grp*ones(1,numAni),grpcc(grp,1:numAni),'ko','MarkerSize',15)
     errorbar(grp,nanmean(grpcc(grp,1:numAni)),nanstd(grpcc(grp,1:numAni))/sqrt(numAni),'k.','LineWidth',1,'MarkerSize',20)
+    
+    subplot(2,2,2)
+    hold on
+    plot(grp*ones(1,numAni),grpccx(grp,1:numAni),'ko','MarkerSize',15)
+    errorbar(grp,nanmean(grpccx(grp,1:numAni)),nanstd(grpccx(grp,1:numAni))/sqrt(numAni),'k.','LineWidth',1,'MarkerSize',20)
+
+    subplot(2,2,3)
+    hold on
+    plot(grp*ones(1,numAni),grpccy(grp,1:numAni),'ko','MarkerSize',15)
+    errorbar(grp,nanmean(grpccy(grp,1:numAni)),nanstd(grpccy(grp,1:numAni))/sqrt(numAni),'k.','LineWidth',1,'MarkerSize',20)
+
+    subplot(2,2,4)
+    combcc(grp,1:numAni) = (grpccx(grp,1:numAni)+grpccy(grp,1:numAni))/2;
+    hold on
+    plot(grp*ones(1,numAni),combcc(grp,1:numAni),'ko','MarkerSize',15)
+    errorbar(grp,nanmean(combcc(grp,1:numAni)),nanstd(combcc(grp,1:numAni))/sqrt(numAni),'k.','LineWidth',1,'MarkerSize',20)
 
 end
 
+figure(f1)
+subplot(2,2,1)
+title('sign cc')
+axis([0 5 0 1]);axis square
+set(gca,'xtick',1:4,'xticklabel',grpnames(1:4),'ytick',0:0.25:1,'fontsize',12,'tickdir','out')
+ylabel('pre/post map correlation')
+subplot(2,2,2)
+title('ccx')
+axis([0 5 0 1]);axis square
+set(gca,'xtick',1:4,'xticklabel',grpnames(1:4),'ytick',0:0.25:1,'fontsize',12,'tickdir','out')
+ylabel('pre/post map correlation')
+subplot(2,2,3)
+title('ccy')
+axis([0 5 0 1]);axis square
+set(gca,'xtick',1:4,'xticklabel',grpnames(1:4),'ytick',0:0.25:1,'fontsize',12,'tickdir','out')
+ylabel('pre/post map correlation')
+subplot(2,2,4)
+title('x/y cc')
 axis([0 5 0 1]);axis square
 set(gca,'xtick',1:4,'xticklabel',grpnames(1:4),'ytick',0:0.25:1,'fontsize',12,'tickdir','out')
 ylabel('pre/post map correlation')
@@ -222,7 +260,7 @@ end
 %% stats
 
 %%%non-parametric test
-[p,tbl,stats] = kruskalwallis(grpcc')
+[p,tbl,stats] = kruskalwallis(combcc')
 
 %%%tukey kramer post-hoc
 [c,m,h,gnames] = multcompare(stats)
@@ -232,8 +270,8 @@ group1 = [1 1 1 2 2 3];
 group2 = [2 3 4 3 4 4];
 sprintf('alpha = %0.4f',0.05/4)
 for i = 1:length(group1)
-    grp1 = grpcc(group1(i),:);grp1 = grp1(~isnan(grp1));
-    grp2 = grpcc(group2(i),:);grp2 = grp2(~isnan(grp2));
+    grp1 = combcc(group1(i),:);grp1 = grp1(~isnan(grp1));
+    grp2 = combcc(group2(i),:);grp2 = grp2(~isnan(grp2));
     [h,p] = ttest2(grp1,grp2,'alpha',0.05/4);
     sprintf('%s vs %s p = %0.4f',grpnames{group1(i)},grpnames{group2(i)},p)
 end
@@ -247,3 +285,31 @@ catch
 end
 
 delete(psfile);
+
+%% individual panels for figures
+% xh = 51:130;yh = 131:210;h=76:220;
+% %saline
+% tx = squeeze(nanmean(nanmean(grptx(1:2,:,xh,h,1),2),1));tx=polarMap(tx);
+% imwrite(tx,'salXpre.tif','tif')
+% 
+% tx = squeeze(nanmean(nanmean(grptx(1:2,:,xh,h,2),2),1));tx=polarMap(tx);
+% imwrite(tx,'salXpost.tif','tif')
+% 
+% ty = squeeze(nanmean(nanmean(grpty(1:2,:,yh,h,1),2),1));ty=polarMap(ty);
+% imwrite(ty,'salYpre.tif','tif')
+% 
+% ty = squeeze(nanmean(nanmean(grpty(1:2,:,yh,h,2),2),1));ty=polarMap(ty);
+% imwrite(ty,'salYpost.tif','tif')
+% 
+% %doi
+% tx = squeeze(nanmean(nanmean(grptx(3:4,:,xh,h,1),2),1));tx=polarMap(tx);
+% imwrite(tx,'doiXpre.tif','tif')
+% 
+% tx = squeeze(nanmean(nanmean(grptx(3:4,:,xh,h,2),2),1));tx=polarMap(tx);
+% imwrite(tx,'doiXpost.tif','tif')
+% 
+% ty = squeeze(nanmean(nanmean(grpty(3:4,:,yh,h,1),2),1));ty=polarMap(ty);
+% imwrite(ty,'doiYpre.tif','tif')
+% 
+% ty = squeeze(nanmean(nanmean(grpty(3:4,:,yh,h,2),2),1));ty=polarMap(ty);
+% imwrite(ty,'doiYpost.tif','tif')

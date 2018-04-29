@@ -282,6 +282,9 @@ else
     else
         mindF= input('dF cutoff : ');
     end
+    if sum(img(pts)>mindF)<10
+        mindF=0;
+    end
     pts = pts(img(pts)>mindF);
     fprintf('%d points in ROI over cutoff\n',length(pts))
     
@@ -690,9 +693,9 @@ end
 
 if Opt.SaveOutput
     Output.R = Rigid;
-    Output.NR = Rotation;
-    Output.dfof = dfofInterp;
-    Output.dF = dF;
+    outfile = fullfile(Opt.pOut,Opt.fOut);
+    save(outfile, 'trialmean', 'trialTcourse', 'stimOrder', 'c', 'dFrepeats','x','y','stdImg')
+    
     varargout{1} = Output;
 end
 close all

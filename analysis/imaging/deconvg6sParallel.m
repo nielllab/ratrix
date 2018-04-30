@@ -29,12 +29,12 @@ for x = 1:size(frames,3)
     
     
         d = deconvlucy(squeeze(frames(1,:,x,y)),psf);
-        imgdecon{y}(1,1:dlength-5,x) = d(6:dlength);
+        imgdecon{y}(1,1:dlength-4,x) = d(5:dlength); %changed from 6:dlength pp/cmn 020618
     end
 end
 
 
-img(1,1:dlength-5,:,:) = shiftdim(cell2mat(imgdecon),1);
+img(1,1:dlength-4,:,:) = shiftdim(cell2mat(imgdecon),1);
 toc
 
 if nd==3

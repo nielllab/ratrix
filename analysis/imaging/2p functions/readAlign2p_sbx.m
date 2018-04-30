@@ -11,6 +11,11 @@ if (exist([fn '.align'])==0 & align)
     display(sprintf('Done %s: Aligned %d images in %d min',fn,info.max_idx,round(toc/60)))
 end
 
+if isempty(info.aligned) %%% sometimes occurs if previously aligned, but not loaded into info
+    load([fn '.align'],'-mat','m','T');
+    info.aligned.m=m; info.aligned.T=T;
+end
+
 sbxread(fn,1,1);            % read one frame to read the header of the image sequence
 
 

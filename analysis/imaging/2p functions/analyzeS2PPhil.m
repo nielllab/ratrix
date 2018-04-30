@@ -94,21 +94,23 @@ for z=1:length(db)
     end
 
     %%%make mean image of entire recording session
-    figure;imagesc(meanImg)
+    figure;
+    subplot(1,2,1)
+    imagesc(meanImg)
     title('Mean Image')
-    axis off
-    if exist('psfilename','var')
-        set(gcf, 'PaperPositionMode', 'auto');
-        print('-dpsc',psfilename,'-append');
-    end
+    axis off;axis image
+%     if exist('psfilename','var')
+%         set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+%         print('-dpsc',psfilename,'-append');
+%     end
 
     %%%draw footprints of all classified cells
-    figure
+    subplot(1,2,2)
     usecells = usePts;
     draw2pSegs(usePts,1:length(usecells),jet,size(meanShiftImg),1:length(usecells),[1 length(usecells)])
     title('Cell Footprints')
     if exist('psfilename','var')
-        set(gcf, 'PaperPositionMode', 'auto');
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilename,'-append');
     end
 
@@ -134,24 +136,26 @@ for z=1:length(db)
         figure
         imagesc(spikes,[0 10])
         title(sprintf('spikes %s',db(z).expname{j}))
+        colorbar
         if exist('psfilename','var')
-            set(gcf, 'PaperPositionMode', 'auto');
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
             print('-dpsc',psfilename,'-append');
         end
 
         %%%plot dF/F data
         figure
-        imagesc(dF,[0 1])
+        imagesc(dF,[0 10])
         title(sprintf('dF/F %s',db(z).expname{j}))
+        colorbar
         if exist('psfilename','var')
-            set(gcf, 'PaperPositionMode', 'auto');
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
             print('-dpsc',psfilename,'-append');
         end
 
         %%%load in green frame from sbx data and save out results
         thisSession = fullfile(db(z).expdir,[db(z).expname{j}(1:strfind(db(z).expname{j},'V2')+1) '.mat']);
-        load(thisSession,'greenframe');
-        save(db(z).expname{j},'dF','greenframe','meanImg','usePts','spikes','meanShiftImg','cropx','cropy','thisSession','cImage')
+%         load(thisSession,'greenframe');
+        save(db(z).expname{j},'dF','meanImg','usePts','spikes','meanShiftImg','cropx','cropy','thisSession','cImage');%'greenframe',
     end
 
     %%%make pdf file for this session

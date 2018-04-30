@@ -67,12 +67,12 @@ for grp=1:length(grpnames)
     dStim = nan(numAni,2,2,2); %ani, corr/cov, base/stim, pre/post for stimuli
     dStimCurve = nan(numAni,2,2,2,500,dReps); %ani, corr/cov, base/stim, pre/post, #cells, sample reps 
     dDark = nan(numAni,2,2); %ani, corr/cov, pre/post for darkness
-    dStimCurve = nan(numAni,2,2,500,dReps); %ani, corr/cov, pre/post, # cells, sample reps
+    dDarkCurve = nan(numAni,2,2,500,dReps); %ani, corr/cov, pre/post, # cells, sample reps
     anicnt = 1;
     tcells = {};
     for i = 1:2:length(use)
         
-        sprintf('animal %d/%d',i,numAni)
+        sprintf('animal %d/%d',(i+1)/2,numAni)
 
         clear spikesprebase spikesprestim spikespostbase spikespoststim
 
@@ -98,7 +98,7 @@ for grp=1:length(grpnames)
         %%%threshold for only responsive cells
         tcells{anicnt} = find((valpre>spthresh)&(valpost>spthresh));
         spikespre = spikespre(tcells{anicnt},:);spikespost = spikespost(tcells{anicnt},:);
-
+        numcells = length(tcells{anicnt});
     %         spikespre = spikespre - repmat(mean(spikespre,2),1,size(spikespre,2)); %subtract mean
     %         spikespost = spikespost - repmat(mean(spikespost,2),1,size(spikespost,2));
     %         spikespre(spikespre>0) = 1;spikespost(spikespost>0) = 1; %binarize
@@ -113,10 +113,10 @@ for grp=1:length(grpnames)
         end 
 
         
-        spikesprebase = imresize(spikesprebase,[length(tcells{anicnt}) size(spikesprebase,2)/dwnsmp]);
-        spikesprestim = imresize(spikesprestim,[length(tcells{anicnt}) size(spikesprestim,2)/dwnsmp]);
-        spikespostbase = imresize(spikespostbase,[length(tcells{anicnt}) size(spikespostbase,2)/dwnsmp]);
-        spikespoststim = imresize(spikespoststim,[length(tcells{anicnt}) size(spikespoststim,2)/dwnsmp]);
+        spikesprebase = imresize(spikesprebase,[numcells size(spikesprebase,2)/dwnsmp]);
+        spikesprestim = imresize(spikesprestim,[numcells size(spikesprestim,2)/dwnsmp]);
+        spikespostbase = imresize(spikespostbase,[numcells size(spikespostbase,2)/dwnsmp]);
+        spikespoststim = imresize(spikespoststim,[numcells size(spikespoststim,2)/dwnsmp]);
 
     %         %do dimensionality only on center responsive cells
     %         valpost = max(squeeze(nanmean(spsize(:,spWindow{1},:,1),2)),[],2);
@@ -134,10 +134,12 @@ for grp=1:length(grpnames)
 
         %%%get #cells X dimensionality curve evoked
         sprintf('doing evoked dimensionality curve')
+        
         tic
-        for rep = 1:dReps
-            for cnum = 1:length(tcells{anicnt})
-                dcells = randsample(length(tcells{anicnt}),cnum);
+        for cnum = 1:numcells
+            d1=[];d2=[];d3=[];d4=[];d5=[];d6=[];d7=[];d8=[];
+            parfor rep = 1:dReps
+                dcells = randsample(numcells,cnum);
 
                 cells = spikesprebase(dcells,:);
                 R = corr(cells'); %correlation pre
@@ -145,7 +147,7 @@ for grp=1:length(grpnames)
                 s = diag(s);
                 s = s/sum(s);
                 d = 1/sum(s.^2);
-                dStimCurve(anicnt,1,1,1,cnum,rep) = d;
+                d1 = [d1 d];
 
                 cells = spikesprestim(dcells,:);
                 R = corr(cells'); %correlation pre
@@ -153,7 +155,7 @@ for grp=1:length(grpnames)
                 s = diag(s);
                 s = s/sum(s);
                 d = 1/sum(s.^2);
-                dStimCurve(anicnt,1,2,1,cnum,rep) = d;
+                d2 = [d2 d];
 
                 cells = spikespostbase(dcells,:);
                 R = corr(cells'); %correlation pre
@@ -161,7 +163,7 @@ for grp=1:length(grpnames)
                 s = diag(s);
                 s = s/sum(s);
                 d = 1/sum(s.^2);
-                dStimCurve(anicnt,1,1,2,cnum,rep) = d;
+                d3 = [d3 d];
 
                 cells = spikespoststim(dcells,:);
                 R = corr(cells'); %correlation pre
@@ -169,7 +171,7 @@ for grp=1:length(grpnames)
                 s = diag(s);
                 s = s/sum(s);
                 d = 1/sum(s.^2);
-                dStimCurve(anicnt,1,2,2,cnum,rep) = d;
+                d4 = [d4 d];
                 
                 cells = spikesprebase(dcells,:);
                 R = cov(cells'); %correlation pre
@@ -177,7 +179,7 @@ for grp=1:length(grpnames)
                 s = diag(s);
                 s = s/sum(s);
                 d = 1/sum(s.^2);
-                dStimCurve(anicnt,2,1,1,cnum,rep) = d;
+                d5 = [d5 d];
 
                 cells = spikesprestim(dcells,:);
                 R = cov(cells'); %correlation pre
@@ -185,7 +187,7 @@ for grp=1:length(grpnames)
                 s = diag(s);
                 s = s/sum(s);
                 d = 1/sum(s.^2);
-                dStimCurve(anicnt,2,2,1,cnum,rep) = d;
+                d6 = [d6 d];
 
                 cells = spikespostbase(dcells,:);
                 R = cov(cells'); %correlation pre
@@ -193,7 +195,7 @@ for grp=1:length(grpnames)
                 s = diag(s);
                 s = s/sum(s);
                 d = 1/sum(s.^2);
-                dStimCurve(anicnt,2,1,2,cnum,rep) = d;
+                d7 = [d7 d];
 
                 cells = spikespoststim(dcells,:);
                 R = cov(cells'); %correlation pre
@@ -201,9 +203,16 @@ for grp=1:length(grpnames)
                 s = diag(s);
                 s = s/sum(s);
                 d = 1/sum(s.^2);
-                dStimCurve(anicnt,2,2,2,cnum,rep) = d;
+                d8 = [d8 d];
             end
-            
+            dStimCurve(anicnt,1,1,1,cnum,:) = d1;
+            dStimCurve(anicnt,1,2,1,cnum,:) = d2;
+            dStimCurve(anicnt,1,1,2,cnum,:) = d3;
+            dStimCurve(anicnt,1,2,2,cnum,:) = d4;
+            dStimCurve(anicnt,2,1,1,cnum,:) = d5;
+            dStimCurve(anicnt,2,2,1,cnum,:) = d6;
+            dStimCurve(anicnt,2,1,2,cnum,:) = d7;
+            dStimCurve(anicnt,2,2,2,cnum,:) = d8;
         end
         toc
     
@@ -265,20 +274,21 @@ for grp=1:length(grpnames)
         aniFile = files(use(i)).darknesspts; load(aniFile,'spikes');
         spikes = spikes(1:cut,end-2999:end);
         spikes = spikes(tcells{anicnt},:);
-        spikespre = imresize(spikes,[length(tcells{anicnt}) size(spikes,2)/dwnsmp]);
+        spikespre = imresize(spikes,[numcells size(spikes,2)/dwnsmp]);
         
         %%%darkness data post
         aniFile = files(use(i+1)).darknesspts; load(aniFile,'spikes');
         spikes = spikes(1:cut,end-2999:end);
         spikes = spikes(tcells{anicnt},:);
-        spikespost = imresize(spikes,[length(tcells{anicnt}) size(spikes,2)/dwnsmp]);
+        spikespost = imresize(spikes,[numcells size(spikes,2)/dwnsmp]);
         
         %%%get #cells X dimensionality curve evoked
         sprintf('doing darkness dimensionality curve')
         tic
-        for rep = 1:dReps
-            for cnum = 1:length(tcells{anicnt})
-                dcells = randsample(length(tcells{anicnt}),cnum);
+        for cnum = 1:numcells
+            d1=[];d2=[];d3=[];d4=[];
+            parfor rep = 1:dReps
+                dcells = randsample(numcells,cnum);
 
                 cells = spikespre(dcells,:);
                 R = corr(cells'); %correlation pre
@@ -286,7 +296,7 @@ for grp=1:length(grpnames)
                 s = diag(s);
                 s = s/sum(s);
                 d = 1/sum(s.^2);
-                dDarkCurve(anicnt,1,1,cnum,rep) = d;
+                d1 = [d1 d];
 
                 cells = spikespost(dcells,:);
                 R = corr(cells'); %correlation pre
@@ -294,7 +304,7 @@ for grp=1:length(grpnames)
                 s = diag(s);
                 s = s/sum(s);
                 d = 1/sum(s.^2);
-                dDarkCurve(anicnt,1,2,cnum,rep) = d;
+                d2 = [d2 d];
                 
                 cells = spikespre(dcells,:);
                 R = cov(cells'); %correlation pre
@@ -302,7 +312,7 @@ for grp=1:length(grpnames)
                 s = diag(s);
                 s = s/sum(s);
                 d = 1/sum(s.^2);
-                dDarkCurve(anicnt,2,1,cnum,rep) = d;
+                d3 = [d3 d];
 
                 cells = spikespost(dcells,:);
                 R = cov(cells'); %correlation pre
@@ -310,9 +320,12 @@ for grp=1:length(grpnames)
                 s = diag(s);
                 s = s/sum(s);
                 d = 1/sum(s.^2);
-                dDarkCurve(anicnt,2,2,cnum,rep) = d;
-                
+                d4 = [d4 d]; 
             end
+            dDarkCurve(anicnt,1,1,cnum,:) = d1;
+            dDarkCurve(anicnt,1,2,cnum,:) = d2;
+            dDarkCurve(anicnt,2,1,cnum,:) = d3;
+            dDarkCurve(anicnt,2,2,cnum,:) = d4;
         end
         toc
         
@@ -355,8 +368,14 @@ for grp=1:length(grpnames)
     save(fullfile(savepath,grpnames{grp}))
     sprintf('done')
     
-    %% stimulus dimensionality
-
+    %% stimulus dimensionality    
+    mincells = 500;
+    for ani = 1:length(tcells)
+        if length(tcells{ani})<mincells
+            mincells = length(tcells{ani});
+        end
+    end
+    
     %%%plot individual animal dimensionality vs. # cells
     for ani = 1:numAni
         figure;
@@ -387,7 +406,7 @@ for grp=1:length(grpnames)
         title('pre vs. post stim');xlabel('# cells');ylabel('dimensionality');
         axis square
         
-        mtit(sprintf('%s %s',files(use(ani)).subj,files(use(ani)).inject))
+        mtit(sprintf('%s %s',files(use(ani*2)).subj,files(use(ani*2)).inject))
         if exist('psfile','var')
             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
             print('-dpsc',psfile,'-append');
@@ -404,24 +423,28 @@ for grp=1:length(grpnames)
     shadedErrorBar(1:500,nanmean(prestim,1),nanstd(prestim,1)/sqrt(numAni),'r',1)
     title('pre base vs. stim');xlabel('# cells');ylabel('dimensionality');
     axis square
+    xlim([0 mincells])
     subplot(2,2,2)
     hold on
     shadedErrorBar(1:500,nanmean(postbase,1),nanstd(postbase,1)/sqrt(numAni),'k',1)
     shadedErrorBar(1:500,nanmean(poststim,1),nanstd(poststim,1)/sqrt(numAni),'r',1)
     title('post base vs. stim');xlabel('# cells');ylabel('dimensionality');
     axis square
+    xlim([0 mincells])
     subplot(2,2,3)
     hold on
     shadedErrorBar(1:500,nanmean(prebase,1),nanstd(prebase,1)/sqrt(numAni),'k',1)
     shadedErrorBar(1:500,nanmean(postbase,1),nanstd(postbase,1)/sqrt(numAni),'r',1)
     title('pre vs. post base');xlabel('# cells');ylabel('dimensionality');
     axis square
+    xlim([0 mincells])
     subplot(2,2,4)
     hold on
     shadedErrorBar(1:500,nanmean(prestim,1),nanstd(prestim,1)/sqrt(numAni),'k',1)
     shadedErrorBar(1:500,nanmean(poststim,1),nanstd(poststim,1)/sqrt(numAni),'r',1)
     title('pre vs. post stim');xlabel('# cells');ylabel('dimensionality');
     axis square
+    xlim([0 mincells])
 
     mtit(sprintf('%s',grpnames{grp}))
     if exist('psfile','var')
@@ -504,15 +527,15 @@ for grp=1:length(grpnames)
     hold on
     shadedErrorBar(1:500,nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k',1)
     shadedErrorBar(1:500,nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r',1)
-    title('pre base vs. stim');xlabel('# cells');ylabel('corr dim');
-    axis square
+    title('pre vs. post');xlabel('# cells');ylabel('corr dim');
+    axis square; xlim([0 mincells])
     pre = squeeze(nanmean(dDarkCurve(:,1,1,:,:),5));post = squeeze(nanmean(dDarkCurve(:,1,2,:,:),5));
     subplot(1,2,2)
     hold on
     shadedErrorBar(1:500,nanmean(pre,1),nanstd(pre,1)/sqrt(numAni),'k',1)
     shadedErrorBar(1:500,nanmean(post,1),nanstd(post,1)/sqrt(numAni),'r',1)
-    title('pre base vs. stim');xlabel('# cells');ylabel('cov dim');
-    axis square
+    title('pre vs. post');xlabel('# cells');ylabel('cov dim');
+    axis square; xlim([0 mincells])
 
     mtit(sprintf('%s darkness',grpnames{grp}))
     if exist('psfile','var')
@@ -553,7 +576,7 @@ for grp=1:length(grpnames)
 
     
     
-    %%
+    %% save pdf
     try
         dos(['ps2pdf ' psfile ' "' [fullfile(savepath,grpnames{grp}) '.pdf'] '"'] )
     catch
@@ -561,6 +584,8 @@ for grp=1:length(grpnames)
     end
 
     delete(psfile);
+    
+    close all
 end
 
 

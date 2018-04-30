@@ -1,6 +1,6 @@
 clear all
 close all
-%% Analyze multiple files using sutterOctoNeural function. Instead of 
+%% Analyze multiple files using sutterOctoNeural function. Instead of
 % providing user input interactively, input the parameters below
 % Change the DataDir to the folder containing the files you want analyzed
 batchOctoLobe
@@ -12,7 +12,7 @@ used = 1:length(files)
 fprintf('%u tif files to process\n',length(used));
 %% General Parameters
 Opt.align = 1;
-Opt.NumChannels = 2; 
+Opt.NumChannels = 2;
 Opt.SaveFigs = 1;
 Opt.psfile = 'C:\temp\TempFigs.ps';
 Opt.MakeMov = 0;
@@ -29,7 +29,7 @@ Opt.AlignmentChannel = 2;   %What channel do you want to use for alignment? Gree
 
 %Options for finding cells
 Opt.selectPts = 0;          %Select points automatically (0) rather than manually
-Opt.mindF = 0.5;            %Minimum delta-f value 
+Opt.mindF = 0.5;            %Minimum delta-f value
 Opt.nclust = 5;             %Number of cell population clusters
 
 %% Loop through the filelist and analyze each tif stack
@@ -41,12 +41,12 @@ for iFile = 1:length(used)
     Opt.fTif = files(used(iFile)).tif;
     fprintf('Processing file %s\n',Opt.fTif);
     
-
+    
     Opt.pTTL = folder;
     Opt.fTTL = files(used(iFile)).ttl;
     
-    Opt.pStim = folder; 
-    Opt.fStim = files(used(iFile)).stimrec; 
+    Opt.pStim = folder;
+    Opt.fStim = files(used(iFile)).stimrec;
     
     %Name of pdf save file
     if Opt.SaveFigs == 1
@@ -62,17 +62,17 @@ for iFile = 1:length(used)
     %% Run sutterOctoNeural
     Results(iFile).Input = Opt;
     
-    if ~exist(fullfile(Opt.pPDF, Opt.fPDF),'file') | ~exist(fullfile(Opt.pOut, Opt.fOut),'file')      
-   %    try
-            sutterOctoNeural(Opt);
-            Results(iFile).Output = 'success'
-%         catch
-%             fprintf('Error in sutterOctoNeural script - Continuing onto next file');
-%             Results(iFile).Output = [];
-%         end
+    if ~exist(fullfile(Opt.pPDF, Opt.fPDF),'file') | ~exist(fullfile(Opt.pOut, Opt.fOut),'file')
+        %    try
+        sutterOctoNeural(Opt);
+        Results(iFile).Output = 'success'
+        %         catch
+        %             fprintf('Error in sutterOctoNeural script - Continuing onto next file');
+        %             Results(iFile).Output = [];
+        %         end
     else
         Results(iFile).Output = 'already done';
         display('already done')
+    end
+    
 end
-
-

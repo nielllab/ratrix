@@ -95,6 +95,19 @@ if redo
     for i = 1:2 %sit/run
         pre=nan(length(unique(sess)),length(sizes));post=pre;
         for j = 1:length(unique(sess))
+            %normalized
+%             tmpre = squeeze(nanmean(grpspsize(sess==j,spWindow{win},:,i,1),2));
+%             tmpre = bsxfun(@minus,tmpre,min(tmpre,[],2));
+%             tmp = bsxfun(@rdivide,tmpre,max(tmpre,[],2));
+%             tmp(~isfinite(tmp))=0;
+%             pre(j,:) = squeeze(nanmean(tmp,1));
+%             tmpost = squeeze(nanmean(grpspsize(sess==j,spWindow{win},:,i,2),2));
+%             tmpost = bsxfun(@minus,tmpost,min(tmpost,[],2));
+%             tmp = bsxfun(@rdivide,tmpost,max(tmpre,[],2));
+%             tmp(~isfinite(tmp))=0;
+%             post(j,:) = squeeze(nanmean(tmp,1));
+            
+            %non-normalized
             pre(j,:) = squeeze(nanmean(nanmean(grpspsize(sess==j,spWindow{win},:,i,1),2),1));
             post(j,:) = squeeze(nanmean(nanmean(grpspsize(sess==j,spWindow{win},:,i,2),2),1));
         end

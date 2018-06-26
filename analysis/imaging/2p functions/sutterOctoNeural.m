@@ -161,6 +161,7 @@ img = img.*repmat(amp,[1 1 3]);
 figure
 imshow(imresize(img,2))
 colormap(hsv); colorbar
+polarImg = img;
 
 title(sprintf('fourier map at %.3f frame cycle',cycLength));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
@@ -694,7 +695,7 @@ end
 if Opt.SaveOutput
     Output.R = Rigid;
     outfile = fullfile(Opt.pOut,Opt.fOut);
-    save(outfile, 'trialmean', 'trialTcourse', 'stimOrder', 'c', 'dFrepeats','x','y','stdImg')
+    save(outfile, 'trialmean', 'trialTcourse', 'stimOrder', 'c', 'dFrepeats','x','y','stdImg','polarImg','cycImg')
     
     varargout{1} = Output;
 end

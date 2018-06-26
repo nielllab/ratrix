@@ -95,6 +95,7 @@ end
 %Reduce Aligned stack to include only the stimulus times
 dfofInterp = dfofInterp(:,:,startTime:end);
 
+
 %% Load in the stimulus record
 % Get File Path for stimulus record file
 if ~isfield(Opt,'fStim')

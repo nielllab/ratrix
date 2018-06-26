@@ -153,6 +153,14 @@ if Opt.align
     else
         nr = [];
         Aligned_Seq = RAligned_Seq;
+        Aligned_Seq(:,:,~FrameBool,:) = NaN;
+           figure
+        NR_Mean = nanmean(Aligned_Seq(:,:,:,1),3);
+        imagesc(NR_Mean,[0, 0.80].*max(NR_Mean(:)));colormap gray
+        title(sprintf('NanMean Image after zbinning of %u out of %u total frames',length(FrameIndices),nframes));
+        ax = gca; ax.XTick = []; ax.YTick = [];
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
     end
     
     %% Quantify alignment quality

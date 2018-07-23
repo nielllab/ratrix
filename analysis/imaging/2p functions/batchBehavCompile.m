@@ -6,7 +6,7 @@ batch2pBehaviorFix;
 %%% select files to analyze
 %alluse = find(strcmp({files.task},'GTS') & strcmp({files.notes},'good imaging session'))
 %alluse = find( strcmp({files.notes},'good imaging session'));
-alluse = find( strcmp({files.notes},'good imaging session')& ~strcmp({files.task},'HvV'));
+alluse = find( strcmp({files.notes},'good imaging session') & ~strcmp({files.task},'HvV'));
 
 %%% labels for each condition
 gts = 3; naive=1; naiveTrained=5;  rand =2; hvv = 4;
@@ -373,8 +373,9 @@ figure
 imagesc(allData(sortCentered' ,1:244),[0 0.5]); %%% fix
 hold on; for j= 1:4, plot([j*length(behavTimepts) j*length(behavTimepts)]+1,[1 sum(sortCentered' )],'g'); end
 title('all conds')
-%keyboard
+keyboard
 
+%sortInvariant = 
 
 for cond = 1:4
     figure           % sortCentered vs centered?

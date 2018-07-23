@@ -27,7 +27,8 @@ end
 %%% appropriate size
 useReference=1;
 if useReference
-    load('\\langevin\backup\widefield\DOIpaper\referenceMapFullSkull.mat','avgmap4d','avgmap');
+    load('referenceMap.mat','avgmap4d','avgmap'); %for vis areas only (e.g. 5mm window)
+%     load('referenceMapFullSkull.mat','avgmap4d','avgmap'); %for bilateral full skull
 end
 display('aligning')
 
@@ -193,7 +194,7 @@ end
 % frame(:,31:290,:)=avgmap;
 % avgmap=frame;
 
-% % % load('C:/mapoverlay.mat') %%%need to fix this, only hard coded for 5mm
+load('mapoverlay.mat') %only for 5mm window right now
 
 
 % for m=1:2
@@ -206,24 +207,24 @@ for m=1:2
     subplot(2,2,m);
     
     imshow(polarMap(meanpolar{m},95));
-   % title(allsubj{s})
+   title(allsubj{s})
     hold on
-%     plot(ypts,xpts,'w.','Markersize',2)
+    plot(ypts,xpts,'w.','Markersize',2)
     %     im = polarMap(meanpolar{m},80);
     %     imwrite(im,sprintf('polarmap%d%s', m,'.tif'), 'tif')
 end
 subplot(2,2,3)
 imshow(avgmap);
 title('average topo  map');
-% hold on
-% plot(ypts,xpts,'w.','Markersize',2)
+hold on
+plot(ypts,xpts,'w.','Markersize',2)
 
 subplot(2,2,4);
 
 imAmp = max(abs(meanpolar{1}),abs(meanpolar{2}));
 imAmp=imAmp/(prctile(imAmp(:),90));
 imAmp(imAmp>1)=1;imAmp = imAmp.^1.5;
-% showGradient(allPhase,imAmp,xpts,ypts);
+showGradient(allPhase,imAmp,xpts,ypts);
 figure
 showGradient(allPhase,imAmp,0,0);
 

@@ -140,8 +140,40 @@ axis square
 title('saline spread')
 set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',12,'tickdir','out')
 
+fitanipre = ~isnan(pre(:,1));
+fitanipost = ~isnan(post(:,1));
+fitani = fitanipre&fitanipost;
+[prea preb prec preresult] = gausFit(0:9,pre(fitani,1:10),[0.01 2 0.005]);
+[posta postb postc postresult] = gausFit(0:9,post(fitani,1:10),[0.01 2 0.005]);
+[h pa] = ttest(prea,posta);
+[h pb] = ttest(preb,postb);
+[h pc] = ttest(prec,postc);
+sprintf('pa=%0.3f pb=%0.3f pc=%0.3f',pa,pb,pc)
+
+for j = 1:length(preresult)
+    figure;hold on
+    plot(0:size(pre,2)-1,pre(j,:),'ko')
+    plot(0:size(post,2)-1,post(j,:),'ro')
+    plot(preresult{j},'k:')
+    plot(postresult{j},'r:')
+    legend off
+end
+figure;
+subplot(1,3,1);hold on
+plot(prea,posta,'ko');axis square
+plot([-10 10],[-10 10],':');axis([0 0.05 0 0.05])
+title('a')
+subplot(1,3,2);hold on
+plot(preb,postb,'ko');axis square
+plot([-10 10],[-10 10],':');axis([-2 6 -2 6])
+title('b')
+subplot(1,3,3);hold on
+plot(prec,postc,'ko');axis square
+plot([-10 10],[-10 10],':');axis([-0.002 0.01 -0.002 0.01])
+title('c')
+
 subplot(2,2,2)
-load(grpfiles{expg},'grptrace','grpring') %control group
+load(grpfiles{expg},'grptrace','grpring') %experimental group
 numAni = size(grptrace,1);
 pre = squeeze(nanmean(grptrace(:,:,2,:,runstate,1),4));post = squeeze(nanmean(grptrace(:,:,2,:,runstate,2),4));
 hold on

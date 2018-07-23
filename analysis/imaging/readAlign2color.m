@@ -18,7 +18,7 @@ display('reading frames')
 %Read in frames
 for iFrame = 1:nframes
     if iFrame/100 == round(iFrame/100)
-        sprintf('%d / %d read',iFrame,nframes)        
+        sprintf('%d / %d read',iFrame,nframes)
     end
     Img_Seq(:,:,iFrame,1) = double(imread(fname,(iFrame-1)*2+1)); %Green channel
     Img_Seq(:,:,iFrame,2) = double(imread(fname,(iFrame-1)*2+2)); %Red channel
@@ -47,12 +47,12 @@ if Opt.align
     else
         alignIndices = 1:2:nframes*2;
     end
-
+    
     %% Perform Rigid Compensation regardless
-  tic
-  r = sbxalign_tif(fname,alignIndices);
-  toc
-  mv = r.T;
+    tic
+    r = sbxalign_tif(fname,alignIndices);
+    toc
+    mv = r.T;
     buffer = max(abs(mv(:)))+2;
     
     %Plot xy translations for each frame
@@ -60,7 +60,7 @@ if Opt.align
     plot(r.T(:,1));
     hold on
     plot(r.T(:,2),'g');
-
+    
     title('XY Translations');
     
     % Apply translation determined by sbxalign_tif to each frame
@@ -75,15 +75,26 @@ if Opt.align
     end
     % what is largest offset? Clip image edges by buffer value to remove
     % rigid translation artifacts
+    
+    RAligned_all = RAligned_Seq; %%% keep a copy
+    %%% calculate buffer for each side
+    buffers(:,1) = max(mv,[],1)+1;
+    buffers(:,2) = min(mv,[],1)-1;
+    
     if ~isfield(Opt,'clip') | (isfield(Opt,'clip') & Opt.clip==1)
-        RAligned_Seq = RAligned_Seq((buffer+12):end-buffer,buffer:end-buffer,:,:); %%% +12 removes strip at top
+        %  RAligned_Seq = RAligned_Seq((buffer+12):end-buffer,buffer:end-buffer,:,:); %%% +12 removes strip at top
+        RAligned_Seq = RAligned_Seq(buffers(1,1):end+buffers(1,2),buffers(2,1):end+buffers(2,2),:,:); %%% +12 removes strip at top
+        
     end
+    
+    
     %Plot Mean image of rigidly aligned image sequence
     figure
     R_Mean = mean(RAligned_Seq(:,:,:,1),3);
     imagesc(R_Mean,[0, 0.70].*max(R_Mean(:)));colormap gray
     title('Mean Green Image after Rigid Alignment of full frame sequence');
-    ax = gca; ax.XTick = []; ax.YTick = [];
+    %ax = gca; ax.XTick = []; ax.YTick = [];
+    axis equal
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %Should we bin for z-motion?
@@ -96,9 +107,9 @@ if Opt.align
     %% Perform cluster analysis on image sequence to determine which
     %images stay within a similar z-plane
     if zplane == 1
-       tic
-       [FrameIndices, FrameBool] = bin_Zplane(Img_Seq(:,:,:,AC), RAligned_Seq(:,:,:,AC), Opt);
-       toc 
+        tic
+        [FrameIndices, FrameBool] = bin_Zplane(Img_Seq(:,:,:,AC), RAligned_Seq(:,:,:,AC), Opt);
+        toc
         %Plot Mean image of rigidly aligned image sequence
         figure
         R_Mean = mean(RAligned_Seq(:,:,FrameIndices,1),3);
@@ -119,14 +130,14 @@ if Opt.align
         rigid = input('Do you want to correct for rotations as well? yes(1)/no(0): ');
     end
     
-    %% Now that we have a subset of frames that are presumably in the same 
+    %% Now that we have a subset of frames that are presumably in the same
     % z-plane, re-run the alignment process with only that subset using
     % either the non-rigid or rigid alignment algorithms
     if rigid == 1
         % Rigid/rotation Compensation on a Rigidly aligned image seq
         tic; nr = sbxalign_tif_rot(RAligned_Seq(:,:,:,AC),FrameIndices);toc
         
-        % Apply translation determined by sbxalign_tif_nonrigid to each 
+        % Apply translation determined by sbxalign_tif_nonrigid to each
         % frame in the subset, while setting those not in subset to NaN
         ii = 1;
         Aligned_Seq = zeros(size(RAligned_Seq));
@@ -136,7 +147,7 @@ if Opt.align
                 tform = affine2d(nr.T{1,ii});
                 Aligned_Seq(:,:,iFrame,1) = imwarp(RAligned_Seq(:,:,iFrame,1),tform,'OutputView',Rfixed);
                 Aligned_Seq(:,:,iFrame,2) = imwarp(RAligned_Seq(:,:,iFrame,2),tform,'OutputView',Rfixed);
-                ii = ii + 1; 
+                ii = ii + 1;
             else
                 Aligned_Seq(:,:,iFrame,1) = NaN;
                 Aligned_Seq(:,:,iFrame,2) = NaN;
@@ -149,63 +160,80 @@ if Opt.align
         title(sprintf('Mean Image after Rigid + Rotation Alignment of %u out of %u total frames',length(FrameIndices),nframes));
         ax = gca; ax.XTick = []; ax.YTick = [];
         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-      
+        
     else
         nr = [];
-        Aligned_Seq = RAligned_Seq;
+        Aligned_Seq = RAligned_all;
+        Aligned_Seq(:,:,~FrameBool,:) = NaN;
+        buffers(:,1) = max(mv(FrameBool==1,:),[],1)+1;
+        buffers(:,2) = min(mv(FrameBool==1,:),[],1)-1;
+        if ~isfield(Opt,'clip') | (isfield(Opt,'clip') & Opt.clip==1)
+            %  RAligned_Seq = RAligned_Seq((buffer+12):end-buffer,buffer:end-buffer,:,:); %%% +12 removes strip at top
+            Aligned_Seq = Aligned_Seq(buffers(1,1):end+buffers(1,2),buffers(2,1):end+buffers(2,2),:,:); %%% +12 removes strip at top
+            
+        end
+       
+        figure
+        NR_Mean = nanmean(Aligned_Seq(:,:,:,1),3);
+        imagesc(NR_Mean,[0, 0.80].*max(NR_Mean(:)));colormap gray
+        title(sprintf('NanMean Image after zbinning of %u out of %u total frames',length(FrameIndices),nframes));
+        %ax = gca; ax.XTick = []; ax.YTick = [];
+        axis equal
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        
     end
     
     %% Quantify alignment quality
-%     NA_Mean = mean(Img_Seq(:,:,:,1),3);
-%     for iFrame = 1:size(Img_Seq,3)
-%         iiImg = Img_Seq(:,:,iFrame,1);
-%         NACorrCoeff(iFrame,1) = corr2(iiImg,NA_Mean);
-%         
-%     end
-%         
-%     R_Mean = mean(RAligned_Seq(:,:,:,1),3);
-%     for iFrame = 1:size(RAligned_Seq,3)
-%         iiImg = RAligned_Seq(:,:,iFrame,1);
-%         RigidCorrCoeff(iFrame,1) = corr2(iiImg,R_Mean);
-%         
-%     end
-%         
-%     RZ_Mean = mean(RAligned_Seq(:,:,FrameIndices,1),3);
-%     for iFrame = 1:length(FrameIndices)
-%         iiImg = RAligned_Seq(:,:,FrameIndices(iFrame),1);
-%         RigidZBin_CorrCoeff(iFrame,1) = corr2(iiImg,RZ_Mean);
-%         
-%     end
-%         
-%     NR_Mean = mean(Aligned_Seq(:,:,FrameIndices,1),3);
-%     for iFrame = 1:length(FrameIndices)
-%         iiImg = Aligned_Seq(:,:,FrameIndices(iFrame),1);
-%         RigidRotationZbin_CorrCoeff(iFrame,1) = corr2(iiImg,NR_Mean);
-%         
-%     end
-%     
-%     %Plot Correlation Coefficients for various alignment methods
-%     CorrCoeff_Align = [mean(NACorrCoeff), mean(RigidCorrCoeff), mean(RigidZBin_CorrCoeff), mean(RigidRotationZbin_CorrCoeff)];
-%     figure
-%     plot(1:1:4,CorrCoeff_Align,'ob','MarkerFaceColor','b')
-%     ax = gca; ax.XLim = [0.5 4.5];
-%     ax.YLabel.String = '2D Correlation Coefficient';
-%     ax.YLabel.FontSize = 12;
-%     ax.YLabel.FontWeight = 'bold';
-%     ax.TickLabelInterpreter = 'latex';
-%     ax.YLim = [0.82 1];
-%     ax.XTick = [1 2 3 4];
-%     ax.XTickLabel = {'\bf Non-Aligned','\bf Rigid Alignment','\bf Z-Binning','\bf Rotation'};
-%     ax.XTickLabelRotation = 45;
-%     ax.XGrid = 'on';
-%     ax.YGrid = 'on';
-%     title('Mean Correlation Coefficient');
-
+    %     NA_Mean = mean(Img_Seq(:,:,:,1),3);
+    %     for iFrame = 1:size(Img_Seq,3)
+    %         iiImg = Img_Seq(:,:,iFrame,1);
+    %         NACorrCoeff(iFrame,1) = corr2(iiImg,NA_Mean);
+    %
+    %     end
+    %
+    %     R_Mean = mean(RAligned_Seq(:,:,:,1),3);
+    %     for iFrame = 1:size(RAligned_Seq,3)
+    %         iiImg = RAligned_Seq(:,:,iFrame,1);
+    %         RigidCorrCoeff(iFrame,1) = corr2(iiImg,R_Mean);
+    %
+    %     end
+    %
+    %     RZ_Mean = mean(RAligned_Seq(:,:,FrameIndices,1),3);
+    %     for iFrame = 1:length(FrameIndices)
+    %         iiImg = RAligned_Seq(:,:,FrameIndices(iFrame),1);
+    %         RigidZBin_CorrCoeff(iFrame,1) = corr2(iiImg,RZ_Mean);
+    %
+    %     end
+    %
+    %     NR_Mean = mean(Aligned_Seq(:,:,FrameIndices,1),3);
+    %     for iFrame = 1:length(FrameIndices)
+    %         iiImg = Aligned_Seq(:,:,FrameIndices(iFrame),1);
+    %         RigidRotationZbin_CorrCoeff(iFrame,1) = corr2(iiImg,NR_Mean);
+    %
+    %     end
+    %
+    %     %Plot Correlation Coefficients for various alignment methods
+    %     CorrCoeff_Align = [mean(NACorrCoeff), mean(RigidCorrCoeff), mean(RigidZBin_CorrCoeff), mean(RigidRotationZbin_CorrCoeff)];
+    %     figure
+    %     plot(1:1:4,CorrCoeff_Align,'ob','MarkerFaceColor','b')
+    %     ax = gca; ax.XLim = [0.5 4.5];
+    %     ax.YLabel.String = '2D Correlation Coefficient';
+    %     ax.YLabel.FontSize = 12;
+    %     ax.YLabel.FontWeight = 'bold';
+    %     ax.TickLabelInterpreter = 'latex';
+    %     ax.YLim = [0.82 1];
+    %     ax.XTick = [1 2 3 4];
+    %     ax.XTickLabel = {'\bf Non-Aligned','\bf Rigid Alignment','\bf Z-Binning','\bf Rotation'};
+    %     ax.XTickLabelRotation = 45;
+    %     ax.XGrid = 'on';
+    %     ax.YGrid = 'on';
+    %     title('Mean Correlation Coefficient');
+    
     %% Make an aligned movie from Aligned_Seq
     if Opt.MakeMov
         MakeMovieFromImgSeq(fname, Aligned_Seq,FrameIndices);
     end
-        
+    
 else
     nr = [];
     r = [];

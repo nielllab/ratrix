@@ -3,7 +3,7 @@ close all
 %% Analyze multiple files using sutterOctoNeural function. Instead of
 % providing user input interactively, input the parameters below
 % Change the DataDir to the folder containing the files you want analyzed
-batchOctoLobe
+batchOctoSutterLobe_bk
 
 %%% select files to analze
 used = 1:length(files)

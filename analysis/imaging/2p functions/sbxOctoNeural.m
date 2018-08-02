@@ -49,6 +49,7 @@ mv = info.aligned.T;
 buffer(:,1) = max(mv,[],1)/cfg.spatialBin+1; buffer(buffer<1)=1;
 buffer(:,2) = max(-mv,[],1)/cfg.spatialBin+1; buffer(buffer<0)=0;
 buffer=round(buffer)
+buffer(2,:) = buffer(2,:)+32 %%% to account for deadbands;
 dfof = dfofInterp;
 dfofInterp= dfof(buffer(1,1):(end-buffer(1,2)),buffer(2,1):(end-buffer(2,2)),:);
 

@@ -2,6 +2,7 @@ function varargout = sutterOctoNeural(varargin)
 %% reads in sutter data, extracts cell traces, and aligns to stim
 % optimized for octopus optic lobe with cal520 label
 % if sutterOctoNeural is called as a function
+close all
 if ~isempty(varargin)
     Opt = varargin{1};
 else

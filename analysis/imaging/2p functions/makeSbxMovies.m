@@ -20,7 +20,7 @@ alignData=1; showImages=1;
 
 [img framerate] = readAlign2p_sbx(fname(1:end-4),alignData,showImages);
 toc
-
+ img = img(:,:,1:round(end/4));
 
 %%% spatial downsampling
 display('resizing')

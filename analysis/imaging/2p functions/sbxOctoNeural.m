@@ -334,7 +334,7 @@ figure
 plot((0:size(dFrepeats,2)-1)/cycWindow, squeeze(mean(dFrepeats,1)))
 xlabel('stim #'); xlim([1 nstim+1]); ylim([-0.05 0.15])
 title('mean trace for each repeat');
-hold on; 
+hold on;
 %plot((0:totalframes-1)/cycLength+1, squeeze(mean(mean(dFrepeats,3),1)),)
 plot((0:size(dFrepeats,2)-1)/cycWindow, squeeze(mean(nanmedian(dFrepeats,3),1)),'g','Linewidth',2)
 for i = 1:nstim;
@@ -357,7 +357,7 @@ figure
 for i = 1:min(cycLength,30)
     subplot(5,6,i);
     % imagesc(cycImg(:,:,i)-min(cycImg,[],3),[0 0.1]); axis equal
-     data = cycImg(:,:,i)-mean(cycImg(:,:,1:10),3);
+    data = cycImg(:,:,i)-mean(cycImg(:,:,1:10),3);
     datafilt = imfilter(data,fspecial('gaussian',[10 10],2));
     imagesc(datafilt,[0 0.1]); axis equal; axis off
 end
@@ -655,12 +655,12 @@ if nstim==48 %%% 4x6 spots
     figLabel = 'OFF spots';
     npanel = 24; nrow = 4; ncol = 6; offset = 0;
     pixPlot;
-      pixPlotWeight;
+    pixPlotWeight;
     
     figLabel = 'ON spots';
     npanel = 24; nrow = 4; ncol = 6; offset = 24;
     pixPlot;
-      pixPlotWeight;
+    pixPlotWeight;
 end
 
 if nstim==50 %%% 5x5 spots
@@ -674,8 +674,12 @@ if nstim==50 %%% 5x5 spots
     figLabel = 'ON spots';
     npanel = 25; nrow = 5; ncol = 5; offset = 25;
     pixPlot;
+    
+    octoRetinotopy;
+    
 end
 
+keyboard
 
 if Opt.SaveFigs
     if ~isfield(Opt,'pPDF')

@@ -112,7 +112,7 @@ reps = floor(size(dfofInterp,3)/totalframes);  %%% number of times the whole sti
 
 
 %% generate periodic map
-filt = fspecial('gaussian',5,1);
+filt = fspecial('gaussian',10,1);
 xy = size(dfofInterp(:,:,1));
 map = zeros(xy);
 for iFrame = round(stimTimes(1)/dt):size(dfofInterp,3)
@@ -126,9 +126,12 @@ map = map/size(dfofInterp,3); map(isnan(map)) = 0;
 amp = abs(map);
 prctile(amp(:),99)
 amp=amp/prctile(amp(:),98); amp(amp>1)=1;
-img = mat2im(mod(angle(map),2*pi),hsv,[pi/2  (2*pi -pi/4)]);
+cycPhase = mod(angle(map),2*pi);
+img = mat2im(cycPhase,hsv,[pi/2  (2*pi -pi/4)]);
 img = img.*repmat(amp,[1 1 3]);
+cycAmp = amp;
 
+cycPolarImg = img;
 figure
 imshow(imresize(img,2))
 colormap(hsv); colorbar
@@ -154,8 +157,10 @@ greenFig = figure;
 
 stdImg = imresize(greenframe,1/cfg.spatialBin);
 stdImg= stdImg(buffer(1,1):(end-buffer(1,2)),buffer(2,1):(end-buffer(2,2)),:);
-greencrop = stdImg;
+greenCrop = double(stdImg);
 imagesc(stdImg,[prctile(stdImg(:),1) prctile(stdImg(:),99)*1.2]); hold on; axis equal; colormap gray;
+meanGreenImg = mat2im(greenCrop,gray,[prctile(greenCrop(:),1) prctile(greenCrop(:),99)*1.2]);
+
 title('Mean Green Channel');
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
@@ -217,7 +222,7 @@ else
     %%% select points based on peaks of max df/f
     %%%calculate max df/f image
     %img = nanmax(dfofInterp,[],3);
-    img = greencrop;
+    img = greenCrop;
     img(isnan(img(:))) = 0;
     img(isinf(img(:))) = 0;
     filt = fspecial('gaussian',5,1);
@@ -407,7 +412,7 @@ dFclust = nanmedian(dFclust,3);
 
 % dFclust = dFclust./repmat(max(dFclust,[],2),[1 size(dFclust,2)]);  %% normalize by max response
 % dFclust = imresize(dFclust,[size(dFclust,1) size(dFclust,2)*0.5]); %%% downsample to improve SNR
-dFclust = imresize(dFclust,[size(dFclust,1) 0.5*size(dFclust,2)])   %%% downsample to improve SNR
+dFclust = imresize(dFclust,[size(dFclust,1) 0.5*size(dFclust,2)]);   %%% downsample to improve SNR
 dFclust(dFclust>0.2) = 0.2; dFclust(dFclust<0)=0;
 figure
 imagesc(dFclust,[-0.05 0.2])
@@ -563,13 +568,8 @@ if nstim==12 %%% spots
         stimImg(:,:,i) = meanimg;
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    overlay(:,:,1) = mean(stimImg(:,:,6),3);
-    overlay(:,:,2) = mean(stimImg(:,:,12),3);
     
-    overlay(:,:,3)= 0;
-    overlay(overlay<0)=0; overlay = overlay/0.15;
-    figure
-    imshow(imresize(overlay,2));
+    
 end
 
 range = [-0.05 0.2]; %%% colormap range
@@ -646,6 +646,17 @@ if nstim==13 %%% gratings 1 tf
     npanel = 1; nrow = 1; ncol = 1; offset = 12;
     pixPlot;
     pixPlotWeight;
+    
+    mapGratingsOcto;
+    figure
+    subplot(2,2,1); imshow(meanGreenImg);
+    subplot(2,2,2); imshow(overlayImg);
+    subplot(2,2,3); imshow(cycPolarImg); title('timecourse')
+    subplot(2,2,4); imshow(hvImg); title('h vs v')
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+    
+    
 end
 
 
@@ -662,6 +673,18 @@ if nstim==48 %%% 4x6 spots
     npanel = 24; nrow = 4; ncol = 6; offset = 24;
     pixPlot;
     pixPlotWeight;
+    
+    octoRetinotopy;
+    
+    for rep=1:2
+        figure
+        subplot(2,2,1); imshow(meanGreenImg);
+        subplot(2,2,2); imshow(topoOverlayImg{rep});
+        subplot(2,2,3); imshow(xpolarImg{rep});
+        subplot(2,2,4); imshow(ypolarImg{rep});
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    end
+    
 end
 
 if nstim==50 %%% 5x5 spots
@@ -678,9 +701,19 @@ if nstim==50 %%% 5x5 spots
     
     octoRetinotopy;
     
+    for rep=1:2
+        figure
+        subplot(2,2,1); imshow(meanGreenImg);
+        subplot(2,2,2); imshow(topoOverlayImg{rep});
+        subplot(2,2,3); imshow(xpolarImg{rep});
+        subplot(2,2,4); imshow(ypolarImg{rep});
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        
+    end
+    
+    
 end
 
-keyboard
 
 if Opt.SaveFigs
     if ~isfield(Opt,'pPDF')
@@ -695,6 +728,17 @@ if Opt.SaveFigs
         display('couldnt generate pdf');
     end
 end
+
+outfile = newpdfFile(1:end-4);
+save(outfile, 'trialmean', 'trialTcourse', 'stimOrder', 'c', 'dFrepeats','x','y','stdImg','cycPolarImg','cycImg','meanGreenImg')
+if nstim==48 | nstim==50  %%% spots
+    save(outfile,'topoOverlayImg','xpolarImg','ypolarImg','xphase','yphase','-append')
+end
+if nstim ==13 %%% gratings
+    save(outfile,'overlayImg','hvImg','-append');
+end
+
+psfile
 %
 % if Opt.SaveOutput
 %     Output.R = Rigid;

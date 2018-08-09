@@ -8,7 +8,7 @@ for i = (1:npanel)+offset
     data_im = mat2im(meanimg,jet,range);
     imshow(imresize(data_im.*normgreen,0.5)); axis equal; axis off; colormap jet
     figure(traceFig); subplot(nrow,ncol,loc(i-offset));
-    plot(1:tl, weightTcourse(:,stimOrder==i)); hold on; plot(nanmedian(weightTcourse(:,stimOrder==i),2),'g','Linewidth',2); xlim([1 tl]);ylim(range)
+    plot(1:tl, weightTcourse(:,stimOrder==i)); hold on; plot(nanmedian(weightTcourse(:,stimOrder==i),2),'g','Linewidth',2); xlim([1 tl]);ylim(range/2)
     
 end
 

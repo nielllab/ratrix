@@ -1,56 +1,84 @@
-
-filt = fspecial('gaussian',[10  10],2);
+szx = ncol; szy=nrow;
+filt = fspecial('gaussian',[10  10],1);
 trialmeanfilt = imfilter(trialmean,filt);
 
-x = ones(50,1);
-y= ones(50,1);
-onoff = ones(50,1);onoff(1:25)=0;
+nstim = 2*szx*szy;
+nloc = szx*szy;
+x = ones(nstim,1);
+y= ones(nstim,1);
+onoff = ones(nstim,1);onoff(1:nloc)=0;
 
-for xpos = 1:5;
-    x(((xpos-1)*5+1):((xpos-1)*5+5))=xpos;
+for xpos = 1:szx;
+    x(((xpos-1)*szy+1):(xpos*szy))=xpos;
 end
-x(26:50)=x(1:25);
-for ypos = 1:5;
-    y(ypos:5:end)=ypos;
+x(nloc +(1:nloc))=x(1:nloc);
+
+for ypos = 1:szy;
+    y(ypos:szy:end)=ypos;
 end
 
 clear meanImg
-for i = 1:50;
+for i = 1:nstim;
     meanImg(:,:,i) = nanmean(trialmeanfilt(:,:,stimOrder==i),3);
 end
 meanImg(meanImg<0.025)=0;
+
+for rep=1:2 %%% off and on
 xmap = 0; ymap =0;
-for i = 26:50
+onrange = nloc*(rep-1) + (1:nloc) ;
+for i = onrange %%% only take on (or off) responses
     xmap = xmap+meanImg(:,:,i)*x(i);
     ymap = ymap+meanImg(:,:,i)*y(i);
 end
-amp = sum(meanImg(:,:,26:50),3);
+amp = sum(meanImg(:,:,onrange),3);
 amp(amp<=0)=0.001;
 ymap = ymap./amp;
 xmap = xmap./amp;
 amp = amp/0.3;
 amp(amp>1)=1;
 
+topoAmp = amp;
 figure
 imagesc(amp)
 figure
-imagesc(xmap,[1 5]);colormap hsv
+imagesc(xmap,[1 szx]);colormap hsv
 figure
-imagesc(ymap,[1 5]); colormap hsv
+imagesc(ymap,[1 szy]); colormap hsv
 
-xpolar = mat2im(xmap,hsv,[1.5 4.5]);
+xpolar = mat2im(xmap,hsv,[1.5 szx-0.5]);
 xpolar = xpolar.*repmat(amp,[1 1 3]);
 topox = figure;
 imshow(imresize(xpolar,2));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-
-ypolar = mat2im(ymap,hsv,[1.5 4.5]);
+ypolar = mat2im(ymap,hsv,[1.5 szy-0.5]);
 ypolar = ypolar.*repmat(amp,[1 1 3]);
 topoy = figure;
 imshow(imresize(ypolar,2));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
+xphase{rep} = xmap; yphase{rep} = ymap;
+overlay = zeros(size(topoAmp,1),size(topoAmp,2),3);
+
+overlay = meanGreenImg;
+%overlay(:,:,2) = overlay(:,:,2).*topoAmp;
+overlay(:,:,1) = overlay(:,:,1).*(1- topoAmp).^2;
+overlay(:,:,3) = overlay(:,:,3).*(1 - topoAmp).^2;
+
+figure
+imshow(overlay);
+
+figure
+imshow(topoAmp)
+
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+
+xpolarImg{rep} = xpolar;
+ypolarImg{rep} = ypolar;
+topoOverlayImg{rep} = overlay;
+topoAmpImg{rep} = topoAmp;
+end
 
 % figure
 % for i= 26:50;

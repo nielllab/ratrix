@@ -11,6 +11,15 @@ else
     % option to save figures to pdf file; make sure C:/temp/ folder exists
     Opt.SaveFigs = 1;
     Opt.psfile = 'C:\temp\TempFigs.ps';
+    %%% manually select points?
+    Opt.selectPts=0;
+    %%% manually choose region to crop full image in selecting points
+    Opt.selectCrop =0;
+    %%% minimum brightness of selected points
+    Opt.mindF = 200;
+    %%% number of clusters from hierarchical analysis
+    Opt.nclust = 5;
+
     %     % option to create movies of non-aligned and aligned image sequences
     %     Opt.MakeMov = 0;
     %     % option for gaussian filter standard deviation
@@ -35,7 +44,7 @@ end
 % framerate=1/dt;
 
 if Opt.SaveFigs
-    psfile = Opt.psfile;
+    psfile = Opt.psfile
     if exist(psfile,'file')==2;delete(psfile);end
 end
 dt = Opt.Resample_dt;
@@ -244,14 +253,13 @@ else
     plot(x,y,'o');
     
     %%% crop image to avoid points near border that may have artifact
-    disp('Select area in figure to include in the analysis');
-    if isfield(Opt,'selectPts')
-        mv = Rigid.T;
-        buffer = floor((max(abs(mv(:)))+2)/2);
-        xrange = [buffer, size(img,2) - buffer];
-        yrange = [buffer, size(img,1) - buffer];
-    else
+    if isfield(Opt,'selectCrop') && Opt.selectCrop ==1
+        disp('Select area in figure to include in the analysis');
         [xrange, yrange] = ginput(2);
+    else 
+        b = 10;
+        xrange = [b size(img,2)-b];
+        yrange = [b size(img,1)-b];
     end
     pts = pts(x>xrange(1) & x<xrange(2) & y>yrange(1) & y<yrange(2));
     

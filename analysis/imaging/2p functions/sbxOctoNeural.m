@@ -52,6 +52,10 @@ cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  %%% configuration parameters 
 cfg.syncToVid=0; cfg.saveDF=0;
 
 sessionName=0; %%% don't save session data itself
+if isfield(Opt,'fSbx')
+    fileName = fullfile(Opt.pSbx,Opt.fSbx);
+end
+
 
 get2pSession_sbx;  %%% returns dfofInterp, and phasetimes (time in secs each stim started)
 global info

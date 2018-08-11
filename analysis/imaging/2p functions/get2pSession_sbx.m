@@ -22,9 +22,7 @@ else %%% new session data
     
     fileName = fileName(1:end-4)  %%% create filename
     
-    if ~exist('cycLength','var')
-        cycLength = input('cycle length : ');
-    end
+ cycLength = 2;
     
     %     twocolor = input('# of channels : ')
     %     twocolor= (twocolor==2);

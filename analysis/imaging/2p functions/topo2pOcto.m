@@ -24,6 +24,7 @@ nframes = min(size(dfofInterp,3),3000);  %%% limit topoY data to 5mins to avoid 
 nframes = floor(nframes/cycFrames)*cycFrames;
 dfofInterp = dfofInterp(:,:,1:nframes);
 
+
 global info
 mv = info.aligned.T;
 buffer(:,1) = max(mv,[],1)/cfg.spatialBin+1; buffer(buffer<1)=1;
@@ -33,17 +34,27 @@ buffer(2,:) = buffer(2,:)+32 %%% to account for deadbands;
 dfof = dfofInterp;
 dfofInterp= dfof(buffer(1,1):(end-buffer(1,2)),buffer(2,1):(end-buffer(2,2)),:);
 
+
+figure
+plot((1:size(dfofInterp,3))*dt,squeeze(mean(mean(dfofInterp,2),1)))
+title('mean fluorescence');
+xlabel('secs')
+
 %%% generate pixel-wise fourier map
 cycLength = cycLength/dt;
 map = 0;
-filt = fspecial('gaussian',10,1);
+filt = fspecial('gaussian',10,2);
 for i= 1:size(dfofInterp,3);
     map = map+imfilter(dfofInterp(:,:,i),filt)*exp(2*pi*sqrt(-1)*i/cycLength);
 end
 map = map/size(dfofInterp,3); map(isnan(map))=0;
 amp = abs(map);
+
+figure
+imagesc(amp); title('amp'); colormap jet; axis equal
+
 prctile(amp(:),98)
-amp=amp/prctile(amp(:),98); amp(amp>1)=1;
+amp=amp/prctile(amp(:),98); amp = amp-0.2; amp(amp>1)=1; amp(amp<0)=0;
 img = mat2im(mod(angle(map),2*pi),hsv,[pi/2  (2*pi -pi/4)]);
 img = img.*repmat(amp,[1 1 3]);
 mapimg= figure
@@ -81,12 +92,14 @@ end
 % close(vid)
 
 
+
 cycAvgT = mean(mean(cycAvg,2),1);
 figure
 plot(squeeze(cycAvgT));
 title('timecourse cyc avg');
 xlabel ('frames')
 display('saving timecourse fig')
+
 if exist('psfile','var')
     set(gcf, 'PaperPositionMode', 'auto');
     print('-dpsc',psfile,'-append');
@@ -104,3 +117,4 @@ end
 sbxfilename = fileName;
 save(sessionName,'sbxfilename','-append')
 
+keyboard

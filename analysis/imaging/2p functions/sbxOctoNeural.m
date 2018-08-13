@@ -14,11 +14,11 @@ else
     %%% manually select points?
     Opt.selectPts=0;
     %%% manually choose region to crop full image in selecting points
-    Opt.selectCrop =0;
+    Opt.selectCrop =1;
     %%% minimum brightness of selected points
-    Opt.mindF = 200;
+   % Opt.mindF = 200;
     %%% number of clusters from hierarchical analysis
-    Opt.nclust = 5;
+    %Opt.nclust = 5;
 
     %     % option to create movies of non-aligned and aligned image sequences
     %     Opt.MakeMov = 0;
@@ -64,19 +64,8 @@ buffer(:,1) = max(mv,[],1)/cfg.spatialBin+1; buffer(buffer<1)=1;
 buffer(:,2) = max(-mv,[],1)/cfg.spatialBin+1; buffer(buffer<0)=0;
 buffer=round(buffer)
 buffer(2,:) = buffer(2,:)+32 %%% to account for deadbands;
-dfof = dfofInterp;
-dfofInterp= dfof(buffer(1,1):(end-buffer(1,2)),buffer(2,1):(end-buffer(2,2)),:);
 
-%%% remove if this messes things up!
-
-% stdImg = imresize(greenframe,1/cfg.spatialBin);
-% stdImg= stdImg(buffer(1,1):(end-buffer(1,2)),buffer(2,1):(end-buffer(2,2)),:);
-% thresh = 0.1*prctile(stdImg(:),99);
-
-% for i = 1:size(dfofInterp,3);
-%     dfofInterp(:,:,i) = dfofInterp(:,:,i).*(stdImg>thresh);
-% end
-
+dfofInterp= dfofInterp(buffer(1,1):(end-buffer(1,2)),buffer(2,1):(end-buffer(2,2)),:);
 
 % number of frames per cycle
 cycLength = mean(diff(phasetimes))/dt;
@@ -112,6 +101,7 @@ for i = 1:nCycles
     stimOrder(i) = stimRec.cond(min(find(stimT>((i-1)*cycLength*dt+0.1))));
 end
 
+nCycles = min(length(stimTimes),nCycles); %%% trim to length of video or length of stimrech, whichever is shorter
 stimTimes = stimTimes(1:nCycles);
 nstim = max(stimOrder);
 
@@ -261,7 +251,7 @@ else
         disp('Select area in figure to include in the analysis');
         [xrange, yrange] = ginput(2);
     else 
-        b = 10;
+        b = 5;
         xrange = [b size(img,2)-b];
         yrange = [b size(img,1)-b];
     end
@@ -307,7 +297,7 @@ plot((1:size(dF,2))*dt,dF');
 hold on
 plot((1:size(dF,2))*dt,nanmean(dF,1),'g','Linewidth',2);
 xlabel('secs');ylabel('df/f');title('Fluorescence Traces'); xlim([0 size(dF,2)*dt]);
-if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+%if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %%% plot movement correction trace
 if exist('mv','var')
@@ -545,6 +535,8 @@ figure
 hist(max(dFclust,[],2))
 %%% calculate pixel-wise maps of activity for different stim
 
+display('doing pixel plots')
+
 evRange = 10:20; baseRange = 1:5; %%% timepoints for evoked and baseline activity
 dfInterpsm = imresize(dfofInterp,0.25);
 dfWeight = dfInterpsm.* repmat(imresize(normgreen(:,:,1),0.25),[1 1 size(dfofInterp,3)]);
@@ -726,7 +718,7 @@ if nstim==50 %%% 5x5 spots
     
 end
 
-
+display('saving pdf')
 if Opt.SaveFigs
     if ~isfield(Opt,'pPDF')
         [Opt.fPDF, Opt.pPDF] = uiputfile('*.pdf','save pdf file');
@@ -741,6 +733,7 @@ if Opt.SaveFigs
     end
 end
 
+display('saving data')
 outfile = newpdfFile(1:end-4);
 save(outfile, 'trialmean', 'trialTcourse', 'stimOrder', 'c', 'dFrepeats','x','y','stdImg','cycPolarImg','cycImg','meanGreenImg')
 if nstim==48 | nstim==50  %%% spots

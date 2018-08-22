@@ -1,4 +1,6 @@
-function unknownPleasures(dF)
+function unknownPleasuresOcto(dF)
+
+dF = dFrepeats(:,:,1);
 
 figure
 hold on

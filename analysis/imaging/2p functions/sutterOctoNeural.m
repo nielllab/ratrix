@@ -700,6 +700,6 @@ if Opt.SaveOutput
     
     varargout{1} = Output;
 end
-close all
+%close all
 
 end

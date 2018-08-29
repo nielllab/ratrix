@@ -6,3 +6,5 @@
 *.mat
 *.DS_Store
 analysis/imaging/2p functions/genericSutterJPwithclusters.m
+analysis/imaging/2p functions/batchOctoLobe.m
+analysis/imaging/2p functions/batchOctoLobe.m

@@ -335,4 +335,87 @@ files(n).sbx = '080918_Octopus_Cal520_000_014.sbx';
 files(n).stimrec = 'Acq14';
 files(n).notes = 'good loading and activity';
 
-%%%
+%%% 082318
+%%% 
+
+n=n+1;
+files(n).expt = '082318';
+files(n).dye = 'Cal520';
+files(n).path = '082318_Octopus_Cal520';
+files(n).loc = 1; files(n).acq = 1; files(n).stim = '6x4';
+files(n).sbx = '082318_Octopus_Cal520_000_000.sbx';
+files(n).stimrec = 'Acq0';
+files(n).notes = 'good loading and activity, Loc 1';
+
+n=n+1;
+files(n).expt = '082318';
+files(n).dye = 'Cal520';
+files(n).path = '082318_Octopus_Cal520';
+files(n).loc = 1; files(n).acq = 1; files(n).stim = 'Gratings3sf';
+files(n).sbx = '082318_Octopus_Cal520_000_001.sbx';
+files(n).stimrec = 'Acq1';
+files(n).notes = 'good loading and activity Loc 1';
+
+n=n+1;
+files(n).expt = '082318';
+files(n).dye = 'Cal520';
+files(n).path = '082318_Octopus_Cal520';
+files(n).loc = 1; files(n).acq = 1; files(n).stim = '6x4';
+files(n).sbx = '082318_Octopus_Cal520_000_000.sbx';
+files(n).stimrec = 'Acq2';
+files(n).notes = 'good loading and activity Loc2';
+
+n=n+1;
+files(n).expt = '082318';
+files(n).dye = 'Cal520';
+files(n).path = '082318_Octopus_Cal520';
+files(n).loc = 1; files(n).acq = 1; files(n).stim = 'Gratings3sf';
+files(n).sbx = '082318_Octopus_Cal520_000_000.sbx';
+files(n).stimrec = 'Acq3';
+files(n).notes = 'good loading and activity Loc2';
+
+n=n+1;
+files(n).expt = '082318';
+files(n).dye = 'Cal520';
+files(n).path = '082318_Octopus_Cal520';
+files(n).loc = 1; files(n).acq = 1; files(n).stim = '5x5';
+files(n).sbx = '082318_Octopus_Cal520_000_000.sbx';
+files(n).stimrec = 'Acq4';
+files(n).notes = 'good loading and activity Loc1';
+
+n=n+1;
+files(n).expt = '082318';
+files(n).dye = 'Cal520';
+files(n).path = '082318_Octopus_Cal520';
+files(n).loc = 1; files(n).acq = 1; files(n).stim = '5x5';
+files(n).sbx = '082318_Octopus_Cal520_000_000.sbx';
+files(n).stimrec = 'Acq5';
+files(n).notes = 'good loading and activity Loc2';
+
+n=n+1;
+files(n).expt = '082318';
+files(n).dye = 'Cal520';
+files(n).path = '082318_Octopus_Cal520';
+files(n).loc = 1; files(n).acq = 1; files(n).stim = '6x4';
+files(n).sbx = '082318_Octopus_Cal520_000_000.sbx';
+files(n).stimrec = 'Acq6';
+files(n).notes = 'good loading and activity Loc3';
+
+n=n+1;
+files(n).expt = '082318';
+files(n).dye = 'Cal520';
+files(n).path = '082318_Octopus_Cal520';
+files(n).loc = 1; files(n).acq = 1; files(n).stim = 'Gratings3sf';
+files(n).sbx = '082318_Octopus_Cal520_000_000.sbx';
+files(n).stimrec = 'Acq7';
+files(n).notes = 'good loading and activity Loc3';
+
+n=n+1;
+files(n).expt = '082318';
+files(n).dye = 'Cal520';
+files(n).path = '082318_Octopus_Cal520';
+files(n).loc = 1; files(n).acq = 1; files(n).stim = '5x5';
+files(n).sbx = '082318_Octopus_Cal520_000_000.sbx';
+files(n).stimrec = 'Acq8';
+files(n).notes = 'good loading and activity Loc3';
+

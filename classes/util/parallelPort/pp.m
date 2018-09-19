@@ -287,7 +287,7 @@ if ispc
         if isnan(ioObj)
             codeStr = lptread(a);
         else
-            codeStr = double(io32(ioObj,a));
+            codeStr = double(io64(ioObj,a));
         end
         
         codeStr = fastDec2Bin(codeStr);
@@ -308,7 +308,7 @@ if ispc
             if isnan(ioObj)
                 lptwrite(a,codeStr);
             else
-                io32(ioObj,a,codeStr);
+                io64(ioObj,a,codeStr);
             end
         else
             error('doesn''t yet support write validation')

@@ -338,7 +338,7 @@ imagesc(dF);
 figure
 imagesc(dFclust);
 
-keyboard
+
 %%% cluster responses from selected traces
 %dist = pdist(dF,'correlation');  %%% sort based on whole timecourse
 dist = pdist(dFclust,'euclidean');  %%% sort based on average across repeats (averages away artifact on individual trials)
@@ -385,6 +385,14 @@ baserange=0:2;
 for clust = 1:nclust
     clustfig = figure;
     
+    
+        %%% spatial location of cells in this cluster
+    figure(clustfig)
+    subplot(2,3,1);
+    imagesc(stdImg,[0 prctile(stdImg(:),99)*1.2]); axis equal; hold on;colormap gray;freezeColors;
+    title(sprintf('cluster %d',clust));
+    plot(x(c==clust),y(c==clust),'go')%%'Color',colors(c));
+    
     for i = 1:length(stimTimes)-2;
         dFalign(i,:) = mean(dF(c==clust,stimFrames(i) +framerange),1)- mean(mean(dF(c==clust,stimFrames(i)+baserange),2),1);
     end
@@ -392,8 +400,16 @@ for clust = 1:nclust
     
     sta=0; clear stas
     
+    for rep = 1:2
+       m= (double(moviedata)-127)/128;
+ if rep==1
+       m(m<0)=0;   
+ else
+     m(m>0)=0;
+ end
+    
     figure;
-    range = 0
+    range = -1:1
     for tau = 3:18;
         resp = mean(dFalign(:,tau+range),2);
         %resp(resp<0)=0;
@@ -407,55 +423,52 @@ for clust = 1:nclust
         subplot(4,5,tau);
         imagesc(sta',[-1 1]);colormap jet; axis equal;title(sprintf('lag %d',tau));
     end
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     sta = stas(:,:,11);
     figure(clustfig)
     
-    subplot(2,2,3);
-    imagesc(sta,[-1 1]); axis equal; colormap jet;
+    subplot(2,3,1+rep);
+    imagesc(sta',[-1 1]); hold on; axis equal; colormap jet;
     xprofile = max(abs(sta),[],1); [mx xmax] = max(xprofile);
     yprofile = max(abs(sta),[],2); [mx ymax] = max(yprofile);
     xmax
     ymax
+    plot(ymax,xmax,'go');
     
     sz=[2 4 8 255]; col = 'bcrg'
     figure
-    eps = find(m(ymax,xmax,:)>0);
+    eps = find(m(ymax,xmax,:)~=0);
     plot(dFalign(eps,:)')
     hold on
     for i = 1:4
-        eps = find(m(ymax,xmax,:)>0 & sz_mov(ymax,xmax,:)==sz(i));
+        eps = find(m(ymax,xmax,:)~=0 & sz_mov(ymax,xmax,:)==sz(i));
         plot(mean(dFalign(eps,:),1),col(i),'Linewidth',2);
     end
-    
+    if rep==2
+        legend('2','4','8','full')
+    end
     %%% mean traces
     figure(clustfig)
-    subplot(2,2,4);
+    subplot(2,3,4+rep);
     hold on
-    %%% ON mean traces
+    %%% mean traces
     for i = 1:4
-        eps = find(m(ymax,xmax,:)>0 & sz_mov(ymax,xmax,:)==sz(i));
+        eps = find(m(ymax,xmax,:)~=0 & sz_mov(ymax,xmax,:)==sz(i));
         plot(mean(dFalign(eps,:),1),col(i),'Linewidth',2);
     end
-    %%% off mean traces
-    for i = 1:4
-        eps = find(m(ymax,xmax,:)<0 & sz_mov(ymax,xmax,:)==sz(i));
-        plot(mean(dFalign(eps,:),1),col(i)*0.5,'Linewidth',2);
-    end
+ 
+    ylim([-0.05 0.1]); xlim([1 20])
    
-    %%% spatial location of cells in this cluster
-    figure(clustfig)
-    subplot(2,2,1);
-    imagesc(stdImg,[0 prctile(stdImg(:),99)*1.2]); axis equal; hold on;colormap gray;freezeColors;
-    title(sprintf('cluster %d',clust));
-    plot(x(c==clust),y(c==clust),'go')%%'Color',colors(c));
+    end
     
     %%% heatmap average timecourse
-    subplot(2,2,2);
+    subplot(2,3,4);
     imagesc(dFclust(c==clust,:),[-0.1 0.4]); axis xy % was df
     title(sprintf('clust %d',clust)); hold on
 
+    figure(clustfig)
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+   
 end %end of for clust
 
 
@@ -484,13 +497,8 @@ end
 
 display('saving data')
 outfile = newpdfFile(1:end-4);
-save(outfile, 'trialmean', 'trialTcourse', 'stimOrder', 'c', 'dFrepeats','xpts','ypts','stdImg','cycPolarImg','cycImg','meanGreenImg')
-if nstim==48 | nstim==50  %%% spots
-    save(outfile,'topoOverlayImg','xpolarImg','ypolarImg','xphase','yphase','-append')
-end
-if nstim ==13 %%% gratings
-    save(outfile,'overlayImg','hvImg','-append');
-end
+%save(outfile, 'trialmean', 'trialTcourse', 'stimOrder', 'c', 'dFrepeats','xpts','ypts','stdImg','cycPolarImg','cycImg','meanGreenImg')
+
 
 psfile
 %

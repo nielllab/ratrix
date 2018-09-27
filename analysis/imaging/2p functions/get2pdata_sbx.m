@@ -1,4 +1,4 @@
-function [dfofInterp im_dt greenframe framerate phasetimes m dt alignment] = get2pdata_sbx(fname,dt,cycLength,cfg);
+function [dfofInterp im_dt greenframe framerate phasetimes m dt vidframetimes] = get2pdata_sbx(fname,dt,cycLength,cfg);
 %%% reads in 2p data and syncs with stimulus signals
 
 global S2P
@@ -109,6 +109,11 @@ else %%% leave timing intact and adjust video stim times to acq rate
     %%phasetimes = phasesync*dt; %%% convert to frame time (dt)
     fr =(info.frame(phasesync) + info.line(phasesync)/796) /binsize; %%% get frame each trigger occured on,  add on fractio nbased on lineand correct for binning
     phasetimes = fr*dt;
+    
+    frsync =  find( info.event_id ==1 | info.event_id==3);
+    fr = (info.frame(frsync) + info.line(frsync)/796) /binsize;
+    vidframetimes = fr*dt;
+
 end
 
 if (exist('S2P','var')&S2P==1)

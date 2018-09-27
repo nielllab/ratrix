@@ -32,7 +32,7 @@ else %%% new session data
     if twocolor
         [dfofInterp dtRaw redframe greenframe] = get2colordata(fileName,dt,cycLength,cfg); %%% not currently functional!
     else
-        [dfofInterp dtRaw greenframe framerate phasetimes meanImg dt] = get2pdata_sbx(fileName,dt,cycLength,cfg);
+        [dfofInterp dtRaw greenframe framerate phasetimes meanImg dt vidframetimes] = get2pdata_sbx(fileName,dt,cycLength,cfg);
     end
     
     

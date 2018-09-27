@@ -24,7 +24,8 @@ warning('off','MATLAB:dispatcher:nameConflict')
 addpath(fullfile(getRatrixPath,'classes','util','infrastructure')); %for deGitify
 addpath(fullfile(getRatrixPath,'classes','util','parallelPort')); %for getPP
 
-[~, matlab64] = getPP;
+% [~, matlab64] = getPP;
+matlab64=1;
 
 if matlab64
     addpath(deGitify(genpath(getRatrixPath)));
@@ -41,9 +42,9 @@ warning('on','MATLAB:dispatcher:nameConflict')
 
 clearJavaComponents();
 closeAllSerials
-if ispc
-    daqreset
-end
+% if ispc
+%     DaqReset
+% end
 
 setupDBPaths();
 %would like to have these taken care of in setupEnvironment(), but some java problem seems to conflict with making the rnet (addJavaComponents() does update the path, but the import fails to make the class def's visible)

@@ -21,7 +21,8 @@ batchPhil2pSizeSelect22min
 
 pathname = '\\langevin\backup\twophoton\Phil\Compiled2p\';
 % savepath = '\\langevin\backup\twophoton\Phil\Compiled2p\eff analysis'
-altpath = 'C:\Users\nlab\Box Sync\Phil Niell Lab\2pData'; savepath=altpath;
+% altpath = 'C:\Users\nlab\Box Sync\Phil Niell Lab\2pData';
+savepath=altpath;
 
 psfile = 'c:\tempPhil2pSize.ps';
 if exist(psfile,'file')==2;delete(psfile);end
@@ -69,7 +70,7 @@ if redoani==1
 %     sizeSelect2pAnalysis
 end
 
-% % % keyboard
+keyboard
 
 mycol = {'b','g','r','c','m','y','k','b','g','r','c','m','y','k'};mycol = [mycol mycol];
 moviefname = 'C:\sizeselectBin22min';

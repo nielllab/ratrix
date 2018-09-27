@@ -76,6 +76,10 @@ if redogrp
         spikes = spikes(threshcellsall{anicnt},:);
         spikespre = imresize(spikes,[length(threshcellsall{anicnt}) size(spikes,2)/dwnsmp]);
         
+        %%%running data
+        load(fullfile(pathname,files(use(i)).darknessstimObj),'stimRec');
+        speed = get2pSpeed(stimRec,dt,size(spikes,2));close;speed=speed(1:3000);
+        
         %%%plot pre spikes
         j=0;
         f1 = figure

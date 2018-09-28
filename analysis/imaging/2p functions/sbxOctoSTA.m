@@ -433,7 +433,7 @@ for clust = 1:nclust
     yprofile = max(abs(sta),[],2); [mx ymax] = max(yprofile);
     xmax
     ymax
-    plot(ymax,xmax,'go');
+    plot(ymax,xmax,'ko');
     
     sz=[2 4 8 255]; col = 'bcrg'
     figure
@@ -444,9 +444,7 @@ for clust = 1:nclust
         eps = find(m(ymax,xmax,:)~=0 & sz_mov(ymax,xmax,:)==sz(i));
         plot(mean(dFalign(eps,:),1),col(i),'Linewidth',2);
     end
-    if rep==2
-        legend('2','4','8','full')
-    end
+
     %%% mean traces
     figure(clustfig)
     subplot(2,3,4+rep);
@@ -456,7 +454,9 @@ for clust = 1:nclust
         eps = find(m(ymax,xmax,:)~=0 & sz_mov(ymax,xmax,:)==sz(i));
         plot(mean(dFalign(eps,:),1),col(i),'Linewidth',2);
     end
- 
+     if rep==2
+        legend('2','4','8','full')
+    end
     ylim([-0.05 0.1]); xlim([1 20])
    
     end

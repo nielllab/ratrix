@@ -67,6 +67,15 @@ buffer(2,:) = buffer(2,:)+32 %%% to account for deadbands;
 
 dfofInterp= dfofInterp(buffer(1,1):(end-buffer(1,2)),buffer(2,1):(end-buffer(2,2)),:);
 
+stdImg = imresize(greenframe,1/cfg.spatialBin);
+stdImg= stdImg(buffer(1,1):(end-buffer(1,2)),buffer(2,1):(end-buffer(2,2)),:);
+greenCrop = double(stdImg);
+
+thresh = prctile(greenCrop(:),95)/100; %%% cut out points that are 100x dimmer than peak
+dfofInterp(repmat(greenCrop,[1 1 size(dfofInterp,3)])<thresh)=0;
+figure
+imagesc(greenCrop>thresh);
+
 % number of frames per cycle
 cycLength = mean(diff(phasetimes))/dt;
 % number of frames in window around each cycle. min of 4 secs, or actual cycle length + 2

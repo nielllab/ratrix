@@ -1,8 +1,8 @@
 dbstop if error
 pathname = '\\langevin\backup\twophoton\Phil\Compiled2p\';
-% altpath = 'C:\Users\nlab\Box Sync\Phil Niell Lab\2pData\';
+altpath = 'C:\Users\nlab\Box Sync\Phil Niell Lab\2pData\';
 % altpath = 'C:\Users\nlab\Box Sync\Phil Niell Lab\2pData\sizecontrast';
-altpath = 'C:\Users\nlab\Box Sync\Phil Niell Lab\2pData\revision';
+% altpath = 'C:\Users\nlab\Box Sync\Phil Niell Lab\2pData\revision';
 n = 0;
 
 %% crappy alignment

@@ -70,10 +70,10 @@ if redoani==1
 %     sizeSelect2pAnalysis
 end
 
-keyboard
+% keyboard
 
 mycol = {'b','g','r','c','m','y','k','b','g','r','c','m','y','k'};mycol = [mycol mycol];
-moviefname = 'C:\sizeselectBin22min';
+moviefname = 'C:\src\movies\sizeselectBin22min';
 load(moviefname)
 dfWindow = 9:11;
 spWindow = {6:10,6:7,8:10};splabel={'all','early','late'};
@@ -2976,635 +2976,635 @@ for z=1%:length(ccvals)
 
 
 %%
-% % %         %%%%%%%%%do size fits by cell
-% % %         %%stationary
-% % %         sprintf('doing cell-wise stationary fits %s...',splabel{win}')
-% % %         pre = squeeze(nanmean(grpspsize(:,spWindow{win},:,1,1),2));
-% % %         post = squeeze(nanmean(grpspsize(:,spWindow{win},:,1,2),2));
-% % % 
-% % %         %%%in case there are nans, throw out that ani's fit
-% % %     %     [Ipre,J]=ind2sub(size(pre),find(isnan(pre)));
-% % %     %     [Ipost,J]=ind2sub(size(post),find(isnan(post)));
-% % %     %     I = unique([Ipre Ipost]);
-% % %     %     fitani = 1:size(grpspsize,1);
-% % %     %     for j = 1:length(I)
-% % %     %         fitani = fitani(find(fitani~=I(j)));
-% % %     %     end
-% % %     %     pre=pre(fitani,:);post=post(fitani,:);sess=session(fitani);
-% % % 
-% % %         [preRD preRS presigmaD presigmaS prem preresult] = sizeCurveFit(radiusRange,pre);
-% % %         [postRD postRS postsigmaD postsigmaS postm postresult] = sizeCurveFit(radiusRange,post);
-% % % 
-% % %         nofit = unique([find(isnan(preRD)) find(isnan(postRD))]); %%cells that wouldn't fit
-% % %         fitani = 1:length(preRD);
-% % %         for j = 1:length(nofit)
-% % %             fitani = fitani(find(fitani~=nofit(j)));
-% % %         end
-% % %         preRD=preRD(fitani);preRS=preRS(fitani);presigmaD=presigmaD(fitani);presigmaS=presigmaS(fitani);prem=prem(fitani);preresult=preresult(fitani);
-% % %         postRD=postRD(fitani);postRS=postRS(fitani);postsigmaD=postsigmaD(fitani);postsigmaS=postsigmaS(fitani);postm=postm(fitani);postresult=postresult(fitani);
-% % %         sessfit=sess(fitani);pre=pre(fitani,:);post=post(fitani,:);
-% % % 
-% % %         %%%plot individual fits
-% % %         preR2=nan(1,length(preresult));postR2=preR2;
-% % %         for i = 1:length(preresult)
-% % %             preR2(i) = corr(pre(i,:)',preresult{i}(radiusRange));
-% % %             postR2(i) = corr(post(i,:)',postresult{i}(radiusRange));
-% % %         end
-% % % 
-% % %     %     cnt=1;
-% % %     %     for i = 1:ceil(length(sessfit)/15)
-% % %     %         figure
-% % %     %         for j = 1:15
-% % %     %             if cnt<=length(sessfit)
-% % %     %                 subplot(3,5,j)
-% % %     %                 hold on
-% % %     %                 plot(radiusRange,pre(cnt,:),'ko')
-% % %     %                 plot(radiusRange,post(cnt,:),'ro')
-% % %     %                 plot(preresult{cnt},'k')
-% % %     %                 plot(postresult{cnt},'r')
-% % %     %                 axis([0 radiusRange(end) min([pre(cnt,:) post(cnt,:)])-0.05 max([pre(cnt,:) post(cnt,:)])+0.05])
-% % %     %                 axis square
-% % %     %                 legend off
-% % %     %                 xlabel('size (deg)')
-% % %     %                 ylabel('dfof')
-% % %     %                 title(sprintf('ani %d cell %d',sessfit(cnt),fitani(cnt)))
-% % %     %                 set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',8,'xtick',radiusRange,'xticklabel',sizes)
-% % %     %                 cnt=cnt+1;
-% % %     %             else
-% % %     %                 continue
-% % %     %             end
-% % %     %         end
-% % %     %         mtit(sprintf('cell fits sit %d/%d preR2=%0.3f postR2=%0.3f %s',i,ceil(length(sessfit)/15),nanmean(preR2),nanmean(postR2),splabel{win}))
-% % %     %         if exist('psfile','var')
-% % %     %             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-% % %     %             print('-dpsc',psfile,'-append');
-% % %     %         end
-% % %     %     end
-% % % 
-% % %         %%%plot stationary fit parameters
-% % %         figure
-% % %         subplot(2,5,1)
-% % %         hold on
-% % %         plot([1 2],[preRD' postRD'],'k.:')
-% % %         errorbar([1 2],[nanmean(preRD) nanmean(postRD)],[nanstd(preRD)/sqrt(numAni) nanstd(postRD)/sqrt(numAni)],'r')
-% % %         axis([0 3 0 3])
-% % %         axis square
-% % %         set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         ylabel('RD')
-% % %         [h p] = ttest(preRD,postRD);
-% % %         title(sprintf('p=%0.3f',p))
-% % % 
-% % %         subplot(2,5,2)
-% % %         hold on
-% % %         plot([1 2],[preRS' postRS'],'k.:')
-% % %         errorbar([1 2],[nanmean(preRS) nanmean(postRS)],[nanstd(preRS)/sqrt(numAni) nanstd(postRS)/sqrt(numAni)],'r')
-% % %         axis([0 3 0 80])
-% % %         axis square
-% % %         set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         ylabel('RS')
-% % %         [h p] = ttest(preRS,postRS);
-% % %         title(sprintf('p=%0.3f',p))
-% % % 
-% % %         subplot(2,5,3)
-% % %         hold on
-% % %         plot([1 2],[presigmaD' postsigmaD'],'k.:')
-% % %         errorbar([1 2],[nanmean(presigmaD) nanmean(postsigmaD)],[nanstd(presigmaD)/sqrt(numAni) nanstd(postsigmaD)/sqrt(numAni)],'r')
-% % %         axis([0 3 0 3])
-% % %         axis square
-% % %         set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         ylabel('sigmaD')
-% % %         [h p] = ttest(presigmaD,postsigmaD);
-% % %         title(sprintf('p=%0.3f',p))
-% % % 
-% % %         subplot(2,5,4)
-% % %         hold on
-% % %         plot([1 2],[presigmaS' postsigmaS'],'k.:')
-% % %         errorbar([1 2],[nanmean(presigmaS) nanmean(postsigmaS)],[nanstd(presigmaS)/sqrt(numAni) nanstd(postsigmaS)/sqrt(numAni)],'r')
-% % %         axis([0 3 0 10])
-% % %         axis square
-% % %         set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         ylabel('sigmaS')
-% % %         [h p] = ttest(presigmaS,postsigmaS);
-% % %         title(sprintf('p=%0.3f',p))
-% % % 
-% % %         subplot(2,5,5)
-% % %         hold on
-% % %         plot([1 2],[prem' postm'],'k.:')
-% % %         errorbar([1 2],[nanmean(prem) nanmean(postm)],[nanstd(prem)/sqrt(numAni) nanstd(postm)/sqrt(numAni)],'r')
-% % %         axis([0 3 0 6])
-% % %         axis square
-% % %         set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         ylabel('m')
-% % %         [h p] = ttest(prem,postm);
-% % %         title(sprintf('p=%0.3f',p))
-% % % 
-% % %         subplot(2,5,6)
-% % %         for j = 1:length(unique(sessfit))
-% % %             anipre(j) = nanmean(preRD(find(sessfit==j)));
-% % %             anipost(j) = nanmean(postRD(find(sessfit==j)));
-% % %         end
-% % %         hold on
-% % %         plot(preRD,postRD,'k.')
-% % %         errorbarxy(nanmean(anipre),nanmean(anipost),nanstd(anipre)/sqrt(numAni),nanstd(anipost)/sqrt(numAni))
-% % %         plot([0 100],[0 100],'m:')
-% % %         axis([0 3 0 3])
-% % %         axis square
-% % %         set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         xlabel('pre');ylabel('post')
-% % %         [h p] = ttest(anipre,anipost);
-% % %         title(sprintf('RD p=%0.3f',p))
-% % % 
-% % %         subplot(2,5,7)
-% % %         for j = 1:length(unique(sessfit))
-% % %             anipre(j) = nanmean(preRS(find(sessfit==j)));
-% % %             anipost(j) = nanmean(postRS(find(sessfit==j)));
-% % %         end
-% % %         hold on
-% % %         plot(preRS,postRS,'k.')
-% % %         errorbarxy(nanmean(preRS),nanmean(postRS),nanstd(preRS)/sqrt(numAni),nanstd(postRS)/sqrt(numAni))
-% % %         plot([0 100],[0 100],'m:')
-% % %         axis([0 80 0 80])
-% % %         axis square
-% % %         set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         xlabel('pre');ylabel('post')
-% % %         [h p] = ttest(anipre,anipost);
-% % %         title(sprintf('RS p=%0.3f',p))
-% % % 
-% % %         subplot(2,5,8)
-% % %         for j = 1:length(unique(sessfit))
-% % %             anipre(j) = nanmean(presigmaD(find(sessfit==j)));
-% % %             anipost(j) = nanmean(postsigmaD(find(sessfit==j)));
-% % %         end
-% % %         hold on
-% % %         plot(presigmaD,postsigmaD,'k.')
-% % %         errorbarxy(nanmean(presigmaD),nanmean(postsigmaD),nanstd(presigmaD)/sqrt(numAni),nanstd(postsigmaD)/sqrt(numAni))
-% % %         plot([0 100],[0 100],'m:')
-% % %         axis([0 3 0 3])
-% % %         axis square
-% % %         set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         xlabel('pre');ylabel('post')
-% % %         [h p] = ttest(anipre,anipost);
-% % %         title(sprintf('sigmaD p=%0.3f',p))
-% % % 
-% % %         subplot(2,5,9)
-% % %         for j = 1:length(unique(sessfit))
-% % %             anipre(j) = nanmean(presigmaS(find(sessfit==j)));
-% % %             anipost(j) = nanmean(postsigmaS(find(sessfit==j)));
-% % %         end
-% % %         hold on
-% % %         plot(presigmaS,postsigmaS,'k.')
-% % %         errorbarxy(nanmean(presigmaS),nanmean(postsigmaS),nanstd(presigmaS)/sqrt(numAni),nanstd(postsigmaS)/sqrt(numAni))
-% % %         plot([0 100],[0 100],'m:')
-% % %         axis([0 10 0 10])
-% % %         axis square
-% % %         set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         xlabel('pre');ylabel('post')
-% % %         [h p] = ttest(anipre,anipost);
-% % %         title(sprintf('sigmaS p=%0.3f',p))
-% % % 
-% % %         subplot(2,5,10)
-% % %         for j = 1:length(unique(sessfit))
-% % %             anipre(j) = nanmean(prem(find(sessfit==j)));
-% % %             anipost(j) = nanmean(postm(find(sessfit==j)));
-% % %         end
-% % %         hold on
-% % %         plot(prem,postm,'k.')
-% % %         errorbarxy(nanmean(prem),nanmean(postm),nanstd(prem)/sqrt(numAni),nanstd(postm)/sqrt(numAni))
-% % %         plot([0 100],[0 100],'m:')
-% % %         axis([0 6 0 6])
-% % %         axis square
-% % %         set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         xlabel('pre');ylabel('post')
-% % %         [h p] = ttest(anipre,anipost);
-% % %         title(sprintf('m p=%0.3f',p))
-% % % 
-% % %         mtit(sprintf('stationary size curve fit params %s',splabel{win}))
-% % %         if exist('psfile','var')
-% % %             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-% % %             print('-dpsc',psfile,'-append');
-% % %         end
-% % % 
-% % % 
-% % %         %%%constrain fit parameters to only fit Rd and Rs for stationary
-% % %         sprintf('doing cell-wise stationary fits with sigmas constrained %s...',splabel{win})
-% % %         sigmaD = (presigmaD + postsigmaD)/2;sigmaS = (presigmaS + postsigmaS)/2;m = (prem + postm)/2;
-% % %         [preRD preRS preresult] = sizeCurveFitRdRs(radiusRange,pre,sigmaD,sigmaS,m);
-% % %         [postRD postRS postresult] = sizeCurveFitRdRs(radiusRange,post,sigmaD,sigmaS,m);
-% % % 
-% % %         %%%plot individual fits
-% % %         preR2=nan(1,length(preresult));postR2=preR2;
-% % %         for i = 1:length(preresult)
-% % %             preR2(i) = corr(pre(i,:)',preresult{i}(radiusRange));
-% % %             postR2(i) = corr(post(i,:)',postresult{i}(radiusRange));
-% % %         end
-% % % 
-% % %     %     cnt=1;
-% % %     %     for i = 1:ceil(length(sessfit)/15)
-% % %     %         figure
-% % %     %         for j = 1:15
-% % %     %             if cnt<=length(sessfit)
-% % %     %                 subplot(3,5,j)
-% % %     %                 hold on
-% % %     %                 plot(radiusRange,pre(cnt,:),'ko')
-% % %     %                 plot(radiusRange,post(cnt,:),'ro')
-% % %     %                 plot(preresult{cnt},'k')
-% % %     %                 plot(postresult{cnt},'r')
-% % %     %                 axis([0 radiusRange(end) min([pre(cnt,:) post(cnt,:)])-0.05 max([pre(cnt,:) post(cnt,:)])+0.05])
-% % %     %                 axis square
-% % %     %                 legend off
-% % %     %                 xlabel('size (deg)')
-% % %     %                 ylabel('dfof')
-% % %     %                 title(sprintf('ani %d cell %d',sessfit(cnt),fitani(cnt)))
-% % %     %                 set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',8,'xtick',radiusRange,'xticklabel',sizes)
-% % %     %                 cnt=cnt+1;
-% % %     %             else
-% % %     %                 continue
-% % %     %             end
-% % %     %         end
-% % %     %         mtit(sprintf('constrained cell fits sit %d/%d preR2=%0.3f postR2=%0.3f %s',i,ceil(length(sessfit)/15),nanmean(preR2),nanmean(postR2),splabel{win}))
-% % %     %         if exist('psfile','var')
-% % %     %             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-% % %     %             print('-dpsc',psfile,'-append');
-% % %     %         end
-% % %     %     end
-% % % 
-% % % 
-% % %         figure
-% % %         subplot(2,2,1)
-% % %         hold on
-% % %         plot([1 2],[preRD' postRD'],'k.:')
-% % %         errorbar([1 2],[nanmean(preRD) nanmean(postRD)],[nanstd(preRD)/sqrt(numAni) nanstd(postRD)/sqrt(numAni)],'r')
-% % %         axis([0 3 0 3])
-% % %         axis square
-% % %         set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         ylabel('RD')
-% % %         [h p] = ttest(preRD,postRD);
-% % %         title(sprintf('p=%0.3f',p))
-% % % 
-% % %         subplot(2,2,2)
-% % %         hold on
-% % %         plot([1 2],[preRS' postRS'],'k.:')
-% % %         errorbar([1 2],[nanmean(preRS) nanmean(postRS)],[nanstd(preRS)/sqrt(numAni) nanstd(postRS)/sqrt(numAni)],'r')
-% % %         axis([0 3 0 80])
-% % %         axis square
-% % %         set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         ylabel('RS')
-% % %         [h p] = ttest(preRS,postRS);
-% % %         title(sprintf('p=%0.3f',p))
-% % % 
-% % %         subplot(2,2,3)
-% % %         for j = 1:length(unique(sessfit))
-% % %             anipre(j) = nanmean(preRD(find(sessfit==j)));
-% % %             anipost(j) = nanmean(postRD(find(sessfit==j)));
-% % %         end
-% % %         hold on
-% % %         plot(preRD,postRD,'k.')
-% % %         errorbarxy(nanmean(anipre),nanmean(anipost),nanstd(anipre)/sqrt(numAni),nanstd(anipost)/sqrt(numAni))
-% % %         plot([0 100],[0 100],'m:')
-% % %         axis([0 3 0 3])
-% % %         axis square
-% % %         set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         xlabel('pre');ylabel('post')
-% % %         [h p] = ttest(anipre,anipost);
-% % %         title(sprintf('RD p=%0.3f',p))
-% % % 
-% % %         subplot(2,2,4)
-% % %         for j = 1:length(unique(sessfit))
-% % %             anipre(j) = nanmean(preRS(find(sessfit==j)));
-% % %             anipost(j) = nanmean(postRS(find(sessfit==j)));
-% % %         end
-% % %         hold on
-% % %         plot(preRS,postRS,'k.')
-% % %         errorbarxy(nanmean(preRS),nanmean(postRS),nanstd(preRS)/sqrt(numAni),nanstd(postRS)/sqrt(numAni))
-% % %         plot([0 100],[0 100],'m:')
-% % %         axis([0 80 0 80])
-% % %         axis square
-% % %         set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         xlabel('pre');ylabel('post')
-% % %         [h p] = ttest(anipre,anipost);
-% % %         title(sprintf('RS p=%0.3f',p))
-% % % 
-% % %         mtit(sprintf('constrained stationary size curve fit params %s',splabel{win}))
-% % %         if exist('psfile','var')
-% % %             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-% % %             print('-dpsc',psfile,'-append');
-% % %         end
-% % % 
-% % % 
-% % % 
-% % %         %%%do size fits by cell
-% % %         %%running
-% % %         sprintf('doing cell-wise running fits %s...',splabel{win})
-% % %         pre = squeeze(nanmean(grpspsize(:,spWindow{win},:,2,1),2));
-% % %         post = squeeze(nanmean(grpspsize(:,spWindow{win},:,2,2),2));
-% % % 
-% % %         %%%in case there are nans, throw out that ani's fit
-% % %     %     [Ipre,J]=ind2sub(size(pre),find(isnan(pre)));
-% % %     %     [Ipost,J]=ind2sub(size(post),find(isnan(post)));
-% % %     %     I = unique([Ipre Ipost]);
-% % %     %     fitani = 1:size(grpspsize,1);
-% % %     %     for j = 1:length(I)
-% % %     %         fitani = fitani(find(fitani~=I(j)));
-% % %     %     end
-% % %     %     pre=pre(fitani,:);post=post(fitani,:);sess=session(fitani);
-% % % 
-% % %         [preRD preRS presigmaD presigmaS prem preresult] = sizeCurveFit(radiusRange,pre);
-% % %         [postRD postRS postsigmaD postsigmaS postm postresult] = sizeCurveFit(radiusRange,post);
-% % % 
-% % %         nofit = unique([find(isnan(preRD)) find(isnan(postRD))]); %%cells that wouldn't fit
-% % %         fitani = 1:length(preRD);
-% % %         for j = 1:length(nofit)
-% % %             fitani = fitani(find(fitani~=nofit(j)));
-% % %         end
-% % %         preRD=preRD(fitani);preRS=preRS(fitani);presigmaD=presigmaD(fitani);presigmaS=presigmaS(fitani);prem=prem(fitani);preresult=preresult(fitani);
-% % %         postRD=postRD(fitani);postRS=postRS(fitani);postsigmaD=postsigmaD(fitani);postsigmaS=postsigmaS(fitani);postm=postm(fitani);postresult=postresult(fitani);
-% % %         sessfit=sess(fitani);pre=pre(fitani,:);post=post(fitani,:);
-% % % 
-% % %         %%%plot individual fits
-% % %         preR2=nan(1,length(preresult));postR2=preR2;
-% % %         for i = 1:length(preresult)
-% % %             preR2(i) = corr(pre(i,:)',preresult{i}(radiusRange));
-% % %             postR2(i) = corr(post(i,:)',postresult{i}(radiusRange));
-% % %         end
-% % % 
-% % %     %     cnt=1;
-% % %     %     for i = 1:ceil(length(sessfit)/15)
-% % %     %         figure
-% % %     %         for j = 1:15
-% % %     %             if cnt<=length(sessfit)
-% % %     %                 subplot(3,5,j)
-% % %     %                 hold on
-% % %     %                 plot(radiusRange,pre(cnt,:),'ko')
-% % %     %                 plot(radiusRange,post(cnt,:),'ro')
-% % %     %                 plot(preresult{cnt},'k')
-% % %     %                 plot(postresult{cnt},'r')
-% % %     %                 axis([0 radiusRange(end) min([pre(cnt,:) post(cnt,:)])-0.05 max([pre(cnt,:) post(cnt,:)])+0.05])
-% % %     %                 axis square
-% % %     %                 legend off
-% % %     %                 xlabel('size (deg)')
-% % %     %                 ylabel('dfof')
-% % %     %                 title(sprintf('ani %d cell %d',sessfit(cnt),fitani(cnt)))
-% % %     %                 set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',8,'xtick',radiusRange,'xticklabel',sizes)
-% % %     %                 cnt=cnt+1;
-% % %     %             else
-% % %     %                 continue
-% % %     %             end
-% % %     %         end
-% % %     %         mtit(sprintf('cell fits run %d/%d preR2=%0.3f postR2=%0.3f %s',i,ceil(length(sessfit)/15),nanmean(preR2),nanmean(postR2),splabel{win}))
-% % %     %         if exist('psfile','var')
-% % %     %             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-% % %     %             print('-dpsc',psfile,'-append');
-% % %     %         end
-% % %     %     end
-% % % 
-% % %         %%%plot running fit parameters
-% % %         figure
-% % %         subplot(2,5,1)
-% % %         hold on
-% % %         plot([1 2],[preRD' postRD'],'k.:')
-% % %         errorbar([1 2],[nanmean(preRD) nanmean(postRD)],[nanstd(preRD)/sqrt(numAni) nanstd(postRD)/sqrt(numAni)],'r')
-% % %         axis([0 3 0 3])
-% % %         axis square
-% % %         set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         ylabel('RD')
-% % %         [h p] = ttest(preRD,postRD);
-% % %         title(sprintf('p=%0.3f',p))
-% % % 
-% % %         subplot(2,5,2)
-% % %         hold on
-% % %         plot([1 2],[preRS' postRS'],'k.:')
-% % %         errorbar([1 2],[nanmean(preRS) nanmean(postRS)],[nanstd(preRS)/sqrt(numAni) nanstd(postRS)/sqrt(numAni)],'r')
-% % %         axis([0 3 0 80])
-% % %         axis square
-% % %         set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         ylabel('RS')
-% % %         [h p] = ttest(preRS,postRS);
-% % %         title(sprintf('p=%0.3f',p))
-% % % 
-% % %         subplot(2,5,3)
-% % %         hold on
-% % %         plot([1 2],[presigmaD' postsigmaD'],'k.:')
-% % %         errorbar([1 2],[nanmean(presigmaD) nanmean(postsigmaD)],[nanstd(presigmaD)/sqrt(numAni) nanstd(postsigmaD)/sqrt(numAni)],'r')
-% % %         axis([0 3 0 3])
-% % %         axis square
-% % %         set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         ylabel('sigmaD')
-% % %         [h p] = ttest(presigmaD,postsigmaD);
-% % %         title(sprintf('p=%0.3f',p))
-% % % 
-% % %         subplot(2,5,4)
-% % %         hold on
-% % %         plot([1 2],[presigmaS' postsigmaS'],'k.:')
-% % %         errorbar([1 2],[nanmean(presigmaS) nanmean(postsigmaS)],[nanstd(presigmaS)/sqrt(numAni) nanstd(postsigmaS)/sqrt(numAni)],'r')
-% % %         axis([0 3 0 10])
-% % %         axis square
-% % %         set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         ylabel('sigmaS')
-% % %         [h p] = ttest(presigmaS,postsigmaS);
-% % %         title(sprintf('p=%0.3f',p))
-% % % 
-% % %         subplot(2,5,5)
-% % %         hold on
-% % %         plot([1 2],[prem' postm'],'k.:')
-% % %         errorbar([1 2],[nanmean(prem) nanmean(postm)],[nanstd(prem)/sqrt(numAni) nanstd(postm)/sqrt(numAni)],'r')
-% % %         axis([0 3 0 6])
-% % %         axis square
-% % %         set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         ylabel('m')
-% % %         [h p] = ttest(prem,postm);
-% % %         title(sprintf('p=%0.3f',p))
-% % % 
-% % %         subplot(2,5,6)
-% % %         for j = 1:length(unique(sessfit))
-% % %             anipre(j) = nanmean(preRD(find(sessfit==j)));
-% % %             anipost(j) = nanmean(postRD(find(sessfit==j)));
-% % %         end
-% % %         hold on
-% % %         plot(preRD,postRD,'k.')
-% % %         errorbarxy(nanmean(anipre),nanmean(anipost),nanstd(anipre)/sqrt(numAni),nanstd(anipost)/sqrt(numAni))
-% % %         plot([0 100],[0 100],'m:')
-% % %         axis([0 3 0 3])
-% % %         axis square
-% % %         set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         xlabel('pre');ylabel('post')
-% % %         [h p] = ttest(anipre,anipost);
-% % %         title(sprintf('RD p=%0.3f',p))
-% % % 
-% % %         subplot(2,5,7)
-% % %         for j = 1:length(unique(sessfit))
-% % %             anipre(j) = nanmean(preRS(find(sessfit==j)));
-% % %             anipost(j) = nanmean(postRS(find(sessfit==j)));
-% % %         end
-% % %         hold on
-% % %         plot(preRS,postRS,'k.')
-% % %         errorbarxy(nanmean(preRS),nanmean(postRS),nanstd(preRS)/sqrt(numAni),nanstd(postRS)/sqrt(numAni))
-% % %         plot([0 100],[0 100],'m:')
-% % %         axis([0 80 0 80])
-% % %         axis square
-% % %         set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         xlabel('pre');ylabel('post')
-% % %         [h p] = ttest(anipre,anipost);
-% % %         title(sprintf('RS p=%0.3f',p))
-% % % 
-% % %         subplot(2,5,8)
-% % %         for j = 1:length(unique(sessfit))
-% % %             anipre(j) = nanmean(presigmaD(find(sessfit==j)));
-% % %             anipost(j) = nanmean(postsigmaD(find(sessfit==j)));
-% % %         end
-% % %         hold on
-% % %         plot(presigmaD,postsigmaD,'k.')
-% % %         errorbarxy(nanmean(presigmaD),nanmean(postsigmaD),nanstd(presigmaD)/sqrt(numAni),nanstd(postsigmaD)/sqrt(numAni))
-% % %         plot([0 100],[0 100],'m:')
-% % %         axis([0 3 0 3])
-% % %         axis square
-% % %         set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         xlabel('pre');ylabel('post')
-% % %         [h p] = ttest(anipre,anipost);
-% % %         title(sprintf('sigmaD p=%0.3f',p))
-% % % 
-% % %         subplot(2,5,9)
-% % %         for j = 1:length(unique(sessfit))
-% % %             anipre(j) = nanmean(presigmaS(find(sessfit==j)));
-% % %             anipost(j) = nanmean(postsigmaS(find(sessfit==j)));
-% % %         end
-% % %         hold on
-% % %         plot(presigmaS,postsigmaS,'k.')
-% % %         errorbarxy(nanmean(presigmaS),nanmean(postsigmaS),nanstd(presigmaS)/sqrt(numAni),nanstd(postsigmaS)/sqrt(numAni))
-% % %         plot([0 100],[0 100],'m:')
-% % %         axis([0 10 0 10])
-% % %         axis square
-% % %         set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         xlabel('pre');ylabel('post')
-% % %         [h p] = ttest(anipre,anipost);
-% % %         title(sprintf('sigmaS p=%0.3f',p))
-% % % 
-% % %         subplot(2,5,10)
-% % %         for j = 1:length(unique(sessfit))
-% % %             anipre(j) = nanmean(prem(find(sessfit==j)));
-% % %             anipost(j) = nanmean(postm(find(sessfit==j)));
-% % %         end
-% % %         hold on
-% % %         plot(prem,postm,'k.')
-% % %         errorbarxy(nanmean(prem),nanmean(postm),nanstd(prem)/sqrt(numAni),nanstd(postm)/sqrt(numAni))
-% % %         plot([0 100],[0 100],'m:')
-% % %         axis([0 6 0 6])
-% % %         axis square
-% % %         set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         xlabel('pre');ylabel('post')
-% % %         [h p] = ttest(anipre,anipost);
-% % %         title(sprintf('m p=%0.3f',p))
-% % % 
-% % %         mtit(sprintf('running size curve fit params %s',splabel{win}))
-% % %         if exist('psfile','var')
-% % %             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-% % %             print('-dpsc',psfile,'-append');
-% % %         end
-% % % 
-% % % 
-% % %         %%%constrain fit parameters to only fit Rd and Rs for running
-% % %         sprintf('doing cell-wise running fits with sigmas constrained %s...',splabel{win})
-% % %         sigmaD = (presigmaD + postsigmaD)/2;sigmaS = (presigmaS + postsigmaS)/2;m = (prem + postm)/2;
-% % %         [preRD preRS preresult] = sizeCurveFitRdRs(radiusRange,pre,sigmaD,sigmaS,m);
-% % %         [postRD postRS postresult] = sizeCurveFitRdRs(radiusRange,post,sigmaD,sigmaS,m);
-% % % 
-% % %         %%%plot individual fits
-% % %         preR2=nan(1,length(preresult));postR2=preR2;
-% % %         for i = 1:length(preresult)
-% % %             preR2(i) = corr(pre(i,:)',preresult{i}(radiusRange));
-% % %             postR2(i) = corr(post(i,:)',postresult{i}(radiusRange));
-% % %         end
-% % % 
-% % %     %     cnt=1;
-% % %     %     for i = 1:ceil(length(sessfit)/15)
-% % %     %         figure
-% % %     %         for j = 1:15
-% % %     %             if cnt<=length(sessfit)
-% % %     %                 subplot(3,5,j)
-% % %     %                 hold on
-% % %     %                 plot(radiusRange,pre(cnt,:),'ko')
-% % %     %                 plot(radiusRange,post(cnt,:),'ro')
-% % %     %                 plot(preresult{cnt},'k')
-% % %     %                 plot(postresult{cnt},'r')
-% % %     %                 axis([0 radiusRange(end) min([pre(cnt,:) post(cnt,:)])-0.05 max([pre(cnt,:) post(cnt,:)])+0.05])
-% % %     %                 axis square
-% % %     %                 legend off
-% % %     %                 xlabel('size (deg)')
-% % %     %                 ylabel('dfof')
-% % %     %                 title(sprintf('ani %d cell %d',sessfit(cnt),fitani(cnt)))
-% % %     %                 set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',8,'xtick',radiusRange,'xticklabel',sizes)
-% % %     %                 cnt=cnt+1;
-% % %     %             else
-% % %     %                 continue
-% % %     %             end
-% % %     %         end
-% % %     %         mtit(sprintf('constrained cell fits run %d/%d preR2=%0.3f postR2=%0.3f %s',i,ceil(length(sessfit)/15),nanmean(preR2),nanmean(postR2),splabel{win}))
-% % %     %         if exist('psfile','var')
-% % %     %             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-% % %     %             print('-dpsc',psfile,'-append');
-% % %     %         end
-% % %     %     end
-% % % 
-% % % 
-% % %         figure
-% % %         subplot(2,2,1)
-% % %         hold on
-% % %         plot([1 2],[preRD' postRD'],'k.:')
-% % %         errorbar([1 2],[nanmean(preRD) nanmean(postRD)],[nanstd(preRD)/sqrt(numAni) nanstd(postRD)/sqrt(numAni)],'r')
-% % %         axis([0 3 0 3])
-% % %         axis square
-% % %         set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         ylabel('RD')
-% % %         [h p] = ttest(preRD,postRD);
-% % %         title(sprintf('p=%0.3f',p))
-% % % 
-% % %         subplot(2,2,2)
-% % %         hold on
-% % %         plot([1 2],[preRS' postRS'],'k.:')
-% % %         errorbar([1 2],[nanmean(preRS) nanmean(postRS)],[nanstd(preRS)/sqrt(numAni) nanstd(postRS)/sqrt(numAni)],'r')
-% % %         axis([0 3 0 80])
-% % %         axis square
-% % %         set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         ylabel('RS')
-% % %         [h p] = ttest(preRS,postRS);
-% % %         title(sprintf('p=%0.3f',p))
-% % % 
-% % %         subplot(2,2,3)
-% % %         for j = 1:length(unique(sessfit))
-% % %             anipre(j) = nanmean(preRD(find(sessfit==j)));
-% % %             anipost(j) = nanmean(postRD(find(sessfit==j)));
-% % %         end
-% % %         hold on
-% % %         plot(preRD,postRD,'k.')
-% % %         errorbarxy(nanmean(anipre),nanmean(anipost),nanstd(anipre)/sqrt(numAni),nanstd(anipost)/sqrt(numAni))
-% % %         plot([0 100],[0 100],'m:')
-% % %         axis([0 3 0 3])
-% % %         axis square
-% % %         set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         xlabel('pre');ylabel('post')
-% % %         [h p] = ttest(anipre,anipost);
-% % %         title(sprintf('RD p=%0.3f',p))
-% % % 
-% % %         subplot(2,2,4)
-% % %         for j = 1:length(unique(sessfit))
-% % %             anipre(j) = nanmean(preRS(find(sessfit==j)));
-% % %             anipost(j) = nanmean(postRS(find(sessfit==j)));
-% % %         end
-% % %         hold on
-% % %         plot(preRS,postRS,'k.')
-% % %         errorbarxy(nanmean(preRS),nanmean(postRS),nanstd(preRS)/sqrt(numAni),nanstd(postRS)/sqrt(numAni))
-% % %         plot([0 100],[0 100],'m:')
-% % %         axis([0 80 0 80])
-% % %         axis square
-% % %         set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
-% % %         xlabel('pre');ylabel('post')
-% % %         [h p] = ttest(anipre,anipost);
-% % %         title(sprintf('RS p=%0.3f',p))
-% % % 
-% % %         mtit(sprintf('constrained running size curve fit params %s',splabel{win}))
-% % %         if exist('psfile','var')
-% % %             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-% % %             print('-dpsc',psfile,'-append');
-% % %         end
+        %%%%%%%%%do size fits by cell
+        %%stationary
+        sprintf('doing cell-wise stationary fits %s...',splabel{win}')
+        pre = squeeze(nanmean(grpspsize(:,spWindow{win},:,1,1),2));
+        post = squeeze(nanmean(grpspsize(:,spWindow{win},:,1,2),2));
+
+        %%%in case there are nans, throw out that ani's fit
+    %     [Ipre,J]=ind2sub(size(pre),find(isnan(pre)));
+    %     [Ipost,J]=ind2sub(size(post),find(isnan(post)));
+    %     I = unique([Ipre Ipost]);
+    %     fitani = 1:size(grpspsize,1);
+    %     for j = 1:length(I)
+    %         fitani = fitani(find(fitani~=I(j)));
+    %     end
+    %     pre=pre(fitani,:);post=post(fitani,:);sess=session(fitani);
+
+        [preRD preRS presigmaD presigmaS prem preresult] = sizeCurveFit(radiusRange,pre);
+        [postRD postRS postsigmaD postsigmaS postm postresult] = sizeCurveFit(radiusRange,post);
+
+        nofit = unique([find(isnan(preRD)) find(isnan(postRD))]); %%cells that wouldn't fit
+        fitani = 1:length(preRD);
+        for j = 1:length(nofit)
+            fitani = fitani(find(fitani~=nofit(j)));
+        end
+        preRD=preRD(fitani);preRS=preRS(fitani);presigmaD=presigmaD(fitani);presigmaS=presigmaS(fitani);prem=prem(fitani);preresult=preresult(fitani);
+        postRD=postRD(fitani);postRS=postRS(fitani);postsigmaD=postsigmaD(fitani);postsigmaS=postsigmaS(fitani);postm=postm(fitani);postresult=postresult(fitani);
+        sessfit=sess(fitani);pre=pre(fitani,:);post=post(fitani,:);
+
+        %%%plot individual fits
+        preR2=nan(1,length(preresult));postR2=preR2;
+        for i = 1:length(preresult)
+            preR2(i) = corr(pre(i,:)',preresult{i}(radiusRange));
+            postR2(i) = corr(post(i,:)',postresult{i}(radiusRange));
+        end
+
+    %     cnt=1;
+    %     for i = 1:ceil(length(sessfit)/15)
+    %         figure
+    %         for j = 1:15
+    %             if cnt<=length(sessfit)
+    %                 subplot(3,5,j)
+    %                 hold on
+    %                 plot(radiusRange,pre(cnt,:),'ko')
+    %                 plot(radiusRange,post(cnt,:),'ro')
+    %                 plot(preresult{cnt},'k')
+    %                 plot(postresult{cnt},'r')
+    %                 axis([0 radiusRange(end) min([pre(cnt,:) post(cnt,:)])-0.05 max([pre(cnt,:) post(cnt,:)])+0.05])
+    %                 axis square
+    %                 legend off
+    %                 xlabel('size (deg)')
+    %                 ylabel('dfof')
+    %                 title(sprintf('ani %d cell %d',sessfit(cnt),fitani(cnt)))
+    %                 set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',8,'xtick',radiusRange,'xticklabel',sizes)
+    %                 cnt=cnt+1;
+    %             else
+    %                 continue
+    %             end
+    %         end
+    %         mtit(sprintf('cell fits sit %d/%d preR2=%0.3f postR2=%0.3f %s',i,ceil(length(sessfit)/15),nanmean(preR2),nanmean(postR2),splabel{win}))
+    %         if exist('psfile','var')
+    %             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    %             print('-dpsc',psfile,'-append');
+    %         end
+    %     end
+
+        %%%plot stationary fit parameters
+        figure
+        subplot(2,5,1)
+        hold on
+        plot([1 2],[preRD' postRD'],'k.:')
+        errorbar([1 2],[nanmean(preRD) nanmean(postRD)],[nanstd(preRD)/sqrt(numAni) nanstd(postRD)/sqrt(numAni)],'r')
+        axis([0 3 0 3])
+        axis square
+        set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        ylabel('RD')
+        [h p] = ttest(preRD,postRD);
+        title(sprintf('p=%0.3f',p))
+
+        subplot(2,5,2)
+        hold on
+        plot([1 2],[preRS' postRS'],'k.:')
+        errorbar([1 2],[nanmean(preRS) nanmean(postRS)],[nanstd(preRS)/sqrt(numAni) nanstd(postRS)/sqrt(numAni)],'r')
+        axis([0 3 0 80])
+        axis square
+        set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        ylabel('RS')
+        [h p] = ttest(preRS,postRS);
+        title(sprintf('p=%0.3f',p))
+
+        subplot(2,5,3)
+        hold on
+        plot([1 2],[presigmaD' postsigmaD'],'k.:')
+        errorbar([1 2],[nanmean(presigmaD) nanmean(postsigmaD)],[nanstd(presigmaD)/sqrt(numAni) nanstd(postsigmaD)/sqrt(numAni)],'r')
+        axis([0 3 0 3])
+        axis square
+        set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        ylabel('sigmaD')
+        [h p] = ttest(presigmaD,postsigmaD);
+        title(sprintf('p=%0.3f',p))
+
+        subplot(2,5,4)
+        hold on
+        plot([1 2],[presigmaS' postsigmaS'],'k.:')
+        errorbar([1 2],[nanmean(presigmaS) nanmean(postsigmaS)],[nanstd(presigmaS)/sqrt(numAni) nanstd(postsigmaS)/sqrt(numAni)],'r')
+        axis([0 3 0 10])
+        axis square
+        set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        ylabel('sigmaS')
+        [h p] = ttest(presigmaS,postsigmaS);
+        title(sprintf('p=%0.3f',p))
+
+        subplot(2,5,5)
+        hold on
+        plot([1 2],[prem' postm'],'k.:')
+        errorbar([1 2],[nanmean(prem) nanmean(postm)],[nanstd(prem)/sqrt(numAni) nanstd(postm)/sqrt(numAni)],'r')
+        axis([0 3 0 6])
+        axis square
+        set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        ylabel('m')
+        [h p] = ttest(prem,postm);
+        title(sprintf('p=%0.3f',p))
+
+        subplot(2,5,6)
+        for j = 1:length(unique(sessfit))
+            anipre(j) = nanmean(preRD(find(sessfit==j)));
+            anipost(j) = nanmean(postRD(find(sessfit==j)));
+        end
+        hold on
+        plot(preRD,postRD,'k.')
+        errorbarxy(nanmean(anipre),nanmean(anipost),nanstd(anipre)/sqrt(numAni),nanstd(anipost)/sqrt(numAni))
+        plot([0 100],[0 100],'m:')
+        axis([0 3 0 3])
+        axis square
+        set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        xlabel('pre');ylabel('post')
+        [h p] = ttest(anipre,anipost);
+        title(sprintf('RD p=%0.3f',p))
+
+        subplot(2,5,7)
+        for j = 1:length(unique(sessfit))
+            anipre(j) = nanmean(preRS(find(sessfit==j)));
+            anipost(j) = nanmean(postRS(find(sessfit==j)));
+        end
+        hold on
+        plot(preRS,postRS,'k.')
+        errorbarxy(nanmean(preRS),nanmean(postRS),nanstd(preRS)/sqrt(numAni),nanstd(postRS)/sqrt(numAni))
+        plot([0 100],[0 100],'m:')
+        axis([0 80 0 80])
+        axis square
+        set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        xlabel('pre');ylabel('post')
+        [h p] = ttest(anipre,anipost);
+        title(sprintf('RS p=%0.3f',p))
+
+        subplot(2,5,8)
+        for j = 1:length(unique(sessfit))
+            anipre(j) = nanmean(presigmaD(find(sessfit==j)));
+            anipost(j) = nanmean(postsigmaD(find(sessfit==j)));
+        end
+        hold on
+        plot(presigmaD,postsigmaD,'k.')
+        errorbarxy(nanmean(presigmaD),nanmean(postsigmaD),nanstd(presigmaD)/sqrt(numAni),nanstd(postsigmaD)/sqrt(numAni))
+        plot([0 100],[0 100],'m:')
+        axis([0 3 0 3])
+        axis square
+        set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        xlabel('pre');ylabel('post')
+        [h p] = ttest(anipre,anipost);
+        title(sprintf('sigmaD p=%0.3f',p))
+
+        subplot(2,5,9)
+        for j = 1:length(unique(sessfit))
+            anipre(j) = nanmean(presigmaS(find(sessfit==j)));
+            anipost(j) = nanmean(postsigmaS(find(sessfit==j)));
+        end
+        hold on
+        plot(presigmaS,postsigmaS,'k.')
+        errorbarxy(nanmean(presigmaS),nanmean(postsigmaS),nanstd(presigmaS)/sqrt(numAni),nanstd(postsigmaS)/sqrt(numAni))
+        plot([0 100],[0 100],'m:')
+        axis([0 10 0 10])
+        axis square
+        set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        xlabel('pre');ylabel('post')
+        [h p] = ttest(anipre,anipost);
+        title(sprintf('sigmaS p=%0.3f',p))
+
+        subplot(2,5,10)
+        for j = 1:length(unique(sessfit))
+            anipre(j) = nanmean(prem(find(sessfit==j)));
+            anipost(j) = nanmean(postm(find(sessfit==j)));
+        end
+        hold on
+        plot(prem,postm,'k.')
+        errorbarxy(nanmean(prem),nanmean(postm),nanstd(prem)/sqrt(numAni),nanstd(postm)/sqrt(numAni))
+        plot([0 100],[0 100],'m:')
+        axis([0 6 0 6])
+        axis square
+        set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        xlabel('pre');ylabel('post')
+        [h p] = ttest(anipre,anipost);
+        title(sprintf('m p=%0.3f',p))
+
+        mtit(sprintf('stationary size curve fit params %s',splabel{win}))
+        if exist('psfile','var')
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+            print('-dpsc',psfile,'-append');
+        end
+
+
+        %%%constrain fit parameters to only fit Rd and Rs for stationary
+        sprintf('doing cell-wise stationary fits with sigmas constrained %s...',splabel{win})
+        sigmaD = (presigmaD + postsigmaD)/2;sigmaS = (presigmaS + postsigmaS)/2;m = (prem + postm)/2;
+        [preRD preRS preresult] = sizeCurveFitRdRs(radiusRange,pre,sigmaD,sigmaS,m);
+        [postRD postRS postresult] = sizeCurveFitRdRs(radiusRange,post,sigmaD,sigmaS,m);
+
+        %%%plot individual fits
+        preR2=nan(1,length(preresult));postR2=preR2;
+        for i = 1:length(preresult)
+            preR2(i) = corr(pre(i,:)',preresult{i}(radiusRange));
+            postR2(i) = corr(post(i,:)',postresult{i}(radiusRange));
+        end
+
+    %     cnt=1;
+    %     for i = 1:ceil(length(sessfit)/15)
+    %         figure
+    %         for j = 1:15
+    %             if cnt<=length(sessfit)
+    %                 subplot(3,5,j)
+    %                 hold on
+    %                 plot(radiusRange,pre(cnt,:),'ko')
+    %                 plot(radiusRange,post(cnt,:),'ro')
+    %                 plot(preresult{cnt},'k')
+    %                 plot(postresult{cnt},'r')
+    %                 axis([0 radiusRange(end) min([pre(cnt,:) post(cnt,:)])-0.05 max([pre(cnt,:) post(cnt,:)])+0.05])
+    %                 axis square
+    %                 legend off
+    %                 xlabel('size (deg)')
+    %                 ylabel('dfof')
+    %                 title(sprintf('ani %d cell %d',sessfit(cnt),fitani(cnt)))
+    %                 set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',8,'xtick',radiusRange,'xticklabel',sizes)
+    %                 cnt=cnt+1;
+    %             else
+    %                 continue
+    %             end
+    %         end
+    %         mtit(sprintf('constrained cell fits sit %d/%d preR2=%0.3f postR2=%0.3f %s',i,ceil(length(sessfit)/15),nanmean(preR2),nanmean(postR2),splabel{win}))
+    %         if exist('psfile','var')
+    %             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    %             print('-dpsc',psfile,'-append');
+    %         end
+    %     end
+
+
+        figure
+        subplot(2,2,1)
+        hold on
+        plot([1 2],[preRD' postRD'],'k.:')
+        errorbar([1 2],[nanmean(preRD) nanmean(postRD)],[nanstd(preRD)/sqrt(numAni) nanstd(postRD)/sqrt(numAni)],'r')
+        axis([0 3 0 3])
+        axis square
+        set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        ylabel('RD')
+        [h p] = ttest(preRD,postRD);
+        title(sprintf('p=%0.3f',p))
+
+        subplot(2,2,2)
+        hold on
+        plot([1 2],[preRS' postRS'],'k.:')
+        errorbar([1 2],[nanmean(preRS) nanmean(postRS)],[nanstd(preRS)/sqrt(numAni) nanstd(postRS)/sqrt(numAni)],'r')
+        axis([0 3 0 80])
+        axis square
+        set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        ylabel('RS')
+        [h p] = ttest(preRS,postRS);
+        title(sprintf('p=%0.3f',p))
+
+        subplot(2,2,3)
+        for j = 1:length(unique(sessfit))
+            anipre(j) = nanmean(preRD(find(sessfit==j)));
+            anipost(j) = nanmean(postRD(find(sessfit==j)));
+        end
+        hold on
+        plot(preRD,postRD,'k.')
+        errorbarxy(nanmean(anipre),nanmean(anipost),nanstd(anipre)/sqrt(numAni),nanstd(anipost)/sqrt(numAni))
+        plot([0 100],[0 100],'m:')
+        axis([0 3 0 3])
+        axis square
+        set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        xlabel('pre');ylabel('post')
+        [h p] = ttest(anipre,anipost);
+        title(sprintf('RD p=%0.3f',p))
+
+        subplot(2,2,4)
+        for j = 1:length(unique(sessfit))
+            anipre(j) = nanmean(preRS(find(sessfit==j)));
+            anipost(j) = nanmean(postRS(find(sessfit==j)));
+        end
+        hold on
+        plot(preRS,postRS,'k.')
+        errorbarxy(nanmean(preRS),nanmean(postRS),nanstd(preRS)/sqrt(numAni),nanstd(postRS)/sqrt(numAni))
+        plot([0 100],[0 100],'m:')
+        axis([0 80 0 80])
+        axis square
+        set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        xlabel('pre');ylabel('post')
+        [h p] = ttest(anipre,anipost);
+        title(sprintf('RS p=%0.3f',p))
+
+        mtit(sprintf('constrained stationary size curve fit params %s',splabel{win}))
+        if exist('psfile','var')
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+            print('-dpsc',psfile,'-append');
+        end
+
+
+
+        %%%do size fits by cell
+        %%running
+        sprintf('doing cell-wise running fits %s...',splabel{win})
+        pre = squeeze(nanmean(grpspsize(:,spWindow{win},:,2,1),2));
+        post = squeeze(nanmean(grpspsize(:,spWindow{win},:,2,2),2));
+
+        %%%in case there are nans, throw out that ani's fit
+    %     [Ipre,J]=ind2sub(size(pre),find(isnan(pre)));
+    %     [Ipost,J]=ind2sub(size(post),find(isnan(post)));
+    %     I = unique([Ipre Ipost]);
+    %     fitani = 1:size(grpspsize,1);
+    %     for j = 1:length(I)
+    %         fitani = fitani(find(fitani~=I(j)));
+    %     end
+    %     pre=pre(fitani,:);post=post(fitani,:);sess=session(fitani);
+
+        [preRD preRS presigmaD presigmaS prem preresult] = sizeCurveFit(radiusRange,pre);
+        [postRD postRS postsigmaD postsigmaS postm postresult] = sizeCurveFit(radiusRange,post);
+
+        nofit = unique([find(isnan(preRD)) find(isnan(postRD))]); %%cells that wouldn't fit
+        fitani = 1:length(preRD);
+        for j = 1:length(nofit)
+            fitani = fitani(find(fitani~=nofit(j)));
+        end
+        preRD=preRD(fitani);preRS=preRS(fitani);presigmaD=presigmaD(fitani);presigmaS=presigmaS(fitani);prem=prem(fitani);preresult=preresult(fitani);
+        postRD=postRD(fitani);postRS=postRS(fitani);postsigmaD=postsigmaD(fitani);postsigmaS=postsigmaS(fitani);postm=postm(fitani);postresult=postresult(fitani);
+        sessfit=sess(fitani);pre=pre(fitani,:);post=post(fitani,:);
+
+        %%%plot individual fits
+        preR2=nan(1,length(preresult));postR2=preR2;
+        for i = 1:length(preresult)
+            preR2(i) = corr(pre(i,:)',preresult{i}(radiusRange));
+            postR2(i) = corr(post(i,:)',postresult{i}(radiusRange));
+        end
+
+    %     cnt=1;
+    %     for i = 1:ceil(length(sessfit)/15)
+    %         figure
+    %         for j = 1:15
+    %             if cnt<=length(sessfit)
+    %                 subplot(3,5,j)
+    %                 hold on
+    %                 plot(radiusRange,pre(cnt,:),'ko')
+    %                 plot(radiusRange,post(cnt,:),'ro')
+    %                 plot(preresult{cnt},'k')
+    %                 plot(postresult{cnt},'r')
+    %                 axis([0 radiusRange(end) min([pre(cnt,:) post(cnt,:)])-0.05 max([pre(cnt,:) post(cnt,:)])+0.05])
+    %                 axis square
+    %                 legend off
+    %                 xlabel('size (deg)')
+    %                 ylabel('dfof')
+    %                 title(sprintf('ani %d cell %d',sessfit(cnt),fitani(cnt)))
+    %                 set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',8,'xtick',radiusRange,'xticklabel',sizes)
+    %                 cnt=cnt+1;
+    %             else
+    %                 continue
+    %             end
+    %         end
+    %         mtit(sprintf('cell fits run %d/%d preR2=%0.3f postR2=%0.3f %s',i,ceil(length(sessfit)/15),nanmean(preR2),nanmean(postR2),splabel{win}))
+    %         if exist('psfile','var')
+    %             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    %             print('-dpsc',psfile,'-append');
+    %         end
+    %     end
+
+        %%%plot running fit parameters
+        figure
+        subplot(2,5,1)
+        hold on
+        plot([1 2],[preRD' postRD'],'k.:')
+        errorbar([1 2],[nanmean(preRD) nanmean(postRD)],[nanstd(preRD)/sqrt(numAni) nanstd(postRD)/sqrt(numAni)],'r')
+        axis([0 3 0 3])
+        axis square
+        set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        ylabel('RD')
+        [h p] = ttest(preRD,postRD);
+        title(sprintf('p=%0.3f',p))
+
+        subplot(2,5,2)
+        hold on
+        plot([1 2],[preRS' postRS'],'k.:')
+        errorbar([1 2],[nanmean(preRS) nanmean(postRS)],[nanstd(preRS)/sqrt(numAni) nanstd(postRS)/sqrt(numAni)],'r')
+        axis([0 3 0 80])
+        axis square
+        set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        ylabel('RS')
+        [h p] = ttest(preRS,postRS);
+        title(sprintf('p=%0.3f',p))
+
+        subplot(2,5,3)
+        hold on
+        plot([1 2],[presigmaD' postsigmaD'],'k.:')
+        errorbar([1 2],[nanmean(presigmaD) nanmean(postsigmaD)],[nanstd(presigmaD)/sqrt(numAni) nanstd(postsigmaD)/sqrt(numAni)],'r')
+        axis([0 3 0 3])
+        axis square
+        set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        ylabel('sigmaD')
+        [h p] = ttest(presigmaD,postsigmaD);
+        title(sprintf('p=%0.3f',p))
+
+        subplot(2,5,4)
+        hold on
+        plot([1 2],[presigmaS' postsigmaS'],'k.:')
+        errorbar([1 2],[nanmean(presigmaS) nanmean(postsigmaS)],[nanstd(presigmaS)/sqrt(numAni) nanstd(postsigmaS)/sqrt(numAni)],'r')
+        axis([0 3 0 10])
+        axis square
+        set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        ylabel('sigmaS')
+        [h p] = ttest(presigmaS,postsigmaS);
+        title(sprintf('p=%0.3f',p))
+
+        subplot(2,5,5)
+        hold on
+        plot([1 2],[prem' postm'],'k.:')
+        errorbar([1 2],[nanmean(prem) nanmean(postm)],[nanstd(prem)/sqrt(numAni) nanstd(postm)/sqrt(numAni)],'r')
+        axis([0 3 0 6])
+        axis square
+        set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        ylabel('m')
+        [h p] = ttest(prem,postm);
+        title(sprintf('p=%0.3f',p))
+
+        subplot(2,5,6)
+        for j = 1:length(unique(sessfit))
+            anipre(j) = nanmean(preRD(find(sessfit==j)));
+            anipost(j) = nanmean(postRD(find(sessfit==j)));
+        end
+        hold on
+        plot(preRD,postRD,'k.')
+        errorbarxy(nanmean(anipre),nanmean(anipost),nanstd(anipre)/sqrt(numAni),nanstd(anipost)/sqrt(numAni))
+        plot([0 100],[0 100],'m:')
+        axis([0 3 0 3])
+        axis square
+        set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        xlabel('pre');ylabel('post')
+        [h p] = ttest(anipre,anipost);
+        title(sprintf('RD p=%0.3f',p))
+
+        subplot(2,5,7)
+        for j = 1:length(unique(sessfit))
+            anipre(j) = nanmean(preRS(find(sessfit==j)));
+            anipost(j) = nanmean(postRS(find(sessfit==j)));
+        end
+        hold on
+        plot(preRS,postRS,'k.')
+        errorbarxy(nanmean(preRS),nanmean(postRS),nanstd(preRS)/sqrt(numAni),nanstd(postRS)/sqrt(numAni))
+        plot([0 100],[0 100],'m:')
+        axis([0 80 0 80])
+        axis square
+        set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        xlabel('pre');ylabel('post')
+        [h p] = ttest(anipre,anipost);
+        title(sprintf('RS p=%0.3f',p))
+
+        subplot(2,5,8)
+        for j = 1:length(unique(sessfit))
+            anipre(j) = nanmean(presigmaD(find(sessfit==j)));
+            anipost(j) = nanmean(postsigmaD(find(sessfit==j)));
+        end
+        hold on
+        plot(presigmaD,postsigmaD,'k.')
+        errorbarxy(nanmean(presigmaD),nanmean(postsigmaD),nanstd(presigmaD)/sqrt(numAni),nanstd(postsigmaD)/sqrt(numAni))
+        plot([0 100],[0 100],'m:')
+        axis([0 3 0 3])
+        axis square
+        set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        xlabel('pre');ylabel('post')
+        [h p] = ttest(anipre,anipost);
+        title(sprintf('sigmaD p=%0.3f',p))
+
+        subplot(2,5,9)
+        for j = 1:length(unique(sessfit))
+            anipre(j) = nanmean(presigmaS(find(sessfit==j)));
+            anipost(j) = nanmean(postsigmaS(find(sessfit==j)));
+        end
+        hold on
+        plot(presigmaS,postsigmaS,'k.')
+        errorbarxy(nanmean(presigmaS),nanmean(postsigmaS),nanstd(presigmaS)/sqrt(numAni),nanstd(postsigmaS)/sqrt(numAni))
+        plot([0 100],[0 100],'m:')
+        axis([0 10 0 10])
+        axis square
+        set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        xlabel('pre');ylabel('post')
+        [h p] = ttest(anipre,anipost);
+        title(sprintf('sigmaS p=%0.3f',p))
+
+        subplot(2,5,10)
+        for j = 1:length(unique(sessfit))
+            anipre(j) = nanmean(prem(find(sessfit==j)));
+            anipost(j) = nanmean(postm(find(sessfit==j)));
+        end
+        hold on
+        plot(prem,postm,'k.')
+        errorbarxy(nanmean(prem),nanmean(postm),nanstd(prem)/sqrt(numAni),nanstd(postm)/sqrt(numAni))
+        plot([0 100],[0 100],'m:')
+        axis([0 6 0 6])
+        axis square
+        set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        xlabel('pre');ylabel('post')
+        [h p] = ttest(anipre,anipost);
+        title(sprintf('m p=%0.3f',p))
+
+        mtit(sprintf('running size curve fit params %s',splabel{win}))
+        if exist('psfile','var')
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+            print('-dpsc',psfile,'-append');
+        end
+
+
+        %%%constrain fit parameters to only fit Rd and Rs for running
+        sprintf('doing cell-wise running fits with sigmas constrained %s...',splabel{win})
+        sigmaD = (presigmaD + postsigmaD)/2;sigmaS = (presigmaS + postsigmaS)/2;m = (prem + postm)/2;
+        [preRD preRS preresult] = sizeCurveFitRdRs(radiusRange,pre,sigmaD,sigmaS,m);
+        [postRD postRS postresult] = sizeCurveFitRdRs(radiusRange,post,sigmaD,sigmaS,m);
+
+        %%%plot individual fits
+        preR2=nan(1,length(preresult));postR2=preR2;
+        for i = 1:length(preresult)
+            preR2(i) = corr(pre(i,:)',preresult{i}(radiusRange));
+            postR2(i) = corr(post(i,:)',postresult{i}(radiusRange));
+        end
+
+    %     cnt=1;
+    %     for i = 1:ceil(length(sessfit)/15)
+    %         figure
+    %         for j = 1:15
+    %             if cnt<=length(sessfit)
+    %                 subplot(3,5,j)
+    %                 hold on
+    %                 plot(radiusRange,pre(cnt,:),'ko')
+    %                 plot(radiusRange,post(cnt,:),'ro')
+    %                 plot(preresult{cnt},'k')
+    %                 plot(postresult{cnt},'r')
+    %                 axis([0 radiusRange(end) min([pre(cnt,:) post(cnt,:)])-0.05 max([pre(cnt,:) post(cnt,:)])+0.05])
+    %                 axis square
+    %                 legend off
+    %                 xlabel('size (deg)')
+    %                 ylabel('dfof')
+    %                 title(sprintf('ani %d cell %d',sessfit(cnt),fitani(cnt)))
+    %                 set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',8,'xtick',radiusRange,'xticklabel',sizes)
+    %                 cnt=cnt+1;
+    %             else
+    %                 continue
+    %             end
+    %         end
+    %         mtit(sprintf('constrained cell fits run %d/%d preR2=%0.3f postR2=%0.3f %s',i,ceil(length(sessfit)/15),nanmean(preR2),nanmean(postR2),splabel{win}))
+    %         if exist('psfile','var')
+    %             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    %             print('-dpsc',psfile,'-append');
+    %         end
+    %     end
+
+
+        figure
+        subplot(2,2,1)
+        hold on
+        plot([1 2],[preRD' postRD'],'k.:')
+        errorbar([1 2],[nanmean(preRD) nanmean(postRD)],[nanstd(preRD)/sqrt(numAni) nanstd(postRD)/sqrt(numAni)],'r')
+        axis([0 3 0 3])
+        axis square
+        set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        ylabel('RD')
+        [h p] = ttest(preRD,postRD);
+        title(sprintf('p=%0.3f',p))
+
+        subplot(2,2,2)
+        hold on
+        plot([1 2],[preRS' postRS'],'k.:')
+        errorbar([1 2],[nanmean(preRS) nanmean(postRS)],[nanstd(preRS)/sqrt(numAni) nanstd(postRS)/sqrt(numAni)],'r')
+        axis([0 3 0 80])
+        axis square
+        set(gca,'xtick',1:2,'xticklabel',{'pre','post'},'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        ylabel('RS')
+        [h p] = ttest(preRS,postRS);
+        title(sprintf('p=%0.3f',p))
+
+        subplot(2,2,3)
+        for j = 1:length(unique(sessfit))
+            anipre(j) = nanmean(preRD(find(sessfit==j)));
+            anipost(j) = nanmean(postRD(find(sessfit==j)));
+        end
+        hold on
+        plot(preRD,postRD,'k.')
+        errorbarxy(nanmean(anipre),nanmean(anipost),nanstd(anipre)/sqrt(numAni),nanstd(anipost)/sqrt(numAni))
+        plot([0 100],[0 100],'m:')
+        axis([0 3 0 3])
+        axis square
+        set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        xlabel('pre');ylabel('post')
+        [h p] = ttest(anipre,anipost);
+        title(sprintf('RD p=%0.3f',p))
+
+        subplot(2,2,4)
+        for j = 1:length(unique(sessfit))
+            anipre(j) = nanmean(preRS(find(sessfit==j)));
+            anipost(j) = nanmean(postRS(find(sessfit==j)));
+        end
+        hold on
+        plot(preRS,postRS,'k.')
+        errorbarxy(nanmean(preRS),nanmean(postRS),nanstd(preRS)/sqrt(numAni),nanstd(postRS)/sqrt(numAni))
+        plot([0 100],[0 100],'m:')
+        axis([0 80 0 80])
+        axis square
+        set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',10)
+        xlabel('pre');ylabel('post')
+        [h p] = ttest(anipre,anipost);
+        title(sprintf('RS p=%0.3f',p))
+
+        mtit(sprintf('constrained running size curve fit params %s',splabel{win}))
+        if exist('psfile','var')
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+            print('-dpsc',psfile,'-append');
+        end
 
 
 %%

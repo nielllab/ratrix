@@ -60,11 +60,12 @@ cycLength = cycLength/dt;
 xpos=0;
 sf=0; isi=0; duration=0; theta=0; phase=0; radius=0;
 % moviefname = 'C:\sizeSelect2sf8sz26min.mat';
-moviefname = 'C:\sizeselectBin22min.mat'
+% moviefname = 'C:\sizeselectBin22min.mat'
+moviefname = 'C:\sizeselect4Ctrst24min.mat'
 % moviefname = 'C:\sizeselectLongISI22min.mat'
 load(moviefname)
 ntrials= floor(min(dt*length(dfofInterp)/(isi+duration),length(sf)))-1
-sf=sf(1:ntrials); theta=theta(1:ntrials); phase=phase(1:ntrials); radius=radius(1:ntrials); xpos=xpos(1:ntrials);
+sf=sf(1:ntrials); theta=theta(1:ntrials); phase=phase(1:ntrials); radius=radius(1:ntrials); xpos=xpos(1:ntrials);contrasts=contrasts(1:ntrials);
 onsets = dt + (0:ntrials-1)*(isi+duration);
 timepts = 1:(2*isi+duration)/dt;
 timepts = (timepts-1)*dt;
@@ -77,9 +78,10 @@ meandfofInterp = squeeze(mean(mean(dfofInterp,1),2))';
 sz = unique(radius);
 freq = unique(sf);
 x=unique(xpos);
+ctr = unique(contrasts);
 for i=1:length(radiusRange); sizes{i} = num2str(radiusRange(i)*2); end
 
-load(['stim_obj' fileName(end-7:end)]);
+load(['stim_obj' fileName(end-7:end)],'stimRec');
 % load(stimobj)
 spInterp = get2pSpeed(stimRec,dt,size(dfofInterp,3));
 running = zeros(1,ntrials);
@@ -106,26 +108,28 @@ end
 
 
 for location=1:length(x)
-    figure
-    set(gcf,'Name',sprintf('xpos = %d',x(location)))
-    for s =1:length(sz)
-        img =  squeeze(mean(dFout(:,:,find(timepts==duration),xpos==x(location) & radius == sz(s))-dFout(:,:,find(timepts==0),xpos==x(location) & radius==sz(s)),4));
-        subplot(2,ceil(length(sz)/2),s)
-        imagesc(img,[0 0.25]); axis equal; colormap jet; title(sprintf('size %d',sizes{s}));
-        resp(s,:) = squeeze(mean(mean(mean(dFout(:,:,:,xpos==x(location)& radius==sz(s)),4),2),1))- squeeze(mean(mean(mean(dFout(:,:,find(timepts==0),xpos==x(location)& radius==sz(s)),4),2),1));
-    end
-    
-    if exist('psfile','var')
-        set(gcf, 'PaperPositionMode', 'auto');
-        print('-dpsc',psfile,'-append');
-    end
-    
-    figure
-    plot(timepts,resp'); ylim([-0.05 0.2]); title(sprintf('xpos = %d',x(location))); legend(sizes);
-    
-    if exist('psfile','var')
-        set(gcf, 'PaperPositionMode', 'auto');
-        print('-dpsc',psfile,'-append');
+    for c = 1:length(ctr)
+        figure
+        set(gcf,'Name',sprintf('xpos=%d, ctr=%0.3f',x(location),ctr(c)))
+        for s =1:length(sz)
+            img =  squeeze(mean(dFout(:,:,find(timepts==duration),xpos==x(location) & radius == sz(s) & contrasts == ctr(c))-dFout(:,:,find(timepts==0),xpos==x(location) & radius==sz(s) & contrasts == ctr(c)),4));
+            subplot(2,ceil(length(sz)/2),s)
+            imagesc(img,[0 0.25]); axis equal; colormap jet; title(sprintf('size %d',sizes{s}));
+            resp(s,:) = squeeze(mean(mean(mean(dFout(:,:,:,xpos==x(location)& radius==sz(s) & contrasts == ctr(c)),4),2),1))- squeeze(mean(mean(mean(dFout(:,:,find(timepts==0),xpos==x(location)& radius==sz(s) & contrasts == ctr(c)),4),2),1));
+        end
+
+        if exist('psfile','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfile,'-append');
+        end
+
+        figure
+        plot(timepts,resp'); ylim([-0.05 0.2]); title(sprintf('xpos=%d, ctr=%0.3f',x(location),ctr(c))); legend(sizes);
+
+        if exist('psfile','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfile,'-append');
+        end
     end
     
 end
@@ -146,30 +150,34 @@ if exist('psfile','var')
 end
 
 %%get rid of temporal info and have first, second half and whole
-frmdata = nan(size(dFout,1),size(dFout,2),length(freq),length(sz),2);
+frmdata = nan(size(dFout,1),size(dFout,2),length(freq),length(ctr),length(sz),2);
 for s = 1:length(sz);
     for fre = 1:length(freq)
-        for r = 1:2
-            frmdata(:,:,fre,s,r) = nanmean(nanmean(dFout(:,:,9:11,radius==sz(s)&sf==freq(fre)&running==(r-1)),4),3)-...
-                nanmean(nanmean(dFout(:,:,1:4,radius==sz(s)&sf==freq(fre)&running==(r-1)),4),3);
+        for c = 1:length(ctr)
+            for r = 1:2
+                frmdata(:,:,fre,c,s,r) = nanmean(nanmean(dFout(:,:,9:11,radius==sz(s)&sf==freq(fre)&contrasts==ctr(c)&running==(r-1)),4),3)-...
+                    nanmean(nanmean(dFout(:,:,1:4,radius==sz(s)&sf==freq(fre)&contrasts==ctr(c)&running==(r-1)),4),3);
+            end
         end
     end
 end
 
 for i = 1:length(freq)
-    figure;
-    colormap jet
-    for j = 2:length(sz)
-        subplot(2,floor(length(sz)/2),j-1)
-        imagesc(frmdata(:,:,i,j,1),[-0.01 0.1])
-        set(gca,'ytick',[],'xtick',[])
-        axis square
-        xlabel(sprintf('%sdeg',sizes{j}))
-    end
-    mtit(sprintf('sit sf=%0.2f',freq(i)))
-    if exist('psfile','var')
-        set(gcf, 'PaperPositionMode', 'auto');
-        print('-dpsc',psfile,'-append');
+    for c = 1:length(ctr)
+        figure;
+        colormap jet
+        for j = 2:length(sz)
+            subplot(2,floor(length(sz)/2),j-1)
+            imagesc(frmdata(:,:,i,c,j,1),[-0.01 0.1])
+            set(gca,'ytick',[],'xtick',[])
+            axis square
+            xlabel(sprintf('%sdeg',sizes{j}))
+        end
+        mtit(sprintf('sit sf=%0.2f ctr=%0.3f',freq(i),ctr(c)))
+        if exist('psfile','var')
+            set(gcf, 'PaperPositionMode', 'auto');
+            print('-dpsc',psfile,'-append');
+        end
     end
 end
 
@@ -245,7 +253,7 @@ end
 % end
 
 display('saving')
-save(sessionName,'frmdata','meandfofInterp','xpos','sf','theta','phase','radius','radiusRange','timepts','moviefname','sbxfilename','-append')
+save(sessionName,'frmdata','meandfofInterp','xpos','sf','ctr','theta','phase','radius','radiusRange','timepts','moviefname','sbxfilename','-append')
 %%%'frmdata1','frmdata2',
 
 % for i = 1:10;

@@ -3,23 +3,36 @@ close all;clear all;dbstop if error;
 
 deconvplz = 1;
 
-ctlg = 5; %select control group from grpfiles list
-expg = 6; %select experimental group
+ctlg = 1; %select control group from grpfiles list
+expg = 2; %select experimental group
 runstate = 1; %1=stationary, 2=running
 
+% grpfiles = {'SalineNaiveIsoCrossWF'...
+%             'SalineTrainedIsoCrossWF'...
+%             'DOINaiveIsoCrossWF'...
+%             'DOITrainedIsoCrossWF'...
+%             'SalineIsoCrossWF'...
+%             'DOIIsoCrossWF'...
+%             'DOINaiveLowDoseIsoCrossWF'};
+% 
+% grpnames = {'saline naive'...
+%             'saline trained'...
+%             'doi naive'...
+%             'doi trained'...
+%             'saline'...
+%             'doi'...
+%             'doi naive lowdose'};
+
+%for supp fig on dose
 grpfiles = {'SalineNaiveIsoCrossWF'...
-            'SalineTrainedIsoCrossWF'...
-            'DOINaiveIsoCrossWF'...
-            'DOITrainedIsoCrossWF'...
-            'SalineIsoCrossWF'...
-            'DOIIsoCrossWF'};
+            'DOINaiveLowDoseIsoCrossWF'...
+            'DOINaiveIsoCrossWF'};
 
 grpnames = {'saline naive'...
-            'saline trained'...
-            'doi naive'...
-            'doi trained'...
-            'saline'...
-            'doi'};
+            'doi naive lowdose'...
+            'doi naive'};
+        
+grps=length(grpnames);
 
 load('C:\patchonpatch16min')
 imagerate=10;
@@ -38,10 +51,13 @@ else
     peakWindow = 12:21;%peakWindow = isi*imagerate+8:isi*imagerate+10;
     pathname = '\\langevin\backup\widefield\DOIpaper\patchonpatch\nodecon';
 end
+
+batchPhilIntactSkull
+
 cd(pathname)
 
-% psfile = 'c:\tempPhilWF.ps';
-% if exist(psfile,'file')==2;delete(psfile);end
+psfile = 'c:\tempPhilWF.ps';
+if exist(psfile,'file')==2;delete(psfile);end
 
 %% Figure 1 - pixelwise response
 % figure;set(gcf,'color','w');colormap jet
@@ -205,10 +221,10 @@ set(gca,'LooseInset',get(gca,'TightInset'),'fontsize',12,'tickdir','out')
 % end
 
 %% Figure 3 - all group comparison
-grpdiff = nan(10,4); %group difference array for stats 
+grpdiff = nan(10,grps); %group difference array for stats 
 
 grpfig=figure;set(gcf,'color','w');
-for i = 1:4
+for i = 1:grps
     load(grpfiles{i},'grptrace')
     numAni = size(grptrace,1);
     pre = squeeze(nanmean(nanmean(grptrace(:,peakWindow,2,:,runstate,1),4),2))-squeeze(nanmean(nanmean(grptrace(:,base,2,:,runstate,1),4),2)); %center only
@@ -242,7 +258,7 @@ for i = 1:4
     
     figure;
     for j = 1:numAni
-        subplot(2,3,j)
+        subplot(2,6,j)
         pre = squeeze(nanmean(grptrace(j,:,2,:,runstate,1),4));
         post = squeeze(nanmean(grptrace(j,:,2,:,runstate,2),4));
         hold on
@@ -258,10 +274,10 @@ end
 
 figure(grpfig)
 plot(0:5,ones(1,6),':','Color',[0.5 0.5 0.5])
-axis([0 5 0 1.5])
+axis([0 grps+1 0 1.5])
 axis square
 ylabel('normalized change')
-set(gca,'xtick',1:4,'xticklabel',grpnames(1:4),'ytick',0:0.5:2,'fontsize',12,'tickdir','out')
+set(gca,'xtick',1:grps,'xticklabel',grpnames(1:grps),'ytick',0:0.5:1.5,'fontsize',12,'tickdir','out')
 
 % if exist('psfile','var')
 %     set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
@@ -289,10 +305,10 @@ end
 
 %% save pdf
 
-% try
-%     dos(['ps2pdf ' psfile ' "' 'comparePatchOnPatch.pdf' '"'])
-% catch
-%     display('couldnt generate pdf');
-% end
-% 
-% delete(psfile);
+try
+    dos(['ps2pdf ' psfile ' "' 'comparePatchOnPatch.pdf' '"'])
+catch
+    display('couldnt generate pdf');
+end
+
+delete(psfile);

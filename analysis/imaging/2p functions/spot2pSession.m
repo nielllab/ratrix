@@ -72,7 +72,7 @@ close(vid)
 
 xpos=0;
 sf=0; isi=0; duration=0; theta=0; phase=0; radius=0;
-moviefname = 'C:\bigSizeTest.mat'
+moviefname = 'C:\sizeTest.mat'
 load(moviefname)
 nframes = min(size(dfofInterp,3),length(sf)*10+10);  %%% limit topoY data to 5mins to avoid movie boundaries
 dfofInterp = dfofInterp(:,:,1:nframes);

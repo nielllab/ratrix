@@ -1,7 +1,7 @@
 %batchDfofMovie
 errmsg= [];errRpt = {};
 nerr=0;
-redo=0;
+redo=1;
 for f = 1:length(files)
     f
     tic
@@ -15,7 +15,7 @@ for f = 1:length(files)
     
     if redo  || isempty([pathname files(f).topox]) || ~exist([pathname files(f).topox],'file')
         try
-            dfofMovie_Blue([datapathname files(f).topoxdata],rig);
+            dfofMovie([datapathname files(f).topoxdata],rig);
         catch exc
             sprintf('couldnt do %s',files(f).topoxdata)
             nerr=nerr+1;
@@ -29,7 +29,7 @@ for f = 1:length(files)
  
     if redo || isempty([pathname files(f).topoy]) || ~exist([pathname files(f).topoy],'file')
         try
-            dfofMovie_Blue([datapathname files(f).topoydata],rig);
+            dfofMovie([datapathname files(f).topoydata],rig);
         catch exc
             sprintf('couldnt do %s',files(f).topoydata)
             nerr=nerr+1;
@@ -42,7 +42,7 @@ for f = 1:length(files)
     
 %     if redo || isempty([pathname files(f).fullflanker]) || ~exist([pathname files(f).fullflanker],'file')
 %         try
-%             dfofMovie_Blue([datapathname files(f).fullflankerdata],rig);
+%             dfofMovie([datapathname files(f).fullflankerdata],rig);
 %         catch exc
 %             sprintf('couldnt do %s',files(f).fullflankerdata)
 %             nerr=nerr+1;
@@ -53,31 +53,31 @@ for f = 1:length(files)
 %         sprintf('skipping %s',files(f).fullflanker)
 %     end
 
-    if redo || isempty([pathname files(f).patchgratings]) || ~exist([pathname files(f).patchgratings],'file')
-        try
-            dfofMovie([datapathname files(f).patchgratingsdata],rig);
-        catch exc
-            sprintf('couldnt do %s',files(f).patchgratingsdata)
-            nerr=nerr+1;
-            errmsg{nerr}=sprintf('couldnt do %s',files(f).patchgratingsdata)
-            errRpt{nerr}=getReport(exc,'extended')
-        end
-    else
-        sprintf('skipping %s',files(f).patchgratings)
-    end
-      
-%     if redo || isempty([pathname files(f).patchonpatch]) || ~exist([pathname files(f).patchonpatch],'file')
+%     if redo || isempty([pathname files(f).patchgratings]) || ~exist([pathname files(f).patchgratings],'file')
 %         try
-%             dfofMovie([datapathname files(f).patchonpatchdata],rig);
+%             dfofMovie([datapathname files(f).patchgratingsdata],rig);
 %         catch exc
-%             sprintf('couldnt do %s',files(f).patchonpatchdata)
+%             sprintf('couldnt do %s',files(f).patchgratingsdata)
 %             nerr=nerr+1;
-%             errmsg{nerr}=sprintf('couldnt do %s',files(f).patchonpatchdata)
+%             errmsg{nerr}=sprintf('couldnt do %s',files(f).patchgratingsdata)
 %             errRpt{nerr}=getReport(exc,'extended')
 %         end
 %     else
-%         sprintf('skipping %s',files(f).patchonpatchdata)
+%         sprintf('skipping %s',files(f).patchgratings)
 %     end
+      
+    if redo || isempty([pathname files(f).patchonpatch]) || ~exist([pathname files(f).patchonpatch],'file')
+        try
+            dfofMovie([datapathname files(f).patchonpatchdata],rig);
+        catch exc
+            sprintf('couldnt do %s',files(f).patchonpatchdata)
+            nerr=nerr+1;
+            errmsg{nerr}=sprintf('couldnt do %s',files(f).patchonpatchdata)
+            errRpt{nerr}=getReport(exc,'extended')
+        end
+    else
+        sprintf('skipping %s',files(f).patchonpatchdata)
+    end
 %     
 %     if redo || isempty([pathname files(f).darkness]) || ~exist([pathname files(f).darkness],'file')
 %         try

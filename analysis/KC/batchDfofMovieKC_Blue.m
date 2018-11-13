@@ -1,4 +1,4 @@
-%batchDfofMovie_Blue
+   %batchDfofMovie_Blue
 errmsg= [];errRpt = {};
 nerr=0;
 redo=0;
@@ -51,7 +51,7 @@ for f = 1:length(files)
     else
         sprintf('skipping %s',files(f).patchonpatchdata)
     end
-%     
+    
 %     if redo || isempty([pathname files(f).darkness]) || ~exist([pathname files(f).darkness],'file')
 %         try
 %             dfofMovie_Blue([datapathname files(f).darknessdata],rig);

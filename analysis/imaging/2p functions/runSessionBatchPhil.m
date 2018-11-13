@@ -28,7 +28,7 @@ if S2P==0
     sbxaligndir
 end
 
-% makeSbxMoviesBatch
+makeSbxMoviesBatch
 
 % %%%%for batch analysis
 % 
@@ -864,18 +864,146 @@ end
 % sizeSelect2pSession('G6H71LT_001_005.sbx','sizeSession_POST_V2.mat',psfilename);
 % topo2pSession('G6H71LT_001_006.sbx','darkness_POST_V2.mat',psfilename);
 
+% %%052518
+% topo2pSession('G6H28LT_001_001.sbx','topoXsession_180_V2.mat',psfilename);
+% topo2pSession('G6H28LT_001_002.sbx','topoYsession_180_V2.mat',psfilename);
+% sizeSelect2pSession('G6H28LT_001_003.sbx','sizeSession_180_V2.mat',psfilename);
+% sizeSelect2pSession('G6H28LT_001_004.sbx','sizeSession_50_V2.mat',psfilename);
+% topo2pSession('G6H28LT_001_005.sbx','topoXsession_400_V2.mat',psfilename);
+% topo2pSession('G6H28LT_001_006.sbx','topoYsession_400_V2.mat',psfilename);
+% sizeSelect2pSession('G6H28LT_001_007.sbx','sizeSession_400_V2.mat',psfilename);
+
+%%071218 FIRST EXPT W/4 CONTRASTS
+% topo2pSession('G6H310RT_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('G6H310RT_001_002.sbx','topoYsession_V2.mat',psfilename);
+% sizeSelect2pSession('G6H310RT_001_003.sbx','sizeSession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G6H310RT_001_004.sbx','sizeSession_POST_V2.mat',psfilename);
+
+% %%071718 
+% topo2pSession('G6H115TT_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('G6H115TT_001_002.sbx','topoYsession_V2.mat',psfilename);
+% sizeSelect2pSession('G6H115TT_001_003.sbx','sizeSession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G6H115TT_001_004.sbx','sizeSession_POST_V2.mat',psfilename);
+% 
+% %071818 
+% topo2pSession('G6H310RT_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('G6H310RT_001_002.sbx','topoYsession_V2.mat',psfilename);
+% sizeSelect2pSession('G6H310RT_001_003.sbx','sizeSession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G6H310RT_001_004.sbx','sizeSession_POST_V2.mat',psfilename);
+
+% %071918 
+% topo2pSession('G6H115TT_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('G6H115TT_001_002.sbx','topoYsession_V2.mat',psfilename);
+% sizeSelect2pSession('G6H115TT_001_003.sbx','sizeSession_PRE_V2.mat',psfilename);
+% sizeSelect2pSession('G6H115TT_001_004.sbx','sizeSession_POST_V2.mat',psfilename);
+
+% %080718
+% topo2pSession('J425 RT_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('J425 RT_001_002.sbx','topoYsession_V2.mat',psfilename);
+% spot2pSession('J425 RT_001_003.sbx','spotTest_V2.mat',psfilename);
+% topo2pSession('J425 RT_001_004.sbx','topoXsession2_V2.mat',psfilename);
+% topo2pSession('J425 RT_001_005.sbx','topoYsession2_V2.mat',psfilename);
+% spot2pSession('J425 RT_001_006.sbx','spotTest2_V2.mat',psfilename);
+
+
+% %080818
+% topo2pSession('J425 TT_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('J425 TT_001_002.sbx','topoYsession_V2.mat',psfilename);
+% spot2pSession('J425 TT_001_003.sbx','spotTest_V2.mat',psfilename);
+% topo2pSession('J425 TT_001_004.sbx','topoXsession2_V2.mat',psfilename);
+% topo2pSession('J425 TT_001_005.sbx','topoYsession2_V2.mat',psfilename);
+% spot2pSession('J425 TT_001_006.sbx','spotTest2_V2.mat',psfilename);
+
+% %081318
+% topo2pSession('J425 RT_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('J425 RT_001_002.sbx','topoYsession_V2.mat',psfilename);
+% spot2pSession('J425 RT_001_003.sbx','spotTest_V2.mat',psfilename);
+% topo2pSession('J425 RT_001_004.sbx','topoXsession2_V2.mat',psfilename);
+% topo2pSession('J425 RT_001_005.sbx','topoYsession2_V2.mat',psfilename);
+% spot2pSession('J425 RT_001_006.sbx','spotTest2_V2.mat',psfilename);
+
+% %081518
+% topo2pSession('J426 RN_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('J426 RN_001_002.sbx','topoYsession_V2.mat',psfilename);
+% spot2pSession('J426 RN_001_003.sbx','spotTest_V2.mat',psfilename);
+% topo2pSession('J426 RN_001_004.sbx','topoXsession2_V2.mat',psfilename);
+% topo2pSession('J426 RN_001_005.sbx','topoYsession2_V2.mat',psfilename);
+% spot2pSession('J426 RN_001_006.sbx','spotTest2_V2.mat',psfilename);
+% topo2pSession('J426 RN_001_007.sbx','topoXsession3_V2.mat',psfilename);
+% topo2pSession('J426 RN_001_008.sbx','topoYsession3_V2.mat',psfilename);
+% spot2pSession('J426 RN_001_009.sbx','spotTest3_V2.mat',psfilename);
+
+% % %081618
+% topo2pSession('J426 RN_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('J426 RN_001_002.sbx','topoYsession_V2.mat',psfilename);
+% spot2pSession('J426 RN_001_003.sbx','spotTest_V2.mat',psfilename);
+% topo2pSession('J426 RN_001_004.sbx','topoXsession2_V2.mat',psfilename);
+% topo2pSession('J426 RN_001_005.sbx','topoYsession2_V2.mat',psfilename);
+% spot2pSession('J426 RN_001_006.sbx','spotTest2_V2.mat',psfilename);
+
+% %082818
+% topo2pSession('J426 RN_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('J426 RN_001_002.sbx','topoYsession_V2.mat',psfilename);
+% topo2pSession('J426 RN_001_004.sbx','topoXsession2_V2.mat',psfilename);
+% topo2pSession('J426 RN_001_005.sbx','topoYsession2_V2.mat',psfilename);
+% spot2pSession('J426 RN_001_006.sbx','spotTest2_V2.mat',psfilename);
+
+% % %082818
+% topo2pSession('J426 LT_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('J426 LT_001_002.sbx','topoYsession_V2.mat',psfilename);
+% spot2pSession('J426 LT_001_003.sbx','spotTest_V2.mat',psfilename);
+% topo2pSession('J426 LT_001_004.sbx','topoXsession2_V2.mat',psfilename);
+% topo2pSession('J426 LT_001_005.sbx','topoYsession2_V2.mat',psfilename);
+% spot2pSession('J426 LT_001_006.sbx','spotTest2_V2.mat',psfilename);
+
+% %082818
+% topo2pSession('J426 RN_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('J426 RN_001_002.sbx','topoYsession_V2.mat',psfilename);
+% topo2pSession('J426 RN_001_004.sbx','topoXsession2_V2.mat',psfilename);
+% topo2pSession('J426 RN_001_005.sbx','topoYsession2_V2.mat',psfilename);
+% spot2pSession('J426 RN_001_006.sbx','spotTest2_V2.mat',psfilename);
+
+% %083018
+% topo2pSession('J426 LT_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('J426 LT_001_002.sbx','topoYsession_V2.mat',psfilename);
+% spot2pSession('J426 LT_001_003.sbx','spotTest_V2.mat',psfilename);
+% topo2pSession('J426 LT_001_004.sbx','topoXsession2_V2.mat',psfilename);
+% topo2pSession('J426 LT_001_005.sbx','topoYsession2_V2.mat',psfilename);
+% spot2pSession('J426 LT_001_006.sbx','spotTest2_V2.mat',psfilename);
+
+% %083018
+% topo2pSession('J426 RN_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('J426 RN_001_002.sbx','topoYsession_V2.mat',psfilename);
+% spot2pSession('J426 RN_001_003.sbx','spotTest_V2.mat',psfilename);
+
+% %083118
+% topo2pSession('J425 TT_001_001.sbx','topoXsession_V2.mat',psfilename);
+% topo2pSession('J425 TT_001_002.sbx','topoYsession_V2.mat',psfilename);
+% spot2pSession('J425 TT_001_003.sbx','spotTest_V2.mat',psfilename);
+% topo2pSession('J425 TT_001_004.sbx','topoXsession2_V2.mat',psfilename);
+% topo2pSession('J425 TT_001_005.sbx','topoYsession2_V2.mat',psfilename);
+% spot2pSession('J425 TT_001_006.sbx','spotTest2_V2.mat',psfilename);
+
+%083118
+spot2pSession('J425TT_001_001.sbx','spotTest_V2.mat',psfilename);
+topo2pSession('J425TT_001_002.sbx','topoXsession_V2.mat',psfilename);
+topo2pSession('J425TT_001_003.sbx','topoYsession_V2.mat',psfilename);
+
+
+%% for Santiago
+% topo2pSession('G6H73LTRN_001_001.sbx','topoXsession_V2.mat',psfilename);
 
 %% morgan
-cfg.dt = 0.1; cfg.spatialBin=2; cfg.temporalBin=1;  %%% configuration parameters eff
-cfg.syncToVid=0; cfg.saveDF=1; cfg.alignData=1;
-
-topo2pSession('8022_001_001.sbx','pinene1x.mat',psfilename);
-topo2pSession('8022_002_002.sbx','pinene2x.mat',psfilename);
-topo2pSession('8022_001_003.sbx','isoproponol1x.mat',psfilename);
-topo2pSession('8022_001_004.sbx','amylacetate1x.mat',psfilename);
-topo2pSession('8022_001_005.sbx','control1x.mat',psfilename);
-topo2pSession('8022_002_006.sbx','pinene2x250um.mat',psfilename);
-topo2pSession('8022_004_007.sbx','amylacetate4x.mat',psfilename);
+% cfg.dt = 0.1; cfg.spatialBin=2; cfg.temporalBin=1;  %%% configuration parameters eff
+% cfg.syncToVid=0; cfg.saveDF=1; cfg.alignData=1;
+% 
+% topo2pSession('8022_001_001.sbx','pinene1x.mat',psfilename);
+% topo2pSession('8022_002_002.sbx','pinene2x.mat',psfilename);
+% topo2pSession('8022_001_003.sbx','isoproponol1x.mat',psfilename);
+% topo2pSession('8022_001_004.sbx','amylacetate1x.mat',psfilename);
+% topo2pSession('8022_001_005.sbx','control1x.mat',psfilename);
+% topo2pSession('8022_002_006.sbx','pinene2x250um.mat',psfilename);
+% topo2pSession('8022_004_007.sbx','amylacetate4x.mat',psfilename);
 
 %%%%%testing stuff
 

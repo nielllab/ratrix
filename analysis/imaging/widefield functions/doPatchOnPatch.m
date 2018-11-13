@@ -184,8 +184,7 @@ for f = 1:length(use)
         
         
         
-%%
-        %%% separate responses by trials
+%% separate responses by trials
         sprintf('separating responses by trial')
         speedcut = 20;
 %         trialdata = zeros(size(deconvimg,1),size(deconvimg,2),trials);
@@ -266,8 +265,7 @@ for f = 1:length(use)
         
         
     
-%%
-        %manual/loading point selection
+%% manual/loading point selection
         [files(use(f)).subj ' ' files(use(f)).inject]
         if mod(f,2)==1
             if reselect==1

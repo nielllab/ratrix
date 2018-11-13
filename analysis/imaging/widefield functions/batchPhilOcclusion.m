@@ -1,0 +1,211 @@
+%batchPhilOcclusion
+
+n = 0;
+
+% pathname = '\\langevin\backup\widefield\DOIpaper\';
+% datapathname = '\\langevin\backup\widefield\DOIpaper\';  
+% outpathname = '\\langevin\backup\widefield\DOIpaper\patchonpatch\decon\';
+
+pathname = 'D:\Phil\';
+datapathname = 'D:\Phil\';
+outpathname = 'D:\Phil\occlusion\';
+
+% %%
+% n=n+1;
+% files(n).subj = 'G6H1.15TT';
+% files(n).expt = '102518';
+% files(n).topox= '102518_G6H115TT_RIG2_OCCLUSION\102518_G6H115TT_RIG2_OCCLUSION_TOPOX\102518_G6H115TT_RIG2_OCCLUSION_TOPOXmaps.mat';
+% files(n).topoxdata = '102518_G6H115TT_RIG2_OCCLUSION\102518_G6H115TT_RIG2_OCCLUSION_TOPOX\102518_G6H115TT_RIG2_OCCLUSION_TOPOX';
+% files(n).topoy = '102518_G6H115TT_RIG2_OCCLUSION\102518_G6H115TT_RIG2_OCCLUSION_TOPOY\102518_G6H115TT_RIG2_OCCLUSION_TOPOYmaps.mat';
+% files(n).topoydata = '102518_G6H115TT_RIG2_OCCLUSION\102518_G6H115TT_RIG2_OCCLUSION_TOPOY\102518_G6H115TT_RIG2_OCCLUSION_TOPOY';
+% files(n).occlusion =  '102518_G6H115TT_RIG2_OCCLUSION\102518_G6H115TT_RIG2_OCCLUSION_OCCLUDESTIM10COND22MIN\102518_G6H115TT_RIG2_OCCLUSION_OCCLUDESTIM10COND22MINmaps.mat';
+% files(n).occlusiondata = '102518_G6H115TT_RIG2_OCCLUSION\102518_G6H115TT_RIG2_OCCLUSION_OCCLUDESTIM10COND22MIN\102518_G6H115TT_RIG2_OCCLUSION_OCCLUDESTIM10COND22MIN';
+% files(n).inject = '';
+% files(n).dose = '';
+% files(n).training = 'naive';
+% files(n).rignum = 'rig2';
+% files(n).monitor = 'land';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'normal height monitor';
+% files(n).timing = '';
+% files(n).window = 'window';
+% 
+% %%
+% n=n+1;
+% files(n).subj = 'G6H11.6LT';
+% files(n).expt = '102518';
+% files(n).topox= '102518_G6H116LT_RIG2_OCCLUSION\102518_G6H116LT_RIG2_OCCLUSION_TOPOX\102518_G6H116LT_RIG2_OCCLUSION_TOPOXmaps.mat';
+% files(n).topoxdata = '102518_G6H116LT_RIG2_OCCLUSION\102518_G6H116LT_RIG2_OCCLUSION_TOPOX\102518_G6H116LT_RIG2_OCCLUSION_TOPOX';
+% files(n).topoy = '102518_G6H116LT_RIG2_OCCLUSION\102518_G6H116LT_RIG2_OCCLUSION_TOPOY\102518_G6H116LT_RIG2_OCCLUSION_TOPOYmaps.mat';
+% files(n).topoydata = '102518_G6H116LT_RIG2_OCCLUSION\102518_G6H116LT_RIG2_OCCLUSION_TOPOY\102518_G6H116LT_RIG2_OCCLUSION_TOPOY';
+% files(n).occlusion =  '102518_G6H116LT_RIG2_OCCLUSION\102518_G6H116LT_RIG2_OCCLUSION_OCCLUDESTIM10COND22MIN\102518_G6H116LT_RIG2_OCCLUSION_OCCLUDESTIM10COND22MINmaps.mat';
+% files(n).occlusiondata = '102518_G6H116LT_RIG2_OCCLUSION\102518_G6H116LT_RIG2_OCCLUSION_OCCLUDESTIM10COND22MIN\102518_G6H116LT_RIG2_OCCLUSION_OCCLUDESTIM10COND22MIN';
+% files(n).inject = '';
+% files(n).dose = '';
+% files(n).training = 'naive';
+% files(n).rignum = 'rig2';
+% files(n).monitor = 'land';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'magnification set to 15 instead of 7.5';
+% files(n).timing = '';
+% files(n).window = 'full skull';
+% 
+% %%
+% n=n+1;
+% files(n).subj = 'G6H10.5LN';
+% files(n).expt = '102518';
+% files(n).topox= '102518_G6H105LN_RIG2_OCCLUSION\102518_G6H105LN_RIG2_OCCLUSION_TOPOX\102518_G6H105LN_RIG2_OCCLUSION_TOPOXmaps.mat';
+% files(n).topoxdata = '102518_G6H105LN_RIG2_OCCLUSION\102518_G6H105LN_RIG2_OCCLUSION_TOPOX\102518_G6H105LN_RIG2_OCCLUSION_TOPOX';
+% files(n).topoy = '102518_G6H105LN_RIG2_OCCLUSION\102518_G6H105LN_RIG2_OCCLUSION_TOPOY\102518_G6H105LN_RIG2_OCCLUSION_TOPOYmaps.mat';
+% files(n).topoydata = '102518_G6H105LN_RIG2_OCCLUSION\102518_G6H105LN_RIG2_OCCLUSION_TOPOY\102518_G6H105LN_RIG2_OCCLUSION_TOPOY';
+% files(n).occlusion =  '102518_G6H105LN_RIG2_OCCLUSION\102518_G6H105LN_RIG2_OCCLUSION_OCCLUDESTIM10COND22MIN\102518_G6H105LN_RIG2_OCCLUSION_OCCLUDESTIM10COND22MINmaps.mat';
+% files(n).occlusiondata = '102518_G6H105LN_RIG2_OCCLUSION\102518_G6H105LN_RIG2_OCCLUSION_OCCLUDESTIM10COND22MIN\102518_G6H105LN_RIG2_OCCLUSION_OCCLUDESTIM10COND22MIN';
+% files(n).inject = '';
+% files(n).dose = '';
+% files(n).training = 'naive';
+% files(n).rignum = 'rig2';
+% files(n).monitor = 'land';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'low height monitors';
+% files(n).timing = '';
+% files(n).window = 'full skull';
+% 
+% %%
+% n=n+1;
+% files(n).subj = 'G6H11.6RT';
+% files(n).expt = '102518';
+% files(n).topox= '102518_G6H116RT_RIG2_OCCLUSION\102518_G6H116RT_RIG2_OCCLUSION_TOPOX\102518_G6H116RT_RIG2_OCCLUSION_TOPOXmaps.mat';
+% files(n).topoxdata = '102518_G6H116RT_RIG2_OCCLUSION\102518_G6H116RT_RIG2_OCCLUSION_TOPOX\102518_G6H116RT_RIG2_OCCLUSION_TOPOX';
+% files(n).topoy = '102518_G6H116RT_RIG2_OCCLUSION\102518_G6H116RT_RIG2_OCCLUSION_TOPOY\102518_G6H116RT_RIG2_OCCLUSION_TOPOYmaps.mat';
+% files(n).topoydata = '102518_G6H116RT_RIG2_OCCLUSION\102518_G6H116RT_RIG2_OCCLUSION_TOPOY\102518_G6H116RT_RIG2_OCCLUSION_TOPOY';
+% files(n).occlusion =  '102518_G6H116RT_RIG2_OCCLUSION\102518_G6H116RT_RIG2_OCCLUSION_OCCLUDESTIM10COND22MIN\102518_G6H116RT_RIG2_OCCLUSION_OCCLUDESTIM10COND22MINmaps.mat';
+% files(n).occlusiondata = '102518_G6H116RT_RIG2_OCCLUSION\102518_G6H116RT_RIG2_OCCLUSION_OCCLUDESTIM10COND22MIN\102518_G6H116RT_RIG2_OCCLUSION_OCCLUDESTIM10COND22MIN';
+% files(n).inject = '';
+% files(n).dose = '';
+% files(n).training = 'naive';
+% files(n).rignum = 'rig2';
+% files(n).monitor = 'land';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'normal height monitors';
+% files(n).timing = '';
+% files(n).window = 'full skull';
+
+%%
+n=n+1;
+files(n).subj = 'G6H7.9LT';
+files(n).expt = '103118';
+files(n).topox= '103118_G6H79LT_RIG2_OCCLUSION\103118_G6H79LT_RIG2_OCCLUSION_TOPOX\103118_G6H79LT_RIG2_OCCLUSION_TOPOXmaps.mat';
+files(n).topoxdata = '103118_G6H79LT_RIG2_OCCLUSION\103118_G6H79LT_RIG2_OCCLUSION_TOPOX\103118_G6H79LT_RIG2_OCCLUSION_TOPOX';
+files(n).topoy = '103118_G6H79LT_RIG2_OCCLUSION\103118_G6H79LT_RIG2_OCCLUSION_TOPOY\103118_G6H79LT_RIG2_OCCLUSION_TOPOYmaps.mat';
+files(n).topoydata = '103118_G6H79LT_RIG2_OCCLUSION\103118_G6H79LT_RIG2_OCCLUSION_TOPOY\103118_G6H79LT_RIG2_OCCLUSION_TOPOY';
+files(n).occlusion =  '103118_G6H79LT_RIG2_OCCLUSION\103118_G6H79LT_RIG2_OCCLUSION_OCCLUSION24MIN\103118_G6H79LT_RIG2_OCCLUSION_OCCLUSION24MINmaps.mat';
+files(n).occlusiondata = '103118_G6H79LT_RIG2_OCCLUSION\103118_G6H79LT_RIG2_OCCLUSION_OCCLUSION24MIN\103118_G6H79LT_RIG2_OCCLUSION_OCCLUSION24MIN';
+files(n).inject = '';
+files(n).dose = '';
+files(n).training = 'naive';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'normal height monitor';
+files(n).timing = '';
+files(n).window = 'window';
+
+%%
+n=n+1;
+files(n).subj = 'G6H8.4LT';
+files(n).expt = '103118';
+files(n).topox= '103118_G6H84LT_RIG2_OCCLUSION\103118_G6H84LT_RIG2_OCCLUSION_TOPOX\103118_G6H84LT_RIG2_OCCLUSION_TOPOXmaps.mat';
+files(n).topoxdata = '103118_G6H84LT_RIG2_OCCLUSION\103118_G6H84LT_RIG2_OCCLUSION_TOPOX\103118_G6H84LT_RIG2_OCCLUSION_TOPOX';
+files(n).topoy = '103118_G6H84LT_RIG2_OCCLUSION\103118_G6H84LT_RIG2_OCCLUSION_TOPOY\103118_G6H84LT_RIG2_OCCLUSION_TOPOYmaps.mat';
+files(n).topoydata = '103118_G6H84LT_RIG2_OCCLUSION\103118_G6H84LT_RIG2_OCCLUSION_TOPOY\103118_G6H84LT_RIG2_OCCLUSION_TOPOY';
+files(n).occlusion =  '103118_G6H84LT_RIG2_OCCLUSION\103118_G6H84LT_RIG2_OCCLUSION_OCCLUDE24MIN\103118_G6H84LT_RIG2_OCCLUSION_OCCLUDE24MINmaps.mat';
+files(n).occlusiondata = '103118_G6H84LT_RIG2_OCCLUSION\103118_G6H84LT_RIG2_OCCLUSION_OCCLUDE24MIN\103118_G6H84LT_RIG2_OCCLUSION_OCCLUDE24MIN';
+files(n).inject = '';
+files(n).dose = '';
+files(n).training = 'naive';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'normal height monitor';
+files(n).timing = '';
+files(n).window = 'window';
+
+%%
+n=n+1;
+files(n).subj = 'G6H8.4RT';
+files(n).expt = '103118';
+files(n).topox= '103118_G6H84RT_RIG2_OCCLUSION\103118_G6H84RT_RIG2_OCCLUSION_TOPOX\103118_G6H84RT_RIG2_OCCLUSION_TOPOXmaps.mat';
+files(n).topoxdata = '103118_G6H84RT_RIG2_OCCLUSION\103118_G6H84RT_RIG2_OCCLUSION_TOPOX\103118_G6H84RT_RIG2_OCCLUSION_TOPOX';
+files(n).topoy = '103118_G6H84RT_RIG2_OCCLUSION\103118_G6H84RT_RIG2_OCCLUSION_TOPOY\103118_G6H84RT_RIG2_OCCLUSION_TOPOYmaps.mat';
+files(n).topoydata = '103118_G6H84RT_RIG2_OCCLUSION\103118_G6H84RT_RIG2_OCCLUSION_TOPOY\103118_G6H84RT_RIG2_OCCLUSION_TOPOY';
+files(n).occlusion =  '103118_G6H84RT_RIG2_OCCLUSION\103118_G6H84RT_RIG2_OCCLUSION_OCCLUSION24MIN\103118_G6H84RT_RIG2_OCCLUSION_OCCLUSION24MINmaps.mat';
+files(n).occlusiondata = '103118_G6H84RT_RIG2_OCCLUSION\103118_G6H84RT_RIG2_OCCLUSION_OCCLUSION24MIN\103118_G6H84RT_RIG2_OCCLUSION_OCCLUSION24MIN';
+files(n).inject = '';
+files(n).dose = '';
+files(n).training = 'naive';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'normal height monitor';
+files(n).timing = '';
+files(n).window = 'window';
+
+%%
+n=n+1;
+files(n).subj = 'G6H11.1TT';
+files(n).expt = '103118';
+files(n).topox= '103118_G6H111TT_RIG2_OCCLUSION\103118_G6H111TT_RIG2_OCCLUSION_TOPOX\103118_G6H111TT_RIG2_OCCLUSION_TOPOXmaps.mat';
+files(n).topoxdata = '103118_G6H111TT_RIG2_OCCLUSION\103118_G6H111TT_RIG2_OCCLUSION_TOPOX\103118_G6H111TT_RIG2_OCCLUSION_TOPOX';
+files(n).topoy = '103118_G6H111TT_RIG2_OCCLUSION\103118_G6H111TT_RIG2_OCCLUSION_TOPOY\103118_G6H111TT_RIG2_OCCLUSION_TOPOYmaps.mat';
+files(n).topoydata = '103118_G6H111TT_RIG2_OCCLUSION\103118_G6H111TT_RIG2_OCCLUSION_TOPOY\103118_G6H111TT_RIG2_OCCLUSION_TOPOY';
+files(n).occlusion =  '103118_G6H111TT_RIG2_OCCLUSION\103118_G6H111TT_RIG2_OCCLUSION_OCCLUSION24MIN\103118_G6H111TT_RIG2_OCCLUSION_OCCLUSION24MINmaps.mat';
+files(n).occlusiondata = '103118_G6H111TT_RIG2_OCCLUSION\103118_G6H111TT_RIG2_OCCLUSION_OCCLUSION24MIN\103118_G6H111TT_RIG2_OCCLUSION_OCCLUSION24MIN';
+files(n).inject = '';
+files(n).dose = '';
+files(n).training = 'naive';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'normal height monitor';
+files(n).timing = '';
+files(n).window = 'window';
+
+%%
+n=n+1;
+files(n).subj = 'G6H1.15TT';
+files(n).expt = '103118';
+files(n).topox= '103118_G6H115TT_RIG2_OCCLUSION\103118_G6H115TT_RIG2_OCCLUSION_TOPOX\103118_G6H115TT_RIG2_OCCLUSION_TOPOXmaps.mat';
+files(n).topoxdata = '103118_G6H115TT_RIG2_OCCLUSION\103118_G6H115TT_RIG2_OCCLUSION_TOPOX\103118_G6H115TT_RIG2_OCCLUSION_TOPOX';
+files(n).topoy = '103118_G6H115TT_RIG2_OCCLUSION\103118_G6H115TT_RIG2_OCCLUSION_TOPOY\103118_G6H115TT_RIG2_OCCLUSION_TOPOYmaps.mat';
+files(n).topoydata = '103118_G6H115TT_RIG2_OCCLUSION\103118_G6H115TT_RIG2_OCCLUSION_TOPOY\103118_G6H115TT_RIG2_OCCLUSION_TOPOY';
+files(n).occlusion =  '103118_G6H115TT_RIG2_OCCLUSION\103118_G6H115TT_RIG2_OCCLUSION_OCCLUSION24MIN\103118_G6H115TT_RIG2_OCCLUSION_OCCLUSION24MINmaps.mat';
+files(n).occlusiondata = '103118_G6H115TT_RIG2_OCCLUSION\103118_G6H115TT_RIG2_OCCLUSION_OCCLUSION24MIN\103118_G6H115TT_RIG2_OCCLUSION_OCCLUSION24MIN';
+files(n).inject = '';
+files(n).dose = '';
+files(n).training = 'naive';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'normal height monitor';
+files(n).timing = '';
+files(n).window = 'window';
+
+%%
+n=n+1;
+files(n).subj = 'G6H3.10RT';
+files(n).expt = '103118';
+files(n).topox= '103118_G6H310RT_RIG2_OCCLUSION\103118_G6H310RT_RIG2_OCCLUSION_TOPOX\103118_G6H310RT_RIG2_OCCLUSION_TOPOXmaps.mat';
+files(n).topoxdata = '103118_G6H310RT_RIG2_OCCLUSION\103118_G6H310RT_RIG2_OCCLUSION_TOPOX\103118_G6H310RT_RIG2_OCCLUSION_TOPOX';
+files(n).topoy = '103118_G6H310RT_RIG2_OCCLUSION\103118_G6H310RT_RIG2_OCCLUSION_TOPOY\103118_G6H310RT_RIG2_OCCLUSION_TOPOYmaps.mat';
+files(n).topoydata = '103118_G6H310RT_RIG2_OCCLUSION\103118_G6H310RT_RIG2_OCCLUSION_TOPOY\103118_G6H310RT_RIG2_OCCLUSION_TOPOY';
+files(n).occlusion =  '103118_G6H310RT_RIG2_OCCLUSION\103118_G6H310RT_RIG2_OCCLUSION_OCCLUSION24MIN\103118_G6H310RT_RIG2_OCCLUSION_OCCLUSION24MINmaps.mat';
+files(n).occlusiondata = '103118_G6H310RT_RIG2_OCCLUSION\103118_G6H310RT_RIG2_OCCLUSION_OCCLUSION24MIN\103118_G6H310RT_RIG2_OCCLUSION_OCCLUSION24MIN';
+files(n).inject = '';
+files(n).dose = '';
+files(n).training = 'naive';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).label = 'camk2 gc6';
+files(n).notes = 'normal height monitor';
+files(n).timing = '';
+files(n).window = 'window';

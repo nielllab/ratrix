@@ -170,7 +170,8 @@ greenFig = figure;
 stdImg = imresize(greenframe,1/cfg.spatialBin);
 stdImg= stdImg(buffer(1,1):(end-buffer(1,2)),buffer(2,1):(end-buffer(2,2)),:);
 greenCrop = double(stdImg);
-imagesc(stdImg,[prctile(stdImg(:),1) prctile(stdImg(:),99)*1.2]); hold on; axis equal; colormap gray;
+%imagesc(stdImg,[prctile(stdImg(:),1) prctile(stdImg(:),99)*1.2]); hold on; axis equal; colormap gray;
+imagesc(stdImg,[min(stdImg(:)) prctile(stdImg(:),95)*1.2]); hold on; axis equal; colormap gray;
 meanGreenImg = mat2im(greenCrop,gray,[prctile(greenCrop(:),1) prctile(greenCrop(:),99)*1.2]);
 
 title('Mean Green Channel');

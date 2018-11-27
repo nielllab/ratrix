@@ -445,3 +445,42 @@ files(n).notes = 'good data';
 % files(n).monitor = 'land';
 % files(n).label = 'camk2 gc6';
 % files(n).notes = 'good data';
+
+%% - Alyssa's
+%pre
+% n=n+1;
+% files(n).subj = 'G6H121TT'; %animal name
+% files(n).expt = '111218'; %date of experiment
+% files(n).topox= '111218_G6H121TT_RIG2\112618_G6H121TT_RIG2_PRE_TOPOX\112618_G6H121TT_RIG2_PRE_TOPOXmaps.mat'; %where to put dfof
+% files(n).topoxdata = '112618_G6H121TT_RIG2\112618_G6H121TT_RIG2_PRE_TOPOX\112618_G6H121TT_RIG2_PRE_TOPOX'; %raw data
+% files(n).topoy = '112618_G6H121TT_RIG2\112618_G6H121TT_RIG2_PRE_TOPOY\112618_G6H121TT_RIG2_PRE_TOPOYmaps.mat';
+% files(n).topoydata = '112618_G6H121TT_RIG2\112618_G6H121TT_RIG2_PRE_TOPOY\112618_G6H121TT_RIG2_PRE_TOPOY';
+% files(n).occlusion =  '112618_G6H121TT_RIG2\112618_G6H121TT_RIG2_PRE_OCCLUSION\112618_G6H121TT_RIG2_PRE_OCCLUSIONmaps.mat';
+% files(n).occlusiondata = '112618_G6H121TT_RIG2\112618_G6H121TT_RIG2_PRE_OCCLUSION\112618_G6H121TT_RIG2_PRE_OCCLUSION';
+% files(n).inject = 'CLOZ'; 
+% files(n).timing = 'pre';
+% files(n).training = 'naive';
+% files(n).area = 'lp';
+% files(n).rignum = 'rig2';
+% files(n).monitor = 'land';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good data';
+% 
+% %post
+% 
+% n=n+1;
+% files(n).subj = 'G6H121TT'; %animal name
+% files(n).expt = '112618'; %date of experiment
+% files(n).topox= '112618_G6H121TT_RIG2\112618_G6H121TT_RIG2_POST_TOPOX\112618_G6H121TT_RIG2_POST_TOPOXmaps.mat'; %where to put dfof
+% files(n).topoxdata = '112618_G6H121TT_RIG2\112618_G6H121TT_RIG2_POST_TOPOX\112618_G6H121TT_RIG2_POST_TOPOX'; %raw data
+% files(n).topoy = '112618_G6H121TT_RIG2\112618_G6H121TT_RIG2_POST_TOPOY\112618_G6H121TT_RIG2_POST_TOPOYmaps.mat';
+% files(n).topoydata = '112618_G6H121TT_RIG2\112618_G6H121TT_RIG2_POST_TOPOY\112618_G6H121TT_RIG2_POST_TOPOY';
+% files(n).occlusion =  '112618_G6H121TT_RIG2\112618_G6H121TT_RIG2_POST_OCCLUSION\112618_G6H121TT_RIG2_POST_OCCLUSIONmaps.mat';
+% files(n).occlusiondata = '112618_G6H121TT_RIG2\112618_G6H121TT_RIG2_POST_OCCLUSION\112618_G6H121TT_RIG2_POST_OCCLUSION';
+% files(n).inject = 'CLOZ'; 
+% files(n).timing = 'post';
+% files(n).training = 'naive';
+% files(n).area = 'lp';
+% files(n).rignum = 'rig2';
+% files(n).monitor = 'land';
+% files(n).label = 'camk2 gc6';

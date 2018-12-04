@@ -484,3 +484,7 @@ files(n).notes = 'good data';
 % files(n).rignum = 'rig2';
 % files(n).monitor = 'land';
 % files(n).label = 'camk2 gc6';
+
+%% add to each file:
+
+% files(n).dose = '0.5mg/kg';

@@ -1,6 +1,6 @@
 %%%analyzePatchOnPatch_KC
 close all
-clear all1
+clear all
 dbstop if error
 
 %select batch file
@@ -50,23 +50,17 @@ if indani
     sprintf('individual analysis complete, starting group...')
 end
 
-group = input('which group? 1=LGN saline, 2=LGN CNO, 3=LP saline, 4=LP CNO: ')
+group = input('which group? 1=CONTROL LP CLOZ 0.5 mg/kg, 2=EXPERIMENTAL LP CLOZ 0.5 mg/kg: ')
 redogrp = input('reanalyze group data? 0=no, 1=yes: ')
 
 % redogrp=1
 
 if group==1
-    use = find(strcmp({files.inject},'saline') & strcmp({files(n).area},'lgn') & strcmp({files.notes},'good data'))
-    grpfilename = 'LGN_saline'
+    use = find(strcmp({files(n).area},'lp') & strcmp({files.inject},'CLOZ') & strcmp({files.dose},'0.5 mg/kg') & strcmp({files.controlvirus},'yes')& strcmp({files.notes},'good data'))
+    grpfilename = 'LP_Control_CLOZ half_mg_per_kg'
 elseif group==2
-    use = find(strcmp({files.inject},'CNO') & strcmp({files(n).area},'lgn') & strcmp({files.notes},'good data'))
-    grpfilename = 'LGN_CNO'
-elseif group==3
-    use = find(strcmp({files.inject},'saline') & strcmp({files(n).area},'lp') & strcmp({files.notes},'good data'))
-    grpfilename = 'LP_saline'
-elseif group==4
-    use = find(strcmp({files.inject},'CNO') & strcmp({files(n).area},'lp') & strcmp({files.notes},'good data'))
-    grpfilename = 'LP_CNO'
+    use = find(strcmp({files(n).area},'lp') & strcmp({files.inject},'CLOZ') & strcmp({files.dose},'0.5 mg/kg') & strcmp({files.controlvirus},'no')& strcmp({files.notes},'good data'))
+    grpfilename = 'LP_Control_CLOZ half_mg_per_kg'
 else
     sprintf('please restart and choose a number 1-2')
 end

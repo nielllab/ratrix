@@ -40,31 +40,31 @@ for f = 1:length(files)
         sprintf('skipping %s',files(f).topoy)
     end
   
-    if redo || isempty([pathname files(f).patchonpatch]) || ~exist([pathname files(f).patchonpatch],'file')
-        try
-            dfofMovie([datapathname files(f).patchonpatchdata],rig);
-        catch exc
-            sprintf('couldnt do %s',files(f).patchonpatchdata)
-            nerr=nerr+1;
-            errmsg{nerr}=sprintf('couldnt do %s',files(f).patchonpatchdata)
-            errRpt{nerr}=getReport(exc,'extended')
-        end
-    else
-        sprintf('skipping %s',files(f).patchonpatch)
-    end
-    
-%     if redo || isempty([pathname files(f).occlusion]) || ~exist([pathname files(f).occlusion],'file')
+%     if redo || isempty([pathname files(f).patchonpatch]) || ~exist([pathname files(f).patchonpatch],'file')
 %         try
-%             dfofMovie([datapathname files(f).occlusiondata],rig);
+%             dfofMovie([datapathname files(f).patchonpatchdata],rig);
 %         catch exc
-%             sprintf('couldnt do %s',files(f).occlusiondata)
+%             sprintf('couldnt do %s',files(f).patchonpatchdata)
 %             nerr=nerr+1;
-%             errmsg{nerr}=sprintf('couldnt do %s',files(f).occlusiondata)
+%             errmsg{nerr}=sprintf('couldnt do %s',files(f).patchonpatchdata)
 %             errRpt{nerr}=getReport(exc,'extended')
 %         end
 %     else
-%         sprintf('skipping %s',files(f).occlusion)
+%         sprintf('skipping %s',files(f).patchonpatch)
 %     end
+    
+    if redo || isempty([pathname files(f).occlusion]) || ~exist([pathname files(f).occlusion],'file')
+        try
+            dfofMovie([datapathname files(f).occlusiondata],rig);
+        catch exc
+            sprintf('couldnt do %s',files(f).occlusiondata)
+            nerr=nerr+1;
+            errmsg{nerr}=sprintf('couldnt do %s',files(f).occlusiondata)
+            errRpt{nerr}=getReport(exc,'extended')
+        end
+    else
+        sprintf('skipping %s',files(f).occlusion)
+    end
     
 %     if redo || isempty([pathname files(f).fullflanker]) || ~exist([pathname files(f).fullflanker],'file')
 %         try

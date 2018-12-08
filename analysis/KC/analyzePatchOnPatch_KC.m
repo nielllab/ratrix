@@ -4,7 +4,7 @@ clear all
 dbstop if error
 
 %select batch file
-batchKC_WF
+batchPatch_KC
 cd(pathname)
 moviename = 'C:\patchonpatch10min';
 load(moviename)

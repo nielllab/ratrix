@@ -1,4 +1,5 @@
-szx = ncol; szy=nrow;
+%szx = ncol; szy=nrow;
+szx=5; szy=5;
 filt = fspecial('gaussian',[10  10],1);
 trialmeanfilt = imfilter(trialmean,filt);
 
@@ -80,50 +81,50 @@ topoOverlayImg{rep} = overlay;
 topoAmpImg{rep} = topoAmp;
 end
 
-% figure
-% for i= 26:50;
-%     subplot(5,5,i-25);
-%     imagesc(meanImg(:,:,i),[0 0.1])
-% end
-% 
-% figure
-% imshow(xpolar);
-% [y x] = ginput(2);
-% [xgrid ygrid] = meshgrid(1:size(xpolar,2),1:size(xpolar,1));
-% 
-% vector = [x(2)-x(1) y(2)-y(1)];
-% vector = vector/sqrt(vector(1)^2 + vector(2)^2);
-% xgrid = xgrid-x(1);
-% ygrid = ygrid-y(1);
-% dist = xgrid*vector(1) + ygrid*vector(2);
-% figure
-% imagesc(dist)
-% figure
-% plot(dist(amp>0.75), xmap(amp>0.75),'.')
-% 
-% dvals = dist(amp>0.75); xvals = (xmap(amp>0.75)-2.4)*10;
-% dvals = dvals(:); xvals = xvals(:);
-% binx = -25:25:150;
-% clear mapMean mapStd
-% for i = 1:length(binx)-1
-%     mapMean(i) = median(xvals(dvals>binx(i) & dvals<binx(i+1)));
-%     mapStd(i) =std(xvals(dvals>binx(i) & dvals<binx(i+1)))/ sqrt(25);
-% end
-% figure
-% errorbar((binx(1:end-1)+25)*400/256, mapMean,mapStd);
-% xlim([-25 250]); xlabel('distance (um)');
-% ylabel('RF azimuth (deg)')
-% figure
-% imshow(ypolar);
-% [y x] = ginput(2);
-% [xgrid ygrid] = meshgrid(1:size(xpolar,2),1:size(xpolar,1));
-% 
-% vector = [x(2)-x(1) y(2)-y(1)];
-% vector = vector/sqrt(vector(1)^2 + vector(2)^2);
-% xgrid = xgrid-x(1);
-% ygrid = ygrid-y(1);
-% dist = xgrid*vector(1) + ygrid*vector(2);
-% figure
-% imagesc(dist)
-% figure
-% plot(dist(amp>0.5), ymap(amp>0.5),'.')
+figure
+for i= 26:50;
+    subplot(5,5,i-25);
+    imagesc(meanImg(:,:,i),[0 0.1])
+end
+
+figure
+imshow(xpolar);
+[y x] = ginput(2);
+[xgrid ygrid] = meshgrid(1:size(xpolar,2),1:size(xpolar,1));
+
+vector = [x(2)-x(1) y(2)-y(1)];
+vector = vector/sqrt(vector(1)^2 + vector(2)^2);
+xgrid = xgrid-x(1);
+ygrid = ygrid-y(1);
+dist = xgrid*vector(1) + ygrid*vector(2);
+figure
+imagesc(dist)
+figure
+plot(dist(amp>0.75), xmap(amp>0.75),'.')
+
+dvals = dist(amp>0.75); xvals = (xmap(amp>0.75)-2.4)*10;
+dvals = dvals(:); xvals = xvals(:);
+binx = -25:25:150;
+clear mapMean mapStd
+for i = 1:length(binx)-1
+    mapMean(i) = median(xvals(dvals>binx(i) & dvals<binx(i+1)));
+    mapStd(i) =std(xvals(dvals>binx(i) & dvals<binx(i+1)))/ sqrt(25);
+end
+figure
+errorbar((binx(1:end-1)+25)*400/256, mapMean,mapStd);
+xlim([-25 250]); xlabel('distance (um)');
+ylabel('RF azimuth (deg)')
+figure
+imshow(ypolar);
+[y x] = ginput(2);
+[xgrid ygrid] = meshgrid(1:size(xpolar,2),1:size(xpolar,1));
+
+vector = [x(2)-x(1) y(2)-y(1)];
+vector = vector/sqrt(vector(1)^2 + vector(2)^2);
+xgrid = xgrid-x(1);
+ygrid = ygrid-y(1);
+dist = xgrid*vector(1) + ygrid*vector(2);
+figure
+imagesc(dist)
+figure
+plot(dist(amp>0.5), ymap(amp>0.5),'.')

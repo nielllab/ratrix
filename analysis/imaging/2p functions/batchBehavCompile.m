@@ -154,20 +154,24 @@ for i = 1:length(alluse);
     %%% get speed and dF on each trial, for isi and stim intervals
     load(moviefname,'isi','duration');
     dFdecon(dFdecon>5)=5;
-    clear sp_spont sp_ev spont ev
+    clear sp_spont sp_ev spont ev  
     if isi==2
         for tr = 1:floor(size(dFdecon,2)/30);
-            sp_spont(tr) = mean(spd((tr-1)*30 + (11:20)));
-            sp_ev(tr) = mean(spd((tr-1)*30 + (22:28)));
-            spont(:,tr) = mean(dFdecon(:,(tr-1)*30 + (11:20)),2);
-            ev(:,tr) = mean(dFdecon(:,(tr-1)*30 + (22:28)),2)- spont(:,tr);
+            sp_spont(tr) = nanmean(spd((tr-1)*30 + (11:20)));
+            sp_ev(tr) = nanmean(spd((tr-1)*30 + (22:28)));
+            spont(:,tr) = nanmean(dFdecon(:,(tr-1)*30 + (11:20)),2);
+            ev(:,tr) = nanmean(dFdecon(:,(tr-1)*30 + (22:28)),2)- spont(:,tr);
+                speed_all_ev{i}(:,tr) = spd((tr-1)*30 + (11:20));  %distribution of speed w/ stim on each trial, each session. need reshape? (stim)
+                speed_all_spont{i}(:,tr) = spd((tr-1)*30 + (22:28));  %%distribution of speed w/o stim. need reshape?  (speed on each trial- no stim)
         end
     else
         for tr = 1:floor(size(dFdecon,2)/20);
-            sp_spont(tr) = mean(spd((tr-1)*20 + (6:10)));
-            sp_ev(tr) = mean(spd((tr-1)*20 + (12:18)));
-            spont(:,tr) = mean(dFdecon(:,(tr-1)*20 + (6:10)),2);
-            ev(:,tr) = mean(dFdecon(:,(tr-1)*20 + (12:18)),2)- spont(:,tr);
+            sp_spont(tr) = nanmean(spd((tr-1)*20 + (6:10)));
+            sp_ev(tr) = nanmean(spd((tr-1)*20 + (12:18)));
+            spont(:,tr) = nanmean(dFdecon(:,(tr-1)*20 + (6:10)),2);
+            ev(:,tr) = nanmean(dFdecon(:,(tr-1)*20 + (12:18)),2)- spont(:,tr);
+             speed_all_ev{i}(:,tr) =spd((tr-1)*20 + (6:10));  %distribution of speed w/ stim on each trial, each session. need reshape? (stim)
+             speed_all_spont{i}(:,tr) =spd((tr-1)*20 + (12:18));  %%distribution of speed w/o stim. need reshape?  (speed on each trial- no stim)
         end
     end
     
@@ -177,7 +181,7 @@ for i = 1:length(alluse);
     spontCorr = d(1:end-1,end); %figure; hist(spontCorr,[-0.95:0.1:1]); title('spont corr')
     deltaSpont = mean(spont(:,sp_spont>250),2)-mean(spont(:,sp_spont<250),2);
     % figure; hist(deltaSpont,[-0.95:0.1:1]); title('delta spont')
-    clear d
+    clear d 
     d = corrcoef([ev; double(sp_ev>250)]');
     evCorr = d(1:end-1,end); % figure; hist(evCorr,[-0.95:0.1:1]); title('evoked correlation')
     spontCorrAll(cellrange) = spontCorr(1:cutoff);
@@ -186,12 +190,24 @@ for i = 1:length(alluse);
     deltaEvAll(cellrange) = deltaEv (1:cutoff)
     deltaSpontAll(cellrange) =deltaSpont(1:cutoff);
     runFraction(i) = mean(spd>250);  %%% fraction of time running in passive 3x
+ 
+   
+%     %added 12/7/18 JW
+%     speed_all_ev{i} = sp_ev;   %above
+%     speed_all_spont{i} = sp_spont;
     
+%%%distribution of all running
+      runDist{i} = spd(:);   %%%%%cell array for each session..  reshape?.
+      
+   
     
     n=n+cutoff;
     
     drawnow
 end
+
+
+ %runDist=runDist';
 
 
 close all
@@ -204,6 +220,13 @@ figure
 hist(deltaSpontAll,[-0.95:0.1:1]); title('evoked correlation');  %running - not running
 figure
 hist(eyeCorrAll,[-0.95:0.1:1]); title('pupil correlation');
+
+%%%%%%%added 12/7/18 but not right yet
+ figure; hist(speed_all_spont{10}(:,:)); %this is just for one animal... how to do for all??
+ figure; hist(speed_all_ev{10}(:,:));
+ figure; hist(runDist{10});
+
+
 
 behavTimepts = -1:0.1:5;
 
@@ -272,6 +295,14 @@ clustData= clustData(:,[1 2 3 ]);  %%% choose only preferred (1-3) not non-prefe
 figure
 hist(std(clustData'),0.005:0.01:1);
 active = (std(clustData')>0.02)';
+
+
+%%%try different values of std here (12/7/18) JW
+
+%active = (std(clustData')>0.02)';
+%active = (std(clustData')>0.04)';
+
+
 
 %%% only use cells that are centered and have activity in clustering (don't cluster noise!!!)
 clustData = clustData(centered & active,:);
@@ -366,13 +397,20 @@ allData = allData(mdInd,:); sortCond = sortCond(mdInd); sortActive = sortActive(
 figure
 imagesc(allData(sortCentered' ,:),[0 0.5]); %%% fix
 hold on; for j= 1:8, plot([j*length(behavTimepts) j*length(behavTimepts)]+1,[1 sum(sortCentered' )],'g'); end
-title('all conds')
+title('all conds (corrects(1:4), incorrects(4:8)')
 
 
 figure
-imagesc(allData(sortCentered' ,1:244),[0 0.5]); %%% fix
+imagesc(allData(sortCentered' ,1:244),[0 0.5]); %%% %%% 1:244 will give corrects only
 hold on; for j= 1:4, plot([j*length(behavTimepts) j*length(behavTimepts)]+1,[1 sum(sortCentered' )],'g'); end
-title('all conds')
+title('all conds CORRECTS')
+
+figure     %%(added 12/7/18 JW)
+imagesc(allData(sortCentered' ,245:488),[0 0.5]); %%%%%% 245:488 will give corrects only
+hold on; for j= 1:4, plot([j*length(behavTimepts) j*length(behavTimepts)]+1,[1 sum(sortCentered' )],'g'); end
+title('all conds INCORRECTS')
+keyboard
+
 keyboard
 
 %sortInvariant = 
@@ -1798,7 +1836,7 @@ for i= 1:max(clust);
     figure      %(& sesscond~=4)?
     [n b] =hist(deltaSpontAll(clust==i),[-0.5:0.1:0.5]); bar(b,n/sum(n)); title(sprintf('cluster %d',i)); xlim([-0.55 0.55]); ylim([0 0.85]); ylabel('fraction'); xlabel('running modulation (spont)');
     set(gca,'Xtick',-0.5:0.25:0.5); set(gca,'Ytick',0:0.2:0.8); set(gca,'Fontsize',16);
-     spontModUse(1:length(deltaSpontAll(clust==i)),i) =(abs(deltaSpontAll(clust==i)))';
+     spontModUse(1:length(deltaSpontAll(clust==i)),i) =(abs(deltaSpontAll(clust==i)))';%not sure this is correct
     spontMod(i) = nanmean(abs(deltaSpontAll(clust==i))); spontModErr(i) = nanstd(abs(deltaSpontAll(clust==i)))/sqrt(sum(clust==i));
 end
 figure
@@ -1808,14 +1846,17 @@ ylabel('mean absolute modulation');title('running modulation - all cells'); set(
 %%%%statistical testing on spontaneous modulation
 % figure
 % boxplot(spontModUse)
-[p,tbl,stats]=kruskalwallis(spontModUse)
+[p,tbl,stats]=kruskalwallis(spontModUse)  %not sure this is correct
 c = multcompare(stats)
 
- clear evMod evModErr evc  
+ clear evMod evModErr evc evModUse 
+ EvModUse = nan(3375,3);
 for i= 1:max(clust);
     figure      %(& sesscond~=4)?
     [n b] =hist(deltaEvAll(clust==i),[-0.5:0.1:0.5]); bar(b,n/sum(n)); title(sprintf('cluster %d',i)); xlim([-0.55 0.55]); ylim([0 0.85]); ylabel('fraction'); xlabel('running modulation (evoked)');
     set(gca,'Xtick',-0.5:0.25:0.5); set(gca,'Ytick',0:0.2:0.8); set(gca,'Fontsize',16);
+    %evMod(i) = nanmean(abs(deltaEvAll(clust==i))); evModErr(i) = nanstd(abs(deltaEvAll(clust==i)))/sqrt(sum(clust==i));
+     evModUse(1:length(deltaEvAll(clust==i)),i) =(abs(deltaEvAll(clust==i)))';%not sure this is correct
     evMod(i) = nanmean(abs(deltaEvAll(clust==i))); evModErr(i) = nanstd(abs(deltaEvAll(clust==i)))/sqrt(sum(clust==i));
 end
 figure
@@ -1823,21 +1864,35 @@ bar(evMod); hold on; errorbar(1:3,evMod,evModErr,'k.','markersize',8,'Linewidth'
 ylabel('mean absolute modulation');title('Evoked running modulation - all cells'); set(gca,'FontSize',16); ylim([0 0.125]); set(gca,'Xtick',0:0.025:0.125);
 
 
+%%%%statistical testing on evoked modulation (12/7/18) JW
+% figure
+% boxplot(evModUse)
+[p,tbl,stats]=kruskalwallis(evModUse)   %not sure this is correct
+c = multcompare(stats)
 
 %passive pupil correlation
 figure
 hist(eyeCorrAll,[-0.95:0.1:1]); title('pupil correlation');
 
- clear pupilMod pupilModErr   
+ clear pupilMod pupilModErr pupilModUse  
 for i= 1:max(clust);
     figure      %(& sesscond~=4)?
     [n b] =hist(eyeCorrAll(clust==i),[-0.5:0.1:0.5]); bar(b,n/sum(n)); title(sprintf('cluster %d',i)); xlim([-0.55 0.55]); ylim([0 0.85]); ylabel('fraction'); xlabel('running modulation (evoked)');
     set(gca,'Xtick',-0.5:0.25:0.5); set(gca,'Ytick',0:0.2:0.8); set(gca,'Fontsize',16);
+%       pupilModUse(1:length(eyeCorrAll(clust==i)),i) =(abs(eyeCorrAll(clust==i)))';%not sure this is correct
     pupilMod(i) = nanmean(abs(eyeCorrAll(clust==i))); pupilModErr(i) = nanstd(abs(eyeCorrAll(clust==i)))/sqrt(sum(clust==i));
 end
 figure
 bar(pupilMod); hold on; errorbar(1:3,pupilMod,pupilModErr,'k.','markersize',8,'Linewidth',2);
 ylabel('mean pupil correlation');title('Passive pupil correlation - all cells'); set(gca,'FontSize',16); ylim([0 0.125]); set(gca,'Xtick',0:0.025:0.125);
+% 
+% %%%%statistical testing on pupil modulation (12/7/18) JW
+% % figure
+% % boxplot(pupilModUse)
+% [p,tbl,stats]=kruskalwallis(pupilModUse)   %not sure this is correct
+% c = multcompare(stats)
+
+
 
 
 
@@ -1874,7 +1929,7 @@ for ss = 1:length(sessionDate)
 end;
 
 %%combine for training conditions
-for j=1:4
+for j=1:3%4
     for i=1:max(clust)
      spontModSessGroup(j,i) = nanmean(spontModSess(sessCond==j,i)); 
      spontModSessGroupErr(j,i) = nanstd(spontModSess(sessCond==j,i))/sqrt(sum(sessCond==j));
@@ -2175,7 +2230,7 @@ circVarUse=nan(1310,3);
 for i=1:3 %clusters
 circVarClust(i)=nanmean(cirVar(clust==i & maxresp>0.2));
 circVarUse(1:length(cirVar(clust==i & maxresp>0.2)),i)=cirVar(clust==i & maxresp>0.2);
-circVarClustErr(i) =nanstd(cirVar(clust==i & maxresp>0.2),1)/sqrt(sum(clust==i & maxresp>0.3)); %check this
+circVarClustErr(i) =nanstd(cirVar(clust==i & maxresp>0.2),1)/sqrt(sum(clust==i & maxresp>0.2)); %check this
 end
 figure
 barweb(circVarClust(:), circVarClustErr(:),0.8); ylim([-0.05 1.05]); set(gca,'Ytick',0:0.25:1.0);

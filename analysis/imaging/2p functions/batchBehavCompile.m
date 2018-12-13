@@ -163,6 +163,7 @@ for i = 1:length(alluse);
             ev(:,tr) = nanmean(dFdecon(:,(tr-1)*30 + (22:28)),2)- spont(:,tr);
                 speed_all_ev{i}(:,tr) = spd((tr-1)*30 + (11:20));  %distribution of speed w/ stim on each trial, each session. need reshape? (stim)
                 speed_all_spont{i}(:,tr) = spd((tr-1)*30 + (22:28));  %%distribution of speed w/o stim. need reshape?  (speed on each trial- no stim)
+             speed_all{i}(:,tr) = nan(1,19)      %%distribution of speed
         end
     else
         for tr = 1:floor(size(dFdecon,2)/20);
@@ -172,6 +173,7 @@ for i = 1:length(alluse);
             ev(:,tr) = nanmean(dFdecon(:,(tr-1)*20 + (12:18)),2)- spont(:,tr);
              speed_all_ev{i}(:,tr) =spd((tr-1)*20 + (6:10));  %distribution of speed w/ stim on each trial, each session. need reshape? (stim)
              speed_all_spont{i}(:,tr) =spd((tr-1)*20 + (12:18));  %%distribution of speed w/o stim. need reshape?  (speed on each trial- no stim)
+        speed_all{i}(:,tr) = spd((tr-1)*20 + (1:19));   %not the same for every session?
         end
     end
     
@@ -196,10 +198,11 @@ for i = 1:length(alluse);
 %     speed_all_ev{i} = sp_ev;   %above
 %     speed_all_spont{i} = sp_spont;
     
-%%%distribution of all running
-      runDist{i} = spd(:);   %%%%%cell array for each session..  reshape?.
-      
+%%%distribution of all running average for each session
+
+     runDistribution(i,:) = nanmean(speed_all{i}(:,1:tr),2);   %%%%%cell array for each session..  reshape?.
    
+    
     
     n=n+cutoff;
     
@@ -207,6 +210,16 @@ for i = 1:length(alluse);
 end
 
 
+
+Mean_runDistribution = nanmean(runDistribution(:,(1:19)));%%%%%cell array for each session..  reshape?.
+Std_runDistribution= nanstd(runDistribution(:,(1:19)));
+
+figure; errorbar(Mean_runDistribution,Std_runDistribution);hold on; ylim([ -0.2 4000]);title('average run spreed passive')  %plot runspeed accross trials
+
+
+% for i=1:length(alluse)
+% all_runDistribution=nanmean(runDistribution(i,:));
+% end
  %runDist=runDist';
 
 
@@ -222,9 +235,9 @@ figure
 hist(eyeCorrAll,[-0.95:0.1:1]); title('pupil correlation');
 
 %%%%%%%added 12/7/18 but not right yet
- figure; hist(speed_all_spont{10}(:,:)); %this is just for one animal... how to do for all??
- figure; hist(speed_all_ev{10}(:,:));
- figure; hist(runDist{10});
+%  figure; hist(speed_all_spont{10}(:,:)); %this is just for one animal... how to do for all??
+%  figure; hist(speed_all_ev{10}(:,:));
+ %figure; hist(runDist{10});
 
 
 
@@ -299,7 +312,7 @@ active = (std(clustData')>0.02)';
 
 %%%try different values of std here (12/7/18) JW
 
-%active = (std(clustData')>0.02)';
+%active = (std(clustData')>0.01)';
 %active = (std(clustData')>0.04)';
 
 
@@ -409,7 +422,7 @@ figure     %%(added 12/7/18 JW)
 imagesc(allData(sortCentered' ,245:488),[0 0.5]); %%%%%% 245:488 will give corrects only
 hold on; for j= 1:4, plot([j*length(behavTimepts) j*length(behavTimepts)]+1,[1 sum(sortCentered' )],'g'); end
 title('all conds INCORRECTS')
-keyboard
+%keyboard
 
 keyboard
 
@@ -640,7 +653,7 @@ for s= 1:max(sess)
     circle(34,0.625*128-2,12);circle(34,0.375*128-2,12); set(gca,'Xtick',[]); set(gca,'Ytick',[]);
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
-    close all
+ %   close all
 end
 
 %keyboard
@@ -1856,7 +1869,7 @@ for i= 1:max(clust);
     [n b] =hist(deltaEvAll(clust==i),[-0.5:0.1:0.5]); bar(b,n/sum(n)); title(sprintf('cluster %d',i)); xlim([-0.55 0.55]); ylim([0 0.85]); ylabel('fraction'); xlabel('running modulation (evoked)');
     set(gca,'Xtick',-0.5:0.25:0.5); set(gca,'Ytick',0:0.2:0.8); set(gca,'Fontsize',16);
     %evMod(i) = nanmean(abs(deltaEvAll(clust==i))); evModErr(i) = nanstd(abs(deltaEvAll(clust==i)))/sqrt(sum(clust==i));
-     evModUse(1:length(deltaEvAll(clust==i)),i) =(abs(deltaEvAll(clust==i)))';%not sure this is correct
+     evModUse(1:length(deltaEvAll(clust==i)),i) =(abs(deltaEvAll(clust==i)))';%not sure this is correct, not working for some reason
     evMod(i) = nanmean(abs(deltaEvAll(clust==i))); evModErr(i) = nanstd(abs(deltaEvAll(clust==i)))/sqrt(sum(clust==i));
 end
 figure
@@ -2534,7 +2547,13 @@ for c = 1:5
 end
 %%
 
-
+%%% print out number of cells and subjects in each condition
+for c = 1:5
+    cells = find(allCond==c & centered' & active');
+    sessions = unique(sess(cells));
+    subjs = unique({files(alluse(sessions)).subj});
+    sprintf('%s %d cells %d subjs %d sessions',condLabel{c},length(cells), length(subjs),length(sessions))
+end
 
 
 %end of joes current code, commented out cris' below because some variables are re-used and overwritten, was getting confusing 

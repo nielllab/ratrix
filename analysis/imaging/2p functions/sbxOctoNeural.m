@@ -58,8 +58,65 @@ end
 
 
 get2pSession_sbx;  %%% returns dfofInterp, and phasetimes (time in secs each stim started)
+
+
 global info
 mv = info.aligned.T;
+
+zbin = input('do zbinning? 0/1 : ');
+if zbin
+   display('doing clustering')
+    %%% recreate small version of absolute fluorescence
+    greensmall = double(imresize(greenframe,0.5));
+    F = (1 + dfofInterp).*repmat(greensmall,[1 1 size(dfofInterp,3)]);
+    
+    %%% resize and reshape images into vectors, to calculate distance
+    smallDf = imresize(F(50:350,50:350,:),1/8); %%% remove edges for boundary effects
+    smallDf = reshape(smallDf,size(smallDf,1)*size(smallDf,2),size(smallDf,3));
+    D = pdist(smallDf','euclidean');
+    
+    %Create hierarchical cluster tree based on D
+    Z = linkage(D,'ward');
+    %Create figure of hierarchical cluster tree for visualization purposes
+    figure
+    [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3);
+    title('Hierarchical Cluster tree of Image Sequence');
+    
+    nclust = input('How many z-plane clusters do you want?: ');
+    T = cluster(Z,'maxclust',nclust);
+    
+    %%% compare clusters and movement
+    figure
+    plot(T*5); hold on; plot(mv)
+    legend('clusters','x movement','y movement')
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+    figure
+    for i = 1:nclust;
+        subplot(2,3,i)
+        imagesc(mean(F(:,:,T==i),3));
+        title(sprintf('clust %d n = %d',i,sum(T==i)));
+    end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+    useBin = input('which bin to use : ');
+    display('redoing dfofinterp')
+    F0 = repmat(prctile(F(:,:,T==useBin),10,3),[1 1 size(F,3)]);
+    dfofInterp = (F-F0)./F0;
+    
+    dfofInterp(:,:,T~=useBin)=NaN;
+    mv(T~=useBin,:)=NaN;
+    greenframe = imresize(mean(F(:,:,T==useBin),3),2);
+    
+    figure
+    range =[prctile(greenframe(:),1) prctile(greenframe(:),98)*1.2];
+    imagesc(greenframe,range); colormap gray
+    title(sprintf('mean of binned cluster %d',useBin))
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+end
+
+
 buffer(:,1) = max(mv,[],1)/cfg.spatialBin+1; buffer(buffer<1)=1;
 buffer(:,2) = max(-mv,[],1)/cfg.spatialBin+1; buffer(buffer<0)=0;
 buffer=round(buffer)
@@ -72,7 +129,8 @@ stdImg= stdImg(buffer(1,1):(end-buffer(1,2)),buffer(2,1):(end-buffer(2,2)),:);
 greenCrop = double(stdImg);
 
 thresh = prctile(greenCrop(:),95)/100; %%% cut out points that are 100x dimmer than peak
-%dfofInterp(repmat(greenCrop,[1 1 size(dfofInterp,3)])<thresh)=0;
+dfofInterp(repmat(greenCrop,[1 1 size(dfofInterp,3)])<thresh)=0;
+
 figure
 imagesc(greenCrop>thresh);
 

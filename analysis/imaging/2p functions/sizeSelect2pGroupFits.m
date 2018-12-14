@@ -46,7 +46,7 @@ else
     sprintf('please restart and choose a number 1-6')
 end
 
-moviefname = 'C:\sizeselectBin22min';
+moviefname = 'C:\src\movies\sizeselectBin22min';
 load(moviefname)
 dfWindow = 9:11;spWindow = {6:10,6:7,8:10};splabel={'all','early','late'};
 stlb = {'sit','run'};
@@ -61,7 +61,7 @@ numAni = length(use)/2;
 
 win=1; %which spikes window
 
-%% analysis
+%% analysis of averaged animal curves
 if redo
     
     sprintf('loading data') %load the size data
@@ -92,6 +92,7 @@ if redo
     allparams = nan(numAni,2,2,2);allcc = nan(numAni,2,2);
     allfit = cell(numAni,2,2);grpfitcurve = nan(numAni,1001,2,2,2);nfit = zeros(2,2);
     prefsz=nan(numAni,2,2);
+    R2 = nan(numAni,2,2);
     for i = 1:2 %sit/run
         pre=nan(length(unique(sess)),length(sizes));post=pre;
         for j = 1:length(unique(sess))
@@ -141,6 +142,7 @@ if redo
             preR2(j) = corr(pre(j,:)',preresult{j}(radiusRange));
             postR2(j) = corr(post(j,:)',postresult{j}(radiusRange));
         end
+        R2(fitani,i,1) = preR2;R2(fitani,i,2) = postR2;
 
         allparams(fitani,1,i,1) = preRD;allparams(fitani,1,i,2) = postRD;
         allparams(fitani,2,i,1) = preRS;allparams(fitani,2,i,2) = postRS;
@@ -169,11 +171,150 @@ if redo
             nfit(i,j) = cnt;
         end
     end
-    
 else
     load([fullfile(savepath,grpfilename) 'SSfits']);
 end
 
+figure;
+for i = 1:2
+    pre = R2(:,i,1); post = R2(:,i,2);
+    subplot(1,2,i)
+    plot([1 2],[pre post],'ko:')
+    hold on
+    errorbar([1 2],[nanmean(pre) nanmean(post)],...
+        [nanstd(pre)/sqrt(length(fitani)) nanstd(post)/sqrt(length(fitani))])
+    set(gca,'xtick',[1 2],'xticklabel',{'pre','post'})
+    ylabel('fit R2')
+    axis([0.5 2.5 0 1])
+    [h p] = ttest(pre,post);
+    title(sprintf('%s p=%0.3f',stlb{i},p))
+end
+mtit(sprintf('%s',grpfilename))
+
+keyboard
+%% analysis of individual neurons
+% if redo
+%     
+%     sprintf('loading data') %load the size data
+%     load([fullfile(savepath,grpfilename) '2pSizeSelectEff'])
+%     ncells = size(grpspsize,1);
+%     
+%     %%%SI for preferred SF and ori
+%     SIcalc = squeeze(nanmean(grpspsize(:,spWindow{win},:,:,:),2));
+%     SIdata = nan(ncells,2,2);SIfit=SIdata;
+%     for i = 1:2
+%         for j = 1:2
+%             A = SIcalc(:,:,i,j);
+%             B = min(SIcalc(:,:,i,j),[],2);
+%             SIcalc(:,:,i,j) = bsxfun(@minus,A,B);
+%             [SIpks, SIinds] = max(squeeze(SIcalc(:,:,i,j)),[],2);
+%             SI50 = squeeze(SIcalc(:,end,i,j));
+%             SIdata(:,i,j) = (SIpks - SI50)./(SIpks + SI50);
+%         end
+%     end
+% 
+%     %%% fits
+%     grpdata = nan(numAni,length(sizes),2,2);
+%     allparams = nan(numAni,2,2,2);allcc = nan(numAni,2,2);
+%     allfit = cell(numAni,2,2);grpfitcurve = nan(numAni,1001,2,2,2);nfit = zeros(2,2);
+%     prefsz=nan(numAni,2,2);
+%     for i = 1:2 %sit/run
+%         pre = squeeze(nanmean(grpspsize(:,spWindow{win},:,i,1),2));
+%         post = squeeze(nanmean(grpspsize(:,spWindow{win},:,i,2),2));
+%         
+%         [preRD preRS presigmaD presigmaS prem preresult] = sizeCurveFit(radiusRange,pre);
+%         [postRD postRS postsigmaD postsigmaS postm postresult] = sizeCurveFit(radiusRange,post);
+% 
+%         nofit = unique([find(isnan(preRD)) find(isnan(postRD))]); %%cells that wouldn't fit
+%         fitcell = 1:length(preRD);
+%         for j = 1:length(nofit)
+%             fitcell = fitcell(find(fitcell~=nofit(j)));
+%         end
+%         preRD=preRD(fitcell);preRS=preRS(fitcell);presigmaD=presigmaD(fitcell);presigmaS=presigmaS(fitcell);prem=prem(fitcell);preresult=preresult(fitcell);
+%         postRD=postRD(fitcell);postRS=postRS(fitcell);postsigmaD=postsigmaD(fitcell);postsigmaS=postsigmaS(fitcell);postm=postm(fitcell);postresult=postresult(fitcell);
+%         sessfit=sess(fitcell);pre=pre(fitcell,:);post=post(fitcell,:);fitani = unique(sessfit);
+%         for j = 1:length(unique(sessfit))
+%             grpdata(j,:,i,1) = nanmean(pre(find(sessfit==j),:),1);
+%             grpdata(j,:,i,2) = nanmean(post(find(sessfit==j),:),1);
+%         end
+% 
+%         %%%constrain fit parameters to only fit Rd and Rs for stationary
+%         sprintf('doing %s constrained fits...',stlb{i})
+%         sigmaD = (presigmaD + postsigmaD)/2;sigmaS = (presigmaS + postsigmaS)/2;m = (prem + postm)/2;
+%         [preRD preRS preresult] = sizeCurveFitRdRs(radiusRange,pre,sigmaD,sigmaS,m);
+%         [postRD postRS postresult] = sizeCurveFitRdRs(radiusRange,post,sigmaD,sigmaS,m);
+% 
+%         %%%fit correlation w/data
+%         preR2=nan(1,length(preresult));postR2=preR2;
+%         for j = 1:length(preresult)
+%             preR2(j) = corr(pre(j,:)',preresult{j}(radiusRange));
+%             postR2(j) = corr(post(j,:)',postresult{j}(radiusRange));
+%         end
+% 
+%         for j = 1:fitani
+%             anicells = fitani(j);
+%             allparams(anicells,1,i,1) = nanmean(preRD(sessfit==anicells));allparams(anicells,1,i,2) = nanmean(postRD(sessfit==anicells));
+%             allparams(anicells,2,i,1) = nanmean(preRS(sessfit==anicells));allparams(anicells,2,i,2) = nanmean(postRS(sessfit==anicells));
+%             allcc(anicells,i,1) = nanmean(preR2(sessfit==anicells));allcc(anicells,i,2) = nanmean(postR2(sessfit==anicells));
+%         end
+%         allfit(fitcell,i,1) = preresult;allfit(fitcell,i,2) = postresult;
+% 
+%         %calculate SI from fits
+%         for j = 1:2 %pre/post
+%             cnt=0;
+%             for k = 1:length(fitcell)
+%                 h1=figure;
+%                 ft = plot(allfit{fitcell(k),i,j});%(radiusRange);
+%                 xdata = ft.XData;ydata = ft.YData;
+%                 close(h1)
+%                 try
+%                     SIfit(fitcell(k),i,j) = (max(ydata)-ydata(end))/(max(ydata)+ydata(end));
+%                     grpfitcurve(fitcell(k),:,1,i,j) = xdata;
+%                     grpfitcurve(fitcell(k),:,2,i,j) = ydata;
+%                     [tmp, tmpmax] = max(ydata);
+%                     prefsz(k,i,j) = xdata(tmpmax);%pref radius in degrees
+%                     cnt=cnt+1;
+%                 catch
+%                     SIfit(fitcell(k),i,j) = 0;
+%                 end
+%             end
+%             nfit(i,j) = cnt;
+%         end
+%     end
+%     
+% else
+%     load([fullfile(savepath,grpfilename) 'SSfits']);
+% end
+
+%% individual cell size preference vs. change in Rd/Rs
+aniState = {'sit','run'};
+for r = 1:2
+    figure;
+    subplot(1,3,1)
+    deltaD = (allparams(:,1,r,2) - allparams(:,1,r,1))./(allparams(:,1,r,2) + allparams(:,1,r,1));
+    plot(prefsz(:,r,1),deltaD,'k.')
+    xlabel('pref size')
+    ylabel('change Rd')
+    ind=~isnan(deltaD)&~isnan(prefsz(:,r,1));
+    title(sprintf('r2=%0.3f',corr(prefsz(ind,r,1),deltaD(ind))))
+    axis square
+    subplot(1,3,2)
+    deltaS = (allparams(:,2,r,2) - allparams(:,2,r,1))./(allparams(:,2,r,2) + allparams(:,2,r,1));
+    plot(prefsz(:,r,1),deltaS,'k.')
+    xlabel('pref size')
+    ylabel('change Rs')
+    ind=~isnan(deltaS)&~isnan(prefsz(:,r,1));;
+    title(sprintf('r2=%0.3f',corr(prefsz(ind,r,2),deltaS(ind))))
+    axis square
+    subplot(1,3,3)
+    plot(deltaD,deltaS,'k.')
+    xlabel('change Rd')
+    ylabel('change Rs')
+    ind=~isnan(deltaS)&~isnan(prefsz(:,r,1));;
+    title(sprintf('r2=%0.3f',corr(deltaD(ind),deltaS(ind))))
+    axis square
+    mtit(sprintf('%s',aniState{r}))
+end
 %% plot group fit data   
 figure;set(gcf,'color','w')
 for j = 1:2 %sit/run

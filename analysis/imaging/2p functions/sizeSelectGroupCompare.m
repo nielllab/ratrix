@@ -13,18 +13,18 @@ centwin = 1:3; %%%window for measurment of response at center (20um bins current
 grpfiles = {'SalineNaive2pSizeSelectEff'...
             'SalineTrained2pSizeSelectEff'...
             'DOINaive2pSizeSelectEff'...
-            'DOITrained2pSizeSelectEff'...
-            'Saline2pSizeSelectEff'...
-            'DOI2pSizeSelectEff'};
+            'DOITrained2pSizeSelectEff'};%...
+%             'Saline2pSizeSelectEff'...
+%             'DOI2pSizeSelectEff'};
 
 grpnames = {'saline naive'...
             'saline trained'...
             'doi naive'...
-            'doi trained'...
-            'saline'...
-            'doi'};
+            'doi trained'};%...
+%             'saline'...
+%             'doi'};
 
-moviefname = 'C:\sizeselectBin22min';
+moviefname = 'C:\src\movies\sizeselectBin22min';
 load(moviefname)
 dfWindow = 9:11;
 spWindow = 6:10;
@@ -51,8 +51,9 @@ for i = 1:length(sfrange)
 end
 grps = length(grpfiles);
 
-f1=figure;f2=figure;f3=figure;f4=figure;f5=figure;f6=figure;f7=figure;f8=figure;
+f1=figure;f2=figure;f3=figure;f4=figure;f5=figure;f6=figure;f7=figure;f8=figure;f9=figure;
 grpchange = nan(grps,length(sizes),2); %group,size,sit/run
+grpbase = nan(15,grps,2); %groups, animal, baseline response (avg across sizes), sit/run
 for i = 1:length(grpfiles)
     sprintf('loading %s data',grpnames{i})
     load(fullfile(grppath,grpfiles{i}))
@@ -379,6 +380,35 @@ for i = 1:length(grpfiles)
     ylabel(sprintf('%s sit',grpnames{i}))
     set(gca,'xtick',1:length(sizes),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'fontsize',8)
     
+    figure(f9)
+    presit=nan(length(unique(session)),length(sizes));prerun=presit;
+    for j = 1:length(unique(session))
+        presit(j,:) = squeeze(nanmean(nanmean(grpspsize(find(session==j),spWindow{1},:,1,1),2),1));
+        prerun(j,:) = squeeze(nanmean(nanmean(grpspsize(find(session==j),spWindow{1},:,2,1),2),1));
+    end
+    subplot(1,2,1)
+    hold on
+    errorbar(1:length(radiusRange),nanmean(presit,1),nanstd(presit,1)/sqrt(numAni),'-o','Markersize',5)
+    xlabel('Stim Size (deg)')
+    ylabel('Stationary dfof')
+    axis([0 length(radiusRange)+1 -0.025 0.75])
+    axis square
+    set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'ytick',0:0.25:0.75,'LooseInset',get(gca,'TightInset'),'fontsize',8)
+    hold off
+    subplot(1,2,2)
+    hold on
+    errorbar(1:length(radiusRange),nanmean(prerun,1),nanstd(prerun,1)/sqrt(numAni),'-o','Markersize',5)
+    xlabel('Stim Size (deg)')
+    ylabel('Stationary dfof')
+    axis([0 length(radiusRange)+1 -0.025 0.75])
+    axis square
+    set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'ytick',0:0.25:0.75,'LooseInset',get(gca,'TightInset'),'fontsize',8)
+    hold off
+    
+    grpbase(1:numAni,i,1) = nanmean(presit(:,2:end),2);
+    grpbase(1:numAni,i,2) = nanmean(prerun(:,2:end),2);
+    
+    
 %     figure(f5)%%%stationary spread
 %     zeropre = squeeze(nanmean(grpring(:,:,:,1,1,1),3));zeropost = squeeze(nanmean(grpring(:,:,:,1,1,2),3));
 %     subplot(4,grps,i)%%5 deg
@@ -632,6 +662,39 @@ if exist('psfile','var')
     set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
     print('-dpsc',psfile,'-append');
 end
+
+figure(f9)
+subplot(1,2,1)
+legend(grpnames)
+set(gcf,'color','white')
+mtit('Baseline response comparison')
+if exist('psfile','var')
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    print('-dpsc',psfile,'-append');
+end
+
+%% stats for baseline comparison
+
+for r = 1:2
+    %%%non-parametric test
+    [p,tbl,stats] = kruskalwallis(squeeze(grpbase(:,:,r)))
+
+    %%%tukey kramer post-hoc
+    [c,m,h,gnames] = multcompare(stats)
+
+    %%%unpaired ttest
+    group1 = [1 1 1 2 2 3];
+    group2 = [2 3 4 3 4 4];
+    sprintf('alpha = %0.4f',0.05/4)
+    for i = 1:length(group1)
+        grp1 = squeeze(grpbase(:,group1(i),r));grp1 = grp1(~isnan(grp1));
+        grp2 = squeeze(grpbase(:,group2(i),r));grp2 = grp2(~isnan(grp2));
+        [h,p] = ttest2(grp1,grp2,'alpha',0.05/4);
+        sprintf('%s vs %s p = %0.4f',grpnames{group1(i)},grpnames{group2(i)},p)
+    end
+end
+
+%%
 
 % figure(f5)
 % mtit('stationary pixelwise analysis 0.04cpd')

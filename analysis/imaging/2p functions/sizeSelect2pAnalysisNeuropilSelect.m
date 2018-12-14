@@ -11,8 +11,8 @@ dfWindow = 9:11;spWindow = 6:10;
 spthresh = 0.1;%dfthresh = 0.05;
 dt = 0.1;
 cyclelength = 1/0.1;
-% moviefname = 'C:\src\sizeselectBin22min';
-moviefname = 'C:\src\movies\sizeselect4Ctrst24min';
+moviefname = 'C:\src\movies\sizeselectBin22min';
+% moviefname = 'C:\src\movies\sizeselect4Ctrst24min';
 load(moviefname)
 xrange = unique(xpos);yrange = unique(ypos);ctrange = unique(contrasts);sfrange = unique(sf);
 tfrange = unique(tf);phaserange = unique(phase);thetaRange = unique(theta);
@@ -97,7 +97,8 @@ for f=1:length(use)
             figure
             for i = 1:length(sizes)
                 subplot(2,ceil(length(sizes)/2),i)
-                resp = imresize(squeeze(nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,c,i,1),3)),0.5);
+%                 resp = imresize(squeeze(nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,c,i,1),3)),0.5);
+                resp = imresize(squeeze(nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,i,1),3)),0.5); %switch this back later for contrasts
                 respimg = mat2im(resp,jet,[-0.01 0.1]);
                 imshow(respimg)
                 set(gca,'ytick',[],'xtick',[])
@@ -111,8 +112,9 @@ for f=1:length(use)
         %%%use manual selection of 10 degree pixelwise response for cell selection
         if mod(f,2)~=0 & (~exist(fullfile(altpath,[files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).inject '_'  files(use(f)).timing '.mat'])) | reselect==1)
 
-            resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,end,2,1),3);%-...
-                    %nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,1,1),3);
+%             resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,end,2,1),3);%-...
+%                     %nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,1,1),3);
+            resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,2,1),3); %switch back later for contrasts
 
             [gpLUT,P,etheta] = neuropilEllipse(resp,psfilei);
 
@@ -393,7 +395,8 @@ for f=1:length(use)
         figure
         for c = 1:length(ctrange)
             subplot(1,length(ctrange),c);
-            imagesc(nanmean(frmdata(:,:,:,c,3,1),3),[-0.01 0.1]);axis equal;
+%             imagesc(nanmean(frmdata(:,:,:,c,3,1),3),[-0.01 0.1]);axis equal;
+            imagesc(nanmean(frmdata(:,:,:,3,1),3),[-0.01 0.1]);axis equal; %switch back later for contrasts
             hold on
             plot(ex,ey,'g','linewidth',2);
             plot(y0,x0,'ro')
@@ -406,14 +409,16 @@ for f=1:length(use)
         %%%compare 5/10deg pixel vs cell footprints
         figure
         subplot(1,3,1)
-        resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,end,2,1),3);
+%         resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,end,2,1),3);
+        resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,2,1),3); %switch back later for contrasts
         respimg = mat2im(resp,jet,[-0.01 0.1]);
         imshow(respimg)
         set(gca,'ytick',[],'xtick',[])
         xlabel('5deg resp')
         axis equal
         subplot(1,3,2)
-        resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,end,3,1),3);
+%         resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,end,3,1),3);
+        resp = nanmean(frmdata(cropx(1):cropx(2),cropy(1):cropy(2),:,3,1),3); %switch back later for contrasts
         respimg = mat2im(resp,jet,[-0.01 0.1]);
         imshow(respimg)
         set(gca,'ytick',[],'xtick',[])
@@ -441,7 +446,8 @@ for f=1:length(use)
                 colormap jet
                 for i = 2:length(sizes)
                     subplot(2,floor(length(sizes)/2),i-1)
-                    resp = nanmean(frmdata(:,:,h,c,i,1),3);
+%                     resp = nanmean(frmdata(:,:,h,c,i,1),3);
+                    resp = nanmean(frmdata(:,:,h,i,1),3); %switch back later for contrasts
                     imagesc(resp,[-0.01 0.1])
                     set(gca,'ytick',[],'xtick',[])
                     xlabel(sprintf('%sdeg',sizes{i}))
@@ -457,7 +463,8 @@ for f=1:length(use)
                 colormap jet
                 for i = 2:length(sizes)
                     subplot(2,floor(length(sizes)/2),i-1)
-                    resp = nanmean(frmdata(:,:,h,c,i,2),3);
+%                     resp = nanmean(frmdata(:,:,h,c,i,2),3);
+                    resp = nanmean(frmdata(:,:,h,i,2),3); %switch back later for contrasts
                     imagesc(resp,[-0.01 0.1])
                     set(gca,'ytick',[],'xtick',[])
                     xlabel(sprintf('%sdeg',sizes{i}))
@@ -477,8 +484,10 @@ for f=1:length(use)
             for c = 1:length(ctrange)
                 subplot(1,length(ctrange),c)
                 mrg=zeros(size(frmdata,1),size(frmdata,2),3);
-                mrg(:,:,2) = squeeze(nanmean(frmdata(:,:,1,c,2,r),3));
-                mrg(:,:,1) = squeeze(nanmean(frmdata(:,:,1,c,end,r),3));
+%                 mrg(:,:,2) = squeeze(nanmean(frmdata(:,:,1,c,2,r),3));
+%                 mrg(:,:,1) = squeeze(nanmean(frmdata(:,:,1,c,end,r),3));
+                mrg(:,:,2) = squeeze(nanmean(frmdata(:,:,1,2,r),3)); %switch back later for contrasts
+                mrg(:,:,1) = squeeze(nanmean(frmdata(:,:,1,end,r),3));
                 mrg=mrg*10;
                 image(mrg)
                 set(gca,'ytick',[],'xtick',[])
@@ -519,7 +528,7 @@ for f=1:length(use)
         ylabel('sit dfof')
         axis([0 length(radiusRange)+1 -0.01 0.3])
         axis square
-        legend(ctrange)
+        legend(mat2str(ctrange))
         set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'Fontsize',8)
         hold off
         subplot(1,2,2)
@@ -532,7 +541,7 @@ for f=1:length(use)
         ylabel('run dfof')
         axis([0 length(radiusRange)+1 -0.01 0.3])
         axis square
-        legend(ctrange)
+        legend(mat2str(ctrange))
         set(gca,'xtick',1:length(radiusRange),'xticklabel',sizes,'LooseInset',get(gca,'TightInset'),'Fontsize',8)
         mtit('Mean df suppression curve')
         if exist('psfilei','var')
@@ -750,6 +759,10 @@ for f=1:length(use)
             end
         end
 
+        
+        frmdata=squeeze(frmdata);dfsize=squeeze(dfsize);spsize=squeeze(spsize);dfsizeall=squeeze(dfsizeall);spsizeall=squeeze(spsizeall);
+        SIdf=squeeze(SIdf);SIsp=squeeze(SIsp);dftuning=squeeze(dftuning);sptuning=squeeze(sptuning);dftuningall=squeeze(dftuningall);sptuningall=squeeze(sptuningall);
+        
         %%%saving
         save(fullfile(pathname,filename),...
             'avgrad','histrad','spInterp','running','timepts','ntrials','onsets','dt','ring','frmdata','dfsize','spsize','dfsizeall','spsizeall','cellprint','SIdf','SIsp','dftuning','sptuning','dftuningall','sptuningall','sizebestsfdfall','sizebestsfspall','sizebestthetadfall','sizebestthetaspall','-append')

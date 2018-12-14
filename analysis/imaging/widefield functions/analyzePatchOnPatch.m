@@ -4,7 +4,9 @@ clear all
 dbstop if error
 
 %select batch file
+% batchPhilIntactSkull_lowdose %phil moved this to batchPhilIntactSkull
 batchPhilIntactSkull
+
 cd(pathname)
 moviename = 'C:\patchonpatch16min';
 load(moviename)
@@ -23,7 +25,8 @@ end
 
  
 %select animals to use
-use = find(strcmp({files.notes},'good darkness and stimulus') | strcmp({files.notes},'good stimulus'))
+use = find(strcmp({files.inject},'doi')  & strcmp({files.training},'naive') & strcmp({files.dose},'2mg/kg') & strcmp({files.label},'camk2 gc6') & (strcmp({files.notes},'good darkness and stimulus') | strcmp({files.notes},'good stimulus'))  ) 
+%use = find(strcmp({files.notes},'good darkness and stimulus') | strcmp({files.notes},'good stimulus'))
 sprintf('%d experiments for individual analysis',length(use)/2)
 
 indani = input('analyze individual data? 0=no 1=yes: ')
@@ -47,11 +50,8 @@ if indani
     sprintf('individual analysis complete, starting group...')
 end
 
-group = input('which group? 1=saline naive, 2=saline trained, 3=DOI naive, 4=DOI trained, 5=saline, 6=DOI: ')
+group = input('which group? 1=saline naive, 2=saline trained, 3=DOI naive, 4=DOI trained, 5=saline, 6=DOI, 7=DOI naive low dose: ')
 redogrp = input('reanalyze group data? 0=no, 1=yes: ')
-
-redogrp=1
-% for group=1:4
 
     if group==1
         use = find(strcmp({files.inject},'saline')  & strcmp({files.training},'naive') & strcmp({files.label},'camk2 gc6') & (strcmp({files.notes},'good darkness and stimulus') | strcmp({files.notes},'good stimulus'))  ) 
@@ -71,6 +71,9 @@ redogrp=1
     elseif group==6
         use = find(strcmp({files.inject},'doi')  & strcmp({files.label},'camk2 gc6') & (strcmp({files.notes},'good darkness and stimulus') | strcmp({files.notes},'good stimulus'))  ) 
         grpfilename = 'DOIIsoCrossWF'
+    elseif group==7
+        use = find(strcmp({files.inject},'doi')  & strcmp({files.training},'naive') & strcmp({files.dose},'2mg/kg') & strcmp({files.label},'camk2 gc6') & (strcmp({files.notes},'good darkness and stimulus') | strcmp({files.notes},'good stimulus'))  ) 
+        grpfilename = 'DOINaiveLowDoseIsoCrossWF'
     else
         sprintf('please restart and choose a number 1-6')
     end

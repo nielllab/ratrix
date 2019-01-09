@@ -4,14 +4,14 @@
 %%add pixel-wise, thresholded histogram of phase
 
 % %%% reads raw images, calculates dfof, and aligns to stim sync
-close all; clear all
+close all; clear all;dbstop if error
 fileName = uigetfile('*.sbx','topox file');
 
 dt = 0.1; %%% resampled time frame
 framerate=1/dt;
 cycLength=10;
 cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  %%% configuration parameters
-cfg.syncToVid=1; cfg.saveDF=0; cfg.alignData=0;
+cfg.syncToVid=0; cfg.saveDF=0; cfg.alignData=0;
 sessionName = 'topo';
 get2pSession_sbx;
 

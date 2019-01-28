@@ -17,9 +17,32 @@ for z=1:length(db)
     %%%load the data
     cd(db(z).procdir)
     load(db(z).procfile)
+    if ~exist('dat')
+        sprintf('dat was empty')
+        dat = {};
+        dat.cl = cl;
+        dat.clustrules = clustrules;
+        dat.F = F;
+        dat.Fcell = Fcell;
+        dat.FcellNeu = FcellNeu;
+        dat.figure = figure;
+        dat.filename = filename;
+        dat.map = map;
+        dat.maxmap = maxmap;
+        dat.mimg = mimg;
+        dat.mimg_proc = mimg_proc;
+        dat.ops = ops;
+        dat.procmap = 0;
+        dat.res = res;
+        dat.stat = stat;
+        dat.xlim = xlim;
+        dat.ylim = ylim;
+        save(db(i).procfile,'dat')
+        sprintf('dat exist now')
+    end
 
     %%%figure out how many actual cells there are take out any with nan values
-    for h = 1:length(db(z).expname)
+    for h = 1:1%length(db(z).expname)
         baddies = find(isnan(dat.Fcell{h}));
         [idx val] = ind2sub(size(dat.Fcell{h}),baddies);
         baddie = unique(idx);
@@ -135,7 +158,7 @@ for z=1:length(db)
         %%%plot spike data
         figure
         imagesc(spikes,[0 10])
-        title(sprintf('spikes %s',db(z).expname{j}))
+        title(sprintf('spikes %s',db(z).expname{j}))%
         colorbar
         if exist('psfilename','var')
             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
@@ -145,7 +168,7 @@ for z=1:length(db)
         %%%plot dF/F data
         figure
         imagesc(dF,[0 10])
-        title(sprintf('dF/F %s',db(z).expname{j}))
+        title(sprintf('dF/F %s',db(z).expname{j}))%
         colorbar
         if exist('psfilename','var')
             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
@@ -153,7 +176,7 @@ for z=1:length(db)
         end
 
         %%%load in green frame from sbx data and save out results
-        thisSession = fullfile(db(z).expdir,[db(z).expname{j}(1:strfind(db(z).expname{j},'V2')+1) '.mat']);
+        thisSession = fullfile(db(z).expdir,[db(z).expname{j}(1:strfind(db(z).expname{j},'V2')+1) '.mat']);%
 %         load(thisSession,'greenframe');
         save(db(z).expname{j},'dF','meanImg','usePts','spikes','meanShiftImg','cropx','cropy','thisSession','cImage');%'greenframe',
     end

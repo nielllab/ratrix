@@ -446,6 +446,7 @@ for i = 1:min(cycLength,30)
     % imagesc(cycImg(:,:,i)-min(cycImg,[],3),[0 0.1]); axis equal
     data = cycImg(:,:,i)-mean(cycImg(:,:,1:10),3);
     datafilt = imfilter(data,fspecial('gaussian',[10 10],2));
+    datafilt(isnan(datafilt))=0;
     data_im = mat2im(datafilt,jet,[0 0.05]);
     imshow(data_im.*normgreen);
     axis equal; axis off

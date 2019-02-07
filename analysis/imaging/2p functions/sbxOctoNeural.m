@@ -708,7 +708,7 @@ end
 
 
 if nstim==13 %%% gratings 1 tf
-    range = [-0.01 0.1]; %%% colormap range
+    range = [-0.05 0.2]; %%% colormap range
     loc = [1 5 9 2 6 10 3 7 11 4 8 12]; %%% map stim order onto subplot
     figLabel = 'gratings';
     npanel = 12; nrow = 3; ncol = 4; offset = 0;

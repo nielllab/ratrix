@@ -95,6 +95,7 @@ if cfg.syncToVid
     for i = 1:length(phasesync);
         phasetimes(i)= max(find(stim<=phasesync(i)+2))/60;  %%% find frame trigger that occurred right before this, and convert to time bsed on stim framerate (60Hz) // need offset of two since phase trigger goes up/down before
     end
+    vidframetimes = [];
     
 else %%% leave timing intact and adjust video stim times to acq rate
     

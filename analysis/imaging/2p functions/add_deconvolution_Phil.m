@@ -31,7 +31,7 @@ for i = 1:length(ops.planesToProcess)
     ops = addfields(ops, dat.ops);
     
     % set up options for deconvolution
-    ops.imageRate    = getOr(ops0, {'imageRate'}, 0.37); % total image rate (over all planes)
+    ops.imageRate    = getOr(ops0, {'imageRate'}, 0.1); % total image rate (over all planes)
     ops.sensorTau    = getOr(ops0, {'sensorTau'}, 2); % approximate timescale in seconds
     ops.sameKernel   = getOr(ops0, {'sameKernel'}, 1); % 1 for same kernel per plane, 0 for individual kernels (not recommended)
     ops.sameKernel   = getOr(ops0, {'sameKernel'}, 1);

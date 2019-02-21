@@ -1,4 +1,4 @@
-function img = deconvg6s(frames, dt);
+function img = deconvg6sParallel(frames, dt);
 %dt = 0.1
 t = (0:9)*dt;
 tau = [0.05 0.55];
@@ -25,9 +25,7 @@ imgdecon = cell(size(frames,4),1);
 tic
 
 parfor y = 1:size(frames,4)
-for x = 1:size(frames,3)
-    
-    
+    for x = 1:size(frames,3)
         d = deconvlucy(squeeze(frames(1,:,x,y)),psf);
         imgdecon{y}(1,1:dlength-4,x) = d(5:dlength); %changed from 6:dlength pp/cmn 020618
     end

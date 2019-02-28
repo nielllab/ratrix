@@ -210,11 +210,16 @@ for i = 1:length(alluse);
 end
 
 
+%stim on 11:20
+Mean_runDistribution = nanmean(runDistribution(:,[(1:19) (1:10)]));%%%%%cell array for each session..  reshape?.
+Std_runDistribution= nanstd(runDistribution(:,[(1:19) (1:10)]));
 
-Mean_runDistribution = nanmean(runDistribution(:,(1:19)));%%%%%cell array for each session..  reshape?.
-Std_runDistribution= nanstd(runDistribution(:,(1:19)));
 
-figure; errorbar(Mean_runDistribution,Std_runDistribution);hold on; ylim([ -0.2 4000]);title('average run spreed passive')  %plot runspeed accross trials
+figure; errorbar(Mean_runDistribution,Std_runDistribution);hold on; xlim([5 30]); ylim([ -0.2 4000]);title('average run spreed passive')  %plot runspeed accross trials
+
+
+Std_error_runDistribution= (nanstd(runDistribution(:,[(1:19) (1:10)]))/sqrt(51));%hardcoded #sessions here
+figure; errorbar(Mean_runDistribution,Std_error_runDistribution);hold on; xlim([5 30]); ylim([ -0.2 2500]);title('average run spreed passive')  %plot runspeed accross trials
 
 
 % for i=1:length(alluse)
@@ -426,7 +431,73 @@ title('all conds INCORRECTS')
 
 keyboard
 
-%sortInvariant = 
+%%% plot correlations of clusters
+cmap = cbrewer('div','RdBu',64); %%% redblue color map
+
+sortInvariant = 0.5*(allData(:,1:61) + allData(:,62:122));%average across two orientations
+sortResp = sortInvariant(sortClust>=0,:); %%% can select certain clusters here if you want
+figure
+imagesc(sortResp);
+
+cc = corrcoef(sortResp');  %%% correlation of full trace
+figure
+imagesc(cc,[-0.75 0.75]); colormap(cmap); title('full trace correlation')
+
+%%% randomize order so sessions don't create artificial clumps
+for i = 1:3
+    j = find(sortClust==i);
+    sortResp(j(myshuffle(length(j))),:) = sortResp(j,:);
+end
+
+%%% select specific time intervals as discriminants
+clear discrim
+discrim(:,1) = mean(sortResp(:,12:15),2);
+discrim(:,2) = mean(sortResp(:,24:35),2);
+discrim(:,3) = mean(sortResp(:,1:9),2);
+
+
+%%% select full time ranges (don't average within) for key periods (pre, onset, sustain)
+discrim = sortResp(sortClust>0,[3:6 12:15 24:37]);
+figure
+cc =corrcoef(discrim');
+imagesc(cc,[-0.75 0.75]); colormap(flipud(cmap));
+
+for i = 1:3
+   respClust = sortClust(sortClust>0);
+   data = cc(respClust==i,respClust==i);
+   corrs(1,i) = mean(data(:));
+   corrserr(1,i) = std(data(:))/sqrt(sum(respClust==i));
+   
+   data =cc(respClust==i,respClust~=i);
+   corrs(2,i) = mean(data(:));
+   corrserr(2,i) = std(data(:))/sqrt(sum(respClust==i));
+
+end
+
+figure
+barweb(corrs',corrserr'); ylabel('correlation');
+legend('within','across');
+
+figure
+barweb(corrs(1,:),corrserr(1,:)); hold on; barweb(corrs(2,:),corrserr(2,:)); 
+
+figure
+bar(corrs(1,:)); hold on; bar(corrs(2,:),'r');
+errorbar(1:3,corrs(1,:),corrserr(1,:),'k.'); errorbar(1:3,corrs(2,:),corrserr(2,:),'k.');
+
+
+
+
+
+%%% create "transient/sustain index" and plot histogram
+d_ind = (discrim(:,1)-discrim(:,2))./(discrim(:,1)+discrim(:,2));
+figure
+drange = [-0.95:0.1:1]; clear dhist
+for i = 1:2
+    dhist(:,i) = hist(d_ind(sortClust ==i ),drange);
+end
+bar(drange, dhist);
+%%%
 
 for cond = 1:4
     figure           % sortCentered vs centered?
@@ -1337,6 +1408,18 @@ end
 [p,tbl,stats]=kruskalwallis(ModulationSuppCell)
 c = multcompare(stats)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+% clear ModulationAllCell 
+% ModulationAllCell = nan(4256,3);
+% for j=1:3
+% clear respM
+% respM=TaskMod{j,:};
+% ModulationAllCell(1:length(respM),j)=respM;
+% end
+% %%%%stats
+% [p,tbl,stats]=kruskalwallis(ModulationAllCell)
+% c = multcompare(stats)
+
 
   %%%distribution of task diff  
 for j=1:3

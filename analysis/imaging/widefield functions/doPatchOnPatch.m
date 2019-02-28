@@ -274,18 +274,18 @@ for f = 1:length(use)
                 figure;
                 colormap jet
                 subplot(1,2,1)
-                imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),dfrangesit)
+                imagesc(squeeze(nanmean(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,:),3),5),6)),dfrangesit)
                 axis off; axis equal
                 title('center sit')
                 subplot(1,2,2)
-                imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,3,:,1),3),5)),dfrangesit)
+                imagesc(squeeze(nanmean(nanmean(nanmean(trialcycavg(:,:,peakWindow,3,:,:),3),5),6)),dfrangesit)
                 axis off; axis equal
                 title('surround sit')
 
                 figure;
                 colormap jet
                 subplot(1,2,1)
-                imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),dfrangesit)
+                imagesc(squeeze(nanmean(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,:),3),5),6)),dfrangesit)
                 axis off; axis equal
                 title('select center point of response')
                 [y x] = ginput(1);
@@ -311,7 +311,7 @@ for f = 1:length(use)
                     figure;
                     colormap jet
                     subplot(1,2,1)
-                    imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),dfrangesit)
+                    imagesc(squeeze(nanmean(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,:),3),5),6)),dfrangesit)
                     axis off; axis equal
                     title('select center point of response')
                     hold on
@@ -330,18 +330,18 @@ for f = 1:length(use)
                     figure;
                     colormap jet
                     subplot(1,2,1)
-                    imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),dfrangesit)
+                    imagesc(squeeze(nanmean(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,:),3),5),6)),dfrangesit)
                     axis off; axis equal
                     title('center sit')
                     subplot(1,2,2)
-                    imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,3,:,1),3),5)),dfrangesit)
+                    imagesc(squeeze(nanmean(nanmean(nanmean(trialcycavg(:,:,peakWindow,3,:,:),3),5),6)),dfrangesit)
                     axis off; axis equal
                     title('surround sit')
 
                     figure;
                     colormap jet
                     subplot(1,2,1)
-                    imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),dfrangesit)
+                    imagesc(squeeze(nanmean(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,:),3),5),6)),dfrangesit)
                     axis off; axis equal
                     title('select center point of response')
                     [y x] = ginput(1);
@@ -388,7 +388,7 @@ for f = 1:length(use)
                 figure;
                 colormap jet
                 subplot(1,2,1)
-                imagesc(squeeze(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,1),3),5)),dfrangesit)
+                imagesc(squeeze(nanmean(nanmean(nanmean(trialcycavg(:,:,peakWindow,2,:,:),3),5),6)),dfrangesit)
                 axis off; axis equal
                 title('select center point of response')
                 hold on

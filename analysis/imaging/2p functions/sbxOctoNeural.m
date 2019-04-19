@@ -129,7 +129,7 @@ stdImg= stdImg(buffer(1,1):(end-buffer(1,2)),buffer(2,1):(end-buffer(2,2)),:);
 greenCrop = double(stdImg);
 
 thresh = prctile(greenCrop(:),95)/100; %%% cut out points that are 100x dimmer than peak
-dfofInterp(repmat(greenCrop,[1 1 size(dfofInterp,3)])<thresh)=0;
+%dfofInterp(repmat(greenCrop,[1 1 size(dfofInterp,3)])<thresh)=0;
 
 figure
 imagesc(greenCrop>thresh);
@@ -728,7 +728,21 @@ if nstim==13 %%% gratings 1 tf
     subplot(2,2,4); imshow(hvImg); title('h vs v')
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
+end
+
+
+if nstim==17 %%% gratings 1 tf; either 4sfx4orient, or 2sf x 8 orient
+    range = [-0.05 0.2]; %%% colormap range
+    loc = [1 5 9 13 2 6 10 14 3 7 11 15 4 8 12 16]; %%% map stim order onto subplot
+    figLabel = 'gratings';
+    npanel = 16; nrow = 4; ncol = 4; offset = 0;
+    pixPlot;
+    pixPlotWeight;
     
+    figLabel = 'flicker';
+    npanel = 1; nrow = 1; ncol = 1; offset = 16;
+    pixPlot;
+    pixPlotWeight;
     
 end
 

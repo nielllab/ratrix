@@ -1,4 +1,4 @@
-function varargout = sutterOctoNeural(varargin)
+function varargout = sutterOctoSTA(varargin)
 %% reads in sutter data, extracts cell traces, and aligns to stim
 % optimized for octopus optic lobe with cal520 label
 % if sutterOctoNeural is called as a function
@@ -206,7 +206,7 @@ for rep =1:4 %%% 4 conditions: On, Off, fullfield On, fullfield off
             imagesc(sta',[-0.1 0.1]); colormap jet;  set(gca,'Visible','off');
             set(gca,'LooseInset',get(gca,'TightInset'));
             
-            
+            staAll(:,:,nx,ny,rep) = sta';
         end
     end
 
@@ -214,6 +214,25 @@ for rep =1:4 %%% 4 conditions: On, Off, fullfield On, fullfield off
     
     drawnow
 end
+
+
+pnum=0;
+figure
+for nx = 1:length(xrange);
+    for ny = 1:length(yrange)
+        pnum =pnum+1;
+        subplot(length(xrange),length(yrange),pnum);
+        im = zeros(size(staAll,1),size(staAll,2),3);
+        im(:,:,1) = staAll(:,:,nx,ny,1)/0.1;
+        im(:,:,2) = -staAll(:,:,nx,ny,2)/0.1;
+        im(:,:,3) = staAll(:,:,nx,ny,1)/0.1; % magenta
+        imshow(imresize(im,0.5));
+        set(gca,'LooseInset',get(gca,'TightInset'))
+        drawnow
+    end
+end
+
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 
 %%% time to select points! either by hand or automatic

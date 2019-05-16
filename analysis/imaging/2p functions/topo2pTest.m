@@ -5,6 +5,7 @@
 
 % %%% reads raw images, calculates dfof, and aligns to stim sync
 close all; clear all;dbstop if error
+sbxaligndir
 fileName = uigetfile('*.sbx','topox file');
 
 dt = 0.1; %%% resampled time frame

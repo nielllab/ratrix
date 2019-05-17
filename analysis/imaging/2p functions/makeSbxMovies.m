@@ -5,6 +5,8 @@ spatialBin = input('spatial binning factor: ');
 temporalBin = input('temporal binning factor: ');
 fullMovie = input('make full movie? (0/1) :');
 cycMovie = input('make cycle avg movie? (0/1) :');
+chan = input('pmt channel (1/2) : ');
+
 if cycMovie
     cycLength =input('cycle length (secs) :');
 end
@@ -18,7 +20,12 @@ display('reading data')
 tic
 alignData=1; showImages=1;
 
-[img framerate] = readAlign2p_sbx(fname(1:end-4),alignData,showImages);
+[img framerate] = readAlign2p_sbx(fname(1:end-4),alignData,showImages,chan);
+if isnan(img)
+    display('error reading data')
+    return
+end
+
 toc
 %edit  img = img(:,:,1:round(end/8));
 

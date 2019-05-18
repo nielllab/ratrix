@@ -1,5 +1,7 @@
 [f p] = uigetfile({'*.sbx'},'sbx file');
 fname = fullfile(p,f)
+d = sbxread(fname(1:end-4),1,1); %%% read in one frame to determine # of channels
+display(sprintf('%d channels',size(d,1)))
 
 spatialBin = input('spatial binning factor: ');
 temporalBin = input('temporal binning factor: ');

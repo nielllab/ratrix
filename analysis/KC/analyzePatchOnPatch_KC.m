@@ -3,7 +3,7 @@ close all
 clear all
 dbstop if error
 
-%select batch file
+%select batch file1
 batchPatch_KC
 cd(pathname)
 moviename = 'C:\patchonpatch10min';

@@ -103,6 +103,7 @@ else %%% leave timing intact and adjust video stim times to acq rate
     dfofInterp = dfof;
     
     phasesync = find( info.event_id ==2 | info.event_id==3); %%% get phase trigger signals
+   % phasesync = find( info.event_id ==2);
     if info.frame(phasesync(1))==0  %%% something funny happens at start giving transition on first frame
         phasesync = phasesync(2:end);
     end

@@ -135,15 +135,23 @@ figure
 imagesc(greenCrop>thresh);
 
 % number of frames per cycle
-cycLength = mean(diff(phasetimes))/dt;
+cycLength = median(diff(phasetimes))/dt;
 % number of frames in window around each cycle. min of 4 secs, or actual cycle length + 2
 cycWindow = round(max(2/dt,cycLength));
 
 stimTimes = phasetimes;   %%% we call them phasetimes in behavior, but better to call it stimTimes here
 startFrame = round((stimTimes(1)-1)/dt);
 dfofInterp = dfofInterp(:,:,startFrame:end);   %%% movie starts 1 sec before first stim
-stimTimes = stimTimes-stimTimes(1)+1;
+stimTimesOld = stimTimes-stimTimes(1)+1;
+% stimTimes = stimTimes(stimTimes/dt < size(dfofInterp,3)-cycWindow - 1);
+%%% hack to account for bad stimtimes
+stimTimes = 1:cycLength*dt:(size(dfofInterp,3)-cycWindow - 2)*dt;
+stimTimes = stimTimes(stimTimes<max(stimTimesOld));
 
+
+figure
+plot(diff(stimTimes)); hold on; plot(diff(stimTimesOld)); title('time between stim on 2p trigs');ylabel('secs');
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 % Get File Path for stimulus record file
 if ~isfield(Opt,'fStim')
@@ -154,7 +162,8 @@ end
 %%% need to figure out whether to trim off beginning
 load(fullfile(Opt.pStim,Opt.fStim),'stimRec');
 alignRecs =1;
-nCycles = floor(size(dfofInterp,3)/cycLength)-ceil((cycWindow-cycLength)/cycLength)-2;  %%% trim off last stims to allow window for previous stim
+%nCycles = floor(size(dfofInterp,3)/cycLength)-ceil((cycWindow-cycLength)/cycLength)-2;  %%% trim off last stims to allow window for previous stim
+nCycles  = length(stimTimes);
 stimT = stimRec.ts - stimRec.ts(1);
 for i = 1:length(stimRec.cond)
     if stimRec.cond(i) == 0
@@ -163,6 +172,18 @@ for i = 1:length(stimRec.cond)
         pastCond = stimRec.cond(i);
     end
 end
+
+figure
+plot(stimT(1:end-1),diff(stimRec.cond));
+hold on
+plot(cycLength*dt*(1:nCycles),0,'*');
+
+figure
+plot(diff(stimT(stimT>0)));
+title('differencee of psychstim frames'); ylabel('secs')
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+
 
 for i = 1:nCycles
     stimOrder(i) = stimRec.cond(min(find(stimT>((i-1)*cycLength*dt+0.1))));

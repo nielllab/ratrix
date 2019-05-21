@@ -145,7 +145,7 @@ dfofInterp = dfofInterp(:,:,startFrame:end);   %%% movie starts 1 sec before fir
 stimTimesOld = stimTimes-stimTimes(1)+1;
 % stimTimes = stimTimes(stimTimes/dt < size(dfofInterp,3)-cycWindow - 1);
 %%% hack to account for bad stimtimes
-stimTimes = 1:cycLength*dt:(size(dfofInterp,3)-cycWindow - 2)*dt;
+stimTimes = 1:cycLength*dt:(size(dfofInterp,3)-cycWindow - 30)*dt;  %%% make sure you have one cycle, plus 3sec padding to be safe, at end
 stimTimes = stimTimes(stimTimes<max(stimTimesOld));
 
 

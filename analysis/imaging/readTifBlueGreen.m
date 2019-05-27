@@ -54,7 +54,7 @@ end
 
 
 psfilenameFinal = [basename '.ps'];
-psfilename = 'C:\temp.ps';
+psfilename = 'D:\temp.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
 figure

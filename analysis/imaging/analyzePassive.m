@@ -1,18 +1,19 @@
-
-
+close all
 clear all
+warning off
 %batchPassive2015;
 %batchTopography
-batchDOI0722
+% batchDOI0722
 %batchTopoFrontiers
-close all
+batchMandiEnrichment
 
+psfilename = 'D:\Mandi\tempWF.ps';
+if exist(psfilename,'file')==2;delete(psfilename);end
 
-
-   alluse = find(strcmp({files.inject},'saline') & strcmp({files.rignum},'rig1') & strcmp({files.timing},'post') &  strcmp({files.notes},'good imaging session')  ) 
+   alluse = find(strcmp({files.rignum},'rig2') & strcmp({files.notes},'good imaging session')) 
   
 length(alluse)
-alluse=alluse(1:5)
+% alluse=alluse(1:5)
 %alluse=alluse(end-5:end);
 allsubj = unique({files(alluse).subj})
 
@@ -34,7 +35,13 @@ clear map merge
 x0 =0; y0=0; sz = 128;
 doTopography;
 
+disp('doing 3x2y')
+rep=2;
 doGratingsNew;
+disp('doing 4x3y')
+rep=4;
+doGratingsNew;
+
 % %%% analyze looming
 % for f = 1:length(use)
 %     loom_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'loom');
@@ -59,4 +66,10 @@ if f~=0
     save(fullfile(p,f),'allsubj','sessiondata','shiftData','fit','mnfit','cycavg');
 end
 
+try
+    dos(['ps2pdf ' psfilename ' "' [f '.pdf'] '"'])
+catch
+    display('couldnt generate pdf');
+end
 
+delete(psfilename);

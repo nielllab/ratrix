@@ -22,4 +22,6 @@ files(n).rignum = 'rig2'; %rig1 or rig2
 files(n).monitor = 'vert'; %land or vert
 files(n).label = 'camk2 gc6';
 files(n).notes = 'good imaging session';
+
 %%
+

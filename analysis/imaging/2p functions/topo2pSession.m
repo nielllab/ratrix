@@ -33,7 +33,7 @@ img = mat2im(mod(angle(map),2*pi),hsv,[pi/2  (2*pi -pi/4)]);
 img = img.*repmat(amp,[1 1 3]);
 mapimg= figure
 figure
-imshow(imresize(img,0.5))
+imshow(imresize(img,1))
 colormap(hsv); colorbar
 
 polarImg = img;
@@ -56,7 +56,7 @@ imagesc(cycAvg(:,:,i),[-0.1 0.5]); colormap gray; axis equal
 mov(i) = getframe(gcf);
 end
 
-cycAvgT = mean(mean(cycAvg,2),1);
+cycAvgT = mean(mean(cycAvg,2),1); %%%  should find a way to select pixels above a certain intensity, so we don't average noise
 figure
 plot(squeeze(cycAvgT(1,1,:)));
 title('timecourse cyc avg');

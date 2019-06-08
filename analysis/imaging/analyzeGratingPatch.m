@@ -46,7 +46,7 @@ nx=ceil(sqrt(acqdurframes+1)); %%% how many rows in figure subplot
 figure
 map=0;
 for f=1:acqdurframes
-    cycavg(:,:,f) = mean(img(:,:,(f+trials*acqdurframes/2):acqdurframes:end),3);
+    cycavg(:,:,f) = mean(img(:,:,f:acqdurframes:end),3);
     subplot(nx,nx,f)
     imagesc(squeeze(cycavg(:,:,f)),[-0.02 0.02])
     axis off
@@ -63,7 +63,7 @@ set(gca,'LooseInset',get(gca,'TightInset'))
 
 
 if exist('psfilename','var')
-    set(gcf, 'PaperPositionMode', 'auto');
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
     print('-dpsc',psfilename,'-append');
 end
 
@@ -78,7 +78,7 @@ plot((1:length(tcourse))/600,angle(conv(fourier,ones(1,600),'same')));
 ylim([-pi pi])
 ylabel('phase'); xlabel('mins')
 if exist('psfilename','var')
-    set(gcf, 'PaperPositionMode', 'auto');
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
     print('-dpsc',psfilename,'-append');
 end
 
@@ -124,7 +124,7 @@ if length(unique(tf))>1
 end
 
 if exist('psfilename','var')
-    set(gcf, 'PaperPositionMode', 'auto');
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
     print('-dpsc',psfilename,'-append');
 end
 
@@ -181,7 +181,7 @@ if bkgrat
     end
     
     if exist('psfilename','var')
-        set(gcf, 'PaperPositionMode', 'auto');
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilename,'-append');
     end
     
@@ -300,6 +300,10 @@ if length(xrange)==4 & length(yrange)==3
             set(gca,'LooseInset',get(gca,'TightInset'))
         end
     end
+    if exist('psfilename','var')
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+        print('-dpsc',psfilename,'-append');
+    end
 end
 
 
@@ -316,7 +320,7 @@ for i = 1:length(sfrange)
     end
 end
 if exist('psfilename','var')
-    set(gcf, 'PaperPositionMode', 'auto');
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
     print('-dpsc',psfilename,'-append');
 end  
 
@@ -334,61 +338,67 @@ subplot(1,2,1)
 bar(mv);
 xlabel('subject')
 ylabel('fraction running')
+ylim([0 1])
 subplot(1,2,2)
 bar([mean(trialspeed(run)) mean(trialspeed(sit))])
 set(gca,'xticklabel',{'run','sit'})
 ylabel('speed')
 if exist('psfilename','var')
-    set(gcf, 'PaperPositionMode', 'auto');
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
     print('-dpsc',psfilename,'-append');
 end
 
 
-% figure
-% for i = 1:length(xrange)
-%     for j=1:length(yrange)
-%         subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
-%         d=squeeze(mean(mean(avgtrialcourse(i,j,:,:,:),4),3));
-%         plot(d-min(d)); axis([1 18 0 0.015])
-%         set(gca,'Xticklabel',[]); set(gca,'Yticklabel',[]);
-%         set(gca,'LooseInset',get(gca,'TightInset'))
-%     end
-% end
+figure
+for i = 1:length(xrange)
+    for j=1:length(yrange)
+        subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
+        d=squeeze(mean(mean(avgtrialcourse(i,j,:,:,:),4),3));
+        plot(d-min(d)); axis([1 18 0 0.015])
+        set(gca,'Xticklabel',[]); set(gca,'Yticklabel',[]);
+        set(gca,'LooseInset',get(gca,'TightInset'))
+    end
+end
+if exist('psfilename','var')
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    print('-dpsc',psfilename,'-append');
+end
 
 %%% plot x/y maps
-% if ~bkgrat
-%     figure
-%     for i = 1:length(xrange)
-%         for j=1:length(yrange)
-%             subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
-%             imagesc(squeeze(mean(mean(tuning(:,:,i,j,:,:),6),5)),range); colormap jet
-%             % title(sprintf('%0.2f %0.2f',xrange(i),yrange(j)))
-%             axis off; axis equal
-%             hold on; plot(ypts,xpts,'w.','Markersize',2)
-%             set(gca,'LooseInset',get(gca,'TightInset'))
-%         end
-%     end
-% else
-%     for k = 1:2
-%         figure
-%         for i = 1:length(xrange)
-%             for j=1:length(yrange)
-%                 subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
-%                 imagesc(squeeze(mean(mean(tuning(:,:,i,j,k,:),6),5)),range);
-%                 % title(sprintf('%0.2fcpd %0.2fhz',sfrange(i),tfrange(j)))
-%                 axis off; axis equal
-%                 hold on; plot(ypts,xpts,'w.','Markersize',2)
-%                 set(gca,'LooseInset',get(gca,'TightInset'))
-%             end
-%         end
-%         title(sprintf('sf = %d',k));
-%     end
-% end
-% 
-% if exist('psfilename','var')
-%     set(gcf, 'PaperPositionMode', 'auto');
-%     print('-dpsc',psfilename,'-append');
-% end
+if ~bkgrat
+    figure
+    for i = 1:length(xrange)
+        for j=1:length(yrange)
+            subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
+            imagesc(squeeze(mean(mean(tuning(:,:,i,j,:,:),6),5)),range); colormap jet
+%             title(sprintf('%0.2f %0.2f',xrange(i),yrange(j)))
+            axis off; axis equal
+            hold on; plot(ypts,xpts,'w.','Markersize',2)
+            set(gca,'LooseInset',get(gca,'TightInset'))
+        end
+    end
+    title('x/y maps')
+else
+    for k = 1:2
+        figure
+        for i = 1:length(xrange)
+            for j=1:length(yrange)
+                subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
+                imagesc(squeeze(mean(mean(tuning(:,:,i,j,k,:),6),5)),range);
+                % title(sprintf('%0.2fcpd %0.2fhz',sfrange(i),tfrange(j)))
+                axis off; axis equal
+                hold on; plot(ypts,xpts,'w.','Markersize',2)
+                set(gca,'LooseInset',get(gca,'TightInset'))
+            end
+        end
+        title(sprintf('sf = %d',k));
+    end
+end
+
+if exist('psfilename','var')
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    print('-dpsc',psfilename,'-append');
+end
 
 
     

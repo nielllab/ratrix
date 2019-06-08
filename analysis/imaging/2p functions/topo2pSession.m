@@ -20,7 +20,7 @@ nframes = min(size(dfofInterp,3),3000);  %%% limit topoY data to 5mins to avoid 
 dfofInterp = dfofInterp(:,:,1:nframes);
 
 %%% generate pixel-wise fourier map
-cycLength = cycLength/dt;
+cycLength = cycLength/dt;  
 map = 0;
 for i= 1:size(dfofInterp,3);
     map = map+dfofInterp(:,:,i)*exp(2*pi*sqrt(-1)*i/cycLength);
@@ -37,6 +37,8 @@ imshow(imresize(img,1))
 colormap(hsv); colorbar
 
 polarImg = img;
+
+display('saving')
 save(sessionName,'polarImg','map','dfofInterp','-append')
 
 if exist('psfile','var')

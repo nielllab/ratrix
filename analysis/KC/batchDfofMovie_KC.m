@@ -13,6 +13,7 @@ for f = 1:length(files)
     end   
     
     
+    %uncomment for topox
     if redo  || isempty([pathname files(f).topox]) || ~exist([pathname files(f).topox],'file')
         try
             dfofMovie([datapathname files(f).topoxdata],rig);
@@ -26,7 +27,7 @@ for f = 1:length(files)
         sprintf('skipping %s',files(f).topox)
     end
     
- 
+    %uncomment for topoy
     if redo || isempty([pathname files(f).topoy]) || ~exist([pathname files(f).topoy],'file')
         try
             dfofMovie([datapathname files(f).topoydata],rig);
@@ -39,6 +40,34 @@ for f = 1:length(files)
     else
         sprintf('skipping %s',files(f).topoy)
     end
+    
+    %uncomment for 3x2y
+    if redo || isempty([pathname files(f).grating3x2y6sf4tf]) || ~exist([pathname files(f).grating3x2y6sf4tf],'file')
+        try
+            dfofMovie([datapathname files(f).grating3x2y6sf4tfdata],rig);
+        catch exc
+            sprintf('couldnt do %s',files(f).grating3x2y6sf4tfdata)
+            nerr=nerr+1;
+            errmsg{nerr}=sprintf('couldnt do %s',files(f).grating3x2y6sf4tfdata)
+            errRpt{nerr}=getReport(exc,'extended')
+        end
+    else
+        sprintf('skipping %s',files(f).grating3x2y6sf4tfdata)
+    end
+    
+    %uncomment for 4x3y
+%     if redo || isempty([pathname files(f).grating4x3y6sf3tf]) || ~exist([pathname files(f).grating4x3y6sf3tf],'file')
+%         try
+%             dfofMovie([datapathname files(f).grating4x3y6sf3tfdata],rig);
+%         catch exc
+%             sprintf('couldnt do %s',files(f).grating4x3y6sf3tfdata)
+%             nerr=nerr+1;
+%             errmsg{nerr}=sprintf('couldnt do %s',files(f).grating4x3y6sf3tfdata)
+%             errRpt{nerr}=getReport(exc,'extended')
+%         end
+%     else
+%         sprintf('skipping %s',files(f).grating4x3y6sf3tfdata)
+%     end
 
 %     if redo || isempty([pathname files(f).fourxthreey]) || ~exist([pathname files(f).fourxthreey],'file')
 %         try

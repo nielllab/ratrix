@@ -1,16 +1,27 @@
+%% analyzePassive
 close all
 clear all
 warning off
+
+%% choose batch file and filter experiments w/batch file fields
+
+batch4x3y_KC %Kris' batch file
+cd(pathname)
+% batchMandiEnrichment %Mandi's batch file
+
+%%%old batch files
 %batchPassive2015;
 %batchTopography
-% batchDOI0722
+%batchDOI0722
 %batchTopoFrontiers
-batchMandiEnrichment
 
-psfilename = 'D:\Mandi\tempWF.ps';
-if exist(psfilename,'file')==2;delete(psfilename);end
 
-   alluse = find(strcmp({files.rignum},'rig2') & strcmp({files.notes},'good imaging session')) 
+%pick animals for Kristen
+alluse = find(strcmp({files.controlvirus},'no') & strcmp({files.inject},'CLOZ') & strcmp({files.dose},'0.5 mg/kg')...
+    & strcmp({files.timing},'pre') & strcmp({files.notes},'good data'))  
+
+%pick animals for Mandi
+% alluse = find(strcmp({files.condition},'enriched') & strcmp({files.notes},'good imaging session'))
   
 length(alluse)
 % alluse=alluse(1:5)
@@ -18,6 +29,8 @@ length(alluse)
 allsubj = unique({files(alluse).subj})
 
 
+psfilename = 'D:\Mandi\tempWF.ps';
+if exist(psfilename,'file')==2;delete(psfilename);end
 
 %%% use this one for subject by subject averaging
 %for s = 1:length(allsubj)
@@ -35,13 +48,19 @@ clear map merge
 x0 =0; y0=0; sz = 128;
 doTopography;
 
+%% pick which gratings analysis to run
+
+%uncomment for 3x2y
 disp('doing 3x2y')
 rep=2;
 doGratingsNew;
-disp('doing 4x3y')
-rep=4;
-doGratingsNew;
 
+% uncomment for 4x3y
+% disp('doing 4x3y')
+% rep=4;
+% doGratingsNew;
+
+%%
 % %%% analyze looming
 % for f = 1:length(use)
 %     loom_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'loom');
@@ -67,7 +86,7 @@ if f~=0
 end
 
 try
-    dos(['ps2pdf ' psfilename ' "' [f '.pdf'] '"'])
+    dos(['ps2pdf ' psfilename ' "' [fullfile(p,f) '.pdf'] '"'])
 catch
     display('couldnt generate pdf');
 end

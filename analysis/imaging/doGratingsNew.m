@@ -43,10 +43,16 @@ x=0;
             if ~exist('sp','var')
                 sp =0;stimRec=[];
             end
+            load(files(use(f)).moviename3x2y,'isi','duration')
+            imagerate = files(use(f)).imagerate;
             dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
-            [ph amp data ft cyc] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
-                'C:\grating3x2y6sf4tf_021215_20min',21:25,14:16,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
-        elseif rep==3
+%             [ph amp data ft cyc] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
+%                 files(use(f)).gratmoviename,1:round(imagerate*isi/2),imagerate*isi+1:imagerate*(isi+duration),...
+%                 xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
+              [ph amp data ft cyc] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
+                files(use(f)).moviename3x2y,17:18,10:12,...
+                xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
+      elseif rep==3
             load ([pathname files(use(f)).behavGratings ], 'dfof_bg','sp','stimRec','frameT')
             zoom = 260/size(dfof_bg,1);
             if ~exist('sp','var')
@@ -64,13 +70,14 @@ x=0;
                 end
                 dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
                 [ph amp data ft cyc tuning4x3y(f,:,:,:,:,:,:) sftcourse(:,:,:,f) trialcycavg trialcycavgRun trialcycavgSit ] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
-                    'C:\grating4x3y5sf3tf_short011315.mat',16:17,10:11,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
+                    files(use(f)).moviename4x3y,16:17,10:11,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
             end
 
         end
         
         
         sp = conv(sp,ones(50,1),'same')/50;
+%         sfrange=unique(sf); tfrange=unique(tf);
         %sp_all(1:13000,f) = sp;
         mv(f) = sum(sp>500)/length(sp);
         if rep~=3
@@ -87,7 +94,7 @@ x=0;
             plotGratingRespFit(squeeze(shiftData(:,:,:,f)),squeeze(shiftData(:,:,5,f)+shiftData(:,:,6,f)),squeeze(fit(:,:,:,f)),rep,xpts,ypts,[files(use(f)).subj ' ' files(use(f)).expt])
             subplot(2,3,6)
             title([files(use(f)).subj ' ' files(use(f)).expt])
-            set(gcf, 'PaperPositionMode', 'auto');
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
             print('-dpsc',psfilename,'-append');
         end
         
@@ -103,9 +110,10 @@ x=0;
                 hold on
                 plot(squeeze(mean(sftcourse(sf,tf,:,:),4)),'k','Linewidth',2);
                 axis([1 18 0 0.015]); set(gca,'Xticklabel',[]); set(gca,'Yticklabel',[]);
+%                 title(sprintf('%0.2fcpd %dHz',sfrange(sf),tfrange(tf)))
             end
         end
-               set(gcf, 'PaperPositionMode', 'auto');
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
             print('-dpsc',psfilename,'-append');
             
         alltcoursedata = reshape(sftcourse,size(sftcourse,1)*size(sftcourse,2)*size(sftcourse,3),size(sftcourse,4));
@@ -114,8 +122,8 @@ x=0;
         colormap jet; colorbar
         title('timecourse correlation');
         xlabel('subj'); ylabel('subj')
-        set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfilename,'-append');
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+        print('-dpsc',psfilename,'-append');
             
     end
 
@@ -130,7 +138,7 @@ x=0;
     plotGratingRespFit(median(shiftData,4),median(shiftData(:,:,5,:) + shiftData(:,:,6,:),4),median(fit,4),rep,xpts,ypts,'average')
     subplot(2,3,6)
     title('average')
-    set(gcf, 'PaperPositionMode', 'auto');
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
     print('-dpsc',psfilename,'-append');
     
     
@@ -232,7 +240,7 @@ x=0;
         xlim([1 20]); title('timecourse');
         xlabel('frames')
         
-                      set(gcf, 'PaperPositionMode', 'auto');
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilename,'-append');
         
         %%% 4x3y
@@ -244,7 +252,7 @@ x=0;
         for i = 1:7;
             plot([y(i)-w y(i)-w y(i)+w y(i)+w y(i)-w],[x(i)-w x(i)+w x(i)+w x(i)-w x(i)-w],col(i),'LineWidth',2)
         end
-        legend({'V1','LM','AL','RL','AM','PM','MM'})
+        legend({'V1','MM','LM','AL','RL','AM','PM'})
         
         hold on; plot(ypts,xpts,'w.','Markersize',2); axis off
         
@@ -306,7 +314,7 @@ x=0;
         xlim([1 15]); title('timecourse');
         xlabel('frames')
         
-          set(gcf, 'PaperPositionMode', 'auto');
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilename,'-append');
         %%plot overall cycle average
         
@@ -321,7 +329,7 @@ x=0;
     legend('Total','Run','Sit')
     axis([1 15 -0.05 0.05])
     if exist('psfilename','var')
-        set(gcf, 'PaperPositionMode', 'auto');
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilename,'-append');
     end
         
@@ -371,7 +379,7 @@ x=0;
         xlim([0.75 2.25]); ylim([0 1]); title('sf');     
         xlabel('cpd')
         
-         set(gcf, 'PaperPositionMode', 'auto');
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilename,'-append');
         
         for sf = 1:2
@@ -412,7 +420,7 @@ x=0;
        xlabel('frames')
         end
              
-        set(gcf, 'PaperPositionMode', 'auto');
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilename,'-append');
         
         end %%sf

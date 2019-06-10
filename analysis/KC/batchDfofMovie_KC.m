@@ -1,7 +1,7 @@
 %batchDfofMovie
 errmsg= [];errRpt = {};
 nerr=0;
-redo=1;
+redo=0;
 for f = 1:length(files)
     f  
     tic
@@ -56,17 +56,17 @@ for f = 1:length(files)
     end
     
     %uncomment for 4x3y
-%     if redo || isempty([pathname files(f).grating4x3y6sf3tf]) || ~exist([pathname files(f).grating4x3y6sf3tf],'file')
+%     if redo || isempty([pathname files(f).grating4x3y5sf3tf_short011315]) || ~exist([pathname files(f).grating4x3y5sf3tf_short011315],'file')
 %         try
-%             dfofMovie([datapathname files(f).grating4x3y6sf3tfdata],rig);
+%             dfofMovie([datapathname files(f).grating4x3y5sf3tf_short011315data],rig);
 %         catch exc
-%             sprintf('couldnt do %s',files(f).grating4x3y6sf3tfdata)
+%             sprintf('couldnt do %s',files(f).grating4x3y5sf3tf_short011315data)
 %             nerr=nerr+1;
-%             errmsg{nerr}=sprintf('couldnt do %s',files(f).grating4x3y6sf3tfdata)
+%             errmsg{nerr}=sprintf('couldnt do %s',files(f).grating4x3y5sf3tf_short011315data)
 %             errRpt{nerr}=getReport(exc,'extended')
 %         end
 %     else
-%         sprintf('skipping %s',files(f).grating4x3y6sf3tfdata)
+%         sprintf('skipping %s',files(f).grating4x3y5sf3tf_short011315data)
 %     end
 
 %     if redo || isempty([pathname files(f).fourxthreey]) || ~exist([pathname files(f).fourxthreey],'file')

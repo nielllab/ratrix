@@ -5,7 +5,7 @@ warning off
 
 %% choose batch file and filter experiments w/batch file fields
 
-batch4x3y_KC %Kris' batch file
+batch4x3y_3x2y_KC %Kris' batch file
 cd(pathname)
 % batchMandiEnrichment %Mandi's batch file
 
@@ -17,8 +17,8 @@ cd(pathname)
 
 
 %pick animals for Kristen
-alluse = find(strcmp({files.controlvirus},'no') & strcmp({files.inject},'CLOZ') & strcmp({files.dose},'0.5 mg/kg')...
-    & strcmp({files.timing},'pre') & strcmp({files.notes},'good data'))  
+alluse = find(strcmp({files.controlvirus},'no') & strcmp({files.inject},'CLOZ') & strcmp({files.dose},'1.0 mg/kg')...
+    & strcmp({files.monitor},'land') & strcmp({files.timing},'post') & strcmp({files.notes},'good data'))  
 
 %pick animals for Mandi
 % alluse = find(strcmp({files.condition},'enriched') & strcmp({files.notes},'good imaging session'))
@@ -28,15 +28,17 @@ length(alluse)
 %alluse=alluse(end-5:end);
 allsubj = unique({files(alluse).subj})
 
-
-psfilename = 'D:\Mandi\tempWF.ps';
+psfilename = 'F:\Widefield_Analysis\Kristen\tempWF.ps'; % what is this?
 if exist(psfilename,'file')==2;delete(psfilename);end
+
+% psfilename = 'D:\Mandi\tempWF.ps';
+% if exist(psfilename,'file')==2;delete(psfilename);end
 
 %%% use this one for subject by subject averaging
 %for s = 1:length(allsubj)
 %use = intersect(alluse,find(strcmp({files.subj},allsubj{s})))    
 
-%%% use this one to average all sessions that meet criteria
+%% run doTopography (use this one to average all sessions that meet criteria)
 for s=1:1
 use = alluse;
 

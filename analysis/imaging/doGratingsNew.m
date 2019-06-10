@@ -94,6 +94,7 @@ x=0;
             plotGratingRespFit(squeeze(shiftData(:,:,:,f)),squeeze(shiftData(:,:,5,f)+shiftData(:,:,6,f)),squeeze(fit(:,:,:,f)),rep,xpts,ypts,[files(use(f)).subj ' ' files(use(f)).expt])
             subplot(2,3,6)
             title([files(use(f)).subj ' ' files(use(f)).expt])
+            mtit('fits for retinotopy,sf,tf')
             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
             print('-dpsc',psfilename,'-append');
         end
@@ -101,7 +102,7 @@ x=0;
         
     end
     
-    if rep==4
+    if rep==4 || rep==3
         figure
         for sf = 1:6
             for tf = 1:3
@@ -110,7 +111,7 @@ x=0;
                 hold on
                 plot(squeeze(mean(sftcourse(sf,tf,:,:),4)),'k','Linewidth',2);
                 axis([1 18 0 0.015]); set(gca,'Xticklabel',[]); set(gca,'Yticklabel',[]);
-%                 title(sprintf('%0.2fcpd %dHz',sfrange(sf),tfrange(tf)))
+                mtit('group cycavg for each sf/tf combo')
             end
         end
             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
@@ -144,7 +145,7 @@ x=0;
     
     mnfit = median(fit,4);
     if x==0
-        [fname pname] = uigetfile('*.mat','points file');
+        [fname pname] = uigetfile('*.mat','select points file? cancel to pick points');
         if fname~=0
             load(fullfile(pname, fname));
         else
@@ -239,7 +240,7 @@ x=0;
         end
         xlim([1 20]); title('timecourse');
         xlabel('frames')
-        
+        mtit('tuning for each vis area')
         set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilename,'-append');
         
@@ -313,7 +314,7 @@ x=0;
         end
         xlim([1 15]); title('timecourse');
         xlabel('frames')
-        
+        mtit('tuning for each vis area')
         set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilename,'-append');
         %%plot overall cycle average
@@ -327,7 +328,8 @@ x=0;
     plot(squeeze(nanmean(nanmean(nanmean(nanmean(trialcycavgRun(x(1),y(1),:,:,:,:,:),4),5),6),7)))
     plot(squeeze(nanmean(nanmean(nanmean(nanmean(trialcycavgSit(x(1),y(1),:,:,:,:,:),4),5),6),7)))        
     legend('Total','Run','Sit')
-    axis([1 15 -0.05 0.05])
+    axis([1 15 -0.02 0.15])
+    title('group cycavg running/stationary')
     if exist('psfilename','var')
         set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilename,'-append');
@@ -442,7 +444,10 @@ for i = 1:7
 end
 xlim([1 15]); title('timecourse');
 xlabel('frames')
-
+if exist('psfilename','var')
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    print('-dpsc',psfilename,'-append');
+end
 
 figure
 hold on
@@ -454,8 +459,12 @@ for i = 1:7
     d = dconvd(31:45);
     plot(0.1:0.1:(0.1*length(d)),(circshift(d',7)-min(d))/(max(d)-min(d)),col(i),'LineWidth',2);
 end
-xlim([0.1 1.5]); title('timecourse');
+xlim([0.1 1.5]); title('deconvolved timecourse');
 xlabel('sec')
+if exist('psfilename','var')
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    print('-dpsc',psfilename,'-append');
+end
 
 %
 %

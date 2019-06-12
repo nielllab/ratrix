@@ -38,6 +38,7 @@ x=0;
             [ph amp data ft cyc] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
                 'C:\background3x2y2sf_021215_16minBlank',20:22,14:16,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
         elseif rep==2
+           %  load ([pathname files(use(f)).grating3x2y6sf4tf ], 'dfof_bg','sp','stimRec','frameT')
             load ([pathname files(use(f)).grating3x2y6sf4tf ], 'dfof_bg','sp','stimRec','frameT')
             zoom = 260/size(dfof_bg,1);
             if ~exist('sp','var')
@@ -63,7 +64,7 @@ x=0;
                 'C:\behavStim2sfSmall3366',24:26,18:20,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);   
         elseif rep ==4
             if ~isempty(files(use(f)).grating4x3y6sf3tf)
-                load ([pathname files(use(f)).grating4x3y6sf3tf], 'dfof_bg','sp','stimRec','frameT')
+                load([pathname files(use(f)).grating4x3y6sf3tf], 'dfof_bg','sp','stimRec','frameT')
                 zoom = 260/size(dfof_bg,1);
                 if ~exist('sp','var')
                     sp =0;stimRec=[];

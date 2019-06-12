@@ -16,9 +16,10 @@ cd(pathname)
 %batchTopoFrontiers
 
 
-%pick animals for Kristen
-alluse = find(strcmp({files.controlvirus},'no') & strcmp({files.inject},'CLOZ') & strcmp({files.dose},'1.0 mg/kg')...
-    & strcmp({files.monitor},'land') & strcmp({files.timing},'post') & strcmp({files.notes},'good data'))  
+%pick animals for Kristen 
+% & strcmp({files.dose},'1.0 mg/kg')
+alluse = find(strcmp({files.controlvirus},'no') & strcmp({files.inject},'CLOZ') & strcmp({files.dose},'2.5 mg/kg')  ...
+    & strcmp({files.monitor},'vert') & strcmp({files.timing},'post') & strcmp({files.notes},'good data'))  
 
 %pick animals for Mandi
 % alluse = find(strcmp({files.condition},'enriched') & strcmp({files.notes},'good imaging session'))
@@ -28,7 +29,7 @@ length(alluse)
 %alluse=alluse(end-5:end);
 allsubj = unique({files(alluse).subj})
 
-psfilename = 'F:\Widefield_Analysis\Kristen\tempWF.ps'; % what is this?
+psfilename = 'F:\Widefield_Analysis\Kristen\tempWF.ps'; 
 if exist(psfilename,'file')==2;delete(psfilename);end
 
 % psfilename = 'D:\Mandi\tempWF.ps';
@@ -53,14 +54,14 @@ doTopography;
 %% pick which gratings analysis to run
 
 %uncomment for 3x2y
-disp('doing 3x2y')
-rep=2;
-doGratingsNew;
+% disp('doing 3x2y')
+% rep=2;
+% doGratingsNew;
 
 % uncomment for 4x3y
-% disp('doing 4x3y')
-% rep=4;
-% doGratingsNew;
+disp('doing 4x3y')
+rep=4;
+doGratingsNew;
 
 %%
 % %%% analyze looming

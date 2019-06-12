@@ -1,36 +1,51 @@
 [f p] = uigetfile({'*.sbx'},'sbx file');
 fname = fullfile(p,f)
-d = sbxread(fname(1:end-4),1,1); %%% read in one frame to determine # of channels
-display(sprintf('%d channels',size(d,1)))
 
-spatialBin = input('spatial binning factor: ');
-temporalBin = input('temporal binning factor: ');
-fullMovie = input('make full movie? (0/1) :');
-cycMovie = input('make cycle avg movie? (0/1) :');
-chan = input('pmt channel (1/2) : ');
-
-if cycMovie
-    cycLength =input('cycle length (secs) :');
-end
-movierate = input('framerate :');
-
-[avif avip] = uiputfile({'*.avi'},'output avi file');
-avifname = fullfile(avip,avif)
 
 %%% read in sbx data and perform motion correction (if not already done)
 display('reading data')
 tic
 alignData=1; showImages=1;
 
-[img framerate] = readAlign2p_sbx(fname(1:end-4),alignData,showImages,chan);
-if isnan(img)
-    display('error reading data')
-    return
-end
-
+[img framerate] = readAlign2p_sbx(fname(1:end-4),alignData,showImages);
 toc
-%edit  img = img(:,:,1:round(end/8));
+ img = double(img(:,:,1:round(end/4)));
 
+mn = mean(img,3);
+figure
+imagesc(mn);
+
+delta = img - repmat(mn, [1 1 size(img,3)]);
+dF = delta./repmat(mn, [1 1 size(img,3)]);
+dFsmall = imresize(dF,1/4);
+deltasm = imresize(delta,0.125);
+figure
+imagesc(deltasm(:,:,1))
+
+figure
+imagesc(mean(dFsmall(:,:,1:4),3),[-0.2 0.2]);
+
+imgSmall = imresize(img,1/16);
+figure
+deltaT = (mean(imgSmall(:,:,60:62),3)- mean(imgSmall(:,:,55:57),3) );
+figure
+imagesc(deltaT);
+figure
+plot(mean(deltaT'));
+
+t = 150;
+deltaT = (mean(dFsmall(:,:,t+(5:7)),3)- mean(dFsmall(:,:,t+ (0:2)),3) );
+figure
+imagesc(deltaT,[-.05 0.1]); colormap jet
+figure
+plot(mean(deltaT(:,40:100)'));
+
+keyboard
+
+
+
+
+ 
 %%% spatial downsampling
 display('resizing')
 tic
@@ -60,10 +75,7 @@ if fullMovie
     display('converting to movie')
     cycMov= mat2im(img,gray,[lb ub]);
     mov = immovie(permute(cycMov,[1 2 4 3]));
-   vid = VideoWriter([avifname(1:end-4) '_FULL.avi']);
-% for non-compressed
-%     mov = cycMov(:,:,:,1);
-%     vid = VideoWriter([avifname(1:end-4) '_FULL.avi'],'Grayscale AVI');
+    vid = VideoWriter([avifname(1:end-4) '_FULL.avi']);
     vid.FrameRate=movierate;
     open(vid);
     display('writing movie')
@@ -99,8 +111,8 @@ if cycMovie
     
     cycMov= mat2im(cycAvg,gray,[lb ub]);
     mov = immovie(permute(cycMov,[1 2 4 3]));
-    vid = VideoWriter([avifname(1:end-4) '_cycAvg.avi'],'Grayscale AVI');
-    vid.FrameRate=movierate;
+    vid = VideoWriter([avifname(1:end-4) '_cycAvg.avi']);
+    vid.FrameRate=20;
     open(vid);
     display('writing movie')
     writeVideo(vid,mov);

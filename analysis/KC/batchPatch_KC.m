@@ -1,11 +1,14 @@
 n = 0;
 
-pathname = '\\LANGEVIN\backup\Kristen\winter_19\';
+% pathname = '\\LANGEVIN\backup\Kristen\winter_19\';
 % pathname = 'D:\Kristen\LGN_Dreadds_WF_Imaging\'
-datapathname = '\\LANGEVIN\backup\Kristen\winter_19\';  
+pathname = 'D:\Kristen\'
+% datapathname = '\\LANGEVIN\backup\Kristen\winter_19\';  
 % datapathname = 'D:\Kristen\LGN_Dreadds_WF_Imaging\'
+datapathname = 'D:\Kristen\'
 % outpathname = '\\langevin\backup\Kristen\output_LGN_Dreadds_WF_Imaging\'
-outpathname = '\\LANGEVIN\backup\Kristen\winter_19\';
+% outpathname = '\\LANGEVIN\backup\Kristen\winter_19\';
+outpathname = 'D:\Kristen\'
 %%  
 % pre
 % n=n+1;
@@ -127,7 +130,7 @@ outpathname = '\\LANGEVIN\backup\Kristen\winter_19\';
 % files(n).label = 'camk2 gc6';
 % files(n).notes = 'good data';
 
-%%  
+%%  G6H119RT      **********
 % USE for GROUP analysis
 % pre
 % n=n+1;
@@ -149,9 +152,9 @@ outpathname = '\\LANGEVIN\backup\Kristen\winter_19\';
 % files(n).monitor = 'land';
 % files(n).label = 'camk2 gc6';
 % files(n).notes = 'good data';
-
-% post
-
+% 
+% % post
+% 
 % n=n+1;
 % files(n).subj = 'G6H119RT'; %animal name
 % files(n).expt = '102618'; %date of experiment
@@ -173,9 +176,7 @@ outpathname = '\\LANGEVIN\backup\Kristen\winter_19\';
 % files(n).notes = 'good data'; 
 
 
-%% 
-% UNKNOWN viral expression status (not sectioned yet)
-% CONTROL mouse
+%%  CONTROL virus
 % pre
 % n=n+1;
 % files(n).subj = 'G6H118RT'; %animal name
@@ -445,8 +446,8 @@ outpathname = '\\LANGEVIN\backup\Kristen\winter_19\';
 % files(n).monitor = 'land';
 % files(n).label = 'camk2 gc6';
 % files(n).notes = 'good data';
-%% 
-% pre
+%% G6H127RT       ************
+% % pre
 % n=n+1;
 % files(n).subj = 'G6H127RT'; %animal name
 % files(n).expt = '021319'; %date of experiment
@@ -661,45 +662,176 @@ outpathname = '\\LANGEVIN\backup\Kristen\winter_19\';
 % files(n).monitor = 'land';
 % files(n).label = 'camk2 gc6';
 % files(n).notes = 'good data';
-%%
-n=n+1;
-files(n).subj = 'G6H127LT'; %animal name
-files(n).expt = '021519'; %date of experiment
-files(n).topox= '021519_G6H127LT_RIG2\021519_G6H127LT_RIG2_PRE_TOPOX\021519_G6H127LT_RIG2_PRE_TOPOXmaps.mat'; %where to put dfof
-files(n).topoxdata = '021519_G6H127LT_RIG2\021519_G6H127LT_RIG2_PRE_TOPOX\021519_G6H127LT_RIG2_PRE_TOPOY'; %raw data
-files(n).topoy = '021519_G6H127LT_RIG2\021519_G6H127LT_RIG2_PRE_TOPOY\021519_G6H127LT_RIG2_PRE_TOPOYmaps.mat';
-files(n).topoydata = '021519_G6H127LT_RIG2\021519_G6H127LT_RIG2_PRE_TOPOY\021519_G6H127LT_RIG2_PRE_TOPOY';
-files(n).patchonpatch =  '021519_G6H127LT_RIG2\021519_G6H127LT_RIG2_PRE_PATCHONPATCH\021519_G6H127LT_RIG2_PRE_PATCHONPATCHmaps.mat';
-files(n).patchonpatchdata = '021519_G6H127LT_RIG2\021519_G6H127LT_RIG2_PRE_PATCHONPATCH\021519_G6H127LT_RIG2_PRE_PATCHONPATCH';
-files(n).inject = 'CLOZ'; 
-files(n).dose = '0.5 mg/kg'
-files(n).controlvirus = 'no'
-files(n).timing = 'pre';
-files(n).training = 'naive';
-files(n).area = 'lp';
-files(n).rignum = 'rig2';
-files(n).monitor = 'land';
-files(n).label = 'camk2 gc6';
-files(n).notes = 'good data';
+%% G6H127LT     **************
+% Green light not centered very well
+% n=n+1;
+% files(n).subj = 'G6H127LT'; %animal name
+% files(n).expt = '021519'; %date of experiment
+% files(n).topox= '021519_G6H127LT_RIG2\021519_G6H127LT_RIG2_PRE_TOPOX\021519_G6H127LT_RIG2_PRE_TOPOXmaps.mat'; %where to put dfof
+% files(n).topoxdata = '021519_G6H127LT_RIG2\021519_G6H127LT_RIG2_PRE_TOPOX\021519_G6H127LT_RIG2_PRE_TOPOY'; %raw data
+% files(n).topoy = '021519_G6H127LT_RIG2\021519_G6H127LT_RIG2_PRE_TOPOY\021519_G6H127LT_RIG2_PRE_TOPOYmaps.mat';
+% files(n).topoydata = '021519_G6H127LT_RIG2\021519_G6H127LT_RIG2_PRE_TOPOY\021519_G6H127LT_RIG2_PRE_TOPOY';
+% files(n).patchonpatch =  '021519_G6H127LT_RIG2\021519_G6H127LT_RIG2_PRE_PATCHONPATCH\021519_G6H127LT_RIG2_PRE_PATCHONPATCHmaps.mat';
+% files(n).patchonpatchdata = '021519_G6H127LT_RIG2\021519_G6H127LT_RIG2_PRE_PATCHONPATCH\021519_G6H127LT_RIG2_PRE_PATCHONPATCH';
+% files(n).inject = 'CLOZ'; 
+% files(n).dose = '0.5 mg/kg'
+% files(n).controlvirus = 'no'
+% files(n).timing = 'pre';
+% files(n).training = 'naive';
+% files(n).area = 'lp';
+% files(n).rignum = 'rig2';
+% files(n).monitor = 'land';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good data';
+% 
+% % post
+% 
+% n=n+1;
+% files(n).subj = 'G6H127LT'; %animal name
+% files(n).expt = '021519'; %date of experiment
+% files(n).topox= '021519_G6H127LT_RIG2\021519_G6H127LT_RIG2_POST_TOPOX\021519_G6H127LT_RIG2_POST_TOPOXmaps.mat'; %where to put dfof
+% files(n).topoxdata = '021519_G6H127LT_RIG2\021519_G6H127LT_RIG2_POST_TOPOX\021519_G6H127LT_RIG2_POST_TOPOX'; %raw data
+% files(n).topoy = '021519_G6H127LT_RIG2\021519_G6H127LT_RIG2_POST_TOPOY\021519_G6H127LT_RIG2_POST_TOPOYmaps.mat';
+% files(n).topoydata = '021519_G6H127LT_RIG2\021519_G6H127LT_RIG2_POST_TOPOY\021519_G6H127LT_RIG2_POST_TOPOY';
+% files(n).patchonpatch =  '021519_G6H127LT_RIG2\021519_G6H127LT_RIG2_POST_PATCHONPATCH\021519_G6H127LT_RIG2_POST_PATCHONPATCHmaps.mat';
+% files(n).patchonpatchdata = '021519_G6H127LT_RIG2\021519_G6H127LT_RIG2_POST_PATCHONPATCH\021519_G6H127LT_RIG2_POST_PATCHONPATCH';
+% files(n).inject = 'CLOZ'; 
+% files(n).dose = '0.5 mg/kg'
+% files(n).controlvirus = 'no'
+% files(n).timing = 'post';
+% files(n).training = 'naive';
+% files(n).area = 'lp';
+% files(n).rignum = 'rig2';
+% files(n).monitor = 'land';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good data';
 
-% post
+%% G6H811TT @ 0.5 mg/kg cloz       ********
+% 
+% n=n+1;
+% files(n).subj = 'G6H811TT'; %animal name
+% files(n).expt = '030519'; %date of experiment
+% files(n).topox= '030519_G6H811TT_RIG2\030519_G6H811TT_RIG2_PRE_TOPOX\030519_G6H811TT_RIG2_PRE_TOPOXmaps.mat'; %where to put dfof
+% files(n).topoxdata = '030519_G6H811TT_RIG2\030519_G6H811TT_RIG2_PRE_TOPOX\030519_G6H811TT_RIG2_PRE_TOPOX'; %raw data
+% files(n).topoy = '030519_G6H811TT_RIG2\030519_G6H811TT_RIG2_PRE_TOPOY\030519_G6H811TT_RIG2_PRE_TOPOYmaps.mat';
+% files(n).topoydata = '030519_G6H811TT_RIG2\030519_G6H811TT_RIG2_PRE_TOPOY\030519_G6H811TT_RIG2_PRE_TOPOY';
+% files(n).patchonpatch =  '030519_G6H811TT_RIG2\030519_G6H811TT_RIG2_PRE_PATCHONPATCH\030519_G6H811TT_RIG2_PRE_PATCHONPATCHmaps.mat';
+% files(n).patchonpatchdata = '030519_G6H811TT_RIG2\030519_G6H811TT_RIG2_PRE_PATCHONPATCH\030519_G6H811TT_RIG2_PRE_PATCHONPATCH';
+% files(n).inject = 'CLOZ'; 
+% files(n).dose = '0.5 mg/kg'
+% files(n).controlvirus = 'yes' %note not a control virus, no virus
+% files(n).timing = 'pre';
+% files(n).training = 'naive';
+% files(n).area = 'lp';
+% files(n).rignum = 'rig2';
+% files(n).monitor = 'land';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good data';
+% 
+% % post
+% 
+% n=n+1;
+% files(n).subj = 'G6H811TT'; %animal name
+% files(n).expt = '030519'; %date of experiment
+% files(n).topox= '030519_G6H811TT_RIG2\030519_G6H811TT_RIG2_POST_TOPOX\030519_G6H811TT_RIG2_POST_TOPOXmaps.mat'; %where to put dfof
+% files(n).topoxdata = '030519_G6H811TT_RIG2\030519_G6H811TT_RIG2_POST_TOPOX\030519_G6H811TT_RIG2_POST_TOPOX'; %raw data
+% files(n).topoy = '030519_G6H811TT_RIG2\030519_G6H811TT_RIG2_POST_TOPOY\030519_G6H811TT_RIG2_POST_TOPOYmaps.mat';
+% files(n).topoydata = '030519_G6H811TT_RIG2\030519_G6H811TT_RIG2_POST_TOPOY\030519_G6H811TT_RIG2_POST_TOPOY';
+% files(n).patchonpatch =  '030519_G6H811TT_RIG2\030519_G6H811TT_RIG2_POST_PATCHONPATCH\030519_G6H811TT_RIG2_POST_PATCHONPATCHmaps.mat';
+% files(n).patchonpatchdata = '030519_G6H811TT_RIG2\030519_G6H811TT_RIG2_POST_PATCHONPATCH\030519_G6H811TT_RIG2_POST_PATCHONPATCH';
+% files(n).inject = 'CLOZ'; 
+% files(n).dose = '0.5 mg/kg'
+% files(n).controlvirus = 'yes'
+% files(n).timing = 'post';
+% files(n).training = 'naive';
+% files(n).area = 'lp';
+% files(n).rignum = 'rig2';
+% files(n).monitor = 'land';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good data';
 
-n=n+1;
-files(n).subj = 'G6H127LT'; %animal name
-files(n).expt = '021519'; %date of experiment
-files(n).topox= '021519_G6H127LT_RIG2\021519_G6H127LT_RIG2_POST_TOPOX\021519_G6H127LT_RIG2_POST_TOPOXmaps.mat'; %where to put dfof
-files(n).topoxdata = '021519_G6H127LT_RIG2\021519_G6H127LT_RIG2_POST_TOPOX\021519_G6H127LT_RIG2_POST_TOPOX'; %raw data
-files(n).topoy = '021519_G6H127LT_RIG2\021519_G6H127LT_RIG2_POST_TOPOY\021519_G6H127LT_RIG2_POST_TOPOYmaps.mat';
-files(n).topoydata = '021519_G6H127LT_RIG2\021519_G6H127LT_RIG2_POST_TOPOY\021519_G6H127LT_RIG2_POST_TOPOY';
-files(n).patchonpatch =  '021519_G6H127LT_RIG2\021519_G6H127LT_RIG2_POST_PATCHONPATCH\021519_G6H127LT_RIG2_POST_PATCHONPATCHmaps.mat';
-files(n).patchonpatchdata = '021519_G6H127LT_RIG2\021519_G6H127LT_RIG2_POST_PATCHONPATCH\021519_G6H127LT_RIG2_POST_PATCHONPATCH';
-files(n).inject = 'CLOZ'; 
-files(n).dose = '0.5 mg/kg'
-files(n).controlvirus = 'no'
-files(n).timing = 'post';
-files(n).training = 'naive';
-files(n).area = 'lp';
-files(n).rignum = 'rig2';
-files(n).monitor = 'land';
-files(n).label = 'camk2 gc6';
-files(n).notes = 'good data';
+%% G6H811TT @ 0.2 mg/kg cloz
+% n=n+1;
+% files(n).subj = 'G6H811TT'; %animal name
+% files(n).expt = '031219'; %date of experiment
+% files(n).topox= '031219_G6H811TT_RIG2\031219_G6H811TT_RIG2_PRE_TOPOX\031219_G6H811TT_RIG2_PRE_TOPOXmaps.mat'; %where to put dfof
+% files(n).topoxdata = '031219_G6H811TT_RIG2\031219_G6H811TT_RIG2_PRE_TOPOX\031219_G6H811TT_RIG2_PRE_TOPOX'; %raw data
+% files(n).topoy = '031219_G6H811TT_RIG2\031219_G6H811TT_RIG2_PRE_TOPOY\031219_G6H811TT_RIG2_PRE_TOPOYmaps.mat';
+% files(n).topoydata = '031219_G6H811TT_RIG2\031219_G6H811TT_RIG2_PRE_TOPOY\031219_G6H811TT_RIG2_PRE_TOPOY';
+% files(n).patchonpatch =  '031219_G6H811TT_RIG2\031219_G6H811TT_RIG2_PRE_PATCHONPATCH\031219_G6H811TT_RIG2_PRE_PATCHONPATCHmaps.mat';
+% files(n).patchonpatchdata = '031219_G6H811TT_RIG2\031219_G6H811TT_RIG2_PRE_PATCHONPATCH\031219_G6H811TT_RIG2_PRE_PATCHONPATCH';
+% files(n).inject = 'CLOZ'; 
+% files(n).dose = '0.2 mg/kg'
+% files(n).controlvirus = 'no';
+% files(n).timing = 'pre';
+% files(n).training = 'naive';
+% files(n).area = 'lp';
+% files(n).rignum = 'rig2';
+% files(n).monitor = 'land';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good data';
+% 
+% % post
+% 
+% n=n+1;
+% files(n).subj = 'G6H811TT'; %animal name
+% files(n).expt = '031219'; %date of experiment
+% files(n).topox= '031219_G6H811TT_RIG2\031219_G6H811TT_RIG2_POST_TOPOX\031219_G6H811TT_RIG2_POST_TOPOXmaps.mat'; %where to put dfof
+% files(n).topoxdata = '031219_G6H811TT_RIG2\031219_G6H811TT_RIG2_POST_TOPOX\031219_G6H811TT_RIG2_POST_TOPOX'; %raw data
+% files(n).topoy = '031219_G6H811TT_RIG2\031219_G6H811TT_RIG2_POST_TOPOY\031219_G6H811TT_RIG2_POST_TOPOYmaps.mat';
+% files(n).topoydata = '031219_G6H811TT_RIG2\031219_G6H811TT_RIG2_POST_TOPOY\031219_G6H811TT_RIG2_POST_TOPOY';
+% files(n).patchonpatch =  '031219_G6H811TT_RIG2\031219_G6H811TT_RIG2_POST_PATCHONPATCH\031219_G6H811TT_RIG2_POST_PATCHONPATCHmaps.mat';
+% files(n).patchonpatchdata = '031219_G6H811TT_RIG2\031219_G6H811TT_RIG2_POST_PATCHONPATCH\031219_G6H811TT_RIG2_POST_PATCHONPATCH';
+% files(n).inject = 'CLOZ'; 
+% files(n).dose = '0.2 mg/kg'
+% files(n).controlvirus = 'no'
+% files(n).timing = 'post';
+% files(n).training = 'naive';
+% files(n).area = 'lp';
+% files(n).rignum = 'rig2';
+% files(n).monitor = 'land';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good data';
+%% G6HWW3RT on FLANKER task
+% n=n+1;
+% files(n).subj = 'G62WW3RT'; %animal name
+% files(n).expt = '102717'; %date of experiment
+% files(n).topox= '102717_WW3RT_RIG1\102717_WW3RT_RIG1_PRE_TOPOX\102717_WW3RT_RIG1_PRE_TOPOXmaps.mat'; %where to put dfof
+% files(n).topoxdata = '102717_WW3RT_RIG1\102717_WW3RT_RIG1_PRE_TOPOX\102717_WW3RT_RIG1_PRE_TOPOX'; %raw data
+% files(n).topoy = '102717_WW3RT_RIG1\102717_WW3RT_RIG1_PRE_TOPOY\102717_WW3RT_RIG1_PRE_TOPOYmaps.mat';
+% files(n).topoydata = '102717_WW3RT_RIG1\102717_WW3RT_RIG1_PRE_TOPOY\102717_WW3RT_RIG1_PRE_TOPOY';
+% files(n).patchonpatch =  '102717_WW3RT_RIG1\102717_WW3RT_RIG1_PRE_PATCHONPATCH\102717_WW3RT_RIG1_PRE_PATCHONPATCHmaps.mat';
+% files(n).patchonpatchdata = '102717_WW3RT_RIG1\102717_WW3RT_RIG1_PRE_PATCHONPATCH\102717_WW3RT_RIG1_PRE_PATCHONPATCH';
+% files(n).inject = 'CLOZ'; 
+% files(n).dose = '0.2 mg/kg'
+% files(n).controlvirus = 'no';
+% files(n).timing = 'pre';
+% files(n).training = 'naive';
+% files(n).area = 'lp';
+% files(n).rignum = 'RIG1';
+% files(n).monitor = 'land';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good data';
+% 
+% % post
+% 
+% n=n+1;
+% files(n).subj = 'WW3RT'; %animal name
+% files(n).expt = '102717'; %date of experiment
+% files(n).topox= '102717_WW3RT_RIG1\102717_WW3RT_RIG1_POST_TOPOX\102717_WW3RT_RIG1_POST_TOPOXmaps.mat'; %where to put dfof
+% files(n).topoxdata = '102717_WW3RT_RIG1\102717_WW3RT_RIG1_POST_TOPOX\102717_WW3RT_RIG1_POST_TOPOX'; %raw data
+% files(n).topoy = '102717_WW3RT_RIG1\102717_WW3RT_RIG1_POST_TOPOY\102717_WW3RT_RIG1_POST_TOPOYmaps.mat';
+% files(n).topoydata = '102717_WW3RT_RIG1\102717_WW3RT_RIG1_POST_TOPOY\102717_WW3RT_RIG1_POST_TOPOY';
+% files(n).patchonpatch =  '102717_WW3RT_RIG1\102717_WW3RT_RIG1_POST_PATCHONPATCH\102717_WW3RT_RIG1_POST_PATCHONPATCHmaps.mat';
+% files(n).patchonpatchdata = '102717_WW3RT_RIG1\102717_WW3RT_RIG1_POST_PATCHONPATCH\102717_WW3RT_RIG1_POST_PATCHONPATCH';
+% files(n).inject = 'CLOZ'; 
+% files(n).dose = '0.2 mg/kg'
+% files(n).controlvirus = 'no'
+% files(n).timing = 'post';
+% files(n).training = 'naive';
+% files(n).area = 'lp';
+% files(n).rignum = 'RIG1';
+% files(n).monitor = 'land';
+% files(n).label = 'camk2 gc6';
+% files(n).notes = 'good data';
+

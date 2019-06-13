@@ -53,15 +53,19 @@ doTopography;
 
 %% pick which gratings analysis to run
 
-%uncomment for 3x2y
+%%%uncomment for 3x2y
 % disp('doing 3x2y')
 % rep=2;
 % doGratingsNew;
 
-% uncomment for 4x3y
+%%% uncomment for 4x3y
 disp('doing 4x3y')
 rep=4;
 doGratingsNew;
+
+%%%uncomment for natural images movie
+disp('doing natural images')
+doNaturalImages
 
 %%
 % %%% analyze looming

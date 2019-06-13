@@ -1,20 +1,27 @@
 %% doNaturalImages
-
+x=0; %clear points
 %%%cycle through animals
 for f = 1:length(use)
     
+    %%%choose downsample factor
+    downsample = 4;
     %%%load the movie from batch file name
     load(files(use(f)).movienameNaturalImages)
     %%%get imaging rate from batch file
     imagerate = files(use(f)).imagerate;
+    %%%load map overlay
+    load('C:\mapOverlay5mm.mat');xpts=xpts/downsample;ypts=ypts/downsample;
+    visareas = {'V1','P','LM','AL','RL','AM','PM','MM'};
+    aniexpt = [files(use(f)).subj '_' files(use(f)).expt]
     
     %%%get indices of videos
     stimuli = unique(fileidx);
     cyclength = (isi+duration)*imagerate;
-    base = 3:5; %indices for baseline
-    peak = 13:15; %indices for peak response
+    base = 8:10; %indices for baseline
+    peak = 11:13; %indices for peak response
     imrange = [0 0.05]; %range to display images at
     ptsrange = 2; %+/- pixels from selected point to average over
+    timepts = 0:1/imagerate:cyclength/imagerate-1/imagerate; %cycle time points
     
     %%%load imaging data from batch file info
     load(fullfile(pathname,files(use(f)).naturalimages),'dfof_bg','sp','stimRec','frameT')
@@ -23,11 +30,11 @@ for f = 1:length(use)
         sp=0;stimRec=[];
     end
     dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);  
-    dfof_bg = imresize(dfof_bg,0.25); %%%spatial downsample dfof
+    dfof_bg = imresize(dfof_bg,1/downsample); %%%spatial downsample dfof
 
     %% check experiment quality
     %%%make timing figure
-    sprintf('checking experiment quality')
+    sprintf('checking natural images quality')
     timingfig = figure;
     subplot(2,2,1)
     plot(diff(stimRec.ts));
@@ -67,20 +74,21 @@ for f = 1:length(use)
 %     p=1:cyclength;p=circshift(p,ceil(cyclength/2)-1,2);
     colormap jet
     for fr=1:cyclength
-        cycavg(:,:,fr) = mean(dfof_bg(:,:,(fr:cyclength:end)),3);
+        cyc(:,:,fr) = mean(dfof_bg(:,:,(fr:cyclength:end)),3);
         subplot(nx,nx,fr)
-        imagesc(squeeze(cycavg(:,:,fr)),imrange)
+        imagesc(squeeze(cyc(:,:,fr)),imrange)
         axis off; axis square
         set(gca,'LooseInset',get(gca,'TightInset'))
 %             hold on; plot(ypts,xpts,'w.','Markersize',2)
-        map = map+squeeze(cycavg(:,:,fr))*exp(2*pi*sqrt(-1)*(0.5 +fr/cyclength));
+        map = map+squeeze(cyc(:,:,fr))*exp(2*pi*sqrt(-1)*(0.5 +fr/cyclength));
     end
 
     %%% add timecourse
     subplot(nx,nx,fr+1)
-    plot(squeeze(mean(mean(cycavg,2),1)))
+    plot(squeeze(mean(mean(cyc,2),1)))
     axis off
     set(gca,'LooseInset',get(gca,'TightInset'))
+    mtit(sprintf('%s cycavg natural images',aniexpt))
     if exist('psfilename','var')
         set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilename,'-append');
@@ -95,6 +103,7 @@ for f = 1:length(use)
     plot((1:length(tcourse))/600,angle(conv(fourier,ones(1,600),'same')));
     ylim([-pi pi])
     ylabel('phase'); xlabel('mins')
+    mtit(sprintf('%s natural images',aniexpt))
     if exist('psfilename','var')
         set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilename,'-append');
@@ -136,6 +145,7 @@ for f = 1:length(use)
     set(gca,'xticklabel',{'run','sit'})
     ylabel('speed')
     ylim([0 3000])
+    mtit(sprintf('%s natural images',aniexpt))
     if exist('psfilename','var')
         set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilename,'-append');
@@ -151,51 +161,110 @@ for f = 1:length(use)
         end
     end
     
+    %%%pick points to analyze
+    try
+        load(files(use(f)).ptsfile)
+    catch
+        disp('no points file designated in batch file')
+    end
+    if x==0
+        [fname pname] = uigetfile('*.mat','select points file? cancel to pick points');
+        if fname~=0
+            load(fullfile(pname, fname));
+        else
+            figure;colormap jet
+            im = nanmean(nanmean(nanmean(trialcycavg(:,:,peak,:,:),3),4),5);
+            imagesc(im,imrange)
+            hold on; plot(ypts,xpts,'w.','Markersize',2)
+            title('pick 8 points: V1, clockwise around, then MM (outside lines below V1')
+            for i = 1:8
+                [y(i) x(i)] =ginput(1);
+                plot(y(i),x(i),'o');
+            end
+
+            x=round(x); y=round(y);
+            if exist('psfilename','var')
+                set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+                print('-dpsc',psfilename,'-append');
+            end
+
+            close(gcf);
+            [fname pname] = uiputfile('*.mat','save points?');
+            if fname~=0
+                save(fullfile(pname,fname),'x','y');
+            end
+        end
+    end
+    
     %%%plot the peak response to each stimulus
     figure; colormap jet
     for i = 1:length(stimuli)
         subplot(5,ceil(length(stimuli)/5),i)
-        im = nanmean(nanmean(trialcycavg(:,:,13:15,i,:),3),5);%-nanmean(nanmean(trialcycavg(:,:,base,i,:),3),5);
+        im = nanmean(nanmean(trialcycavg(:,:,peak,i,:),3),5);%-nanmean(nanmean(trialcycavg(:,:,base,i,:),3),5);
         imagesc(im,imrange)
+        hold on;plot(ypts,xpts,'w.','Markersize',2)
         axis off
         axis image
     end
-    mtit('peak response to each stimulus')
+    mtit(sprintf('%s peak resp natural images',aniexpt))
     if exist('psfilename','var')
         set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilename,'-append');
     end
     
-    figure;colormap jet
-    im = nanmean(nanmean(nanmean(trialcycavg(:,:,peak,:,:),3),4),5);
-    imagesc(im,imrange)
-    title('select V1 peak')
-    axis off
-    [x,y] = ginput(1)
-    x=round(x);y=round(y);
-    if exist('psfilename','var')
-        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-        print('-dpsc',psfilename,'-append');
-    end
-    close
-    
+    %%%plot familiar vs. unfamiliar average
     figure
     fam = find(familiar==1);
     unfam = find(familiar==0);
-    trace = squeeze(nanmean(nanmean(nanmean(trialcyc(x-ptsrange:x+ptsrange,y-ptsrange:y+ptsrange,:,fam),1),2),4));
-    plot(0:1/imagerate:cyclength/imagerate-1/imagerate,trace-mean(trace(8:10)),'k')
-    hold on
-    trace = squeeze(nanmean(nanmean(nanmean(trialcyc(x-ptsrange:x+ptsrange,y-ptsrange:y+ptsrange,:,unfam),1),2),4));
-    plot(0:1/imagerate:cyclength/imagerate-1/imagerate,trace-mean(trace(8:10)),'r')
-    legend('familiar','unfamiliar')
-    xlabel('time (s)')
-    ylabel('dfof')
-    mtit('cycavg familiar vs. unfamiliar')
+    for i = 1:length(x)
+        subplot(2,ceil(length(x)/2),i)
+        trace = squeeze(nanmean(nanmean(nanmean(trialcyc(x(i)-ptsrange:x(i)+ptsrange,y(i)-ptsrange:y(i)+ptsrange,:,fam),1),2),4));
+        plot(timepts,trace-mean(trace(base)),'k')
+        hold on
+        trace = squeeze(nanmean(nanmean(nanmean(trialcyc(x(i)-ptsrange:x(i)+ptsrange,y(i)-ptsrange:y(i)+ptsrange,:,unfam),1),2),4));
+        plot(timepts,trace-mean(trace(base)),'r')
+        xlabel('time (s)')
+        ylabel(sprintf('%s dfof',visareas{i}))
+        axis([0 timepts(end) -0.005 0.03])
+    end
+    legend('familiar','unfamiliar','Location','southeast')
+    mtit(sprintf('%s natural images',aniexpt))
     if exist('psfilename','var')
         set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilename,'-append');
     end
     
-    save([files(use(f)).subj '_' files(use(f)).expt '_' files(use(f)).condition '_NatIm.mat'],'trialcyc','trialcycavg','fileidx','familiar','allfiles','-v7.3')
+    %%%make plots for each natural image
+    for i = 1:length(allims)
+        figure
+        ax1 = subplot(1,3,1);
+        imshow(allims{i})
+        colormap(ax1,'gray')
+        ax2 = subplot(1,3,2);
+        im = nanmean(nanmean(trialcycavg(:,:,peak,i+1,:),3),5);%1st idx is blank so add 1
+        imagesc(im,imrange)
+        hold on;plot(ypts,xpts,'w.','Markersize',2)
+        axis image
+        axis off
+        colormap(ax2,'jet')
+        subplot(1,3,3)
+        hold on
+        for j = 1:length(x)
+            trace = squeeze(nanmean(nanmean(nanmean(trialcycavg(x(j)-ptsrange:x(j)+ptsrange,y(j)-ptsrange:y(j)+ptsrange,:,i+1,:),5),2),1)); %1st idx is blank so add 1
+            plot(timepts,trace-mean(trace(base)))
+        end
+        legend(visareas,'Location','Northwest')
+        xlabel('time (s)')
+        ylabel('dfof')
+        axis([0 timepts(end) -0.005 0.1])
+        axis square
+        mtit(sprintf('%s %s %s %s familiar=%d',files(use(f)).subj,files(use(f)).expt,files(use(f)).condition,allfiles{i},allfam(i)))
+        if exist('psfilename','var')
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+            print('-dpsc',psfilename,'-append');
+        end
+    end
+    
+    natimcycavg(:,:,:,:,:,f) = trialcycavg;
     
 end

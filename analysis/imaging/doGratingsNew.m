@@ -3,6 +3,7 @@ x=0;
 % for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior passive; 4 = 4x3y patches;
     mnAmp{rep}=0; mnPhase{rep}=0; mnAmpWeight{rep}=0; mnData{rep}=0; mnFit{rep}=0;
     clear shiftData shiftAmp shiftPhase fit cycavg
+    visareas = {'V1','P','LM','AL','RL','AM','PM','MM'};
     
     for f = 1:length(use)
         figure
@@ -145,6 +146,11 @@ x=0;
     
     
     mnfit = median(fit,4);
+    try
+        load(files(use(f)).ptsfile)
+    catch
+        disp('no points file designated in batch file')
+    end
     if x==0
         [fname pname] = uigetfile('*.mat','select points file? cancel to pick points');
         if fname~=0
@@ -153,7 +159,8 @@ x=0;
             figure
             imagesc(squeeze(mean(shiftData(:,:,5,:),4)));
             hold on; plot(ypts,xpts,'w.','Markersize',2)
-            for i = 1:7
+            title('pick 8 points: V1, clockwise around, then MM (outside lines below V1')
+            for i = 1:8
                 [y(i) x(i)] =ginput(1);
                 plot(y(i),x(i),'o');
             end
@@ -181,7 +188,7 @@ x=0;
         for i = 1:7;
             plot([y(i)-w y(i)-w y(i)+w y(i)+w y(i)-w],[x(i)-w x(i)+w x(i)+w x(i)-w x(i)-w],col(i),'LineWidth',2)
         end
-        legend({'V1','LM','AL','RL','AM','PM','MM'})
+        legend(visareas)
         
         hold on; plot(ypts,xpts,'w.','Markersize',2); axis off
         

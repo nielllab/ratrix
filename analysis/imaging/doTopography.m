@@ -27,8 +27,8 @@ end
 %%% appropriate size
 useReference=1;
 if useReference
-%     load('referenceMap.mat','avgmap4d','avgmap'); %for vis areas only (e.g. 5mm window)
-    load('referenceMapFullSkull.mat','avgmap4d','avgmap'); %for bilateral full skull
+    load('referenceMap.mat','avgmap4d','avgmap'); %for vis areas only (e.g. 5mm window)
+%     load('referenceMapFullSkull.mat','avgmap4d','avgmap'); %for bilateral full skull
 end
 display('aligning')
 
@@ -194,7 +194,8 @@ end
 % frame(:,31:290,:)=avgmap;
 % avgmap=frame;
 
-load('mapoverlay.mat') %only for 5mm window right now
+load('C:\mapoverlay5mm.mat')
+% load('mapoverlay.mat') %only for 5mm window right now
 
 
 for m=1:2

@@ -54,7 +54,7 @@ end
 
 
 psfilenameFinal = [basename '.ps'];
-psfilename = 'C:\temp.ps';
+psfilename = 'D:\temp.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
 figure
@@ -247,7 +247,7 @@ else
         display('generated pdf using builtin matlab ps2pdf')
     catch
         display('couldnt generate pdf');
-        keyboard
+%         keyboard
     end
 end
 

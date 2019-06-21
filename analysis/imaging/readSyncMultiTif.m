@@ -115,7 +115,7 @@ shrunkdata = data(10:10:end,10:10:end,:);
 shrunkdata = reshape(shrunkdata,[size(shrunkdata,1)*size(shrunkdata,2) size(shrunkdata,3)]);
 
 %%% calculate pca and cluster on them
-[coeff score latent] = princomp(double(shrunkdata)');
+[coeff score latent] = pca(double(shrunkdata)');
 idx = kmeans(score(:,1),2);
 
 %%% blue is the larger cluster

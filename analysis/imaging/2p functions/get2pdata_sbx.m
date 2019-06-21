@@ -12,8 +12,8 @@ alignData=cfg.alignData; showImages=1;
 toc
 size(img)
 
-greenframe = prctile(img(:,:,25:25:end),10,3);  %%% keep mean raw fluorescence image
-
+%greenframe = prctile(img(:,:,25:25:end),10,3);  %%% keep mean raw fluorescence image
+greenframe = median(img(:,:,25:25:end),3); % was 10th percentile, changed to median to avoid zeros
 
 %%% spatial downsampling
 display('resizing')
@@ -38,14 +38,25 @@ end
 
 display('computing baseline')
 tic
-m = prctile(double(img(:,:,10:10:end)),10,3);
+m = prctile(double(img(:,:,10:10:end)),10,3);  %%% change to median?
 toc
 %%% Yeti seems to have a large DC offset, even in blanks on edge of image
 %%% Estimate this as minimum of mean image and subtract it off
+
+figure
+imagesc(m);
+title('baseline image')
+
 dcOffset = 0.95*min(m(:));
 m = m-dcOffset;
 img = img-dcOffset;
 greenframe=greenframe-dcOffset;
+
+figure
+imagesc(m);
+title('baseline image after dcOffset')
+
+sprintf('dcOffset = %0.2f',dcOffset)
 
 if (exist('S2P','var')&S2P==1)
     dfof = double(img);
@@ -103,6 +114,7 @@ else %%% leave timing intact and adjust video stim times to acq rate
     dfofInterp = dfof;
     
     phasesync = find( info.event_id ==2 | info.event_id==3); %%% get phase trigger signals
+   % phasesync = find( info.event_id ==2);
     if info.frame(phasesync(1))==0  %%% something funny happens at start giving transition on first frame
         phasesync = phasesync(2:end);
     end
@@ -126,6 +138,4 @@ if (exist('S2P','var')&S2P==1)
         imwrite(q,fullfile(sess,[fname sprintf('_%05d.tif',i)]),'tif');
     end
 end
-
-
 

@@ -3,7 +3,7 @@ close all
 clear all
 dbstop if error
 
-%select batch file
+%select batch file1
 batchPatch_KC
 cd(pathname)
 moviename = 'C:\patchonpatch10min';
@@ -57,10 +57,10 @@ redogrp = input('reanalyze group data? 0=no, 1=yes: ')
 
 if group==1
     use = find(strcmp({files(n).area},'lp') & strcmp({files.inject},'CLOZ') & strcmp({files.dose},'0.5 mg/kg') & strcmp({files.controlvirus},'yes')& strcmp({files.notes},'good data'))
-    grpfilename = 'LP_Control_CLOZ half_mg_per_kg'
+    grpfilename = 'LP_Control_CLOZ'
 elseif group==2
     use = find(strcmp({files(n).area},'lp') & strcmp({files.inject},'CLOZ') & strcmp({files.dose},'0.5 mg/kg') & strcmp({files.controlvirus},'no')& strcmp({files.notes},'good data'))
-    grpfilename = 'LP_Control_CLOZ half_mg_per_kg'
+    grpfilename = 'LP_DREADDs_CLOZ'
 else
     sprintf('please restart and choose a number 1-2')
 end
@@ -68,6 +68,8 @@ end
 if isempty(use)
     sprintf('No animals in this group')
     return
+else
+    sprintf('please restart and choose a number 1-2')
 end
 
 psfilename = 'C:\Users\Kris\Documents\tempKCWF.ps';

@@ -22,7 +22,9 @@ else %%% new session data
     
     fileName = fileName(1:end-4)  %%% create filename
     
- cycLength = 2;
+ if ~exist('cycLength','var')
+     cycLength = 2;
+ end
     
     %     twocolor = input('# of channels : ')
     %     twocolor= (twocolor==2);
@@ -58,12 +60,14 @@ else %%% new session data
 end
 
 figure
-timecourse = squeeze(mean(mean(dfofInterp(:,:,1:60/dt),2),1));
-plot(dt:dt:60,timecourse); xlabel('secs')
-hold on
-for st = 0:10
-    plot(st*cycLength,[0.2 1],'g:')
-end
+% timecourse = squeeze(mean(mean(dfofInterp(:,:,1:60/dt),2),1));
+timecourse = squeeze(mean(mean(dfofInterp,2),1));
+% plot(dt:dt:60,timecourse); xlabel('secs')
+plot(timecourse); xlabel('secs')
+% hold on
+% for st = 0:10
+%     plot(st*cycLength,[0.2 1],'g:')
+% end
 
 if exist('psfile','var')
     set(gcf, 'PaperPositionMode', 'auto');

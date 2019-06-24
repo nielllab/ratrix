@@ -8,9 +8,7 @@ close all; clear all;dbstop if error
 sbxaligndir
 fileName = uigetfile('*.sbx','topox file');
 
-dt = 0.1; %%% resampled time frame
-framerate=1/dt;
-cycLength=10;
+dt=0.1
 cfg.dt = dt; cfg.spatialBin=2; cfg.temporalBin=1;  %%% configuration parameters
 cfg.syncToVid=0; cfg.saveDF=0; cfg.alignData=0;
 sessionName = 'topo';
@@ -20,6 +18,9 @@ nframes = min(size(dfofInterp,3),3000);  %%% limit topoY data to 5mins to avoid 
 dfofInterp = dfofInterp(:,:,1:nframes);
 
 %%% generate pixel-wise fourier map
+dt = 0.1; %%% resampled time frame
+framerate=1/dt;
+cycLength=10;
 cycLength = cycLength/dt;
 map = 0;
 for i= 1:size(dfofInterp,3);

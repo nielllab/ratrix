@@ -20,7 +20,7 @@ nframes = min(size(dfofInterp,3),3000);  %%% limit topoY data to 5mins to avoid 
 dfofInterp = dfofInterp(:,:,1:nframes);
 
 %%% generate pixel-wise fourier map
-cycLength = cycLength/dt;
+cycLength = cycLength/dt;  
 map = 0;
 for i= 1:size(dfofInterp,3);
     map = map+dfofInterp(:,:,i)*exp(2*pi*sqrt(-1)*i/cycLength);
@@ -33,10 +33,12 @@ img = mat2im(mod(angle(map),2*pi),hsv,[pi/2  (2*pi -pi/4)]);
 img = img.*repmat(amp,[1 1 3]);
 mapimg= figure
 figure
-imshow(imresize(img,0.5))
+imshow(imresize(img,1))
 colormap(hsv); colorbar
 
 polarImg = img;
+
+display('saving')
 save(sessionName,'polarImg','map','dfofInterp','-append')
 
 if exist('psfile','var')
@@ -56,7 +58,7 @@ imagesc(cycAvg(:,:,i),[-0.1 0.5]); colormap gray; axis equal
 mov(i) = getframe(gcf);
 end
 
-cycAvgT = mean(mean(cycAvg,2),1);
+cycAvgT = mean(mean(cycAvg,2),1); %%%  should find a way to select pixels above a certain intensity, so we don't average noise
 figure
 plot(squeeze(cycAvgT(1,1,:)));
 title('timecourse cyc avg');

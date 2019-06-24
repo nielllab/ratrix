@@ -69,7 +69,7 @@ dfofInterp= dfofInterp(buffer(1,1):(end-buffer(1,2)),buffer(2,1):(end-buffer(2,2
 
 
 % number of frames per cycle
-cycLength = mean(diff(vidframetimes))/dt;
+cycLength = median(diff(vidframetimes))/dt;
 % number of frames in window around each cycle. min of 4 secs, or actual cycle length + 2
 cycWindow = round(max(2/dt,cycLength));
 
@@ -78,6 +78,11 @@ startFrame = round((stimTimes(1)-1)/dt);
 dfofInterp = dfofInterp(:,:,startFrame:end);   %%% movie starts 1 sec before first stim
 stimTimes = stimTimes-stimTimes(1)+1;
 stimFrames = round(stimTimes/dt);
+
+figure
+plot(diff(stimTimes)); title('diff of vidframetimes in 2p');
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
 
 %%%
 
@@ -172,7 +177,7 @@ for rep =1:4 %%% 4 conditions: On, Off, fullfield On, fullfield off
     
     
     %%% calculate STA at peak time (tau) at gridpoints on 2p image
-    tau = 6;
+    tau = 8;
     
     blocksize=25
     xrange = 1:blocksize:size(dfofInterp,1); xrange = xrange(1:end-1); %%% last one will be off the edge

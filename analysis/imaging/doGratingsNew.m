@@ -1,8 +1,9 @@
 %%%% doGratingsNew
 x=0;
-for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior passive; 4 = 4x3y patches;
+% for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior passive; 4 = 4x3y patches;
     mnAmp{rep}=0; mnPhase{rep}=0; mnAmpWeight{rep}=0; mnData{rep}=0; mnFit{rep}=0;
     clear shiftData shiftAmp shiftPhase fit cycavg
+    visareas = {'V1','P','LM','AL','RL','AM','PM','MM'};
     
     for f = 1:length(use)
         figure
@@ -38,15 +39,22 @@ for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
             [ph amp data ft cyc] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
                 'C:\background3x2y2sf_021215_16minBlank',20:22,14:16,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
         elseif rep==2
+           %  load ([pathname files(use(f)).grating3x2y6sf4tf ], 'dfof_bg','sp','stimRec','frameT')
             load ([pathname files(use(f)).grating3x2y6sf4tf ], 'dfof_bg','sp','stimRec','frameT')
             zoom = 260/size(dfof_bg,1);
             if ~exist('sp','var')
                 sp =0;stimRec=[];
             end
+            load(files(use(f)).moviename3x2y,'isi','duration')
+            imagerate = files(use(f)).imagerate;
             dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
-            [ph amp data ft cyc] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
-                'C:\grating3x2y6sf4tf_021215_20min',21:25,14:16,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
-        elseif rep==3
+%             [ph amp data ft cyc] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
+%                 files(use(f)).gratmoviename,1:round(imagerate*isi/2),imagerate*isi+1:imagerate*(isi+duration),...
+%                 xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
+              [ph amp data ft cyc] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
+                files(use(f)).moviename3x2y,17:18,10:12,...
+                xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
+      elseif rep==3
             load ([pathname files(use(f)).behavGratings ], 'dfof_bg','sp','stimRec','frameT')
             zoom = 260/size(dfof_bg,1);
             if ~exist('sp','var')
@@ -57,20 +65,21 @@ for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
                 'C:\behavStim2sfSmall3366',24:26,18:20,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);   
         elseif rep ==4
             if ~isempty(files(use(f)).grating4x3y6sf3tf)
-                load ([pathname files(use(f)).grating4x3y6sf3tf], 'dfof_bg','sp','stimRec','frameT')
+                load([pathname files(use(f)).grating4x3y6sf3tf], 'dfof_bg','sp','stimRec','frameT')
                 zoom = 260/size(dfof_bg,1);
                 if ~exist('sp','var')
                     sp =0;stimRec=[];
                 end
                 dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
                 [ph amp data ft cyc tuning4x3y(f,:,:,:,:,:,:) sftcourse(:,:,:,f) trialcycavg trialcycavgRun trialcycavgSit ] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
-                    'C:\grating4x3y5sf3tf_short011315.mat',16:17,10:11,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
+                    files(use(f)).moviename4x3y,16:17,10:11,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
             end
 
         end
         
         
         sp = conv(sp,ones(50,1),'same')/50;
+%         sfrange=unique(sf); tfrange=unique(tf);
         %sp_all(1:13000,f) = sp;
         mv(f) = sum(sp>500)/length(sp);
         if rep~=3
@@ -87,14 +96,15 @@ for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
             plotGratingRespFit(squeeze(shiftData(:,:,:,f)),squeeze(shiftData(:,:,5,f)+shiftData(:,:,6,f)),squeeze(fit(:,:,:,f)),rep,xpts,ypts,[files(use(f)).subj ' ' files(use(f)).expt])
             subplot(2,3,6)
             title([files(use(f)).subj ' ' files(use(f)).expt])
-            set(gcf, 'PaperPositionMode', 'auto');
+            mtit('fits for retinotopy,sf,tf')
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
             print('-dpsc',psfilename,'-append');
         end
         
         
     end
     
-    if rep==4
+    if rep==4 || rep==3
         figure
         for sf = 1:6
             for tf = 1:3
@@ -103,9 +113,10 @@ for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
                 hold on
                 plot(squeeze(mean(sftcourse(sf,tf,:,:),4)),'k','Linewidth',2);
                 axis([1 18 0 0.015]); set(gca,'Xticklabel',[]); set(gca,'Yticklabel',[]);
+                mtit('group cycavg for each sf/tf combo')
             end
         end
-               set(gcf, 'PaperPositionMode', 'auto');
+            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
             print('-dpsc',psfilename,'-append');
             
         alltcoursedata = reshape(sftcourse,size(sftcourse,1)*size(sftcourse,2)*size(sftcourse,3),size(sftcourse,4));
@@ -114,8 +125,8 @@ for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
         colormap jet; colorbar
         title('timecourse correlation');
         xlabel('subj'); ylabel('subj')
-        set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfilename,'-append');
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+        print('-dpsc',psfilename,'-append');
             
     end
 
@@ -130,20 +141,26 @@ for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
     plotGratingRespFit(median(shiftData,4),median(shiftData(:,:,5,:) + shiftData(:,:,6,:),4),median(fit,4),rep,xpts,ypts,'average')
     subplot(2,3,6)
     title('average')
-    set(gcf, 'PaperPositionMode', 'auto');
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
     print('-dpsc',psfilename,'-append');
     
     
     mnfit = median(fit,4);
+    try
+        load(files(use(f)).ptsfile)
+    catch
+        disp('no points file designated in batch file')
+    end
     if x==0
-        [fname pname] = uigetfile('*.mat','points file');
+        [fname pname] = uigetfile('*.mat','select points file? cancel to pick points');
         if fname~=0
             load(fullfile(pname, fname));
         else
             figure
             imagesc(squeeze(mean(shiftData(:,:,5,:),4)));
             hold on; plot(ypts,xpts,'w.','Markersize',2)
-            for i = 1:7
+            title('pick 8 points: V1, clockwise around, then MM (outside lines below V1')
+            for i = 1:8
                 [y(i) x(i)] =ginput(1);
                 plot(y(i),x(i),'o');
             end
@@ -171,7 +188,7 @@ for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
         for i = 1:7;
             plot([y(i)-w y(i)-w y(i)+w y(i)+w y(i)-w],[x(i)-w x(i)+w x(i)+w x(i)-w x(i)-w],col(i),'LineWidth',2)
         end
-        legend({'V1','LM','AL','RL','AM','PM','MM'})
+        legend(visareas)
         
         hold on; plot(ypts,xpts,'w.','Markersize',2); axis off
         
@@ -231,8 +248,8 @@ for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
         end
         xlim([1 20]); title('timecourse');
         xlabel('frames')
-        
-                      set(gcf, 'PaperPositionMode', 'auto');
+        mtit('tuning for each vis area')
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilename,'-append');
         
         %%% 4x3y
@@ -244,7 +261,7 @@ for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
         for i = 1:7;
             plot([y(i)-w y(i)-w y(i)+w y(i)+w y(i)-w],[x(i)-w x(i)+w x(i)+w x(i)-w x(i)-w],col(i),'LineWidth',2)
         end
-        legend({'V1','LM','AL','RL','AM','PM','MM'})
+        legend({'V1','MM','LM','AL','RL','AM','PM'})
         
         hold on; plot(ypts,xpts,'w.','Markersize',2); axis off
         
@@ -305,8 +322,8 @@ for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
         end
         xlim([1 15]); title('timecourse');
         xlabel('frames')
-        
-          set(gcf, 'PaperPositionMode', 'auto');
+        mtit('tuning for each vis area')
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilename,'-append');
         %%plot overall cycle average
         
@@ -319,9 +336,10 @@ for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
     plot(squeeze(nanmean(nanmean(nanmean(nanmean(trialcycavgRun(x(1),y(1),:,:,:,:,:),4),5),6),7)))
     plot(squeeze(nanmean(nanmean(nanmean(nanmean(trialcycavgSit(x(1),y(1),:,:,:,:,:),4),5),6),7)))        
     legend('Total','Run','Sit')
-    axis([1 15 -0.05 0.05])
+    axis([1 15 -0.02 0.15])
+    title('group cycavg running/stationary')
     if exist('psfilename','var')
-        set(gcf, 'PaperPositionMode', 'auto');
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilename,'-append');
     end
         
@@ -371,7 +389,7 @@ for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
         xlim([0.75 2.25]); ylim([0 1]); title('sf');     
         xlabel('cpd')
         
-         set(gcf, 'PaperPositionMode', 'auto');
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilename,'-append');
         
         for sf = 1:2
@@ -412,14 +430,14 @@ for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior p
        xlabel('frames')
         end
              
-        set(gcf, 'PaperPositionMode', 'auto');
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilename,'-append');
         
         end %%sf
         
         %%% bkgrat
     end
-end
+% end
 
 
 figure
@@ -434,7 +452,10 @@ for i = 1:7
 end
 xlim([1 15]); title('timecourse');
 xlabel('frames')
-
+if exist('psfilename','var')
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    print('-dpsc',psfilename,'-append');
+end
 
 figure
 hold on
@@ -446,8 +467,12 @@ for i = 1:7
     d = dconvd(31:45);
     plot(0.1:0.1:(0.1*length(d)),(circshift(d',7)-min(d))/(max(d)-min(d)),col(i),'LineWidth',2);
 end
-xlim([0.1 1.5]); title('timecourse');
+xlim([0.1 1.5]); title('deconvolved timecourse');
 xlabel('sec')
+if exist('psfilename','var')
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    print('-dpsc',psfilename,'-append');
+end
 
 %
 %

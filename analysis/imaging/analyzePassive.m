@@ -1,62 +1,94 @@
-
-
-clear all
-%batchPassive2015;
-%batchTopography
-batchDOI0722
-%batchTopoFrontiers
+%% analyzePassive: choose batch file and filter experiments w/batch file fields, comment/uncomment stimulus-specific analyses below
 close all
+clear all
+warning off
 
+%% pick animals for Kristen
 
+% batch4x3y_3x2y_KC %Kris' batch file
+% cd(pathname)
+% 
+% alluse = find(strcmp({files.controlvirus},'no') & strcmp({files.inject},'CLOZ') & strcmp({files.dose},'2.5 mg/kg')  ...
+%     & strcmp({files.monitor},'vert') & strcmp({files.timing},'post') & strcmp({files.notes},'good data'))  
+% 
+% savename = ['KC_4X3Y' files(alluse(1)).inject '_' files(alluse(1)).dose '_' files(alluse(1)).timing]; 
 
-   alluse = find(strcmp({files.inject},'saline') & strcmp({files.rignum},'rig1') & strcmp({files.timing},'post') &  strcmp({files.notes},'good imaging session')  ) 
-  
+%% pick animals for Mandi
+
+batchMandiEnrichment %Mandi's batch file
+cd(pathname)
+
+alluse = find(strcmp({files.condition},'control') & strcmp({files.notes},'good imaging session'))
+
+savename = ['MS_' files(alluse(1)).condition];
+
+%% run doTopography (use this one to average all sessions that meet criteria)
 length(alluse)
-alluse=alluse(1:5)
-%alluse=alluse(end-5:end);
 allsubj = unique({files(alluse).subj})
 
-
+psfilename = 'F:\Widefield_Analysis\Kristen\tempWF.ps'; 
+if exist(psfilename,'file')==2;delete(psfilename);end
 
 %%% use this one for subject by subject averaging
 %for s = 1:length(allsubj)
 %use = intersect(alluse,find(strcmp({files.subj},allsubj{s})))    
 
-%%% use this one to average all sessions that meet criteria
 for s=1:1
 use = alluse;
-
 allsubj{s}
 
 %%% calculate gradients and regions
 clear map merge
 
-x0 =0; y0=0; sz = 128;
+x0=0; y0=0; sz=128;
 doTopography;
 
+%% pick which gratings analysis to run
+
+%%%UNCOMMENT FOR 3X2Y
+disp('doing 3x2y')
+rep=2;
 doGratingsNew;
-% %%% analyze looming
-% for f = 1:length(use)
-%     loom_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'loom');
-% end
-% fourPhaseAvg(loom_resp,allxshift+x0,allyshift+y0,allthetashift,zoom, sz, avgmap);
+
+% %%% UNCOMMENT FOR 4X3Y
+% disp('doing 4x3y')
+% rep=4;
+% doGratingsNew;
+
+%%%UNCOMMENT FOR NATURAL IMAGES
+disp('doing natural images')
+doNaturalImages
 
 
-%%% analyze grating
-% for f = 1:length(use)
-%  f
-%  grating_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'grating');
-% end
-% fourPhaseAvg(grating_resp,allxshift+x0,allyshift+y0, allthetashift,zoom*0.57, sz, avgmap);
-
-
+% % %%
+% % % %%% analyze looming
+% % % for f = 1:length(use)
+% % %     loom_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'loom');
+% % % end
+% % % fourPhaseAvg(loom_resp,allxshift+x0,allyshift+y0,allthetashift,zoom, sz, avgmap);
+% % 
+% % 
+% % %%% analyze grating
+% % % for f = 1:length(use)
+% % %  f
+% % %  grating_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'grating');
+% % % end
+% % % fourPhaseAvg(grating_resp,allxshift+x0,allyshift+y0, allthetashift,zoom*0.57, sz, avgmap);
 
 end
-[f p] = uiputfile('*.mat','save data?');
-sessiondata = files(alluse);
 
-if f~=0
-    save(fullfile(p,f),'allsubj','sessiondata','shiftData','fit','mnfit','cycavg');
+disp('saving data')
+try
+    save(fullfile(pathname,savename),'allsubj','sessiondata','shiftData','fit','mnfit','cycavg','natimcycavg','allfam','allims','allfiles','-v7.3');
+catch
+    save(fullfile(pathname,savename),'allsubj','sessiondata','shiftData','fit','mnfit','cycavg','-v7.3');
 end
 
+try
+    dos(['ps2pdf ' psfilename ' "' [fullfile(p,f) '.pdf'] '"'])
+catch
+    disp('couldnt generate pdf');
+    keyboard
+end
 
+delete(psfilename);

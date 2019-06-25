@@ -247,7 +247,7 @@ else
         display('generated pdf using builtin matlab ps2pdf')
     catch
         display('couldnt generate pdf');
-        keyboard
+%         keyboard
     end
 end
 

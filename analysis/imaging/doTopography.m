@@ -194,7 +194,8 @@ end
 % frame(:,31:290,:)=avgmap;
 % avgmap=frame;
 
-load('mapoverlay.mat') %only for 5mm window right now
+load('C:\mapoverlay5mm.mat')
+% load('mapoverlay.mat') %only for 5mm window right now
 
 
 for m=1:2

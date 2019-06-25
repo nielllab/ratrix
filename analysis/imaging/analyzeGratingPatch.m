@@ -46,7 +46,7 @@ nx=ceil(sqrt(acqdurframes+1)); %%% how many rows in figure subplot
 figure
 map=0;
 for f=1:acqdurframes
-    cycavg(:,:,f) = mean(img(:,:,(f+trials*acqdurframes/2):acqdurframes:end),3);
+    cycavg(:,:,f) = mean(img(:,:,f:acqdurframes:end),3);
     subplot(nx,nx,f)
     imagesc(squeeze(cycavg(:,:,f)),[-0.02 0.02])
     axis off
@@ -60,10 +60,11 @@ subplot(nx,nx,f+1)
 plot(squeeze(mean(mean(cycavg,2),1)))
 axis off
 set(gca,'LooseInset',get(gca,'TightInset'))
+mtit('cycle average and timecourse')
 
 
 if exist('psfilename','var')
-    set(gcf, 'PaperPositionMode', 'auto');
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
     print('-dpsc',psfilename,'-append');
 end
 
@@ -77,8 +78,9 @@ subplot(2,2,4)
 plot((1:length(tcourse))/600,angle(conv(fourier,ones(1,600),'same')));
 ylim([-pi pi])
 ylabel('phase'); xlabel('mins')
+mtit('stimulus/acquisition timing sanity check')
 if exist('psfilename','var')
-    set(gcf, 'PaperPositionMode', 'auto');
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
     print('-dpsc',psfilename,'-append');
 end
 
@@ -122,9 +124,9 @@ if length(unique(tf))>1
     subplot(2,2,4)
     [ph(:,:,4) amp(:,:,4) tftuning] = getPixelTuning(trialdata,tf,'TF',[1 length(unique(tf))],jet);
 end
-
+mtit('raw retinotopy,SF,TF maps')
 if exist('psfilename','var')
-    set(gcf, 'PaperPositionMode', 'auto');
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
     print('-dpsc',psfilename,'-append');
 end
 
@@ -181,7 +183,7 @@ if bkgrat
     end
     
     if exist('psfilename','var')
-        set(gcf, 'PaperPositionMode', 'auto');
+        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilename,'-append');
     end
     
@@ -288,19 +290,25 @@ end
 %     imagesc(squeeze(tuning(x,y,:,:,2,1)),[-0.025 0.025]);
 % end
 %
-if length(xrange)==4 & length(yrange)==3
-    figure
-    for i = 1:length(sfrange)
-        for j=1:length(tfrange)
-            subplot(length(tfrange),length(sfrange),length(sfrange)*(j-1)+i)
-            d=squeeze(mean(mean(avgtrialcourse(:,:,i,j,:),2),1));
-            sftcourse(i,j,:) = d-min(d);
-            plot(d-min(d)); axis([1 18 0 0.015]);
-            set(gca,'Xticklabel',[]); set(gca,'Yticklabel',[]);
-            set(gca,'LooseInset',get(gca,'TightInset'))
-        end
+
+figure
+for i = 1:length(sfrange)
+    for j=1:length(tfrange)
+        subplot(length(tfrange),length(sfrange),length(sfrange)*(j-1)+i)
+        d=squeeze(mean(mean(avgtrialcourse(:,:,i,j,:),2),1));
+        sftcourse(i,j,:) = d-min(d);
+        plot(d-min(d)); axis([1 18 0 0.015]);
+        set(gca,'Xticklabel',[]); set(gca,'Yticklabel',[]);
+        set(gca,'LooseInset',get(gca,'TightInset'))
+        title(sprintf('%0.2fcpd %0.0fhz',sfrange(i),tfrange(j)))
     end
 end
+mtit('cycavg for each sf/tf combo')
+if exist('psfilename','var')
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    print('-dpsc',psfilename,'-append');
+end
+
 
 
 %%% plot sf and tf responses
@@ -315,8 +323,9 @@ for i = 1:length(sfrange)
         set(gca,'LooseInset',get(gca,'TightInset'))
     end
 end
+mtit('peak resp for each SF, TF combo')
 if exist('psfilename','var')
-    set(gcf, 'PaperPositionMode', 'auto');
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
     print('-dpsc',psfilename,'-append');
 end  
 
@@ -334,61 +343,68 @@ subplot(1,2,1)
 bar(mv);
 xlabel('subject')
 ylabel('fraction running')
+ylim([0 1])
 subplot(1,2,2)
 bar([mean(trialspeed(run)) mean(trialspeed(sit))])
 set(gca,'xticklabel',{'run','sit'})
 ylabel('speed')
 if exist('psfilename','var')
-    set(gcf, 'PaperPositionMode', 'auto');
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
     print('-dpsc',psfilename,'-append');
 end
 
 
-% figure
-% for i = 1:length(xrange)
-%     for j=1:length(yrange)
-%         subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
-%         d=squeeze(mean(mean(avgtrialcourse(i,j,:,:,:),4),3));
-%         plot(d-min(d)); axis([1 18 0 0.015])
-%         set(gca,'Xticklabel',[]); set(gca,'Yticklabel',[]);
-%         set(gca,'LooseInset',get(gca,'TightInset'))
-%     end
-% end
+figure
+for i = 1:length(xrange)
+    for j=1:length(yrange)
+        subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
+        d=squeeze(mean(mean(avgtrialcourse(i,j,:,:,:),4),3));
+        plot(d-min(d)); axis([1 18 0 0.015])
+        set(gca,'Xticklabel',[]); set(gca,'Yticklabel',[]);
+        set(gca,'LooseInset',get(gca,'TightInset'))
+    end
+end
+mtit('cycavg per spatial location')
+if exist('psfilename','var')
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    print('-dpsc',psfilename,'-append');
+end
 
 %%% plot x/y maps
-% if ~bkgrat
-%     figure
-%     for i = 1:length(xrange)
-%         for j=1:length(yrange)
-%             subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
-%             imagesc(squeeze(mean(mean(tuning(:,:,i,j,:,:),6),5)),range); colormap jet
-%             % title(sprintf('%0.2f %0.2f',xrange(i),yrange(j)))
-%             axis off; axis equal
-%             hold on; plot(ypts,xpts,'w.','Markersize',2)
-%             set(gca,'LooseInset',get(gca,'TightInset'))
-%         end
-%     end
-% else
-%     for k = 1:2
-%         figure
-%         for i = 1:length(xrange)
-%             for j=1:length(yrange)
-%                 subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
-%                 imagesc(squeeze(mean(mean(tuning(:,:,i,j,k,:),6),5)),range);
-%                 % title(sprintf('%0.2fcpd %0.2fhz',sfrange(i),tfrange(j)))
-%                 axis off; axis equal
-%                 hold on; plot(ypts,xpts,'w.','Markersize',2)
-%                 set(gca,'LooseInset',get(gca,'TightInset'))
-%             end
-%         end
-%         title(sprintf('sf = %d',k));
-%     end
-% end
-% 
-% if exist('psfilename','var')
-%     set(gcf, 'PaperPositionMode', 'auto');
-%     print('-dpsc',psfilename,'-append');
-% end
+if ~bkgrat
+    figure
+    for i = 1:length(xrange)
+        for j=1:length(yrange)
+            subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
+            imagesc(squeeze(mean(mean(tuning(:,:,i,j,:,:),6),5)),range); colormap jet
+%             title(sprintf('%0.2f %0.2f',xrange(i),yrange(j)))
+            axis off; axis equal
+            hold on; plot(ypts,xpts,'w.','Markersize',2)
+            set(gca,'LooseInset',get(gca,'TightInset'))
+        end
+    end
+    mtit('peak response per spatial location')
+else
+    for k = 1:2
+        figure
+        for i = 1:length(xrange)
+            for j=1:length(yrange)
+                subplot(length(yrange),length(xrange),length(xrange)*(j-1)+i)
+                imagesc(squeeze(mean(mean(tuning(:,:,i,j,k,:),6),5)),range);
+                % title(sprintf('%0.2fcpd %0.2fhz',sfrange(i),tfrange(j)))
+                axis off; axis equal
+                hold on; plot(ypts,xpts,'w.','Markersize',2)
+                set(gca,'LooseInset',get(gca,'TightInset'))
+            end
+        end
+        title(sprintf('sf = %d',k));
+    end
+end
+
+if exist('psfilename','var')
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    print('-dpsc',psfilename,'-append');
+end
 
 
     

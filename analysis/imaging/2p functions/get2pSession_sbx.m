@@ -57,13 +57,13 @@ else %%% new session data
     end
 end
 
-figure
-timecourse = squeeze(mean(mean(dfofInterp(:,:,1:60/dt),2),1));
-plot(dt:dt:60,timecourse); xlabel('secs')
-hold on
-for st = 0:10
-    plot(st*cycLength,[0.2 1],'g:')
-end
+% figure
+% timecourse = squeeze(mean(mean(dfofInterp(:,:,1:60/dt),2),1));
+% plot(dt:dt:60,timecourse); xlabel('secs')
+% hold on
+% for st = 0:10
+%     plot(st*cycLength,[0.2 1],'g:')
+% end
 
 if exist('psfile','var')
     set(gcf, 'PaperPositionMode', 'auto');

@@ -23,7 +23,7 @@ else %%% new session data
     fileName = fileName(1:end-4)  %%% create filename
     
  if ~exist('cycLength','var')
-     cycLength = 2;
+     cycLength= 2;
  end
     
     %     twocolor = input('# of channels : ')
@@ -59,11 +59,9 @@ else %%% new session data
     end
 end
 
-figure
+% figure
 % timecourse = squeeze(mean(mean(dfofInterp(:,:,1:60/dt),2),1));
-timecourse = squeeze(mean(mean(dfofInterp,2),1));
 % plot(dt:dt:60,timecourse); xlabel('secs')
-plot(timecourse); xlabel('secs')
 % hold on
 % for st = 0:10
 %     plot(st*cycLength,[0.2 1],'g:')

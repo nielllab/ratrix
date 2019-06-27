@@ -5,22 +5,22 @@ warning off
 
 %% pick animals for Kristen
 
-% batch4x3y_3x2y_KC %Kris' batch file
-% cd(pathname)
-% 
-% alluse = find(strcmp({files.controlvirus},'no') & strcmp({files.inject},'CLOZ') & strcmp({files.dose},'2.5 mg/kg')  ...
-%     & strcmp({files.monitor},'vert') & strcmp({files.timing},'post') & strcmp({files.notes},'good data'))  
-% 
-% savename = ['KC_4X3Y' files(alluse(1)).inject '_' files(alluse(1)).dose '_' files(alluse(1)).timing]; 
+batch4x3y_3x2y_KC %Kris' batch file
+cd(pathname)
+
+alluse = find(strcmp({files.controlvirus},'no') & strcmp({files.inject},'CLOZ') & strcmp({files.dose},'0.5 mg_kg')  ...
+    & strcmp({files.monitor},'land') & strcmp({files.timing},'post') & strcmp({files.notes},'good data'))  
+
+savename = ['KC_3X2Y' files(alluse(1)).inject '_' files(alluse(1)).dose '_' files(alluse(1)).timing '.mat']; 
 
 %% pick animals for Mandi
 
-batchMandiEnrichment %Mandi's batch file
-cd(pathname)
-
-alluse = find(strcmp({files.condition},'control') & strcmp({files.notes},'good imaging session'))
-
-savename = ['MS_' files(alluse(1)).condition];
+% batchMandiEnrichment %Mandi's batch file
+% cd(pathname)
+% 
+% alluse = find(strcmp({files.condition},'control') & strcmp({files.notes},'good imaging session'))
+% 
+% savename = ['MS_' files(alluse(1)).condition '.mat'];
 
 %% run doTopography (use this one to average all sessions that meet criteria)
 length(alluse)
@@ -56,8 +56,8 @@ doGratingsNew;
 % doGratingsNew;
 
 %%%UNCOMMENT FOR NATURAL IMAGES
-disp('doing natural images')
-doNaturalImages
+% disp('doing natural images')
+% doNaturalImages
 
 
 % % %%
@@ -79,13 +79,16 @@ end
 
 disp('saving data')
 try
-    save(fullfile(pathname,savename),'allsubj','sessiondata','shiftData','fit','mnfit','cycavg','natimcycavg','allfam','allims','allfiles','-v7.3');
+    save(fullfile(pathname,savename),'allsubj','shiftData','fit','mnfit','cycavg','natimcycavg','allfam','allims','allfiles','-v7.3');
 catch
-    save(fullfile(pathname,savename),'allsubj','sessiondata','shiftData','fit','mnfit','cycavg','-v7.3');
+    save(fullfile(pathname,savename),'allsubj','shiftData','fit','mnfit','cycavg','-v7.3');
 end
+%%%phil note to self- where did sessiondata go/come from and why was it originally
+%%%being saved out? removed from save 6/13/19 after error said it didn't
+%%%exist
 
 try
-    dos(['ps2pdf ' psfilename ' "' [fullfile(p,f) '.pdf'] '"'])
+    dos(['ps2pdf ' psfilename ' "' [fullfile(pathname,savename(1:end-4)) '.pdf'] '"'])
 catch
     disp('couldnt generate pdf');
     keyboard

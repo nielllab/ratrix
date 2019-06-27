@@ -4,7 +4,7 @@ x=0; %clear points
 for f = 1:length(use)
     
     %%%choose downsample factor
-    downsample = 4;
+    downsample = 1;
     %%%load the movie from batch file name
     load(files(use(f)).movienameNaturalImages)
     %%%get imaging rate from batch file
@@ -73,6 +73,7 @@ for f = 1:length(use)
     map=0;
 %     p=1:cyclength;p=circshift(p,ceil(cyclength/2)-1,2);
     colormap jet
+    clear cyc
     for fr=1:cyclength
         cyc(:,:,fr) = mean(dfof_bg(:,:,(fr:cyclength:end)),3);
         subplot(nx,nx,fr)

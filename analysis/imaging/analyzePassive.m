@@ -5,28 +5,28 @@ warning off
 
 %% pick animals for Kristen
 
-batch4x3y_3x2y_KC %Kris' batch file
-cd(pathname)
-
-alluse = find(strcmp({files.controlvirus},'no') & strcmp({files.inject},'CLOZ') & strcmp({files.dose},'0.5 mg_kg')  ...
-    & strcmp({files.monitor},'land') & strcmp({files.timing},'post') & strcmp({files.notes},'good data'))  
-
-savename = ['KC_3X2Y' files(alluse(1)).inject '_' files(alluse(1)).dose '_' files(alluse(1)).timing '.mat']; 
+% batch4x3y_3x2y_KC %Kris' batch file
+% cd(pathname)
+% 
+% alluse = find(strcmp({files.controlvirus},'no') & strcmp({files.inject},'CLOZ') & strcmp({files.dose},'0.5 mg_kg')  ...
+%     & strcmp({files.monitor},'land') & strcmp({files.timing},'post') & strcmp({files.notes},'good data'))  
+% 
+% savename = ['KC_3X2Y' files(alluse(1)).inject '_' files(alluse(1)).dose '_' files(alluse(1)).timing '.mat']; 
 
 %% pick animals for Mandi
 
-% batchMandiEnrichment %Mandi's batch file
-% cd(pathname)
-% 
-% alluse = find(strcmp({files.condition},'control') & strcmp({files.notes},'good imaging session'))
-% 
-% savename = ['MS_' files(alluse(1)).condition '.mat'];
+batchMandiEnrichment %Mandi's batch file
+cd(pathname)
+
+alluse = find(strcmp({files.condition},'control') & strcmp({files.notes},'good imaging session'))
+
+savename = ['MS_' files(alluse(1)).condition '.mat'];
 
 %% run doTopography (use this one to average all sessions that meet criteria)
 length(alluse)
 allsubj = unique({files(alluse).subj})
 
-psfilename = 'F:\Widefield_Analysis\Kristen\tempWF.ps'; 
+psfilename = fullfile(pathname,'tempWF.ps'); 
 if exist(psfilename,'file')==2;delete(psfilename);end
 
 %%% use this one for subject by subject averaging
@@ -56,8 +56,8 @@ doGratingsNew;
 % doGratingsNew;
 
 %%%UNCOMMENT FOR NATURAL IMAGES
-% disp('doing natural images')
-% doNaturalImages
+disp('doing natural images')
+doNaturalImages
 
 
 % % %%
@@ -79,7 +79,7 @@ end
 
 disp('saving data')
 try
-    save(fullfile(pathname,savename),'allsubj','shiftData','fit','mnfit','cycavg','natimcycavg','allfam','allims','allfiles','-v7.3');
+    save(fullfile(pathname,savename),'allsubj','shiftData','fit','mnfit','cycavg','natimcyc','natimcycavg','allfam','allims','allfiles','-v7.3');
 catch
     save(fullfile(pathname,savename),'allsubj','shiftData','fit','mnfit','cycavg','-v7.3');
 end
@@ -89,9 +89,10 @@ end
 
 try
     dos(['ps2pdf ' psfilename ' "' [fullfile(pathname,savename(1:end-4)) '.pdf'] '"'])
+    delete(psfilename);
 catch
     disp('couldnt generate pdf');
     keyboard
 end
 
-delete(psfilename);
+

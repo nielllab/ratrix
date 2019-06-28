@@ -267,5 +267,6 @@ for f = 1:length(use)
     end
     
     natimcycavg(:,:,:,:,:,f) = trialcycavg;
+    natimcyc(:,:,:,:,f) = trialcyc;
     
 end

@@ -1,13 +1,13 @@
 %% batchMandiEnrichment
 n = 0;
 
-pathname = 'F:\Mandi\Enrichment Widefield\';
-datapathname = 'F:\Mandi\Enrichment Widefield\';
-outpathname = 'F:\Mandi\Enrichment Widefield\';
+pathname = 'F:\Mandi\EnrichmentWidefield\';
+datapathname = 'F:\Mandi\EnrichmentWidefield\';
+outpathname = 'F:\Mandi\EnrichmentWidefield\';
 
-% pathname = '\\langevin\backup\widefield\Mandi\Enrichment Widefield\';
-% datapathname = '\\langevin\backup\widefield\Mandi\Enrichment Widefield\';
-% outpathname = '\\langevin\backup\widefield\Mandi\Enrichment Widefield\';
+% pathname = '\\langevin\backup\widefield\Mandi\EnrichmentWidefield\';
+% datapathname = '\\langevin\backup\widefield\Mandi\EnrichmentWidefield\';
+% outpathname = '\\langevin\backup\widefield\Mandi\EnrichmentWidefield\';
 
 %%
 % 
@@ -127,7 +127,7 @@ outpathname = 'F:\Mandi\Enrichment Widefield\';
 % files(n).label = 'camk2 gc6';
 % files(n).moviename3x2y = 'C:\grating3x2y6sf4tf_1728sec.mat'
 % files(n).movienameNaturalImages = 'C:\src\Movies\naturalImagesEnrichment8mag648s.mat';
-% files(n).ptsfile = 'F:\Mandi\Enrichment Widefield\CrisPts.mat';
+% files(n).ptsfile = 'F:\Mandi\EnrichmentWidefield\CrisPts.mat';
 % files(n).imagerate = 10; %imaging rate in Hz (usually 10)
 % files(n).notes = 'good imaging session'; %If something happens during the experiment that could affect data, write here.
 % 
@@ -149,7 +149,7 @@ outpathname = 'F:\Mandi\Enrichment Widefield\';
 % files(n).label = 'camk2 gc6';
 % files(n).moviename3x2y = 'C:\grating3x2y6sf4tf_1728sec.mat'
 % files(n).movienameNaturalImages = 'C:\src\Movies\naturalImagesEnrichment8mag648s.mat';
-% files(n).ptsfile = 'F:\Mandi\Enrichment Widefield\CrisPts.mat';
+% files(n).ptsfile = 'F:\Mandi\EnrichmentWidefield\CrisPts.mat';
 % files(n).imagerate = 10; %imaging rate in Hz (usually 10)
 % files(n).notes = 'good imaging session'; %If something happens during the experiment that could affect data, write here.
 
@@ -173,7 +173,7 @@ files(n).monitor = 'land'; %land or vert. All should be land.
 files(n).label = 'camk2 gc6';
 files(n).moviename3x2y = 'C:\grating3x2y6sf4tf_1728sec.mat';
 files(n).movienameNaturalImages = 'C:\src\Movies\naturalImagesEnrichment8mag648s.mat';
-files(n).ptsfile = 'F:\Mandi\Enrichment Widefield\CrisPts.mat';
+files(n).ptsfile = 'F:\Mandi\EnrichmentWidefield\CrisPts.mat';
 files(n).imagerate = 10; %imaging rate in Hz (usually 10)
 files(n).notes = 'good imaging session'; %If something happens during the experiment that could affect data, write here.
 
@@ -197,7 +197,7 @@ files(n).monitor = 'land'; %land or vert. All should be land.
 files(n).label = 'camk2 gc6';
 files(n).moviename3x2y = 'C:\grating3x2y6sf4tf_1728sec.mat';
 files(n).movienameNaturalImages = 'C:\src\Movies\naturalImagesEnrichment8mag648s.mat';
-files(n).ptsfile = 'F:\Mandi\Enrichment Widefield\CrisPts.mat';
+files(n).ptsfile = 'F:\Mandi\EnrichmentWidefield\CrisPts.mat';
 files(n).imagerate = 10; %imaging rate in Hz (usually 10)
 files(n).notes = 'good imaging session'; %If something happens during the experiment that could affect data, write here.
 
@@ -222,7 +222,7 @@ files(n).monitor = 'land'; %land or vert. All should be land.
 files(n).label = 'camk2 gc6';
 files(n).moviename3x2y = 'C:\grating3x2y6sf4tf_1728sec.mat';
 files(n).movienameNaturalImages = 'C:\src\Movies\naturalImagesEnrichment8mag648s.mat';
-files(n).ptsfile = 'F:\Mandi\Enrichment Widefield\CrisPts.mat';
+files(n).ptsfile = 'F:\Mandi\EnrichmentWidefield\CrisPts.mat';
 files(n).imagerate = 10; %imaging rate in Hz (usually 10)
 files(n).notes = 'good imaging session'; %If something happens during the experiment that could affect data, write here.
 
@@ -247,9 +247,9 @@ files(n).monitor = 'land'; %land or vert. All should be land.
 files(n).label = 'camk2 gc6';
 files(n).moviename3x2y = 'C:\grating3x2y6sf4tf_1728sec.mat';
 files(n).movienameNaturalImages = 'C:\src\Movies\naturalImagesEnrichment8mag648s.mat';
-files(n).ptsfile = 'F:\Mandi\Enrichment Widefield\CrisPts.mat';
+files(n).ptsfile = 'F:\Mandi\EnrichmentWidefield\CrisPts.mat';
 files(n).imagerate = 10; %imaging rate in Hz (usually 10)
-files(n).notes = 'good imaging session'; %If something happens during the experiment that could affect data, write here.
+files(n).notes = 'not Gcamp'; %If something happens during the experiment that could affect data, write here.
 
 %%
 
@@ -272,7 +272,7 @@ files(n).monitor = 'land'; %land or vert. All should be land.
 files(n).label = 'camk2 gc6';
 files(n).moviename3x2y = 'C:\grating3x2y6sf4tf_1728sec.mat';
 files(n).movienameNaturalImages = 'C:\src\Movies\naturalImagesEnrichment8mag648s.mat';
-files(n).ptsfile = 'F:\Mandi\Enrichment Widefield\CrisPts.mat';
+files(n).ptsfile = 'F:\Mandi\EnrichmentWidefield\CrisPts.mat';
 files(n).imagerate = 10; %imaging rate in Hz (usually 10)
 files(n).notes = 'good imaging session'; %If something happens during the experiment that could affect data, write here.
 
@@ -297,9 +297,9 @@ files(n).monitor = 'land'; %land or vert. All should be land.
 files(n).label = 'camk2 gc6';
 files(n).moviename3x2y = 'C:\grating3x2y6sf4tf_1728sec.mat';
 files(n).movienameNaturalImages = 'C:\src\Movies\naturalImagesEnrichment8mag648s.mat';
-files(n).ptsfile = 'F:\Mandi\Enrichment Widefield\CrisPts.mat';
+files(n).ptsfile = 'F:\Mandi\EnrichmentWidefield\CrisPts.mat';
 files(n).imagerate = 10; %imaging rate in Hz (usually 10)
-files(n).notes = 'good imaging session'; %If something happens during the experiment that could affect data, write here.
+files(n).notes = 'not Gcamp'; %If something happens during the experiment that could affect data, write here.
 
 %%
 
@@ -322,7 +322,7 @@ files(n).monitor = 'land'; %land or vert. All should be land.
 files(n).label = 'camk2 gc6';
 files(n).moviename3x2y = 'C:\grating3x2y6sf4tf_1728sec.mat';
 files(n).movienameNaturalImages = 'C:\src\Movies\naturalImagesEnrichment8mag648s.mat';
-files(n).ptsfile = 'F:\Mandi\Enrichment Widefield\CrisPts.mat';
+files(n).ptsfile = 'F:\Mandi\EnrichmentWidefield\CrisPts.mat';
 files(n).imagerate = 10; %imaging rate in Hz (usually 10)
 files(n).notes = 'good imaging session'; %If something happens during the experiment that could affect data, write here.
 
@@ -347,6 +347,6 @@ files(n).monitor = 'land'; %land or vert. All should be land.
 files(n).label = 'camk2 gc6';
 files(n).moviename3x2y = 'C:\grating3x2y6sf4tf_1728sec.mat';
 files(n).movienameNaturalImages = 'C:\src\Movies\naturalImagesEnrichment8mag648s.mat';
-files(n).ptsfile = 'F:\Mandi\Enrichment Widefield\CrisPts.mat';
+files(n).ptsfile = 'F:\Mandi\EnrichmentWidefield\CrisPts.mat';
 files(n).imagerate = 10; %imaging rate in Hz (usually 10)
 files(n).notes = 'good imaging session'; %If something happens during the experiment that could affect data, write here.

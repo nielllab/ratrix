@@ -18,7 +18,7 @@ for f = 1:length(use)
     stimuli = unique(fileidx);
     cyclength = (isi+duration)*imagerate;
     base = 8:10; %indices for baseline
-    peak = 11:13; %indices for peak response
+    peak = 14:16; %indices for peak response
     imrange = [0 0.05]; %range to display images at
     ptsrange = 2; %+/- pixels from selected point to average over
     timepts = 0:1/imagerate:cyclength/imagerate-1/imagerate; %cycle time points
@@ -201,7 +201,7 @@ for f = 1:length(use)
     figure; colormap jet
     for i = 1:length(stimuli)
         subplot(5,ceil(length(stimuli)/5),i)
-        im = nanmean(nanmean(trialcycavg(:,:,peak,i,:),3),5);%-nanmean(nanmean(trialcycavg(:,:,base,i,:),3),5);
+        im = nanmean(nanmean(trialcycavg(:,:,peak,i,:),3),5);-nanmean(nanmean(trialcycavg(:,:,base,i,:),3),5);
         imagesc(im,imrange)
         hold on;plot(ypts,xpts,'w.','Markersize',2)
         axis off
@@ -220,13 +220,14 @@ for f = 1:length(use)
     for i = 1:length(x)
         subplot(2,ceil(length(x)/2),i)
         trace = squeeze(nanmean(nanmean(nanmean(trialcyc(x(i)-ptsrange:x(i)+ptsrange,y(i)-ptsrange:y(i)+ptsrange,:,fam),1),2),4));
-        plot(timepts,trace-mean(trace(base)),'k')
+        plot(timepts,circshift(trace-mean(trace(base)),11),'k')
         hold on
         trace = squeeze(nanmean(nanmean(nanmean(trialcyc(x(i)-ptsrange:x(i)+ptsrange,y(i)-ptsrange:y(i)+ptsrange,:,unfam),1),2),4));
-        plot(timepts,trace-mean(trace(base)),'r')
+        plot(timepts,circshift(trace-mean(trace(base)),11),'r')
         xlabel('time (s)')
         ylabel(sprintf('%s dfof',visareas{i}))
-        axis([0 timepts(end) -0.005 0.03])
+        yv = get(gca,'ylim');
+        axis([0 timepts(end) 0 yv(2)])
     end
     legend('familiar','unfamiliar','Location','southeast')
     mtit(sprintf('%s natural images',aniexpt))
@@ -242,7 +243,7 @@ for f = 1:length(use)
         imshow(allims{i})
         colormap(ax1,'gray')
         ax2 = subplot(1,3,2);
-        im = nanmean(nanmean(trialcycavg(:,:,peak,i+1,:),3),5);%1st idx is blank so add 1
+        im = nanmean(nanmean(trialcycavg(:,:,peak,i+1,:),3),5)-nanmean(nanmean(trialcycavg(:,:,base,i+1,:),3),5);%1st idx is blank so add 1
         imagesc(im,imrange)
         hold on;plot(ypts,xpts,'w.','Markersize',2)
         axis image
@@ -252,12 +253,13 @@ for f = 1:length(use)
         hold on
         for j = 1:length(x)
             trace = squeeze(nanmean(nanmean(nanmean(trialcycavg(x(j)-ptsrange:x(j)+ptsrange,y(j)-ptsrange:y(j)+ptsrange,:,i+1,:),5),2),1)); %1st idx is blank so add 1
-            plot(timepts,trace-mean(trace(base)))
+            plot(timepts,circshift(trace-mean(trace(base)),11))
         end
-        legend(visareas,'Location','Northwest')
+        legend(visareas,'Location','Northeast')
         xlabel('time (s)')
         ylabel('dfof')
-        axis([0 timepts(end) -0.005 0.1])
+        yv = get(gca,'ylim');
+        axis([0 timepts(end) 0 yv(2)])
         axis square
         mtit(sprintf('%s %s %s %s familiar=%d',files(use(f)).subj,files(use(f)).expt,files(use(f)).condition,allfiles{i},allfam(i)))
         if exist('psfilename','var')

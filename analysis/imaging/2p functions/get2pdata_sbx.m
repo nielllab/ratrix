@@ -77,7 +77,19 @@ end
 %%% event_id==2, TTL1 (rising and falling)
 %%% event_id==3, both
 global info
-stim = find( info.event_id ==1 | info.event_id==3);
+TTL0 = 1; TTL1 = 2; TTLboth =3;
+
+%%% new TTL format, contains both rising and falling
+%%% bit 0 = TTL0 rise; bit 1 = TTL0 fall; bit 2 = TTL1 rise; bit 3 = TTL1 fall
+
+
+if max(info.event_id)==8 %%% new TTL format
+    info.event_id(info.event_id==1) = TTL0; %%% TTL0 rising
+    info.event_id(info.event_id ==4 | info.event_id==8)=TTL1; %%% TTL1 rising or falling
+    info.event_id(info.event_id ==5 | info.event_id==9)=TTLboth; %%% TTL0 rising + TTL 1 rising/falling
+end
+    
+stim = find( info.event_id ==TTL0 | info.event_id==TTLboth);
 fr =(info.frame(stim) + info.line(stim)/796) /binsize; %%% get frame each trigger occured on,  add on fractio nbased on lineand correct for binning
 
 
@@ -101,7 +113,7 @@ if cfg.syncToVid
     %%% second trigger line
     %%%either beginning of each stim, or (more importantly) phases for behavior
     
-    phasesync = find( info.event_id ==2 | info.event_id==3); %%% get phase trigger signals
+    phasesync = find( info.event_id ==TTL1 | info.event_id==TTLboth); %%% get phase trigger signals
     phasesync=phasesync(1:2:end); %%% scanbox records rising and falling edge;
     for i = 1:length(phasesync);
         phasetimes(i)= max(find(stim<=phasesync(i)+2))/60;  %%% find frame trigger that occurred right before this, and convert to time bsed on stim framerate (60Hz) // need offset of two since phase trigger goes up/down before
@@ -113,7 +125,7 @@ else %%% leave timing intact and adjust video stim times to acq rate
     dt = 1/(framerate*binsize);   %%% keep dt as the actual acquired framerate
     dfofInterp = dfof;
     
-    phasesync = find( info.event_id ==2 | info.event_id==3); %%% get phase trigger signals
+    phasesync = find( info.event_id ==TTL1 | info.event_id==TTLboth); %%% get phase trigger signals
    % phasesync = find( info.event_id ==2);
     if info.frame(phasesync(1))==0  %%% something funny happens at start giving transition on first frame
         phasesync = phasesync(2:end);
@@ -123,7 +135,7 @@ else %%% leave timing intact and adjust video stim times to acq rate
     fr =(info.frame(phasesync) + info.line(phasesync)/796) /binsize; %%% get frame each trigger occured on,  add on fractio nbased on lineand correct for binning
     phasetimes = fr*dt;
     
-    frsync =  find( info.event_id ==1 | info.event_id==3);
+    frsync =  find( info.event_id ==TTL0 | info.event_id==TTLboth);
     fr = (info.frame(frsync) + info.line(frsync)/796) /binsize;
     vidframetimes = fr*dt;
 

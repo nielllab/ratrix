@@ -23,6 +23,9 @@ for f = 1:length(use)
     
 end
 
+load('C:\mapoverlay5mm.mat')
+% load('mapoverlay.mat') %only for 5mm window right now
+
 %%% need to max shiftImage return full array (260 across after zoom?), then fit it into a space of
 %%% appropriate size
 useReference=1;
@@ -73,7 +76,7 @@ for f= 1:length(use) ;
         
         figure
         subplot(nx,ny,2)
-        imshow(m);
+        imshow(m);hold on; plot(ypts,xpts,'w.','Markersize',2)
         title( [files(use(f)).subj ' ' files(use(f)).expt ' ' files(use(f)).monitor f] );
         
         imblue=zeros(100,100); imgreen=zeros(100,100);
@@ -135,6 +138,7 @@ for f= 1:length(use) ;
             subplot(nx,ny,1+(ind-1)*ny);
             
             imshow(polarMap(polarshift{ind},94));
+            hold on; plot(ypts,xpts,'w.','Markersize',2)
             allPolar(:,:,ind,f) = polarshift{ind};
             meanpolar{ind} = meanpolar{ind} + polarshift{ind};
             %            subplot(nx,ny,4+(ind-1)*ny);
@@ -194,8 +198,7 @@ end
 % frame(:,31:290,:)=avgmap;
 % avgmap=frame;
 
-load('C:\mapoverlay5mm.mat')
-% load('mapoverlay.mat') %only for 5mm window right now
+
 
 
 for m=1:2

@@ -4,8 +4,8 @@
 %%add pixel-wise, thresholded histogram of phase
 
 % %%% reads raw images, calculates dfof, and aligns to stim sync
-close all; clear all;dbstop if error
-sbxaligndir
+close all; clear all;dbstop if error;warning off
+% sbxaligndir
 fileName = uigetfile('*.sbx','topox file');
 
 dt=0.1

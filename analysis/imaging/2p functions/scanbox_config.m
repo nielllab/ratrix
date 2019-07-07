@@ -25,7 +25,7 @@ sbconfig.portcamera     = true;             % enable path camera (0 - disabled, 
 sbconfig.pathcamera     = 'Manta';
 sbconfig.pathcamera_format = 'Mono8';      % format for path camera (use > 8 bits only if doing intrinsic/epi-imaging)
 sbconfig.pathlr         = true;            % switch camera image lr? (Use camera hardware option if availabe!)
-sbconfig.imask          = bin2dec('00001111');    % interrupt mask
+sbconfig.imask          = bin2dec('00001101');    % interrupt mask
 sbconfig.pockels_range  = uint8([1 2]);           % set pockels range [vdac pga]
 sbconfig.pockels_lut    = uint8([]);              % your look up table (must have *exactly* 256 entries)
 sbconfig.mmap           = false;                    % enable/disable memory mapped file stream and plugin server
@@ -164,3 +164,14 @@ sbconfig.led_stim_com = 'COM8';                             % Arduino pulse gene
 sbconfig.led_id = '';                                       % Thorlabs DC2020 controller
 sbconfig.led_stim_com = '';    
 
+
+% fix gpu problem
+warning off parallel:gpu:device:DeviceLibsNeedsRecompiling
+try
+    gpuArray.eye(2)^2;
+catch ME
+end
+try
+    nnet.internal.cnngpu.reluForward(1);
+catch ME
+end

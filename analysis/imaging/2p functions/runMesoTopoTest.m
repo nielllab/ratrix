@@ -19,7 +19,8 @@ last_frame = first_frame + 1885;
 
 %% get the acquisition rate (resample if you want)
 
-acqrate = 10 %set this here;
+acqrate = 8.33 %set this here;
+desired_rate = 10 %the rate you want acquisition to be
 
 %% run the code
 map = {};

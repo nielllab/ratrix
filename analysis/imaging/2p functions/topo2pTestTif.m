@@ -1,4 +1,4 @@
-function [outmap] = topo2pTestTif(fileName,acqrate,first_frame,last_frame)
+function [outmap] = topo2pTestTif(fileName,acqrate,desired_rate,first_frame,last_frame)
 % this script runs a quick test for topox or topoy to get cycavg and
 % fourier map for data in tif format
 
@@ -16,7 +16,10 @@ end
 toc
 disp('finished reading tif file')
 
-nframes = min(size(data,3),3000);  %%% limit topo data to 5mins to avoid movie boundaries
+data = interp1(0:1/acqrate:(size(data,3)-1)/acqrate,shiftdim(data,2),0:1/desired_rate:(size(data,3)-1)/acqrate);
+data = shiftdim(data,1);
+
+nframes = min(size(data,3),300*desired_rate);  %%% limit topo data to 5mins to avoid movie boundaries
 data = data(:,:,1:nframes);
 
 %%% spatial downsampling

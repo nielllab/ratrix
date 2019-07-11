@@ -24,7 +24,7 @@ desired_rate = 10 %the rate you want acquisition to be
 
 %% run the code
 map = {};
-map{1} = topo2pTestTif(fileName,acqrate,first_frame,last_frame);
+map{1} = topo2pTestTif(fileName,acqrate,desired_rate,first_frame,last_frame);
 
 save([fileName(1:end-4) '_map.mat'],'map')
 frm = imread(fileName, 1);

@@ -45,7 +45,7 @@ for i=1:length(d)
             dimg = img(5:5:end,5:5:end,5:5:end);
             figure
             hist(dimg(:),100); hold on
-            lb = prctile(dimg(:),0.1); ub = prctile(dimg(:),99.5);
+    lb = 0.5*prctile(dimg(:),1); ub = 1.5*prctile(dimg(:),99.9)
             plot(lb,0,'g*'); plot(ub,0,'g*');
             figure
             mn = mean(img,3);

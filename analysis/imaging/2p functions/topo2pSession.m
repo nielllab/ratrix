@@ -27,14 +27,15 @@ for i= 1:size(dfofInterp,3);
 end
 map = map/size(dfofInterp,3); map(isnan(map))=0;
 amp = abs(map);
-prctile(amp(:),98)
-amp=amp/prctile(amp(:),98); amp(amp>1)=1;
+maxAmp = prctile(amp(:),95)  %%% changed from 98 to 95 for better scaling - cmn072119
+amp=amp/maxAmp; amp(amp>1)=1;
 img = mat2im(mod(angle(map),2*pi),hsv,[pi/2  (2*pi -pi/4)]);
 img = img.*repmat(amp,[1 1 3]);
 mapimg= figure
 figure
 imshow(imresize(img,1))
 colormap(hsv); colorbar
+title(sprintf('maxAmp = %0.2f',maxAmp));
 
 polarImg = img;
 

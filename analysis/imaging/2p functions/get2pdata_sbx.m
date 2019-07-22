@@ -37,9 +37,13 @@ end
 
 
 display('computing baseline')
+% tic
+% m = prctile(double(img(:,:,3:3:end)),10,3);  %%% changed to median - cmn 072119
+% toc
 tic
-m = prctile(double(img(:,:,10:10:end)),10,3);  %%% change to median?
+m = median(double(img(:,:,3:3:end)),3);  %%% change to median
 toc
+
 %%% Yeti seems to have a large DC offset, even in blanks on edge of image
 %%% Estimate this as minimum of mean image and subtract it off
 

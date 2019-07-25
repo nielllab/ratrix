@@ -17,11 +17,11 @@ newpdfFile = fullfile(p,f);
 psfilename = 'c:\tempIan.ps';
 if exist(psfilename,'file')==2;delete(psfilename);end
 
-makeSbxMoviesBatch
+%makeSbxMoviesBatch
 
 %% 060219
- topo2pSession('G6H12p13LN_001_009.sbx','topoXsession_V3.mat',psfilename);
- topo2pSession('G6H12p13LN_001_010.sbx','topoYsession_V2.mat',psfilename);
+%  topo2pSession('G6H12p13LN_001_009.sbx','topoXsession_V3.mat',psfilename);
+%  topo2pSession('G6H12p13LN_001_010.sbx','topoYsession_V2.mat',psfilename);
 % topo2pSession('G6H12p13LN_001_001.sbx','topo1session_V2.mat',psfilename);
 % topo2pSession('G6H12p13LN_001_002.sbx','topo2session_V2.mat',psfilename);
 % topo2pSession('G6H12p13LN_001_003.sbx','topo3session_V2.mat',psfilename);
@@ -29,9 +29,6 @@ makeSbxMoviesBatch
 % topo2pSession('G6H12p13LN_001_005.sbx','topo5session_V2.mat',psfilename);
 % topo2pSession('G6H12p13LN_001_006.sbx','topo6session_V2.mat',psfilename);
 % topo2pSession('G6H12p13LN_001_008.sbx','topo8session_V2.mat',psfilename);
-[dF xpts ypts minF xrange yrange] = getCellsPeaks('topoXsession_V3.mat', 2);
-
-[dF xpts ypts minF xrange yrange] = getCellsPeaks('topoXsession_V3.mat', 2, minF, xrange,yrange);
 
 %% 060319
 % topo2pSession('G6H12p13LN_001_001.sbx','topoXPREsession_V2.mat',psfilename);
@@ -45,6 +42,27 @@ makeSbxMoviesBatch
 %% 071619
 % topo2pSession('G6H15p5RT_001_001.sbx','darknessPREsession_V2.mat',psfilename);
 % topo2pSession('G6H15p5RT_001_002.sbx','darknessPOSTsession_V2.mat',psfilename);
+
+%% 072219
+topo2pSession('G6H12p13TT_001_001.sbx','topoX_pre.mat',psfilename);
+topo2pSession('G6H12p13TT_001_002.sbx','topoY_pre.mat',psfilename);
+%    topo2pSession('G6H12p13TT_001_003.sbx','003.mat',psfilename);
+%   topo2pSession('G6H12p13TT_001_004.sbx','004.mat',psfilename);
+%   topo2pSession('G6H12p13TT_001_005.sbx','005.mat',psfilename);
+%   topo2pSession('G6H12p13TT_001_006.sbx','006.mat',psfilename);
+topo2pSession('G6H12p13TT_001_007.sbx','topoY_post.mat',psfilename);
+topo2pSession('G6H12p13TT_001_008.sbx','topoX_post.mat',psfilename);
+
+%%% extract cell peaks (use values from first session, but could modify
+[dF xpts ypts minF xrange yrange ] =  getCellsPeaks('topoX_pre.mat',psfilename,2);
+getCellsPeaks('topoY_pre.mat',psfilename,2,minF,xrange,yrange);
+getCellsPeaks('topoY_post.mat',psfilename,2,minF,xrange,yrange);
+getCellsPeaks('topoX_post.mat',psfilename,2,minF,xrange,yrange);
+
+%%% prepost comparison
+prePost2p({'topoX_pre.mat','topoX_post.mat'},psfilename)
+prePost2p({'topoY_pre.mat','topoY_post.mat'},psfilename)
+
 
 %%
 dos(['ps2pdf ' psfilename ' "' newpdfFile '"'] )

@@ -71,6 +71,7 @@ for i=1:length(d)
         
     catch
         sprintf('couldnt make movie')
+        dbstop
     end
     
 end

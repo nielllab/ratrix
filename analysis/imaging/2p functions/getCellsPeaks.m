@@ -1,4 +1,4 @@
-function [dF xpts ypts minF xrange yrange ] =  getCellsPeaks(fname,pixWin,minF,xrange,yrange)
+function [dF xpts ypts minF xrange yrange ] =  getCellsPeaks(fname,psfile,pixWin,minF,xrange,yrange)
 %%% selects "cells" based on peak of mean image
 %%% allows criterea based on intensity and cropping; 
 %%% if these aren't passed, then they get set manually
@@ -8,6 +8,7 @@ function [dF xpts ypts minF xrange yrange ] =  getCellsPeaks(fname,pixWin,minF,x
 %%% pixWin = window to average over around each "cell", +/-pixWin
 %%% minF = minimum fluorescence intensity to be include
 %%% x/yrange = range for cropping image (to avoid boundary, or non-expressing areas
+%%% psfile = postscript file to write figures to
 %%%
 %%% outputs : 
 %%% dF = traces from all cells selected
@@ -81,8 +82,10 @@ fprintf('%d points in ROI over cutoff\n',length(pts))
 %%% plot selected points
 [y, x] = ind2sub(size(maxStd),pts);
 figure
-imagesc(stdImg,[0 prctile(stdImg(:),98)]); hold on; colormap gray
+imagesc(stdImg,[0 prctile(stdImg(:),98)]); hold on; colormap gray; colorbar
 plot(x,y,'.');
+title(fname);
+if exist('psfile','var'), set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %%% average df/f in a box around each selected point
 range = -pixWin:pixWin;
@@ -117,11 +120,35 @@ figure
 imagesc(dF(sortind,:),[-1 1]);
 title('responses sorted by mds')
 colorbar
+if exist('psfile','var'), set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 xyDist = pdist([xpts ypts],'euclidean');
 figure
 plot(xyDist,1-dist,'.');
 xlabel('distance (pix)');
 ylabel('correlation');
+if exist('psfile','var'), set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+save(fname,'dF','xpts','ypts','xrange','yrange','minF','-append');
+
+clear cycAvg
+for i = 1:100;
+    cycAvg(:,i) = mean(dF(:,i:100:end),2);
+end
+figure
+imagesc(cycAvg);
 
 
+display('doing mds');
+dist = pdist(cycAvg,'correlation');
+tic
+[Y e] = mdscale(dist,1);
+toc
+[y sortind] = sort(Y);
+figure
+imagesc(cycAvg(sortind,:),[-1 1]);
+title('responses sorted by mds')
+colorbar
+
+figure
+plot(mean(cycAvg,1)); title('cycle average')

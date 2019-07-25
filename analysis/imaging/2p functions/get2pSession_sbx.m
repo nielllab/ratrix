@@ -22,9 +22,9 @@ else %%% new session data
     
     fileName = fileName(1:end-4)  %%% create filename
     
- if ~exist('cycLength','var')
-     cycLength= 2;
- end
+    if ~exist('cycLength','var')
+        cycLength= 2;
+    end
     
     %     twocolor = input('# of channels : ')
     %     twocolor= (twocolor==2);
@@ -59,10 +59,21 @@ else %%% new session data
     end
 end
 
+m= meanImg;
+upper = prctile(m(:),97.5)*1.2;
+lower = min(m(:));
+figure
+imagesc(m,[lower upper]); colormap gray; title(sprintf('%s baseline (median) img',fileName)); axis equal
+
+if exist('psfile','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfile,'-append');
+end
+
 figure
 plot((1:size(dfofInterp,3))*dt,squeeze(mean(mean(dfofInterp,2),1)));
 xlabel('secs');
-title('mean timecourse')
+title(sprintf('%s mean timecourse',fileName))
 
 
 if exist('psfile','var')
@@ -75,7 +86,7 @@ for i = 1:cycLength/dt;
     cycAvg(i) = mean(mean(mean(dfofInterp(:,:,i:cycLength/dt:end))));
 end
 figure
-plot((1:length(cycAvg))*dt,cycAvg); xlabel('secs'); title('cycle average')
+plot((1:length(cycAvg))*dt,cycAvg); xlabel('secs'); title(sprintf('%s cycle average',fileName))
 
 if exist('psfile','var')
     set(gcf, 'PaperPositionMode', 'auto');

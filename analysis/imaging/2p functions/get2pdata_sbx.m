@@ -52,6 +52,7 @@ imagesc(m);
 title('baseline image')
 
 dcOffset = 0.95*min(m(:));
+dcOffset = 0; %%% not a major issue since scanbox upgrade. and dcOffset subtraction creates a lot of noise in dark regions, esp after swtich to median baseline (which creates higher dcOffset)
 m = m-dcOffset;
 img = img-dcOffset;
 greenframe=greenframe-dcOffset;

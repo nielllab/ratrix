@@ -128,14 +128,14 @@ stdImg = imresize(greenframe,1/cfg.spatialBin);
 stdImg= stdImg(buffer(1,1):(end-buffer(1,2)),buffer(2,1):(end-buffer(2,2)),:);
 greenCrop = double(stdImg);
 
-thresh = prctile(greenCrop(:),95)/500; %%% cut out points that are 100x dimmer than peak
+thresh = prctile(greenCrop(:),95)/50; %%% cut out points that are 100x dimmer than peak
 dfofInterp(repmat(greenCrop,[1 1 size(dfofInterp,3)])<thresh)=0;
 
 figure
 imagesc(greenCrop>thresh);
 
 % number of frames per cycle
-cycLength = median(diff(phasetimes))/dt;
+cycLength = median(diff(phasetimes))/dt
 % number of frames in window around each cycle. min of 4 secs, or actual cycle length + 2
 cycWindow = round(max(2/dt,cycLength));
 
@@ -143,6 +143,7 @@ stimTimes = phasetimes;   %%% we call them phasetimes in behavior, but better to
 startFrame = round((stimTimes(1)-1)/dt);
 dfofInterp = dfofInterp(:,:,startFrame:end);   %%% movie starts 1 sec before first stim
 stimTimesOld = stimTimes-stimTimes(1)+1;
+% stimTimesOld = stimTimesOld(1:end-3);
 % stimTimes = stimTimes(stimTimes/dt < size(dfofInterp,3)-cycWindow - 1);
 %%% hack to account for bad stimtimes
 stimTimes = 1:cycLength*dt:(size(dfofInterp,3)-cycWindow - 30)*dt;  %%% make sure you have one cycle, plus 3sec padding to be safe, at end
@@ -150,7 +151,7 @@ stimTimes = stimTimes(stimTimes<max(stimTimesOld));
 
 
 figure
-plot(diff(stimTimes)); hold on; plot(diff(stimTimesOld)); title('time between stim on 2p trigs');ylabel('secs');
+plot(diff(stimTimes)); hold on; plot(diff(stimTimesOld)); title(sprintf('time between stim on 2p trigs, median %0.03f',median(diff(stimTimes))));ylabel('secs');
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 % Get File Path for stimulus record file
@@ -188,6 +189,15 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 for i = 1:nCycles
     stimOrder(i) = stimRec.cond(min(find(stimT>((i-1)*cycLength*dt+0.1))));
 end
+
+figure
+hold on
+plot(stimOrder)
+plot(stimRec.cond(1:2:end));
+ylabel('stimulus cond')
+legend('stimOrder','stimRec.cond');
+title('should overlap except end')
+
 
 nCycles = min(length(stimTimes),nCycles); %%% trim to length of video or length of stimrech, whichever is shorter
 stimTimes = stimTimes(1:nCycles);

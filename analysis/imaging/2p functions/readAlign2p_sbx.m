@@ -34,7 +34,7 @@ end
 
 %% PRLP commented out 07/07/19 because pitches an error if align=0
 %%% CMN uncommented 07/23/19 and added test for align==1. otherwise fails to assign alignment in some cases
-if isempty(info.aligned) && align==1 %%% sometimes occurs if previously aligned, but not loaded into info
+if (~isfield('info','aligned')  || isempty(info.aligned)) && align==1 %%% sometimes occurs if previously aligned, but not loaded into info
     load([fn '.align'],'-mat','m','T');
     info.aligned.m=m; info.aligned.T=T;
 end
@@ -78,5 +78,6 @@ if showImg
     drawnow
 end
 
+info.resfreq = 7920;  %%% added by cmn 072519; new config file has this set at 8000
 framerate = info.resfreq/info.config.lines;
 

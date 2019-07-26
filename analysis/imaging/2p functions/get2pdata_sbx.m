@@ -88,7 +88,7 @@ TTL0 = 1; TTL1 = 2; TTLboth =3;
 %%% bit 0 = TTL0 rise; bit 1 = TTL0 fall; bit 2 = TTL1 rise; bit 3 = TTL1 fall
 
 
-if max(info.event_id)==8 %%% new TTL format
+if max(info.event_id)>3 %%% new TTL format
     info.event_id(info.event_id==1) = TTL0; %%% TTL0 rising
     info.event_id(info.event_id ==4 | info.event_id==8)=TTL1; %%% TTL1 rising or falling
     info.event_id(info.event_id ==5 | info.event_id==9)=TTLboth; %%% TTL0 rising + TTL 1 rising/falling
@@ -138,7 +138,7 @@ else %%% leave timing intact and adjust video stim times to acq rate
     phasesync=phasesync(1:2:end); %%% scanbox records rising and falling edge;
     %%phasetimes = phasesync*dt; %%% convert to frame time (dt)
     fr =(info.frame(phasesync) + info.line(phasesync)/796) /binsize; %%% get frame each trigger occured on,  add on fractio nbased on lineand correct for binning
-    phasetimes = fr*dt;
+    phasetimes = fr*dt; 
     
     frsync =  find( info.event_id ==TTL0 | info.event_id==TTLboth);
     fr = (info.frame(frsync) + info.line(frsync)/796) /binsize;

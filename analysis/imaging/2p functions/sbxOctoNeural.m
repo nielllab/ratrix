@@ -155,6 +155,9 @@ plot(diff(stimTimes)); hold on; plot(diff(stimTimesOld)); title(sprintf('time be
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 % Get File Path for stimulus record file
+
+
+fileName
 if ~isfield(Opt,'fStim')
     %Get tif file input
     [Opt.fStim, Opt.pStim] = uigetfile('*.mat','stimulus record');
@@ -225,8 +228,9 @@ for iFrame = round(stimTimes(1)/dt):size(dfofInterp,3)
 end
 map = map/size(dfofInterp,3); map(isnan(map)) = 0;
 amp = abs(map);
-prctile(amp(:),99)
-amp=amp/prctile(amp(:),98); amp(amp>1)=1;
+maxAmp = prctile(amp(:),99);
+maxAmp = 0.025;
+amp=amp/maxAmp; amp(amp>1)=1;
 cycPhase = mod(angle(map),2*pi);
 img = mat2im(cycPhase,hsv,[pi/2  (2*pi -pi/4)]);
 img = img.*repmat(amp,[1 1 3]);
@@ -237,7 +241,7 @@ figure
 imshow(imresize(img,2))
 colormap(hsv); colorbar
 
-title(sprintf('fourier map at %.3f frame cycle',cycLength));
+title(sprintf('%.03f frame cycle %0.3f amp',cycLength,maxAmp));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 
@@ -870,5 +874,4 @@ psfile
 % end
 %close all
 
-keyboard
 end

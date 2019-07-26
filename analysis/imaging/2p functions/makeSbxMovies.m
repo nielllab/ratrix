@@ -60,11 +60,14 @@ if fullMovie
     display('converting to movie')
     cycMov= mat2im(img,gray,[lb ub]);
     mov = immovie(permute(cycMov,[1 2 4 3]));
-   vid = VideoWriter([avifname(1:end-4) '_FULL.avi']);
+ %  vid = VideoWriter([avifname(1:end-4) '_FULL.avi']);
+  %   vid = VideoWriter([avifname(1:end-4) '_fullquality.avi']);
+  %vid.Quality = 100;
 % for non-compressed
-%     mov = cycMov(:,:,:,1);
-%     vid = VideoWriter([avifname(1:end-4) '_FULL.avi'],'Grayscale AVI');
+    mov = cycMov(:,:,:,1);
+    vid = VideoWriter([avifname(1:end-4) '_grayscale.avi'],'Grayscale AVI');
     vid.FrameRate=movierate;
+    
     open(vid);
     display('writing movie')
     writeVideo(vid,mov);

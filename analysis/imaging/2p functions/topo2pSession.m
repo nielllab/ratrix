@@ -27,14 +27,16 @@ for i= 1:size(dfofInterp,3);
 end
 map = map/size(dfofInterp,3); map(isnan(map))=0;
 amp = abs(map);
-prctile(amp(:),98)
-amp=amp/prctile(amp(:),98); amp(amp>1)=1;
+%maxAmp = prctile(amp(:),95)  %%% changed from 98 to 95 for better scaling - cmn072119
+maxAmp = 0.15;
+amp=amp/maxAmp; amp(amp>1)=1;
 img = mat2im(mod(angle(map),2*pi),hsv,[pi/2  (2*pi -pi/4)]);
 img = img.*repmat(amp,[1 1 3]);
 mapimg= figure
 figure
 imshow(imresize(img,1))
 colormap(hsv); colorbar
+title(sprintf('%s maxAmp = %0.2f',sessionName,maxAmp));
 
 polarImg = img;
 
@@ -63,10 +65,11 @@ figure
 plot(squeeze(cycAvgT(1,1,:)));
 title('timecourse cyc avg');
 xlabel ('frames')
-if exist('psfile','var')
-    set(gcf, 'PaperPositionMode', 'auto');
-    print('-dpsc',psfile,'-append');
-end
+%%% CMN commented out since it's a repeat of figure made in get2pSession - 0722319
+% if exist('psfile','var')
+%     set(gcf, 'PaperPositionMode', 'auto');
+%     print('-dpsc',psfile,'-append');
+% end
 
 
 vid = VideoWriter(movieFile);
@@ -75,6 +78,9 @@ open(vid);
 writeVideo(vid,mov);
 close(vid)
 
+tcourse = squeeze(mean(mean(dfofInterp,2),1)); %%% save this out to avoid reading in all data later
+
+
 sbxfilename = fileName;
-save(sessionName,'sbxfilename','-append')
+save(sessionName,'sbxfilename','cycAvgT','tcourse','-append')
 

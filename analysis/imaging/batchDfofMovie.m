@@ -40,48 +40,48 @@ for f = 1:length(files)
         sprintf('skipping %s',files(f).topoy)
     end
     
-    %uncomment for 3x2y
-    if redo || isempty([pathname files(f).grating3x2y6sf4tf]) || ~exist([pathname files(f).grating3x2y6sf4tf],'file')
-        try
-            dfofMovie([datapathname files(f).grating3x2y6sf4tfdata],rig);
-        catch exc
-            sprintf('couldnt do %s',files(f).grating3x2y6sf4tfdata)
-            nerr=nerr+1;
-            errmsg{nerr}=sprintf('couldnt do %s',files(f).grating3x2y6sf4tfdata)
-            errRpt{nerr}=getReport(exc,'extended')
-        end
-    else
-        sprintf('skipping %s',files(f).grating3x2y6sf4tfdata)
-    end
-    
-    %uncomment for natural images
-    if redo || isempty([pathname files(f).naturalimages]) || ~exist([pathname files(f).naturalimages],'file')
-        try
-            dfofMovie([datapathname files(f).naturalimagesdata],rig);
-        catch exc
-            sprintf('couldnt do %s',files(f).naturalimagesdata)
-            nerr=nerr+1;
-            errmsg{nerr}=sprintf('couldnt do %s',files(f).naturalimagesdata)
-            errRpt{nerr}=getReport(exc,'extended')
-        end
-    else
-        sprintf('skipping %s',files(f).naturalimagesdata)
-    end
-    
-    %uncomment for darkness
-    if redo || isempty([pathname files(f).darkness]) || ~exist([pathname files(f).darkness],'file')
-        try
-            dfofMovie([datapathname files(f).darknessdata],rig);
-        catch exc
-            sprintf('couldnt do %s',files(f).darknessdata)
-            nerr=nerr+1;
-            errmsg{nerr}=sprintf('couldnt do %s',files(f).darknessdata)
-            errRpt{nerr}=getReport(exc,'extended')
-        end
-    else
-        sprintf('skipping %s',files(f).darknessdata)
-    end  
-    
+%     %uncomment for 3x2y
+%     if redo || isempty([pathname files(f).grating3x2y6sf4tf]) || ~exist([pathname files(f).grating3x2y6sf4tf],'file')
+%         try
+%             dfofMovie([datapathname files(f).grating3x2y6sf4tfdata],rig);
+%         catch exc
+%             sprintf('couldnt do %s',files(f).grating3x2y6sf4tfdata)
+%             nerr=nerr+1;
+%             errmsg{nerr}=sprintf('couldnt do %s',files(f).grating3x2y6sf4tfdata)
+%             errRpt{nerr}=getReport(exc,'extended')
+%         end
+%     else
+%         sprintf('skipping %s',files(f).grating3x2y6sf4tfdata)
+%     end
+%     
+%     %uncomment for natural images
+%     if redo || isempty([pathname files(f).naturalimages]) || ~exist([pathname files(f).naturalimages],'file')
+%         try
+%             dfofMovie([datapathname files(f).naturalimagesdata],rig);
+%         catch exc
+%             sprintf('couldnt do %s',files(f).naturalimagesdata)
+%             nerr=nerr+1;
+%             errmsg{nerr}=sprintf('couldnt do %s',files(f).naturalimagesdata)
+%             errRpt{nerr}=getReport(exc,'extended')
+%         end
+%     else
+%         sprintf('skipping %s',files(f).naturalimagesdata)
+%     end
+%     
+%     %uncomment for darkness
+%     if redo || isempty([pathname files(f).darkness]) || ~exist([pathname files(f).darkness],'file')
+%         try
+%             dfofMovie([datapathname files(f).darknessdata],rig);
+%         catch exc
+%             sprintf('couldnt do %s',files(f).darknessdata)
+%             nerr=nerr+1;
+%             errmsg{nerr}=sprintf('couldnt do %s',files(f).darknessdata)
+%             errRpt{nerr}=getReport(exc,'extended')
+%         end
+%     else
+%         sprintf('skipping %s',files(f).darknessdata)
+%     end  
+%     
     %uncomment for 4x3y
 %     if redo || isempty([pathname files(f).grating4x3y6sf3tf]) || ~exist([pathname files(f).grating4x3y6sf3tf],'file')
 %         try

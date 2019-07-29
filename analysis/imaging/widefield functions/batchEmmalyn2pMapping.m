@@ -74,14 +74,24 @@ n = 0;
 % files(n).monitor = 'land'; %%% for topox and y
 % files(n).label = 'calb2'; %%% or 'calb2'
 
+% n=n+1;
+% files(n).subj = 'Calb23p6RT';
+% files(n).expt = '071519';
+% files(n).topox =  '071519_Calb23p6RT_2PMAP_RIG2\071519_Calb23p6RT_2PMAP_RIG2_TOPOX\071519_Calb23p6RT_2PMAP_RIG2_TOPOXmaps.mat';
+% files(n).topoxdata = '071519_Calb23p6RT_2PMAP_RIG2\071519_Calb23p6RT_2PMAP_RIG2_TOPOX\071519_Calb23p6RT_2PMAP_RIG2_TOPOX';
+% files(n).topoy =  '071519_Calb23p6RT_2PMAP_RIG2\071519_Calb23p6RT_2PMAP_RIG2_TOPOY\071519_Calb23p6RT_2PMAP_RIG2_TOPOYmaps.mat';
+% files(n).topoydata = '071519_Calb23p6RT_2PMAP_RIG2\071519_Calb23p6RT_2PMAP_RIG2_TOPOY\071519_Calb23p6RT_2PMAP_RIG2_TOPOY';
+% files(n).rignum = 'rig2'; %%% or 'rig1'
+% files(n).monitor = 'land'; %%% for topox and y
+% files(n).label = 'calb2'; %%% or 'calb2'
+
 n=n+1;
-files(n).subj = 'Calb23p6RT';
-files(n).expt = '071519';
-files(n).topox =  '071519_Calb23p6RT_2PMAP_RIG2\071519_Calb23p6RT_2PMAP_RIG2_TOPOX\071519_Calb23p6RT_2PMAP_RIG2_TOPOXmaps.mat';
-files(n).topoxdata = '071519_Calb23p6RT_2PMAP_RIG2\071519_Calb23p6RT_2PMAP_RIG2_TOPOX\071519_Calb23p6RT_2PMAP_RIG2_TOPOX';
-files(n).topoy =  '071519_Calb23p6RT_2PMAP_RIG2\071519_Calb23p6RT_2PMAP_RIG2_TOPOY\071519_Calb23p6RT_2PMAP_RIG2_TOPOYmaps.mat';
-files(n).topoydata = '071519_Calb23p6RT_2PMAP_RIG2\071519_Calb23p6RT_2PMAP_RIG2_TOPOY\071519_Calb23p6RT_2PMAP_RIG2_TOPOY';
+files(n).subj = 'G6H19p1RN';
+files(n).expt = '072319';
+files(n).topox =  '072319_G6H19p1RN_2PMAP_RIG2\072319_G6H19p1RN_2PMAP_RIG2_TOPOX\072319_G6H19p1RN_2PMAP_RIG2_TOPOXmaps.mat';
+files(n).topoxdata = '072319_G6H19p1RN_2PMAP_RIG2\072319_G6H19p1RN_2PMAP_RIG2_TOPOX\072319_G6H19p1RN_2PMAP_RIG2_TOPOX';
+files(n).topoy =  '072319_G6H19p1RN_2PMAP_RIG2\072319_G6H19p1RN_2PMAP_RIG2_TOPOY\072319_G6H19p1RN_2PMAP_RIG2_TOPOYmaps.mat';
+files(n).topoydata = '072319_G6H19p1RN_2PMAP_RIG2\072319_G6H19p1RN_2PMAP_RIG2_TOPOY\072319_G6H19p1RN_2PMAP_RIG2_TOPOY';
 files(n).rignum = 'rig2'; %%% or 'rig1'
 files(n).monitor = 'land'; %%% for topox and y
-files(n).label = 'calb2'; %%% or 'calb2'
-
+files(n).label = 'camk2 gc6'; %%% or 'calb2'

@@ -5,7 +5,10 @@ tl = size(trialTcourse,1);
 for i = (1:npanel)+offset
     meanimg = nanmedian(trialmean(:,:,stimOrder==i),3);
     figure(pixFig); subplot(nrow,ncol,loc(i-offset));
-    imagesc(meanimg,range); axis equal; axis off; colormap jet
+    imagesc(meanimg,range); axis equal; axis off; colormap jet;
+    if gratingTitle
+        title(sprintf('theta %0.0f sf %0.2f',orient(i),freq(i)),'Fontsize',8);
+    end
     figure(traceFig); subplot(nrow,ncol,loc(i-offset));
     set(gcf,'defaultAxesColorOrder',jet(sum(stimOrder==i)));
     plot(1:tl, trialTcourse(:,stimOrder==i)); hold on; plot(nanmedian(trialTcourse(:,stimOrder==i),2),'g','Linewidth',2); xlim([1 tl]);ylim(range/2)

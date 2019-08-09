@@ -12,7 +12,8 @@ datapathname = 'F:\Widefield_Analysis\Kristen\'
 % outpathname = '\\LANGEVIN\backup\Kristen\winter_19\';
 outpathname = 'F:\Widefield_Analysis\Kristen\'
 % outpathname = 'D:\Kristen\'
-% %% G6H113LT non-dreadds @ 0.5 mg/kg cloz
+
+%% G6H113LT non-dreadds @ 0.5 mg/kg cloz
 % n=n+1;
 % files(n).subj = 'G6H113LT'; %animal name
 % files(n).expt = '051719'; %date of experiment
@@ -59,7 +60,7 @@ outpathname = 'F:\Widefield_Analysis\Kristen\'
 % files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat'
 % files(n).notes = 'good data';
 % 
-% %% G6H146LT non-dreadds @ 0.1 mg/kg 
+%% G6H146LT non-dreadds @ 0.1 mg/kg 
 % n=n+1;
 % files(n).subj = 'G6H146LT'; %animal name
 % files(n).expt = '051719'; %date of experiment
@@ -105,7 +106,8 @@ outpathname = 'F:\Widefield_Analysis\Kristen\'
 % files(n).imagerate = 10;
 % files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat'
 % files(n).notes = 'good data';
-% %% G6H141RT non-dreadds @ 1.0 mg/kg, here I changed data file name to correctly reflect stim name (4x3y)
+
+%% G6H141RT non-dreadds @ 1.0 mg/kg, here I changed data file name to correctly reflect stim name (4x3y)
 % n=n+1;
 % files(n).subj = 'G6H141RT'; %animal name
 % files(n).expt = '051819'; %date of experiment
@@ -152,7 +154,7 @@ outpathname = 'F:\Widefield_Analysis\Kristen\'
 % files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat'
 % files(n).notes = 'good data';
 % 
-% %% G6H1213LT @ 0.5 mg/kg **leave mouse out due to poor window
+%% G6H1213LT @ 0.5 mg/kg **leave mouse out due to poor window
 % n=n+1;
 % files(n).subj = 'G6H1213LT'; %animal name
 % files(n).expt = '052119'; %date of experiment
@@ -199,7 +201,7 @@ outpathname = 'F:\Widefield_Analysis\Kristen\'
 % files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat'
 % files(n).notes = 'poor window';
 % 
-% %% G6H1212RT @ 0.5 mg/kg
+%% G6H1212RT @ 0.5 mg/kg
 % n=n+1;
 % files(n).subj = 'G6H1212RT'; %animal name
 % files(n).expt = '052219'; %date of experiment
@@ -246,7 +248,7 @@ outpathname = 'F:\Widefield_Analysis\Kristen\'
 % files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat'
 % files(n).notes = 'good data';
 % 
-% %% G6H137LT @ 0.5 mg/kg
+%%  G6H137LT @ 0.5 mg/kg
 % n=n+1;
 % files(n).subj = 'G6H137LT'; %animal name
 % files(n).expt = '052319'; %date of experiment
@@ -293,7 +295,7 @@ outpathname = 'F:\Widefield_Analysis\Kristen\'
 % files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat'
 % files(n).notes = 'good data';
 % 
-% %% G6H137TT @ 1.0 mg/kg
+%% G6H137TT @ 1.0 mg/kg
 % n=n+1;
 % files(n).subj = 'G6H137TT'; %animal name
 % files(n).expt = '052419'; %date of experiment
@@ -340,7 +342,7 @@ outpathname = 'F:\Widefield_Analysis\Kristen\'
 % files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat'
 % files(n).notes = 'good data';
 % 
-% %% G6H1210LT @ 1.0 mg/kg
+%% G6H1210LT @ 1.0 mg/kg
 % n=n+1;
 % files(n).subj = 'G6H1210LT'; %animal name
 % files(n).expt = '052719'; %date of experiment
@@ -387,7 +389,7 @@ outpathname = 'F:\Widefield_Analysis\Kristen\'
 % files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat'
 % files(n).notes = 'good data';
 % 
-% %% G6H175LN @ 1.0 mg/kg (~2.5 in reality)
+%% G6H175LN @ 1.0 mg/kg (~2.5 in reality)
 % n=n+1;
 % files(n).subj = 'G6H175LN'; %animal name
 % files(n).expt = '060119'; %date of experiment
@@ -441,7 +443,7 @@ outpathname = 'F:\Widefield_Analysis\Kristen\'
 % % files(n).grating3x2y6sf4tfdata = '060319_G6H21p1LT_RIG2\060319_G6H21p1LT_RIG2_GRATINGS3X2Y\060319_G6H21p1LT_RIG2_GRATINGS3X2Y';
 % % files(n).moviename3x2y = 'C:\grating3x2y6sf4tf_1728sec.mat'
 % 
-% %% G6H1212RT @ 1.0 mg/kg (oil spill)
+%% G6H1212RT @ 1.0 mg/kg (oil spill)
 % n=n+1;
 % files(n).subj = 'G6H1212RT'; %animal name
 % files(n).expt = '060719'; %date of experiment
@@ -488,7 +490,7 @@ outpathname = 'F:\Widefield_Analysis\Kristen\'
 % files(n).moviename3x2y = 'C:\grating3x2y6sf4tf_1728sec.mat'
 % files(n).notes = 'good data';
 % 
-% %% G6H1137TT @ 1.0 mg/kg
+%% G6H1137TT @ 1.0 mg/kg
 % n=n+1;
 % files(n).subj = 'G6H137TT'; %animal name
 % files(n).expt = '061719'; %date of experiment
@@ -535,7 +537,7 @@ outpathname = 'F:\Widefield_Analysis\Kristen\'
 % files(n).moviename3x2y = 'C:\grating3x2y6sf4tf_1728sec.mat'
 % files(n).notes = 'good data';
 % 
-% %% G6H175NN @ 1.0 mg/kg (~0.7 in reality)
+%% G6H175NN @ 1.0 mg/kg (~0.7 in reality)
 % n=n+1;
 % files(n).subj = 'G6H175NN'; %animal name
 % files(n).expt = '060819'; %date of experiment
@@ -582,7 +584,7 @@ outpathname = 'F:\Widefield_Analysis\Kristen\'
 % files(n).moviename3x2y = 'C:\grating3x2y6sf4tf_1728sec.mat'
 % files(n).notes = 'good data';
 % 
-% %% G6H1210LT @ 2.5 mg/kG
+%% G6H1210LT @ 2.5 mg/kG
 % n=n+1;
 % files(n).subj = 'G6H1210LT'; %animal name
 % files(n).expt = '061319'; %date of experiment
@@ -677,17 +679,64 @@ outpathname = 'F:\Widefield_Analysis\Kristen\'
 % files(n).notes = 'good data';
 
 %% G6H1210LT @ 0.5 mg/kG
+% n=n+1;
+% files(n).subj = 'G6H1210LT'; %animal name
+% files(n).expt = '061919'; %date of experiment
+% files(n).topox= '061919_G6H1210LT_RIG2\061919_G6H1210LT_RIG2_PRE_TOPOX\061919_G6H1210LT_RIG2_PRE_TOPOXmaps.mat'; %where to put dfof
+% files(n).topoxdata = '061919_G6H1210LT_RIG2\061919_G6H1210LT_RIG2_PRE_TOPOX\061919_G6H1210LT_RIG2_PRE_TOPOX'; %raw data
+% files(n).topoy = '061919_G6H1210LT_RIG2\061919_G6H1210LT_RIG2_PRE_TOPOY\061919_G6H1210LT_RIG2_PRE_TOPOYmaps.mat';
+% files(n).topoydata = '061919_G6H1210LT_RIG2\061919_G6H1210LT_RIG2_PRE_TOPOY\061919_G6H1210LT_RIG2_PRE_TOPOY';
+% files(n).grating3x2y6sf4tf =  '061919_G6H1210LT_RIG2\061919_G6H1210LT_RIG2_PRE_FOURXTHREEY\061919_G6H1210LT_RIG2_PRE_FOURXTHREEYmaps.mat';
+% files(n).grating3x2y6sf4tfdata = '061919_G6H1210LT_RIG2\061919_G6H1210LT_RIG2_PRE_FOURXTHREEY\061919_G6H1210LT_RIG2_PRE_FOURXTHREEY';
+% files(n).inject = 'CLOZ'; 
+% files(n).dose = '0.5 mg_kg'
+% files(n).controlvirus = 'no';
+% files(n).timing = 'pre';
+% files(n).training = 'naive';
+% files(n).area = 'lp';
+% files(n).rignum = 'rig2';
+% files(n).monitor = 'land'; %vert or land for portrait or landscape
+% files(n).label = 'camk2 gc6';
+% files(n).imagerate = 10;
+% files(n).moviename3x2y = 'C:\grating3x2y6sf4tf_1728sec.mat'
+% files(n).notes = 'good data';
+% 
+% % post
+% 
+% n=n+1;
+% files(n).subj = 'G6H1210LT'; %animal name
+% files(n).expt = '061919'; %date of experiment
+% files(n).topox= '061919_G6H1210LT_RIG2\061919_G6H1210LT_RIG2_POST_TOPOX\061919_G6H1210LT_RIG2_POST_TOPOXmaps.mat'; %where to put dfof
+% files(n).topoxdata = '061919_G6H1210LT_RIG2\061919_G6H1210LT_RIG2_POST_TOPOX\061919_G6H1210LT_RIG2_POST_TOPOX'; %raw data
+% files(n).topoy = '061919_G6H1210LT_RIG2\061919_G6H1210LT_RIG2_POST_TOPOY\061919_G6H1210LT_RIG2_POST_TOPOYmaps.mat';
+% files(n).topoydata = '061919_G6H1210LT_RIG2\061919_G6H1210LT_RIG2_POST_TOPOY\061919_G6H1210LT_RIG2_POST_TOPOY';
+% files(n).grating3x2y6sf4tf =  '061919_G6H1210LT_RIG2\061919_G6H1210LT_RIG2_POST_FOURXTHREEY\061919_G6H1210LT_RIG2_POST_FOURXTHREEYmaps.mat';
+% files(n).grating3x2y6sf4tfdata = '061919_G6H1210LT_RIG2\061919_G6H1210LT_RIG2_POST_FOURXTHREEY\061919_G6H1210LT_RIG2_POST_FOURXTHREEY';
+% files(n).inject = 'CLOZ'; 
+% files(n).dose = '0.5 mg_kg' % probably more like 0.7 mg/kg, due to loss of injection volume
+% files(n).controlvirus = 'no'
+% files(n).timing = 'post';
+% files(n).training = 'naive';
+% files(n).area = 'lp';
+% files(n).rignum = 'rig2';
+% files(n).monitor = 'land'; %vert or land for portrait or landscape
+% files(n).label = 'camk2 gc6';
+% files(n).imagerate = 10;
+% files(n).moviename3x2y = 'C:\grating3x2y6sf4tf_1728sec.mat';
+% files(n).notes = 'good data';
+
+%% G6H1511RN saline
 n=n+1;
-files(n).subj = 'G6H1210LT'; %animal name
-files(n).expt = '061919'; %date of experiment
-files(n).topox= '061919_G6H1210LT_RIG2\061919_G6H1210LT_RIG2_PRE_TOPOX\061919_G6H1210LT_RIG2_PRE_TOPOXmaps.mat'; %where to put dfof
-files(n).topoxdata = '061919_G6H1210LT_RIG2\061919_G6H1210LT_RIG2_PRE_TOPOX\061919_G6H1210LT_RIG2_PRE_TOPOX'; %raw data
-files(n).topoy = '061919_G6H1210LT_RIG2\061919_G6H1210LT_RIG2_PRE_TOPOY\061919_G6H1210LT_RIG2_PRE_TOPOYmaps.mat';
-files(n).topoydata = '061919_G6H1210LT_RIG2\061919_G6H1210LT_RIG2_PRE_TOPOY\061919_G6H1210LT_RIG2_PRE_TOPOY';
-files(n).grating3x2y6sf4tf =  '061919_G6H1210LT_RIG2\061919_G6H1210LT_RIG2_PRE_THREEXTWOY\061919_G6H1210LT_RIG2_PRE_THREEXTWOYmaps.mat';
-files(n).grating3x2y6sf4tfdata = '061919_G6H1210LT_RIG2\061919_G6H1210LT_RIG2_PRE_THREEXTWOY\061919_G6H1210LT_RIG2_PRE_THREEXTWOY';
-files(n).inject = 'CLOZ'; 
-files(n).dose = '0.5 mg_kg'
+files(n).subj = 'G6H1511RN'; %animal name
+files(n).expt = '080219'; %date of experiment
+files(n).topox= '080219_G6H1511RN_RIG2\080219_G6H1511RN_RIG2_PRE_TOPOX\080219_G6H1511RN_RIG2_PRE_TOPOXmaps.mat'; %where to put dfof
+files(n).topoxdata = '080219_G6H1511RN_RIG2\080219_G6H1511RN_RIG2_PRE_TOPOX\080219_G6H1511RN_RIG2_PRE_TOPOX'; %raw data
+files(n).topoy = '080219_G6H1511RN_RIG2\080219_G6H1511RN_RIG2_PRE_TOPOY\080219_G6H1511RN_RIG2_PRE_TOPOYmaps.mat';
+files(n).topoydata = '080219_G6H1511RN_RIG2\080219_G6H1511RN_RIG2_PRE_TOPOY\080219_G6H1511RN_RIG2_PRE_TOPOY';
+files(n).grating4x3y5sf3tf =  '080219_G6H1511RN_RIG2\080219_G6H1511RN_RIG2_PRE_FOURXTHREEY\080219_G6H1511RN_RIG2_PRE_FOURXTHREEYmaps.mat';
+files(n).grating4x3y5sf3tfdata = '080219_G6H1511RN_RIG2\080219_G6H1511RN_RIG2_PRE_FOURXTHREEY\080219_G6H1511RN_RIG2_PRE_FOURXTHREEY';
+files(n).inject = 'SALINE'; 
+files(n).dose = '0.15 mL'
 files(n).controlvirus = 'no';
 files(n).timing = 'pre';
 files(n).training = 'naive';
@@ -696,22 +745,22 @@ files(n).rignum = 'rig2';
 files(n).monitor = 'land'; %vert or land for portrait or landscape
 files(n).label = 'camk2 gc6';
 files(n).imagerate = 10;
-files(n).moviename3x2y = 'C:\grating3x2y6sf4tf_1728sec.mat'
+files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat'
 files(n).notes = 'good data';
 
 % post
 
 n=n+1;
-files(n).subj = 'G6H1210LT'; %animal name
-files(n).expt = '061919'; %date of experiment
-files(n).topox= '061919_G6H1210LT_RIG2\061919_G6H1210LT_RIG2_POST_TOPOX\061919_G6H1210LT_RIG2_POST_TOPOXmaps.mat'; %where to put dfof
-files(n).topoxdata = '061919_G6H1210LT_RIG2\061919_G6H1210LT_RIG2_POST_TOPOX\061919_G6H1210LT_RIG2_POST_TOPOX'; %raw data
-files(n).topoy = '061919_G6H1210LT_RIG2\061919_G6H1210LT_RIG2_POST_TOPOY\061919_G6H1210LT_RIG2_POST_TOPOYmaps.mat';
-files(n).topoydata = '061919_G6H1210LT_RIG2\061919_G6H1210LT_RIG2_POST_TOPOY\061919_G6H1210LT_RIG2_POST_TOPOY';
-files(n).grating3x2y6sf4tf =  '061919_G6H1210LT_RIG2\061919_G6H1210LT_RIG2_POST_THREEXTWOY\061919_G6H1210LT_RIG2_POST_THREEXTWOYmaps.mat';
-files(n).grating3x2y6sf4tfdata = '061919_G6H1210LT_RIG2\061919_G6H1210LT_RIG2_POST_THREEXTWOY\061919_G6H1210LT_RIG2_POST_THREEXTWOY';
-files(n).inject = 'CLOZ'; 
-files(n).dose = '0.5 mg_kg' % probably more like 0.7 mg/kg, due to loss of injection volume
+files(n).subj = 'G6H1511RN'; %animal name
+files(n).expt = '080219'; %date of experiment
+files(n).topox= '080219_G6H1511RN_RIG2\080219_G6H1511RN_RIG2_POST_TOPOX\080219_G6H1511RN_RIG2_POST_TOPOXmaps.mat'; %where to put dfof
+files(n).topoxdata = '080219_G6H1511RN_RIG2\080219_G6H1511RN_RIG2_POST_TOPOX\080219_G6H1511RN_RIG2_POST_TOPOX'; %raw data
+files(n).topoy = '080219_G6H1511RN_RIG2\080219_G6H1511RN_RIG2_POST_TOPOY\080219_G6H1511RN_RIG2_POST_TOPOYmaps.mat';
+files(n).topoydata = '080219_G6H1511RN_RIG2\080219_G6H1511RN_RIG2_POST_TOPOY\080219_G6H1511RN_RIG2_POST_TOPOY';
+files(n).grating4x3y5sf3tf =  '080219_G6H1511RN_RIG2\080219_G6H1511RN_RIG2_POST_FOURXTHREEY\080219_G6H1511RN_RIG2_POST_FOURXTHREEYmaps.mat';
+files(n).grating4x3y5sf3tfdata = '080219_G6H1511RN_RIG2\080219_G6H1511RN_RIG2_POST_FOURXTHREEY\080219_G6H1511RN_RIG2_POST_FOURXTHREEY';
+files(n).inject = 'SALINE'; 
+files(n).dose = '0.15 mL' % probably more like 0.7 mg/kg, due to loss of injection volume
 files(n).controlvirus = 'no'
 files(n).timing = 'post';
 files(n).training = 'naive';
@@ -720,5 +769,6 @@ files(n).rignum = 'rig2';
 files(n).monitor = 'land'; %vert or land for portrait or landscape
 files(n).label = 'camk2 gc6';
 files(n).imagerate = 10;
-files(n).moviename3x2y = 'C:\grating3x2y6sf4tf_1728sec.mat';
+files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat';
 files(n).notes = 'good data';
+

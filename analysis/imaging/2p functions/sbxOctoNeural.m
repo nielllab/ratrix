@@ -164,7 +164,7 @@ if ~isfield(Opt,'fStim')
 end
 
 %%% need to figure out whether to trim off beginning
-load(fullfile(Opt.pStim,Opt.fStim),'stimRec');
+load(fullfile(Opt.pStim,Opt.fStim),'stimRec','freq','orient');
 alignRecs =1;
 %nCycles = floor(size(dfofInterp,3)/cycLength)-ceil((cycWindow-cycLength)/cycLength)-2;  %%% trim off last stims to allow window for previous stim
 nCycles  = length(stimTimes);
@@ -643,6 +643,7 @@ hist(max(dFclust,[],2))
 
 display('doing pixel plots')
 
+gratingTitle=0; %%% titles for grating figs?
 evRange = 10:20; baseRange = 1:5; %%% timepoints for evoked and baseline activity
 dfInterpsm = imresize(dfofInterp,0.25);
 dfWeight = dfInterpsm.* repmat(imresize(normgreen(:,:,1),0.25),[1 1 size(dfofInterp,3)]);
@@ -749,12 +750,13 @@ if nstim==13 %%% gratings 1 tf
     loc = [1 5 9 2 6 10 3 7 11 4 8 12]; %%% map stim order onto subplot
     figLabel = 'gratings';
     npanel = 12; nrow = 3; ncol = 4; offset = 0;
-    pixPlot;
+   gratingTitle = 1; pixPlot;
     pixPlotWeight;
     
     figLabel = 'flicker';
     npanel = 1; nrow = 1; ncol = 1; offset = 12;
-    pixPlot;
+   gratingTitle=0;
+   pixPlot;
     pixPlotWeight;
     
     mapGratingsOcto;
@@ -773,11 +775,13 @@ if nstim==17 %%% gratings 1 tf; either 4sfx4orient, or 2sf x 8 orient
     loc = [1 5 9 13 2 6 10 14 3 7 11 15 4 8 12 16]; %%% map stim order onto subplot
     figLabel = 'gratings';
     npanel = 16; nrow = 4; ncol = 4; offset = 0;
+    gratingTitle = 1;
     pixPlot;
     pixPlotWeight;
     
     figLabel = 'flicker';
     npanel = 1; nrow = 1; ncol = 1; offset = 16;
+    gratingTitle=0;
     pixPlot;
     pixPlotWeight;
     

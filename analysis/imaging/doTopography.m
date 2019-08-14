@@ -35,8 +35,6 @@ if useReference
 end
 display('aligning')
 
-
-
 %%% align gradient maps to first file
 for f = 1:length(use); %changed from 1:length(map)
     f

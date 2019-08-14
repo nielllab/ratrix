@@ -5,22 +5,22 @@ warning off
 
 %% pick animals for Kristen
 
-% batch4x3y_3x2y_KC %Kris' batch file
-% cd(pathname)
-% 
-% alluse = find(strcmp({files.controlvirus},'no') & strcmp({files.inject},'CLOZ') & strcmp({files.dose},'0.5 mg_kg')  ...
-%     & strcmp({files.monitor},'land') & strcmp({files.timing},'post') & strcmp({files.notes},'good data'))  
-% 
-% savename = ['KC_3X2Y' files(alluse(1)).inject '_' files(alluse(1)).dose '_' files(alluse(1)).timing '.mat']; 
+batch4x3y_3x2y_KC %Kris' batch file
+cd(pathname)
+
+alluse = find(strcmp({files.controlvirus},'no') & strcmp({files.inject},'SALINE') & strcmp({files.dose},'0.15 mL')  ...
+    & strcmp({files.monitor},'land') & strcmp({files.timing},'post') & strcmp({files.notes},'good data'))  
+
+savename = ['KC_4X3Y' files(alluse(1)).inject '_' files(alluse(1)).dose '_' files(alluse(1)).timing '.mat']; 
 
 %% pick animals for Mandi
 
-batchMandiEnrichment %Mandi's batch file
-cd(pathname)
-
-alluse = find(strcmp({files.condition},'control') & strcmp({files.notes},'good imaging session'))
-
-savename = ['MS_' files(alluse(1)).condition '.mat'];
+% batchMandiEnrichment %Mandi's batch file
+% cd(pathname)
+% 
+% alluse = find(strcmp({files.condition},'control') & strcmp({files.notes},'good imaging session'))
+% 
+% savename = ['MS_' files(alluse(1)).condition '.mat'];
 
 %% run doTopography (use this one to average all sessions that meet criteria)
 length(alluse)
@@ -46,18 +46,18 @@ doTopography;
 %% pick which gratings analysis to run
 
 %%%UNCOMMENT FOR 3X2Y
-disp('doing 3x2y')
+disp('doing 4x3y')
 rep=2;
 doGratingsNew;
 
 % %%% UNCOMMENT FOR 4X3Y
-% disp('doing 4x3y')
-% rep=4;
-% doGratingsNew;
+disp('doing 4x3y')
+rep=4;
+doGratingsNew;
 
 %%%UNCOMMENT FOR NATURAL IMAGES
-disp('doing natural images')
-doNaturalImages
+% disp('doing natural images')
+% doNaturalImages
 
 
 % % %%

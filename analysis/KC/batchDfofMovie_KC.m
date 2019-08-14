@@ -42,32 +42,32 @@ for f = 1:length(files)
     end
     
     %uncomment for 3x2y
-    if redo || isempty([pathname files(f).grating3x2y6sf4tf]) || ~exist([pathname files(f).grating3x2y6sf4tf],'file')
-        try
-            dfofMovie([datapathname files(f).grating3x2y6sf4tfdata],rig);
-        catch exc
-            sprintf('couldnt do %s',files(f).grating3x2y6sf4tfdata)
-            nerr=nerr+1;
-            errmsg{nerr}=sprintf('couldnt do %s',files(f).grating3x2y6sf4tfdata)
-            errRpt{nerr}=getReport(exc,'extended')
-        end
-    else
-        sprintf('skipping %s',files(f).grating3x2y6sf4tfdata)
-    end
-    
-    %uncomment for 4x3y
-%     if redo || isempty([pathname files(f).grating4x3y5sf3tf]) || ~exist([pathname files(f).grating4x3y5sf3tf],'file')
+%     if redo || isempty([pathname files(f).grating3x2y6sf4tf]) || ~exist([pathname files(f).grating3x2y6sf4tf],'file')
 %         try
-%             dfofMovie([datapathname files(f).grating4x3y5sf3tfdata],rig);
+%             dfofMovie([datapathname files(f).grating3x2y6sf4tfdata],rig);
 %         catch exc
-%             sprintf('couldnt do %s',files(f).grating4x3y5sf3tfdata)
+%             sprintf('couldnt do %s',files(f).grating3x2y6sf4tfdata)
 %             nerr=nerr+1;
-%             errmsg{nerr}=sprintf('couldnt do %s',files(f).grating4x3y5sf3tfdata)
+%             errmsg{nerr}=sprintf('couldnt do %s',files(f).grating3x2y6sf4tfdata)
 %             errRpt{nerr}=getReport(exc,'extended')
 %         end
 %     else
-%         sprintf('skipping %s',files(f).grating4x3y5sf3tfdata)
+%         sprintf('skipping %s',files(f).grating3x2y6sf4tfdata)
 %     end
+    
+%     uncomment for 4x3y
+    if redo || isempty([pathname files(f).grating4x3y5sf3tf]) || ~exist([pathname files(f).grating4x3y5sf3tf],'file')
+        try
+            dfofMovie([datapathname files(f).grating4x3y5sf3tfdata],rig);
+        catch exc
+            sprintf('couldnt do %s',files(f).grating4x3y5sf3tfdata)
+            nerr=nerr+1;
+            errmsg{nerr}=sprintf('couldnt do %s',files(f).grating4x3y5sf3tfdata)
+            errRpt{nerr}=getReport(exc,'extended')
+        end
+    else
+        sprintf('skipping %s',files(f).grating4x3y5sf3tfdata)
+    end
 
 %     if redo || isempty([pathname files(f).fourxthreey]) || ~exist([pathname files(f).fourxthreey],'file')
 %         try

@@ -3,7 +3,7 @@
 
 
 dbstop if error
-pathname = '\\gilliam\2p Data\';
+pathname = '\\langevin\backup\Octopus_Recordings\Good_recordings\';
 n = 0;
 
 %%% 073019

@@ -12,7 +12,6 @@ for f = 1:length(files)
         rig=1;
     end   
     
-    
     %uncomment for topox
     if redo  || isempty([pathname files(f).topox]) || ~exist([pathname files(f).topox],'file')
         try

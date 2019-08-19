@@ -8,10 +8,10 @@ warning off
 batch4x3y_3x2y_KC %Kris' batch file
 cd(pathname)
 
-alluse = find(strcmp({files.controlvirus},'no') & strcmp({files.inject},'SALINE') & strcmp({files.dose},'0.15 mL')  ...
+alluse = find(strcmp({files.controlvirus},'no') & strcmp({files.inject},'CLOZ') & strcmp({files.dose},'1.0 mg_kg')  ...
     & strcmp({files.monitor},'land') & strcmp({files.timing},'post') & strcmp({files.notes},'good data'))  
 
-savename = ['KC_4X3Y' files(alluse(1)).inject '_' files(alluse(1)).dose '_' files(alluse(1)).timing '.mat']; 
+savename = ['Group_G6H197LT_G6H1511RN_4X3Y_' files(alluse(1)).inject '_' files(alluse(1)).dose '_' files(alluse(1)).timing '.mat']; 
 
 %% pick animals for Mandi
 
@@ -46,9 +46,9 @@ doTopography;
 %% pick which gratings analysis to run
 
 %%%UNCOMMENT FOR 3X2Y
-disp('doing 4x3y')
-rep=2;
-doGratingsNew;
+% disp('doing 4x3y')
+% rep=2;
+% doGratingsNew;
 
 % %%% UNCOMMENT FOR 4X3Y
 disp('doing 4x3y')

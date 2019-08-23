@@ -550,3 +550,65 @@ files(n).sbx = '080919_Octopus_Cal520_015.sbx';
 files(n).locnum = 'Loc4';
 files(n).stimrec = 'Acq15';
 files(n).notes = 'OFF and ON to 3x1, 3x2, 4x1, 4x2';
+
+%%% 082219
+
+n=n+1;
+files(n).expt = '082219';
+files(n).dye = 'Cal520';
+files(n).path = '082219_Octopus_Cal520';
+files(n).loc = 1; files(n).acq = 0; files(n).stim = '6x4';
+files(n).sbx = '082219_Octopus_Cal520_000_007.sbx';
+files(n).locnum = 'Loc5';
+files(n).stimrec = 'Acq7';
+files(n).notes = 'OFF and ON to 4x2, 5x2';
+
+n=n+1;
+files(n).expt = '082219';
+files(n).dye = 'Cal520';
+files(n).path = '082219_Octopus_Cal520';
+files(n).loc = 1; files(n).acq = 0; files(n).stim = 'singratings2ISI';
+files(n).sbx = '082219_Octopus_Cal520_000_008.sbx';
+files(n).locnum = 'Loc5';
+files(n).stimrec = 'Acq8';
+files(n).notes = 'Response to some stimuli';
+
+n=n+1;
+files(n).expt = '082219';
+files(n).dye = 'Cal520';
+files(n).path = '082219_Octopus_Cal520';
+files(n).loc = 1; files(n).acq = 0; files(n).stim = 'sparsenoise';
+files(n).sbx = '082219_Octopus_Cal520_000_009.sbx';
+files(n).locnum = 'Loc5';
+files(n).stimrec = 'Acq9';
+files(n).notes = 'Segregated OFF and ON';
+
+n=n+1;
+files(n).expt = '082219';
+files(n).dye = 'Cal520';
+files(n).path = '082219_Octopus_Cal520';
+files(n).loc = 1; files(n).acq = 0; files(n).stim = '8waygratings2ISI';
+files(n).sbx = '082219_Octopus_Cal520_000_010.sbx';
+files(n).locnum = 'Loc5';
+files(n).stimrec = 'Acq10';
+files(n).notes = 'Response to most stimuli';
+
+n=n+1;
+files(n).expt = '082219';
+files(n).dye = 'Cal520';
+files(n).path = '082219_Octopus_Cal520';
+files(n).loc = 1; files(n).acq = 0; files(n).stim = 'bars';
+files(n).sbx = '082219_Octopus_Cal520_000_011.sbx';
+files(n).locnum = 'Loc5';
+files(n).stimrec = 'Acq11';
+files(n).notes = 'Response to some stimuli';
+
+n=n+1;
+files(n).expt = '082219';
+files(n).dye = 'Cal520';
+files(n).path = '082219_Octopus_Cal520';
+files(n).loc = 1; files(n).acq = 0; files(n).stim = 'bars';
+files(n).sbx = '082219_Octopus_Cal520_000_011.sbx';
+files(n).locnum = 'Loc5';
+files(n).stimrec = 'Acq11';
+files(n).notes = 'Response to some stimuli';

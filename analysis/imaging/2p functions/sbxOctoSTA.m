@@ -130,8 +130,9 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 %figure
 load('C:\data\octo_sparse_flash_10min.mat')
 
-for rep =1:4 %%% 4 conditions: On, Off, fullfield On, fullfield off
+for rep =1:2 %%% 4 conditions: On, Off, fullfield On, fullfield off; currently skipping fullfield since it's not interesting
     
+    STAfig = figure;
     %%% select movie aspects to analyze
     m = (double(moviedata)-127)/128;
     if rep ==1 | rep ==3 %%% ON
@@ -163,8 +164,8 @@ for rep =1:4 %%% 4 conditions: On, Off, fullfield On, fullfield off
         resp = mean(dFalign(:,tau+range),2);
         %resp = resp-mean(resp);
         sta =0;
-       npts = min(length(resp),size(moviedata,3));
-       for i = 1:min(length(resp),size(moviedata,3));
+        npts = min(length(resp),size(moviedata,3));
+        for i = 1:min(length(resp),size(moviedata,3));
             sta = sta+resp(i)*m(:,:,i);
         end
         sta = sta/sum(abs(resp(1:npts)));
@@ -183,7 +184,8 @@ for rep =1:4 %%% 4 conditions: On, Off, fullfield On, fullfield off
     xrange = 1:blocksize:size(dfofInterp,1); xrange = xrange(1:end-1); %%% last one will be off the edge
     yrange = 1:blocksize:size(dfofInterp,2);  yrange = yrange(1:end-1);
     pnum=0; % index for plots
-    figure; set(gcf,'Name',sprintf('rep %d map',rep));
+    STAfig = figure; set(gcf,'Name',sprintf('rep %d map',rep));
+    tcourseFig = figure; set(gcf,'Name',sprintf('rep %d timecourse',rep));
     for nx = 1:length(xrange);
         for ny = 1:length(yrange)
             sprintf('%d %d',nx,ny)
@@ -206,15 +208,40 @@ for rep =1:4 %%% 4 conditions: On, Off, fullfield On, fullfield off
                 sta = sta+resp(i)*m(:,:,i);
             end
             sta = sta/(sum(abs(resp(1:npts)))); %%% normalize sta by total amount of neural activity (like dividing by # of spikes in standard STA)
+            
+            figure(STAfig)
             subplot(length(xrange),length(yrange),pnum);
-
+            
             imagesc(sta',[-0.1 0.1]); colormap jet;  set(gca,'Visible','off');
             set(gca,'LooseInset',get(gca,'TightInset'));
+            
+            xprofile = max(abs(sta),[],1); [mx xmax] = max(xprofile);
+            yprofile = max(abs(sta),[],2); [mx ymax] = max(yprofile);       
+            sz=[2 4 8 255]; col = 'bcrg';
+
+            
+            %%% mean traces
+            figure(tcourseFig)
+           subplot(length(xrange),length(yrange),pnum);
+            hold on
+            %%% mean traces
+            for i = 1:4
+               if i<4
+                   eps = find(abs(m(ymax,xmax,:))>0.9 & sz_mov(ymax*2,xmax*2,:)==sz(i)); %%% because sz_mov is twice as large!
+               else
+                   eps = find(sz_mov(ymax*2,xmax*2,:)==sz(i)); %%% for fullfield (since these are excluded from m; note this will get both on/off
+               end
+               eps = eps(eps<=size(dFalign,1));
+                plot(mean(dFalign(eps,:),1),col(i),'Linewidth',2);
+            end          
+            ylim([-0.025 0.1]); xlim([1 20]);  set(gca,'Xtick',[]); set(gca,'Ytick',[]); 
+            set(gca,'LooseInset',get(gca,'TightInset'));
+            
             
             staAll(:,:,nx,ny,rep) = sta';
         end
     end
-
+    
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     drawnow
@@ -237,7 +264,7 @@ for nx = 1:length(xrange);
     end
 end
 
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 
 %%% time to select points! either by hand or automatic
@@ -419,7 +446,7 @@ for clust = 1:nclust
     clustfig = figure;
     
     
-        %%% spatial location of cells in this cluster
+    %%% spatial location of cells in this cluster
     figure(clustfig)
     subplot(2,3,1);
     imagesc(stdImg,[0 prctile(stdImg(:),99)*1.2]); axis equal; hold on;colormap gray;freezeColors;
@@ -434,84 +461,84 @@ for clust = 1:nclust
     sta=0; clear stas
     
     for rep = 1:2
-       m= (double(moviedata)-127)/128;
- if rep==1
-       m(m<0)=0;   
- else
-     m(m>0)=0;
- end
-    
-    figure;
-    range = -1:1
-    for tau = 3:18;
-        resp = mean(dFalign(:,tau+range),2);
-        %resp(resp<0)=0;
-        %resp = resp-mean(resp);
-        sta =0;
-        npts = min(length(resp),size(moviedata,3));
-        for i = 1:npts;
-            sta = sta+resp(i)*m(:,:,i);
+        m= (double(moviedata)-127)/128;
+        if rep==1
+            m(m<0)=0;
+        else
+            m(m>0)=0;
         end
-        sta = sta/sum(abs(resp(1:npts)));
-        stas(:,:,tau)=sta;
-        %sta = sta/sum(resp);
-        subplot(4,5,tau);
-        imagesc(sta',[-0.2 0.2]);colormap jet; axis equal;title(sprintf('lag %d',tau));
-    end
-        title(sprintf('clust %d rep %d',clust,rep));
-    tau = 8;
-    
-    sta = stas(:,:,tau);
-    figure(clustfig)
-    
-    subplot(2,3,1+rep);
-    imagesc(sta',[-0.2 0.2]); hold on; axis equal; colormap jet;
-    xprofile = max(abs(sta),[],1); [mx xmax] = max(xprofile);
-    yprofile = max(abs(sta),[],2); [mx ymax] = max(yprofile);
-    xmax
-    ymax
-    plot(ymax,xmax,'ko');
-    
-    sz=[2 4 8 255]; col = 'bcrg'
-    figure
-    eps = find(m(ymax,xmax,:)~=0);
-    eps = eps(eps<=size(dFalign,1));
-    
-    plot(dFalign(eps,:)')
-    hold on
-    for i = 1:4
-        eps = find(m(ymax,xmax,:)~=0 & sz_mov(ymax,xmax,:)==sz(i));
-        eps = eps(eps<=size(dFalign,1));
-        plot(mean(dFalign(eps,:),1),col(i),'Linewidth',2);
         
-    end
-    title(sprintf('cluster %d rep %d',clust,rep));
-
-    %%% mean traces
-    figure(clustfig)
-    subplot(2,3,4+rep);
-    hold on
-    %%% mean traces
-    for i = 1:4
-        eps = find(m(ymax,xmax,:)~=0 & sz_mov(ymax,xmax,:)==sz(i));
-         eps = eps(eps<=size(dFalign,1));
-        plot(mean(dFalign(eps,:),1),col(i),'Linewidth',2);
-    end
-     if rep==2
-        legend('2','4','8','full')
-    end
-    ylim([-0.05 0.2]); xlim([1 20])
-   
+        figure;
+        range = -1:1
+        for tau = 3:18;
+            resp = mean(dFalign(:,tau+range),2);
+            %resp(resp<0)=0;
+            %resp = resp-mean(resp);
+            sta =0;
+            npts = min(length(resp),size(moviedata,3));
+            for i = 1:npts;
+                sta = sta+resp(i)*m(:,:,i);
+            end
+            sta = sta/sum(abs(resp(1:npts)));
+            stas(:,:,tau)=sta;
+            %sta = sta/sum(resp);
+            subplot(4,5,tau);
+            imagesc(sta',[-0.2 0.2]);colormap jet; axis equal;title(sprintf('lag %d',tau));
+        end
+        title(sprintf('clust %d rep %d',clust,rep));
+        tau = 8;
+        
+        sta = stas(:,:,tau);
+        figure(clustfig)
+        
+        subplot(2,3,1+rep);
+        imagesc(sta',[-0.2 0.2]); hold on; axis equal; colormap jet;
+        xprofile = max(abs(sta),[],1); [mx xmax] = max(xprofile);
+        yprofile = max(abs(sta),[],2); [mx ymax] = max(yprofile);
+        xmax
+        ymax
+        plot(ymax,xmax,'ko');
+        
+        sz=[2 4 8 255]; col = 'bcrg'
+        figure
+        eps = find(m(ymax,xmax,:)~=0);
+        eps = eps(eps<=size(dFalign,1));
+        
+        plot(dFalign(eps,:)')
+        hold on
+        for i = 1:4
+            eps = find(m(ymax,xmax,:)~=0 & sz_mov(ymax,xmax,:)==sz(i));
+            eps = eps(eps<=size(dFalign,1));
+            plot(mean(dFalign(eps,:),1),col(i),'Linewidth',2);
+            
+        end
+        title(sprintf('cluster %d rep %d',clust,rep));
+        
+        %%% mean traces
+        figure(clustfig)
+        subplot(2,3,4+rep);
+        hold on
+        %%% mean traces
+        for i = 1:4
+            eps = find(m(ymax,xmax,:)~=0 & sz_mov(ymax,xmax,:)==sz(i));
+            eps = eps(eps<=size(dFalign,1));
+            plot(mean(dFalign(eps,:),1),col(i),'Linewidth',2);
+        end
+        if rep==2
+            legend('2','4','8','full')
+        end
+        ylim([-0.05 0.2]); xlim([1 20])
+        
     end
     
     %%% heatmap average timecourse
     subplot(2,3,4);
     imagesc(dFclust(c==clust,:),[-0.1 0.4]); axis xy % was df
     title(sprintf('clust %d',clust)); hold on
-
+    
     figure(clustfig)
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-   
+    
 end %end of for clust
 
 

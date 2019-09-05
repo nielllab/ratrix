@@ -39,12 +39,12 @@ for rep=1:2 %%% off and on
     amp(amp>1)=1;
     
     topoAmp = amp;
-    figure
-    imagesc(amp)
-    figure
-    imagesc(xmap,[1 szx]);colormap hsv
-    figure
-    imagesc(ymap,[1 szy]); colormap hsv
+%     figure
+%     imagesc(amp)
+%     figure
+%     imagesc(xmap,[1 szx]);colormap hsv
+%     figure
+%     imagesc(ymap,[1 szy]); colormap hsv
     
     xmap(isnan(xmap))=0;
     xpolar = mat2im(xmap,hsv,[1.5 szx-0.5]);
@@ -68,14 +68,14 @@ for rep=1:2 %%% off and on
     overlay(:,:,1) = overlay(:,:,1).*(1- topoAmp).^2;
     overlay(:,:,3) = overlay(:,:,3).*(1 - topoAmp).^2;
     
-    figure
-    imshow(overlay);
-    
-    figure
-    imshow(topoAmp)
-    
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
+%     figure
+%     imshow(overlay);
+%     
+%     figure
+%     imshow(topoAmp)
+%     
+%     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+%     
     
     xpolarImg{rep} = xpolar;
     ypolarImg{rep} = ypolar;

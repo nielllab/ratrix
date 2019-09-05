@@ -71,47 +71,84 @@ if zbin
     F = (1 + dfofInterp).*repmat(greensmall,[1 1 size(dfofInterp,3)]);
     
     %%% resize and reshape images into vectors, to calculate distance
-    smallDf = imresize(F(50:350,50:350,:),1/8); %%% remove edges for boundary effects
-    smallDf = reshape(smallDf,size(smallDf,1)*size(smallDf,2),size(smallDf,3));
-    D = pdist(smallDf','euclidean');
-    
-    %Create hierarchical cluster tree based on D
-    Z = linkage(D,'ward');
-    %Create figure of hierarchical cluster tree for visualization purposes
+    smallDf = imresize(F(50:350,50:350,:),1/2); %%% remove edges for boundary effects
+   % smallDf = reshape(smallDf,size(smallDf,1)*size(smallDf,2),size(smallDf,3));
+    smallMean = nanmedian(smallDf,3);
     figure
-    [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3);
-    title('Hierarchical Cluster tree of Image Sequence');
+    imagesc(smallMean);
     
-    nclust = input('How many z-plane clusters do you want?: ');
-    T = cluster(Z,'maxclust',nclust);
-    
-    %%% compare clusters and movement
-    figure
-    plot(T*5); hold on; plot(mv)
-    legend('clusters','x movement','y movement')
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+     for i = 1:size(smallDf,3);
 
+        im = smallDf(:,:,i);
+         cc = corrcoef(im(:),smallMean(:));        
+         dist(i) = cc(2,1);
+     end
+     
+     figure
+     plot(dist), ylim([0 1]); title('correlation with median')
+     %ccthresh = 0.9;   
+     ccthresh = input('enter correlation threshold : ')
+     figure
+     plot(dist); ylim([0 1])
+     title('correlation of images with median'); xlabel('frame'); ylabel('corr coef')
+  hold on
+  plot([1 length(dist)], [ccthresh ccthresh],'r:');
+  if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+  
+    useframes = dist>ccthresh;
     figure
-    for i = 1:nclust;
-        subplot(2,3,i)
-        imagesc(mean(F(:,:,T==i),3));
-        title(sprintf('clust %d n = %d',i,sum(T==i)));
-    end
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    imagesc(mean(F(:,:,dist>ccthresh),3)); title(sprintf('mean of frames above thresh %0.2f used',mean(useframes)));
 
-    useBin = input('which bin to use : ');
+    
     display('redoing dfofinterp')
-    F0 = repmat(prctile(F(:,:,T==useBin),10,3),[1 1 size(F,3)]);
+    F0 = repmat(prctile(F(:,:,useframes),10,3),[1 1 size(F,3)]);
     dfofInterp = (F-F0)./F0;
     
-    dfofInterp(:,:,T~=useBin)=NaN;
-    mv(T~=useBin,:)=NaN;
-    greenframe = imresize(mean(F(:,:,T==useBin),3),2);
+    dfofInterp(:,:,~useframes)=NaN;
+    mv(~useframes,:)=NaN;
+    greenframe = imresize(mean(F(:,:,useframes),3),2);
+    
+    for junk=1:0 %%% compress out old z-bin cluster code
+%     %%% old cluster-based binning
+%     D = pdist(smallDf','euclidean');
+%     
+%     %Create hierarchical cluster tree based on D
+%     Z = linkage(D,'ward');
+%     %Create figure of hierarchical cluster tree for visualization purposes
+%     figure
+%     [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3);
+%     title('Hierarchical Cluster tree of Image Sequence');
+%     
+%     nclust = input('How many z-plane clusters do you want?: ');
+%     T = cluster(Z,'maxclust',nclust);
+%     
+%     %%% compare clusters and movement
+%     figure
+%     plot(T*5); hold on; plot(mv)
+%     legend('clusters','x movement','y movement')
+%     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+% 
+%     figure
+%     for i = 1:nclust;
+%         subplot(2,3,i)
+%         imagesc(mean(F(:,:,T==i),3));
+%         title(sprintf('clust %d n = %d',i,sum(T==i)));
+%     end
+%     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+%     useBin = input('which bin to use : ');
+%     display('redoing dfofinterp')
+%     F0 = repmat(prctile(F(:,:,T==useBin),10,3),[1 1 size(F,3)]);
+%     dfofInterp = (F-F0)./F0;
+%     
+%     dfofInterp(:,:,T~=useBin)=NaN;
+%     mv(T~=useBin,:)=NaN;
+%     greenframe = imresize(mean(F(:,:,T==useBin),3),2);
+    end
     
     figure
     range =[prctile(greenframe(:),1) prctile(greenframe(:),98)*1.2];
     imagesc(greenframe,range); colormap gray
-    title(sprintf('mean of binned cluster %d',useBin))
+    title(sprintf('mean of binned thresh = %0.2f used %0.2f',ccthresh, mean(useframes)))
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 end
@@ -219,20 +256,22 @@ reps = floor(size(dfofInterp,3)/totalframes);  %%% number of times the whole sti
 filt = fspecial('gaussian',10,1);
 xy = size(dfofInterp(:,:,1));
 map = zeros(xy);
+nUsed = 0;
 for iFrame = round(stimTimes(1)/dt):size(dfofInterp,3)
     %Only include the frames that aren't NaN; i.e. the frames that we kept
     %after z-plane sorting
     if ~isnan(dfofInterp(floor(xy(1)/2),floor(xy(2)/2),iFrame))
+        nUsed = nUsed+1;
         map = map+imfilter(dfofInterp(:,:,iFrame),filt)*exp(2*pi*sqrt(-1)*iFrame/cycLength);
     end
 end
-map = map/size(dfofInterp,3); map(isnan(map)) = 0;
+map = map/nUsed; map(isnan(map)) = 0;
 amp = abs(map);
 maxAmp = prctile(amp(:),99);
 maxAmp = 0.025;
 amp=amp/maxAmp; amp(amp>1)=1;
 cycPhase = mod(angle(map),2*pi);
-img = mat2im(cycPhase,hsv,[pi/2  (2*pi -pi/4)]);
+img = mat2im(cycPhase,hsv,[0 2*pi]);
 img = img.*repmat(amp,[1 1 3]);
 cycAmp = amp;
 

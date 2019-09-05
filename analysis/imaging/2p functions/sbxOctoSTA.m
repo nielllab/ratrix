@@ -260,7 +260,6 @@ for nx = 1:length(xrange);
         im(:,:,3) = staAll(:,:,nx,ny,1)/0.1; % magenta
         imshow(imresize(im,0.5));
         set(gca,'LooseInset',get(gca,'TightInset'))
-        drawnow
     end
 end
 
@@ -501,14 +500,12 @@ for clust = 1:nclust
         
         sz=[2 4 8 255]; col = 'bcrg'
         figure
-        eps = find(m(ymax,xmax,:)~=0);
-        eps = eps(eps<=size(dFalign,1));
-        
-        plot(dFalign(eps,:)')
+
         hold on
         for i = 1:4
             eps = find(m(ymax,xmax,:)~=0 & sz_mov(ymax,xmax,:)==sz(i));
             eps = eps(eps<=size(dFalign,1));
+             plot(dFalign(eps,:),col(i));
             plot(mean(dFalign(eps,:),1),col(i),'Linewidth',2);
             
         end

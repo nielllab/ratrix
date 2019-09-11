@@ -28,7 +28,7 @@ while ~done
         %%% if all is good, then add on the data
         else
             n=n+1;
-            dF(:,n) = squeeze(mean(nanmedian(dFrepeats,3),1));
+            dF(:,n) = squeeze(median(nanmedian(dFrepeats,3),1));
             labels{n} = input('data label : ','s');
         end    
     end

@@ -77,6 +77,7 @@ catch
     display('couldnt generate pdf');
 end
 
-
+matfile = newpdfFile(1:end-4);
+save(matfile,'dF','tc','nstim','stimDur');
 
 

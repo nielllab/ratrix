@@ -56,15 +56,40 @@ end
 legend(labels); title('cell average')
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
+% for i = 1:nstim
+%     tuning(i,:) = mean(dF((i-1)*stimDur + (1:20),:),1);
+% end
+% figure
+% hold on
+% for i = 1:n
+%     plot(tuning(:,i),'Color',cmap(i,:))
+% end
+% ylim([-0.01 0.05]); 
+%     
+figure
+bar(mean(dF,1))
+set(gca,'XtickLabel',labels); ylabel('mean dF/F')
+title('average over all stim, cells');
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %%% plot pixel averages
-figure
-plot(tc); ylim([-0.05 0.15]); hold on
+figure; hold on
+for i = 1:n
+    plot(tc(:,i),'Color',cmap(i,:))
+end
+ylim([-0.05 0.15]); hold on
 for i = 1:nstim
     plot([30*i 30*i], [-0.1 0.2],'k:')
 end
 legend(labels); title('non-weighted pixel average')
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+figure
+bar(mean(tc,1))
+set(gca,'XtickLabel',labels); ylabel('mean dF/F')
+title('average over all stim, pixels');
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
 
 %%% save pdf
 display('saving pdf')
@@ -78,6 +103,6 @@ catch
 end
 
 matfile = newpdfFile(1:end-4);
-save(matfile,'dF','tc','nstim','stimDur');
+save(matfile,'dF','tc','nstim','stimDur','labels');
 
 

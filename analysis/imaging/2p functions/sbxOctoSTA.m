@@ -628,7 +628,7 @@ end
 
 display('saving data')
 outfile = newpdfFile(1:end-4);
-%save(outfile, 'trialmean', 'trialTcourse', 'stimOrder', 'c', 'dFrepeats','xpts','ypts','stdImg','cycPolarImg','cycImg','meanGreenImg')
+save(outfile, 'moviedata','sz_mov',  'c', 'xpts','ypts','stdImg','meanGreenImg','dF','stimTimes','stimFrames')
 
 
 psfile

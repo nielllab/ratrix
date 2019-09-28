@@ -663,7 +663,7 @@ plot(tcourseAll'); title('mean timecourse'); legend('on','off');
 figure
 plot(ymax,xmax,'.'); title('all rf locations'); axis equal; axis ij
 
-zthresh = 5.5;
+zthresh = 5;
 use = zscore(:,1)>zthresh | zscore(:,2)<-zthresh;
 useN= find(use);
 
@@ -686,25 +686,19 @@ x0 = median(rfx(useOn,1));
 y0 = median(rfy(useOn,1));
 
 figure
-subplot(2,2,1)
-plot(xpts(useOn),rfx(useOn,1)-x0,'o'); ylim([-30 30])
-title('topography ON')
+subplot(1,2,1)
+plot(xpts(useOn),rfx(useOn,1)-x0,'r.'); hold on;
+plot(xpts(useOff),rfx(useOff,1)-x0,'b.'); ylim([-30 30]); axis square
+title('X topography'); legend('ON','OFF')
 xlabel('x location'); ylabel('x RF');
 
-subplot(2,2,2)
-plot(ypts(useOn),rfy(useOn,1)-y0,'o'); ylim([-30 30])
-title('topography ON')
+subplot(1,2,2)
+plot(ypts(useOn),rfy(useOn,1)-y0,'r.');hold on;
+ylim([-30 30]); axis square
+plot(ypts(useOff),rfy(useOff,1)-y0,'b.');
+title('Y topography'); legend('ON','OFF')
 xlabel('y location'); ylabel('y RF');
 
-subplot(2,2,3)
-plot(xpts(useOff),rfx(useOff,1)-x0,'o'); ylim([-30 30])
-title('topography OFF')
-xlabel('x location'); ylabel('x RF');
-
-subplot(2,2,4)
-plot(ypts(useOff),rfy(useOff,1)-y0,'o'); ylim([-30 30])
-title('topography OFF')
-xlabel('y location'); ylabel('y RF');
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
     

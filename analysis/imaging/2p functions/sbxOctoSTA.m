@@ -139,7 +139,7 @@ for rep =1:2 %%% 4 conditions: On, Off, fullfield On, fullfield off; currently s
     STAfig.NextPlot = 'new';
     %%% select movie aspects to analyze
     m = (double(moviedata)-127)/128;
-    if rep ==1 | rep ==3 %%% ON
+    if rep ==1 || rep ==3 %%% ON
         m(m<0)=0;
     elseif rep ==2 | rep==4; %%% OFF
         m(m>0)=0;
@@ -603,6 +603,269 @@ for clust = 1:nclust
     
 end %end of for clust
 
+framerange = 0:20;
+baserange=2:3;  %%% importnat?
+  for i = 1:length(stimTimes)-2;
+        dFalign(i,:) = nanmean(dF(:,stimFrames(i) +framerange),1)- nanmean(mean(dF(:,stimFrames(i)+baserange),2),1);
+    end
+figure
+plot(nanmean(dFalign,1)); title('mean timecourse all cells');
+
+sz=[2 4 8 255];
+
+clear stas
+
+for n = 1:size(dF,1)
+    n
+    for i = 1:length(stimTimes)-2;
+        dFalign(i,:) = dF(n,stimFrames(i) +framerange) - nanmean(dF(n,stimFrames(i)+baserange),2);
+    end
+    
+    sta=0; 
+    
+    for rep = 1:2
+        m= (double(moviedata)-127)/128;
+        if rep==1
+            m(m<0)=0;
+        else
+            m(m>0)=0;
+        end
+        range = -2:2;
+        tau = 10;
+        resp = nanmean(dFalign(:,tau+range),2);
+        %resp(resp<0)=0;
+        %resp = resp-mean(resp);
+        sta =0;
+        npts = min(length(resp),size(moviedata,3));
+        for i = 1:npts;
+            if ~isnan(resp(i))
+                sta = sta+resp(i)*m(:,:,i);
+            end
+        end
+        sta = sta/nansum(abs(resp(1:npts)));
+        stas(:,:,n,rep)=sta;
+        xprofile = max(abs(sta),[],1); [mx xmax(n,rep)] = max(xprofile);
+        yprofile = max(abs(sta),[],2); [mx ymax(n,rep)] = max(yprofile);
+        zscore(n,rep) = (sta(ymax(n,rep),xmax(n,rep)) - mean(sta(:)))/std(sta(:));
+        
+        for i = 1:4
+            eps = find(m(ymax(n,rep),xmax(n,rep),:)~=0 & sz_mov(ymax(n,rep),xmax(n,rep),:)==sz(i));
+            eps = eps(eps<=size(dFalign,1));
+            tuning(n,rep,i,:) = nanmean(dFalign(eps,:),1);
+        end
+    end
+end
+
+amp = nanmean(nanmean(tuning(:,:,1:3,8:15),4),3);
+tcourseAll = squeeze(nanmean(nanmean(tuning(:,:,1:3,:),3),1));
+figure
+plot(tcourseAll'); title('mean timecourse'); legend('on','off');
+figure
+plot(ymax,xmax,'.'); title('all rf locations'); axis equal; axis ij
+
+zthresh = 5.5;
+use = zscore(:,1)>zthresh | zscore(:,2)<-zthresh;
+useN= find(use);
+
+useOn = find(zscore(:,1)>zthresh);
+useOff = find(zscore(:,2)<-zthresh);
+
+figure
+plot(ymax(useOn,1),xmax(useOn,1),'r.'); hold on;
+plot(ymax(useOff,2),xmax(useOff,2),'b.'); 
+title('all rf locations'); axis equal; axis ij
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+
+rfx = ymax;  %%% reversed due to rows/columns of movie matrix
+rfy = xmax; 
+
+
+
+x0 = median(rfx(useOn,1));
+y0 = median(rfy(useOn,1));
+
+figure
+subplot(2,2,1)
+plot(xpts(useOn),rfx(useOn,1)-x0,'o'); ylim([-30 30])
+title('topography ON')
+xlabel('x location'); ylabel('x RF');
+
+subplot(2,2,2)
+plot(ypts(useOn),rfy(useOn,1)-y0,'o'); ylim([-30 30])
+title('topography ON')
+xlabel('y location'); ylabel('y RF');
+
+subplot(2,2,3)
+plot(xpts(useOff),rfx(useOff,1)-x0,'o'); ylim([-30 30])
+title('topography OFF')
+xlabel('x location'); ylabel('x RF');
+
+subplot(2,2,4)
+plot(ypts(useOff),rfy(useOff,1)-y0,'o'); ylim([-30 30])
+title('topography OFF')
+xlabel('y location'); ylabel('y RF');
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+    
+useOnOff = intersect(useOn,useOff);
+
+figure
+subplot(1,2,1);
+plot(rfx(useOnOff,1)-x0,rfx(useOnOff,2)-x0,'o');axis([-20 20 -20 20]);axis square
+title('X RF center'); xlabel('On'); ylabel('Off');
+
+
+subplot(1,2,2);
+plot(rfy(useOnOff,1)-y0,rfy(useOnOff,2)-y0,'o');axis([-20 20 -20 20]); axis square
+title('Y RF center'); xlabel('On'); ylabel('Off');
+
+
+
+axLabel = {'X','Y'};
+onoffLabel = {'On','Off'}
+figure
+for ax = 1:2
+    for rep = 1:2;
+        subplot(2,2,2*(rep-1)+ax)
+        
+        imagesc(meanGreenImg(:,:,1)); colormap gray; axis equal
+        hold on
+        if rep==1
+            data = useOn;
+        else data = useOff;
+        end
+        
+        for i = 1:length(data)
+            if ax ==1
+                plot(xpts(data(i)),ypts(data(i)),'o','Color',cmapVar(rfx(data(i),rep)-x0,-25, 25, jet));
+            else
+                plot(xpts(data(i)),ypts(data(i)),'o','Color',cmapVar(rfy(data(i),rep)-y0,-25, 25, jet));
+            end
+        end
+        title(sprintf('%s %s',axLabel{ax},onoffLabel{rep}))
+    end
+end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+sz_tune = nanmean(tuning(:,:,:,8:15),4);
+figure
+for i = 1:2
+    subplot(1,2,i)
+    plot(squeeze(sz_tune(useN,i,:))')
+end
+
+notOn = find(zscore(:,1)<zthresh);
+notOff = find(zscore(:,2)>-zthresh);
+ampPos = amp; ampPos(ampPos<0)=0; 
+onOff = (ampPos(:,1)-ampPos(:,2))./(ampPos(:,1)+ampPos(:,2));
+onOff(notOn)=-1; onOff(notOff)=1;
+
+
+figure
+imagesc(meanGreenImg(:,:,1),[-0.5 1]); colormap gray; axis equal
+hold on
+for i = 1:length(useN)   
+    plot(xpts(useN(i)),ypts(useN(i)),'o','Color',cmapVar(onOff(useN(i)),-0.5, 0.5, jet));  
+end
+title('on off ratio')
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+
+szPref = squeeze(sz_tune(:,:,1)+ sz_tune(:,:,2)*2 + sz_tune(:,:,3)*3)./sum(sz_tune(:,:,1:3),3);
+
+figure
+imagesc(meanGreenImg(:,:,1),[-0.5 1]); colormap gray; axis equal
+hold on
+for i = 1:length(useOn)   
+    plot(xpts(useOn(i)),ypts(useOn(i)),'o','Color',cmapVar(szPref(useOn(i),1),1.5 , 2.5, jet));  
+end
+title('size pref On')
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+
+figure
+imagesc(meanGreenImg(:,:,1),[-0.5 1]); colormap gray; axis equal
+hold on
+for i = 1:length(useOff)   
+    plot(xpts(useOff(i)),ypts(useOff(i)),'o','Color',cmapVar(szPref(useOff(i),2),1.5 , 2.5, jet));  
+end
+title('size pref OFF')
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+
+%%% mean size tuning curves
+figure
+subplot(2,2,1)
+plot(squeeze(mean(tuning(useOn,1,:,:),1))');
+title('ON')
+
+subplot(2,2,2)
+plot(squeeze(mean(tuning(useOff,2,:,:),1))');
+title('OFF')
+
+subplot(2,2,3)
+plot(squeeze(mean(tuning(useOn,1,:,:),1))','r'); hold on
+plot(squeeze(mean(tuning(useOff,2,:,:),1))','b');
+title('On - red, Off - blue, all sizes')
+
+subplot(2,2,4) %%% spaceholder for legend
+for i = 1:4; plot(1,1);hold on; end
+legend('2','4','8','full')
+
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+n= ceil(rand(48,1)*size(stas,3));
+
+figure
+for rep = 1:2
+    figure
+    for i = 1:48
+        subplot(6,8,i);  
+        imagesc(stas(:,:,n(i),rep)',[-0.1 0.1]); axis off; axis equal; colormap jet; title(sprintf('%0.2f',zscore(n(i),rep)));
+    end
+end
+
+n= ceil(rand(48,1)*length(useN));
+
+figure
+for rep = 1:2
+    figure
+    for i = 1:48
+        subplot(6,8,i);  
+        imagesc(stas(:,:,useN(i),rep)',[-0.1 0.1]); axis off; axis equal; colormap jet; title(sprintf('%0.2f',zscore(useN(i),rep)));
+    end
+end
+
+onoffLabel = {'ON','OFF'};
+
+figure
+for i = 1:2
+    subplot(1,2,i);
+    plot(zscore(:,i),amp(:,i),'.'); hold on; xlabel('zscore'), ylabel('response amp'); title(onoffLabel{i})
+    plot(zscore(use,i),amp(use,i),'r.');
+end
+
+figure
+subplot(2,1,1)
+plot(zscore(:,1),rfx(:,1),'.');title('on'); xlabel('zscore'); ylabel('rf X'); hold on; plot([zthresh zthresh], [ 0 250],'r')
+subplot(2,1,2);
+plot(zscore(:,2),rfx(:,2),'.'); title('off'); xlabel('zscore'); ylabel('rf X'); hold on; plot([-zthresh -zthresh], [ 0 250],'r')
+
+
+
+
+
+figure
+for rep= 1:2
+    for sz = 1:4;
+        subplot(2,4,4*(rep-1)+sz)
+        plot(squeeze(tuning(useN,rep,sz,:))');
+        hold on
+        plot(mean(squeeze(tuning(useN,rep,sz,:)),1),'g','LineWidth',2);
+        ylim([-0.1 0.25]); xlim([0 20])
+    end
+end
 
 %%% correlation map (shows how good the clustering is
 figure

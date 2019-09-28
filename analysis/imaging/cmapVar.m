@@ -1,4 +1,9 @@
 function cm=cmapVar(val,mn,mx,cmap)
+%%% inputs
+%%% value to be mapped
+%%% min/max of range
+%%% selected colormap
+%%% output = color triplet
 if ~exist('cmap','var')
 cmap = jet;
 end

@@ -65,21 +65,8 @@ for f = 1:length(files)
             errRpt{nerr}=getReport(exc,'extended')
         end
     else
-        sprintf('skipping %s',files(f).grating4x3y5sf3tfdata)
+        sprintf('skipping %s',files(f).grating4x3y5sf3tf)
     end
-
-%     if redo || isempty([pathname files(f).fourxthreey]) || ~exist([pathname files(f).fourxthreey],'file')
-%         try
-%             dfofMovie([datapathname files(f).fourxthreeydata],rig);
-%         catch exc
-%             sprintf('couldnt do %s',files(f).fourxthreeydata)
-%             nerr=nerr+1;
-%             errmsg{nerr}=sprintf('couldnt do %s',files(f).fourxthreeydata)
-%             errRpt{nerr}=getReport(exc,'extended')
-%         end
-%     else
-%         sprintf('skipping %s',files(f).fourxthreey)
-%     end
     
 %     if redo || isempty([pathname files(f).patchonpatch]) || ~exist([pathname files(f).patchonpatch],'file')
 %         try

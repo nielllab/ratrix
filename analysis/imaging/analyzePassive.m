@@ -9,9 +9,9 @@ batch4x3y_3x2y_KC %Kris' batch file
 cd(pathname)
 
 alluse = find(strcmp({files.controlvirus},'no') & strcmp({files.inject},'CLOZ') & strcmp({files.dose},'1.0 mg_kg')  ...
-    & strcmp({files.monitor},'land') & strcmp({files.timing},'post') & strcmp({files.notes},'good data'))  
+    & strcmp({files.monitor},'land') & strcmp({files.timing},'pre') & strcmp({files.notes},'good data'))  
 
-savename = ['Group_G6H197LT_G6H1511RN_4X3Y_' files(alluse(1)).inject '_' files(alluse(1)).dose '_' files(alluse(1)).timing '.mat']; 
+savename = ['G6H203RT_4X3Y_' files(alluse(1)).inject '_' files(alluse(1)).dose '_' files(alluse(1)).timing '.mat']; 
 
 %% pick animals for Mandi
 

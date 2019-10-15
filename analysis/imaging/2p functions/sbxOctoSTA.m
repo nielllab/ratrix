@@ -820,16 +820,17 @@ for rep = 1:2
     end
 end
 
-n= ceil(rand(48,1)*length(useN));
 
-figure
-for rep = 1:2
-    figure
-    for i = 1:48
-        subplot(6,8,i);  
-        imagesc(stas(:,:,useN(i),rep)',[-0.1 0.1]); axis off; axis equal; colormap jet; title(sprintf('%0.2f',zscore(useN(i),rep)));
-    end
-end
+% n= ceil(rand(48,1)*length(useN));
+% 
+% figure
+% for rep = 1:2
+%     figure
+%     for i = 1:48
+%         subplot(6,8,i);  
+%         imagesc(stas(:,:,useN(i),rep)',[-0.1 0.1]); axis off; axis equal; colormap jet; title(sprintf('%0.2f',zscore(useN(i),rep)));
+%     end
+% end
 
 onoffLabel = {'ON','OFF'};
 
@@ -839,12 +840,16 @@ for i = 1:2
     plot(zscore(:,i),amp(:,i),'.'); hold on; xlabel('zscore'), ylabel('response amp'); title(onoffLabel{i})
     plot(zscore(use,i),amp(use,i),'r.');
 end
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+
 
 figure
 subplot(2,1,1)
 plot(zscore(:,1),rfx(:,1),'.');title('on'); xlabel('zscore'); ylabel('rf X'); hold on; plot([zthresh zthresh], [ 0 250],'r')
 subplot(2,1,2);
 plot(zscore(:,2),rfx(:,2),'.'); title('off'); xlabel('zscore'); ylabel('rf X'); hold on; plot([-zthresh -zthresh], [ 0 250],'r')
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 
 

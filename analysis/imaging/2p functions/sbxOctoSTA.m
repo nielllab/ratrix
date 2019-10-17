@@ -732,9 +732,9 @@ for ax = 1:2
         
         for i = 1:length(data)
             if ax ==1
-                plot(xpts(data(i)),ypts(data(i)),'o','Color',cmapVar(rfx(data(i),rep)-x0,-25, 25, jet));
+                plot(xpts(data(i)),ypts(data(i)),'.','Color',cmapVar(rfx(data(i),rep)-x0,-25, 25, jet));
             else
-                plot(xpts(data(i)),ypts(data(i)),'o','Color',cmapVar(rfy(data(i),rep)-y0,-25, 25, jet));
+                plot(xpts(data(i)),ypts(data(i)),'.','Color',cmapVar(rfy(data(i),rep)-y0,-25, 25, jet));
             end
         end
         title(sprintf('%s %s',axLabel{ax},onoffLabel{rep}))
@@ -823,6 +823,7 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 
 n= ceil(rand(48,1)*length(useN));
 
+<<<<<<< HEAD
 %%% plot location of all 48 points on their own figure
 %%% probably want to comment this out!!!!
 % for i= 1:length(n)
@@ -843,6 +844,18 @@ n= ceil(rand(48,1)*length(useN));
 %     
 %      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 % end
+=======
+n= ceil(rand(48,1)*length(useN));
+
+figure
+for rep = 1:2
+    figure
+    for i = 1:48
+        subplot(6,8,i);  
+        imagesc(stas(:,:,useN(n(i)),rep)',[-0.1 0.1]); axis off; axis equal; colormap jet; title(sprintf('%0.2f',zscore(useN(n(i)),rep)));
+    end
+end
+>>>>>>> b88a8edddf1f76a6fa71377e864decd82843bae2
 
 onoffLabel = {'ON','OFF'};
 

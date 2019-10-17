@@ -809,18 +809,42 @@ legend('2','4','8','full')
 
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-n= ceil(rand(48,1)*size(stas,3));
+% n= ceil(rand(48,1)*size(stas,3));
+% 
+% figure
+% for rep = 1:2
+%     figure
+%     for i = 1:48
+%         subplot(6,8,i);  
+%         imagesc(stas(:,:,n(i),rep)',[-0.1 0.1]); axis off; axis equal; colormap jet; title(sprintf('%0.2f',zscore(n(i),rep)));
+%     end
+% end
 
-figure
-for rep = 1:2
-    figure
-    for i = 1:48
-        subplot(6,8,i);  
-        imagesc(stas(:,:,n(i),rep)',[-0.1 0.1]); axis off; axis equal; colormap jet; title(sprintf('%0.2f',zscore(n(i),rep)));
-    end
-end
 
+n= ceil(rand(48,1)*length(useN));
 
+<<<<<<< HEAD
+%%% plot location of all 48 points on their own figure
+%%% probably want to comment this out!!!!
+% for i= 1:length(n)
+% figure
+% imagesc(meanGreenImg(:,:,1),[-0.5 1]); colormap gray; axis equal; hold on
+% plot(xpts(useN(n(i))),ypts(useN(n(i))),'o'); title(sprintf('%d %0.2f',i, zscore(useN(n(i)),1)));
+% end
+% 
+%Judit commented out for speed
+% 
+% figure
+% for rep = 1:2
+%     figure
+%     for i = 1:48
+%         subplot(6,8,i);  
+%         imagesc(stas(:,:,useN(n(i)),rep)',[-0.1 0.1]); axis off; axis equal; colormap jet; title(sprintf('%0.2f',zscore(useN(n(i)),rep)));
+%     end
+%     
+%      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+% end
+=======
 n= ceil(rand(48,1)*length(useN));
 
 figure
@@ -831,6 +855,7 @@ for rep = 1:2
         imagesc(stas(:,:,useN(n(i)),rep)',[-0.1 0.1]); axis off; axis equal; colormap jet; title(sprintf('%0.2f',zscore(useN(n(i)),rep)));
     end
 end
+>>>>>>> b88a8edddf1f76a6fa71377e864decd82843bae2
 
 onoffLabel = {'ON','OFF'};
 

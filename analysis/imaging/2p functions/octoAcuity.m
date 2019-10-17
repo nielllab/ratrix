@@ -24,9 +24,9 @@ files = dir('*.mat');
 % files = goodfiles;
 
 for f = 1:length(files)
-   % load(files(f).name,'stimOrder','weightTcourse')
-    load(files(f).name,'stimOrder','trialTcourse')
-    weightTcourse = trialTcourse;
+    load(files(f).name,'stimOrder','weightTcourse')
+%     load(files(f).name,'stimOrder','trialTcourse')
+%     weightTcourse = trialTcourse;
     for c = 1:17;
         resp(c,:) = nanmedian(weightTcourse(:,stimOrder==c),2);
         amp(c,f) = nanmean(resp(c,9:20),2);

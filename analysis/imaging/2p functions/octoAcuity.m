@@ -2,9 +2,26 @@
 %%% based on full-image weighted dF/F
 %%% cmn 2019
 
-close all
+close all; clear all
+
 
 files = dir('*.mat');
+
+%%% old analysis didn't save weightTcourse
+%%% check and only use ones that have it
+n=0;
+for i = 1:length(files)
+    clear weightTcourse
+    load(files(i).name,'weightTcourse');
+    if exist('weightTcourse','var');
+        n=n+1;
+        goodfiles(n) = files(i);
+    else
+        sprintf('missing weightTcourse in %s',files(i).name)
+    end
+end
+
+files = goodfiles;
 
 for f = 1:length(files)
     load(files(f).name,'stimOrder','weightTcourse')

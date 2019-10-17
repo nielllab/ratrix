@@ -10,7 +10,7 @@ for f = 1:length(files)
     load(files(f).name,'stimOrder','weightTcourse')
     for c = 1:17;
         resp(c,:) = nanmedian(weightTcourse(:,stimOrder==c),2);
-        amp(c,f) = nanmean(resp(c,9:15),2);
+        amp(c,f) = nanmean(resp(c,9:20),2);
     end
     
     figure
@@ -42,8 +42,13 @@ figure
 plot(mean(sfResp,3)'); title('resp vs SF')
 
 figure
-errorbar(mean(tuning,2), std(tuning,[],2)/sqrt(length(files)));
+hold on
+plot(2:5,mean(tuning(2:end,:),2),'bo')
+errorbar(2:5,mean(tuning(2:end,:),2), std(tuning(2:end,:),[],2)/sqrt(length(files)),'k');
+plot(1.5,mean(tuning(1,:),2),'bo')
+errorbar(1.5,mean(tuning(1,:),2), std(tuning(1,:),[],2)/sqrt(length(files)),'k');
+
 ylabel('mean dF/F');xlabel('cyc / deg'); title('SF tuning')
-set(gca,'Xtick',1:5);
-set(gca,'XtickLabel',{'0','0.01','0.04','0.16','0.64'});
-xlim([0.5 5.5])
+set(gca,'Xtick',[ 1.5 2:5]);
+set(gca,'XtickLabel',{'0','0.05','0.02','0.08','0.32'});
+xlim([1 5.5])

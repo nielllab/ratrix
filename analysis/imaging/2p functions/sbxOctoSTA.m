@@ -890,7 +890,7 @@ end
 
 display('saving data')
 outfile = newpdfFile(1:end-4);
-save(outfile, 'moviedata','sz_mov',  'c', 'xpts','ypts','stdImg','meanGreenImg','dF','stimTimes','stimFrames')
+save(outfile, 'moviedata','sz_mov',  'c', 'xpts','ypts','stdImg','meanGreenImg','dF','stimTimes','stimFrames','tuning','zscore','rfx','rfy','stas')
 
 
 psfile

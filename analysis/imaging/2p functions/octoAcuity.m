@@ -41,11 +41,12 @@ for f = 1:length(files)
     end
     tuning(1,f) = amp(end);
     sfResp(1,:,f) = resp(end,:);
-   
-    figure
-    plot(sfResp(:,:,f)'); title(files(f).name);
+%    
+%     figure
+%     plot(sfResp(:,:,f)'); title(files(f).name);
     figure
     plot(tuning(:,f))
+    title(files(f).name); ylim([0 0.05])
     
 end
 
@@ -67,5 +68,5 @@ errorbar(1.5,mean(tuning(1,:),2), std(tuning(1,:),[],2)/sqrt(length(files)),'k')
 
 ylabel('mean dF/F');xlabel('cyc / deg'); title('SF tuning')
 set(gca,'Xtick',[ 1.5 2:5]);
-set(gca,'XtickLabel',{'0','0.05','0.02','0.08','0.32'});
+set(gca,'XtickLabel',{'0','0.005','0.02','0.08','0.32'});
 xlim([1 5.5])

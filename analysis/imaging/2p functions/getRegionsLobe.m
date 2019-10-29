@@ -31,6 +31,7 @@ for r = 1:nr;
     if n>0;
         xb{r}(n+1) = xb{r}(1); yb{r}(n+1) = yb{r}(1);
         region(inpolygon(xpts,ypts,xb{r},yb{r}))=r;
+        plot(xb{r},yb{r},'Color',col(r));
     end
 end
 
@@ -40,5 +41,7 @@ hold on;
 for r = 1:nr;
     plot(xpts(region==r),ypts(region==r),'o','Color',col(r));
 end
+drawnow;
 
+display('saving')
 save(fullfile(p,f),'xb','yb','region','-append');

@@ -41,4 +41,4 @@ for r = 1:nr;
     plot(xpts(region==r),ypts(region==r),'o','Color',col(r));
 end
 
-save(fullfile(p,f),'xb','rb','-append');
+save(fullfile(p,f),'xb','yb','region','-append');

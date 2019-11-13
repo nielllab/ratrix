@@ -826,6 +826,45 @@ if nstim==17 %%% gratings 1 tf; either 4sfx4orient, or 2sf x 8 orient
     
 end
 
+for i = 1:nstim;
+    meanResp(i) = nanmean(nanmedian(weightTcourse(8:25,stimOrder==i),2),1);
+end
+
+
+if nstim==29 %%% gratings 1 tf; either 4sfx4orient, or 2sf x 8 orient
+    range = [-0.05 0.2]; %%% colormap range
+    loc = [1 5 9 13 17 21 25 2 6 10 14 18 22 26 3 7 11 15 19 23 27 4 8 12 16 20 24 28]; %%% map stim order onto subplot
+    figLabel = 'gratings';
+    npanel = 28; nrow = 7; ncol = 4; offset = 0;
+    gratingTitle = 1;
+    pixPlot;
+    pixPlotWeight;
+    
+    figLabel = 'flicker';
+    npanel = 1; nrow = 1; ncol = 1; offset = 28;
+    gratingTitle=0;
+    pixPlot;
+    pixPlotWeight;
+    
+    %%% plot tuning curve
+    for i = 1:7;
+        tuning(i+1)= nanmean(meanResp(i+0:7:21));
+    end
+    tuning(1) = meanResp(29);
+    figure
+    plot(tuning);
+    xlabel('SF');
+    ylabel('mean dF/F');
+    ylim([0 0.05])
+    title('weighted mean response');
+    set(gca,'Xtick',1:8);
+    set(gca,'Xticklabel',{'0', '0.01','0.02','0.04','0.08','0.16','0.32','0.64'})
+    
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+    
+    
+end
 
 if nstim==48 %%% 4x6 spots
     range = [-0.05 0.2];

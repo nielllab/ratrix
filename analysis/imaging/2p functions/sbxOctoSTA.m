@@ -131,7 +131,17 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 
 %%%
 %figure
+display('which movie file?')
+display('1) octo_sparse_flash_10min')
+display('2) sparse_20min_1-8')
+movienum = input('1 or 2 : ');
+
+
+if movienum==1
 load('C:\data\octo_sparse_flash_10min.mat')
+else
+    load('C:\data\sparse_20min_1-8.mat');
+end
 
 for rep =1:2 %%% 4 conditions: On, Off, fullfield On, fullfield off; currently skipping fullfield since it's not interesting
     
@@ -225,16 +235,20 @@ for rep =1:2 %%% 4 conditions: On, Off, fullfield On, fullfield off; currently s
 %             
             xprofile = max(abs(sta),[],1); [mx xmax] = max(xprofile);
             yprofile = max(abs(sta),[],2); [mx ymax] = max(yprofile);       
-            sz=[2 4 8 255]; col = 'bcrg';
-
+            
+            if movienum==1
+                sz=[2 4 8 255]; col = 'bcrg';
+            else
+                sz=[0.8 2 4 8 255]; col = 'kbcrg';
+            end
             
             %%% mean traces
 %             figure(tcourseFig)
 %            subplot(length(xrange),length(yrange),pnum,'Parent',tcourseFig);
 %             hold on
 %             %%% mean traces
-            for i = 1:4
-               if i<4
+            for i = 1:length(sz)
+               if i<length(sz)
                    eps = find(abs(m(ymax,xmax,:))>0.9 & sz_mov(ymax*2,xmax*2,:)==sz(i)); %%% because sz_mov is twice as large!
                else
                    eps = find(sz_mov(ymax*2,xmax*2,:)==sz(i)); %%% for fullfield (since these are excluded from m; note this will get both on/off
@@ -302,7 +316,7 @@ end
 title('grid pattern')
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-
+%%% on/off sta plots
 pnum=0;
 figure
 for nx = 1:length(xrange);
@@ -556,15 +570,19 @@ for clust = 1:nclust
         ymax
         plot(ymax,xmax,'ko');
         
+        if movienum==1            
         sz=[2 4 8 255]; col = 'bcrg'
-
+        else
+            sz=[0.8 2 4 8 255]; col = 'kbcrg';
+        end
+        
         onoffLabel = {'ON','OFF'};
         figure
         hold on
-        for i = 1:4
+        for i = 1:length(sz)
             eps = find(m(ymax,xmax,:)~=0 & sz_mov(ymax,xmax,:)==sz(i));
             eps = eps(eps<=size(dFalign,1));
-            subplot(2,2,i); hold on
+            subplot(2,3,i); hold on
             cmap = jet(length(eps))
             for j = 1:length(eps)
                 plot(dFalign(eps(j),:)','Color',cmap(j,:));
@@ -581,13 +599,18 @@ for clust = 1:nclust
         subplot(2,3,4+rep);
         hold on
         %%% mean traces
-        for i = 1:4
+        for i = 1:length(sz)
             eps = find(m(ymax,xmax,:)~=0 & sz_mov(ymax,xmax,:)==sz(i));
             eps = eps(eps<=size(dFalign,1));
             plot(nanmean(dFalign(eps,:),1),col(i),'Linewidth',2);
         end
         if rep==2
-            legend('2','4','8','full')
+            if movienum==1
+                legend('2','4','8','full')
+            else
+                legend('1','2','4','8','full')
+            end
+                
         end
         ylim([-0.05 0.2]); xlim([1 20])
         
@@ -611,7 +634,11 @@ baserange=2:3;  %%% importnat?
 figure
 plot(nanmean(dFalign,1)); title('mean timecourse all cells');
 
+if movienum==1
 sz=[2 4 8 255];
+else
+    sz = [0.8 2 4 8 255];
+end
 
 clear stas
 
@@ -648,7 +675,7 @@ for n = 1:size(dF,1)
         yprofile = max(abs(sta),[],2); [mx ymax(n,rep)] = max(yprofile);
         zscore(n,rep) = (sta(ymax(n,rep),xmax(n,rep)) - mean(sta(:)))/std(sta(:));
         
-        for i = 1:4
+        for i = 1:length(sz)
             eps = find(m(ymax(n,rep),xmax(n,rep),:)~=0 & sz_mov(ymax(n,rep),xmax(n,rep),:)==sz(i));
             eps = eps(eps<=size(dFalign,1));
             tuning(n,rep,i,:) = nanmean(dFalign(eps,:),1);
@@ -804,8 +831,12 @@ plot(squeeze(mean(tuning(useOff,2,:,:),1))','b');
 title('On - red, Off - blue, all sizes')
 
 subplot(2,2,4) %%% spaceholder for legend
-for i = 1:4; plot(1,1);hold on; end
-legend('2','4','8','full')
+for i = 1:length(sz); plot(1,1);hold on; end
+if movienum ==1
+    legend('2','4','8','full')
+else
+    legend('1','2','4','8','full')
+end
 
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
@@ -823,7 +854,6 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 
 n= ceil(rand(48,1)*length(useN));
 
-<<<<<<< HEAD
 %%% plot location of all 48 points on their own figure
 %%% probably want to comment this out!!!!
 % for i= 1:length(n)
@@ -844,7 +874,7 @@ n= ceil(rand(48,1)*length(useN));
 %     
 %      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 % end
-=======
+
 n= ceil(rand(48,1)*length(useN));
 
 figure
@@ -855,7 +885,7 @@ for rep = 1:2
         imagesc(stas(:,:,useN(n(i)),rep)',[-0.1 0.1]); axis off; axis equal; colormap jet; title(sprintf('%0.2f',zscore(useN(n(i)),rep)));
     end
 end
->>>>>>> b88a8edddf1f76a6fa71377e864decd82843bae2
+
 
 onoffLabel = {'ON','OFF'};
 

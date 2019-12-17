@@ -16,10 +16,10 @@ else
     %%% manually choose region to crop full image in selecting points
     Opt.selectCrop =1;
     %%% minimum brightness of selected points
-   % Opt.mindF = 200;
+    % Opt.mindF = 200;
     %%% number of clusters from hierarchical analysis
     %Opt.nclust = 5;
-
+    
     %     % option to create movies of non-aligned and aligned image sequences
     %     Opt.MakeMov = 0;
     %     % option for gaussian filter standard deviation
@@ -63,42 +63,52 @@ get2pSession_sbx;  %%% returns dfofInterp, and phasetimes (time in secs each sti
 global info
 mv = info.aligned.T;
 
-zbin = input('do zbinning? 0/1 : ');
+if isfield(Opt,'zbinning');
+    zbin = Opt.zbinning
+else
+    zbin = input('do zbinning? 0/1 : ');
+end
+
 if zbin
-   display('doing clustering')
+    display('doing clustering')
     %%% recreate small version of absolute fluorescence
     greensmall = double(imresize(greenframe,0.5));
     F = (1 + dfofInterp).*repmat(greensmall,[1 1 size(dfofInterp,3)]);
     
     %%% resize and reshape images into vectors, to calculate distance
     smallDf = imresize(F(50:350,50:350,:),1/2); %%% remove edges for boundary effects
-   % smallDf = reshape(smallDf,size(smallDf,1)*size(smallDf,2),size(smallDf,3));
+    % smallDf = reshape(smallDf,size(smallDf,1)*size(smallDf,2),size(smallDf,3));
     smallMean = nanmedian(smallDf,3);
     figure
     imagesc(smallMean);
     
-     for i = 1:size(smallDf,3);
-
+    for i = 1:size(smallDf,3);
+        
         im = smallDf(:,:,i);
-         cc = corrcoef(im(:),smallMean(:));        
-         dist(i) = cc(2,1);
-     end
-     
-     figure
-     plot(dist), ylim([0 1]); title('correlation with median')
-     %ccthresh = 0.9;   
-     ccthresh = input('enter correlation threshold : ')
-     figure
-     plot(dist); ylim([0 1])
-     title('correlation of images with median'); xlabel('frame'); ylabel('corr coef')
-  hold on
-  plot([1 length(dist)], [ccthresh ccthresh],'r:');
-  if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-  
+        cc = corrcoef(im(:),smallMean(:));
+        dist(i) = cc(2,1);
+    end
+    
+    figure
+    plot(dist), ylim([0 1]); title('correlation with median')
+    %ccthresh = 0.9;
+    if isfield(Opt,'binningThresh')
+        ccthresh = Opt.binningThresh;
+    else
+        ccthresh = input('enter correlation threshold : ')
+    end
+    
+    figure
+    plot(dist); ylim([0 1])
+    title('correlation of images with median'); xlabel('frame'); ylabel('corr coef')
+    hold on
+    plot([1 length(dist)], [ccthresh ccthresh],'r:');
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
     useframes = dist>ccthresh;
     figure
     imagesc(mean(F(:,:,dist>ccthresh),3)); title(sprintf('mean of frames above thresh %0.2f used',mean(useframes)));
-
+    
     
     display('redoing dfofinterp')
     F0 = repmat(prctile(F(:,:,useframes),10,3),[1 1 size(F,3)]);
@@ -109,40 +119,40 @@ if zbin
     greenframe = imresize(mean(F(:,:,useframes),3),2);
     
     for junk=1:0 %%% compress out old z-bin cluster code
-%     %%% old cluster-based binning
-%     D = pdist(smallDf','euclidean');
-%     
-%     %Create hierarchical cluster tree based on D
-%     Z = linkage(D,'ward');
-%     %Create figure of hierarchical cluster tree for visualization purposes
-%     figure
-%     [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3);
-%     title('Hierarchical Cluster tree of Image Sequence');
-%     
-%     nclust = input('How many z-plane clusters do you want?: ');
-%     T = cluster(Z,'maxclust',nclust);
-%     
-%     %%% compare clusters and movement
-%     figure
-%     plot(T*5); hold on; plot(mv)
-%     legend('clusters','x movement','y movement')
-%     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-% 
-%     figure
-%     for i = 1:nclust;
-%         subplot(2,3,i)
-%         imagesc(mean(F(:,:,T==i),3));
-%         title(sprintf('clust %d n = %d',i,sum(T==i)));
-%     end
-%     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-%     useBin = input('which bin to use : ');
-%     display('redoing dfofinterp')
-%     F0 = repmat(prctile(F(:,:,T==useBin),10,3),[1 1 size(F,3)]);
-%     dfofInterp = (F-F0)./F0;
-%     
-%     dfofInterp(:,:,T~=useBin)=NaN;
-%     mv(T~=useBin,:)=NaN;
-%     greenframe = imresize(mean(F(:,:,T==useBin),3),2);
+        %     %%% old cluster-based binning
+        %     D = pdist(smallDf','euclidean');
+        %
+        %     %Create hierarchical cluster tree based on D
+        %     Z = linkage(D,'ward');
+        %     %Create figure of hierarchical cluster tree for visualization purposes
+        %     figure
+        %     [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3);
+        %     title('Hierarchical Cluster tree of Image Sequence');
+        %
+        %     nclust = input('How many z-plane clusters do you want?: ');
+        %     T = cluster(Z,'maxclust',nclust);
+        %
+        %     %%% compare clusters and movement
+        %     figure
+        %     plot(T*5); hold on; plot(mv)
+        %     legend('clusters','x movement','y movement')
+        %     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        %
+        %     figure
+        %     for i = 1:nclust;
+        %         subplot(2,3,i)
+        %         imagesc(mean(F(:,:,T==i),3));
+        %         title(sprintf('clust %d n = %d',i,sum(T==i)));
+        %     end
+        %     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        %     useBin = input('which bin to use : ');
+        %     display('redoing dfofinterp')
+        %     F0 = repmat(prctile(F(:,:,T==useBin),10,3),[1 1 size(F,3)]);
+        %     dfofInterp = (F-F0)./F0;
+        %
+        %     dfofInterp(:,:,T~=useBin)=NaN;
+        %     mv(T~=useBin,:)=NaN;
+        %     greenframe = imresize(mean(F(:,:,T==useBin),3),2);
     end
     
     figure
@@ -150,7 +160,7 @@ if zbin
     imagesc(greenframe,range); colormap gray
     title(sprintf('mean of binned thresh = %0.2f used %0.2f',ccthresh, mean(useframes)))
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
+    
 end
 
 
@@ -167,6 +177,7 @@ greenCrop = double(stdImg);
 
 thresh = prctile(greenCrop(:),95)/50; %%% cut out points that are 100x dimmer than peak
 dfofInterp(repmat(greenCrop,[1 1 size(dfofInterp,3)])<thresh)=0;
+dfofInterp(isnan(dfofInterp))=0;
 
 figure
 imagesc(greenCrop>thresh);
@@ -392,7 +403,7 @@ else
     if isfield(Opt,'selectCrop') && Opt.selectCrop ==1
         disp('Select area in figure to include in the analysis');
         [xrange, yrange] = ginput(2);
-    else 
+    else
         b = 5;
         xrange = [b size(img,2)-b];
         yrange = [b size(img,1)-b];
@@ -404,7 +415,7 @@ else
     figure
     plot(brightness); xlabel('N'); ylabel('brightness');
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
+    
     fprintf('%d points in ROI\n',length(pts))
     
     %%% choose points over a cutoff, to eliminate noise / nonresponsive
@@ -789,13 +800,13 @@ if nstim==13 %%% gratings 1 tf
     loc = [1 5 9 2 6 10 3 7 11 4 8 12]; %%% map stim order onto subplot
     figLabel = 'gratings';
     npanel = 12; nrow = 3; ncol = 4; offset = 0;
-   gratingTitle = 1; pixPlot;
+    gratingTitle = 1; pixPlot;
     pixPlotWeight;
     
     figLabel = 'flicker';
     npanel = 1; nrow = 1; ncol = 1; offset = 12;
-   gratingTitle=0;
-   pixPlot;
+    gratingTitle=0;
+    pixPlot;
     pixPlotWeight;
     
     mapGratingsOcto;
@@ -805,7 +816,7 @@ if nstim==13 %%% gratings 1 tf
     subplot(2,2,3); imshow(cycPolarImg); title('timecourse')
     subplot(2,2,4); imshow(hvImg); title('h vs v')
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
+    
 end
 
 
@@ -860,8 +871,8 @@ if nstim==29 %%% gratings 1 tf; either 4sfx4orient, or 2sf x 8 orient
     set(gca,'Xtick',1:8);
     set(gca,'Xticklabel',{'0', '0.01','0.02','0.04','0.08','0.16','0.32','0.64'})
     
-        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
     
     
 end

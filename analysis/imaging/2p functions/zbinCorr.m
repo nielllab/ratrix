@@ -23,7 +23,11 @@ end
 figure
 plot(dist), ylim([0 1]); title('correlation with median')
 %ccthresh = 0.9;
-ccthresh = input('enter correlation threshold : ')
+if isfield(Opt,'binningThresh')
+    ccthresh = Opt.binningThresh;
+else
+    ccthresh = input('enter correlation threshold : ')
+end
 figure
 plot(dist); ylim([0 1])
 title('correlation of images with median'); xlabel('frame'); ylabel('corr coef')

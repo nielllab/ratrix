@@ -61,6 +61,7 @@ get2pSession_sbx;  %%% returns dfofInterp, and phasetimes (time in secs each sti
 global info
 mv = info.aligned.T;
 
+
 zbinCorr
 
 buffer(:,1) = max(mv,[],1)/cfg.spatialBin+1; buffer(buffer<1)=1;

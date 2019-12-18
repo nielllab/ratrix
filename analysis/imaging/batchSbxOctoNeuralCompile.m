@@ -32,8 +32,7 @@ Opt.binningThresh = 0.95;
 
 Results = struct;
 
-%for iFile = 1:length(sbx_fname);
-for iFile = length(sbx_fname):length(sbx_fname)
+for iFile = 1:length(sbx_fname)
    iFile
     %%% criteria as to whether to analyze this one
     use = ~exist(mat_fname{iFile},'file');

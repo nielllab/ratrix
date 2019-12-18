@@ -1,11 +1,13 @@
-clear all
-close all
 %% Analyze multiple files using sbxOctoNeural function.
 %% uses excel compile file to choose files, stim, etc
+%%% cmn 2019
 
+clear all
+close all
 
+stimname = 'sparse noise';
 %%% select files to analze
-[sbx_fname acq_fname mat_fname] = compileFilenames('For Batch File.xlsx','sparse noise');
+[sbx_fname acq_fname mat_fname] = compileFilenames('For Batch File.xlsx',stimname);
 
 
 %% General Parameters
@@ -31,7 +33,8 @@ Opt.binningThresh = 0.95;
 Results = struct;
 
 %for iFile = 1:length(sbx_fname);
-    for iFile = length(sbx_fname):length(sbx_fname)
+for iFile = length(sbx_fname):length(sbx_fname)
+   iFile
     %%% criteria as to whether to analyze this one
     use = ~exist(mat_fname{iFile},'file');
     
@@ -57,14 +60,25 @@ Results = struct;
         end
         
         %% Run sutterOctoNeural
-        Results(iFile).Input = Opt;       
-%         try
+        Results(iFile).Input = Opt;
+        %         try
+        if strcmp(stimname(1:6),'sparse')
+            display('sparse noise')
+            if strcmp(stimname,'sparse noise');
+                Opt.noiseFile=1;   %%octo_sparse_flash_10min
+            else
+                Opt.noiseFile=2; %%%sparse_20min_1-8
+            end
             sbxOctoSTA(Opt);
-            Results(iFile).Output = 'success'
-%         catch
-%             fprintf('Error in sutterOctoNeural script - Continuing onto next file');
-%             Results(iFile).Output = [];
-%         end
-   
+        else
+            sbxOctoNeural(Opt);
+        end
+        
+        Results(iFile).Output = 'success'
+        %         catch
+        %             fprintf('Error in sutterOctoNeural script - Continuing onto next file');
+        %             Results(iFile).Output = [];
+        %         end
+        
     end
 end

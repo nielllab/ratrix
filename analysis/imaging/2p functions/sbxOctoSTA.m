@@ -133,9 +133,13 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 %%%
 %figure
 display('which movie file?')
-display('1) octo_sparse_flash_10min')
-display('2) sparse_20min_1-8')
-movienum = input('1 or 2 : ');
+if isfield(Opt,'noiseFile')
+    movienum = Opt.noiseFile;
+else
+    display('1) octo_sparse_flash_10min')
+    display('2) sparse_20min_1-8')
+    movienum = input('1 or 2 : ');
+end
 
 
 if movienum==1

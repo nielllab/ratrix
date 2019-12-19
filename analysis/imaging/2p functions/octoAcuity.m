@@ -4,37 +4,32 @@
 
 close all; clear all
 
+%%% select files to analyze based on compile file
+stimname = 'sin gratings';
+[sbx_fname acq_fname mat_fname] = compileFilenames('For Batch File.xlsx',stimname);
 
-files = dir('*.mat');
-
-%%% old analysis didn't save weightTcourse
-%%% check and only use ones that have it
-% n=0;
-% for i = 1:length(files)
-%     clear weightTcourse
-%     load(files(i).name,'weightTcourse');
-%     if exist('weightTcourse','var');
-%         n=n+1;
-%         goodfiles(n) = files(i);
-%     else
-%         sprintf('missing weightTcourse in %s',files(i).name)
-%     end
+% %%% selectall files in directory
+% files = dir('*.mat');
+% for i = 1:nfiles
+%     mat_fname{i} = files(i).name;
 % end
-% 
-% files = goodfiles;
 
-for f = 1:length(files)
-    load(files(f).name,'stimOrder','weightTcourse')
-%     load(files(f).name,'stimOrder','trialTcourse')
-%     weightTcourse = trialTcourse;
-    for c = 1:17;
+
+nfiles = length(mat_fname);
+
+for f = 1:nfiles
+    
+    %%% read in weighted timecourse (from pixelmap, weighted by baseline fluorescence
+    load(mat_fname{f},'stimOrder','weightTcourse')
+
+    for c = 1:17;  %%% loop over conditions
+        %%% timecourse of response
         resp(c,:) = nanmedian(weightTcourse(:,stimOrder==c),2);
+        %%% amplitude of response over timewindow
         amp(c,f) = nanmean(resp(c,9:20),2);
     end
 
-    figure
-    plot(amp); title(files(f).name)
-    
+    %%%% average across orientations (4) for each sf
     for sf = 1:4;
         tuning(sf+1,f) = nanmean(amp(sf:4:end,f));
         sfResp(sf+1,:,f) = nanmean(resp(sf:4:end,:),1);
@@ -43,10 +38,10 @@ for f = 1:length(files)
     sfResp(1,:,f) = resp(end,:);
 %    
 %     figure
-%     plot(sfResp(:,:,f)'); title(files(f).name);
+%     plot(sfResp(:,:,f)'); title(mat_fname{f});
     figure
     plot(tuning(:,f))
-    title(files(f).name); ylim([0 0.05])
+    title(mat_fname{f}); ylim([0 0.05])
     
 end
 
@@ -62,9 +57,9 @@ plot(mean(sfResp,3)'); title('resp vs SF')
 figure
 hold on
 plot(2:5,mean(tuning(2:end,:),2),'bo')
-errorbar(2:5,mean(tuning(2:end,:),2), std(tuning(2:end,:),[],2)/sqrt(length(files)),'k');
+errorbar(2:5,mean(tuning(2:end,:),2), std(tuning(2:end,:),[],2)/sqrt(nfiles),'k');
 plot(1.5,mean(tuning(1,:),2),'bo')
-errorbar(1.5,mean(tuning(1,:),2), std(tuning(1,:),[],2)/sqrt(length(files)),'k');
+errorbar(1.5,mean(tuning(1,:),2), std(tuning(1,:),[],2)/sqrt(nfiles),'k');
 
 ylabel('mean dF/F');xlabel('cyc / deg'); title('SF tuning')
 set(gca,'Xtick',[ 1.5 2:5]);

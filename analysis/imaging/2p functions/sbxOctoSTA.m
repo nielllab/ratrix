@@ -133,9 +133,13 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 %%%
 %figure
 display('which movie file?')
-display('1) octo_sparse_flash_10min')
-display('2) sparse_20min_1-8')
-movienum = input('1 or 2 : ');
+if isfield(Opt,'noiseFile')
+    movienum = Opt.noiseFile;
+else
+    display('1) octo_sparse_flash_10min')
+    display('2) sparse_20min_1-8')
+    movienum = input('1 or 2 : ');
+end
 
 
 if movienum==1
@@ -220,7 +224,7 @@ for rep =1:2 %%% 4 conditions: On, Off, fullfield On, fullfield off; currently s
             
             range = -2:2;
             resp = nanmean(dFalign(:,tau+range),2);
-            sta =0;
+            sta =zeros(size(m,1),size(m,2));
             npts = min(length(resp),size(moviedata,3));
             for i = 1:npts;
                 if ~isnan(resp(i))
@@ -407,6 +411,7 @@ else
     [brightness, order] = sort(img(pts),1,'descend');
     figure
     plot(brightness); xlabel('N'); ylabel('brightness');
+
     fprintf('%d points in ROI\n',length(pts))
     
     %%% choose points over a cutoff, to eliminate noise / nonresponsive
@@ -417,6 +422,12 @@ else
     end
     pts = pts(img(pts)>mindF);
     fprintf('%d points in ROI over cutoff\n',length(pts))
+    
+    hold on
+    plot([1 length(brightness)],[mindF mindF],'b');
+    title('%d points in ROI over cutoff\n',length(pts))
+   if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
     
     %%% plot selected points
     [y, x] = ind2sub(size(maxStd),pts);

@@ -21,7 +21,7 @@ Opt.SaveOutput = 1;
 
 %Options for finding cells
 Opt.selectPts = 0;          %Select points automatically (0) rather than manually
-Opt.mindF = 10000;            %Minimum delta-f value
+Opt.mindF = 5000;            %Minimum delta-f value
 Opt.nclust = 5;             %Number of cell population clusters
 Opt.selectCrop = 0;         %whether to manually crop image region
 
@@ -31,7 +31,7 @@ Opt.binningThresh = 0.95;
 Results = struct;
 
 %for iFile = 1:length(sbx_fname);
-    for iFile = length(sbx_fname):length(sbx_fname)
+    for iFile = 1:length(sbx_fname)
     %%% criteria as to whether to analyze this one
     use = ~exist(mat_fname{iFile},'file');
     
@@ -48,7 +48,7 @@ Results = struct;
         %Name of pdf save file
         if Opt.SaveFigs == 1
             Opt.pPDF = folder;
-            Opt.fPDF = [mat_fname{iFile}(1:end-4)  '.pdf'];
+            Opt.fPDF = [mat_fname{iFile}(1:end-4)  'df5000.pdf'];
         end
         
         if Opt.SaveOutput
@@ -59,7 +59,7 @@ Results = struct;
         %% Run sutterOctoNeural
         Results(iFile).Input = Opt;       
 %         try
-            sbxOctoSTA(Opt);
+            sbxOctoNeural(Opt);
             Results(iFile).Output = 'success'
 %         catch
 %             fprintf('Error in sutterOctoNeural script - Continuing onto next file');

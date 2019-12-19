@@ -1,4 +1,4 @@
-function [sbx_fname acq_fname mat_fname] = compileFilenames(xlsfile,stimname);
+function [sbx_fname acq_fname mat_fname quality] = compileFilenames(xlsfile,stimname);
 %%% reads in excel batch file and generates standardized filenames 
 %%% for sbx file , stimrec, and analsyis .mat file
 %%% cmn 2019
@@ -7,6 +7,7 @@ T = readtable(xlsfile);
 
 %%% find entries with proper stimulus
 use = find(strcmp(T.Stim,stimname));
+
 
 %%% generate list of filenames
 for j = 1:length(use);
@@ -25,4 +26,7 @@ for j = 1:length(use);
     
     %%% generate analysis filename
     mat_fname{j} = [T.Date{i} '_' T.Loc{i} '_Acq' num2str(T.RecordingNumber(i)) '_' T.Stim{i} '.mat'];
+ 
+    %%% other fields?
+    quality{j} = T.GoodQuality{i};
 end

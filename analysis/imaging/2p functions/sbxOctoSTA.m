@@ -411,6 +411,7 @@ else
     [brightness, order] = sort(img(pts),1,'descend');
     figure
     plot(brightness); xlabel('N'); ylabel('brightness');
+
     fprintf('%d points in ROI\n',length(pts))
     
     %%% choose points over a cutoff, to eliminate noise / nonresponsive
@@ -421,6 +422,12 @@ else
     end
     pts = pts(img(pts)>mindF);
     fprintf('%d points in ROI over cutoff\n',length(pts))
+    
+    hold on
+    plot([1 length(brightness)],[mindF mindF],'b');
+    title('%d points in ROI over cutoff\n',length(pts))
+   if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
     
     %%% plot selected points
     [y, x] = ind2sub(size(maxStd),pts);

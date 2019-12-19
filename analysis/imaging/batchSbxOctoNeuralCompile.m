@@ -5,7 +5,7 @@
 clear all
 close all
 
-stimname = 'sparse noise';
+stimname = 'sin gratings';
 %%% select files to analze
 [sbx_fname acq_fname mat_fname] = compileFilenames('For Batch File.xlsx',stimname);
 

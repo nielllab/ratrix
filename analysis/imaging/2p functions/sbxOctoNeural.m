@@ -428,7 +428,7 @@ else
     
     hold on
     plot([1 length(brightness)],[mindF mindF],'b');
-    title('%d points in ROI over cutoff\n',length(pts))
+    title(sprintf('%d points in ROI over cutoff\n',length(pts)))
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     

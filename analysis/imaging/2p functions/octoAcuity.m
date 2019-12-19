@@ -34,6 +34,8 @@ for f = 1:nfiles
         tuning(sf+1,f) = nanmean(amp(sf:4:end,f));
         sfResp(sf+1,:,f) = nanmean(resp(sf:4:end,:),1);
     end
+    
+    %%% get fullfield flicker (last stim cond)
     tuning(1,f) = amp(end);
     sfResp(1,:,f) = resp(end,:);
 %    
@@ -42,7 +44,7 @@ for f = 1:nfiles
     figure
     plot(tuning(:,f))
     title(mat_fname{f}); ylim([0 0.05])
-    
+    xlabel('SF'); ylabel('resp')
 end
 
 

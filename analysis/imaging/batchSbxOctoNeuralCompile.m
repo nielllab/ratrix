@@ -28,7 +28,7 @@ Opt.nclust = 5;             %Number of cell population clusters
 Opt.selectCrop = 0;         %whether to manually crop image region
 
 Opt.zbinning = 1;
-Opt.binningThresh = 0.95;
+Opt.binningThresh = 0.9;
 
 Results = struct;
 

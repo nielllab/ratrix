@@ -224,7 +224,7 @@ for rep =1:2 %%% 4 conditions: On, Off, fullfield On, fullfield off; currently s
             
             range = -2:2;
             resp = nanmean(dFalign(:,tau+range),2);
-            sta =0;
+            sta =zeros(size(m,1),size(m,2));
             npts = min(length(resp),size(moviedata,3));
             for i = 1:npts;
                 if ~isnan(resp(i))

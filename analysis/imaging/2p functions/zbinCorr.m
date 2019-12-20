@@ -42,6 +42,7 @@ imagesc(mean(F(:,:,dist>ccthresh),3)); title(sprintf('mean of frames above thres
 display('redoing dfofinterp')
 F0 = repmat(prctile(F(:,:,useframes),10,3),[1 1 size(F,3)]);
 dfofInterp = (F-F0)./F0;
+dfofInterp(isnan(dfofInterp))=0;
 
 dfofInterp(:,:,~useframes)=NaN;
 mv(~useframes,:)=NaN;

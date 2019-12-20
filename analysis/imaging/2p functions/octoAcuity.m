@@ -5,7 +5,7 @@
 close all; clear all
 
 %%% select files to analyze based on compile file
-stimname = 'sin gratings';
+stimname = 'sin gratings smaller 2ISI';
 [sbx_fname acq_fname mat_fname] = compileFilenames('For Batch File.xlsx',stimname);
 
 % %%% selectall files in directory
@@ -16,12 +16,27 @@ stimname = 'sin gratings';
 
 
 nfiles = length(mat_fname);
+ncond = 17;
 
 for f = 1:nfiles
     
     %%% read in weighted timecourse (from pixelmap, weighted by baseline fluorescence
-    load(mat_fname{f},'stimOrder','weightTcourse')
-
+    load(mat_fname{f},'stimOrder','weightTcourse','dFrepeats')
+    
+    %%% dFrepeats(cell,conds x timepts, repeats)
+    %%% average over repeats
+    clear cellResp
+    dFmean = nanmean(dFrepeats,3);
+    figure
+    imagesc(dFmean,[-0.05 0.1])
+    for c = 1:ncond
+        cellResp(:,c,:) = dFmean(:,(c-1)*30+1 : c*30,:);
+    end
+    
+    figure
+    imagesc(dFmean)
+    
+        
     for c = 1:17;  %%% loop over conditions
         %%% timecourse of response
         resp(c,:) = nanmedian(weightTcourse(:,stimOrder==c),2);
@@ -39,8 +54,9 @@ for f = 1:nfiles
     tuning(1,f) = amp(end);
     sfResp(1,:,f) = resp(end,:);
 %    
-%     figure
-%     plot(sfResp(:,:,f)'); title(mat_fname{f});
+    figure
+    plot(sfResp(:,:,f)'); title(mat_fname{f});
+    
     figure
     plot(tuning(:,f))
     title(mat_fname{f}); ylim([0 0.05])

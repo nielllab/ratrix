@@ -5,7 +5,7 @@
 clear all
 close all
 
-stimname = 'sin gratings';
+stimname = 'sin gratings smaller 2ISI';
 %%% select files to analze
 [sbx_fname acq_fname mat_fname] = compileFilenames('For Batch File.xlsx',stimname);
 
@@ -36,7 +36,7 @@ for iFile = 1:length(sbx_fname)
    iFile
     %%% criteria as to whether to analyze this one
     use = ~exist(mat_fname{iFile},'file');
-    
+    use = 1
     if use
         
         folder = '.';

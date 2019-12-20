@@ -114,6 +114,8 @@ if zbin
     F0 = repmat(prctile(F(:,:,useframes),10,3),[1 1 size(F,3)]);
     dfofInterp = (F-F0)./F0;
     
+    dfofInterp(isnan(dfofInterp))=0;
+    
     dfofInterp(:,:,~useframes)=NaN;
     mv(~useframes,:)=NaN;
     greenframe = imresize(mean(F(:,:,useframes),3),2);
@@ -177,7 +179,7 @@ greenCrop = double(stdImg);
 
 thresh = prctile(greenCrop(:),95)/50; %%% cut out points that are 100x dimmer than peak
 dfofInterp(repmat(greenCrop,[1 1 size(dfofInterp,3)])<thresh)=0;
-dfofInterp(isnan(dfofInterp))=0;
+
 
 figure
 imagesc(greenCrop>thresh);

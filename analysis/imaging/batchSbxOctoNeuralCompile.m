@@ -5,7 +5,7 @@
 clear all
 close all
 
-stimname = 'sin gratings';
+stimname = 'sparse noise';
 %%% select files to analze
 [sbx_fname acq_fname mat_fname] = compileFilenames('For Batch File.xlsx',stimname);
 
@@ -23,7 +23,7 @@ Opt.SaveOutput = 1;
 
 %Options for finding cells
 Opt.selectPts = 0;          %Select points automatically (0) rather than manually
-Opt.mindF = 10000;            %Minimum delta-f value
+Opt.mindF = 5000;            %Minimum delta-f value
 Opt.nclust = 5;             %Number of cell population clusters
 Opt.selectCrop = 0;         %whether to manually crop image region
 

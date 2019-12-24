@@ -1,13 +1,17 @@
+function getRegionsLobe(fname,nr)
 %%% load in NLW octo data, and select regions for subsequent analysis
 %%% cmn 2019
 
-close all
-clear all
+if ~exist('fname','var')
+    [f p] = uigetfile('analyzed data','*.mat');
+    fname = fullfile(p,f);
+end
 
-[f p] = uigetfile('analyzed data','*.mat');
-load(fullfile(p,f),'meanGreenImg','xpts','ypts');
+load(fname,'meanGreenImg','xpts','ypts');
 
-nr = input('number of regions : ');
+if ~exist('nr','var')
+    nr = input('number of regions : ');
+end
 
 figure
 imshow(meanGreenImg); hold on;
@@ -18,15 +22,15 @@ for r = 1:nr;
     n=0;
     while ~done
         [x y b] = ginput(1);
-           if b ==3
-               done=1
-           else
-               n=n+1;
-               xb{r}(n) = x;
-               yb{r}(n) = y;
-               plot(xb{r},yb{r},'o','Color',col(r));
-               plot(xb{r},yb{r},'Color',col(r));
-           end
+        if b ==3
+            done=1
+        else
+            n=n+1;
+            xb{r}(n) = x;
+            yb{r}(n) = y;
+            plot(xb{r},yb{r},'o','Color',col(r));
+            plot(xb{r},yb{r},'Color',col(r));
+        end
     end
     if n>0;
         xb{r}(n+1) = xb{r}(1); yb{r}(n+1) = yb{r}(1);
@@ -44,4 +48,4 @@ end
 drawnow;
 
 display('saving')
-save(fullfile(p,f),'xb','yb','region','-append');
+save(fname,'xb','yb','region','-append');

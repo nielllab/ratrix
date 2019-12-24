@@ -19,7 +19,6 @@ nfiles = length(mat_fname);
 ncond = 17;
 cycDur=20;
 
-nfiles = 1
 for f = 1:nfiles
     
     %%% read in weighted timecourse (from pixelmap, weighted by baseline fluorescence
@@ -30,18 +29,17 @@ for f = 1:nfiles
     %%% average over repeats
     clear cellResp cellAmp
     dFmean = nanmean(dFrepeats,3);
-    figure
-    imagesc(dFmean,[-0.05 0.1])
+
     for c = 1:ncond
         cellResp(:,c,:) = dFmean(:,(c-1)*cycDur+1 : c*cycDur,:);
         cellAmp(:,c) = nanmean(cellResp(:,c,9:20),3);
     end
     
     figure
-    imagesc(dFmean,[-0.1 0.1])
+    imagesc(dFmean,[-0.1 0.1]); title(['response of all cells ' mat_fname{f}])
     
     figure
-    plot(1:ncond,cellAmp);
+    plot(1:ncond,cellAmp); title(['amplitude of all cells ' mat_fname{f}])
     xlabel('condition #');
     
     %%% region-specific analysis
@@ -94,7 +92,7 @@ for f = 1:nfiles
     sfResp(1,:,f) = resp(end,:);
     %
     figure
-    plot(sfResp(:,:,f)'); title(mat_fname{f});
+    plot(sfResp(:,:,f)'); title(mat_fname{f}); xlabel('time')
     
     figure
     plot(tuning(:,f))

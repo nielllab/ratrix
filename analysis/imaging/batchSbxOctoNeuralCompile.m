@@ -1,13 +1,11 @@
-%% Analyze multiple files using sbxOctoNeural function.
-%% uses excel compile file to choose files, stim, etc
-%%% cmn 2019
-
 clear all
 close all
+%% Analyze multiple files using sbxOctoNeural function.
+%% uses excel compile file to choose files, stim, etc
 
-stimname = 'sparse noise';
+
 %%% select files to analze
-[sbx_fname acq_fname mat_fname] = compileFilenames('For Batch File.xlsx',stimname);
+[sbx_fname acq_fname mat_fname] = compileFilenames('For Batch File.xlsx','sparse noise');
 
 
 %% General Parameters
@@ -28,15 +26,15 @@ Opt.nclust = 5;             %Number of cell population clusters
 Opt.selectCrop = 0;         %whether to manually crop image region
 
 Opt.zbinning = 1;
-Opt.binningThresh = 0.9;
+Opt.binningThresh = 0.95;
 
 Results = struct;
 
-for iFile = 1:length(sbx_fname)
-   iFile
+%for iFile = 1:length(sbx_fname);
+    for iFile = 1:length(sbx_fname)
     %%% criteria as to whether to analyze this one
     use = ~exist(mat_fname{iFile},'file');
-    use = 1
+    
     if use
         
         folder = '.';
@@ -50,7 +48,7 @@ for iFile = 1:length(sbx_fname)
         %Name of pdf save file
         if Opt.SaveFigs == 1
             Opt.pPDF = folder;
-            Opt.fPDF = [mat_fname{iFile}(1:end-4)  '.pdf'];
+            Opt.fPDF = [mat_fname{iFile}(1:end-4)  'df5000.pdf'];
         end
         
         if Opt.SaveOutput
@@ -59,25 +57,14 @@ for iFile = 1:length(sbx_fname)
         end
         
         %% Run sutterOctoNeural
-        Results(iFile).Input = Opt;
-        %         try
-        if strcmp(stimname(1:6),'sparse')
-            display('sparse noise')
-            if strcmp(stimname,'sparse noise');
-                Opt.noiseFile=1;   %%octo_sparse_flash_10min
-            else
-                Opt.noiseFile=2; %%%sparse_20min_1-8
-            end
-            sbxOctoSTA(Opt);
-        else
+        Results(iFile).Input = Opt;       
+%         try
             sbxOctoNeural(Opt);
-        end
-        
-        Results(iFile).Output = 'success'
-        %         catch
-        %             fprintf('Error in sutterOctoNeural script - Continuing onto next file');
-        %             Results(iFile).Output = [];
-        %         end
-        
+            Results(iFile).Output = 'success'
+%         catch
+%             fprintf('Error in sutterOctoNeural script - Continuing onto next file');
+%             Results(iFile).Output = [];
+%         end
+   
     end
 end

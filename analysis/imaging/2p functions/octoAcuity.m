@@ -5,8 +5,16 @@
 close all; clear all
 
 %%% select files to analyze based on compile file
-stimname = 'sin gratings';
+stimname = 'sin gratings smaller 2ISI';
 [sbx_fname acq_fname mat_fname quality] = compileFilenames('For Batch File.xlsx',stimname);
+
+Opt.SaveFigs = 1;
+    Opt.psfile = 'C:\temp\TempFigs.ps';
+
+if Opt.SaveFigs
+    psfile = Opt.psfile
+    if exist(psfile,'file')==2;delete(psfile);end
+end
 
 %%% select files to use based on quality
 for i = 1: length(quality);
@@ -56,6 +64,7 @@ for f = 1:nfiles
     ampHist(:,f) = hist(maxResp,bins)/length(maxResp);
     figure
     plot(bins,ampHist(:,f)); xlabel('max resp'); ylabel('fraction');
+     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% select responsive cells (can add more interesting criteria)
     responsive = maxResp>0.08;
@@ -77,7 +86,10 @@ for f = 1:nfiles
             inRegion = inpolygon(xpts,ypts,xb{r},yb{r});
             plot(xpts(inRegion),ypts(inRegion),'.','Color',col(r));
         end
+       
         axis equal
+        
+         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
         
         figure
         region = zeros(size(xpts)); %%% empty variable for which region each cell is
@@ -104,7 +116,8 @@ for f = 1:nfiles
             fractResponsive(r,f) = sum(inRegion & responsive)/sum(inRegion);    
             end
         end
-       
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        
         %%% show all responses sorted by region
         [val regionOrder] = sort(region);
         figure
@@ -114,6 +127,8 @@ for f = 1:nfiles
             plot([1 size(dFmean,2)], [borders(i) borders(i)],'r')
         end
         xlabel('time and conds'); ylabel('cells'); title(mat_fname{f});
+        
+         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     end
     
     %%% to do - determine response amp or selectivity index
@@ -150,23 +165,28 @@ for f = 1:nfiles
           plot(1:cycDur,squeeze(regionSFresp(:,r,:,f))); ylim([-0.025 0.075])
       title(rLabels{r});
       end
-      
+       if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     %
     figure
     plot(sfResp(:,:,f)'); title(mat_fname{f}); xlabel('time')
+     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     figure
     plot(tuning(:,f))
     title(mat_fname{f}); ylim([0 0.05])
     xlabel('SF'); ylabel('resp')
+    
+     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 end
 
 %%% mean across sessions for each condition
 figure
 plot(mean(resp,3)'); title('mean of all recordings for each condition');
+ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 figure
 plot(mean(sfResp,3)'); title('resp vs SF'); 
+ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %%% SF tuning curves
 figure
@@ -179,6 +199,7 @@ ylabel('mean dF/F');xlabel('cyc / deg'); title('SF tuning')
 set(gca,'Xtick',[ 1.5 2:5]);
 set(gca,'XtickLabel',{'0','0.005','0.02','0.08','0.32'});
 xlim([1 5.5])
+ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 figure
 for r = 1:4
@@ -187,8 +208,24 @@ for r = 1:4
     ylim([-0.01 0.1])
     title(rLabels{r})
 end
-
+ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 figure
 plot(bins,ampHist); xlim([-0.1 0.5]); hold on; plot(bins,mean(ampHist,2),'g','Linewidth',2)
 xlabel('amp dF/F'); title('amplitude distribution across sessions');
+ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+ 
+ display('saving pdf')
+if Opt.SaveFigs
+    if ~isfield(Opt,'pPDF')
+        [Opt.fPDF, Opt.pPDF] = uiputfile('*.pdf','save pdf file');
+    end
+    
+    newpdfFile = fullfile(Opt.pPDF,Opt.fPDF);
+    try
+        dos(['ps2pdf ' 'c:\temp\TempFigs.ps "' newpdfFile '"'] )
+        
+    catch
+        display('couldnt generate pdf');
+    end
+end

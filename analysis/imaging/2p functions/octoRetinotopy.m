@@ -1,3 +1,5 @@
+%%% plot retinotopy based on 6x4 spots
+
 szx = ncol; szy=nrow;
 %szx=6; szy=4;
 filt = fspecial('gaussian',[10  10],1);

@@ -9,7 +9,7 @@ stimname = 'sin gratings smaller 2ISI';
 [sbx_fname acq_fname mat_fname quality] = compileFilenames('For Batch File.xlsx',stimname);
 
 Opt.SaveFigs = 1;
-    Opt.psfile = 'C:\temp\TempFigs.ps';
+Opt.psfile = 'C:\temp\TempFigs.ps';
 
 if Opt.SaveFigs
     psfile = Opt.psfile
@@ -52,7 +52,7 @@ for f = 1:nfiles
     %%% average over repeats
     clear cellResp cellAmp
     dFmean = nanmean(dFrepeats,3);
-
+    
     for c = 1:ncond
         cellResp(:,c,:) = dFmean(:,(c-1)*cycDur+1 : c*cycDur,:);
         cellAmp(:,c) = nanmean(cellResp(:,c,9:20),3);
@@ -64,56 +64,55 @@ for f = 1:nfiles
     ampHist(:,f) = hist(maxResp,bins)/length(maxResp);
     figure
     plot(bins,ampHist(:,f)); xlabel('max resp'); ylabel('fraction');
-     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% select responsive cells (can add more interesting criteria)
     responsive = maxResp>0.08;
     
     figure
     imagesc(dFmean,[-0.1 0.1]); title(['response of all cells ' mat_fname{f}])
- 
+    
     
     figure
     plot(nanmean(dFmean,1))
     
     %%% region-specific analysis
     if exist('xb','var');
- 
+        
         col = 'rgbc';
         figure
         imagesc(meanGreenImg); hold on
         for r = 1:length(xb)
             inRegion = inpolygon(xpts,ypts,xb{r},yb{r});
             plot(xpts(inRegion),ypts(inRegion),'.','Color',col(r));
-        end
-       
+        end 
         axis equal
         
-         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
         
         figure
         region = zeros(size(xpts)); %%% empty variable for which region each cell is
-
+        
         for r = 1:4
             if r>length(xb) || sum(inpolygon(xpts,ypts,xb{r},yb{r}))==0;
                 regionResp(r,:,:,f)=NaN;
                 regionAmp(r,:,f) = NaN;
             else
-            %%% find cells in the region
-            inRegion = inpolygon(xpts,ypts,xb{r},yb{r});
-            region(inRegion) = r;
-            
-            %%% select out data for cells in this region
-            %%% regionResp(region, cond, time, file) = timecourse
-            %%% regionAmp(region,cond,file) = mean response in peak window
-            regionResp(r,:,:,f) = nanmean(cellResp(inRegion &responsive,:,:),1);
-            regionAmp(r,:,f) = nanmean(cellAmp(inRegion & responsive,:),1);
-            subplot(2,2,r);
-            %             plot(1:size(regionResp,3),squeeze(regionResp(r,:,:)));
-            %             xlabel('secs'); title(sprintf('region %d',r))
-            imagesc(squeeze(regionResp(r,:,:,f)),[-0.01 0.125])
-            title(sprintf('region %d %d pts %d resp',r,sum(inRegion),sum(inRegion & responsive))); xlabel('time'); ylabel('cond')
-            fractResponsive(r,f) = sum(inRegion & responsive)/sum(inRegion);    
+                %%% find cells in the region
+                inRegion = inpolygon(xpts,ypts,xb{r},yb{r});
+                region(inRegion) = r;
+                
+                %%% select out data for cells in this region
+                %%% regionResp(region, cond, time, file) = timecourse
+                %%% regionAmp(region,cond,file) = mean response in peak window
+                regionResp(r,:,:,f) = nanmean(cellResp(inRegion &responsive,:,:),1);
+                regionAmp(r,:,f) = nanmean(cellAmp(inRegion & responsive,:),1);
+                subplot(2,2,r);
+                %             plot(1:size(regionResp,3),squeeze(regionResp(r,:,:)));
+                %             xlabel('secs'); title(sprintf('region %d',r))
+                imagesc(squeeze(regionResp(r,:,:,f)),[-0.01 0.125])
+                title(sprintf('region %d %d pts %d resp',r,sum(inRegion),sum(inRegion & responsive))); xlabel('time'); ylabel('cond')
+                fractResponsive(r,f) = sum(inRegion & responsive)/sum(inRegion);
             end
         end
         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
@@ -128,7 +127,18 @@ for f = 1:nfiles
         end
         xlabel('time and conds'); ylabel('cells'); title(mat_fname{f});
         
-         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+       [val regionOrder] = sort(region(responsive));
+       responsiveList = find(responsive);
+        figure
+        imagesc(dFmean(responsiveList(regionOrder),:),[-0.01 0.125]); hold on
+        borders = find(diff(val)>0);
+        for i = 1:length(borders)
+            plot([1 size(dFmean,2)], [borders(i) borders(i)],'r')
+        end
+        xlabel('time and conds'); ylabel('cells'); title([mat_fname{f} ' responsive only']);
+        
+        
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     end
     
     %%% to do - determine response amp or selectivity index
@@ -155,38 +165,38 @@ for f = 1:nfiles
     %%% get fullfield flicker (last stim cond)
     tuning(1,f) = amp(end);
     sfResp(1,:,f) = resp(end,:);
-     regionTuning(1,:,f) = regionAmp(:,end,f);
-      regionSFresp(1,:,:,f) = regionResp(:,end,:,f);
+    regionTuning(1,:,f) = regionAmp(:,end,f);
+    regionSFresp(1,:,:,f) = regionResp(:,end,:,f);
     
-      %%% plot SF responses for each region
-      figure
-      for r = 1:4
-          subplot(2,2,r)
-          plot(1:cycDur,squeeze(regionSFresp(:,r,:,f))); ylim([-0.025 0.075])
-      title(rLabels{r});
-      end
-       if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    %%% plot SF responses for each region
+    figure
+    for r = 1:4
+        subplot(2,2,r)
+        plot(1:cycDur,squeeze(regionSFresp(:,r,:,f))); ylim([-0.025 0.075])
+        title(rLabels{r});
+    end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     %
     figure
     plot(sfResp(:,:,f)'); title(mat_fname{f}); xlabel('time')
-     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     figure
     plot(tuning(:,f))
     title(mat_fname{f}); ylim([0 0.05])
     xlabel('SF'); ylabel('resp')
     
-     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 end
 
 %%% mean across sessions for each condition
 figure
 plot(mean(resp,3)'); title('mean of all recordings for each condition');
- if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 figure
-plot(mean(sfResp,3)'); title('resp vs SF'); 
- if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+plot(mean(sfResp,3)'); title('resp vs SF');
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %%% SF tuning curves
 figure
@@ -199,7 +209,37 @@ ylabel('mean dF/F');xlabel('cyc / deg'); title('SF tuning')
 set(gca,'Xtick',[ 1.5 2:5]);
 set(gca,'XtickLabel',{'0','0.005','0.02','0.08','0.32'});
 xlim([1 5.5])
- if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+%%% SF tuning curves
+figure
+for r = 1:4
+    subplot(2,2,r)
+    hold on
+    plot(2:5,nanmean(regionTuning(2:end,r,:),3),'bo')
+    errorbar(2:5,nanmean(regionTuning(2:end,r,:),3), nanstd(regionTuning(2:end,r,:),[],3)/sqrt(nfiles),'k');
+    plot(1.5,nanmean(regionTuning(1,r,:),3),'bo')
+    errorbar(1.5,nanmean(regionTuning(1,r,:),3), nanstd(regionTuning(1,r,:),[],3)/sqrt(nfiles),'k');
+    ylabel('mean dF/F');xlabel('cyc / deg'); title(rLabels{r})
+    set(gca,'Xtick',[ 1.5 2:5]);
+    set(gca,'XtickLabel',{'0','0.005','0.02','0.08','0.32'});
+    xlim([1 5.5]); ylim([0 0.05])
+end
+
+figure
+for r = 1:4
+    subplot(2,2,r)
+    hold on
+    plot(1:5,squeeze((regionTuning(1:end,r,:))))
+    ylabel('mean dF/F');xlabel('cyc / deg'); title(rLabels{r})
+    set(gca,'Xtick',[ 1.5 2:5]);
+    set(gca,'XtickLabel',{'0','0.005','0.02','0.08','0.32'});
+    xlim([1 5.5]); ylim([-0.025 0.1])
+end
+
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+
 
 figure
 for r = 1:4
@@ -208,14 +248,14 @@ for r = 1:4
     ylim([-0.01 0.1])
     title(rLabels{r})
 end
- if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 figure
 plot(bins,ampHist); xlim([-0.1 0.5]); hold on; plot(bins,mean(ampHist,2),'g','Linewidth',2)
 xlabel('amp dF/F'); title('amplitude distribution across sessions');
- if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
- 
- display('saving pdf')
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+display('saving pdf')
 if Opt.SaveFigs
     if ~isfield(Opt,'pPDF')
         [Opt.fPDF, Opt.pPDF] = uiputfile('*.pdf','save pdf file');

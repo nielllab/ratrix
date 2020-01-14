@@ -44,7 +44,7 @@ for f = 1:nfiles
     %%% average over repeats
     clear cellResp cellAmp
     dFmean = nanmean(dFrepeats,3);
-    
+
     for c = 1:ncond
         cellResp(:,c,:) = dFmean(:,(c-1)*cycDur+1 : c*cycDur,:);
         cellAmp(:,c) = nanmean(cellResp(:,c,9:20),3);
@@ -62,14 +62,14 @@ for f = 1:nfiles
     
     figure
     imagesc(dFmean,[-0.1 0.1]); title(['response of all cells ' mat_fname{f}])
-    
+ 
     
     figure
     plot(nanmean(dFmean,1))
     
     %%% region-specific analysis
     if exist('xb','var');
-        
+ 
         col = 'rgbc';
         figure
         imagesc(meanGreenImg); hold on
@@ -81,30 +81,30 @@ for f = 1:nfiles
         
         figure
         region = zeros(size(xpts)); %%% empty variable for which region each cell is
-        
+
         for r = 1:4
             if r>length(xb) || sum(inpolygon(xpts,ypts,xb{r},yb{r}))==0;
                 regionResp(r,:,:,f)=NaN;
                 regionAmp(r,:,f) = NaN;
             else
-                %%% find cells in the region
-                inRegion = inpolygon(xpts,ypts,xb{r},yb{r});
-                region(inRegion) = r;
-                
-                %%% select out data for cells in this region
-                %%% regionResp(region, cond, time, file) = timecourse
-                %%% regionAmp(region,cond,file) = mean response in peak window
-                regionResp(r,:,:,f) = nanmean(cellResp(inRegion &responsive,:,:),1);
-                regionAmp(r,:,f) = nanmean(cellAmp(inRegion & responsive,:),1);
-                subplot(2,2,r);
-                %             plot(1:size(regionResp,3),squeeze(regionResp(r,:,:)));
-                %             xlabel('secs'); title(sprintf('region %d',r))
-                imagesc(squeeze(regionResp(r,:,:,f)),[-0.01 0.125])
-                title(sprintf('region %d %d pts %d resp',r,sum(inRegion),sum(inRegion & responsive))); xlabel('time'); ylabel('cond')
-                fractResponsive(r,f) = sum(inRegion & responsive)/sum(inRegion);
+            %%% find cells in the region
+            inRegion = inpolygon(xpts,ypts,xb{r},yb{r});
+            region(inRegion) = r;
+            
+            %%% select out data for cells in this region
+            %%% regionResp(region, cond, time, file) = timecourse
+            %%% regionAmp(region,cond,file) = mean response in peak window
+            regionResp(r,:,:,f) = nanmean(cellResp(inRegion &responsive,:,:),1);
+            regionAmp(r,:,f) = nanmean(cellAmp(inRegion & responsive,:),1);
+            subplot(2,2,r);
+            %             plot(1:size(regionResp,3),squeeze(regionResp(r,:,:)));
+            %             xlabel('secs'); title(sprintf('region %d',r))
+            imagesc(squeeze(regionResp(r,:,:,f)),[-0.01 0.125])
+            title(sprintf('region %d %d pts %d resp',r,sum(inRegion),sum(inRegion & responsive))); xlabel('time'); ylabel('cond')
+            fractResponsive(r,f) = sum(inRegion & responsive)/sum(inRegion);    
             end
         end
-        
+       
         %%% show all responses sorted by region
         [val regionOrder] = sort(region);
         figure
@@ -140,17 +140,17 @@ for f = 1:nfiles
     %%% get fullfield flicker (last stim cond)
     tuning(1,f) = amp(end);
     sfResp(1,:,f) = resp(end,:);
-    regionTuning(1,:,f) = regionAmp(:,end,f);
-    regionSFresp(1,:,:,f) = regionResp(:,end,:,f);
+     regionTuning(1,:,f) = regionAmp(:,end,f);
+      regionSFresp(1,:,:,f) = regionResp(:,end,:,f);
     
-    %%% plot SF responses for each region
-    figure
-    for r = 1:4
-        subplot(2,2,r)
-        plot(1:cycDur,squeeze(regionSFresp(:,r,:,f))); ylim([-0.025 0.075])
-        title(rLabels{r});
-    end
-    
+      %%% plot SF responses for each region
+      figure
+      for r = 1:4
+          subplot(2,2,r)
+          plot(1:cycDur,squeeze(regionSFresp(:,r,:,f))); ylim([-0.025 0.075])
+      title(rLabels{r});
+      end
+      
     %
     figure
     plot(sfResp(:,:,f)'); title(mat_fname{f}); xlabel('time')
@@ -166,7 +166,7 @@ figure
 plot(mean(resp,3)'); title('mean of all recordings for each condition');
 
 figure
-plot(mean(sfResp,3)'); title('resp vs SF');
+plot(mean(sfResp,3)'); title('resp vs SF'); 
 
 %%% SF tuning curves
 figure

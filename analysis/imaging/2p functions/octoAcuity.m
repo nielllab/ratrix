@@ -67,7 +67,7 @@ for f = 1:nfiles
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% select responsive cells (can add more interesting criteria)
-    responsive = maxResp>0.08;
+    responsive = maxResp>0.09;
     
     figure
     imagesc(dFmean,[-0.1 0.1]); title(['response of all cells ' mat_fname{f}])
@@ -105,7 +105,7 @@ for f = 1:nfiles
                 %%% select out data for cells in this region
                 %%% regionResp(region, cond, time, file) = timecourse
                 %%% regionAmp(region,cond,file) = mean response in peak window
-                regionResp(r,:,:,f) = nanmean(cellResp(inRegion &responsive,:,:),1);
+                regionResp(r,:,:,f) = nanmean(cellResp(inRegion & responsive,:,:),1);
                 regionAmp(r,:,f) = nanmean(cellAmp(inRegion & responsive,:),1);
                 subplot(2,2,r);
                 %             plot(1:size(regionResp,3),squeeze(regionResp(r,:,:)));
@@ -126,9 +126,10 @@ for f = 1:nfiles
             plot([1 size(dFmean,2)], [borders(i) borders(i)],'r')
         end
         xlabel('time and conds'); ylabel('cells'); title(mat_fname{f});
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
         
-       [val regionOrder] = sort(region(responsive));
-       responsiveList = find(responsive);
+        [val regionOrder] = sort(region(responsive));
+        responsiveList = find(responsive);
         figure
         imagesc(dFmean(responsiveList(regionOrder),:),[-0.01 0.125]); hold on
         borders = find(diff(val)>0);
@@ -136,8 +137,6 @@ for f = 1:nfiles
             plot([1 size(dFmean,2)], [borders(i) borders(i)],'r')
         end
         xlabel('time and conds'); ylabel('cells'); title([mat_fname{f} ' responsive only']);
-        
-        
         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     end
     
@@ -179,6 +178,12 @@ for f = 1:nfiles
     %
     figure
     plot(sfResp(:,:,f)'); title(mat_fname{f}); xlabel('time')
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    %%% Judit added this, was hoping for the curves for only the cells over threshold, but I don't think that's what this actually does?
+    
+     figure
+    plot(regionSFresp(:,:,f)'); title(mat_fname{f}); xlabel('time')
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     figure

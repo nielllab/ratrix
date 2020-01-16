@@ -24,7 +24,7 @@ end
 
 %%% select files to use based on quality
 for i = 1: length(quality);
-    usefile(i) = ~strcmp(quality{i},'N');
+    usefile(i) = strcmp(quality{i}(1),'Y');
 end
 
 useN = find(usefile);
@@ -161,8 +161,8 @@ for f = 1:nfiles
     plot(squeeze(mean(tuning(useOff,2,:,:),1))');
     title(mat_fname{f})
     
-      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-      
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
     %%% store tuning for all files
     szTuning(1,:,:,f) = nanmean(tuning(useOn,1,:,:),1);
     szTuning(2,:,:,f) = nanmean(tuning(useOff,2,:,:),1);
@@ -170,7 +170,7 @@ for f = 1:nfiles
     %%% retinotopy
     figure
     plot(rfx(useOff,2),xpts(useOff),'.'); xlabel('RF location'); ylabel('cell location')
-      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% mean rf centers
     mx = mean(rfx(useOn,1),1);
@@ -204,13 +204,13 @@ for f = 1:nfiles
     figure
     plot(topoCC(:,:,f)); hold on; plot(topoCCshuff(:,:,f),':');
     title(mat_fname{f}); set(gca,'Xtick',[1 2]); set(gca,'Xticklabel',{'x','y'})
-      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
-%%% center RF positions
-x0 = nanmedian(rfx(useOn,1));
-y0 = nanmedian(rfy(useOn,1));
-
-%%% do topographic maps for X and Y, for both On and Off responses
+    %%% center RF positions
+    x0 = nanmedian(rfx(useOn,1));
+    y0 = nanmedian(rfy(useOn,1));
+    
+    %%% do topographic maps for X and Y, for both On and Off responses
     axLabel = {'X','Y'};
     onoffLabel = {'On','Off'}
     figure
@@ -236,7 +236,7 @@ y0 = nanmedian(rfy(useOn,1));
         end
     end
     
-      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% map of On/Off ratio
     figure
@@ -258,7 +258,7 @@ y0 = nanmedian(rfy(useOn,1));
     end
     title('size pref On')
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
+    
     %%% size map for Off
     figure
     imagesc(meanGreenImg(:,:,1),[-0.5 1]); colormap gray; axis equal
@@ -268,64 +268,73 @@ y0 = nanmedian(rfy(useOn,1));
     end
     title('size pref OFF')
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
+    
     
     
     %%% region-wise analysis
     if exist('xb','var')
         
         %%% show regions
-           col = 'rgbc';
+        col = 'rgbc';
         figure
         imagesc(meanGreenImg); hold on
         for r = 1:length(xb)
             inRegion = inpolygon(xpts,ypts,xb{r},yb{r});
             plot(xpts(inRegion),ypts(inRegion),'.','Color',col(r));
-        end 
+        end
         axis equal
-          if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
         
         
         %%% compile data
         for r = 1:4
-            inRegion = inpolygon(xpts,ypts,xb{r},yb{r});
-            fracUsed(r,f) = length(intersect(use, find(inRegion)))/sum(inRegion);
-            onSizeDist(r,1:5,f) = hist(szPref(intersect(useOn, find(inRegion)),1),1:5)/length(intersect(useOn, find(inRegion)));
-            offSizeDist(r,1:5,f) = hist(szPref(intersect(useOff, find(inRegion)),2),1:5)/length(intersect(useOff, find(inRegion)));
-            onOffHistAll(r,:,f) = hist(onOff(intersect(use,find(inRegion))),[-1:0.1:1])/ length(intersect(use,find(inRegion)));
-            regionTuning(r,1,:,:,f) = nanmean(tuning(intersect(useOn, find(inRegion)),1,:,:),1);
-            regionTuning(r,2,:,:,f) = nanmean(tuning(intersect(useOff, find(inRegion)),2,:,:),1);
-            
+            if r<=length(xb) & sum(inpolygon(xpts,ypts,xb{r},yb{r}))>0
+                inRegion = inpolygon(xpts,ypts,xb{r},yb{r});
+                fracUsed(r,f) = length(intersect(use, find(inRegion)))/sum(inRegion);
+                onSizeDist(r,1:5,f) = hist(szPref(intersect(useOn, find(inRegion)),1),1:0.5:3)/length(intersect(useOn, find(inRegion)));
+                offSizeDist(r,1:5,f) = hist(szPref(intersect(useOff, find(inRegion)),2),1:5)/length(intersect(useOff, find(inRegion)));
+                onOffHistAll(r,:,f) = hist(onOff(intersect(use,find(inRegion))),[-1:0.1:1])/ length(intersect(use,find(inRegion)));
+                regionTuning(r,1,:,:,f) = nanmean(tuning(intersect(useOn, find(inRegion)),1,:,:),1);
+                regionTuning(r,2,:,:,f) = nanmean(tuning(intersect(useOff, find(inRegion)),2,:,:),1);
+            else
+                fracUsed(r,f) = NaN;
+                onSizeDist(r,1:5,f) = NaN;
+                offSizeDist(r,1:5,f) = NaN;
+                onOffHistAll(r,:,f) =NaN;
+                regionTuning(r,1,:,:,f) = NaN;
+                regionTuning(r,2,:,:,f) = NaN;
+                
+            end
         end
         
         %%% fraction used figure
         figure
         bar(fracUsed(:,f)); ylabel('fraction'); title('fraction used'); xlabel('region'); ylim([0 1])
-          if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
         
         %%% on/off preference figure
         figure
         for r = 1:4
-        subplot(2,2,r)
-        bar(-1:0.1:1,onOffHistAll(r,:,f)); ylim([0 1]); xlabel('on off index'); title(rLabels{r});
+            subplot(2,2,r)
+            bar(-1:0.1:1,onOffHistAll(r,:,f)); ylim([0 1]); xlabel('on off index'); title(rLabels{r});
         end
-          if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
         
         %%% ON size preference
         figure
         for r = 1:4
-        subplot(2,2,r)
-        bar(1:5,onSizeDist(r,:,f)); ylim([0 1]); xlabel('size'); title([rLabels{r} ' ON']);
+            subplot(2,2,r)
+            bar(1:5,onSizeDist(r,:,f)); ylim([0 1]); xlabel('size'); title([rLabels{r} ' ON']);
         end
-          if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-          
-             %%% OFF size preference
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        
+        %%% OFF size preference
         figure
         for r = 1:4
-        subplot(2,2,r)
-        bar(1:5,offSizeDist(r,:,f)); ylim([0 1]); xlabel('size'); title([rLabels{r} ' OFF']);
+            subplot(2,2,r)
+            bar(1:5,offSizeDist(r,:,f)); ylim([0 1]); xlabel('size'); title([rLabels{r} ' OFF']);
         end
-          if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
         
         %%% ON size tuning
         figure
@@ -333,18 +342,18 @@ y0 = nanmedian(rfy(useOn,1));
             subplot(2,2,r);
             plot(squeeze(regionTuning(r,1,:,:,f))'); title([rLabels{r} ' ON']); ylim([-0.1 0.2])
         end
-          if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
         
-                %%% Off size tuning
+        %%% Off size tuning
         figure
         for r = 1:4
             subplot(2,2,r);
             plot(squeeze(regionTuning(r,2,:,:,f))'); title([rLabels{r} ' OFF']); ylim([-0.1 0.2])
         end
-          if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
         
         
-        end
+    end
 end
 
 %%% plot On/Off correlation as function of distance
@@ -357,7 +366,7 @@ ylabel('On / Off correlation');
 xlabel('distance (um)');
 legend('data','shuffle');
 xlim([0 400]); ylim([-0.1 0.6])
-  if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %%% size prefernce correlation
 centers = 0.5*(bins(1:end-1) + bins(2:end))
@@ -369,7 +378,7 @@ ylabel('size pref correlation');
 xlabel('distance (um)');
 legend('data','shuffle');
 xlim([0 400]); ylim([-0.1 0.6])
-  if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %%% plot response timecourses
 t = 0.1*((1:21)-3);  %%% time in seconds
@@ -386,7 +395,7 @@ for rep = 1:2  %%% on vs off
     end
     xlim([-0.2 2]); ylim([-0.03 0.125])
     title(labels{rep})
-      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 end
 
 
@@ -397,9 +406,10 @@ for i = 1:4
     plot(1,1,col(i));
 end
 legend({'3deg','6deg','12deg','full-field'});
-  if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %%% calculate mean values for topography
+clear data
 data(:,1) = mean(topoCC(:,1,:),3);
 err(:,1) = std(topoCC(:,1,:),[],3) / sqrt(f);
 
@@ -413,29 +423,63 @@ set(gca,'Xticklabel',{'azimuth','elevation'});
 ylabel('correlation coeff');
 legend({'data','shuffle'})
 title('topography correlation')
-  if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-  %%% trying for tuning across recordings
-  
-  
+%%% trying for tuning across recordings
+% 
+% fracUsed(r,f) 
+% onSizeDist(r,1:5,f)
+% offSizeDist(r,1:5,f) 
+% onOffHistAll(r,:,f)
+% regionTuning(r,1,:,:,f) 
+% regionTuning(r,2,:,:,f) 
 
-        for r = 1:4
-            figure 
-            subplot(2,2,r);
-            for j = 1:4
-                subplot(2,2,j);
-            plot(squeeze(regionTuning(r,1,j,:,:))'); title([rLabels{r} ' ON']); ylim([-0.1 0.2])
-            end
-        end
-          if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-        
-                %%% Off size tuning
-        figure
-        for r = 1:4
-            subplot(2,2,r);
-            plot(squeeze(regionTuning(r,2,:,:,:))'); title([rLabels{r} ' OFF']); ylim([-0.1 0.2])
-        end
-          if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+%%% fraction responsive
+figure
+bar(nanmean(fracUsed,2)); %%% add error bars
+title('fraction used'); set(gca,'Xtick',1:4); set(gca,'Xticklabels',rLabels); ylim([0 1])
+
+%%% on size distribution
+figure
+for r = 1:4
+    subplot(2,2,r);
+    bar(1:0.5:3,squeeze(nanmean(onSizeDist(r,:,:),3)));
+    xlabel('size'); title([rLabels{r} ' ON']);
+end
+
+%% off size distribution
+figure
+for r = 1:4
+    subplot(2,2,r);
+    bar(1:0.5:3,squeeze(nanmean(offSizeDist(r,:,:),3)));
+    xlabel('size'); title([rLabels{r} ' OFF']);
+end
+
+%%% on/off bias
+figure
+for r = 1:4
+    subplot(2,2,r)
+    bar(-1:0.1:1,nanmean(onOffHistAll(r,:,:),3)); ylim([0 1]); title(rLabels{r})
+end
+
+
+%%% region tuning
+figure
+for r = 1:4
+    subplot(2,2,r);
+    plot(1:21,squeeze(nanmean(regionTuning(r,1,:,:,:),5)));
+    title([rLabels{r} ' ON']); ylim([-0.1 0.2])
+end
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+%%% Off size tuning
+figure
+for r = 1:4
+    subplot(2,2,r);
+    plot(1:21,squeeze(nanmean(regionTuning(r,2,:,:,:),5)));
+    title([rLabels{r} ' Off']); ylim([-0.1 0.2])
+end
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 display('saving pdf')
 if Opt.SaveFigs

@@ -5,13 +5,11 @@ warning off
 
 %% pick animals for Kristen
 
-batch4x3y_3x2y_KC %Kris' batch file
+batchV1_4X3Y %Kris' batch file
 cd(pathname)
 
-alluse = find(strcmp({files.controlvirus},'no') & strcmp({files.inject},'CLOZ') & strcmp({files.dose},'1.0 mg_kg')  ...
-    & strcmp({files.monitor},'land') & strcmp({files.timing},'pre') & strcmp({files.notes},'good data'))  
-
-savename = ['G6H203RT_4X3Y_' files(alluse(1)).inject '_' files(alluse(1)).dose '_' files(alluse(1)).timing '.mat']; 
+alluse = find(strcmp({files.controlvirus},'no') & strcmp({files.inject},'CLOZ') & strcmp({files.monitor},'land') & strcmp({files.timing},'post') & strcmp({files.notes},'good data') & strcmp({files.dose},'1.0 mg_kg'))
+savename = ['011720_G6H23RT' files(alluse(1)).inject '_' files(alluse(1)).timing '.mat' files(alluse(1)).dose '_']
 
 %% pick animals for Mandi
 

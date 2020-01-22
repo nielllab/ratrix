@@ -46,7 +46,17 @@ for f = 1:nfiles
     
     %%% read in weighted timecourse (from pixelmap, weighted by baseline fluorescence
     clear xb yb
-    load(mat_fname{f},'stimOrder','weightTcourse','dFrepeats','xpts','ypts','xb','yb','meanGreenImg')
+    load(mat_fname{f},'stimOrder','weightTcourse','dFrepeats','xpts','ypts','xb','yb','meanGreenImg','trialmean')
+
+    
+    %%% load freq and orient from stimRec
+    
+    
+    %%% get weight tcourse for each orientation. then at the end, colorcode
+    %%% each pixel by preferred orientation
+    
+    %%% also, get orientation tuning for each cell (avg over SF, or peak SF)
+    
     
     %%% dFrepeats(cell,conds x timepts, repeats)
     %%% average over repeats
@@ -143,15 +153,47 @@ for f = 1:nfiles
     %%% to do - determine response amp or selectivity index
     %%% and color-code these on map of lobe
     
+    clear respMap
     %%% pixel-level data
     for c = 1:17;  %%% loop over conditions
         %%% timecourse of response
         resp(c,:) = nanmedian(weightTcourse(:,stimOrder==c),2);
         %%% amplitude of response over timewindow
         amp(c,f) = nanmean(resp(c,9:20),2);
-        
+        respMap(:,:,c) =  nanmedian(trialmean(:,:,stimOrder==c),3);
+    
     end
     
+    figure
+    for c = 1:16
+        subplot(4,4,c);
+        imagesc(respMap(:,:,c),[-0.1 0.2]);
+    end
+    
+    %%% need to fix this
+    for ori = 1:4
+        range = (ori-1)*4 + (1:2); %%% only low sf
+        %range
+%         oriTuning(ori,f) = nanmean(amp(range,f));
+%         oriResp(ori,:,f) = nanmean(resp(range,:),1);
+%         
+        mapOriTuning(:,:,ori) = nanmean(respMap(:,:,range),3);
+        
+%         regionOriTuning(ori,:,f) = nanmean(regionAmp(:,range,f),2);
+%         regionOriResp(ori,:,:,f) = nanmean(regionResp(:,range,:,f),2);
+    end
+    
+   
+    oriMap = 0;
+    
+    figure
+    for ori = 1:4
+        subplot(2,2,ori);
+        imagesc(mapOriTuning(:,:,ori),[-0.1 0.2]);
+        oriMap = oriMap + mapOriTuning(:,:,ori)*exp(2*pi*sqrt(-1)*ori/4);
+    end
+    
+        
     %%%% average across orientations (4) for each sf
     for sf = 1:4;
         tuning(sf+1,f) = nanmean(amp(sf:4:end,f));
@@ -159,6 +201,7 @@ for f = 1:nfiles
         
         regionTuning(sf+1,:,f) = nanmean(regionAmp(:,sf:4:end,f),2);
         regionSFresp(sf+1,:,:,f) = nanmean(regionResp(:,sf:4:end,:,f),2);
+  
     end
     
     %%% get fullfield flicker (last stim cond)

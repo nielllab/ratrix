@@ -5,7 +5,7 @@
 close all; clear all
 
 %%% select files to analyze based on compile file
-stimname = 'sin gratings';
+stimname = 'sin gratings smaller 2ISI';
 [sbx_fname acq_fname mat_fname quality] = compileFilenames('For Batch File.xlsx',stimname);
 
 Opt.SaveFigs = 1;
@@ -42,12 +42,17 @@ if strcmp(stimname,'sin gratings smaller 2ISI')
     cycDur = 30;
 end
 
+sfs = zeros(16,1);
+thetas = zeros(16,1);
+sfs(1:4:end) = 0.01; sfs(2:4:end) = 0.04; sfs(3:4:end) = 0.16; sfs(4:4:end) = 0.64;
+thetas(1:4) = 0; thetas(5:8) = 90; thetas(9:12) = 180; thetas(13:16) = 270;
+
 for f = 1:nfiles
     
     %%% read in weighted timecourse (from pixelmap, weighted by baseline fluorescence
     clear xb yb
     load(mat_fname{f},'stimOrder','weightTcourse','dFrepeats','xpts','ypts','xb','yb','meanGreenImg','trialmean','cycPolarImg')
-
+    
     figure
     imshow(cycPolarImg); title('timecourse polar img');
     %%% load freq and orient from stimRec
@@ -96,7 +101,7 @@ for f = 1:nfiles
         for r = 1:length(xb)
             inRegion = inpolygon(xpts,ypts,xb{r},yb{r});
             plot(xpts(inRegion),ypts(inRegion),'.','Color',col(r));
-        end 
+        end
         axis equal
         
         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
@@ -158,26 +163,37 @@ for f = 1:nfiles
     %%% pixel-level data
     for c = 1:17;  %%% loop over conditions
         %%% timecourse of response
-        resp(c,:) = nanmedian(weightTcourse(:,stimOrder==c),2);
+        resp(c,:,f) = nanmedian(weightTcourse(:,stimOrder==c),2);
+  
         %%% amplitude of response over timewindow
-        amp(c,f) = nanmean(resp(c,9:20),2);
+        amp(c,f) = nanmean(resp(c,9:20,f),2);
         respMap(:,:,c) =  nanmedian(trialmean(:,:,stimOrder==c),3);
-    
+        
     end
+    
+    sfLabel = {'0.01','0.04','0.16','0.64'}
+    figure
+    for sf = 1:4;
+        subplot(2,2,sf);
+        plot(resp(sf:4:end,:,f)');
+        title(['sf = ' sfLabel{sf}]);ylim([-0.025 0.1])
+    end
+    
     
     figure
     for c = 1:16
         subplot(4,4,c);
-        imagesc(respMap(:,:,c),[-0.1 0.2]);
+        imagesc(respMap(:,:,c),[-0.05 0.1]);
+        axis equal; axis off; title(sprintf('sf = %0.02f th = %0.0f',sfs(c), thetas(c)));
     end
     
-  %%% average over SFs to get orientation tuning
-  clear mapOriTuning  
-  for ori = 1:4
+    %%% average over SFs to get orientation tuning
+    clear mapOriTuning
+    for ori = 1:4
         range = (ori-1)*4 + (1:4); %%% only low sf
         range
         oriTuning(ori,f) = nanmean(amp(range,f));
-        oriResp(ori,:,f) = nanmean(resp(range,:),1);
+        oriResp(ori,:,f) = nanmean(resp(range,:,f),1);
         
         mapOriTuning(:,:,ori) = nanmean(respMap(:,:,range),3);
         
@@ -185,8 +201,8 @@ for f = 1:nfiles
         regionOriResp(ori,:,:,f) = nanmean(regionResp(:,range,:,f),2);
     end
     
-   %%% view orientations, and compute polar map
-    oriMap = 0;  
+    %%% view orientations, and compute polar map
+    oriMap = 0;
     figure
     for ori = 1:4
         subplot(2,2,ori);
@@ -195,33 +211,33 @@ for f = 1:nfiles
     end
     
     figure
-    imagesc(abs(oriMap),[0 0.1]); 
+    imagesc(abs(oriMap),[0 0.1]);
     title('orientation amplitude map')
     
     figure
     imagesc(angle(oriMap)); colormap(hsv);
     title('orientation phase map');
     
-    amp = abs(oriMap); amp = amp/0.1; amp(amp>1)=1;orimap(isnan(oriMap))=0;
+    ampMap = abs(oriMap); ampMap = ampMap/0.1; ampMap(ampMap>1)=1;orimap(isnan(oriMap))=0;
     phMap = mat2im(angle(oriMap),hsv,[-pi pi]);
     figure
-    imshow(phMap.*repmat(amp,[1 1 3]));
+    imshow(phMap.*repmat(ampMap,[1 1 3]));
     title('orientation polar map')
     
-        
+    
     %%%% average across orientations (4) for each sf
     for sf = 1:4;
         tuning(sf+1,f) = nanmean(amp(sf:4:end,f));
-        sfResp(sf+1,:,f) = nanmean(resp(sf:4:end,:),1);
+        sfResp(sf+1,:,f) = nanmean(resp(sf:4:end,:,f),1);
         
         regionTuning(sf+1,:,f) = nanmean(regionAmp(:,sf:4:end,f),2);
         regionSFresp(sf+1,:,:,f) = nanmean(regionResp(:,sf:4:end,:,f),2);
-  
+        
     end
     
     %%% get fullfield flicker (last stim cond)
     tuning(1,f) = amp(end);
-    sfResp(1,:,f) = resp(end,:);
+    sfResp(1,:,f) = resp(end,:,f);
     regionTuning(1,:,f) = regionAmp(:,end,f);
     regionSFresp(1,:,:,f) = regionResp(:,end,:,f);
     
@@ -235,12 +251,12 @@ for f = 1:nfiles
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     %
     figure
-    plot(sfResp(:,:,f)'); title(mat_fname{f}); xlabel('time')
+    plot(sfResp(:,:,f)'); title(mat_fname{f}); xlabel('time'); legend({'0','0.005','0.02','0.08','0.32'})
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% Judit added this, was hoping for the curves for only the cells over threshold, but I don't think that's what this actually does?
     
-     figure
+    figure
     plot(regionSFresp(:,:,f)'); title(mat_fname{f}); xlabel('time')
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
@@ -256,6 +272,37 @@ end
 figure
 plot(mean(resp,3)'); title('mean of all recordings for each condition');
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+
+%%% orientations broked out by spatial frequency
+    sfLabel = {'0.01','0.04','0.16','0.64'}
+    figure
+    for sf = 1:4;
+        subplot(2,2,sf);
+        plot(mean(resp(sf:4:end,:,:),3)');
+        title(['sf = ' sfLabel{sf}]);ylim([-0.01 0.05])
+    end
+    
+      sfLabel = {'0.01','0.04','0.16','0.64'}
+    figure
+    for sf = 1:4;
+        subplot(2,2,sf);
+        plot(squeeze(mean(nanmean(regionResp(:,sf:4:end,:,:),4),1))');
+        title(['cells sf = ' sfLabel{sf}]);ylim([-0.01 0.05])
+    end  
+    
+          sfLabel = {'0.01','0.04','0.16','0.64'}
+
+   for r = 1:4
+       figure
+       for sf = 1:4;
+        subplot(2,2,sf);
+        plot(squeeze(nanmean(regionResp(r,sf:4:end,:,:),4))');
+        title([rLabels{r} ' ' sfLabel{sf}]);ylim([-0.01 0.05])
+       end  
+   end
+    
+    
 
 figure
 plot(mean(sfResp,3)'); title('resp vs SF');
@@ -308,7 +355,7 @@ figure
 for r = 1:4
     subplot(2,2,r);
     plot(1:cycDur,squeeze(nanmean(regionSFresp(:,r,:,:),4)));
-    ylim([-0.01 0.1])
+    ylim([-0.01 0.05])
     title(rLabels{r})
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end

@@ -5,7 +5,7 @@
 close all; clear all
 
 %%% select files to analyze based on compile file
-stimname = 'sin gratings smaller 2ISI';
+stimname = '8 way gratings';
 [sbx_fname acq_fname mat_fname quality] = compileFilenames('For Batch File.xlsx',stimname);
 
 Opt.SaveFigs = 1;
@@ -55,6 +55,8 @@ for f = 1:nfiles
     
     figure
     imshow(cycPolarImg); title('timecourse polar img');
+    
+      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     %%% load freq and orient from stimRec
     
     
@@ -87,10 +89,12 @@ for f = 1:nfiles
     
     figure
     imagesc(dFmean,[-0.1 0.1]); title(['response of all cells ' mat_fname{f}])
+      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     
     figure
     plot(nanmean(dFmean,1))
+      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% region-specific analysis
     if exist('xb','var');
@@ -178,6 +182,7 @@ for f = 1:nfiles
         plot(resp(sf:4:end,:,f)');
         title(['sf = ' sfLabel{sf}]);ylim([-0.025 0.1])
     end
+      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     
     figure
@@ -186,6 +191,7 @@ for f = 1:nfiles
         imagesc(respMap(:,:,c),[-0.05 0.1]);
         axis equal; axis off; title(sprintf('sf = %0.02f th = %0.0f',sfs(c), thetas(c)));
     end
+      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% average over SFs to get orientation tuning
     clear mapOriTuning
@@ -209,20 +215,24 @@ for f = 1:nfiles
         imagesc(mapOriTuning(:,:,ori),[-0.1 0.2]);
         oriMap = oriMap + mapOriTuning(:,:,ori)*exp(2*pi*sqrt(-1)*ori/4);
     end
+      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     figure
     imagesc(abs(oriMap),[0 0.1]);
     title('orientation amplitude map')
+      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     figure
     imagesc(angle(oriMap)); colormap(hsv);
     title('orientation phase map');
+      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     ampMap = abs(oriMap); ampMap = ampMap/0.1; ampMap(ampMap>1)=1;orimap(isnan(oriMap))=0;
     phMap = mat2im(angle(oriMap),hsv,[-pi pi]);
     figure
     imshow(phMap.*repmat(ampMap,[1 1 3]));
     title('orientation polar map')
+      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     
     %%%% average across orientations (4) for each sf
@@ -282,6 +292,7 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
         plot(mean(resp(sf:4:end,:,:),3)');
         title(['sf = ' sfLabel{sf}]);ylim([-0.01 0.05])
     end
+      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
       sfLabel = {'0.01','0.04','0.16','0.64'}
     figure
@@ -290,18 +301,20 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
         plot(squeeze(mean(nanmean(regionResp(:,sf:4:end,:,:),4),1))');
         title(['cells sf = ' sfLabel{sf}]);ylim([-0.01 0.05])
     end  
-    
+      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+      
           sfLabel = {'0.01','0.04','0.16','0.64'}
 
-   for r = 1:4
-       figure
-       for sf = 1:4;
-        subplot(2,2,sf);
-        plot(squeeze(nanmean(regionResp(r,sf:4:end,:,:),4))');
-        title([rLabels{r} ' ' sfLabel{sf}]);ylim([-0.01 0.05])
-       end  
-   end
-    
+          for r = 1:4;
+              figure
+              for sf = 1:4;
+                  subplot(2,2,sf);
+                  plot(squeeze(nanmean(regionResp(r,sf:4:end,:,:),4))');
+                  title([rLabels{r} ' ' sfLabel{sf}]);ylim([-0.01 0.05])
+              end
+              if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+          end
+      
     
 
 figure
@@ -335,7 +348,8 @@ for r = 1:4
     set(gca,'XtickLabel',{'0','0.005','0.02','0.08','0.32'});
     xlim([1 5.5]); ylim([0 0.05])
 end
-
+  if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+  
 figure
 for r = 1:4
     subplot(2,2,r)

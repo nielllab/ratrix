@@ -42,10 +42,28 @@ if strcmp(stimname,'sin gratings smaller 2ISI')
     cycDur = 30;
 end
 
-sfs = zeros(16,1);
-thetas = zeros(16,1);
-sfs(1:4:end) = 0.01; sfs(2:4:end) = 0.04; sfs(3:4:end) = 0.16; sfs(4:4:end) = 0.64;
-thetas(1:4) = 0; thetas(5:8) = 90; thetas(9:12) = 180; thetas(13:16) = 270;
+if strcmp(stimname,'8 way gratings')
+    nOri = 8;
+    nSF = 2;
+    sfs = zeros(16,1);
+    thetas = zeros(16,1);
+    sfs(1:2:end) = 0.01; sfs(2:2:end) = 0.16;
+    thetas(1:2) = 0; thetas(3:4) = 45; thetas(5:6) = 90; thetas(7:8) = 135; thetas(9:10) = 180; thetas(11:12) = 225; thetas(13:14)=270; thetas(15:16) = 315;
+else
+    nOri = 4;
+    nSF = 4;
+    sfs = zeros(16,1);
+    thetas = zeros(16,1);
+    sfs(1:4:end) = 0.01; sfs(2:4:end) = 0.04; sfs(3:4:end) = 0.16; sfs(4:4:end) = 0.64;
+    thetas(1:4) = 0; thetas(5:8) = 90; thetas(9:12) = 180; thetas(13:16) = 270;   
+end
+
+th = unique(thetas);
+for i = 1:length(th); oriLabels{i} = sprintf('%0.0f',th(i)); end
+
+sf = unique(sfs);
+for i = 1:length(sf); sfLabels{i} = sprintf('%0.02f',sf(i)); end
+
 
 for f = 1:nfiles
     
@@ -175,12 +193,12 @@ for f = 1:nfiles
         
     end
     
-    sfLabel = {'0.01','0.04','0.16','0.64'}
+
     figure
-    for sf = 1:4;
+    for sf = 1:nSF;
         subplot(2,2,sf);
-        plot(resp(sf:4:end,:,f)');
-        title(['sf = ' sfLabel{sf}]);ylim([-0.025 0.1])
+        plot(resp(sf:nSF:end,:,f)');
+        title(['sf = ' sfLabels{sf}]);ylim([-0.025 0.1])
     end
       if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
@@ -195,8 +213,8 @@ for f = 1:nfiles
     
     %%% average over SFs to get orientation tuning
     clear mapOriTuning
-    for ori = 1:4
-        range = (ori-1)*4 + (1:4); %%% only low sf
+    for ori = 1:nOri
+        range = (ori-1)*nSF + (1:nSF); 
         range
         oriTuning(ori,f) = nanmean(amp(range,f));
         oriResp(ori,:,f) = nanmean(resp(range,:,f),1);
@@ -210,10 +228,10 @@ for f = 1:nfiles
     %%% view orientations, and compute polar map
     oriMap = 0;
     figure
-    for ori = 1:4
-        subplot(2,2,ori);
-        imagesc(mapOriTuning(:,:,ori),[-0.1 0.2]);
-        oriMap = oriMap + mapOriTuning(:,:,ori)*exp(2*pi*sqrt(-1)*ori/4);
+    for ori = 1:nOri
+        subplot(2,4,ori);
+        imagesc(mapOriTuning(:,:,ori),[-0.1 0.2]); title(oriLabels{ori});
+        oriMap = oriMap + mapOriTuning(:,:,ori)*exp(2*pi*sqrt(-1)*ori/nOri);
     end
       if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
@@ -236,12 +254,12 @@ for f = 1:nfiles
     
     
     %%%% average across orientations (4) for each sf
-    for sf = 1:4;
-        tuning(sf+1,f) = nanmean(amp(sf:4:end,f));
-        sfResp(sf+1,:,f) = nanmean(resp(sf:4:end,:,f),1);
+    for sf = 1:nSF;
+        tuning(sf+1,f) = nanmean(amp(sf:nSF:end,f));
+        sfResp(sf+1,:,f) = nanmean(resp(sf:nSF:end,:,f),1);
         
-        regionTuning(sf+1,:,f) = nanmean(regionAmp(:,sf:4:end,f),2);
-        regionSFresp(sf+1,:,:,f) = nanmean(regionResp(:,sf:4:end,:,f),2);
+        regionTuning(sf+1,:,f) = nanmean(regionAmp(:,sf:nSF:end,f),2);
+        regionSFresp(sf+1,:,:,f) = nanmean(regionResp(:,sf:nSF:end,:,f),2);
         
     end
     
@@ -285,32 +303,32 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 
 
 %%% orientations broked out by spatial frequency
-    sfLabel = {'0.01','0.04','0.16','0.64'}
+
     figure
-    for sf = 1:4;
-        subplot(2,2,sf);
-        plot(mean(resp(sf:4:end,:,:),3)');
-        title(['sf = ' sfLabel{sf}]);ylim([-0.01 0.05])
+    for sf = 1:nSF;
+        subplot(2,2,nSF);
+        plot(mean(resp(sf:nSF:end,:,:),3)');
+        title(['sf = ' sfLabels{sf}]);ylim([-0.01 0.05])
     end
       if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
-      sfLabel = {'0.01','0.04','0.16','0.64'}
+   
     figure
-    for sf = 1:4;
-        subplot(2,2,sf);
-        plot(squeeze(mean(nanmean(regionResp(:,sf:4:end,:,:),4),1))');
-        title(['cells sf = ' sfLabel{sf}]);ylim([-0.01 0.05])
+    for sf = 1:nSF;
+        subplot(2,2,nSF);
+        plot(squeeze(mean(nanmean(regionResp(:,sf:nSF:end,:,:),4),1))');
+        title(['cells sf = ' sfLabels{sf}]);ylim([-0.01 0.05])
     end  
       if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
       
-          sfLabel = {'0.01','0.04','0.16','0.64'}
+
 
           for r = 1:4;
               figure
-              for sf = 1:4;
+              for sf = 1:nSF;
                   subplot(2,2,sf);
-                  plot(squeeze(nanmean(regionResp(r,sf:4:end,:,:),4))');
-                  title([rLabels{r} ' ' sfLabel{sf}]);ylim([-0.01 0.05])
+                  plot(squeeze(nanmean(regionResp(r,sf:nSF:end,:,:),4))');
+                  title([rLabels{r} ' ' sfLabels{sf}]);ylim([-0.01 0.05])
               end
               if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
           end
@@ -324,8 +342,8 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 %%% SF tuning curves
 figure
 hold on
-plot(2:5,mean(tuning(2:end,:),2),'bo')
-errorbar(2:5,mean(tuning(2:end,:),2), std(tuning(2:end,:),[],2)/sqrt(nfiles),'k');
+plot(2:(nSF+1),mean(tuning(2:end,:),2),'bo')
+errorbar(2:(nSF+1),mean(tuning(2:end,:),2), std(tuning(2:end,:),[],2)/sqrt(nfiles),'k');
 plot(1.5,mean(tuning(1,:),2),'bo')
 errorbar(1.5,mean(tuning(1,:),2), std(tuning(1,:),[],2)/sqrt(nfiles),'k');
 ylabel('mean dF/F');xlabel('cyc / deg'); title('SF tuning')
@@ -339,8 +357,8 @@ figure
 for r = 1:4
     subplot(2,2,r)
     hold on
-    plot(2:5,nanmean(regionTuning(2:end,r,:),3),'bo')
-    errorbar(2:5,nanmean(regionTuning(2:end,r,:),3), nanstd(regionTuning(2:end,r,:),[],3)/sqrt(nfiles),'k');
+    plot(2:(nSF+1),nanmean(regionTuning(2:end,r,:),3),'bo')
+    errorbar(2:(nSF+1),nanmean(regionTuning(2:end,r,:),3), nanstd(regionTuning(2:end,r,:),[],3)/sqrt(nfiles),'k');
     plot(1.5,nanmean(regionTuning(1,r,:),3),'bo')
     errorbar(1.5,nanmean(regionTuning(1,r,:),3), nanstd(regionTuning(1,r,:),[],3)/sqrt(nfiles),'k');
     ylabel('mean dF/F');xlabel('cyc / deg'); title(rLabels{r})
@@ -354,11 +372,11 @@ figure
 for r = 1:4
     subplot(2,2,r)
     hold on
-    plot(1:5,squeeze((regionTuning(1:end,r,:))))
+    plot(1:(nSF+1),squeeze((regionTuning(1:end,r,:))))
     ylabel('mean dF/F');xlabel('cyc / deg'); title(rLabels{r})
     set(gca,'Xtick',[ 1.5 2:5]);
     set(gca,'XtickLabel',{'0','0.005','0.02','0.08','0.32'});
-    xlim([1 5.5]); ylim([-0.025 0.1])
+    xlim([1 (nSF+1.5)]); ylim([-0.025 0.1])
 end
 
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end

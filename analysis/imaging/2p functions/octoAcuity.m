@@ -5,7 +5,7 @@
 close all; clear all
 
 %%% select files to analyze based on compile file
-stimname = '8 way gratings';
+stimname = '8 way gratings 2ISI';
 [sbx_fname acq_fname mat_fname quality] = compileFilenames('For Batch File.xlsx',stimname);
 
 Opt.SaveFigs = 1;
@@ -38,7 +38,7 @@ rLabels = {'OGL','Plex','IGL','Med'};
 nfiles = length(mat_fname);
 ncond = 17;
 cycDur=20;
-if strcmp(stimname,'sin gratings smaller 2ISI')
+if strcmp(stimname,'sin gratings smaller 2ISI') | strcmp(stimname,'8 way gratings 2 ISI');
     cycDur = 30;
 end
 
@@ -121,8 +121,10 @@ for f = 1:nfiles
         figure
         imagesc(meanGreenImg); hold on
         for r = 1:length(xb)
-            inRegion = inpolygon(xpts,ypts,xb{r},yb{r});
+           if length(xb{r})>0
+               inRegion = inpolygon(xpts,ypts,xb{r},yb{r});
             plot(xpts(inRegion),ypts(inRegion),'.','Color',col(r));
+           end
         end
         axis equal
         
@@ -132,9 +134,10 @@ for f = 1:nfiles
         region = zeros(size(xpts)); %%% empty variable for which region each cell is
         
         for r = 1:4
-            if r>length(xb) || sum(inpolygon(xpts,ypts,xb{r},yb{r}))==0;
+            if r>length(xb) ||length(xb{r})==0 || sum(inpolygon(xpts,ypts,xb{r},yb{r}))==0;
                 regionResp(r,:,:,f)=NaN;
                 regionAmp(r,:,f) = NaN;
+                fractResponsive(r,f)=NaN;
             else
                 %%% find cells in the region
                 inRegion = inpolygon(xpts,ypts,xb{r},yb{r});
@@ -183,7 +186,9 @@ for f = 1:nfiles
     
     clear respMap
     %%% pixel-level data
-    for c = 1:17;  %%% loop over conditions
+   nstim = min(length(stimOrder),size(weightTcourse,2));  %%% sometimes stimorder is too long
+   stimOrder = 1:nstim;
+   for c = 1:17;  %%% loop over conditions
         %%% timecourse of response
         resp(c,:,f) = nanmedian(weightTcourse(:,stimOrder==c),2);
   

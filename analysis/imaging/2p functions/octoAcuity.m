@@ -42,7 +42,7 @@ if strcmp(stimname,'sin gratings smaller 2ISI') | strcmp(stimname,'8 way grating
     cycDur = 30;
 end
 
-if strcmp(stimname,'8 way gratings') || strcmp(stimname,'8 way gratings 2ISI') 
+if strcmp(stimname,'8 way gratings') || strcmp(stimname,'8 way gratings 2ISI')
     nOri = 8;
     nSF = 2;
     sfs = zeros(16,1);
@@ -65,8 +65,8 @@ sf = unique(sfs);
 for i = 1:length(sf); sfLabels{i} = sprintf('%0.02f',sf(i)); end
 
 
-%for f = 1:nfiles
- for f =8        
+for f = 1:nfiles
+    
     
     %%% read in weighted timecourse (from pixelmap, weighted by baseline fluorescence
     clear xb yb
@@ -236,23 +236,27 @@ for i = 1:length(sf); sfLabels{i} = sprintf('%0.02f',sf(i)); end
     plot(unique(thetas),oriTuning(:,f))
     xlabel('theta'); title('pixelwise orienation selectivity');
     ylim([-0.025 0.1])
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% region orientation tuning (averaged over SF)
     figure
     for r=1:4
         subplot(2,2,r);
-       bar(unique(thetas),regionOriTuning(:,r,f),'b'); hold on
-       plot(unique(thetas),regionOriTuning(:,r,f),'k','Linewidth',2); 
- 
-        ylim([-0.025 0.1]); xlabel('theta'); title(rLabels{r});
+        bar(unique(thetas),regionOriTuning(:,r,f),'b'); hold on
+        plot(unique(thetas),regionOriTuning(:,r,f),'k','Linewidth',2);
+        
+        ylim([-0.025 0.1]); xlim([-25 340]); xlabel('theta'); title(rLabels{r});
     end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
-     figure
+    figure
     for r=1:4
         subplot(2,2,r);
-       polar(unique(thetas)*pi/180,regionOriTuning(:,r,f),'b'); hold on
-      xlabel('theta'); title(rLabels{r});
+        polar(unique(thetas)*pi/180,regionOriTuning(:,r,f),'b'); hold on
+        xlabel('theta'); title(rLabels{r});
     end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
     
     
     %%% orientation by SF for all regions
@@ -267,7 +271,7 @@ for i = 1:length(sf); sfLabels{i} = sprintf('%0.02f',sf(i)); end
         legend(sfLabels);
         title(rLabels{r}); xlabel('thetas');
     end
-    
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     
     %%% view orientations, and compute polar map
@@ -439,34 +443,36 @@ for r = 1:4
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
- %%% pixelwise orientation tuning
-    figure
-    plot(unique(thetas),nanmean(oriTuning(:,:),2))
-    xlabel('theta'); title('pixelwise orienation selectivity');
-    ylim([-0.025 0.1]);
-    
-    %%% region orientation tuning (averaged over SF)
-    figure
-    for r=1:4
-        subplot(2,2,r);
-        plot(unique(thetas),nanmean(regionOriTuning(:,r,:),3)); xlabel('theta'); title(rLabels{r});
-    ylim([-0.025 0.1]); ylabel('resp avg over SF')
-    end
-    
-    %%% orientation by SF for all regions
-    figure
-    for r = 1:4
-        subplot(2,2,r)
-        hold on
-        for sf = 1:nSF
-            plot(unique(thetas),nanmean(regionAmp(r,sf:nSF:nOri*nSF,:),3));
-        end
-        legend(sfLabels);
-        title(rLabels{r}); xlabel('thetas');
-        ylim([-0.025 0.1])
-    end
-    
+%%% pixelwise orientation tuning
+figure
+plot(unique(thetas),nanmean(oriTuning(:,:),2))
+xlabel('theta'); title('pixelwise orienation selectivity');
+ylim([-0.025 0.1]);
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
+%%% region orientation tuning (averaged over SF)
+figure
+for r=1:4
+    subplot(2,2,r);
+    plot(unique(thetas),nanmean(regionOriTuning(:,r,:),3)); xlabel('theta'); title(rLabels{r});
+    ylim([-0.025 0.1]); ylabel('resp avg over SF')
+end
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+%%% orientation by SF for all regions
+figure
+for r = 1:4
+    subplot(2,2,r)
+    hold on
+    for sf = 1:nSF
+        plot(unique(thetas),nanmean(regionAmp(r,sf:nSF:nOri*nSF,:),3));
+    end
+    legend(sfLabels);
+    title(rLabels{r}); xlabel('thetas');
+    ylim([-0.025 0.1])
+end
+
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 
 figure

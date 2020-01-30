@@ -38,11 +38,11 @@ rLabels = {'OGL','Plex','IGL','Med'};
 nfiles = length(mat_fname);
 ncond = 17;
 cycDur=20;
-if strcmp(stimname,'sin gratings smaller 2ISI') | strcmp(stimname,'8 way gratings 2 ISI');
+if strcmp(stimname,'sin gratings smaller 2ISI') | strcmp(stimname,'8 way gratings 2ISI');
     cycDur = 30;
 end
 
-if strcmp(stimname,'8 way gratings')
+if strcmp(stimname,'8 way gratings') || strcmp(stimname,'8 way gratings 2ISI') 
     nOri = 8;
     nSF = 2;
     sfs = zeros(16,1);
@@ -55,7 +55,7 @@ else
     sfs = zeros(16,1);
     thetas = zeros(16,1);
     sfs(1:4:end) = 0.01; sfs(2:4:end) = 0.04; sfs(3:4:end) = 0.16; sfs(4:4:end) = 0.64;
-    thetas(1:4) = 0; thetas(5:8) = 90; thetas(9:12) = 180; thetas(13:16) = 270;   
+    thetas(1:4) = 0; thetas(5:8) = 90; thetas(9:12) = 180; thetas(13:16) = 270;
 end
 
 th = unique(thetas);
@@ -65,7 +65,8 @@ sf = unique(sfs);
 for i = 1:length(sf); sfLabels{i} = sprintf('%0.02f',sf(i)); end
 
 
-for f = 1:nfiles
+%for f = 1:nfiles
+ for f =8        
     
     %%% read in weighted timecourse (from pixelmap, weighted by baseline fluorescence
     clear xb yb
@@ -74,7 +75,7 @@ for f = 1:nfiles
     figure
     imshow(cycPolarImg); title('timecourse polar img');
     
-      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     %%% load freq and orient from stimRec
     
     
@@ -107,12 +108,12 @@ for f = 1:nfiles
     
     figure
     imagesc(dFmean,[-0.1 0.1]); title(['response of all cells ' mat_fname{f}])
-      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     
     figure
     plot(nanmean(dFmean,1))
-      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% region-specific analysis
     if exist('xb','var');
@@ -121,10 +122,10 @@ for f = 1:nfiles
         figure
         imagesc(meanGreenImg); hold on
         for r = 1:length(xb)
-           if length(xb{r})>0
-               inRegion = inpolygon(xpts,ypts,xb{r},yb{r});
-            plot(xpts(inRegion),ypts(inRegion),'.','Color',col(r));
-           end
+            if length(xb{r})>0
+                inRegion = inpolygon(xpts,ypts,xb{r},yb{r});
+                plot(xpts(inRegion),ypts(inRegion),'.','Color',col(r));
+            end
         end
         axis equal
         
@@ -186,26 +187,26 @@ for f = 1:nfiles
     
     clear respMap
     %%% pixel-level data
-   nstim = min(length(stimOrder),size(weightTcourse,2));  %%% sometimes stimorder is too long
-   stimOrder = 1:nstim;
-   for c = 1:17;  %%% loop over conditions
+    nstim = min(length(stimOrder),size(weightTcourse,2));  %%% sometimes stimorder is too long
+    stimOrder = 1:nstim;
+    for c = 1:17;  %%% loop over conditions
         %%% timecourse of response
         resp(c,:,f) = nanmedian(weightTcourse(:,stimOrder==c),2);
-  
+        
         %%% amplitude of response over timewindow
         amp(c,f) = nanmean(resp(c,9:20,f),2);
         respMap(:,:,c) =  nanmedian(trialmean(:,:,stimOrder==c),3);
         
     end
     
-
+    
     figure
     for sf = 1:nSF;
         subplot(2,2,sf);
-        plot(resp(sf:nSF:end,:,f)');
+        plot(resp(sf:nSF:nOri*nSF,:,f)');
         title(['sf = ' sfLabels{sf}]);ylim([-0.025 0.1])
     end
-      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     
     figure
@@ -214,12 +215,12 @@ for f = 1:nfiles
         imagesc(respMap(:,:,c),[-0.05 0.1]);
         axis equal; axis off; title(sprintf('sf = %0.02f th = %0.0f',sfs(c), thetas(c)));
     end
-      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% average over SFs to get orientation tuning
     clear mapOriTuning
     for ori = 1:nOri
-        range = (ori-1)*nSF + (1:nSF); 
+        range = (ori-1)*nSF + (1:nSF);
         range
         oriTuning(ori,f) = nanmean(amp(range,f));
         oriResp(ori,:,f) = nanmean(resp(range,:,f),1);
@@ -230,6 +231,45 @@ for f = 1:nfiles
         regionOriResp(ori,:,:,f) = nanmean(regionResp(:,range,:,f),2);
     end
     
+    %%% pixelwise orientation tuning
+    figure
+    plot(unique(thetas),oriTuning(:,f))
+    xlabel('theta'); title('pixelwise orienation selectivity');
+    ylim([-0.025 0.1])
+    
+    %%% region orientation tuning (averaged over SF)
+    figure
+    for r=1:4
+        subplot(2,2,r);
+       bar(unique(thetas),regionOriTuning(:,r,f),'b'); hold on
+       plot(unique(thetas),regionOriTuning(:,r,f),'k','Linewidth',2); 
+ 
+        ylim([-0.025 0.1]); xlabel('theta'); title(rLabels{r});
+    end
+    
+     figure
+    for r=1:4
+        subplot(2,2,r);
+       polar(unique(thetas)*pi/180,regionOriTuning(:,r,f),'b'); hold on
+      xlabel('theta'); title(rLabels{r});
+    end
+    
+    
+    %%% orientation by SF for all regions
+    figure
+    for r = 1:4
+        subplot(2,2,r)
+        hold on
+        for sf = 1:nSF
+            plot(unique(thetas),regionAmp(r,sf:nSF:nOri*nSF,f));
+        end
+        ylim([-0.025 0.1])
+        legend(sfLabels);
+        title(rLabels{r}); xlabel('thetas');
+    end
+    
+    
+    
     %%% view orientations, and compute polar map
     oriMap = 0;
     figure
@@ -238,24 +278,26 @@ for f = 1:nfiles
         imagesc(mapOriTuning(:,:,ori),[-0.1 0.2]); title(oriLabels{ori});
         oriMap = oriMap + mapOriTuning(:,:,ori)*exp(2*pi*sqrt(-1)*ori/nOri);
     end
-      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     figure
     imagesc(abs(oriMap),[0 0.1]);
     title('orientation amplitude map')
-      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     figure
     imagesc(angle(oriMap)); colormap(hsv);
     title('orientation phase map');
-      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     ampMap = abs(oriMap); ampMap = ampMap/0.1; ampMap(ampMap>1)=1;orimap(isnan(oriMap))=0;
     phMap = mat2im(angle(oriMap),hsv,[-pi pi]);
     figure
     imshow(phMap.*repmat(ampMap,[1 1 3]));
     title('orientation polar map')
-      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    
     
     
     %%%% average across orientations (4) for each sf
@@ -309,36 +351,36 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 
 %%% orientations broked out by spatial frequency
 
+figure
+for sf = 1:nSF;
+    subplot(2,2,nSF);
+    plot(mean(resp(sf:nSF:end,:,:),3)');
+    title(['sf = ' sfLabels{sf}]);ylim([-0.01 0.05])
+end
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+
+figure
+for sf = 1:nSF;
+    subplot(2,2,nSF);
+    plot(squeeze(mean(nanmean(regionResp(:,sf:nSF:end,:,:),4),1))');
+    title(['cells sf = ' sfLabels{sf}]);ylim([-0.01 0.05])
+end
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+
+
+for r = 1:4;
     figure
     for sf = 1:nSF;
-        subplot(2,2,nSF);
-        plot(mean(resp(sf:nSF:end,:,:),3)');
-        title(['sf = ' sfLabels{sf}]);ylim([-0.01 0.05])
+        subplot(2,2,sf);
+        plot(squeeze(nanmean(regionResp(r,sf:nSF:end,:,:),4))');
+        title([rLabels{r} ' ' sfLabels{sf}]);ylim([-0.01 0.05])
     end
-      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
-   
-    figure
-    for sf = 1:nSF;
-        subplot(2,2,nSF);
-        plot(squeeze(mean(nanmean(regionResp(:,sf:nSF:end,:,:),4),1))');
-        title(['cells sf = ' sfLabels{sf}]);ylim([-0.01 0.05])
-    end  
-      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-      
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+end
 
 
-          for r = 1:4;
-              figure
-              for sf = 1:nSF;
-                  subplot(2,2,sf);
-                  plot(squeeze(nanmean(regionResp(r,sf:nSF:end,:,:),4))');
-                  title([rLabels{r} ' ' sfLabels{sf}]);ylim([-0.01 0.05])
-              end
-              if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-          end
-      
-    
 
 figure
 plot(mean(sfResp,3)'); title('resp vs SF');
@@ -371,8 +413,8 @@ for r = 1:4
     set(gca,'XtickLabel',{'0','0.005','0.02','0.08','0.32'});
     xlim([1 5.5]); ylim([0 0.05])
 end
-  if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-  
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
 figure
 for r = 1:4
     subplot(2,2,r)
@@ -396,6 +438,36 @@ for r = 1:4
     title(rLabels{r})
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+ %%% pixelwise orientation tuning
+    figure
+    plot(unique(thetas),nanmean(oriTuning(:,:),2))
+    xlabel('theta'); title('pixelwise orienation selectivity');
+    ylim([-0.025 0.1]);
+    
+    %%% region orientation tuning (averaged over SF)
+    figure
+    for r=1:4
+        subplot(2,2,r);
+        plot(unique(thetas),nanmean(regionOriTuning(:,r,:),3)); xlabel('theta'); title(rLabels{r});
+    ylim([-0.025 0.1]); ylabel('resp avg over SF')
+    end
+    
+    %%% orientation by SF for all regions
+    figure
+    for r = 1:4
+        subplot(2,2,r)
+        hold on
+        for sf = 1:nSF
+            plot(unique(thetas),nanmean(regionAmp(r,sf:nSF:nOri*nSF,:),3));
+        end
+        legend(sfLabels);
+        title(rLabels{r}); xlabel('thetas');
+        ylim([-0.025 0.1])
+    end
+    
+
+
 
 figure
 plot(bins,ampHist); xlim([-0.1 0.5]); hold on; plot(bins,mean(ampHist,2),'g','Linewidth',2)

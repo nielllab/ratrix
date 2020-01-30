@@ -4,7 +4,7 @@
 %%% correlation on the signmap*amplitudes, then plots them across groups
 close all; clear all;
 
-batchPatch_KC %select batch file
+batch4x3y_3x2y_KC % batchPatch_KC %select batch file
 cd(pathname)
 
 grpnames = {'lp control'...
@@ -13,7 +13,9 @@ grpnames = {'lp control'...
 pplb = {'pre','post'};
 
 %select subset of animals
-use = find(strcmp({files.notes},'good data')&strcmp({files.timing},'pre'));alluse=use;
+%use = find(strcmp({files.notes},'good data')&strcmp({files.timing},'pre'));
+use = find(strcmp({files.notes},'good data'));
+alluse=use;
 allsubj = unique({files(alluse).subj}); %needed for doTopography
 s=1:1;doTopography
 
@@ -24,7 +26,8 @@ for f = 1:length(use)
     save(files(use(f)).topox,'xshift','yshift','tshift','x0','y0','sz','-append')
 end
 
-psfile = 'D:\Kristen\LGN_Dreadds_WF_Imaging\tempKrisWF.ps';
+% psfile = 'D:\Kristen\LGN_Dreadds_WF_Imaging\tempKrisWF.ps';
+psfile = 'F:\Widefield_Analysis\Kristen';
 if exist(psfile,'file')==2;delete(psfile);end
 
 %% quantification
@@ -37,7 +40,7 @@ grptx = zeros(4,10,size(map{1},1)/resamp,size(map{1},2)/resamp,2);grpty=grptx;
 grpcc = zeros(4,10);grpccx=grpcc;grpccy=grpcc;combcc=grpcc; %correlation coefficients
 zoom = 1;%260/size(dfof_bg,1); should be same as in doTopography
 f1=figure;set(gcf,'color','w');
-for grp=1:length(grpnames)
+for grp=2:length(grpnames)
     if grp==1
         use = find(strcmp({files.controlvirus},'yes'));
         grpfilename = 'lpcontrol'
@@ -224,22 +227,22 @@ figure(f1)
 subplot(2,2,1)
 title('sign cc')
 axis([0 5 0 1]);axis square
-set(gca,'xtick',1:length(gprnames),'xticklabel',grpnames,'ytick',0:0.25:1,'fontsize',12,'tickdir','out')
+set(gca,'xtick',1:length(grpnames),'xticklabel',grpnames,'ytick',0:0.25:1,'fontsize',12,'tickdir','out')
 ylabel('pre/post map correlation')
 subplot(2,2,2)
 title('ccx')
 axis([0 5 0 1]);axis square
-set(gca,'xtick',1:length(gprnames),'xticklabel',grpnames,'ytick',0:0.25:1,'fontsize',12,'tickdir','out')
+set(gca,'xtick',1:length(grpnames),'xticklabel',grpnames,'ytick',0:0.25:1,'fontsize',12,'tickdir','out')
 ylabel('pre/post map correlation')
 subplot(2,2,3)
 title('ccy')
 axis([0 5 0 1]);axis square
-set(gca,'xtick',1:length(gprnames),'xticklabel',grpnames,'ytick',0:0.25:1,'fontsize',12,'tickdir','out')
+set(gca,'xtick',1:length(grpnames),'xticklabel',grpnames,'ytick',0:0.25:1,'fontsize',12,'tickdir','out')
 ylabel('pre/post map correlation')
 subplot(2,2,4)
 title('x/y cc')
 axis([0 5 0 1]);axis square
-set(gca,'xtick',1:length(gprnames),'xticklabel',grpnames,'ytick',0:0.25:1,'fontsize',12,'tickdir','out')
+set(gca,'xtick',1:length(grpnames),'xticklabel',grpnames,'ytick',0:0.25:1,'fontsize',12,'tickdir','out')
 ylabel('pre/post map correlation')
 if exist('psfile','var')
     set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');

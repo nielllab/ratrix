@@ -70,10 +70,13 @@ for f = 1:nfiles
     
     %%% read in weighted timecourse (from pixelmap, weighted by baseline fluorescence
     clear xb yb stimOrder weightTcourse
-    load(mat_fname{f},'stimOrder','weightTcourse','dFrepeats','xpts','ypts','xb','yb','meanGreenImg','trialmean','cycPolarImg')
+    load(mat_fname{f},'stimOrder','weightTcourse','dFrepeats','xpts','ypts','xb','yb','meanGreenImg','stdImg','trialmean','cycPolarImg')
     
     figure
+    subplot(1,2,1)
     imshow(cycPolarImg); title('timecourse polar img');
+    subplot(1,2,2);
+    imagesc(meanGreenImg); axis equal; axis off; 
     
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     %%% load freq and orient from stimRec

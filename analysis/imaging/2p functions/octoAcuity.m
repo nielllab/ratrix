@@ -69,7 +69,7 @@ for i = 1:length(sf); sfLabels{i} = sprintf('%0.02f',sf(i)); end
  for f =8        
     
     %%% read in weighted timecourse (from pixelmap, weighted by baseline fluorescence
-    clear xb yb
+    clear xb yb stimOrder weightTcourse
     load(mat_fname{f},'stimOrder','weightTcourse','dFrepeats','xpts','ypts','xb','yb','meanGreenImg','trialmean','cycPolarImg')
     
     figure
@@ -188,7 +188,7 @@ for i = 1:length(sf); sfLabels{i} = sprintf('%0.02f',sf(i)); end
     clear respMap
     %%% pixel-level data
     nstim = min(length(stimOrder),size(weightTcourse,2));  %%% sometimes stimorder is too long
-    stimOrder = 1:nstim;
+    stimOrder = stimOrder(1:nstim);
     for c = 1:17;  %%% loop over conditions
         %%% timecourse of response
         resp(c,:,f) = nanmedian(weightTcourse(:,stimOrder==c),2);
@@ -290,7 +290,7 @@ for i = 1:length(sf); sfLabels{i} = sprintf('%0.02f',sf(i)); end
     title('orientation phase map');
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
-    ampMap = abs(oriMap); ampMap = ampMap/0.1; ampMap(ampMap>1)=1;orimap(isnan(oriMap))=0;
+    ampMap = abs(oriMap); ampMap = ampMap/0.3; ampMap(ampMap>1)=1;orimap(isnan(oriMap))=0;
     phMap = mat2im(angle(oriMap),hsv,[-pi pi]);
     figure
     imshow(phMap.*repmat(ampMap,[1 1 3]));

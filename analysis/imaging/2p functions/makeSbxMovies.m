@@ -8,6 +8,7 @@ temporalBin = input('temporal binning factor: ');
 fullMovie = input('make full movie? (0/1) :');
 cycMovie = input('make cycle avg movie? (0/1) :');
 chan = input('pmt channel (1/2) : ');
+compress = input('compression? (0/1)');
 
 if cycMovie
     cycLength =input('cycle length (secs) :');
@@ -59,13 +60,16 @@ ub = input('upper limit on range: ');
 if fullMovie
     display('converting to movie')
     cycMov= mat2im(img,gray,[lb ub]);
-    mov = immovie(permute(cycMov,[1 2 4 3]));
- %  vid = VideoWriter([avifname(1:end-4) '_FULL.avi']);
-  %   vid = VideoWriter([avifname(1:end-4) '_fullquality.avi']);
-  %vid.Quality = 100;
-% for non-compressed
-    mov = cycMov(:,:,:,1);
-    vid = VideoWriter([avifname(1:end-4) '_grayscale.avi'],'Grayscale AVI');
+    if compress
+        mov = immovie(permute(cycMov,[1 2 4 3]));
+        vid = VideoWriter([avifname(1:end-4) '_small.avi']);
+        %   vid = VideoWriter([avifname(1:end-4) '_fullquality.avi']);
+        %vid.Quality = 100;
+        % for non-compressed
+    else
+        mov = cycMov(:,:,:,1);
+        vid = VideoWriter([avifname(1:end-4) '_noCompress.avi'],'Grayscale AVI');
+    end
     vid.FrameRate=movierate;
     
     open(vid);
@@ -102,7 +106,7 @@ if cycMovie
     
     cycMov= mat2im(cycAvg,gray,[lb ub]);
     mov = immovie(permute(cycMov,[1 2 4 3]));
-    vid = VideoWriter([avifname(1:end-4) '_cycAvg.avi'],'Grayscale AVI');
+    vid = VideoWriter([avifname(1:end-4) '_cycAvgArchive.avi'],'Archival');
     vid.FrameRate=movierate;
     open(vid);
     display('writing movie')

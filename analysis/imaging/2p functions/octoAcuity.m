@@ -302,11 +302,11 @@ for i = 1:length(sf); sfLabels{i} = sprintf('%0.02f',sf(i)); end
     
     %%%% average across orientations (4) for each sf
     for sf = 1:nSF;
-        tuning(sf+1,f) = nanmean(amp(sf:nSF:end,f));
-        sfResp(sf+1,:,f) = nanmean(resp(sf:nSF:end,:,f),1);
+        tuning(sf+1,f) = nanmean(amp(sf:nSF:nSF*nOri,f));
+        sfResp(sf+1,:,f) = nanmean(resp(sf:nSF:nSF*nOri,:,f),1);
         
-        regionTuning(sf+1,:,f) = nanmean(regionAmp(:,sf:nSF:end,f),2);
-        regionSFresp(sf+1,:,:,f) = nanmean(regionResp(:,sf:nSF:end,:,f),2);
+        regionTuning(sf+1,:,f) = nanmean(regionAmp(:,sf:nSF:nSF*nOri,f),2);
+        regionSFresp(sf+1,:,:,f) = nanmean(regionResp(:,sf:nSF:nSF*nOri,:,f),2);
         
     end
     

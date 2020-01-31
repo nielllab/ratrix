@@ -5,13 +5,20 @@ warning off
 
 %% pick animals for Kristen
 
-batchV1_4X3Y %Kris' batch file
+batch_V1_4X3Y %Kris' V1 batch file
 cd(pathname)
 
-alluse = find(strcmp({files.controlvirus},'no') & strcmp({files.inject},'CLOZ') & strcmp({files.monitor},'land') & strcmp({files.timing},'post
-') & strcmp({files.notes},'good data') & strcmp({files.dose},'1.0 mg_kg'))
-savename = ['012220_CALB2CK2G6H47LT' files(alluse(1)).inject '_' files(alluse(1)).timing '.mat' files(alluse(1)).dose '_']
+%%%select the fields that you want to filter on
+alluse = find(strcmp({files.virus},'hM4Di') & strcmp({files.inject},'CLOZ') & strcmp({files.monitor},'land')...
+    & strcmp({files.timing},'post') & strcmp({files.notes},'good data') & strcmp({files.dose},'1.0 mg_kg'))
 
+%%%uncomment this for individual mouse
+% savename = [files(alluse(1)).expt '_' files(alluse(1)).subj '_' files(alluse(1)).inject '_' files(alluse(1)).timing...
+%     '_' files(alluse(1)).dose '_.mat']
+
+% %%%uncomment this for group
+savename = [files(alluse(1)).area '_' files(alluse(1)).virus '_' files(alluse(1)).inject '_' files(alluse(1)).timing...
+    '_' files(alluse(1)).dose '_.mat']
 %% pick animals for Mandi
 
 % batchMandiEnrichment %Mandi's batch file

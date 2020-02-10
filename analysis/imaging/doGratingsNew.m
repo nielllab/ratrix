@@ -2,7 +2,7 @@
 x=0;
 % for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior passive; 4 = 4x3y patches;
     mnAmp{rep}=0; mnPhase{rep}=0; mnAmpWeight{rep}=0; mnData{rep}=0; mnFit{rep}=0;
-    clear shiftData shiftAmp shiftPhase fit cycavg
+    clear shiftData shiftAmp shiftPhase fit cycavg tuningall
     visareas = {'V1','P','LM','AL','RL','AM','PM','MM'};
     
     for f = 1:length(use)
@@ -70,7 +70,7 @@ x=0;
                     sp =0;stimRec=[];
                 end
                 dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
-                [ph amp data ft cyc tuning4x3y(f,:,:,:,:,:,:) sftcourse(:,:,:,f) trialcycavg trialcycavgRun trialcycavgSit ] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
+                [ph amp data ft cyc tuning sft trialcycavg trialcycavgRun trialcycavgSit ] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
                     files(use(f)).moviename4x3y,16:17,10:11,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
             end
 
@@ -88,7 +88,6 @@ x=0;
             fit(:,:,:,f) = imresize(ft,4);
             cycavg(:,:,:,f) = imresize(cyc,4);
             
-            
             shiftData(isnan(shiftData))=0;
             
             % plotGratingResp(shiftPhase,shiftAmp,rep,xpts,ypts)
@@ -100,6 +99,12 @@ x=0;
             print('-dpsc',psfilename,'-append');
         end
         
+        if rep==4 %for 4x3y, save this stuff out
+            tuningall(:,:,:,:,:,:,f) = tuning;
+            sftcourse(:,:,:,f) = sft;
+            trialcycavgRunAll(:,:,:,:,:,:,:,f) = trialcycavgRun;
+            trialcycavgSitAll(:,:,:,:,:,:,:,f) = trialcycavgSit;
+        end
         
     end
     

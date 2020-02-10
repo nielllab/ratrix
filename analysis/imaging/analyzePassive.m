@@ -3,30 +3,32 @@ close all
 clear all
 warning off
 
-%% pick animals for Kristen
-
-batch_V1_4X3Y %Kris' V1 batch file
-cd(pathname)
-
-%%%select the fields that you want to filter on
-alluse = find(strcmp({files.virus},'hM4Di') & strcmp({files.inject},'CLOZ') & strcmp({files.monitor},'land')...
-    & strcmp({files.timing},'post') & strcmp({files.notes},'good data') & strcmp({files.dose},'1.0 mg_kg'))
-
-%%%uncomment this for individual mouse
-% savename = [files(alluse(1)).expt '_' files(alluse(1)).subj '_' files(alluse(1)).inject '_' files(alluse(1)).timing...
-%     '_' files(alluse(1)).dose '_.mat']
-
-% %%%uncomment this for group
-savename = [files(alluse(1)).area '_' files(alluse(1)).virus '_' files(alluse(1)).inject '_' files(alluse(1)).timing...
-    '_' files(alluse(1)).dose '_.mat']
-%% pick animals for Mandi
-
-% batchMandiEnrichment %Mandi's batch file
+% %% pick animals for Kristen
+% 
+% batch_LP_4X3Y %Kris' V1 batch file
 % cd(pathname)
 % 
-% alluse = find(strcmp({files.condition},'control') & strcmp({files.notes},'good imaging session'))
+% %%%select the fields that you want to filter on
+% alluse = find(strcmp({files.virus},'hM4Di') & strcmp({files.inject},'CLOZ') & strcmp({files.monitor},'land')...
+%     & strcmp({files.timing},'pre') & strcmp({files.notes},'good data') & strcmp({files.dose},'1.0 mg_kg'))
 % 
-% savename = ['MS_' files(alluse(1)).condition '.mat'];
+% %%%uncomment this for individual mouse
+% % savename = [files(alluse(1)).expt '_' files(alluse(1)).subj '_' files(alluse(1)).inject '_' files(alluse(1)).timing...
+% %     '_' files(alluse(1)).dose '_.mat']
+% 
+% % %%%uncomment this for group
+% savename = [files(alluse(1)).area '_' files(alluse(1)).virus '_' files(alluse(1)).inject '_' files(alluse(1)).timing...
+%     '_' files(alluse(1)).dose '_.mat']
+% 
+% 
+% pick animals for Mandi
+
+batchEnrichmentCohort2 %Mandi's batch file
+cd(pathname)
+
+alluse = find(strcmp({files.cond},'control') & strcmp({files.notes},'good imaging session'))
+
+savename = ['AF_' files(alluse(1)).cond '.mat'];
 
 %% run doTopography (use this one to average all sessions that meet criteria)
 length(alluse)
@@ -62,8 +64,8 @@ rep=4;
 doGratingsNew;
 
 %%%UNCOMMENT FOR NATURAL IMAGES
-% disp('doing natural images')
-% doNaturalImages
+disp('doing natural images')
+doNaturalImages
 
 
 % % %%

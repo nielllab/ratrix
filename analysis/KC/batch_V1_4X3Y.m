@@ -101,7 +101,6 @@ files(n).grating4x3y5sf3tf =  '012020_G6H23RT_RIG2\012020_G6H23RT_RIG2_POST_FOUR
 files(n).grating4x3y5sf3tfdata = '012020_G6H23RT_RIG2\012020_G6H23RT_RIG2_POST_FOURXTHREEY\012020_G6H23RT_RIG2_POST_FOURXTHREEY';
 files(n).inject = 'CLOZ'; 
 files(n).dose = '1.0 mg_kg'
-files(n).controlvirus = 'no'
 files(n).timing = 'post';
 files(n).training = 'naive';
 files(n).virus = 'hM4Di';
@@ -113,6 +112,7 @@ files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat'
 files(n).notes = 'good data';
 
 %%  G6H233LT @ 1.0 mg/kg SQ V1
+% NO GCAMP
 % n=n+1;
 % files(n).subj = 'G6H233LT'; %animal name
 % files(n).expt = '012020'; %date of experiment
@@ -160,6 +160,7 @@ files(n).notes = 'good data';
 % files(n).notes = 'good data';
 % 
 %%  G6H233RN @ 1.0 mg/kg SQ V1
+% NO GCAMP
 % n=n+1;
 % files(n).subj = 'G6H233RN'; %animal name
 % files(n).expt = '012020'; %date of experiment

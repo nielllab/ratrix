@@ -5,7 +5,7 @@
 close all; clear all
 
 %%% select files to analyze based on compile file
-stimname = '8 way gratings 2ISI';
+stimname = '8 way gratings';
 [sbx_fname acq_fname mat_fname quality] = compileFilenames('For Batch File.xlsx',stimname);
 
 Opt.SaveFigs = 1;
@@ -350,61 +350,75 @@ for f = 1:nfiles
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 end
 
-%%% mean across sessions for each condition
-figure
-plot(mean(resp,3)'); title('mean of all recordings for each condition');
-if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+%%% pixelwise analysis (obsolete)
+% %%% mean across sessions for each condition
+% figure
+% plot(mean(resp,3)'); title('mean of all recordings for each condition (pixel-wise)');
+% if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+% 
+% 
+% %%% orientations broked out by spatial frequency
+% 
+% figure
+% for sf = 1:nSF;
+%     subplot(2,2,nSF);
+%     plot(mean(resp(sf:nSF:end,:,:),3)');
+%     title(['pixelwise sf = ' sfLabels{sf}]);ylim([-0.01 0.05])
+% end
+% if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+% 
+% figure
+% plot(mean(sfResp,3)'); title('pixelwise resp vs SF');
+% if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+% 
+% %%% SF tuning curves
+% figure
+% hold on
+% plot(2:(nSF+1),mean(tuning(2:end,:),2),'bo')
+% errorbar(2:(nSF+1),mean(tuning(2:end,:),2), std(tuning(2:end,:),[],2)/sqrt(nfiles),'k');
+% plot(1.5,mean(tuning(1,:),2),'bo')
+% errorbar(1.5,mean(tuning(1,:),2), std(tuning(1,:),[],2)/sqrt(nfiles),'k');
+% ylabel('mean dF/F');xlabel('cyc / deg'); title('pixel wise SF tuning')
+% set(gca,'Xtick',[ 1.5 2:5]);
+% set(gca,'XtickLabel',{'0','0.005','0.02','0.08','0.32'});
+% xlim([1 5.5])
+% if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+%%% pixelwise orientation tuning
+% figure
+% plot(unique(thetas),nanmean(oriTuning(:,:),2))
+% xlabel('theta'); title('pixelwise orienation selectivity');
+% ylim([-0.025 0.1]);
+% if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+% 
 
 
-%%% orientations broked out by spatial frequency
-
+%%% SF and orientation all cells pooled
 figure
 for sf = 1:nSF;
-    subplot(2,2,nSF);
-    plot(mean(resp(sf:nSF:end,:,:),3)');
-    title(['sf = ' sfLabels{sf}]);ylim([-0.01 0.05])
-end
-if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
-
-figure
-for sf = 1:nSF;
-    subplot(2,2,nSF);
+    subplot(2,2,sf);
     plot(squeeze(mean(nanmean(regionResp(:,sf:nSF:end,:,:),4),1))');
-    title(['cells sf = ' sfLabels{sf}]);ylim([-0.01 0.05])
+    title(['all cells sf = ' sfLabels{sf}]);ylim([-0.01 0.05])
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 
-
+%%% SF and orientation for each layer
 for r = 1:4;
     figure
     for sf = 1:nSF;
         subplot(2,2,sf);
         plot(squeeze(nanmean(regionResp(r,sf:nSF:end,:,:),4))');
-        title([rLabels{r} ' ' sfLabels{sf}]);ylim([-0.01 0.05])
+        title([rLabels{r} ' ' sfLabels{sf}]);ylim([-0.02 0.1])
+    if sf==1
+    legend(oriLabels)
+    end
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
 end
 
 
 
-figure
-plot(mean(sfResp,3)'); title('resp vs SF');
-if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
-%%% SF tuning curves
-figure
-hold on
-plot(2:(nSF+1),mean(tuning(2:end,:),2),'bo')
-errorbar(2:(nSF+1),mean(tuning(2:end,:),2), std(tuning(2:end,:),[],2)/sqrt(nfiles),'k');
-plot(1.5,mean(tuning(1,:),2),'bo')
-errorbar(1.5,mean(tuning(1,:),2), std(tuning(1,:),[],2)/sqrt(nfiles),'k');
-ylabel('mean dF/F');xlabel('cyc / deg'); title('SF tuning')
-set(gca,'Xtick',[ 1.5 2:5]);
-set(gca,'XtickLabel',{'0','0.005','0.02','0.08','0.32'});
-xlim([1 5.5])
-if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %%% SF tuning curves
 figure
@@ -416,49 +430,59 @@ for r = 1:4
     plot(1.5,nanmean(regionTuning(1,r,:),3),'bo')
     errorbar(1.5,nanmean(regionTuning(1,r,:),3), nanstd(regionTuning(1,r,:),[],3)/sqrt(nfiles),'k');
     ylabel('mean dF/F');xlabel('cyc / deg'); title(rLabels{r})
-    set(gca,'Xtick',[ 1.5 2:5]);
-    set(gca,'XtickLabel',{'0','0.005','0.02','0.08','0.32'});
-    xlim([1 5.5]); ylim([0 0.05])
+    set(gca,'Xtick',1:nSF+1);
+    set(gca,'XtickLabel',[{'0'} sfLabels]);
+    xlim([1 nSF+1.5]); ylim([0 0.05])
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
+
+%%% spatial frequency tuning, for each experiment
 figure
 for r = 1:4
     subplot(2,2,r)
     hold on
     plot(1:(nSF+1),squeeze((regionTuning(1:end,r,:))))
     ylabel('mean dF/F');xlabel('cyc / deg'); title(rLabels{r})
-    set(gca,'Xtick',[ 1.5 2:5]);
-    set(gca,'XtickLabel',{'0','0.005','0.02','0.08','0.32'});
-    xlim([1 (nSF+1.5)]); ylim([-0.025 0.1])
+    set(gca,'Xtick',1:nSF+1);
+    set(gca,'XtickLabel',[{'0'} sfLabels]);
+    xlim([0.5 (nSF+1.5)]); ylim([-0.025 0.1])
 end
-
+sgtitle('SF tuning over all expts')
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-
-
+%%% timecourse of each SF, in each layer
+col = 'rgbcmyk';
 figure
 for r = 1:4
     subplot(2,2,r);
-    plot(1:cycDur,squeeze(nanmean(regionSFresp(:,r,:,:),4)));
-    ylim([-0.01 0.05])
+   % plot(1:cycDur,squeeze(nanmean(regionSFresp(:,r,:,:),4)));
+    mn = squeeze(nanmean(regionSFresp(:,r,:,:),4));
+    err = squeeze(nanstd(regionSFresp(:,r,:,:),[],4))/sqrt(nfiles);
+    hold on
+    for i = 1:size(mn,1)
+        shadedErrorBar(1:cycDur,mn(i,:),err(i,:),col(i))
+    end
+    ylim([-0.02 0.1])
     title(rLabels{r})
+    if r ==1
+        legend([{'0'} sfLabels])
+    end
+    xlabel('frame')
 end
+sgtitle('SF timecourses')
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-%%% pixelwise orientation tuning
-figure
-plot(unique(thetas),nanmean(oriTuning(:,:),2))
-xlabel('theta'); title('pixelwise orienation selectivity');
-ylim([-0.025 0.1]);
-if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %%% region orientation tuning (averaged over SF)
 figure
 for r=1:4
     subplot(2,2,r);
-    plot(unique(thetas),nanmean(regionOriTuning(:,r,:),3)); xlabel('theta'); title(rLabels{r});
-    ylim([-0.025 0.1]); ylabel('resp avg over SF')
+    mn = nanmean(regionOriTuning(:,r,:),3);
+    err =nanstd(regionOriTuning(:,r,:),[],3)/sqrt(nfiles);
+    shadedErrorBar(unique(thetas),mn, err);
+    %plot(unique(thetas),nanmean(regionOriTuning(:,r,:),3)); xlabel('theta'); title(rLabels{r});
+    ylim([0 0.05]); ylabel('resp avg over SF')
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 

@@ -1,19 +1,19 @@
 %% prepostTopo_KC
-
 %%% this function takes topox/topoy widefield data and does a pre vs. post
 %%% correlation on the signmap*amplitudes, then plots them across groups
 close all; clear all;
 
-batch_V1_4X3Y % batchPatch_KC %select batch file
+batchNEW_KC % batchPatch_KC %select batch file %make a combined dreadds/caspase file
 cd(pathname)
 
-grpnames = {'V1_dreadds'};
+grpnames = {'pre','post'}; %set the group names here
         
 pplb = {'pre','post'};
+% pplb = {'dreadds','caspase'};
 
 %select subset of animals
 %use = find(strcmp({files.notes},'good data')&strcmp({files.timing},'pre'));
-use = find(strcmp({files.notes},'good data'));
+use = find(strcmp({files.inject},'CLOZ') & strcmp({files.virus},'CAV-hM4Di'));
 alluse=use;
 allsubj = unique({files(alluse).subj}); %needed for doTopography
 s=1:1;doTopography
@@ -25,8 +25,7 @@ for f = 1:length(use)
     save(files(use(f)).topox,'xshift','yshift','tshift','x0','y0','sz','-append')
 end
 
-% psfile = 'D:\Kristen\LGN_Dreadds_WF_Imaging\tempKrisWF.ps';
-psfile = 'F:\Kristen\LP_Imaging_winter20';
+psfile = 'F:\Kristen\tempKrisWF.ps';
 if exist(psfile,'file')==2;delete(psfile);end
 
 %% quantification
@@ -34,62 +33,42 @@ load(files(use(1)).topox,'map'); %first expt to initialize variables
 resamp=2; %how much to downsample maps by
 ampthresh = 0.005; %threshold for phase correlation/display for topox/y
 mrng = [-0.01 0.05]; %display range for imagesc of maps
-grpmaps = zeros(4,10,size(map{1},1)/resamp,size(map{1},2)/resamp,2);grpamp=grpmaps;
-grptx = zeros(4,10,size(map{1},1)/resamp,size(map{1},2)/resamp,2);grpty=grptx;
-grpcc = zeros(4,10);grpccx=grpcc;grpccy=grpcc;combcc=grpcc; %correlation coefficients
+grpmaps = zeros(2,10,size(map{1},1)/resamp,size(map{1},2)/resamp);grpamp=grpmaps; %(group,animal,mapx-dim,mapy-dim)
+grptx = zeros(2,10,size(map{1},1)/resamp,size(map{1},2)/resamp);grpty=grptx;
+grpcc = zeros(2,10);grpccx=grpcc;grpccy=grpcc;combcc=grpcc; %correlation coefficients
 zoom = 1;%260/size(dfof_bg,1); should be same as in doTopography
 f1=figure;set(gcf,'color','w');
-for grp=1:1
-%     if grp==1
-%         use = find(strcmp({files.controlvirus},'yes'));
-%         grpfilename = 'lpcontrol'
-%         numAni = length(use)/2;
-%     elseif grp==2
-%         use = find(strcmp({files.controlvirus},'no'));
-%         grpfilename = 'lpdreadds'
-%         numAni = length(use)/2;
-%     end
- numAni = length(use)/2;
-    for f = 1:2:length(use) %across animals
-        ani = round(f/2);
-        figure;set(gcf,'color','w')
-        cnt=1;
-        for pp = 0:1 %pre/post
-            if pp==1
-                load(files(use(f+pp)).topox,'map');
-            else
-                load(files(use(f+pp)).topox,'map','xshift','yshift','tshift','x0','y0','sz');
-            end
+for grp=1:2 %group loop (pre/post or hm4d vs. caspase)
+    if grp==1
+        use = find(strcmp({files.virus},'CAV-hM4Di')& strcmp({files.timing},'pre') & strcmp({files.inject},'CLOZ')); %make this dreadds (pre or post)
+        grpfilename = 'pre'
+        numAni = length(use);
+            for animal = 1:length(use) %animal loop
+%           ani = animal;
+%           figure;set(gcf,'color','w')
+%           cnt=1;
             clear data
-            if length(map)==3
-                img = imresize(map{3},1/resamp);
-                img = shiftImageRotate(img,xshift+x0,yshift+y0,tshift,zoom,sz);
-                data(:,:,1) = img;
-            else
-                img = imresize(map{1},1/resamp);
-                img = shiftImageRotate(img,xshift+x0,yshift+y0,tshift,zoom,sz);
-                data(:,:,1) = img;
-            end
-            load(files(use(f+pp)).topoy,'map');
-            if length(map)==3
-                img = imresize(map{3},1/resamp);
-                img = shiftImageRotate(img,xshift+x0,yshift+y0,tshift,zoom,sz);
-                data(:,:,2) = img;
-            else
-                img = imresize(map{1},1/resamp);
-                img = shiftImageRotate(img,xshift+x0,yshift+y0,tshift,zoom,sz);
-                data(:,:,2) = img;
-            end
+        
+            load(files(use(grp)).topox,'map','xshift','yshift','tshift','x0','y0','sz');
+            length(map)==3 %blue/green, take blue-green map
+            img = imresize(map{3},1/resamp);
+            img = shiftImageRotate(img,xshift+x0,yshift+y0,tshift,zoom,sz);
+            data(:,:,1) = img;
+
+            load(files(use(grp)).topoy,'map');
+            img = imresize(map{3},1/resamp);
+            img = shiftImageRotate(img,xshift+x0,yshift+y0,tshift,zoom,sz);
+            data(:,:,2) = img;
 
             %sign map analysis
             ph = angle(data);
             ph(ph<0)= ph(ph<0)+2*pi;
 
-            for i = 1:2;
+                for i = 1:2;
                 [x y] = gradient(ph(:,:,i));
                 dx(:,:,i) = x;%imresize(x,[size(ph,1) size(ph,2)])
                 dy(:,:,i)=y;%imresize(y,[size(ph,1) size(ph,2)]);
-            end
+                end
 
             mapsign = dx(:,:,1).*dy(:,:,2) - dy(:,:,1).*dx(:,:,2);
             mapsign(isnan(mapsign))=0;
@@ -102,58 +81,58 @@ for grp=1:1
             amp = sqrt(abs(data(:,:,1)).*abs(data(:,:,2)));
             amp = amp/prctile(amp(:),99);
             amp(amp>1)=1;
-            
-            %cut off heaplate ring
-            [X,Y] = meshgrid(1:size(data,2),1:size(data,1));%Xp = X;
+
+           %cut off heaplate ring
+           [X,Y] = meshgrid(1:size(data,2),1:size(data,1));%Xp = X;
             dist = sqrt((X - size(data,2)/2).^2 + (Y - size(data,1)/2).^2);
             img = mapsign.*amp; %sign map analysis
-%             img = real(squeeze(data(:,:,1))); %x/y only analysis
+%           img = real(squeeze(data(:,:,1))); %x/y only analysis
             img(dist>90) = NaN; %chose 90 pixels for circle just by eye, maybe height/2.88 or width/3.55?
-%             img(dist>90&Xp|Xp>size(Xp,2)/2) = NaN; %chose 90 pixels for circle just by eye, maybe height/2.88 or width/3.55?
+%           img(dist>90&Xp|Xp>size(Xp,2)/2) = NaN; %chose 90 pixels for circle just by eye, maybe height/2.88 or width/3.55?
 
-            grpmaps(grp,ani,:,:,pp+1) = img;
-            grpamp(grp,ani,:,:,pp+1) = amp;
-                        
+            grpmaps(grp,grp,:,:) = img; %sign map for correlation of visual area boundaries across groups
+            grpamp(grp,grp,:,:) = amp; %amplitude map to look for changes across groups
+
             %get x/y phase and threshold only above min amp
             %correlate raw phase, also plot each one
-            tx = squeeze(data(:,:,1));grptx(grp,ani,:,:,pp+1) = tx;%tx(dist>90) = NaN;
+            
+            tx = squeeze(data(:,:,1));grptx(grp,:,:) = tx;%tx(dist>90) = NaN;
             xamp = abs(tx);tx=polarMap(tx);%tx(dist>90) = NaN;
-            ty = squeeze(data(:,:,2));grpty(grp,ani,:,:,pp+1) = ty;%ty(dist>90) = NaN;
+            ty = squeeze(data(:,:,2));grpty(grp,:,:) = ty;%ty(dist>90) = NaN;
             yamp = abs(ty);ty=polarMap(ty);%ty(dist>90) = NaN;           
-            
-            subplot(2,3,cnt)
-            imshow(img);axis off;axis image;
-            title(sprintf('%s sign',pplb{pp+1}))
-            set(gca,'LooseInset',get(gca,'TightInset'))
-            cnt=cnt+1;
-            subplot(2,3,cnt)
-            imshow(tx);axis off;axis image;
-            title(sprintf('%s topox',pplb{pp+1}))
-            set(gca,'LooseInset',get(gca,'TightInset'))
-            cnt=cnt+1;
-            subplot(2,3,cnt)
-            imshow(ty);axis off;axis image;
-            title(sprintf('%s topoy',pplb{pp+1}))
-            set(gca,'LooseInset',get(gca,'TightInset'))
-            cnt=cnt+1;
-            
-        end
-        pre = squeeze(grpmaps(grp,ani,:,:,1));pre(dist>90) = NaN;pre=pre(:);pre=pre(~isnan(pre));
-        post = squeeze(grpmaps(grp,ani,:,:,2));post(dist>90) = NaN;post=post(:);post=post(~isnan(post));
-        cc = corr(pre,post);
-        grpcc(grp,ani) = cc;
+
+        subplot(2,3,cnt)
+        imshow(img);axis off;axis image;
+        title('sign')
+        set(gca,'LooseInset',get(gca,'TightInset'))
+        cnt=cnt+1;
+        subplot(2,3,cnt)
+        imshow(tx);axis off;axis image;
+        title('topox')
+        set(gca,'LooseInset',get(gca,'TightInset'))
+        cnt=cnt+1;
+        subplot(2,3,cnt)
+        imshow(ty);axis off;axis image;
+        title('topoy')
+        set(gca,'LooseInset',get(gca,'TightInset'))
+        cnt=cnt+1;
+
+%         pre = squeeze(grpmaps(grp,ani,:,:,1));pre(dist>90) = NaN;pre=pre(:);pre=pre(~isnan(pre));
+%         post = squeeze(grpmaps(grp,ani,:,:,2));post(dist>90) = NaN;post=post(:);post=post(~isnan(post));
+%         cc = corr(pre,post);
+%         grpcc(grp,ani) = cc;
+%         
+%         pre = squeeze(grptx(grp,ani,:,:,1));pre=pre(:);pre=pre(~isnan(pre));
+%         post = squeeze(grptx(grp,ani,:,:,2));post=post(:);post=post(~isnan(post));
+%         xcc = corr(pre,post);
+%         grpccx(grp,ani) = abs(xcc);
+%         
+%         pre = squeeze(grpty(grp,ani,:,:,1));pre=pre(:);pre=pre(~isnan(pre));
+%         post = squeeze(grpty(grp,ani,:,:,2));post=post(:);post=post(~isnan(post));
+%         ycc = corr(pre,post);
+%         grpccy(grp,ani) = abs(ycc);
         
-        pre = squeeze(grptx(grp,ani,:,:,1));pre=pre(:);pre=pre(~isnan(pre));
-        post = squeeze(grptx(grp,ani,:,:,2));post=post(:);post=post(~isnan(post));
-        xcc = corr(pre,post);
-        grpccx(grp,ani) = abs(xcc);
-        
-        pre = squeeze(grpty(grp,ani,:,:,1));pre=pre(:);pre=pre(~isnan(pre));
-        post = squeeze(grpty(grp,ani,:,:,2));post=post(:);post=post(~isnan(post));
-        ycc = corr(pre,post);
-        grpccy(grp,ani) = abs(ycc);
-        
-        mtit(sprintf('%s %s %s signcc=%0.3f xcc=%0.3f ycc=%0.3f',files(use(f)).subj,files(use(f)).inject,files(use(f)).training,cc,xcc,ycc))
+%         mtit(sprintf('%s %s %s signcc=%0.3f xcc=%0.3f ycc=%0.3f',files(use(animal)).subj,files(use(animal)).inject,files(use(animal)).training,cc,xcc,ycc))
         
         if exist('psfile','var')
             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
@@ -198,20 +177,22 @@ for grp=1:1
     end
     
     %%% amplitude differences
-    figure
-      subplot(2,4,1)
+    figure; colormap jet
+    amp_range = [0 0.02];
+    delta_amp_range = [-0.01 0.01];
+    subplot(2,4,1)
     tx = squeeze(nanmean(grptx(grp,:,:,:,1),2));tx1=abs(tx);
-    imagesc(tx1,[0 0.015]);axis off;axis image;
+    imagesc(tx1,amp_range);axis off;axis image;
     title('pre topox')
     set(gca,'LooseInset',get(gca,'TightInset'))
     subplot(2,4,2)
     tx = squeeze(nanmean(grptx(grp,:,:,:,2),2));tx2=abs(tx);
-    imagesc(tx2,[0 0.015]);axis off;axis image;
+    imagesc(tx2,amp_range);axis off;axis image;
     title(sprintf('post topox cc=%0.3f',nanmean(grpccx(grp,:))))
     set(gca,'LooseInset',get(gca,'TightInset'))
     
      subplot(2,4,3)
-    imagesc(tx2 - tx1,[-0.0025 0.0025]);axis off;axis image;
+    imagesc(tx2 - tx1,delta_amp_range);axis off;axis image;
     title(sprintf('post - pre X'))
     set(gca,'LooseInset',get(gca,'TightInset')); hold on; plot(ypts,xpts,'k.','Markersize',1); 
     
@@ -222,18 +203,18 @@ for grp=1:1
     
     subplot(2,4,5)
     ty = squeeze(nanmean(grpty(grp,:,:,:,1),2));ty1=abs(ty);
-    imagesc(ty1,[0 0.015]);axis off;axis image;
+    imagesc(ty1,amp_range);axis off;axis image;
     title('pre topoy')
     set(gca,'LooseInset',get(gca,'TightInset'))
     subplot(2,4,6)
     ty = squeeze(nanmean(grpty(grp,:,:,:,2),2));ty2=abs(ty);
-    imagesc(ty2,[0 0.015]);axis off;axis image;
-    title(sprintf('post topox cc=%0.3f',nanmean(grpccy(grp,:))))
+    imagesc(ty2,amp_range);axis off;axis image;
+    title(sprintf('post topoy cc=%0.3f',nanmean(grpccy(grp,:))))
     set(gca,'LooseInset',get(gca,'TightInset'))
     mtit(sprintf('%s',grpnames{grp}))
     
          subplot(2,4,7)
-    imagesc(ty2 - ty1,[-0.0025 0.0025]);axis off;axis image;
+    imagesc(ty2 - ty1,delta_amp_range);axis off;axis image;
     title(sprintf('post - pre Y'))
     set(gca,'LooseInset',get(gca,'TightInset')); hold on; plot(ypts,xpts,'k.','Markersize',1); 
     
@@ -266,8 +247,12 @@ for grp=1:1
     hold on
     plot(grp*ones(1,numAni),combcc(grp,1:numAni),'ko','MarkerSize',15)
     errorbar(grp,nanmean(combcc(grp,1:numAni)),nanstd(combcc(grp,1:numAni))/sqrt(numAni),'k.','LineWidth',1,'MarkerSize',20)
-
-end
+  
+    elseif grp==2
+        use = find(strcmp({files.virus},'CAV-hM4Di') & strcmp({files.timing},'post') & strcmp({files.inject},'CLOZ')); %make this caspase
+        grpfilename = 'post'
+        numAni = length(use);
+    end
 
 figure(f1)
 subplot(2,2,1)
@@ -318,7 +303,7 @@ end
 %% save pdf
 
 try
-    dos(['ps2pdf ' psfile ' "' 'prepostTopo.pdf' '"'])
+    dos(['ps2pdf ' psfile ' "' 'cav_hM4Di_G6H203RTprepostTopo.pdf' '"'])
 catch
     display('couldnt generate pdf');
 end

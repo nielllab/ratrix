@@ -4,8 +4,8 @@ clear all
 dbstop if error
 warning off
 
-savename = 'CASP3_DreaddClozCompareSpatial' %pdf file name
-pathname = 'F:\Kristen\CASPASE3_20' %location you want PDF saved
+savename = 'calb2ck2g6h47RT_DiffPeaksSpatial' %pdf file name
+pathname = 'F:\Kristen\Widefield' %location you want PDF saved
 
 %create a temp file for pdf generation
 psfilename = fullfile(pathname,'tempWF.ps'); 

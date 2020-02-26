@@ -13,7 +13,7 @@ datapathname = 'F:\Widefield_Analysis\Kristen\'
 outpathname = 'F:\Widefield_Analysis\Kristen\'
 % outpathname = 'D:\Kristen\'
 
-%% G6H113LT non-dreadds @ 0.5 mg/kg cloz
+%% G6H113LT non-dreadds @ 0.5 mg/kg cloz **really 4x3y
 % n=n+1;
 % files(n).subj = 'G6H113LT'; %animal name
 % files(n).expt = '051719'; %date of experiment
@@ -60,7 +60,7 @@ outpathname = 'F:\Widefield_Analysis\Kristen\'
 % files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat'
 % files(n).notes = 'good data';
 % 
-%% G6H146LT non-dreadds @ 0.1 mg/kg 
+%% G6H146LT non-dreadds @ 0.1 mg/kg **really 4x3y
 % n=n+1;
 % files(n).subj = 'G6H146LT'; %animal name
 % files(n).expt = '051719'; %date of experiment

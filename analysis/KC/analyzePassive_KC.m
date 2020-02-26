@@ -1,24 +1,28 @@
-%% analyzePassiveKC: choose batch file and filter experiments w/batch file fields, comment/uncomment stimulus-specific analyses below
+%% analyzePassive
+
 close all
 clear all
 warning off
 
-%% pick animals for Kristen
-
-batch_LP_4X3Y %Kris' V1 batch file
+batchNEW_KC
 cd(pathname)
 
 %%%select the fields that you want to filter on
-alluse = find(strcmp({files.virus},'hM4Di') & strcmp({files.inject},'CLOZ') & strcmp({files.monitor},'land')...
-    & strcmp({files.timing},'post') & strcmp({files.notes},'good data') & strcmp({files.dose},'1.0 mg_kg'))
+alluse = find(strcmp({files.virus},'cre-hM4Di') & strcmp({files.genotype},'calb2cre-ck2-gc6')...
+    & strcmp({files.inject},'CLOZ') & strcmp({files.monitor},'land')...
+    & strcmp({files.timing},'post') & strcmp({files.notes},'good expression')...
+    & strcmp({files.moviename4x3y},'C:\grating4x3y5sf3tf_short011315.mat'))
+
+files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat'
 
 %%%uncomment this for individual mouse
 % savename = [files(alluse(1)).expt '_' files(alluse(1)).subj '_' files(alluse(1)).inject '_' files(alluse(1)).timing...
 %     '_' files(alluse(1)).dose '_.mat']
 
 % %%%uncomment this for group
-savename = [files(alluse(1)).area '_' files(alluse(1)).virus '_' files(alluse(1)).inject '_' files(alluse(1)).timing...
-    '_' files(alluse(1)).dose '_.mat']
+savename = [files(alluse(1)).subj '_' files(alluse(1)).timing '_' files(alluse(1)).virus '_' ...
+    files(alluse(1)).genotype '_' files(alluse(1)).inject '_.mat']
+
 
 %% run doTopography (use this one to average all sessions that meet criteria)
 length(alluse)
@@ -53,11 +57,30 @@ disp('doing 4x3y')
 rep=4;
 doGratingsNew;
 
+%%%UNCOMMENT FOR NATURAL IMAGES
+% disp('doing natural images')
+% doNaturalImages
+
+
+% % %%
+% % % %%% analyze looming
+% % % for f = 1:length(use)
+% % %     loom_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'loom');
+% % % end
+% % % fourPhaseAvg(loom_resp,allxshift+x0,allyshift+y0,allthetashift,zoom, sz, avgmap);
+% % 
+% % 
+% % %%% analyze grating
+% % % for f = 1:length(use)
+% % %  f
+% % %  grating_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'grating');
+% % % end
+% % % fourPhaseAvg(grating_resp,allxshift+x0,allyshift+y0, allthetashift,zoom*0.57, sz, avgmap);
+
 end
 
 disp('saving data')
 try
-    save(fullfile(pathname,savename),'allsubj','tuningall','sftcourse','trialcycavgRunAll','trialcycavgSitAll','shiftData','fit','mnfit','cycavg','-v7.3');
 catch
     save(fullfile(pathname,savename),'allsubj','shiftData','fit','mnfit','cycavg','-v7.3');
 end

@@ -10,7 +10,7 @@ cd(pathname)
 %%%select the fields that you want to filter on
 alluse = find(strcmp({files.virus},'cre-hM4Di') & strcmp({files.genotype},'calb2cre-ck2-gc6')...
     & strcmp({files.inject},'CLOZ') & strcmp({files.monitor},'land')...
-    & strcmp({files.timing},'post') & strcmp({files.notes},'good expression')...
+    & strcmp({files.timing},'pre') & strcmp({files.notes},'good expression')...
     & strcmp({files.moviename4x3y},'C:\grating4x3y5sf3tf_short011315.mat'))
 
 files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat'
@@ -81,6 +81,7 @@ end
 
 disp('saving data')
 try
+    save(fullfile(pathname,savename),'allsubj','shiftData','fit','mnfit','cycavg','tuningall','sftcourse','trialcycavgRunAll','trialcycavgSitAll','-v7.3');
 catch
     save(fullfile(pathname,savename),'allsubj','shiftData','fit','mnfit','cycavg','-v7.3');
 end

@@ -3,29 +3,11 @@ close all
 clear all
 warning off
 
-% %% pick animals for Kristen
-% 
-% batch_LP_4X3Y %Kris' V1 batch file
-% cd(pathname)
-% 
-% %%%select the fields that you want to filter on
-% alluse = find(strcmp({files.virus},'hM4Di') & strcmp({files.inject},'CLOZ') & strcmp({files.monitor},'land')...
-%     & strcmp({files.timing},'pre') & strcmp({files.notes},'good data') & strcmp({files.dose},'1.0 mg_kg'))
-% 
-% %%%uncomment this for individual mouse
-% % savename = [files(alluse(1)).expt '_' files(alluse(1)).subj '_' files(alluse(1)).inject '_' files(alluse(1)).timing...
-% %     '_' files(alluse(1)).dose '_.mat']
-% 
-% % %%%uncomment this for group
-% savename = [files(alluse(1)).area '_' files(alluse(1)).virus '_' files(alluse(1)).inject '_' files(alluse(1)).timing...
-%     '_' files(alluse(1)).dose '_.mat']
-% 
-% 
-% pick animals for Mandi
-
-batchEnrichmentCohort2 %Mandi's batch file
+% pick animals
+batchEnrichmentCohort2 %batch file
 cd(pathname)
 
+%filter based on fields of batch file that define the animals you want
 alluse = find(strcmp({files.cond},'control') & strcmp({files.notes},'good imaging session'))
 
 savename = ['AF_' files(alluse(1)).cond '.mat'];
@@ -42,59 +24,51 @@ if exist(psfilename,'file')==2;delete(psfilename);end
 %use = intersect(alluse,find(strcmp({files.subj},allsubj{s})))    
 
 for s=1:1
-use = alluse;
-allsubj{s}
+    use = alluse;
+    allsubj{s}
 
-%%% calculate gradients and regions
-clear map merge
+    %%% calculate gradients and regions
+    clear map merge
 
-x0=0; y0=0; sz=128;
-doTopography;
+    x0=0; y0=0; sz=128;
+    doTopography;
 
-%% pick which gratings analysis to run
+    %% pick which gratings analysis to run
 
-%%%UNCOMMENT FOR 3X2Y
-% disp('doing 3x2y')
-% rep=2;
-% doGratingsNew;
+    %%%UNCOMMENT FOR 3X2Y
+    % disp('doing 3x2y')
+    % rep=2;
+    % doGratingsNew;
 
-% %%% UNCOMMENT FOR 4X3Y
-disp('doing 4x3y')
-rep=4;
-doGratingsNew;
+    % %%% UNCOMMENT FOR 4X3Y
+    disp('doing 4x3y')
+    rep=4;
+    doGratingsNew;
+    disp('saving data')
+    save(fullfile(pathname,savename),'allsubj','shiftData','fit','mnfit','cycavg',...
+            'tuningall','sftcourse','trialcycavgRunAll','trialcycavgSitAll','-v7.3');
 
-%%%UNCOMMENT FOR NATURAL IMAGES
-disp('doing natural images')
-doNaturalImages
 
 
-% % %%
-% % % %%% analyze looming
-% % % for f = 1:length(use)
-% % %     loom_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'loom');
-% % % end
-% % % fourPhaseAvg(loom_resp,allxshift+x0,allyshift+y0,allthetashift,zoom, sz, avgmap);
-% % 
-% % 
-% % %%% analyze grating
-% % % for f = 1:length(use)
-% % %  f
-% % %  grating_resp{f}=fourPhaseOverlay(files(use(f)),pathname,outpathname,'grating');
-% % % end
-% % % fourPhaseAvg(grating_resp,allxshift+x0,allyshift+y0, allthetashift,zoom*0.57, sz, avgmap);
+    %%%UNCOMMENT FOR NATURAL IMAGES
+    disp('doing natural images')
+    doNaturalImages
+    disp('saving data')
+    try
+        save(fullfile(pathname,savename),'natimcyc','natimcycavg','allfam','allims','allfiles','-append');
+    catch
+        save(fullfile(pathname,savename),'allsubj','natimcyc','natimcycavg','allfam','allims','allfiles','-v7.3');
+    end
+
 
 end
 
-disp('saving data')
-try
-    save(fullfile(pathname,savename),'allsubj','shiftData','fit','mnfit','cycavg','natimcyc','natimcycavg','allfam','allims','allfiles','-v7.3');
-catch
-    save(fullfile(pathname,savename),'allsubj','shiftData','fit','mnfit','cycavg','-v7.3');
-end
+
 %%%phil note to self- where did sessiondata go/come from and why was it originally
 %%%being saved out? removed from save 6/13/19 after error said it didn't
 %%%exist
 
+%make the pdf
 try
     dos(['ps2pdf ' psfilename ' "' [fullfile(pathname,savename(1:end-4)) '.pdf'] '"'])
     delete(psfilename);

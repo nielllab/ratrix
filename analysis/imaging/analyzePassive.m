@@ -8,7 +8,7 @@ batchEnrichmentCohort2 %batch file
 cd(pathname)
 
 %filter based on fields of batch file that define the animals you want
-alluse = find(strcmp({files.cond},'control') & strcmp({files.notes},'good imaging session'))
+alluse = find(strcmp({files.cond},'enrichment') & strcmp({files.notes},'good imaging session'))
 
 savename = ['AF_' files(alluse(1)).cond '.mat'];
 
@@ -39,14 +39,14 @@ for s=1:1
     % disp('doing 3x2y')
     % rep=2;
     % doGratingsNew;
-
-    % %%% UNCOMMENT FOR 4X3Y
-    disp('doing 4x3y')
-    rep=4;
-    doGratingsNew;
-    disp('saving data')
-    save(fullfile(pathname,savename),'allsubj','shiftData','fit','mnfit','cycavg',...
-            'tuningall','sftcourse','trialcycavgRunAll','trialcycavgSitAll','-v7.3');
+% 
+%     % %%% UNCOMMENT FOR 4X3Y
+%     disp('doing 4x3y')
+%     rep=4;
+%     doGratingsNew;
+%     disp('saving data')
+%     save(fullfile(pathname,savename),'allsubj','shiftData','fit','mnfit','cycavg',...
+%             'tuningall','sftcourse','trialcycavgRunAll','trialcycavgSitAll','-v7.3');
 
 
 

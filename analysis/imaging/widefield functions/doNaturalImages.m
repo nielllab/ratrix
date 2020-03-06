@@ -261,7 +261,7 @@ for f = 1:length(use)
         yv = get(gca,'ylim');
         axis([0 timepts(end) 0 yv(2)])
         axis square
-        mtit(sprintf('%s %s %s %s familiar=%d',files(use(f)).subj,files(use(f)).expt,files(use(f)).condition,allfiles{i},allfam(i)))
+        mtit(sprintf('%s %s %s %s familiar=%d',files(use(f)).subj,files(use(f)).expt,files(use(f)).cond,allfiles{i},allfam(i)))
         if exist('psfilename','var')
             set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
             print('-dpsc',psfilename,'-append');

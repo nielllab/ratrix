@@ -25,7 +25,14 @@ end
 
  
 %select animals to use
-use = find(strcmp({files.notes},'good data'))
+use = find(strcmp({files.notes},'good expression'))
+
+% strcmp({files.virus},'CAV2-cre_cre-hM4Di') & strcmp({files.genotype},'camk2 gc6')...
+%     & strcmp({files.inject},'CLOZ') & strcmp({files.monitor},'land')...
+%     & strcmp({files.timing},'pre') & strcmp({files.notes},'good expression')...
+%     & strcmp({files.moviename4x3y},'C:\grating4x3y5sf3tf_short011315.mat')
+
+
 numAni = length(use)/2;
 sprintf('%d experiments for individual analysis',numAni)
 

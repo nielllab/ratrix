@@ -1,3 +1,5 @@
+
+
 for i = 1:2
     [f p] = uigetfile('*.mat',sprintf('maps file %d',i));
     load(fullfile(p,f),'map');

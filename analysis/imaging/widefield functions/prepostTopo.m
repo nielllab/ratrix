@@ -119,7 +119,7 @@ for grp=1:4
             img(dist>90) = NaN; %chose 90 pixels for circle just by eye, maybe height/2.88 or width/3.55?
 %             img(dist>90&Xp|Xp>size(Xp,2)/2) = NaN; %chose 90 pixels for circle just by eye, maybe height/2.88 or width/3.55?
 
-            grpmaps(grp,ani,:,:,pp+1) = img;
+            grpmaps(grp,ani,:,:,pp+1) = img; %dimensions: group, animal, xpixels, ypixels, pre/post
             grpamp(grp,ani,:,:,pp+1) = amp;
                         
             %get x/y phase and threshold only above min amp

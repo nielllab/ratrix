@@ -30,7 +30,7 @@ files(n).rignum = 'rig2';
 files(n).monitor = 'land'; 
 files(n).genotype = 'calb2cre-ck2-gc6';
 files(n).imagerate = 10;
-files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat';
+files(n).moviename = 'C:\grating4x3y5sf3tf_short011315.mat';
 files(n).notes = 'good data';
 
 %% CALB2CK2G6H92LT - no injection
@@ -55,7 +55,7 @@ files(n).rignum = 'rig2';
 files(n).monitor = 'land'; 
 files(n).genotype = 'calb2cre-ck2-gc6';
 files(n).imagerate = 10;
-files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat';
+files(n).moviename = 'C:\grating4x3y5sf3tf_short011315.mat';
 files(n).notes = 'good data';
 
 %% CALB2CK2G6H83LN - no injection
@@ -80,7 +80,7 @@ files(n).rignum = 'rig2';
 files(n).monitor = 'land'; 
 files(n).genotype = 'calb2cre-ck2-gc6';
 files(n).imagerate = 10;
-files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat';
+files(n).moviename = 'C:\grating4x3y5sf3tf_short011315.mat';
 files(n).notes = 'good data';
 
 %% CALB2CK2G6H92LT - no injection
@@ -105,7 +105,7 @@ files(n).rignum = 'rig2';
 files(n).monitor = 'land'; 
 files(n).genotype = 'calb2cre-ck2-gc6';
 files(n).imagerate = 10;
-files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat';
+files(n).moviename = 'C:\grating4x3y5sf3tf_short011315.mat';
 files(n).notes = 'good data';
 
 %% Cre-dep dreadds in calb2cre-ck2-g6 mice:    4x3y
@@ -133,7 +133,7 @@ files(n).rignum = 'rig2';
 files(n).monitor = 'land';
 files(n).genotype = 'calb2cre-ck2-gc6';
 files(n).imagerate = 10;
-files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat'
+files(n).moviename = 'C:\grating4x3y5sf3tf_short011315.mat'
 files(n).notes = 'good expression';
 
 % post
@@ -156,7 +156,7 @@ files(n).rignum = 'rig2';
 files(n).monitor = 'land';
 files(n).genotype = 'calb2cre-ck2-gc6';
 files(n).imagerate = 10;
-files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat'
+files(n).moviename = 'C:\grating4x3y5sf3tf_short011315.mat'
 files(n).notes = 'good expression';
 
 %%  012820_CALB2CK2G6H47RT_RIG2 @ 1.0 mg/kg SQ LP
@@ -180,7 +180,7 @@ files(n).rignum = 'rig2';
 files(n).monitor = 'land';
 files(n).genotype = 'calb2cre-ck2-gc6';
 files(n).imagerate = 10;
-files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat'
+files(n).moviename = 'C:\grating4x3y5sf3tf_short011315.mat'
 files(n).notes = 'good expression';
 
 % post
@@ -204,7 +204,7 @@ files(n).rignum = 'rig2';
 files(n).monitor = 'land';
 files(n).genotype = 'calb2cre-ck2-gc6';
 files(n).imagerate = 10;
-files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat'
+files(n).moviename = 'C:\grating4x3y5sf3tf_short011315.mat'
 files(n).notes = 'good expression';
 
 % 
@@ -233,7 +233,7 @@ files(n).rignum = 'rig2';
 files(n).monitor = 'land'; 
 files(n).genotype = 'camk2 gc6';
 files(n).imagerate = 10;
-files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat'
+files(n).moviename = 'C:\grating4x3y5sf3tf_short011315.mat'
 files(n).notes = 'good expression';
 
 % post
@@ -256,7 +256,7 @@ files(n).rignum = 'rig2';
 files(n).monitor = 'land'; %vert or land for portrait or landscape
 files(n).genotype = 'camk2 gc6';
 files(n).imagerate = 10;
-files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat';
+files(n).moviename = 'C:\grating4x3y5sf3tf_short011315.mat';
 files(n).notes = 'good expression';
 
 %% G6H203RT @ 1.0 mg/kg CLOZ    4x3y
@@ -281,7 +281,7 @@ files(n).rignum = 'rig2';
 files(n).monitor = 'land'; 
 files(n).genotype = 'camk2 gc6';
 files(n).imagerate = 10;
-files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat'
+files(n).moviename = 'C:\grating4x3y5sf3tf_short011315.mat';
 files(n).notes = 'good expression';
 
 % post
@@ -304,7 +304,7 @@ files(n).rignum = 'rig2';
 files(n).monitor = 'land'; %vert or land for portrait or landscape
 files(n).genotype = 'camk2 gc6';
 files(n).imagerate = 10;
-files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat';
+files(n).moviename = 'C:\grating4x3y5sf3tf_short011315.mat';
 files(n).notes = 'good expression';
 
 %% non-cre-Dreadds in ck2 g6 mice:
@@ -331,7 +331,9 @@ files(n).area = 'lp';
 files(n).rignum = 'rig2';
 files(n).monitor = 'land';
 files(n).genotype = 'camk2 gc6';
+files(n).moviename = 'C:\patchonpatch10min';
 files(n).notes = 'old cloz';
+
 
 % post
 n=n+1;
@@ -352,7 +354,9 @@ files(n).area = 'lp';
 files(n).rignum = 'rig2';
 files(n).monitor = 'land';
 files(n).genotype = 'camk2 gc6';
+files(n).moviename = 'C:\patchonpatch10min';
 files(n).notes = 'old cloz';
+
 
 %% G6H127RT @ (probably) 0.5 mg/kg   patch
 
@@ -375,7 +379,9 @@ files(n).area = 'lp';
 files(n).rignum = 'rig2';
 files(n).monitor = 'land';
 files(n).genotype = 'camk2 gc6';
+files(n).moviename = 'C:\patchonpatch10min';
 files(n).notes = 'good expression';
+
 
 % post
 n=n+1;
@@ -396,9 +402,11 @@ files(n).area = 'lp';
 files(n).rignum = 'rig2';
 files(n).monitor = 'land';
 files(n).genotype = 'camk2 gc6';
+files(n).moviename = 'C:\patchonpatch10min';
 files(n).notes = 'good expression';
 
-%% G6H137TT @ 1.0 mg/kg     3x2y
+
+%% G6H137TT @ 1.0 mg/kg     3x2y    LAND
 
 %pre
 n=n+1;
@@ -420,7 +428,7 @@ files(n).rignum = 'rig2';
 files(n).monitor = 'land'; 
 files(n).genotype = 'camk2 gc6';
 files(n).imagerate = 10;
-files(n).moviename3x2y = 'C:\grating3x2y6sf4tf_1728sec.mat'
+files(n).moviename = 'C:\grating3x2y6sf4tf_1728sec.mat'
 files(n).notes = 'good expression';
 
 % post
@@ -443,10 +451,10 @@ files(n).rignum = 'rig2';
 files(n).monitor = 'land'; 
 files(n).genotype = 'camk2 gc6';
 files(n).imagerate = 10;
-files(n).moviename3x2y = 'C:\grating3x2y6sf4tf_1728sec.mat'
+files(n).moviename = 'C:\grating3x2y6sf4tf_1728sec.mat'
 files(n).notes = 'good expression';
 
-%% G6H137TT @ 1.0 mg/kg      4x3y
+%% G6H137TT @ 1.0 mg/kg      4x3y   VERT
 
 %pre
 n=n+1;
@@ -468,7 +476,7 @@ files(n).rignum = 'rig2';
 files(n).monitor = 'vert';
 files(n).genotype = 'camk2 gc6';
 files(n).imagerate = 10;
-files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat'
+files(n).moviename = 'C:\grating4x3y5sf3tf_short011315.mat'
 files(n).notes = 'good expression';
 
 % post
@@ -491,5 +499,5 @@ files(n).rignum = 'rig2';
 files(n).monitor = 'vert';
 files(n).genotype = 'camk2 gc6';
 files(n).imagerate = 10;
-files(n).moviename4x3y = 'C:\grating4x3y5sf3tf_short011315.mat'
+files(n).moviename = 'C:\grating4x3y5sf3tf_short011315.mat'
 files(n).notes = 'good expression';

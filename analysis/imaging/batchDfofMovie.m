@@ -1,7 +1,11 @@
 %batchDfofMovie
+
+%%% first run your batch file, then check to make sure the stimuli you want
+%%% to analyze are uncommented below, then run this script
+
 errmsg= [];errRpt = {};
 nerr=0;
-redo=0;
+redo=0; %do you want to reanalyze data that have already been analyzed?
 for f = 1:length(files)
     f
     tic
@@ -12,33 +16,33 @@ for f = 1:length(files)
         rig=1;
     end   
     
-    %uncomment for topox
-    if redo  || isempty([pathname files(f).topox]) || ~exist([pathname files(f).topox],'file')
-        try
-            dfofMovie([datapathname files(f).topoxdata],rig);
-        catch exc
-            sprintf('couldnt do %s',files(f).topoxdata)
-            nerr=nerr+1;
-            errmsg{nerr}= sprintf('couldnt do %s',files(f).topoxdata)
-            errRpt{nerr}=getReport(exc,'extended')
-        end
-    else
-        sprintf('skipping %s',files(f).topox)
-    end
-    
-    %uncomment for topoy
-    if redo || isempty([pathname files(f).topoy]) || ~exist([pathname files(f).topoy],'file')
-        try
-            dfofMovie([datapathname files(f).topoydata],rig);
-        catch exc
-            sprintf('couldnt do %s',files(f).topoydata)
-            nerr=nerr+1;
-            errmsg{nerr}=sprintf('couldnt do %s',files(f).topoydata)
-            errRpt{nerr}=getReport(exc,'extended')
-        end
-    else
-        sprintf('skipping %s',files(f).topoy)
-    end
+%     %uncomment for topox
+%     if redo  || isempty([pathname files(f).topox]) || ~exist([pathname files(f).topox],'file')
+%         try
+%             dfofMovie([datapathname files(f).topoxdata],rig);
+%         catch exc
+%             sprintf('couldnt do %s',files(f).topoxdata)
+%             nerr=nerr+1;
+%             errmsg{nerr}= sprintf('couldnt do %s',files(f).topoxdata)
+%             errRpt{nerr}=getReport(exc,'extended')
+%         end
+%     else
+%         sprintf('skipping %s',files(f).topox)
+%     end
+%     
+%     %uncomment for topoy
+%     if redo || isempty([pathname files(f).topoy]) || ~exist([pathname files(f).topoy],'file')
+%         try
+%             dfofMovie([datapathname files(f).topoydata],rig);
+%         catch exc
+%             sprintf('couldnt do %s',files(f).topoydata)
+%             nerr=nerr+1;
+%             errmsg{nerr}=sprintf('couldnt do %s',files(f).topoydata)
+%             errRpt{nerr}=getReport(exc,'extended')
+%         end
+%     else
+%         sprintf('skipping %s',files(f).topoy)
+%     end
     
 %     %uncomment for 3x2y
 %     if redo || isempty([pathname files(f).grating3x2y6sf4tf]) || ~exist([pathname files(f).grating3x2y6sf4tf],'file')
@@ -53,21 +57,21 @@ for f = 1:length(files)
 %     else
 %         sprintf('skipping %s',files(f).grating3x2y6sf4tfdata)
 %     end
-%     
+    
 %     %uncomment for natural images
-    if redo || isempty([pathname files(f).naturalimages]) || ~exist([pathname files(f).naturalimages],'file')
-        try
-            dfofMovie([datapathname files(f).naturalimagesdata],rig);
-        catch exc
-            sprintf('couldnt do %s',files(f).naturalimagesdata)
-            nerr=nerr+1;
-            errmsg{nerr}=sprintf('couldnt do %s',files(f).naturalimagesdata)
-            errRpt{nerr}=getReport(exc,'extended')
-        end
-    else
-        sprintf('skipping %s',files(f).naturalimagesdata)
-    end
-%     
+%     if redo || isempty([pathname files(f).naturalimages]) || ~exist([pathname files(f).naturalimages],'file')
+%         try
+%             dfofMovie([datapathname files(f).naturalimagesdata],rig);
+%         catch exc
+%             sprintf('couldnt do %s',files(f).naturalimagesdata)
+%             nerr=nerr+1;
+%             errmsg{nerr}=sprintf('couldnt do %s',files(f).naturalimagesdata)
+%             errRpt{nerr}=getReport(exc,'extended')
+%         end
+%     else
+%         sprintf('skipping %s',files(f).naturalimagesdata)
+%     end
+    
     %uncomment for darkness
     if redo || isempty([pathname files(f).darkness]) || ~exist([pathname files(f).darkness],'file')
         try
@@ -80,6 +84,20 @@ for f = 1:length(files)
         end
     else
         sprintf('skipping %s',files(f).darknessdata)
+    end 
+    
+    %uncomment for stepbinary
+    if redo || isempty([pathname files(f).stepbinary]) || ~exist([pathname files(f).stepbinary],'file')
+        try
+            dfofMovie([datapathname files(f).stepbinarydata],rig);
+        catch exc
+            sprintf('couldnt do %s',files(f).stepbinarydata)
+            nerr=nerr+1;
+            errmsg{nerr}=sprintf('couldnt do %s',files(f).stepbinarydata)
+            errRpt{nerr}=getReport(exc,'extended')
+        end
+    else
+        sprintf('skipping %s',files(f).stepbinarydata)
     end  
 %     
 %     %uncomment for 4x3y
@@ -98,19 +116,19 @@ for f = 1:length(files)
     
 
  
-        %uncomment for 4x3y grating4x3y5sf3tf
-    if redo || isempty([pathname files(f).grating4x3y5sf3tf]) || ~exist([pathname files(f).grating4x3y5sf3tf],'file')
-        try
-            dfofMovie([datapathname files(f).grating4x3y5sf3tfdata],rig);
-        catch exc
-            sprintf('couldnt do %s',files(f).grating4x3y5sf3tfdata)
-            nerr=nerr+1;
-            errmsg{nerr}=sprintf('couldnt do %s',files(f).grating4x3y5sf3tfdata)
-            errRpt{nerr}=getReport(exc,'extended')
-        end
-    else
-        sprintf('skipping %s',files(f).grating4x3y5sf3tfdata)
-    end
+%         %uncomment for 4x3y grating4x3y5sf3tf
+%     if redo || isempty([pathname files(f).grating4x3y5sf3tf]) || ~exist([pathname files(f).grating4x3y5sf3tf],'file')
+%         try
+%             dfofMovie([datapathname files(f).grating4x3y5sf3tfdata],rig);
+%         catch exc
+%             sprintf('couldnt do %s',files(f).grating4x3y5sf3tfdata)
+%             nerr=nerr+1;
+%             errmsg{nerr}=sprintf('couldnt do %s',files(f).grating4x3y5sf3tfdata)
+%             errRpt{nerr}=getReport(exc,'extended')
+%         end
+%     else
+%         sprintf('skipping %s',files(f).grating4x3y5sf3tfdata)
+%     end
     
 
     

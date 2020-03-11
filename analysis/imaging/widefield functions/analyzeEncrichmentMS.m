@@ -54,104 +54,104 @@ xydata = zeros(2,length(allims));
 
 cnt=1;
 for f = 1:length(fnames)
-%     %%%3x2y analysis
-%     clear cycavg
-%     load(fullfile(p,fnames{f}),'cycavg','shiftData','mnfit')
-%     if length(size(cycavg))==4
-%         semcycavg = std(cycavg,[],4)/sqrt(size(cycavg,4));
-%         cycavg = mean(cycavg,4);
-%     else
-%         semcycavg = zeros(size(cycavg));
-%     end
-%     cycavg = circshift(cycavg,5,3);
-%     figure(f1)
-%     for i = 1:length(x)
-%         subplot(2,floor(length(x)/2)+1,i)
-%         hold on
-%         im = cycavg(x(i)-ptsrange:x(i)+ptsrange,y(i)-ptsrange:y(i)+ptsrange,:);
-%         im = squeeze(mean(mean(im,2),1));
-%         im = im-(mean(im(1:2)));
-%         sim = semcycavg(x(i)-ptsrange:x(i)+ptsrange,y(i)-ptsrange:y(i)+ptsrange,:);
-%         sim = squeeze(mean(mean(sim,2),1));
-%         sim = sim-(mean(sim(1:2)));
-%         shadedErrorBar(0:dt:length(im)*dt-dt,im,sim,mycol{f},1)
-%         axis([0 length(im)*dt-dt 0 0.03])
-%         set(gca,'ytick',0:0.01:0.03)
-%         ylabel(sprintf('%s dfof',areas{i}))
-%         xlabel('time (s)')
-%         axis square
-%         hold off
-%     end
-% %     legend('control','enrichment')
-%     subplot(2,floor(length(x)/2)+1,length(x)+f)
-%     colormap jet
-%     im = mean(cycavg(:,:,6:8),3)-mean(cycavg(:,:,1:2),3);
-%     imagesc(im,pltrange)
-%     hold on; plot(ypts,xpts,'w.','Markersize',2);
-%     for i = 1:length(x)
-%         plot(y(i),x(i),'k.','MarkerSize',10)
-%     end
-%     axis image
-%     axis off
-%     title(sprintf('%s',grpnames{f}))
-%     hold off
-%     
-%     figure(f2)
-%     colormap jet
-%     for i = 4:10
-%         subplot(2,7,cnt)
-%         im = squeeze(cycavg(:,:,i));
-%         imagesc(im,pltrange)
-%         hold on; plot(ypts,xpts,'w.','Markersize',2);
-%         axis image
-%         axis off
-%         hold off
-%         cnt=cnt+1;
-%     end
-%     
-%     for i = 1:length(x)
-%         figure(tunfig(i))
-% 
-%         subplot(2,3,1)
-%         imagesc(mean(shiftData(:,:,5,:),4));
-%         hold on
-%         plot([y(i)-ptsrange y(i)-ptsrange y(i)+ptsrange y(i)+ptsrange y(i)-ptsrange],...
-%             [x(i)-ptsrange x(i)+ptsrange x(i)+ptsrange x(i)-ptsrange x(i)-ptsrange],'k','LineWidth',2)
-%         plot(ypts,xpts,'w.','Markersize',2); axis off; axis image
-%         hold off
-%         
-%         subplot(2,3,2);
-%         hold on
-%         d=squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,1:3),2),1));
-%         maxx=max(d);
-%         plot(d,mycol{f},'LineWidth',2);
-%         hold off
-%         
-%         subplot(2,3,3)
-%         hold on
-%         d=squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,4:5),2),1));
-%         plot(d*maxx,mycol{f},'LineWidth',2);
-%         hold off
-%         
-%         subplot(2,3,4);
-%         hold on
-%         d =  squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,6:11),2),1));
-%         plot(d*maxx,[mycol{f} 'o'],'LineWidth',2);
-%         plot(2:6,d(2:6)*maxx,mycol{f},'LineWidth',2);
-%         hold off
-%         
-%         subplot(2,3,5);
-%         hold on
-%         d=squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,12:15),2),1));
-%         plot(d*maxx,mycol{f},'LineWidth',2);
-%         hold off
-%         
-%         subplot(2,3,6);
-%         hold on
-%         d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,:,:),4),2),1));
-%         plot((circshift(d',10)-min(d)),mycol{f},'LineWidth',2);
-%         hold off
-%     end
+%     %%%3x2y analysis or 4x3y
+    clear cycavg
+    load(fullfile(p,fnames{f}),'cycavg','shiftData','mnfit')
+    if length(size(cycavg))==4
+        semcycavg = std(cycavg,[],4)/sqrt(size(cycavg,4));
+        cycavg = mean(cycavg,4);
+    else
+        semcycavg = zeros(size(cycavg));
+    end
+    cycavg = circshift(cycavg,5,3);
+    figure(f1)
+    for i = 1:length(x)
+        subplot(2,floor(length(x)/2)+1,i)
+        hold on
+        im = cycavg(x(i)-ptsrange:x(i)+ptsrange,y(i)-ptsrange:y(i)+ptsrange,:);
+        im = squeeze(mean(mean(im,2),1));
+        im = im-(mean(im(1:2)));
+        sim = semcycavg(x(i)-ptsrange:x(i)+ptsrange,y(i)-ptsrange:y(i)+ptsrange,:);
+        sim = squeeze(mean(mean(sim,2),1));
+        sim = sim-(mean(sim(1:2)));
+        shadedErrorBar(0:dt:length(im)*dt-dt,im,sim,mycol{f},1)
+        axis([0 length(im)*dt-dt 0 0.03])
+        set(gca,'ytick',0:0.01:0.03)
+        ylabel(sprintf('%s dfof',areas{i}))
+        xlabel('time (s)')
+        axis square
+        hold off
+    end
+%     legend('control','enrichment')
+    subplot(2,floor(length(x)/2)+1,length(x)+f)
+    colormap jet
+    im = mean(cycavg(:,:,6:8),3)-mean(cycavg(:,:,1:2),3);
+    imagesc(im,pltrange)
+    hold on; plot(ypts,xpts,'w.','Markersize',2);
+    for i = 1:length(x)
+        plot(y(i),x(i),'k.','MarkerSize',10)
+    end
+    axis image
+    axis off
+    title(sprintf('%s',grpnames{f}))
+    hold off
+    
+    figure(f2)
+    colormap jet
+    for i = 4:10
+        subplot(2,7,cnt)
+        im = squeeze(cycavg(:,:,i));
+        imagesc(im,pltrange)
+        hold on; plot(ypts,xpts,'w.','Markersize',2);
+        axis image
+        axis off
+        hold off
+        cnt=cnt+1;
+    end
+    
+    for i = 1:length(x)
+        figure(tunfig(i))
+
+        subplot(2,3,1)
+        imagesc(mean(shiftData(:,:,5,:),4));
+        hold on
+        plot([y(i)-ptsrange y(i)-ptsrange y(i)+ptsrange y(i)+ptsrange y(i)-ptsrange],...
+            [x(i)-ptsrange x(i)+ptsrange x(i)+ptsrange x(i)-ptsrange x(i)-ptsrange],'k','LineWidth',2)
+        plot(ypts,xpts,'w.','Markersize',2); axis off; axis image
+        hold off
+        
+        subplot(2,3,2);
+        hold on
+        d=squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,1:3),2),1));
+        maxx=max(d);
+        plot(d,mycol{f},'LineWidth',2);
+        hold off
+        
+        subplot(2,3,3)
+        hold on
+        d=squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,4:5),2),1));
+        plot(d*maxx,mycol{f},'LineWidth',2);
+        hold off
+        
+        subplot(2,3,4);
+        hold on
+        d =  squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,6:11),2),1));
+        plot(d*maxx,[mycol{f} 'o'],'LineWidth',2);
+        plot(2:6,d(2:6)*maxx,mycol{f},'LineWidth',2);
+        hold off
+        
+        subplot(2,3,5);
+        hold on
+        d=squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,12:15),2),1));
+        plot(d*maxx,mycol{f},'LineWidth',2);
+        hold off
+        
+        subplot(2,3,6);
+        hold on
+        d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,:,:),4),2),1));
+        plot((circshift(d',10)-min(d)),mycol{f},'LineWidth',2);
+        hold off
+    end
     
     %%%natural images analysis
     load(fullfile(p,fnames{f}),'natimcyc','natimcycavg')

@@ -2,12 +2,12 @@
 
 %%% getRegions calculates gradients and other map properties based on
 %%% Fourier analysis performed by dfofMovie/readTifBlueGreen and stored in maps files
-for f = 1:length(use)
+for f = 1:length(alluse)
     f
-    if isfield(files(use(f)),'pathname')
-        pathname = files(use(f)).pathname;
+    if isfield(files(alluse(f)),'pathname')
+        pathname = files(alluse(f)).pathname; 
     end
-    [grad{f} amp{f} map_all{f} map{f} merge{f}]= getRegions(files(use(f)),pathname,outpathname);
+    [grad{f} amp{f} map_all{f} map{f} merge{f}]= getRegions(files(alluse(f)),pathname,outpathname);
     
 end
 

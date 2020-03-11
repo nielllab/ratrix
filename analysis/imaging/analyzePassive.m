@@ -39,14 +39,14 @@ for s=1:1
     % disp('doing 3x2y')
     % rep=2;
     % doGratingsNew;
-% 
-%     % %%% UNCOMMENT FOR 4X3Y
-%     disp('doing 4x3y')
-%     rep=4;
-%     doGratingsNew;
-%     disp('saving data')
-%     save(fullfile(pathname,savename),'allsubj','shiftData','fit','mnfit','cycavg',...
-%             'tuningall','sftcourse','trialcycavgRunAll','trialcycavgSitAll','-v7.3');
+
+    % %%% UNCOMMENT FOR 4X3Y
+    disp('doing 4x3y')
+    rep=4;
+    doGratingsNew;
+    disp('saving data')
+    save(fullfile(pathname,savename),'allsubj','shiftData','fit','mnfit','cycavg',...
+            'tuningall','sftcourse','trialcycavgRunAll','trialcycavgSitAll','-v7.3');
 
 
 
@@ -55,7 +55,7 @@ for s=1:1
     doNaturalImages
     disp('saving data')
     try
-        save(fullfile(pathname,savename),'natimcyc','natimcycavg','allfam','allims','allfiles','-append');
+        save(fullfile(pathname,savename),'natimcyc','natimcycavg','allfam','allims','allfiles','-append','-v7.3');
     catch
         save(fullfile(pathname,savename),'allsubj','natimcyc','natimcycavg','allfam','allims','allfiles','-v7.3');
     end

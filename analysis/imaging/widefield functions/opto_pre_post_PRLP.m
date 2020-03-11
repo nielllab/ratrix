@@ -27,9 +27,9 @@ num_cycles = size(dfof_bg,3)/fpc; %total number of stimulus cycles
 
 %%%loop through and load the dfof data into the empty arrays
 cnt = 1;
-for i = 1:2:num_cycles %size of third dimension (total frames)
-    baseline(:,:,cnt:cnt+99) = dfof_bg(:,:,1+(fpc*(i-1)):100+(fpc*(i-1)));
-    opto(:,:,cnt:cnt+99) = dfof_bg(:,:,1+(fpc*i):100+(fpc*i));
+for i = 1:2:num_cycles %loop through and put odd cycles into baseline and even into opto
+    baseline(:,:,cnt:cnt+fpc-1) = dfof_bg(:,:,1+(fpc*(i-1)):fpc+(fpc*(i-1)));
+    opto(:,:,cnt:cnt+fpc-1) = dfof_bg(:,:,1+(fpc*i):fpc+(fpc*i));
     cnt=cnt+fpc;
 end
 

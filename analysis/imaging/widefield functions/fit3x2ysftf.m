@@ -1,4 +1,6 @@
 function [xfit yfit sffit tffit gain ampfit basefit fit] = fit3x2ysf(data,xpos,ypos,sf,tf, sp);
+%%% key variable is fit, which has tuning curves
+xtuning = fit(1:3); ytuning=fit(4:5); sftuning = fit(6:11); tftuning= fit(12:15);
 
 xrange = unique(xpos); yrange=unique(ypos); sfrange = unique(sf); tfrange = unique(tf);
 params = zeros(length(data),18);

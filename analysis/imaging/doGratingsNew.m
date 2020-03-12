@@ -1,336 +1,367 @@
 %%%% doGratingsNew
+%%% analysis module - don't change things in here unless you know what you're doing
+%%% call this from a main analysis file that can link together modules
+%%% runs analysis on a group of sessions, delineated in batch file
+%%% needs dfofMovie run on individual stimuli first (topox, topoy, gratings)
+%%% need doTopography run first, to align across sessions
+%%% most of the heavy lifting is in analyzeGratingPatch, but this does the loop over multiple files and passes appropriate parameters
+
+%%% can run for different types of stim, which here are called reps
+% rep: 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior passive; 4 = 4x3y patches;
+
+
+%%% output :
+%%%
+
+%%% written CMN and EDF, 2014
+%%% updated PRLP 2019 and CMN 2020
+
 x=0;
 % for rep=[4] %%% 1 = background gratings, 2 = 3x2y patches; 3 = simple behavior passive; 4 = 4x3y patches;
-    mnAmp{rep}=0; mnPhase{rep}=0; mnAmpWeight{rep}=0; mnData{rep}=0; mnFit{rep}=0;
-    clear shiftData shiftAmp shiftPhase fit cycavg tuningall
-    visareas = {'V1','P','LM','AL','RL','AM','PM','MM'};
-    
-    for f = 1:length(use)
-        figure
-        set(gcf,'Name',[files(use(f)).subj ' ' files(use(f)).expt])
-        
-        
-        for i = 1:2  %%%% load in topos for check
-            if i==1
-                load([pathname files(use(f)).topox],'map');
-            elseif i==2
-                load([pathname files(use(f)).topoy],'map');
-            elseif i==3 && length(files(use(f)).topoyland)>0
-                load([pathname files(use(f)).topoyland],'map');
-            elseif i==4 &&length(files(use(f)).topoxland)>0
-                load([pathname files(use(f)).topoxland],'map');
-            end
-            subplot(2,2,i);
-            imshow(polarMap(shiftImageRotate(map{3},allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz),90));
-            hold on; plot(ypts,xpts,'w.','Markersize',2)
-            set(gca,'LooseInset',get(gca,'TightInset'))
-        end
-        
-        
-        
-        
-        if rep ==1
-            load ([pathname files(use(f)).background3x2yBlank ], 'dfof_bg','sp','stimRec','frameT')
-            zoom = 260/size(dfof_bg,1);
-            if ~exist('sp','var')
-                sp =0;stimRec=[];
-            end
-            dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
-            [ph amp data ft cyc] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
-                'C:\background3x2y2sf_021215_16minBlank',20:22,14:16,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
-        elseif rep==2
-            load ([pathname files(use(f)).grating3x2y6sf4tf ], 'dfof_bg','sp','stimRec','frameT')
-            zoom = 260/size(dfof_bg,1);
-            if ~exist('sp','var')
-                sp =0;stimRec=[];
-            end
-            load(files(use(f)).moviename3x2y,'isi','duration')
-            imagerate = files(use(f)).imagerate;
-            dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
-%             [ph amp data ft cyc] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
-%                 files(use(f)).gratmoviename,1:round(imagerate*isi/2),imagerate*isi+1:imagerate*(isi+duration),...
-%                 xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
-              [ph amp data ft cyc] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
-                files(use(f)).moviename3x2y,15:17,10:12,...
-                xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT); %was 15:17,10:12
-      elseif rep==3
-            load ([pathname files(use(f)).behavGratings ], 'dfof_bg','sp','stimRec','frameT')
-            zoom = 260/size(dfof_bg,1);
-            if ~exist('sp','var')
-                sp =0;stimRec=[];
-            end
-            dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
-            [ph amp data ft cyc trialcycavg ] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
-                'C:\behavStim2sfSmall3366',24:26,18:20,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);   
-        elseif rep ==4
-            if ~isempty(files(use(f)).grating4x3y5sf3tf)
-                load([pathname files(use(f)).grating4x3y5sf3tf], 'dfof_bg','sp','stimRec','frameT')
-                zoom = 260/size(dfof_bg,1);
-                if ~exist('sp','var')
-                    sp =0;stimRec=[];
-                end
-                dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
-                [ph amp data ft cyc tuning sft trialcycavg trialcycavgRun trialcycavgSit ] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
-                    files(use(f)).moviename4x3y,16:17,10:11,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
-            end
+mnAmp{rep}=0; mnPhase{rep}=0; mnAmpWeight{rep}=0; mnData{rep}=0; mnFit{rep}=0;
+clear shiftData shiftAmp shiftPhase fit cycavg tuningall
+visareas = {'V1','P','LM','AL','RL','AM','PM','MM'};
 
+
+%%% loop over all files in use, load in topography, and run appropriate analyzeGratingPatch
+for f = 1:length(use)
+    figure
+    set(gcf,'Name',[files(use(f)).subj ' ' files(use(f)).expt])
+    
+    
+    for i = 1:2  %%%% load in topos for check
+        if i==1
+            load([pathname files(use(f)).topox],'map');
+        elseif i==2
+            load([pathname files(use(f)).topoy],'map');
+        elseif i==3 && length(files(use(f)).topoyland)>0
+            load([pathname files(use(f)).topoyland],'map');
+        elseif i==4 &&length(files(use(f)).topoxland)>0
+            load([pathname files(use(f)).topoxland],'map');
         end
-        
-        
-        sp = conv(sp,ones(50,1),'same')/50;
-%         sfrange=unique(sf); tfrange=unique(tf);
-        %sp_all(1:13000,f) = sp;
-        mv(f) = sum(sp>500)/length(sp);
-        if rep~=3
-            shiftData(:,:,:,f) = imresize(data,4);
-            shiftAmp(:,:,:,f) = imresize(amp,4);
-            shiftPhase(:,:,:,f) = imresize(ph,4);
-            fit(:,:,:,f) = imresize(ft,4);
-            cycavg(:,:,:,f) = imresize(cyc,4);
-            
-            shiftData(isnan(shiftData))=0;
-            
-            % plotGratingResp(shiftPhase,shiftAmp,rep,xpts,ypts)
-            plotGratingRespFit(squeeze(shiftData(:,:,:,f)),squeeze(shiftData(:,:,5,f)+shiftData(:,:,6,f)),squeeze(fit(:,:,:,f)),rep,xpts,ypts,[files(use(f)).subj ' ' files(use(f)).expt])
-            subplot(2,3,6)
-            title([files(use(f)).subj ' ' files(use(f)).expt])
-            mtit('fits for retinotopy,sf,tf')
-            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-            print('-dpsc',psfilename,'-append');
+        subplot(2,2,i);
+        imshow(polarMap(shiftImageRotate(map{3},allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),allzoom(f),sz),90));
+        hold on; plot(ypts,xpts,'w.','Markersize',2)
+        set(gca,'LooseInset',get(gca,'TightInset'))
+    end
+ 
+    if rep ==1
+        load ([pathname files(use(f)).background3x2yBlank ], 'dfof_bg','sp','stimRec','frameT')
+        zoom = 260/size(dfof_bg,1);
+        if ~exist('sp','var')
+            sp =0;stimRec=[];
         end
-        
-        if rep==4 %for 4x3y, save this stuff out
-            tuningall(:,:,:,:,:,:,f) = tuning;
-            sftcourse(:,:,:,f) = sft;
-            trialcycavgRunAll(:,:,:,:,:,:,:,f) = trialcycavgRun;
-            trialcycavgSitAll(:,:,:,:,:,:,:,f) = trialcycavgSit;
+        dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
+        [ph amp data ft cyc] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
+            'C:\background3x2y2sf_021215_16minBlank',20:22,14:16,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
+    elseif rep==2
+        load ([pathname files(use(f)).grating3x2y6sf4tf ], 'dfof_bg','sp','stimRec','frameT')
+        zoom = 260/size(dfof_bg,1);
+        if ~exist('sp','var')
+            sp =0;stimRec=[];
+        end
+        load(files(use(f)).moviename3x2y,'isi','duration')
+        imagerate = files(use(f)).imagerate;
+        dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
+        %             [ph amp data ft cyc] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
+        %                 files(use(f)).gratmoviename,1:round(imagerate*isi/2),imagerate*isi+1:imagerate*(isi+duration),...
+        %                 xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
+        [ph amp data ft cyc] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
+            files(use(f)).moviename3x2y,15:17,10:12,...
+            xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT); %was 15:17,10:12
+    elseif rep==3
+        load ([pathname files(use(f)).behavGratings ], 'dfof_bg','sp','stimRec','frameT')
+        zoom = 260/size(dfof_bg,1);
+        if ~exist('sp','var')
+            sp =0;stimRec=[];
+        end
+        dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
+        [ph amp data ft cyc trialcycavg ] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
+            'C:\behavStim2sfSmall3366',24:26,18:20,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
+    elseif rep ==4
+        if ~isempty(files(use(f)).grating4x3y5sf3tf)
+            load([pathname files(use(f)).grating4x3y5sf3tf], 'dfof_bg','sp','stimRec','frameT')
+            zoom = 260/size(dfof_bg,1);
+            if ~exist('sp','var')
+                sp =0;stimRec=[];
+            end
+            dfof_bg = shiftImageRotate(dfof_bg,allxshift(f)+x0,allyshift(f)+y0,allthetashift(f),zoom,sz);
+            [ph amp data ft cyc tuning sft trialcycavg trialcycavgRun trialcycavgSit ] = analyzeGratingPatch(imresize(dfof_bg,0.25),sp,...
+                files(use(f)).moviename4x3y,16:17,10:11,xpts/4, ypts/4, [files(use(f)).subj ' ' files(use(f)).expt],stimRec,psfilename,frameT);
         end
         
     end
     
-    if rep==4 || rep==3
-        figure
-        for sf = 1:6
-            for tf = 1:3
-                subplot(3,6,6*(tf-1)+sf)
-                plot(squeeze(sftcourse(sf,tf,:,:)))
-                hold on
-                plot(squeeze(mean(sftcourse(sf,tf,:,:),4)),'k','Linewidth',2);
-                axis([1 18 0 0.015]); set(gca,'Xticklabel',[]); set(gca,'Yticklabel',[]);
-                mtit('group cycavg for each sf/tf combo')
-            end
-        end
-            set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-            print('-dpsc',psfilename,'-append');
-            
-        alltcoursedata = reshape(sftcourse,size(sftcourse,1)*size(sftcourse,2)*size(sftcourse,3),size(sftcourse,4));
-        figure
-        imagesc(imresize(corrcoef(alltcoursedata),10,'nearest'),[0 1]);
-        colormap jet; colorbar
-        title('timecourse correlation');
-        xlabel('subj'); ylabel('subj')
+    
+    sp = conv(sp,ones(50,1),'same')/50;
+    %         sfrange=unique(sf); tfrange=unique(tf);
+    %sp_all(1:13000,f) = sp;
+    mv(f) = sum(sp>500)/length(sp);
+    if rep~=3
+       
+        %%% shiftData has pref values (x,y,sf,tf, amplitude ,[], [])
+        %%% fit has full tuning curves (1:4=x, 5:7=y, 8:13 = sf, 14:16=tf, [] , [])
+        
+        %%%data(:,:,1) = xfit; alldata(:,:,2) = yfit; alldata(:,:,3)=sffit;
+        %%%alldata(:,:,4)=tffit; alldata(:,:,5)=ampfit; 
+        %%% 6th and 7th %%%dimensions are offsets (gain and baseline)
+        shiftData(:,:,:,f) = imresize(data,4);     
+        
+        shiftAmp(:,:,:,f) = imresize(amp,4);
+        shiftPhase(:,:,:,f) = imresize(ph,4);
+        
+        %%% xtuning = ft(1:4); ytuning=ft(5:7); sftuning = ft(9:13); tftuning= ft(14:16);
+        fit(:,:,:,f) = imresize(ft,4);
+        cycavg(:,:,:,f) = imresize(cyc,4);
+        
+        shiftData(isnan(shiftData))=0;
+        
+        % plotGratingResp(shiftPhase,shiftAmp,rep,xpts,ypts)
+        plotGratingRespFit(squeeze(shiftData(:,:,:,f)),squeeze(shiftData(:,:,5,f)+shiftData(:,:,6,f)),squeeze(fit(:,:,:,f)),rep,xpts,ypts,[files(use(f)).subj ' ' files(use(f)).expt])
+        subplot(2,3,6)
+        title([files(use(f)).subj ' ' files(use(f)).expt])
+        mtit('fits for retinotopy,sf,tf')
         set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilename,'-append');
-            
     end
+    
+    if rep==4 %for 4x3y, save this stuff out
+        tuningall(:,:,:,:,:,:,f) = tuning;
+        sftcourse(:,:,:,f) = sft;
+        trialcycavgRunAll(:,:,:,:,:,:,:,f) = trialcycavgRun;
+        trialcycavgSitAll(:,:,:,:,:,:,:,f) = trialcycavgSit;
+    end
+    
+end
 
-%     figure
-%     plot(sp_all);
+
+%%% now do plots! Depends a bit on what type of stim you had (i.e. rep)
+
+if rep==4 || rep==3   %%% 4x3y
     figure
-    bar(mv);
-    xlabel('subject')
-    ylabel('fraction running')
-    % plotGratingResp(mnPhase{rep}/length(use),mnAmp{rep}/length(use),rep,xpts,ypts);
-    %plotGratingResp(mnAmpWeight{rep}./(mnAmp{rep}+0.0001),mnAmp{rep}/length(use),rep,xpts,ypts);
-    plotGratingRespFit(median(shiftData,4),median(shiftData(:,:,5,:) + shiftData(:,:,6,:),4),median(fit,4),rep,xpts,ypts,'average')
-    subplot(2,3,6)
-    title('average')
+    for sf = 1:6
+        for tf = 1:3
+            subplot(3,6,6*(tf-1)+sf)
+            plot(squeeze(sftcourse(sf,tf,:,:)))
+            hold on
+            plot(squeeze(mean(sftcourse(sf,tf,:,:),4)),'k','Linewidth',2);
+            axis([1 18 0 0.015]); set(gca,'Xticklabel',[]); set(gca,'Yticklabel',[]);
+            mtit('group cycavg for each sf/tf combo')
+        end
+    end
     set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
     print('-dpsc',psfilename,'-append');
     
+    alltcoursedata = reshape(sftcourse,size(sftcourse,1)*size(sftcourse,2)*size(sftcourse,3),size(sftcourse,4));
+    figure
+    imagesc(imresize(corrcoef(alltcoursedata),10,'nearest'),[0 1]);
+    colormap jet; colorbar
+    title('timecourse correlation');
+    xlabel('subj'); ylabel('subj')
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    print('-dpsc',psfilename,'-append');
     
-    mnfit = median(fit,4);
-    try
-        load(files(use(f)).ptsfile)
-    catch
-        disp('no points file designated in batch file')
-    end
-    if x==0
-        [fname pname] = uigetfile('*.mat','select points file? cancel to pick points');
+end
+
+%     figure
+%     plot(sp_all);
+figure
+bar(mv);
+xlabel('subject')
+ylabel('fraction running')
+% plotGratingResp(mnPhase{rep}/length(use),mnAmp{rep}/length(use),rep,xpts,ypts);
+%plotGratingResp(mnAmpWeight{rep}./(mnAmp{rep}+0.0001),mnAmp{rep}/length(use),rep,xpts,ypts);
+plotGratingRespFit(median(shiftData,4),median(shiftData(:,:,5,:) + shiftData(:,:,6,:),4),median(fit,4),rep,xpts,ypts,'average')
+subplot(2,3,6)
+title('average')
+set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+print('-dpsc',psfilename,'-append');
+
+
+mnfit = median(fit,4); %%% take median across all sessions
+
+%%% select specific points (e.g. V1, LM) to analyze
+try
+    load(files(use(f)).ptsfile)   
+catch
+    disp('no points file designated in batch file')
+end
+if x==0
+    [fname pname] = uigetfile('*.mat','select points file? cancel to pick points');
+    if fname~=0
+        load(fullfile(pname, fname));
+    else
+        figure
+        imagesc(squeeze(mean(shiftData(:,:,5,:),4)));
+        hold on; plot(ypts,xpts,'w.','Markersize',2)
+        title('pick 8 points: V1, clockwise around, then MM (outside lines below V1')
+        for i = 1:8
+            [y(i) x(i)] =ginput(1);
+            plot(y(i),x(i),'o');
+        end
+        x=round(x); y=round(y);
+        
+        
+        close(gcf);
+        [fname pname] = uiputfile('*.mat','save points?');
         if fname~=0
-            load(fullfile(pname, fname));
-        else
-            figure
-            imagesc(squeeze(mean(shiftData(:,:,5,:),4)));
-            hold on; plot(ypts,xpts,'w.','Markersize',2)
-            title('pick 8 points: V1, clockwise around, then MM (outside lines below V1')
-            for i = 1:8
-                [y(i) x(i)] =ginput(1);
-                plot(y(i),x(i),'o');
-            end
-            x=round(x); y=round(y);
-            
-            
-            close(gcf);
-            [fname pname] = uiputfile('*.mat','save points?');
-            if fname~=0
-                save(fullfile(pname,fname),'x','y');
-            end
-            
+            save(fullfile(pname,fname),'x','y');
         end
         
     end
-    col = 'bgrcmyk'
-    w=2;
-    range = -w:w;
-    if rep ==2
-        
-        figure
-        subplot(2,3,1)
-        imagesc(mean(shiftData(:,:,5,:),4));
-        hold on
-        for i = 1:7;
-            plot([y(i)-w y(i)-w y(i)+w y(i)+w y(i)-w],[x(i)-w x(i)+w x(i)+w x(i)-w x(i)-w],col(i),'LineWidth',2)
-        end
-        legend(visareas)
-        
-        hold on; plot(ypts,xpts,'w.','Markersize',2); axis off
-        
-        subplot(2,3,2);
-        hold on
-        for i = 1:7
-            d=(squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,1:3),2),1)));
-            plot(d,col(i),'LineWidth',2);
-        end
-        xlim([1 3]); title('x');
-        set(gca,'Xtick',[1 4]);
-        set(gca,'Xticklabel',{'medial','lateral'});
-        
-        
-        subplot(2,3,3)
-        hold on
-        for i = 1:7
-            d=squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,4:5),2),1));
-            plot(d/max(d),col(i),'LineWidth',2);
-        end
-        xlim([1 2]);ylim([0 1]); title('y');
-        set(gca,'Xtick',[1 3]);
-        set(gca,'Xticklabel',{'top','bottom'});
-        
-        subplot(2,3,4);
-        hold on
-        for i = 1:7
-            d =  squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,6:11),2),1));
-            plot(d(1)/max(d),[col(i) 'o'],'LineWidth',2);
-            plot(2:6,d(2:6)/max(d),col(i),'LineWidth',2);
-        end
-        xlim([0.75 6.25]); ylim([0 1]); title('sf');
-        set(gca,'Xtick',[1 3 5]);
-        set(gca,'Xticklabel',{'0','0.04','0.16'});
-        xlabel('cpd')
-        
-        subplot(2,3,5);
-        hold on
-        for i = 1:7
-            d=squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,12:15),2),1));
-            plot(d/max(d),col(i),'LineWidth',2);
-        end
-        xlim([1 4]); ylim([0 1]); title('tf');
-        set(gca,'XtickLabel',{'0', '2','8'});
-        xlabel('Hz')
-        
-        subplot(2,3,6);
-        
-        hold on
-        for i = 1:7
-            d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,:,:),4),2),1));
-            %     repd = repmat(d,[10 1]);
-            %     dconvd = deconvg6s(repd'+0.5,0.1);
-            %    % figure
-            %    d = dconvd(16:30);
-            plot((circshift(d',10)-min(d))/(max(d)-min(d)),col(i),'LineWidth',2);
-        end
-        xlim([1 20]); title('timecourse');
-        xlabel('frames')
-        mtit('tuning for each vis area')
-        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-        print('-dpsc',psfilename,'-append');
-        
-        %%% 4x3y
-    elseif rep==4
-        figure
-        subplot(2,3,1)
-        imagesc(mean(shiftData(:,:,5,:),4));
-        hold on
-        for i = 1:7;
-            plot([y(i)-w y(i)-w y(i)+w y(i)+w y(i)-w],[x(i)-w x(i)+w x(i)+w x(i)-w x(i)-w],col(i),'LineWidth',2)
-        end
-        legend({'V1','MM','LM','AL','RL','AM','PM'})
-        
-        hold on; plot(ypts,xpts,'w.','Markersize',2); axis off
-        
-        subplot(2,3,2);
-        hold on
-        for i = 1:7
-            d=(squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,1:4),2),1)));
-            plot(d,col(i),'LineWidth',2);
-        end
-        xlim([1 4]); title('x');
-        set(gca,'Xtick',[1 4]);
-        set(gca,'Xticklabel',{'medial','lateral'});
-        
-        
-        subplot(2,3,3)
-        hold on
-        for i = 1:7
-            d=squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,5:7),2),1));
-            plot(d/max(d),col(i),'LineWidth',2);
-        end
-        xlim([1 3]);ylim([0 1]); title('y');
-        set(gca,'Xtick',[1 3]);
-        set(gca,'Xticklabel',{'top','bottom'});
-        
-        subplot(2,3,4);
-        hold on
-        for i = 1:7
-            d =  squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,8:13),2),1));
-            plot(d(1)/max(d),[col(i) 'o'],'LineWidth',2);
-            plot(2:6,d(2:6)/max(d),col(i),'LineWidth',2);
-        end
-        xlim([0.75 6.25]); ylim([0 1]); title('sf');
-        set(gca,'Xtick',[1 3 5]);
-        set(gca,'Xticklabel',{'0','0.04','0.16'});
-        xlabel('cpd')
-        
-        subplot(2,3,5);
-        hold on
-        for i = 1:7
-            d=squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,14:16),2),1));
-            plot(d/max(d),col(i),'LineWidth',2);
-        end
-        xlim([1 3]); ylim([0 1]); title('tf');
-        set(gca,'Xtick',[1 2 3])
-        set(gca,'XtickLabel',{'0', '2','8'});
-        xlabel('Hz')
-        
-        subplot(2,3,6);
-        
-        hold on
-        for i = 1:7
-            d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,:,:),4),2),1));
-            %     repd = repmat(d,[10 1]);
-            %     dconvd = deconvg6s(repd'+0.5,0.1);
-            %    % figure
-            %    d = dconvd(16:30);
-            plot((circshift(d',10)-min(d))/(max(d)-min(d)),col(i),'LineWidth',2);
-        end
-        xlim([1 15]); title('timecourse');
-        xlabel('frames')
-        mtit('tuning for each vis area')
-        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-        print('-dpsc',psfilename,'-append');
-        %%plot overall cycle average
-        
+    
+end
+col = 'bgrcmyk'
+w=2;
+range = -w:w;
+if rep ==2
+    
+    figure
+    subplot(2,3,1)
+    imagesc(mean(shiftData(:,:,5,:),4));
+    hold on
+    for i = 1:7;
+        plot([y(i)-w y(i)-w y(i)+w y(i)+w y(i)-w],[x(i)-w x(i)+w x(i)+w x(i)-w x(i)-w],col(i),'LineWidth',2)
+    end
+    legend(visareas)
+    
+    hold on; plot(ypts,xpts,'w.','Markersize',2); axis off
+    
+    subplot(2,3,2);
+    hold on
+    for i = 1:7
+        d=(squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,1:3),2),1)));
+        plot(d,col(i),'LineWidth',2);
+    end
+    xlim([1 3]); title('x');
+    set(gca,'Xtick',[1 4]);
+    set(gca,'Xticklabel',{'medial','lateral'});
+    
+    
+    subplot(2,3,3)
+    hold on
+    for i = 1:7
+        d=squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,4:5),2),1));
+        plot(d/max(d),col(i),'LineWidth',2);
+    end
+    xlim([1 2]);ylim([0 1]); title('y');
+    set(gca,'Xtick',[1 3]);
+    set(gca,'Xticklabel',{'top','bottom'});
+    
+    subplot(2,3,4);
+    hold on
+    for i = 1:7
+        d =  squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,6:11),2),1));
+        plot(d(1)/max(d),[col(i) 'o'],'LineWidth',2);
+        plot(2:6,d(2:6)/max(d),col(i),'LineWidth',2);
+    end
+    xlim([0.75 6.25]); ylim([0 1]); title('sf');
+    set(gca,'Xtick',[1 3 5]);
+    set(gca,'Xticklabel',{'0','0.04','0.16'});
+    xlabel('cpd')
+    
+    subplot(2,3,5);
+    hold on
+    for i = 1:7
+        d=squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,12:15),2),1));
+        plot(d/max(d),col(i),'LineWidth',2);
+    end
+    xlim([1 4]); ylim([0 1]); title('tf');
+    set(gca,'XtickLabel',{'0', '2','8'});
+    xlabel('Hz')
+    
+    subplot(2,3,6);
+    
+    hold on
+    for i = 1:7
+        d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,:,:),4),2),1));
+        %     repd = repmat(d,[10 1]);
+        %     dconvd = deconvg6s(repd'+0.5,0.1);
+        %    % figure
+        %    d = dconvd(16:30);
+        plot((circshift(d',10)-min(d))/(max(d)-min(d)),col(i),'LineWidth',2);
+    end
+    xlim([1 20]); title('timecourse');
+    xlabel('frames')
+    mtit('tuning for each vis area')
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    print('-dpsc',psfilename,'-append');
+    
+    %%% 4x3y
+elseif rep==4
+    figure
+    subplot(2,3,1)
+    imagesc(mean(shiftData(:,:,5,:),4));
+    hold on
+    for i = 1:7;
+        plot([y(i)-w y(i)-w y(i)+w y(i)+w y(i)-w],[x(i)-w x(i)+w x(i)+w x(i)-w x(i)-w],col(i),'LineWidth',2)
+    end
+    legend({'V1','MM','LM','AL','RL','AM','PM'})
+    
+    hold on; plot(ypts,xpts,'w.','Markersize',2); axis off
+    
+    subplot(2,3,2);
+    hold on
+    for i = 1:7
+        d=(squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,1:4),2),1)));
+        plot(d,col(i),'LineWidth',2);
+    end
+    xlim([1 4]); title('x');
+    set(gca,'Xtick',[1 4]);
+    set(gca,'Xticklabel',{'medial','lateral'});
+    
+    
+    subplot(2,3,3)
+    hold on
+    for i = 1:7
+        d=squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,5:7),2),1));
+        plot(d/max(d),col(i),'LineWidth',2);
+    end
+    xlim([1 3]);ylim([0 1]); title('y');
+    set(gca,'Xtick',[1 3]);
+    set(gca,'Xticklabel',{'top','bottom'});
+    
+    subplot(2,3,4);
+    hold on
+    for i = 1:7
+        d =  squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,8:13),2),1));
+        plot(d(1)/max(d),[col(i) 'o'],'LineWidth',2);
+        plot(2:6,d(2:6)/max(d),col(i),'LineWidth',2);
+    end
+    xlim([0.75 6.25]); ylim([0 1]); title('sf');
+    set(gca,'Xtick',[1 3 5]);
+    set(gca,'Xticklabel',{'0','0.04','0.16'});
+    xlabel('cpd')
+    
+    subplot(2,3,5);
+    hold on
+    for i = 1:7
+        d=squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,14:16),2),1));
+        plot(d/max(d),col(i),'LineWidth',2);
+    end
+    xlim([1 3]); ylim([0 1]); title('tf');
+    set(gca,'Xtick',[1 2 3])
+    set(gca,'XtickLabel',{'0', '2','8'});
+    xlabel('Hz')
+    
+    subplot(2,3,6);
+    
+    hold on
+    for i = 1:7
+        d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,:,:),4),2),1));
+        %     repd = repmat(d,[10 1]);
+        %     dconvd = deconvg6s(repd'+0.5,0.1);
+        %    % figure
+        %    d = dconvd(16:30);
+        plot((circshift(d',10)-min(d))/(max(d)-min(d)),col(i),'LineWidth',2);
+    end
+    xlim([1 15]); title('timecourse');
+    xlabel('frames')
+    mtit('tuning for each vis area')
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    print('-dpsc',psfilename,'-append');
+    %%plot overall cycle average
+    
     trialcycavg = imresize(trialcycavg,4);
     trialcycavgSit = imresize(trialcycavgSit,4);
     trialcycavgRun = imresize(trialcycavgRun,4);
@@ -338,7 +369,7 @@ x=0;
     hold on
     plot(squeeze(nanmean(nanmean(nanmean(nanmean(trialcycavg(x(1),y(1),:,:,:,:,:),4),5),6),7)))
     plot(squeeze(nanmean(nanmean(nanmean(nanmean(trialcycavgRun(x(1),y(1),:,:,:,:,:),4),5),6),7)))
-    plot(squeeze(nanmean(nanmean(nanmean(nanmean(trialcycavgSit(x(1),y(1),:,:,:,:,:),4),5),6),7)))        
+    plot(squeeze(nanmean(nanmean(nanmean(nanmean(trialcycavgSit(x(1),y(1),:,:,:,:,:),4),5),6),7)))
     legend('Total','Run','Sit')
     axis([1 15 -0.02 0.15])
     title('group cycavg running/stationary')
@@ -346,101 +377,101 @@ x=0;
         set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilename,'-append');
     end
-        
-            
-        
-    elseif rep ==1
-        
-        figure
-        subplot(2,2,1)
-        imagesc(mean(shiftData(:,:,5,:),4));
-        hold on
-        for i = 1:7;
-            plot([y(i)-w y(i)-w y(i)+w y(i)+w y(i)-w],[x(i)-w x(i)+w x(i)+w x(i)-w x(i)-w],col(i),'LineWidth',2)
-        end
-        legend({'V1','LM','AL','RL','AM','PM','MM'})
-        
-        hold on; plot(ypts,xpts,'w.','Markersize',2); axis off
-        
-        subplot(2,2,2);
-        hold on
-        for i = 1:7
-            d=(squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,1:3),2),1)));
-            plot(d,col(i),'LineWidth',2);
-        end
-        xlim([1 3]); title('x');
-        set(gca,'Xtick',[1 4]);
-        set(gca,'Xticklabel',{'medial','lateral'});
-        
-        
-        subplot(2,2,3)
-        hold on
-        for i = 1:7
-            d=squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,4:5),2),1));
-            plot(d/max(d),col(i),'LineWidth',2);
-        end
-        xlim([1 2]);ylim([0 1]); title('y');
-        set(gca,'Xtick',[1 3]);
-        set(gca,'Xticklabel',{'top','bottom'});
-        
-        subplot(2,2,4);
-        hold on
-        for i = 1:7
-            d =  squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,6:7),2),1));
-            plot(d(1)/max(d),[col(i) 'o'],'LineWidth',2);
-            plot(1:2,d(1:2)/max(d),col(i),'LineWidth',2);
-        end
-        xlim([0.75 2.25]); ylim([0 1]); title('sf');     
-        xlabel('cpd')
-        
-        set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
-        print('-dpsc',psfilename,'-append');
-        
-        for sf = 1:2
+    
+    
+    
+elseif rep ==1
+    
+    figure
+    subplot(2,2,1)
+    imagesc(mean(shiftData(:,:,5,:),4));
+    hold on
+    for i = 1:7;
+        plot([y(i)-w y(i)-w y(i)+w y(i)+w y(i)-w],[x(i)-w x(i)+w x(i)+w x(i)-w x(i)-w],col(i),'LineWidth',2)
+    end
+    legend({'V1','LM','AL','RL','AM','PM','MM'})
+    
+    hold on; plot(ypts,xpts,'w.','Markersize',2); axis off
+    
+    subplot(2,2,2);
+    hold on
+    for i = 1:7
+        d=(squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,1:3),2),1)));
+        plot(d,col(i),'LineWidth',2);
+    end
+    xlim([1 3]); title('x');
+    set(gca,'Xtick',[1 4]);
+    set(gca,'Xticklabel',{'medial','lateral'});
+    
+    
+    subplot(2,2,3)
+    hold on
+    for i = 1:7
+        d=squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,4:5),2),1));
+        plot(d/max(d),col(i),'LineWidth',2);
+    end
+    xlim([1 2]);ylim([0 1]); title('y');
+    set(gca,'Xtick',[1 3]);
+    set(gca,'Xticklabel',{'top','bottom'});
+    
+    subplot(2,2,4);
+    hold on
+    for i = 1:7
+        d =  squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,6:7),2),1));
+        plot(d(1)/max(d),[col(i) 'o'],'LineWidth',2);
+        plot(1:2,d(1:2)/max(d),col(i),'LineWidth',2);
+    end
+    xlim([0.75 2.25]); ylim([0 1]); title('sf');
+    xlabel('cpd')
+    
+    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+    print('-dpsc',psfilename,'-append');
+    
+    for sf = 1:2
         figure
         labels = {'blank','blank+patch','patch','blank decon','b+p decon','patch decon' }
         for s = 1:6
-        subplot(2,3,s);        
-        hold on
-        for i = 1:7
-            if s==1 | s==4
-                d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,(1:25)+(sf-1)*50,:),4),2),1));
-            elseif s==2 | s==5
-                d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,(26:50)+(sf-1)*50,:),4),2),1));
-            elseif s==3 | s==6
-                            d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,(26:50)+(sf-1)*50,:)-cycavg(x(i)+range,y(i)+range,(1:25)+(sf-1)*50,:),4),2),1));
+            subplot(2,3,s);
+            hold on
+            for i = 1:7
+                if s==1 | s==4
+                    d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,(1:25)+(sf-1)*50,:),4),2),1));
+                elseif s==2 | s==5
+                    d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,(26:50)+(sf-1)*50,:),4),2),1));
+                elseif s==3 | s==6
+                    d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,(26:50)+(sf-1)*50,:)-cycavg(x(i)+range,y(i)+range,(1:25)+(sf-1)*50,:),4),2),1));
+                end
+                if s>=4
+                    repd = repmat(d,[10 1]);
+                    dconvd = deconvg6s(repd'+0.5,0.1);
+                    % figure
+                    d = dconvd(6*length(d):(7*length(d)-1));
+                end
+                % plot((circshift(d',0)-min(d))/(max(d)-min(d)));
+                plot(circshift(d',0)-min(d),col(i));
             end
-            if s>=4
-                repd = repmat(d,[10 1]);
-                dconvd = deconvg6s(repd'+0.5,0.1);
-               % figure
-               d = dconvd(6*length(d):(7*length(d)-1));
+            plot([11 11],[0 0.2],':')
+            xlim([1 25]);
+            if s<=3
+                ylim([0 0.1]);
+            else
+                ylim([0 0.15])
             end
-           % plot((circshift(d',0)-min(d))/(max(d)-min(d)));
-            plot(circshift(d',0)-min(d),col(i));
+            if s<6
+                title(labels{s});
+            else
+                title(sprintf('sf %d',sf));
+            end
+            xlabel('frames')
         end
-        plot([11 11],[0 0.2],':')
-        xlim([1 25]); 
-        if s<=3 
-            ylim([0 0.1]);
-        else
-            ylim([0 0.15])
-        end
-       if s<6
-           title(labels{s});
-       else
-           title(sprintf('sf %d',sf));
-       end
-       xlabel('frames')
-        end
-             
+        
         set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
         print('-dpsc',psfilename,'-append');
         
-        end %%sf
-        
-        %%% bkgrat
-    end
+    end %%sf
+    
+    %%% bkgrat
+end
 % end
 
 

@@ -1,4 +1,6 @@
 function [xfit yfit sffit tffit gain ampfit basefit fit] = fitxysf(data,xpos,ypos,sf,tf, sp);
+%%% most important values returned is fit
+%%% xtuning = fit(1:4); ytuning=fit(5:7); sftuning = fit(8:13); tftuning= fit(14:16);
 
 xrange = unique(xpos); yrange=unique(ypos); sfrange = unique(sf); tfrange = unique(tf);
 params = zeros(length(data),18);
@@ -15,7 +17,7 @@ end
 ampfit = mean(p0(1:4));
 
 %p0(p0<0)=0;
-p0(17)= mean(data(params(:,17)==1))./( mean(data(params(:,17)==0))+0.0001) - 1;
+p0(17)= mean(data(params(:,17)==1))./( mean(data(params(:,17)==0))+0.0001) - 1;   %%% running modulations
 p0(18)=0;
 
 
@@ -44,5 +46,6 @@ ub';
         xfit = sum(xtuning.*(1:4))/sum(xtuning); yfit = sum(ytuning.*(1:3))/sum(ytuning); tffit = sum(tftuning.*(1:3))/sum(tftuning);
          sffit = sum(sftuning.*(1:5))/sum(sftuning);
        % ampfit = mx*my*msf*mtf;
-       
+     
+       %%% fit(17) = potential running gain modulation
      basefit = fit(18);

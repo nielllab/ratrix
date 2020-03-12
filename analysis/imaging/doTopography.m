@@ -5,7 +5,7 @@
 for f = 1:length(alluse)
     f
     if isfield(files(alluse(f)),'pathname')
-        pathname = files(alluse(f)).pathname; 
+        pathname = files(alluse(f)).pathname;
     end
     [grad{f} amp{f} map_all{f} map{f} merge{f}]= getRegions(files(alluse(f)),pathname,outpathname);
     
@@ -31,7 +31,7 @@ load('C:\mapoverlay5mm.mat')
 useReference=1;
 if useReference
     load('referenceMap.mat','avgmap4d','avgmap'); %for vis areas only (e.g. 5mm window)
-%     load('referenceMapFullSkull.mat','avgmap4d','avgmap'); %for bilateral full skull
+    %     load('referenceMapFullSkull.mat','avgmap4d','avgmap'); %for bilateral full skull
 end
 display('aligning')
 
@@ -167,7 +167,8 @@ meanPolarAll(:,:,s,1)= meanpolar{1}; meanPolarAll(:,:,s,2)= meanpolar{2};
 allPhase(:,:,1) = mod(angle(meanpolar{1}),2*pi);
 allPhase(:,:,2) = mod(angle(meanpolar{2}),2*pi);
 
-if length(use)>1
+if length(use)>1   %%% check for consistency in topo maps across datasets
+    titles = {'topoX', 'topoY'};
     for ind = 1:2
         data = squeeze(allPolar(:,:,ind,:));
         data = reshape (data,size(data,1)*size(data,2),size(data,3));
@@ -179,7 +180,7 @@ if length(use)>1
         d= d(~isnan(d));
         xcAll(s,ind) = mean(d);
         xcStd(s,ind) = std(d);
-        title([allsubj{s} ' ' num2str(ind)])
+        title(['correlation across sessions ' titles{ind}])
         if exist('psfilename','var')
             set(gcf, 'PaperPositionMode', 'auto');
             print('-dpsc',psfilename,'-append');
@@ -209,13 +210,13 @@ for m=1:2
     subplot(2,2,m);
     
     imshow(polarMap(meanpolar{m},95));
-   title(allsubj{s})
+    title(allsubj{s})
     hold on
     plot(ypts,xpts,'w.','Markersize',2)
-         im = polarMap(meanpolar{m},80);
-%        imwrite(im,sprintf('polarmap%d%s', m,'.tif'), 'tif')
-        
-  
+    im = polarMap(meanpolar{m},80);
+    %        imwrite(im,sprintf('polarmap%d%s', m,'.tif'), 'tif')
+    
+    
 end
 subplot(2,2,3)
 imshow(avgmap);
@@ -231,10 +232,10 @@ imAmp(imAmp>1)=1;imAmp = imAmp.^1.5;
 showGradient(allPhase,imAmp,xpts,ypts);
 figure
 showGradient(allPhase,imAmp,0,0);
-         if exist('psfilename','var')
-            set(gcf, 'PaperPositionMode', 'auto');
-            print('-dpsc',psfilename,'-append');
-        end
+if exist('psfilename','var')
+    set(gcf, 'PaperPositionMode', 'auto');
+    print('-dpsc',psfilename,'-append');
+end
 
 %
 % divmap = getDivergenceMap(meanpolar);

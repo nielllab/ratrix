@@ -11,6 +11,7 @@ if exist(psfilename,'file')==2;delete(psfilename);end
 %%% open the maps file containing the data
 [f,p] = uigetfile('*.mat','MAPS file for opto expt');
 %%%load the dfof data
+
 load(fullfile(p,f),'dfof_bg');
 
 %%%create empty arrays to split data in to 'baseline' and 'opto' trials
@@ -27,7 +28,7 @@ num_cycles = size(dfof_bg,3)/fpc; %total number of stimulus cycles
 
 %%%loop through and load the dfof data into the empty arrays
 cnt = 1;
-for i = 1:2:num_cycles %loop through and put odd cycles into baseline and even into opto
+for i = 1:2:num_cycles %go through and put odd 
     baseline(:,:,cnt:cnt+fpc-1) = dfof_bg(:,:,1+(fpc*(i-1)):fpc+(fpc*(i-1)));
     opto(:,:,cnt:cnt+fpc-1) = dfof_bg(:,:,1+(fpc*i):fpc+(fpc*i));
     cnt=cnt+fpc;

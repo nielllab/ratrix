@@ -1,7 +1,9 @@
 function [ph amp alldata fit cycavg tuning sftcourse trialcycavg trialcycavgRun trialcycavgSit] = analyzeGratingPatch(dfof_bg,sp,moviename,useframes,base,xpts,ypts, label,stimRec,psfilename,frameT);
-%load(fname,'dfof_bg');
-%close all
-
+%%% function to analyze maps and tuning from grating patch stimuli (4x3y etc)
+%%% don't modify this unless you know what you're doing
+%%% input = results of dfofMovie and some doTopography
+%%% returns :
+%%% 
 
 timingfig = figure;
 subplot(2,2,1)
@@ -231,6 +233,9 @@ xlabel('pre dfof'); ylabel('post dfof')
 tdata = imresize(avgtrialdata,1);
 %gcp
 
+%%% fit the data at each pixel (i,j) to tuning curves
+%%% this process depends on what your stim is, so there's options for that here. 
+%%% stim type is identified by parameter values, not ideal.
 tic
 for i = 1:size(tdata,1);
     i

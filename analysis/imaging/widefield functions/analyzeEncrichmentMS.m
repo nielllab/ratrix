@@ -1,4 +1,6 @@
 %% analyzeEncrichmentMS
+%%% load in results of AnalyzePassive and do comparisons between two groups
+
 close all
 clear all
 dbstop if error
@@ -7,6 +9,8 @@ warning('off','all')
 savename = 'EEcohort2_DiffPeaksSpatial' %pdf file name
 pathname = 'F:\Alyssa\EnrichmentWidefield\cohort2' %location you want PDF saved
 
+
+%%% load in results of analyzePassive (doTopography, doGratingsNew, doNaturalImages
 [ctlfile p] = uigetfile('*.mat','select CONTROL file');
 cd(p)
 [enrfile p] = uigetfile('*.mat','select ENRICHMENT file');
@@ -16,13 +20,14 @@ fnames = {ctlfile,enrfile};grpnames = {'control','enrichment'};
 psfilename = 'tempWF.ps'; 
 if exist(psfilename,'file')==2;delete(psfilename);end
 
+%%% set up some plotting variables
 mycol = {'k','r'};%colors for plotting
 areas = {'V1','P','LM','AL','RL','AM','PM','MM'};%labels for the different areas
 pltrange = [0 0.01];%colormap range for plotting images
 csval=11; %circular shift for nat im data
 
 imagerate = 10;
-load('C:\src\Movies\naturalImagesEnrichment8mag648s.mat','isi','duration','familiar');
+load('C:\src\Movies\naturalImagesEnrichment8mag648s.mat','isi','duration','familiar'); %%% natural image set
 cyclength = (isi+duration)*imagerate;
 base = 8:10; %indices for baseline
 peak = 14:16; %indices for peak response
@@ -31,10 +36,16 @@ ptsrange = 2; %+/- pixels from selected point to average over
 range = -ptsrange:ptsrange;
 timepts = 0:1/imagerate:cyclength/imagerate-1/imagerate; %cycle time points
 
+%%% load in cortical area coordinates - x,y variables are x-y location of V1, LM, etc
 load('F:\Mandi\EnrichmentWidefield\NewPts070119.mat')%selected points for looking at cycle averages for each area
+
+%%% load in overlay map. xpts and ypts are outlines (wireframe). 
+%%% This is specific for the mag and alignment of your data. 
+%%% Maybe need to multiply/shift appropriately.
 load('C:\mapOverlay5mm.mat')%borders of visual areas for plotting
+
 dt=0.1;%time between imaging frames
-f1 = figure;f2 = figure;%initialize figures
+f1 = figure;f2 = figure;%initialize figures  % what are these figures?
 load(ctlfile,'allfam','allims','allfiles')
 for i = 1:length(allims)
     fig(i) = figure;
@@ -46,17 +57,23 @@ for i = 1:2
     f3(i) = figure;
     f4(i) = figure;
 end
-for i = 1:length(x)
+for i = 1:length(x)   %%% create tunfig for each cortical area
     tunfig(i) = figure;
 end
 
 xydata = zeros(2,length(allims));
 
 cnt=1;
-for f = 1:length(fnames)
+for f = 1:length(fnames)   %%% loop over all groups (fnames are analyzed.mat files, e.g. control, enriched, not individual sessions)
 %     %%%3x2y analysis or 4x3y
     clear cycavg
     load(fullfile(p,fnames{f}),'cycavg','shiftData','mnfit')
+    %%% cycavg(x,y,t,session) = mean response to 4x3y over all conditions
+    %%% mnfit(x,y, tuning);  tuning - 1:4=x, 5:7=y, 8:13 = sf, 14:16=tf, [] , [] (for 4x3y)
+    %%% shiftData(x,y,prefs, session); prefs - x,y,sf,tf, amplitude ,[], []
+    
+    
+    %%% cycle average gets immediately averaged over sessions
     if length(size(cycavg))==4
         semcycavg = std(cycavg,[],4)/sqrt(size(cycavg,4));
         cycavg = mean(cycavg,4);
@@ -67,7 +84,8 @@ for f = 1:length(fnames)
     figure(f1)
     for i = 1:length(x)
         subplot(2,floor(length(x)/2)+1,i)
-        hold on
+         %%% calculate cycle averages at each cortical area
+         hold on
         im = cycavg(x(i)-ptsrange:x(i)+ptsrange,y(i)-ptsrange:y(i)+ptsrange,:);
         im = squeeze(mean(mean(im,2),1));
         im = im-(mean(im(1:2)));
@@ -83,6 +101,8 @@ for f = 1:length(fnames)
         hold off
     end
 %     legend('control','enrichment')
+
+%%% plot a peak amp map, by subtracting t=6:8 minus t=1:2
     subplot(2,floor(length(x)/2)+1,length(x)+f)
     colormap jet
     im = mean(cycavg(:,:,6:8),3)-mean(cycavg(:,:,1:2),3);
@@ -98,7 +118,7 @@ for f = 1:length(fnames)
     
     figure(f2)
     colormap jet
-    for i = 4:10
+    for i = 4:10   %%% show maps from cycle average
         subplot(2,7,cnt)
         im = squeeze(cycavg(:,:,i));
         imagesc(im,pltrange)
@@ -109,7 +129,7 @@ for f = 1:length(fnames)
         cnt=cnt+1;
     end
     
-    for i = 1:length(x)
+    for i = 1:length(x)   %%%% loop over cortical areas and plot tuning curves
         figure(tunfig(i))
 
         subplot(2,3,1)
@@ -124,32 +144,32 @@ for f = 1:length(fnames)
         hold on
         d=squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,1:3),2),1));
         maxx=max(d);
-        plot(d,mycol{f},'LineWidth',2);
+        plot(d,mycol{f},'LineWidth',2); title('x tuning')
         hold off
         
         subplot(2,3,3)
         hold on
         d=squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,4:5),2),1));
-        plot(d*maxx,mycol{f},'LineWidth',2);
+        plot(d*maxx,mycol{f},'LineWidth',2); title('y tuning')
         hold off
         
         subplot(2,3,4);
         hold on
         d =  squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,6:11),2),1));
         plot(d*maxx,[mycol{f} 'o'],'LineWidth',2);
-        plot(2:6,d(2:6)*maxx,mycol{f},'LineWidth',2);
+        plot(2:6,d(2:6)*maxx,mycol{f},'LineWidth',2); title('sf tuning')
         hold off
         
         subplot(2,3,5);
         hold on
         d=squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,12:15),2),1));
-        plot(d*maxx,mycol{f},'LineWidth',2);
+        plot(d*maxx,mycol{f},'LineWidth',2); title('tf tuning')
         hold off
         
         subplot(2,3,6);
         hold on
         d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,:,:),4),2),1));
-        plot((circshift(d',10)-min(d)),mycol{f},'LineWidth',2);
+        plot((circshift(d',10)-min(d)),mycol{f},'LineWidth',2); title('cyc avg')
         hold off
     end
     

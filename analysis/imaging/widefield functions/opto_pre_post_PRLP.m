@@ -4,8 +4,8 @@ clear all
 %%%this code splits data into baseline trials and opto trials
 
 %%%set up PDF to save figures
-% psfilename = 'D:\tempWF.ps'; 
-% if exist(psfilename,'file')==2;delete(psfilename);end
+psfilename = 'D:\tempWF.ps'; 
+if exist(psfilename,'file')==2;delete(psfilename);end
 
 %% loading the data
 %%% open the maps file containing the data
@@ -63,7 +63,7 @@ trialAvg = squeeze(mean(resp,3));  %%% average over time (to give mean for each 
 %% plotting
 
 %%%set a range for imagesc
-pltrange = [-0.01 0.01];
+pltrange = [-0.02 0.02];
 
 % %%%plot the baseline average
 % figure; colormap jet
@@ -110,7 +110,7 @@ for cond = 1:4
         meanImg(:,:,cond) = 0.5*(meanImg(:,:,2) + meanImg(:,:,1));
     end
     subplot(2,2,cond)
-    imagesc(meanImg(:,:,cond),pltrange);
+    imagesc(meanImg(:,:,cond),pltrange); axis equal
     colormap jet; axis off; colorbar;
     title(titles{cond});
 end
@@ -170,6 +170,7 @@ for i = 1:6
     plot(x(i),y(i),[col(i) '*'],'LineWidth',2);
     pointResp(i,:,:,:) = mean(mean(resp(y(i) + range, x(i)+range,:,:,:),2),1);
 end
+legend('1','2','3','4','5','6')
 if exist('psfilename','var'),    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');    print('-dpsc',psfilename,'-append'); end
 
 %%% plot all values at these points
@@ -180,7 +181,7 @@ for cond = 1:2
         plot(1:100,squeeze(pointResp(i,:,:,cond)));
         hold on
         plot(1:100,mean(squeeze(pointResp(i,:,:,cond)),2),'g','LineWidth',2)
-        ylim([-0.2 0.2]); title(sprintf('%s site %d',conds{cond},i))
+        ylim([-0.2 0.2]); title(sprintf('%s site %d',conds{cond},i));
     end
 end
 if exist('psfilename','var'),    set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');    print('-dpsc',psfilename,'-append'); end

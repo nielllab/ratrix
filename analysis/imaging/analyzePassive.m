@@ -8,7 +8,7 @@ batchEnrichmentCohort2 %batch file
 cd(pathname)
 
 %filter based on fields of batch file that define the animals you want
-alluse = find(strcmp({files.cond},'enrichment') & strcmp({files.notes},'good imaging session'))
+alluse = find(strcmp({files.cond},'control') & strcmp({files.notes},'good imaging session'))
 
 savename = ['AF_' files(alluse(1)).cond '.mat'];
 

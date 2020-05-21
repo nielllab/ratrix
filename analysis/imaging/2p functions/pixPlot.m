@@ -6,7 +6,7 @@ for i = (1:npanel)+offset
     meanimg = nanmedian(trialmean(:,:,stimOrder==i),3);
     figure(pixFig); subplot(nrow,ncol,loc(i-offset));
     imagesc(meanimg,range); axis equal; axis off; colormap jet;
-    if gratingTitle
+    if gratingTitle & exist('freq','var')
         title(sprintf('theta %0.0f sf %0.2f',orient(i),freq(i)),'Fontsize',8);
     end
     figure(traceFig); subplot(nrow,ncol,loc(i-offset));

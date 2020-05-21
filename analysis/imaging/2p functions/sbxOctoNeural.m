@@ -955,7 +955,11 @@ end
 
 display('saving data')
 outfile = newpdfFile(1:end-4);
-save(outfile, 'trialmean', 'trialTcourse', 'stimOrder', 'c', 'dFrepeats','xpts','ypts','stdImg','cycPolarImg','cycImg','meanGreenImg','weightTcourse','freq','orient','-append')
+save(outfile, 'trialmean', 'trialTcourse', 'stimOrder', 'c', 'dFrepeats','xpts','ypts','stdImg','cycPolarImg','cycImg','meanGreenImg','weightTcourse')
+if exist('freq','var')
+    save(outfile,'freq','orient','-append');
+end
+
 if nstim==48 | nstim==50  %%% spots
     save(outfile,'topoOverlayImg','xpolarImg','ypolarImg','xphase','yphase','-append')
 end

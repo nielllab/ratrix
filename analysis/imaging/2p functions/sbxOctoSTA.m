@@ -81,6 +81,8 @@ stimTimes = vidframetimes;   %%% we call them phasetimes in behavior, but better
 startFrame = round((stimTimes(1)-1)/dt);
 dfofInterp = dfofInterp(:,:,startFrame:end);   %%% movie starts 1 sec before first stim
 stimTimes = stimTimes-stimTimes(1)+1;
+
+stimTimes = stimTimes(stimTimes<size(dfofInterp,3)*dt - 5);
 stimFrames = round(stimTimes/dt);
 
 figure
@@ -653,9 +655,12 @@ else
 end
 
 clear stas
+display('calculating cell STAs')
 
 for n = 1:size(dF,1)
-    n
+    if n/100 == round(n/100)
+       sprintf('done %d / %d cells',n,size(dF,1))
+    end
     for i = 1:length(stimTimes)-2;
         dFalign(i,:) = dF(n,stimFrames(i) +framerange) - nanmean(dF(n,stimFrames(i)+baserange),2);
     end

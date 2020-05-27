@@ -1,4 +1,4 @@
-%%% compiles data from sparse noise analysis
+%%% compiles data from sparse noise analysis in Octo data
 %%% cmn 2019
 
 close all

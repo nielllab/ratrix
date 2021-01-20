@@ -8,24 +8,39 @@ batchNEW_KC
 cd(pathname)
 
 %%%select the fields that you want to filter on
-alluse = find(strcmp({files.virus},'caspase3')... 
-    & strcmp({files.genotype},'calb2cre-ck2-gc6')...
-    & strcmp({files.inject},'none')... 
-    & strcmp({files.monitor},'land')...
-    & strcmp({files.expt},'030520')...
-    & strcmp({files.timing},'post')...
-    & strcmp({files.notes},'good data')...
-    & strcmp({files.moviename},'C:\grating4x3y5sf3tf_short011315.mat'))
 
-files(n).moviename = 'C:\grating4x3y5sf3tf_short011315.mat'
+alluse = find(strcmp({files.subj},'EEB1LT'))
+   
+% alluse = find(strcmp({files.virus},'CAV2-cre_cre-hM4Di')... 
+%     & strcmp({files.genotype},'camk2 gc6')...
+%     & strcmp({files.inject},'CLOZ')... 
+%     & strcmp({files.monitor},'land')...
+%     & strcmp({files.timing},'pre')...
+%     & strcmp({files.moviename4x3y},'C:\grating4x3y5sf3tf_short011315.mat'))
 
-%%%uncomment this for individual mouse
-% savename = [files(alluse(1)).subj '_' files(alluse(1)).timing '_' files(alluse(1)).virus '_'...
-%     files(alluse(1)).genotype '_' files(alluse(1)).inject '_' ...
-%     '_' files(alluse(1)).dose '_.mat']
+% alluse = find(strcmp({files.virus},'caspase3')... 
+%     & strcmp({files.genotype},'calb2cre-ck2-gc6')...
+%     & strcmp({files.inject},'none')... 
+%     & strcmp({files.monitor},'land')...
+%     & strcmp({files.timing},'post')...
+%     & strcmp({files.moviename4x3y},'C:\grating4x3y5sf3tf_short011315.mat'))
+
+% alluse = find(strcmp({files.virus},'CAV2-cre_cre-hM4Di')... 
+%     & strcmp({files.inject},'CLOZ')... 
+%     & strcmp({files.monitor},'land')...
+%     & strcmp({files.timing},'post')...
+%     & strcmp({files.area}, 'LP')...
+%     & strcmp({files.genotype},'camk2 gc6')...
+%     & strcmp({files.moviename4x3y},'C:\grating4x3y5sf3tf_short011315.mat'))
+    
+
+% files(n).moviename = 'C:\grating4x3y5sf3tf_short011315.mat'
+
+%%uncomment this for individual mouse
+savename = [files(alluse(1)).subj 'EE81LT_010721']
 
 %%%uncomment this for group
-savename = ['Casp3Wk3_.mat']
+% savename = ['203RT_cloz_post.mat']
 % files(alluse(1)).subj '_' files(alluse(1)).timing '_' files(alluse(1)).virus '_' ...
 %    files(alluse(1)).genotype '_' files(alluse(1)).inject 
 
@@ -59,9 +74,9 @@ doTopography;
 % doGratingsNew;
 
 % %%% UNCOMMENT FOR 4X3Y
-disp('doing 4x3y')
-rep=4;
-doGratingsNew;
+% disp('doing 4x3y')
+% rep=4;
+% doGratingsNew;
 
 %%%UNCOMMENT FOR NATURAL IMAGES
 % disp('doing natural images')
@@ -85,12 +100,24 @@ doGratingsNew;
 
 end
 
+% for just doTopography
+
 disp('saving data')
 try
-    save(fullfile(pathname,savename),'allsubj','shiftData','fit','mnfit','cycavg','tuningall','sftcourse','trialcycavgRunAll','trialcycavgSitAll','-v7.3');
+    save(fullfile(pathname,savename),'allsubj','tuningall','sftcourse','trialcycavgRunAll','trialcycavgSitAll','-v7.3');
 catch
-    save(fullfile(pathname,savename),'allsubj','shiftData','fit','mnfit','cycavg','-v7.3');
+    save(fullfile(pathname,savename),'allsubj','-v7.3');
 end
+
+% for grating analysis, which includes shift data, fit, mnfit
+
+% disp('saving data')
+% try
+%     save(fullfile(pathname,savename),'allsubj','shiftData','fit','mnfit','cycavg','tuningall','sftcourse','trialcycavgRunAll','trialcycavgSitAll','-v7.3');
+% catch
+%     save(fullfile(pathname,savename),'allsubj','shiftData','fit','mnfit','cycavg','-v7.3');
+% end
+
 %%%phil note to self- where did sessiondata go/come from and why was it originally
 %%%being saved out? removed from save 6/13/19 after error said it didn't
 %%%exist

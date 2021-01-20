@@ -1014,14 +1014,36 @@ makeSbxMoviesBatch
 % topo2pSession('G6H15P11RT_001_006.sbx','topoXPOSTsession_V2.mat',psfilename);
 % topo2pSession('G6H15P11RT_001_007.sbx','topoYPOSTsession_V2.mat',psfilename);
 
-083019
-topo2pSession('G6H15P11RT_001_001.sbx','topoXPREsession_V2.mat',psfilename);
-topo2pSession('G6H15P11RT_001_002.sbx','topoYPREsession_V2.mat',psfilename);
-patchGrating2pSession('G6H15P11RT_001_003.sbx','patchGratingPREsession_V2.mat',psfilename);
-patchGrating2pSession('G6H15P11RT_001_004.sbx','patchGratingPOSTsession_V2.mat',psfilename);
-topo2pSession('G6H15P11RT_001_005.sbx','topoXPOSTsession_V2.mat',psfilename);
-topo2pSession('G6H15P11RT_001_006.sbx','topoYPOSTsession_V2.mat',psfilename);
+% 083019
+% topo2pSession('G6H15P11RT_001_001.sbx','topoXPREsession_V2.mat',psfilename);
+% topo2pSession('G6H15P11RT_001_002.sbx','topoYPREsession_V2.mat',psfilename);
+% patchGrating2pSession('G6H15P11RT_001_003.sbx','patchGratingPREsession_V2.mat',psfilename);
+% patchGrating2pSession('G6H15P11RT_001_004.sbx','patchGratingPOSTsession_V2.mat',psfilename);
+% topo2pSession('G6H15P11RT_001_005.sbx','topoXPOSTsession_V2.mat',psfilename);
+% topo2pSession('G6H15P11RT_001_006.sbx','topoYPOSTsession_V2.mat',psfilename);
 
+% 080720
+% topo2pSession('J515RT_001_001.sbx','topoXPREsession_V2.mat',psfilename);
+% topo2pSession('J515RT_001_002.sbx','topoYPREsession_V2.mat',psfilename);
+
+% 080720
+% topo2pSession('J515RT_001_001.sbx','topoXPREsession_V2.mat',psfilename);
+% topo2pSession('J515RT_001_002.sbx','topoYPREsession_V2.mat',psfilename);
+% 
+% 082620
+% topo2pSession('JTT484LT_001_001.sbx','topoXPREsession_V2.mat',psfilename);
+% topo2pSession('JTT484LT_001_002.sbx','topoYPREsession_V2.mat',psfilename);
+% topo2pSession('JTT484LT_001_003.sbx','topoXPREsession_V2.mat',psfilename);
+% topo2pSession('JTT484LT_001_004.sbx','topoYPREsession_V2.mat',psfilename);
+
+
+083120
+topo2pSession('JTT484LT_001_001.sbx','topoXPREsession_V2.mat',psfilename);
+topo2pSession('JTT484LT_001_002.sbx','topoYPREsession_V2.mat',psfilename);
+topo2pSession('JTT484LT_001_004.sbx','topoXPREsession_V2.mat',psfilename);
+topo2pSession('JTT484LT_001_005.sbx','topoYPREsession_V2.mat',psfilename);
+topo2pSession('JTT484LT_001_006.sbx','topoYPREsession_V2.mat',psfilename);
+topo2pSession('JTT484LT_001_007.sbx','topoXPREsession_V2.mat',psfilename);
 %% for Santiago
 % topo2pSession('G6H73LTRN_001_001.sbx','topoXsession_V2.mat',psfilename);
 

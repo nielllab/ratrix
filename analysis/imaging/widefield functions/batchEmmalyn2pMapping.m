@@ -8,9 +8,9 @@
 
 
 dbstop if error
-pathname = 'E:\Emmalyn\';
-datapathname = 'E:\Emmalyn\';  
-outpathname = 'E:\Emmalyn\';
+pathname = 'F:\Emmalyn\2pMapping\';
+datapathname = 'F:\Emmalyn\2pMapping\';  
+outpathname = 'F:\Emmalyn\2pMapping\';
 n = 0;
 
 %%
@@ -259,14 +259,58 @@ n = 0;
 % files(n).monitor = 'land'; %%% for topox and y
 % files(n).label = 'camk2 gc6'; %%% or 'calb2'
 % 
+% % % n=n+1;
+% % % files(n).subj = 'J514LT';
+% % % files(n).expt = '030220';
+% % % files(n).topox =  '030220_J514LT_2PMAP_RIG2\030220_J514LT_2PMAP_RIG2_TOPOX\030220_J514LT_2PMAP_RIG2_TOPOXmaps.mat';
+% % % files(n).topoxdata = '030220_J514LT_2PMAP_RIG2\030220_J514LT_2PMAP_RIG2_TOPOX\030220_J514LT_2PMAP_RIG2_TOPOX';
+% % % files(n).topoy =  '030220_J514LT_2PMAP_RIG2\030220_J514LT_2PMAP_RIG2_TOPOY\030220_J514LT_2PMAP_RIG2_TOPOYmaps.mat';
+% % % files(n).topoydata = '030220_J514LT_2PMAP_RIG2\030220_J514LT_2PMAP_RIG2_TOPOY\030220_J514LT_2PMAP_RIG2_TOPOY';
+% % % files(n).rignum = 'rig2'; %%% or 'rig1'
+% % % files(n).monitor = 'land'; %%% for topox and y
+% % % files(n).label = 'camk2 gc6'; %%% or 'calb2'
+% n=n+1;
+% files(n).subj = 'J514RT';
+% files(n).expt = '071720';
+% files(n).topox =  '071720_J514RT_2PMAP_RIG2\071720_J514RT_2PMAP_RIG2_TOPOX\071720_J514RT_2PMAP_RIG2_TOPOXmaps.mat';
+% files(n).topoxdata = '071720_J514RT_2PMAP_RIG2\071720_J514RT_2PMAP_RIG2_TOPOX\071720_J514RT_2PMAP_RIG2_TOPOX';
+% files(n).topoy =  '071720_J514RT_2PMAP_RIG2\071720_J514RT_2PMAP_RIG2_TOPOY\071720_J514RT_2PMAP_RIG2_TOPOYmaps.mat';
+% files(n).topoydata = '071720_J514RT_2PMAP_RIG2\071720_J514RT_2PMAP_RIG2_TOPOY\071720_J514RT_2PMAP_RIG2_TOPOY';
+% files(n).rignum = 'rig2'; %%% or 'rig1'
+% files(n).monitor = 'land'; %%% for topox and y
+% files(n).label = 'camk2 gc6'; %%% or 'calb2'
+
+% n=n+1;
+% files(n).subj = 'J515RT';
+% files(n).expt = '072720';
+% files(n).topox =  '072720_J515RT_2PMAP_RIG2\072720_J515RT_2PMAP_RIG2_TOPOX\072720_J515RT_2PMAP_RIG2_TOPOXmaps.mat';
+% files(n).topoxdata = '072720_J515RT_2PMAP_RIG2\072720_J515RT_2PMAP_RIG2_TOPOX\072720_J515RT_2PMAP_RIG2_TOPOX';
+% files(n).topoy =  '072720_J515RT_2PMAP_RIG2\072720_J515RT_2PMAP_RIG2_TOPOY\072720_J515RT_2PMAP_RIG2_TOPOYmaps.mat';
+% files(n).topoydata = '072720_J515RT_2PMAP_RIG2\072720_J515RT_2PMAP_RIG2_TOPOY\072720_J515RT_2PMAP_RIG2_TOPOY';
+% files(n).rignum = 'rig2'; %%% or 'rig1'
+% files(n).monitor = 'land'; %%% for topox and y
+% files(n).label = 'camk2 gc6'; %%% or 'calb2'
+
+
+% n=n+1;
+% files(n).subj = 'JTT4841P4RT';
+% files(n).expt = '081420';
+% files(n).topox =  '081420_JTT4841P4RT_2PMAP_RIG2\081420_JTT4841P4RT_2PMAP_RIG2_TOPOX\081420_JTT4841P4RT_2PMAP_RIG2_TOPOXmaps.mat';
+% files(n).topoxdata = '081420_JTT4841P4RT_2PMAP_RIG2\081420_JTT4841P4RT_2PMAP_RIG2_TOPOX\081420_JTT4841P4RT_2PMAP_RIG2_TOPOX';
+% files(n).topoy =  '081420_JTT4841P4RT_2PMAP_RIG2\081420_JTT4841P4RT_2PMAP_RIG2_TOPOY\081420_JTT4841P4RT_2PMAP_RIG2_TOPOYmaps.mat';
+% files(n).topoydata = '081420_JTT4841P4RT_2PMAP_RIG2\081420_JTT4841P4RT_2PMAP_RIG2_TOPOY\081420_JTT4841P4RT_2PMAP_RIG2_TOPOY';
+% files(n).rignum = 'rig2'; %%% or 'rig1'
+% files(n).monitor = 'land'; %%% for topox and y
+% files(n).label = 'camk2 gc6'; %%% or 'calb2'
+
+
 n=n+1;
-files(n).subj = 'J514LT';
-files(n).expt = '030220';
-files(n).topox =  '030220_J514LT_2PMAP_RIG2\030220_J514LT_2PMAP_RIG2_TOPOX\030220_J514LT_2PMAP_RIG2_TOPOXmaps.mat';
-files(n).topoxdata = '030220_J514LT_2PMAP_RIG2\030220_J514LT_2PMAP_RIG2_TOPOX\030220_J514LT_2PMAP_RIG2_TOPOX';
-files(n).topoy =  '030220_J514LT_2PMAP_RIG2\030220_J514LT_2PMAP_RIG2_TOPOY\030220_J514LT_2PMAP_RIG2_TOPOYmaps.mat';
-files(n).topoydata = '030220_J514LT_2PMAP_RIG2\030220_J514LT_2PMAP_RIG2_TOPOY\030220_J514LT_2PMAP_RIG2_TOPOY';
+files(n).subj = 'JTT4841P4LT';
+files(n).expt = '081420';
+files(n).topox =  'JTT4841P4LT_2PMAP_RIG2\JTT4841P4LT_2PMAP_RIG2_TOPOX\JTT4841P4LT_2PMAP_RIG2_TOPOXmaps.mat';
+files(n).topoxdata = 'JTT4841P4LT_2PMAP_RIG2\JTT4841P4LT_2PMAP_RIG2_TOPOX\JTT4841P4LT_2PMAP_RIG2_TOPOX';
+files(n).topoy =  'JTT4841P4LT_2PMAP_RIG2\JTT4841P4LT_2PMAP_RIG2_TOPOY\JTT4841P4LT_2PMAP_RIG2_TOPOYmaps.mat';
+files(n).topoydata = 'JTT4841P4LT_2PMAP_RIG2\JTT4841P4LT_2PMAP_RIG2_TOPOY\JTT4841P4LT_2PMAP_RIG2_TOPOY';
 files(n).rignum = 'rig2'; %%% or 'rig1'
 files(n).monitor = 'land'; %%% for topox and y
 files(n).label = 'camk2 gc6'; %%% or 'calb2'
-

@@ -4,8 +4,8 @@ clear all
 dbstop if error
 warning off
 
-savename = 'calb2ck2g6h47RT_DiffPeaksSpatial' %pdf file name
-pathname = 'F:\Kristen\Widefield' %location you want PDF saved
+savename = 'prePostSpatial_203RT_cloz' %pdf file name
+pathname = 'F:\Kristen\Widefield\recentAnalysisFolders' %location you want PDF saved
 
 %create a temp file for pdf generation
 psfilename = fullfile(pathname,'tempWF.ps'); 
@@ -32,6 +32,7 @@ for f = 1:length(fnames) % for both files/2 times
     if length(size(cycavg))==4 % case with a group (if there's a group, the last dimension is #animals)
         semcycavg = std(cycavg,[],4)/sqrt(size(cycavg,4)); % <-- KC: why the brackets? why 4? 
         cycavg = mean(cycavg,4);
+        
     else %case with an individual animal
         semcycavg = zeros(size(cycavg));
     end

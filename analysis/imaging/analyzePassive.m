@@ -4,11 +4,11 @@ clear all
 warning off
 
 % pick animals
-batchEnrichmentCohort2 %batch file
+batchEnrichmentCohort4 %batch file
 cd(pathname)
 
 %filter based on fields of batch file that define the animals you want
-alluse = find(strcmp({files.cond},'control') & strcmp({files.notes},'good imaging session'))
+alluse = find(strcmp({files.cond},'enrichment') & strcmp({files.notes},'good imaging session'))
 
 savename = ['AF_' files(alluse(1)).cond '.mat'];
 
@@ -51,22 +51,22 @@ for s=1:1
 
 
     %%%UNCOMMENT FOR NATURAL IMAGES
-    disp('doing natural images')
-    doNaturalImages
-    disp('saving data')
-    try
-        save(fullfile(pathname,savename),'natimcyc','natimcycavg','allfam','allims','allfiles','-append','-v7.3');
-    catch
-        save(fullfile(pathname,savename),'allsubj','natimcyc','natimcycavg','allfam','allims','allfiles','-v7.3');
-    end
-
-
+%     disp('doing natural images')
+%     doNaturalImages
+%     disp('saving data')
+%     try
+%         save(fullfile(pathname,savename),'natimcyc','natimcycavg','allfam','allims','allfiles','-append','-v7.3');
+%     catch
+%         save(fullfile(pathname,savename),'allsubj','natimcyc','natimcycavg','allfam','allims','allfiles','-v7.3');
+%     end
+% 
+% 
 end
 
 
-%%%phil note to self- where did sessiondata go/come from and why was it originally
-%%%being saved out? removed from save 6/13/19 after error said it didn't
-%%%exist
+%%phil note to self- where did sessiondata go/come from and why was it originally
+%%being saved out? removed from save 6/13/19 after error said it didn't
+%%exist
 
 %make the pdf
 try

@@ -67,7 +67,7 @@ topoy_crop = topoy(y(1):y(2),x(1):x(2),:);
 stdMap = std(df(:,:,1:10:end),[],3); % gonna show image of std of croppoed df over time
 figure
 imagesc(stdMap,[0 0.1])
-title('Cropped stDev of dfof_bg across time(downsized & trimmed first 150 frames)')
+title('Cropped stDev of dfof_bg across time(downsized & trimmed first 150 frames)') % axes are pixels?
 
 
 frameT = frameT-frameT(1);  %%% time of camera frames;
@@ -89,7 +89,7 @@ sum(badtrials)
 
 figure
 for f = 1:12; % why 12?
-    subplot(3,4,f)
+    subplot(3,4,f) % is each subplot a point in time?
     % Qs4below: why mult time dimesion by 3 times f? 11 is because the
     % first frame after the 10 before frame starts... something like
     % that... mean across 4th dimension means across all onsets?
@@ -97,7 +97,7 @@ for f = 1:12; % why 12?
     % so we're subtracing frame 11 from frame 3*f... I guess we're showing
     % an image of the difference in means at two time points 
     axis equal
-    title('unknown, kinda - and what are axes? pixels?') %Q
+    title('what are axes? subplots are time?') %Q
 end
 
 
@@ -123,7 +123,8 @@ subplot(1,2,2);
 imshow(topoy_crop);
 title('topox_crop & topoy crop');
 
-clear xpts ypts % plotting points I picked
+% pick 5 pts - where? why 5?
+clear xpts ypts % why clear these?
 for i = 1:5
     i
     [xpts(i) ypts(i)] = ginput(1);
@@ -134,23 +135,25 @@ for i = 1:5
     end
 end
 
-%%% target contrasts
-% sure point of this plot, I guess just to put dots where i picked them?
-% what contrasts are being displayed here?
+%%% target contrasts - do the points I picked get analyzed?
+% what's being plotted here in plain english? what's the subtraction?
+% is each sublot a tifferent interval in time?
+
 contrasts = unique(tc); % go thru list of contrasts and take each value only once, make this a new vector
 for c = 1:length(contrasts); % for each unique contrast
     figure
      trials =  abs(tcTrial)==contrasts(c); % confused... c-th unique contrast... make abs value of trial target condition equal  contrast? then to  'c' contrast, then assign that to trials?
     set(gcf,'Name',sprintf('tc = %0.3f  n = %d',contrasts(c),sum(trials)));
     for f = 1:12;
-        subplot(3,4,f)
+        subplot(3,4,f) % why f times 3?
         imagesc(mean(onsetDf(:,:,f*3,trials),4)-mean(onsetDf(:,:,11,trials),4) ,range); % again plotting this subtraction
         hold on; plot(xpts,ypts,'r.')
         axis equal; axis off
+        title('?');
     end
 end
 
-%%% flanker contrasts - again what's being plotted here?
+%%% flanker contrasts - what's being plotted here? what contrast are targets here?
 contrasts = unique(abs(fc));
 for c = 1:length(contrasts);
     figure
@@ -163,10 +166,9 @@ for c = 1:length(contrasts);
     end
 end
 
-export_fig 'G6H277RT_threshCompare'-append
-
 %%% full parameters = flanker and target
-% still uncertain what I'm seeing
+
+% do I need these flanker parts?
 contrasts = unique(abs(fc));
 tcontrasts = unique(tc);
 for c = 1:length(contrasts);
@@ -185,8 +187,6 @@ for c = 1:length(contrasts);
     end
 end
 
-export_fig 'G6H277RT_threshCompare'-append
-
 %? 
 figure
 subplot(1,2,1);
@@ -194,4 +194,3 @@ imshow(topox_crop); hold on; plot(xpts,ypts,'wo')
 subplot(1,2,2);
 imshow(topoy_crop);hold on; plot(xpts,ypts,'wo')
 
-export_fig 'G6H277RT_threshCompare'-append

@@ -6,7 +6,7 @@ clear all
 
 load('G6H277RT_subj.mat')
 load('20210107T155415_1.mat')  %%% frames 1:116 are noise
-
+close 
 %load('20171102T171734_85.mat');
 
 [f p] = uigetfile('*.mat','topox maps file')
@@ -49,8 +49,8 @@ for i = 1:length(allResp); % allResp also has 286 rows... not frames, right?
     onsets(i) = allResp(i).frameT(1)-t0; % what are rows in allResp? onset = time of first frame for each response minus time of first frame first stop? 
 end
 
-goodStart=150; % cutting out the first few frams, forget why
-df(:,:,1:goodStart)=0; %% frames 1:150 of 110217WW3RT are noise
+% goodStart=150; % cutting out the first few frams, forget why
+% df(:,:,1:goodStart)=0; %% frames 1:150 of 110217WW3RT are noise
 
 
 stdMap = std(df(:,:,1:10:end),[],3); % only take every 10 frames (don't need all, why?). taking std across 3rd dimension, time
@@ -97,7 +97,7 @@ for f = 1:12; % why 12?
     % so we're subtracing frame 11 from frame 3*f... I guess we're showing
     % an image of the difference in means at two time points 
     axis equal
-    title('what are axes? subplots are time?') %Q
+    title('avg across all trials, over time') %Q
 end
 
 

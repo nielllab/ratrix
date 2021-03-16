@@ -9,7 +9,8 @@ cd(pathname)
 
 %%%select the fields that you want to filter on
 
-alluse = find(strcmp({files.subj},'EEB1LT'))
+alluse = find(strcmp({files.subj},'G6H277RT')...
+      & strcmp({files.expt},'020421'))
    
 % alluse = find(strcmp({files.virus},'CAV2-cre_cre-hM4Di')... 
 %     & strcmp({files.genotype},'camk2 gc6')...
@@ -37,7 +38,7 @@ alluse = find(strcmp({files.subj},'EEB1LT'))
 % files(n).moviename = 'C:\grating4x3y5sf3tf_short011315.mat'
 
 %%uncomment this for individual mouse
-savename = [files(alluse(1)).subj 'EE81LT_010721']
+savename = ['analyzePass_G6H277RT_020421']
 
 %%%uncomment this for group
 % savename = ['203RT_cloz_post.mat']

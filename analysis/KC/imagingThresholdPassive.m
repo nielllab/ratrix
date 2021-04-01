@@ -1,15 +1,19 @@
-% addpath F:\Kristen\Widefield2\balldata_G6H277RT
+addpath F:\Kristen\Widefield2\balldata_G6H277RT
 % addpath F:\Kristen\Widefield2\balldatathe_EE1LT
-addpath F:\Kristen\Widefield2\balldata_EE81LT
+% addpath F:\Kristen\Widefield2\balldata_EE81LT
 
 close all
 clear all
 
-load('EE81LT_subj.mat')
+
+load('277RT_subj.mat')
+% load('EE81LT_subj.mat')
+
+load('20210311T161951_5.mat')
 % load('20210107T155415_1.mat') %277rt 010721
 % load('20210204T131006_5.mat') %277rt 020421 % doBehavior generates one of these files per session
 % load('20210107T140819_6.mat') % EE81LT 010721 (file acccidentally named 010621)
-load('20210204T164434_3.mat') % EE1LT 020421
+% load('20210204T164434_3.mat') % EE1LT 020421
 
 [f p] = uigetfile('*.mat','topox maps file')
 load(fullfile(p,f),'mapNorm');

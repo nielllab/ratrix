@@ -1,7 +1,5 @@
-
-% navigate to balldata folder, load subj file, then navigate back to
-% widefield2 folder for saving figures
-load('G6H277RT_subj.mat')
+% change animal ID each time:
+load('F:\Kristen\Widefield2\balldata_G6H277RT\G6H277RT_subj.mat')
 
 subjName = subjData{1,1}.name % subjNameStr is a char, not string
 titleText = ' : df/f for each TRIAL OVER TIME' % making char variables for sprintf/title later

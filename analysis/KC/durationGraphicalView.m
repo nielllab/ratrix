@@ -49,9 +49,9 @@ s = 1 ;%
 
 %% Duration (rows) vs frames (columns)
 figure % make one figure for all subplots
-t = suptitle(sprintf('%s', subjName, titleText))
-set(t, 'FontSize', 12)
-
+%t = suptitle(sprintf('%s', subjName, titleText))
+%set(t, 'FontSize', 12)
+suptitle('peri-stimulus cortical response to varying durations')
 for d = 1:length(uniqueDurations); % for each unique duration
 % for d = 1:length(subtractLast3UniqueDurations);
 % for c = 1:length(contrasts);    
@@ -66,20 +66,21 @@ for d = 1:length(uniqueDurations); % for each unique duration
     
     for f = 1:length(frames) 
         % subplot(7,4,s) % for subtractLongDurs
-         subplot(5,5,s)
+         subplot(5,4,s)
 
         %axes('Position',[left bottom width height])
         imagesc(mean(onsetDf(:,:,frames(f),dthTrials),4)-mean(onsetDf(:,:,11,dthTrials),4),range);   
-%        
+%       
+        
         if subplotNum == 1
-        ylabel('df/f')
-        xlabel ('frames')
-    else
-        set(gca,'XTick',[], 'YTick', [])
+            ylabel('df/f')
+            xlabel ('frames')
+        else
+            set(gca,'XTick',[], 'YTick', [])
         end
     
         s = s + 1;
-        %axis off;
+        axis off;
         axis image;
 
     end

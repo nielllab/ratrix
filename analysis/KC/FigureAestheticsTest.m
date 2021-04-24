@@ -60,3 +60,40 @@ for j = 1:length(xpts)
     hold on
 end
 legend(reigons)
+
+%  assign the Axes object to a variable, such as ax = gca. 
+%  Then set the XTick property using dot notation, such as 
+%  ax.XTick = [-3*pi -2*pi -pi 0 pi 2*pi 3*pi].
+
+
+% imFig=figure;
+% imFig.MenuBar='none';
+% for I=1:numel(axesPosition)
+%     pHandle(I)=uipanel(imFig,'Position',axesPosition{I},...
+%         'Units','normalized'); % create a grid of UIPanels with the outer
+%                                % position specified.
+%     axesHandles(I)=axes(pHandle(I)); % create an axis in each panel
+%     % Hide the axes and make them fill each panel
+%     set(axesHandles(I),'Visible','off');
+%     set(axesHandles(I),'Position',[0 0 1 1]);
+% end
+% for I=1:size(axesPosition,1)
+%         imshow(IM,'Parent',axesHandles(I)) % Add the image
+%         % Cause image to stretch rather than maintain aspect ratio
+%         set(axesHandles(I),'DataAspectRatioMode','auto')
+% end
+
+
+% numColumns = 1:length(frames);
+% numRows = 1:length(uniqueContrast);
+% 
+% for i = 1:numRows
+% 
+%     for j = 1:numColumns
+% 
+%         subplot('Position',[(j-1)*1/numColumns (numRows-i)*1/numRows 1/numColumns 1/numRows])
+%         imshow(   )
+%         s = s+1;
+%     
+%     end
+% end 

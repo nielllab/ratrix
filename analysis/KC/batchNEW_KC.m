@@ -5,6 +5,54 @@ pathname = 'F:\Kristen\Widefield2\'
 datapathname = 'F:\Kristen\Widefield2\'
 outpathname = 'F:\Kristen\Widefield2\'
 
+%% 041021_G6H277RT_RIG2 
+% 
+n=n+1;
+files(n).subj = 'G6H277RT'; %animal name
+files(n).expt = '041121'; %date of experiment
+files(n).topox= '041121_G6H277RT_RIG2\041121_G6H277RT_RIG2_TOPOX\041121_G6H277RT_RIG2_TOPOXmaps.mat'; %where to put dfof
+files(n).topoxdata = '041121_G6H277RT_RIG2\041121_G6H277RT_RIG2_TOPOX\041121_G6H277RT_RIG2_TOPOX'; %raw data
+files(n).topoy = '041121_G6H277RT_RIG2\041121_G6H277RT_RIG2_TOPOY\041121_G6H277RT_RIG2_TOPOYmaps.mat';
+files(n).topoydata = '041121_G6H277RT_RIG2\041121_G6H277RT_RIG2_TOPOY\041121_G6H277RT_RIG2_TOPOY';
+files(n).thresh = '041121_G6H277RT_RIG2\041121_G6H277RT_RIG2_THRESH\041121_G6H277RT_RIG2_THRESH';
+files(n).threshdata = '041121_G6H277RT_RIG2\041121_G6H277RT_RIG2_THRESH\041121_G6H277RT_RIG2_THRESH';
+files(n).inject = 'none'; 
+files(n).dose = 'none';
+files(n).virus = 'none'
+files(n).timing = 'none';
+files(n).training = 'naive';
+files(n).area = 'none';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).genotype = 'camk2 gc6';
+files(n).imagerate = 10;
+files(n).moviename4x3y = 'none'; %def started using 'fix' version before this... shortly after Phil fixed it
+% files(n).notes = ' ';
+
+%% 041021_G6H277RT_RIG2 
+% % 
+% n=n+1;
+% files(n).subj = 'G6H277RT'; %animal name
+% files(n).expt = '041021'; %date of experiment
+% files(n).topox= '041021_G6H277RT_RIG2\041021_G6H277RT_RIG2_TOPOX\041021_G6H277RT_RIG2_TOPOXmaps.mat'; %where to put dfof
+% files(n).topoxdata = '041021_G6H277RT_RIG2\041021_G6H277RT_RIG2_TOPOX\041021_G6H277RT_RIG2_TOPOX'; %raw data
+% files(n).topoy = '041021_G6H277RT_RIG2\041021_G6H277RT_RIG2_TOPOY\041021_G6H277RT_RIG2_TOPOYmaps.mat';
+% files(n).topoydata = '041021_G6H277RT_RIG2\041021_G6H277RT_RIG2_TOPOY\041021_G6H277RT_RIG2_TOPOY';
+% files(n).thresh = '041021_G6H277RT_RIG2\041021_G6H277RT_RIG2_THRESH\041021_G6H277RT_RIG2_THRESH';
+% files(n).threshdata = '041021_G6H277RT_RIG2\041021_G6H277RT_RIG2_THRESH\041021_G6H277RT_RIG2_THRESH';
+% files(n).inject = 'none'; 
+% files(n).dose = 'none';
+% files(n).virus = 'none'
+% files(n).timing = 'none';
+% files(n).training = 'naive';
+% files(n).area = 'none';
+% files(n).rignum = 'rig2';
+% files(n).monitor = 'land';
+% files(n).genotype = 'camk2 gc6';
+% files(n).imagerate = 10;
+% files(n).moviename4x3y = 'none'; %def started using 'fix' version before this... shortly after Phil fixed it
+% % files(n).notes = ' ';
+
 %% EE81LT_040621 
 
 % n=n+1;
@@ -103,28 +151,28 @@ outpathname = 'F:\Kristen\Widefield2\'
 % files(n).moviename4x3y = 'none'; %def started using 'fix' version before this... shortly after Phil fixed it
 % % files(n).notes = ' ';
 
-%% 030521_G6H277RT_RIG2  
+%% 030521_G6H277RT_RIG2 - too long to analyze
 % 
-n=n+1;
-files(n).subj = 'G6H277RT'; %animal name
-files(n).expt = '030521'; %date of experiment
-files(n).topox= '030521_G6H277RT_RIG2\030521_G6H277RT_RIG2_TOPOX\030521_G6H277RT_RIG2_TOPOXmaps.mat'; %where to put dfof
-files(n).topoxdata = '030521_G6H277RT_RIG2\030521_G6H277RT_RIG2_TOPOX\030521_G6H277RT_RIG2_TOPOX'; %raw data
-files(n).topoy = '030521_G6H277RT_RIG2\030521_G6H277RT_RIG2_TOPOY\030521_G6H277RT_RIG2_TOPOYmaps.mat';
-files(n).topoydata = '030521_G6H277RT_RIG2\030521_G6H277RT_RIG2_TOPOY\030521_G6H277RT_RIG2_TOPOY';
-files(n).thresh = '030521_G6H277RT_RIG2\030521_G6H277RT_RIG2_THRESH\030521_G6H277RT_RIG2_THRESH';
-files(n).threshdata = '030521_G6H277RT_RIG2\030521_G6H277RT_RIG2_THRESH\030521_G6H277RT_RIG2_THRESH';
-files(n).inject = 'none'; 
-files(n).dose = 'none';
-files(n).virus = 'none'
-files(n).timing = 'none';
-files(n).training = 'naive';
-files(n).area = 'none';
-files(n).rignum = 'rig2';
-files(n).monitor = 'land';
-files(n).genotype = 'camk2 gc6';
-files(n).imagerate = 10;
-files(n).moviename4x3y = 'none'; %def started using 'fix' version before this... shortly after Phil fixed it
+% n=n+1;
+% files(n).subj = 'G6H277RT'; %animal name
+% files(n).expt = '030521'; %date of experiment
+% files(n).topox= '030521_G6H277RT_RIG2\030521_G6H277RT_RIG2_TOPOX\030521_G6H277RT_RIG2_TOPOXmaps.mat'; %where to put dfof
+% files(n).topoxdata = '030521_G6H277RT_RIG2\030521_G6H277RT_RIG2_TOPOX\030521_G6H277RT_RIG2_TOPOX'; %raw data
+% files(n).topoy = '030521_G6H277RT_RIG2\030521_G6H277RT_RIG2_TOPOY\030521_G6H277RT_RIG2_TOPOYmaps.mat';
+% files(n).topoydata = '030521_G6H277RT_RIG2\030521_G6H277RT_RIG2_TOPOY\030521_G6H277RT_RIG2_TOPOY';
+% files(n).thresh = '030521_G6H277RT_RIG2\030521_G6H277RT_RIG2_THRESH\030521_G6H277RT_RIG2_THRESH';
+% files(n).threshdata = '030521_G6H277RT_RIG2\030521_G6H277RT_RIG2_THRESH\030521_G6H277RT_RIG2_THRESH';
+% files(n).inject = 'none'; 
+% files(n).dose = 'none';
+% files(n).virus = 'none'
+% files(n).timing = 'none';
+% files(n).training = 'naive';
+% files(n).area = 'none';
+% files(n).rignum = 'rig2';
+% files(n).monitor = 'land';
+% files(n).genotype = 'camk2 gc6';
+% files(n).imagerate = 10;
+% files(n).moviename4x3y = 'none'; %def started using 'fix' version before this... shortly after Phil fixed it
 % files(n).notes = ' ';
 
 %% 020421_EE81LT_RIG2  %% accidentally left out the '1' in animal id

@@ -23,34 +23,43 @@ uniqueContrasts = unique(con); % gets a list of the contrast value options,
 %%
 range = [0 0.1];
 
-frames = [12 15 18 21];
-s = 1 ;%
+% LOAD CORRECT MOUSE/EXPERIMENT FILE
 
-% left=1;
-% bottom=0;
-% 
-% width=4;
-% height=7; 
-% 
-% pos = [left bottom width height]
+frames = [12 15 18 21];
+s = 1 ;
+
+% date
+[filepath,name,ext] = fileparts('20210411T123140_25.mat')
+
+datePart = name(1:8);
+
+year = datePart(1:4);
+month = datePart(5:6);
+day = datePart(7:8);
+
+date = sprintf('%s ', month, day, year);
+
 clear c
 figure
-for c = 1:length(uniqueContrasts); % for each unique contrast
-% for c = 1:length(contrasts);    
 
-%    trials =  abs(tcTrial)==contrasts(c);
-%    trialsMinusOne = trials(1,1:length(trials)-1); 
+subjName = subjData{1,1}.name % subjNameStr is a char, not string
+titleText = ': peri-stimulus cortical response to varying contrasts' % making char variables for sprintf/title later
+supTit = suptitle(sprintf('%s', date, subjName, titleText))
+set(supTit, 'FontSize', 14)
+
+for c = 1:length(uniqueContrasts);    
 
      clear cthTrials
      cthConOrderedByTrialMeetCriteria = conOrderedByTrial(idxOnsetsMeetBothCriteria);
      cthTrials = cthConOrderedByTrialMeetCriteria == uniqueContrasts(c);
+     %cthTrials = cthConOrderedByTrialMeetCriteria == contrasts(c);
    
     for f = 1:length(frames) 
-        %subplot(7,4,'Position',pos)
+        
         subplot(7,4,s)
-        %axes('Position',[left bottom width height])
-        imagesc(mean(onsetDf(:,:,frames(f),cthTrials),4)-mean(onsetDf(:,:,11,cthTrials),4),range);   
-%         
+        
+        imagesc(mean(onsetDf(:,:,frames(f),cthTrials),4)-mean(onsetDf(:,:,11,cthTrials),4),range); 
+        
         s = s + 1;
         axis off;
         axis image;
@@ -59,8 +68,5 @@ for c = 1:length(uniqueContrasts); % for each unique contrast
     
 end
 
-% A = mean(onsetDf(:,:,frames(f),cthTrialsMinusOne),4)-mean(onsetDf(:,:,11,cthTrialsMinusOne),4);
-% imagesc(linspace(0,1,4),linspace(0,1,7),A)
-% imageChangeInDfFromStimOnseToFrameNum = mean(onsetDf(:,:,frames(f),cthTrialsMinusOne),4)-mean(onsetDf(:,:,11,cthTrialsMinusOne),4);
-% imagesc(linspace(0,1,4),linspace(0,1,7),imageChangeInDfFromStimOnseToFrameNum)
-        
+
+

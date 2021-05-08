@@ -13,20 +13,6 @@ alluse = find(strcmp({files.subj},'G6H277RT')...
       & strcmp({files.expt},'041121'))
    
 % alluse = find(strcmp({files.virus},'CAV2-cre_cre-hM4Di')... 
-%     & strcmp({files.genotype},'camk2 gc6')...
-%     & strcmp({files.inject},'CLOZ')... 
-%     & strcmp({files.monitor},'land')...
-%     & strcmp({files.timing},'pre')...
-%     & strcmp({files.moviename4x3y},'C:\grating4x3y5sf3tf_short011315.mat'))
-
-% alluse = find(strcmp({files.virus},'caspase3')... 
-%     & strcmp({files.genotype},'calb2cre-ck2-gc6')...
-%     & strcmp({files.inject},'none')... 
-%     & strcmp({files.monitor},'land')...
-%     & strcmp({files.timing},'post')...
-%     & strcmp({files.moviename4x3y},'C:\grating4x3y5sf3tf_short011315.mat'))
-
-% alluse = find(strcmp({files.virus},'CAV2-cre_cre-hM4Di')... 
 %     & strcmp({files.inject},'CLOZ')... 
 %     & strcmp({files.monitor},'land')...
 %     & strcmp({files.timing},'post')...
@@ -34,16 +20,16 @@ alluse = find(strcmp({files.subj},'G6H277RT')...
 %     & strcmp({files.genotype},'camk2 gc6')...
 %     & strcmp({files.moviename4x3y},'C:\grating4x3y5sf3tf_short011315.mat'))
     
-
 % files(n).moviename = 'C:\grating4x3y5sf3tf_short011315.mat'
 
-%%uncomment this for individual mouse
-savename = ['041121_277RT_anPass_Vars']
+%%% save output
+%%% uncomment this for individual mouse
+%savename = ['041121_277RT_anPass_Vars']
 
-%%%uncomment this for group
+%%% uncomment this for group
 % savename = ['203RT_cloz_post.mat']
 % files(alluse(1)).subj '_' files(alluse(1)).timing '_' files(alluse(1)).virus '_' ...
-%    files(alluse(1)).genotype '_' files(alluse(1)).inject 
+% files(alluse(1)).genotype '_' files(alluse(1)).inject 
 
 
 %% run doTopography (use this one to average all sessions that meet criteria)
@@ -58,14 +44,17 @@ if exist(psfilename,'file')==2;delete(psfilename);end
 %use = intersect(alluse,find(strcmp({files.subj},allsubj{s})))    
 
 for s=1:1
-use = alluse;
-allsubj{s}
+    
+    use = alluse;
+        allsubj{s}
 
-%%% calculate gradients and regions
-clear map merge
+    %%% calculate gradients and regions
+    clear map merge
 
-x0=0; y0=0; sz=128;
-doTopography;
+    x0=0; y0=0; sz=128;
+    doTopography;
+    
+end
 
 %% pick which gratings analysis to run
 

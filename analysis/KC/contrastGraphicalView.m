@@ -21,7 +21,7 @@ uniqueContrasts = unique(con); % gets a list of the contrast value options,
 % so we know how many contrasts to loop over
 
 %%
-range = [0 0.1];
+range = [0 0.04];
 
 % LOAD CORRECT MOUSE/EXPERIMENT FILE
 
@@ -50,8 +50,10 @@ set(supTit, 'FontSize', 14)
 for c = 1:length(uniqueContrasts);    
 
      clear cthTrials
-     cthConOrderedByTrialMeetCriteria = conOrderedByTrial(idxOnsetsMeetBothCriteria);
-     cthTrials = cthConOrderedByTrialMeetCriteria == uniqueContrasts(c);
+     % don't really need the criteria here... not taking a range
+%      cthConOrderedByTrialMeetCriteria = conOrderedByTrial(idxOnsetsMeetBothCriteria);
+%      cthTrials = cthConOrderedByTrialMeetCriteria == uniqueContrasts(c);
+     cthTrials = conOrderedByTrial == uniqueContrasts(c);
      %cthTrials = cthConOrderedByTrialMeetCriteria == contrasts(c);
    
     for f = 1:length(frames) 

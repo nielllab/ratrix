@@ -198,8 +198,6 @@ end
 % avgmap=frame;
 
 
-
-
 for m=1:2
     figure
     imshow(polarMap(meanpolar{m},92));

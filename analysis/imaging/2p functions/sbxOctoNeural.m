@@ -297,6 +297,24 @@ title(sprintf('%.03f frame cycle %0.3f amp',cycLength,maxAmp));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 
+% some debugging to look at traces of individual pixesl
+% keyboard
+% 
+% figure
+% subplot(2,1,1)
+% imagesc(greenCrop); colormap gray; axis equal; hold on
+% for i = 1:20
+%     subplot(2,1,1)
+%     [y x] = ginput(1);
+%     plot(y,x,'g*')
+%     subplot(2,1,2)
+%     range = -10:10
+%     d = squeeze(mean(dfofInterp(round(x+range),round(y+range),:),[1,2]))
+%     plot((1:length(d))*dt,d)
+%     xlim([0 60]); ylim([-0.2 0.2])
+% end
+
+
 %%% mean fluorescence of the entire image
 mfluorescence = squeeze(mean(mean(dfofInterp,2),1));
 figure

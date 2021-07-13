@@ -38,6 +38,7 @@ use_chan=3;
 % use_chan=1;
 % [dfof map mapNorm]= readTifRatio;
 % use_chan=3;
+
 dfof_bg= single(dfof{use_chan});
 display('saving')
 tic
@@ -71,6 +72,7 @@ open(vid);
 writeVideo(vid,mov);
 close(vid)
 
+% RAW movie
 dfshort = (double(dfof_bg(:,:,:)));
 dfshort = imresize(dfshort,0.5,'method','box');
 baseline = prctile(dfshort,3,3);
@@ -86,6 +88,7 @@ vid.FrameRate=25;
 open(vid);
 writeVideo(vid,mov);
 close(vid)
+end
 
 
 % keyboard
@@ -105,106 +108,99 @@ close(vid)
 % writeVideo(vid,mov);
 % close(vid)
 
+% ** COMMENTING OUT STIM REC PART FOR THRESH SESSIONS? ** 
 
-use_speed=1;
-
-fs = dir([datadir '\stim*.*']);
-
-if ~isempty(fs)
-    use_speed=1;
-   display('doing speed')
-   load(fullfile(datadir,fs(1).name),'-mat');
-    %     figure
-    %     plot(stimRec.pos)
-
-
-    figure
-    plot(stimRec.f);
-    ylabel('frame #')
-    
- 
-    mouseT = stimRec.ts- stimRec.ts(2)+0.0001; %%% first is sometimes off
-    figure
-    plot(diff(mouseT));
-    
-    figure
-    plot(mouseT - stimRec.f/60)
-    ylim([-0.5 0.5])
-    
-    dt = diff(mouseT);
-    use = [1<0; dt>0];
-    mouseT=mouseT(use);
-    
-    posx = cumsum(stimRec.pos(use,1)-900);
-    posy = cumsum(stimRec.pos(use,2)-500);
-   if isnan(frameT)
-       frameT = 0.1*(1:size(dfof_bg,3))';
-   end
-   frameT = frameT - frameT(1)+0.02;
-    vx = diff(interp1(mouseT,posx,frameT));
-    vy = diff(interp1(mouseT,posy,frameT));
-    vx(end+1)=0; vy(end+1)=0;
-    
-    figure
-    plot(vx); hold on; plot(vy,'g');
-    sp = sqrt(vx.^2 + vy.^2);
+% use_speed=1;
+% 
+% fs = dir([datadir '\stim*.*']);
+% 
+% if ~isempty(fs)
+%     use_speed=1;
+%    display('doing speed')
+%    load(fullfile(datadir,fs(1).name),'-mat');
+%     %     figure
+%     %     plot(stimRec.pos)
+% 
 %     figure
-%     plot(sp)
-%     hold on 
-%     plot(squeeze(mean(mean(dfof_bg,2),1))*30000,'g');
-%     legend('speed','dF');
+%     plot(stimRec.f);
+%     ylabel('frame #')
+%
+%     mouseT = stimRec.ts- stimRec.ts(2)+0.0001; %%% first is sometimes off
 %     figure
-%     plot(xcorr(sp,mean(mean(dfof_bg,2),1)))
-%     ylabel('sp df xcorr'); xlabel('offset frames')
-%     for i=1:100;
-%         sp_avg(i) = nanmeanMW(sp(i:100:end));
-%        
+%     plot(diff(mouseT));
+%     
+%     figure
+%     plot(mouseT - stimRec.f/60)
+%     ylim([-0.5 0.5])
+%     
+%     dt = diff(mouseT);
+%     use = [1<0; dt>0];
+%     mouseT=mouseT(use);
+%     
+%     posx = cumsum(stimRec.pos(use,1)-900);
+%     posy = cumsum(stimRec.pos(use,2)-500);
+%     if isnan(frameT)
+%        frameT = 0.1*(1:size(dfof_bg,3))';
 %     end
-%     sp_all = reshape(sp,[100 30]);
+%     frameT = frameT - frameT(1)+0.02;
+%     vx = diff(interp1(mouseT,posx,frameT));
+%     vy = diff(interp1(mouseT,posy,frameT));
+%     vx(end+1)=0; vy(end+1)=0;
+%     
 %     figure
-%     plot(0.1:0.1:10,sp_all)
-%     title('all speeds')
-%     figure
-%     plot(0.1:0.1:10,sp_avg)
-%     title('mean speed')
-%     ylim([0 2500])
+%     plot(vx); hold on; plot(vy,'g');
+%     sp = sqrt(vx.^2 + vy.^2);
 
-    thresh = [100 ];
-    if ~isempty(sp<thresh) & ~isempty(sp>thresh)
-        
-   
-    for i = 1:1
-        stop_img = mean(dfof_bg(:,:,sp<thresh(i)),3);
-        mov_img = mean(dfof_bg(:,:,sp>thresh(i)),3);
-        
-        figure
-        subplot(2,2,1);
-        imagesc(stop_img,[-0.2 0.2]);
-        subplot(2,2,2);
-        imagesc(mov_img,[-0.2 0.2]);
-        subplot(2,2,3);
-        imagesc(mov_img-stop_img,[-0.05 0.05]);
-    end
-    
-    movemap = mov_img-stop_img;
-    else
-        movemap=NaN;
-    end
-    %[f p] =uiputfile('*.mat','move map file');
-    save(mapfilename,'movemap','sp','stimRec','-append');
-else
-    error(sprintf('couldnt find stimrec for %s', mapfilename))
-end
-
-
+% %     figure
+% %     plot(sp)
+% %     hold on 
+% %     plot(squeeze(mean(mean(dfof_bg,2),1))*30000,'g');
+% %     legend('speed','dF');
+% %     figure
+% %     plot(xcorr(sp,mean(mean(dfof_bg,2),1)))
+% %     ylabel('sp df xcorr'); xlabel('offset frames')
+% %     for i=1:100;
+% %         sp_avg(i) = nanmeanMW(sp(i:100:end));   
+% %     end
+% %     sp_all = reshape(sp,[100 30]);
+% %     figure
+% %     plot(0.1:0.1:10,sp_all)
+% %     title('all speeds')
+% %     figure
+% %     plot(0.1:0.1:10,sp_avg)
+% %     title('mean speed')
+% %     ylim([0 2500])
+% 
+%     thresh = [100 ];
+%     if ~isempty(sp<thresh) & ~isempty(sp>thresh)
+%         
+%    
+%     for i = 1:1
+%         stop_img = mean(dfof_bg(:,:,sp<thresh(i)),3);
+%         mov_img = mean(dfof_bg(:,:,sp>thresh(i)),3);
+%         
+%         figure
+%         subplot(2,2,1);
+%         imagesc(stop_img,[-0.2 0.2]);
+%         subplot(2,2,2);
+%         imagesc(mov_img,[-0.2 0.2]);
+%         subplot(2,2,3);
+%         imagesc(mov_img-stop_img,[-0.05 0.05]);
+%     end
+%     
+%     movemap = mov_img-stop_img;
+%     else
+%         movemap=NaN;
+%     end
+%     %[f p] =uiputfile('*.mat','move map file');
+%     save(mapfilename,'movemap','sp','stimRec','-append');
+% else
+%     error(sprintf('couldnt find stimrec for %s', mapfilename))
+% end
 
 % keyboard
+% raw movie
 
-%
-% keyboard
-% %% raw movie
-%
-%
 % [f,p] = uiputfile('*.avi','dfof movie file');
 % small_mov = dfof_bg(4:4:end,4:4:end,4:4:end);
 % lowthresh = prctile(small_mov(:),2);

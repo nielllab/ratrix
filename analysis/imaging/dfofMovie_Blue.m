@@ -56,8 +56,6 @@ for i = 1:cyc_period;
     cycle_mov_std(:,:,i) = std(dfof_bg(:,:,i+startframe:cyc_period:end),[],3);
 end
 
-
-
 save(mapfilename,'cycle_mov','cycle_mov_std','cycMap','-append')
 
 baseline = prctile(cycle_mov,1,3);

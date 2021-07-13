@@ -1,9 +1,9 @@
-%batchDfofMovie_Blue
+%batchDfofMovie
 errmsg= [];errRpt = {};
 nerr=0;
 redo=0;
 for f = 1:length(files)
-    f
+    f  
     tic
     
     if isfield(files(f),'rignum') && strcmp(files(f).rignum,'rig2')
@@ -12,10 +12,10 @@ for f = 1:length(files)
         rig=1;
     end   
     
-   % uncomment for topox
+%     %uncomment for topox
     if redo  || isempty([pathname files(f).topox]) || ~exist([pathname files(f).topox],'file')
         try
-            dfofMovie_Blue([datapathname files(f).topoxdata],rig);
+            dfofMovie_GreenBlue_KC([datapathname files(f).topoxdata],rig);
         catch exc
             sprintf('couldnt do %s',files(f).topoxdata)
             nerr=nerr+1;
@@ -26,10 +26,10 @@ for f = 1:length(files)
         sprintf('skipping %s',files(f).topox)
     end
     
-% uncomment for topoy
+    %uncomment for topoy
     if redo || isempty([pathname files(f).topoy]) || ~exist([pathname files(f).topoy],'file')
         try
-            dfofMovie_Blue([datapathname files(f).topoydata],rig);
+            dfofMovie_GreenBlue_KC([datapathname files(f).topoydata],rig);
         catch exc
             sprintf('couldnt do %s',files(f).topoydata)
             nerr=nerr+1;
@@ -40,10 +40,10 @@ for f = 1:length(files)
         sprintf('skipping %s',files(f).topoy)
     end
     
-% uncomment for thresh
+    %uncomment for thresh
     if redo || isempty([pathname files(f).thresh]) || ~exist([pathname files(f).thresh],'file')
         try
-            dfofMovie_Blue([datapathname files(f).threshdata],rig);
+            dfofMovie_GreenBlue_KC([datapathname files(f).threshdata],rig);
         catch exc
             sprintf('couldnt do %s',files(f).threshdata)
             nerr=nerr+1;
@@ -51,12 +51,13 @@ for f = 1:length(files)
             errRpt{nerr}=getReport(exc,'extended')
         end
     else
-        sprintf('skipping %s',files(f).threshdata)
+        sprintf('skipping %s',files(f).thresh)
     end
     
     %     for e = 1:nerr
     %         errRpt{e}
     %     end
+    
     toc
     
 end

@@ -2,13 +2,13 @@
 
 warning off
 
-batchNEW_KC
+batchThresholdExpts
 cd(pathname)
 
 %% select the fields that you want to filter on
 
-alluse = find(strcmp({files.subj},'G6H277RT')...
-      & strcmp({files.expt},'041121'))
+alluse = find(strcmp({files.subj},'G6H305LT')...
+      & strcmp({files.expt},'070121'));
    
 % alluse = find(strcmp({files.virus},'CAV2-cre_cre-hM4Di')... 
 %     & strcmp({files.inject},'CLOZ')... 

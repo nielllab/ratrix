@@ -4,8 +4,8 @@ close all
 clear all
 warning off
 
-batchNEW_KC
-cd(pathname)
+batchNEW_KC % this runs the batch script
+cd(pathname) % path name is defined in the batch script
 
 %%%select the fields that you want to filter on
 

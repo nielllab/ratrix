@@ -30,18 +30,26 @@ end
 
 if in(end-6)=='_' & in(end-5)=='0'
     basename=in(1:end-7);
+    sz = size(imread([basename '_000001.tif']));
+    namelength=6;
+elseif in(end-5)=='_' & in(end-4)=='0'
+    basename=in(1:end-6);
+    sz = size(imread([basename '_00001.tif']));
+    namelength=5;
 elseif in(end-4)=='_' & in(end-3)=='0'
     basename=in(1:end-5);
+    sz = size(imread([basename '_0001.tif']));
+    namelength=4;
 else
     basename=in;
 end
-try
-    sz = size(imread([basename '_000001.tif']));
-    namelength=6;
-catch
-    sz = size(imread([basename '_0001.tif']));
-    namelength=4;
-end
+% try
+%     sz = size(imread([basename '_000001.tif']));
+%     namelength=6;
+% catch
+%     sz = size(imread([basename '_0001.tif']));
+%     namelength=4;
+% end
 basename
 clear in
 if ~exist('fl','var')

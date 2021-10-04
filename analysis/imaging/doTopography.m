@@ -1,5 +1,12 @@
 %%% doTopography
 
+if ~exist('useReference','var') | ~exist('referenceMapName','var') | ~exist('mapOverlayName','var')
+    useReference=1; %%% use a reference map to align to? if not, just align to a single map
+    referenceMapName = 'referenceMap.mat'
+    mapOverlayName = 'C:\mapoverlay5mm.mat';
+end
+
+
 %%% getRegions calculates gradients and other map properties based on
 %%% Fourier analysis performed by dfofMovie/readTifBlueGreen and stored in maps files
 for f = 1:length(alluse)
@@ -11,26 +18,14 @@ for f = 1:length(alluse)
     
 end
 
-clear allamp
-for f = 1:length(use)
-    f
-    if isfield(files(use(f)),'pathname')
-        pathname = files(use(f)).pathname;
-    end
-    load(fullfile(pathname,files(use(f)).topox),'cycMap');
-    df = max(cycMap,[],3) - min(cycMap,[],3);
-    allamp(f) = max(df(:));
-    
-end
-
-load('C:\mapoverlay5mm.mat')
+load(mapOverlayName)
 % load('mapoverlay.mat') %only for 5mm window right now
 
 %%% need to max shiftImage return full array (260 across after zoom?), then fit it into a space of
 %%% appropriate size
-useReference=1;
+
 if useReference
-    load('referenceMap.mat','avgmap4d','avgmap'); %for vis areas only (e.g. 5mm window)
+    load(referenceMapName,'avgmap4d','avgmap'); %for vis areas only (e.g. 5mm window)
     %     load('referenceMapFullSkull.mat','avgmap4d','avgmap'); %for bilateral full skull
 end
 display('aligning')
@@ -215,9 +210,9 @@ for m=1:2
     plot(ypts,xpts,'w.','Markersize',2)
     im = polarMap(meanpolar{m},80);
     %        imwrite(im,sprintf('polarmap%d%s', m,'.tif'), 'tif')
-    
-    
 end
+
+
 subplot(2,2,3)
 imshow(avgmap);
 title('average topo  map');

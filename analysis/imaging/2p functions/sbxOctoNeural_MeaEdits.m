@@ -234,7 +234,7 @@ plot(cycLength*dt*(1:nCycles),0,'*');
 
 figure
 plot(diff(stimT(stimT>0)));
-title('differencee of psychstim frames'); ylabel('secs')
+title('difference of psychstim frames'); ylabel('secs')
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 
@@ -295,24 +295,6 @@ colormap(hsv); colorbar
 
 title(sprintf('%.03f frame cycle %0.3f amp',cycLength,maxAmp));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
-
-% some debugging to look at traces of individual pixesl
-% keyboard
-% 
-% figure
-% subplot(2,1,1)
-% imagesc(greenCrop); colormap gray; axis equal; hold on
-% for i = 1:20
-%     subplot(2,1,1)
-%     [y x] = ginput(1);
-%     plot(y,x,'g*')
-%     subplot(2,1,2)
-%     range = -10:10
-%     d = squeeze(mean(dfofInterp(round(x+range),round(y+range),:),[1,2]))
-%     plot((1:length(d))*dt,d)
-%     xlim([0 60]); ylim([-0.2 0.2])
-% end
 
 
 %%% mean fluorescence of the entire image
@@ -690,7 +672,7 @@ figure
 hold on
 for clust = 1:nclust
     plot(nanmean(cycAvgAll(c==clust,:),1),'Color',colors(clust,:));
-end; title('mean cyc avg for each cluster)')
+end; title('mean cyc avg for each cluster')
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %%% mean response for each cluster
@@ -737,16 +719,19 @@ range = [-0.02 0.1];
 if nstim==12 %%% spots
     loc = [1 4 2 5 3 6]; %%% map stim order onto subplot
     figure; set(gcf,'Name','OFF spots');
+    hold on
+    title('OFF spots')
     for i = 1:6
         meanimg = median(trialmean(:,:,stimOrder==i),3);
         subplot(2,3,loc(i));
         imagesc(meanimg,range); axis equal
-        
         stimImg(:,:,i) = meanimg;
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     figure; set(gcf,'Name','ON spots');
+    hold on
+    title('ON spots')
     for i = 7:12
         meanimg = median(trialmean(:,:,stimOrder==i),3);
         subplot(2,3,loc(i-6));
@@ -893,6 +878,7 @@ if nstim==29 %%% gratings 1 tf; either 4sfx4orient, or 2sf x 8 orient
     ylabel('mean dF/F');
     ylim([0 0.05])
     title('weighted mean response');
+    set(gcf,'Position',[100 100 1000 800])
     set(gca,'Xtick',1:8);
     set(gca,'Xticklabel',{'0', '0.01','0.02','0.04','0.08','0.16','0.32','0.64'})
     
@@ -907,11 +893,13 @@ if nstim==48 %%% 4x6 spots
     loc = [1 7 13 19 2 8 14 20 3 9 15 21 4 10 16 22 5 11 17 23 6 12 18 24]; %%% map stim order onto subplot
     
     figLabel = 'OFF spots';
+    title('OFF spots')
     npanel = 24; nrow = 4; ncol = 6; offset = 0;
     pixPlot;
     pixPlotWeight;
     
     figLabel = 'ON spots';
+    title('ON spots')
     npanel = 24; nrow = 4; ncol = 6; offset = 24;
     pixPlot;
     pixPlotWeight;
@@ -934,10 +922,12 @@ if nstim==50 %%% 5x5 spots
     loc = [1 6 11 16 21 2 7 12 17 22 3 8 13 18 23 4 9 14 19 24 5 10 15 20 25]; %%% map stim order onto subplot
     %loc = [21 16 11 6 1 22 17 12 7 2 23 18 13 8 3 24 19 14 9 4 25 20 15 10 5]; %%% flipped direction
     figLabel = 'OFF spots';
+    title('OFF spots')
     npanel = 25; nrow = 5; ncol = 5; offset = 0;
     pixPlot;
     
     figLabel = 'ON spots';
+    title('ON spots')
     npanel = 25; nrow = 5; ncol = 5; offset = 25;
     pixPlot;
     

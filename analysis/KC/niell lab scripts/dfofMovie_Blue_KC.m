@@ -1,4 +1,4 @@
-function dfofMovie(in,rig);
+function dfofMovie_Blue(in,rig);
 
 if ~exist('rig','var')
     rig = input ('which rig? 1= old, 2=new : ')
@@ -20,24 +20,26 @@ end
 if rig==1
     rigzoom =1; fl=0;
 else
-%     rigzoom = 0.859; fl=1; %FOR 1.6X OBJECTIVE
-    rigzoom = 1; fl=1; %FOR 1X
+    rigzoom =1; fl=1; %0.859; 
 end
 
 datadir = p;
 
 rigzoom
 fl
-[dfof map mapNorm cycMap frameT]= readTifBlueGreen(datafile,rigzoom,fl);
+%[dfof map mapNorm cycMap frameT]= readTifBlueGreen(datafile,rigzoom,fl);
+[dfof map mapNorm cycMap frameT]= readTifBlue(datafile,rigzoom,fl);
 
 % keyboard
 
-use_chan=3;
+%use_chan=3
+use_chan=1
 
 % [dfof map mapNorm]= readTifGreen;
 % use_chan=1;
 % [dfof map mapNorm]= readTifRatio;
 % use_chan=3;
+
 dfof_bg= single(dfof{use_chan});
 display('saving')
 tic
@@ -71,6 +73,7 @@ open(vid);
 writeVideo(vid,mov);
 close(vid)
 
+% RAW movie, no running (fast)
 dfshort = (double(dfof_bg(:,:,:)));
 dfshort = imresize(dfshort,0.5,'method','box');
 baseline = prctile(dfshort,3,3);
@@ -86,7 +89,6 @@ vid.FrameRate=25;
 open(vid);
 writeVideo(vid,mov);
 close(vid)
-
 
 % keyboard
 % lowthresh = prctile(cycle_mov(:),3)
@@ -105,7 +107,6 @@ close(vid)
 % writeVideo(vid,mov);
 % close(vid)
 
-
 use_speed=1;
 
 fs = dir([datadir '\stim*.*']);
@@ -117,12 +118,10 @@ if ~isempty(fs)
     %     figure
     %     plot(stimRec.pos)
 
-
     figure
     plot(stimRec.f);
     ylabel('frame #')
     
- 
     mouseT = stimRec.ts- stimRec.ts(2)+0.0001; %%% first is sometimes off
     figure
     plot(diff(mouseT));
@@ -137,10 +136,10 @@ if ~isempty(fs)
     
     posx = cumsum(stimRec.pos(use,1)-900);
     posy = cumsum(stimRec.pos(use,2)-500);
-   if isnan(frameT)
+    if isnan(frameT)
        frameT = 0.1*(1:size(dfof_bg,3))';
-   end
-   frameT = frameT - frameT(1)+0.02;
+    end
+    frameT = frameT - frameT(1)+0.02;
     vx = diff(interp1(mouseT,posx,frameT));
     vy = diff(interp1(mouseT,posy,frameT));
     vx(end+1)=0; vy(end+1)=0;
@@ -148,6 +147,7 @@ if ~isempty(fs)
     figure
     plot(vx); hold on; plot(vy,'g');
     sp = sqrt(vx.^2 + vy.^2);
+    
 %     figure
 %     plot(sp)
 %     hold on 
@@ -157,8 +157,7 @@ if ~isempty(fs)
 %     plot(xcorr(sp,mean(mean(dfof_bg,2),1)))
 %     ylabel('sp df xcorr'); xlabel('offset frames')
 %     for i=1:100;
-%         sp_avg(i) = nanmeanMW(sp(i:100:end));
-%        
+%         sp_avg(i) = nanmeanMW(sp(i:100:end)); 
 %     end
 %     sp_all = reshape(sp,[100 30]);
 %     figure
@@ -196,27 +195,21 @@ else
     error(sprintf('couldnt find stimrec for %s', mapfilename))
 end
 
-
-
 % keyboard
+% raw movie
 
-%
-% keyboard
-% %% raw movie
-%
-%
-% [f,p] = uiputfile('*.avi','dfof movie file');
+% [f,p] = uiputfile('*.avi','dfof movie file');  %FOR USE INPUT
 % small_mov = dfof_bg(4:4:end,4:4:end,4:4:end);
 % lowthresh = prctile(small_mov(:),2);
 % upperthresh = 1.5*prctile(small_mov(:),98);
-%
+% 
 % clear mov
 % figure
-% mov_length = size(dfof_bg,3);
-% mov_length=400
+% mov_length = size(dfof_bg,3);  %BECAUSE START FRAME = 300
+% % mov_length=400
 % for i = 1:mov_length;
 % i
-%     imagesc(imresize(dfof_bg(:,:,i+300),0.5,'box'),[lowthresh upperthresh]);
+%     imagesc(imresize(dfof_bg(:,:,i),0.5,'box'),[lowthresh upperthresh]);
 %     colormap(gray);
 %    hold on
 %     if use_speed
@@ -231,16 +224,17 @@ end
 %         mov(mov_length) = getframe(gcf); %%%% initializes structure array
 %     end
 %     mov(i) = getframe(gcf);
-%
+% 
 % end
-%
-%
-% vid = VideoWriter(fullfile(p,f));
+% 
+% 
+% % vid = VideoWriter(fullfile(p,f));%IF USING USER INPUT
+% vid = VideoWriter(fullfile(datadir,[f(1:end-11) 'Raw_w_running']))
 % vid.FrameRate=25;
 % open(vid);
 % writeVideo(vid,mov(1:end));
 % close(vid)
-%
+% 
 % clear mov
 %
 %

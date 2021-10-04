@@ -13,6 +13,8 @@ bytesPerPix = 2;
 pixPerFrame = maxGB*1000*1000*1000/length(ids)/bytesPerPix;
 if namelength==6;
     sz = size(imread([iPath '_000001.tif']));
+elseif namelength==5
+    sz = size(imread([iPath '_00001.tif']));
 elseif namelength==4
     sz = size(imread([iPath '_0001.tif']));
 end
@@ -62,6 +64,8 @@ else
         end
         if namelength==6
             fn = sprintf('%s_%06d.tif',[base ext],i);
+        elseif namelength==5
+            fn = sprintf('%s_%05d.tif',[base ext],i);
         elseif namelength==4
             fn = sprintf('%s_%04d.tif',[base ext],i);
         end

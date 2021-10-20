@@ -1,4 +1,4 @@
-function [xPickedPts,yPickedPts ] = pickVisAreaPts(baselinedActIm,range,colorMapOrNot)
+function [xPickedPts,yPickedPts] = pickVisAreaPts(baselinedActIm,range,colorMapOrNot)
 % Prompts user to pick visual areas points from peak activity image
 % 'range' is defined in previous step
 
@@ -6,11 +6,11 @@ function [xPickedPts,yPickedPts ] = pickVisAreaPts(baselinedActIm,range,colorMap
 
     clear xPickedPts 
     clear yPickedPts 
-
-    % show activation image
     
     figure
     suptitle('points picked over peak activation')
+    
+    % show activation image
 
     imagesc(baselinedActIm,range)
     

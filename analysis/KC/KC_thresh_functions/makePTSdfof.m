@@ -1,4 +1,4 @@
-function [RoundXpts,RoundYpts,PTSdfof] = makePTSdfof(xPickedPts,yPickedPts,onsetDf)
+function [RoundXpts,RoundYpts,PTSdfof] = makePTSdfof(xPickedPts,yPickedPts,onsetDf,range,colorMapOrNot)
 % This function used the points selected in the previous step to index into onsetDf
 
     % SELECT ALL PTS from ONSET DF
@@ -10,7 +10,7 @@ function [RoundXpts,RoundYpts,PTSdfof] = makePTSdfof(xPickedPts,yPickedPts,onset
 %     for i = 1:length(xPickedPts)
 %         PTSdfof(i,:,:) = onsetDf(RoundXpts(i),RoundYpts(i),:,:);
 %     end
-
+    range = -2:2;
     clear PTSdfof 
     for i = 1:length(xPickedPts)
         
@@ -29,7 +29,9 @@ function [RoundXpts,RoundYpts,PTSdfof] = makePTSdfof(xPickedPts,yPickedPts,onset
         catXandMeanYptsDfof = cat(3,meanXPTSdfof,meanYPTSdfof); % concatenates in 3rd dimension
         meanXandMeanYptsDfof = mean(catXandMeanYptsDfof,3); % mean across both the x and y range versions...
         
-        PTSdfof(i,:,:) = meanXandMeanYptsDfof; % collct for each point
+        
+        PTSdfof(i,:,:) = squeeze(mean(mean(onsetDf(RoundXpts(i)+range,RoundYpts(i)+range,:,:),2),1));
+        %PTSdfof(i,:,:) = meanXandMeanYptsDfof; % collct for each point
         
     end
 

@@ -1,4 +1,4 @@
-function [meanSpeedAllTrials] = calcMeanRunSpeedAllTrials(allStop,allResp)
+function [meanSpeedAllTrials,idxRunTrials,idxStatTrials] = calcMeanRunSpeedAllTrials(allStop,allResp)
 % This function takes in allStop & allResp, and outputs the mean run speed(displacement)for each trial, 'meanSpeedAllTrials'. 
 % In the code, you can alter the threshold for running vs stationary (variable: 'runThresh').
 

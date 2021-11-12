@@ -169,6 +169,8 @@ figure
 bar(mv);
 xlabel('subject')
 ylabel('fraction running')
+set(gcf, 'PaperUnits', 'normalized', 'PaperPosition', [0 0 1 1], 'PaperOrientation', 'landscape');
+print('-dpsc',psfilename,'-append');
 % plotGratingResp(mnPhase{rep}/length(use),mnAmp{rep}/length(use),rep,xpts,ypts);
 %plotGratingResp(mnAmpWeight{rep}./(mnAmp{rep}+0.0001),mnAmp{rep}/length(use),rep,xpts,ypts);
 plotGratingRespFit(median(shiftData,4),median(shiftData(:,:,5,:) + shiftData(:,:,6,:),4),median(fit,4),rep,xpts,ypts,'average')
@@ -211,16 +213,17 @@ if x==0
     end
     
 end
-col = 'bgrcmyk'
+col = 'bgrcmykb'
 w=2;
 range = -w:w;
+nAreas = length(x)
 if rep ==2
     
     figure
     subplot(2,3,1)
     imagesc(mean(shiftData(:,:,5,:),4));
     hold on
-    for i = 1:7;
+    for i = 1:nAreas;
         plot([y(i)-w y(i)-w y(i)+w y(i)+w y(i)-w],[x(i)-w x(i)+w x(i)+w x(i)-w x(i)-w],col(i),'LineWidth',2)
     end
     legend(visareas)
@@ -229,7 +232,7 @@ if rep ==2
     
     subplot(2,3,2);
     hold on
-    for i = 1:7
+    for i = 1:nAreas
         d=(squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,1:3),2),1)));
         plot(d,col(i),'LineWidth',2);
     end
@@ -240,7 +243,7 @@ if rep ==2
     
     subplot(2,3,3)
     hold on
-    for i = 1:7
+    for i = 1:nAreas
         d=squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,4:5),2),1));
         plot(d/max(d),col(i),'LineWidth',2);
     end
@@ -250,7 +253,7 @@ if rep ==2
     
     subplot(2,3,4);
     hold on
-    for i = 1:7
+    for i = 1:nAreas
         d =  squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,6:11),2),1));
         plot(d(1)/max(d),[col(i) 'o'],'LineWidth',2);
         plot(2:6,d(2:6)/max(d),col(i),'LineWidth',2);
@@ -262,7 +265,7 @@ if rep ==2
     
     subplot(2,3,5);
     hold on
-    for i = 1:7
+    for i = 1:nAreas
         d=squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,12:15),2),1));
         plot(d/max(d),col(i),'LineWidth',2);
     end
@@ -273,7 +276,7 @@ if rep ==2
     subplot(2,3,6);
     
     hold on
-    for i = 1:7
+    for i = 1:nAreas
         d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,:,:),4),2),1));
         %     repd = repmat(d,[10 1]);
         %     dconvd = deconvg6s(repd'+0.5,0.1);
@@ -293,16 +296,16 @@ elseif rep==4
     subplot(2,3,1)
     imagesc(mean(shiftData(:,:,5,:),4));
     hold on
-    for i = 1:7;
+    for i = 1:nAreas;
         plot([y(i)-w y(i)-w y(i)+w y(i)+w y(i)-w],[x(i)-w x(i)+w x(i)+w x(i)-w x(i)-w],col(i),'LineWidth',2)
     end
-    legend({'V1','MM','LM','AL','RL','AM','PM'})
+    legend(visareas)
     
     hold on; plot(ypts,xpts,'w.','Markersize',2); axis off
     
     subplot(2,3,2);
     hold on
-    for i = 1:7
+    for i = 1:nAreas
         d=(squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,1:4),2),1)));
         plot(d,col(i),'LineWidth',2);
     end
@@ -313,7 +316,7 @@ elseif rep==4
     
     subplot(2,3,3)
     hold on
-    for i = 1:7
+    for i = 1:nAreas
         d=squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,5:7),2),1));
         plot(d/max(d),col(i),'LineWidth',2);
     end
@@ -323,7 +326,7 @@ elseif rep==4
     
     subplot(2,3,4);
     hold on
-    for i = 1:7
+    for i = 1:nAreas
         d =  squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,8:13),2),1));
         plot(d(1)/max(d),[col(i) 'o'],'LineWidth',2);
         plot(2:6,d(2:6)/max(d),col(i),'LineWidth',2);
@@ -335,7 +338,7 @@ elseif rep==4
     
     subplot(2,3,5);
     hold on
-    for i = 1:7
+    for i = 1:nAreas
         d=squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,14:16),2),1));
         plot(d/max(d),col(i),'LineWidth',2);
     end
@@ -347,7 +350,7 @@ elseif rep==4
     subplot(2,3,6);
     
     hold on
-    for i = 1:7
+    for i = 1:nAreas
         d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,:,:),4),2),1));
         %     repd = repmat(d,[10 1]);
         %     dconvd = deconvg6s(repd'+0.5,0.1);
@@ -386,7 +389,7 @@ elseif rep ==1
     subplot(2,2,1)
     imagesc(mean(shiftData(:,:,5,:),4));
     hold on
-    for i = 1:7;
+    for i = 1:nAreas;
         plot([y(i)-w y(i)-w y(i)+w y(i)+w y(i)-w],[x(i)-w x(i)+w x(i)+w x(i)-w x(i)-w],col(i),'LineWidth',2)
     end
     legend({'V1','LM','AL','RL','AM','PM','MM'})
@@ -395,7 +398,7 @@ elseif rep ==1
     
     subplot(2,2,2);
     hold on
-    for i = 1:7
+    for i = 1:nAreas
         d=(squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,1:3),2),1)));
         plot(d,col(i),'LineWidth',2);
     end
@@ -406,7 +409,7 @@ elseif rep ==1
     
     subplot(2,2,3)
     hold on
-    for i = 1:7
+    for i = 1:nAreas
         d=squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,4:5),2),1));
         plot(d/max(d),col(i),'LineWidth',2);
     end
@@ -416,7 +419,7 @@ elseif rep ==1
     
     subplot(2,2,4);
     hold on
-    for i = 1:7
+    for i = 1:nAreas
         d =  squeeze(mean(mean(mnfit(x(i)+range,y(i)+range,6:7),2),1));
         plot(d(1)/max(d),[col(i) 'o'],'LineWidth',2);
         plot(1:2,d(1:2)/max(d),col(i),'LineWidth',2);
@@ -433,7 +436,7 @@ elseif rep ==1
         for s = 1:6
             subplot(2,3,s);
             hold on
-            for i = 1:7
+            for i = 1:nAreas
                 if s==1 | s==4
                     d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,(1:25)+(sf-1)*50,:),4),2),1));
                 elseif s==2 | s==5
@@ -477,7 +480,7 @@ end
 
 figure
 hold on
-for i = 1:7
+for i = 1:nAreas
     d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,:,:),4),2),1));
     %     repd = repmat(d,[10 1]);
     %     dconvd = deconvg6s(repd'+0.5,0.1);
@@ -494,7 +497,7 @@ end
 
 figure
 hold on
-for i = 1:7
+for i = 1:nAreas
     d=squeeze(mean(mean(mean(cycavg(x(i)+range,y(i)+range,:,:),4),2),1));
     repd = repmat(d,[10 1]);
     dconvd = deconvg6s(repd'+0.1,0.1);

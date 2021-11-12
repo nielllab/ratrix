@@ -19,7 +19,7 @@ contentFirstCell = testCellArray{1,2};
 % braces if assigning to variable you need one variable per cell 
 [contentFirstCell contentSecondCell] = testCellArray{1,1:2};
 
-% CREATING & INDEXING STRUCT ARRAYS
+%% CREATING & INDEXING STRUCT ARRAYS
 
 % When you have data that you want to organize by name, you can use structures to store it. 
 % Structures store data in containers called fields, which you can then access by the names 
@@ -139,8 +139,6 @@ end
 %% 
 
 fakeStimDetailsStructSess1 = fakeGroupStimDetails{1} = fakeGroupStimDetails{1}
-
-%% 
 
 % now, what do i want? I guess I want whatever I would normally store as
 % 'con' in the individual analysis. I hyst need to be able to index it fron the 

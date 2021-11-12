@@ -145,10 +145,20 @@ end
 
 
 if movienum==1
-load('C:\data\octo_sparse_flash_10min.mat')
+    load('C:\data\octo_sparse_flash_10min.mat')
+    crange = [-0.1 0.1];
+    tau = 9; tau_range = -5:5;
 else
     load('C:\data\sparse_20min_1-8.mat');
+    crange = [-0.05 0.05];
+    tau = 7; tau_range = -3:3;
 end
+
+baserange=0:2;
+%baserange =2;
+
+%%% box size for 'cell body' points
+pts_range = -3:3;   
 
 for rep =1:2 %%% 4 conditions: On, Off, fullfield On, fullfield off; currently skipping fullfield since it's not interesting
     
@@ -163,110 +173,123 @@ for rep =1:2 %%% 4 conditions: On, Off, fullfield On, fullfield off; currently s
     end
     
     if rep==1 | rep ==2  %%% spots (remove fullfield)
-        m(sz_mov==255)=0;     m= imresize(m,0.5,'box');
+        m(sz_mov==255)=0;    %%% keeps fullfield from overwhelming, but means timecourse of fullfield is broken 
+        m= imresize(m,0.5,'box');
     elseif rep ==3 | rep==4  %%% fullfield
         m(sz_mov~=255)=0; m = m(1,1,:); %%% only need one pixel
     end
     
+    movie_mn = mean(m,3);
     %%% calculate timecourse for entire image
     dFclip = dfofInterp;  dFclip(dFclip>1)=1;   %%% get rid of extreme dF values (mostly from outside tissue)
     dF = squeeze(mean(mean(dFclip,2),1));
     framerange = 0:cycWindow;
     baserange=0:2;
+ %   baserange = 2;
     for i = 1:length(stimTimes)-2;
         dFalign(i,:) = dF(stimFrames(i) +framerange)- nanmean(dF(stimFrames(i)+baserange));
     end
     
-    sta=0;
+    figure
+    plot(nanmean(dFalign,1));
+    title('mean timecourse all pixels all stim')
+    xlabel('frame'); ylabel('dfof')
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
     
     figure; set(gcf,'Name',sprintf('rep %d timecourse',rep));
-    range = -2:2
-    for tau = 3:18;
-        resp = nanmean(dFalign(:,tau+range),2);
+    range = -2:2;
+
+    for taus = 3:18;
+        resp = nanmean(dFalign(:,taus+range),2);
+        %resp = resp-nanmin(resp);
         %resp = resp-mean(resp);
         sta =0;
         npts = min(length(resp),size(moviedata,3));
         for i = 1:min(length(resp),size(moviedata,3));
             if ~isnan(resp(i))
-                sta = sta+resp(i)*m(:,:,i);
+                sta = sta+resp(i)*(m(:,:,i)-movie_mn);
             end
         end
         sta = sta/nansum(abs(resp(1:npts)));
-        stas(:,:,tau)=sta;
+        stas(:,:,taus)=sta;
         %sta = sta/sum(resp);
-        subplot(4,5,tau);
-        imagesc(sta',[-0.1 0.1]);colormap jet; axis equal;title(sprintf('lag %d',tau));
+        subplot(4,5,taus);
+        imagesc(sta',crange);colormap jet; axis equal;title(sprintf('lag %d',tau));
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     
     %%% calculate STA at peak time (tau) at gridpoints on 2p image
-    tau = 8;
-    
+
     blocksize=25
     xrange = 1:blocksize:size(dfofInterp,1); xrange = xrange(1:end-1); %%% last one will be off the edge
     yrange = 1:blocksize:size(dfofInterp,2);  yrange = yrange(1:end-1);
-%     pnum=0; % index for plots
-%     STAfig = figure; set(gcf,'Visible','off'); set(gcf,'Name',sprintf('rep %d map',rep));    
-%     tcourseFig = figure;  set(gcf,'Visible','off');% tcourseFig.NextPlot = 'new'; %set(gcf,'Name',sprintf('rep %d timecourse',rep));
-%    % 
+    clear dFalign tcourseAll
+    %     pnum=0; % index for plots
+    %     STAfig = figure; set(gcf,'Visible','off'); set(gcf,'Name',sprintf('rep %d map',rep));
+    %     tcourseFig = figure;  set(gcf,'Visible','off');% tcourseFig.NextPlot = 'new'; %set(gcf,'Name',sprintf('rep %d timecourse',rep));
+    %    %
     for nx = 1:length(xrange);
         for ny = 1:length(yrange)
             sprintf('%d %d',nx,ny)
-          %  pnum=pnum+1;
+            %  pnum=pnum+1;
             
             range = 0:(blocksize-1);
             dF = squeeze(mean(mean(dfofInterp(xrange(nx)+range,yrange(ny)+range,:),2),1));
             
             framerange = 0:cycWindow;
-            baserange=0:2;
-            for i = 1:length(stimTimes)-2;
+
+            for i = 1:length(stimTimes)-4;
                 dFalign(i,:) = dF(stimFrames(i) +framerange)- nanmean(dF(stimFrames(i)+baserange));
             end
             
             range = -2:2;
-            resp = nanmean(dFalign(:,tau+range),2);
+            resp = nanmean(dFalign(:,tau+tau_range),2);
+            %resp(resp<0)=0;
+           % resp = resp-nanmin(resp);
             sta =zeros(size(m,1),size(m,2));
             npts = min(length(resp),size(moviedata,3));
             for i = 1:npts;
                 if ~isnan(resp(i))
-                    sta = sta+resp(i)*m(:,:,i);
+                    sta = sta+resp(i)*(m(:,:,i)-movie_mn);
                 end
             end
             sta = sta/(nansum(abs(resp(1:npts)))); %%% normalize sta by total amount of neural activity (like dividing by # of spikes in standard STA)
             staAll(:,:,nx,ny,rep) = sta';
-%             figure(STAfig)
-%             subplot(length(xrange),length(yrange),pnum,'Parent',STAfig);           
-%             imagesc(imresize(sta',0.25),[-0.1 0.1]); colormap jet;  set(gca,'Visible','off');
-%             set(gca,'LooseInset',get(gca,'TightInset'));
-%             
+            %             figure(STAfig)
+            %             subplot(length(xrange),length(yrange),pnum,'Parent',STAfig);
+            %             imagesc(imresize(sta',0.25),[-0.1 0.1]); colormap jet;  set(gca,'Visible','off');
+            %             set(gca,'LooseInset',get(gca,'TightInset'));
+            %
             xprofile = max(abs(sta),[],1); [mx xmax] = max(xprofile);
-            yprofile = max(abs(sta),[],2); [mx ymax] = max(yprofile);       
+            yprofile = max(abs(sta),[],2); [mx ymax] = max(yprofile);
             
             if movienum==1
-                sz=[2 4 8 255]; col = 'bcrg';
+                sz=[2 4 8 255]; col = 'bcrg'; nt = 4;
             else
-                sz=[0.8 2 4 8 255]; col = 'kbcrg';
+                sz=[0.8 2 4 8 255]; col = 'kbcrg'; nt = 5;
             end
             
             %%% mean traces
-%             figure(tcourseFig)
-%            subplot(length(xrange),length(yrange),pnum,'Parent',tcourseFig);
-%             hold on
-%             %%% mean traces
+            %             figure(tcourseFig)
+            %            subplot(length(xrange),length(yrange),pnum,'Parent',tcourseFig);
+            %             hold on
+            %             %%% mean traces
             for i = 1:length(sz)
-               if i<length(sz)
-                   eps = find(abs(m(ymax,xmax,:))>0.9 & sz_mov(ymax*2,xmax*2,:)==sz(i)); %%% because sz_mov is twice as large!
-               else
-                   eps = find(sz_mov(ymax*2,xmax*2,:)==sz(i)); %%% for fullfield (since these are excluded from m; note this will get both on/off
-               end
-               eps = eps(eps<=size(dFalign,1));
-               % plot(nanmean(dFalign(eps,:),1),col(i),'Linewidth',2);
-                tcourseAll(i,:,nx,ny,rep) = nanmean(dFalign(eps,:),1);
-            end          
-%             ylim([-0.025 0.1]); xlim([1 20]);  set(gca,'Xtick',[]); set(gca,'Ytick',[]); 
-%             set(gca,'LooseInset',get(gca,'TightInset'));
-
+                if i<length(sz)
+                    eps = find(abs(m(ymax,xmax,:))>0.9 & sz_mov(ymax*2,xmax*2,:)==sz(i)); %%% because sz_mov is twice as large!
+                else
+                    eps = find(sz_mov(ymax*2,xmax*2,:)==sz(i)); %%% for fullfield (since these are excluded from m; note this will get both on/off
+                end
+                eps = eps(eps<=size(dFalign,1));
+                % plot(nanmean(dFalign(eps,:),1),col(i),'Linewidth',2);
+                %tcourseAll(i,:,nx,ny,rep) = nanmean(dFalign(eps,:),1);
+                tcourseAll(i,:,nx,ny,rep) = nanmedian(dFalign(eps,:),1);
+            end
+            %             ylim([-0.025 0.1]); xlim([1 20]);  set(gca,'Xtick',[]); set(gca,'Ytick',[]);
+            %             set(gca,'LooseInset',get(gca,'TightInset'));
+            
         end
     end
     
@@ -277,39 +300,52 @@ for rep =1:2 %%% 4 conditions: On, Off, fullfield On, fullfield off; currently s
     figure; set(gcf,'Visible','on');
     pnum = 0;
     for nx = 1:length(xrange)
-      nx
-      for ny = 1:length(yrange)
+        nx
+        for ny = 1:length(yrange)
             pnum = pnum+1;
             subplot(length(xrange),length(yrange),pnum);
-            imagesc(imresize(staAll(:,:,nx,ny,rep),0.5),[-0.1 0.1]); colormap jet;  set(gca,'Visible','off');
-             set(gca,'LooseInset',get(gca,'TightInset'));
+            imagesc(imresize(staAll(:,:,nx,ny,rep),0.5),crange); colormap jet;  set(gca,'Visible','off');
+            set(gca,'LooseInset',get(gca,'TightInset'));
         end
     end
     toc
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
+    figure
+    imagesc(staAll(:,:,6,6,rep),crange); title('sta at 6,6'); colorbar
     
     %%% plot timecourse
     display('drawing timecourses')
     tic
     figure; set(gcf,'Visible','on');
-         pnum = 0;col = 'bcrg';
+    pnum = 0;
     for nx = 1:length(xrange)
-      nx
-      for ny = 1:length(yrange)
+        nx
+        for ny = 1:length(yrange)
             pnum = pnum+1;
             subplot(length(xrange),length(yrange),pnum);
-            for i = 1:4
-                hold on
-                plot(squeeze(tcourseAll(i,:,nx,ny,rep)),col(i),'LineWidth',2);
+            if rep<3
+                for i = 1:nt-1  %%% skip fullfield
+                    hold on
+                    plot(squeeze(tcourseAll(i,:,nx,ny,rep)),col(i),'LineWidth',2);
+                end
+            else
+                plot(squeeze(tcourseAll(nt,:,nx,ny,rep)),col(nt),'LineWidth',2);
             end
-          ylim([-0.025 0.1]); xlim([1 20]);  set(gca,'Xtick',[]); set(gca,'Ytick',[]); 
-             set(gca,'LooseInset',get(gca,'TightInset'));
+            ylim([-0.025 0.1]); xlim([1 20]);  set(gca,'Xtick',[]); set(gca,'Ytick',[]);
+            set(gca,'LooseInset',get(gca,'TightInset'));
         end
     end
     toc
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     drawnow
+    
+    figure
+    for i = 1:nt-1  %%% skip fullfield
+        hold on
+        plot(squeeze(tcourseAll(i,:,6,6,rep)),col(i),'LineWidth',2);
+    end
+    title('timecourse at 6,6');
+    
 end
 
 figure
@@ -342,38 +378,7 @@ end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 
-%%% time to select points! either by hand or automatic
-if isfield(Opt,'selectPts')
-    selectPts = Opt.selectPts;
-else
-    selectPts = input('select points by hand (1) or automatic (0) : ');
-end
 
-if selectPts
-    chooseFig = input('select based on 1) mean image, 2) max image, 3) merge image : ');
-    
-    if chooseFig==1
-        selectFig = greenFig;
-    elseif chooseFig==2
-        selectFig = maxFig;
-    else
-        selectFig = mergeFig;
-    end
-    range = -2:2;
-    clear x y npts
-    rightclick = 0;
-    fprintf('Select points on image. Rightclick to exit interactive ginput');
-    i=0;
-    while rightclick ~= 3
-        i = i+1;
-        figure(selectFig); hold on
-        [x(i), y(i), rightclick] = ginput(1); x=round(x); y = round(y);
-        plot(x(i),y(i),'b*');
-        dF(i,:) = squeeze(nanmean(nanmean(dfofInterp(y(i)+range,x(i)+range,:),2),1));
-    end
-    
-else
-    
     %%% select points based on peaks of max df/f
     %%%calculate max df/f image
     %img = nanmax(dfofInterp,[],3);
@@ -413,7 +418,7 @@ else
     [brightness, order] = sort(img(pts),1,'descend');
     figure
     plot(brightness); xlabel('N'); ylabel('brightness');
-
+    
     fprintf('%d points in ROI\n',length(pts))
     
     %%% choose points over a cutoff, to eliminate noise / nonresponsive
@@ -427,9 +432,9 @@ else
     
     hold on
     plot([1 length(brightness)],[mindF mindF],'b');
-  title(sprintf('%d points in ROI over cutoff\n',length(pts)))
-  if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
+    title(sprintf('%d points in ROI over cutoff\n',length(pts)))
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
     
     %%% plot selected points
     [y, x] = ind2sub(size(maxStd),pts);
@@ -438,13 +443,13 @@ else
     plot(x,y,'o');
     
     %%% average df/f in a box around each selected point
-    range = -2:2;
+
     clear dF
     for i = 1:length(x)
-        dF(i,:) = mean(mean(dfofInterp(y(i)+range,x(i)+range,:),2),1);
+        dF(i,:) = mean(mean(dfofInterp(y(i)+pts_range,x(i)+pts_range,:),2),1);
     end
     xpts = x; ypts = y; %%% new names so they don't get overwritten
-end  %%% if/else
+
 
 
 %% Plotting
@@ -467,19 +472,20 @@ if exist('mv','var')
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-framerange = 8:12
-baserange=0:2;
+framerange = tau+tau_range;
 clear dFclust
 for i = 1:length(stimTimes)-2;
     dFclust(:,i) = nanmean(dF(:,stimFrames(i) +framerange),2)- nanmean(dF(:,stimFrames(i)+baserange),2);
 end
 
+dFclust(dFclust>0.25) = 0.25;
 
 figure
 imagesc(dF);
 figure
 dFclust(isnan(dFclust))=0; %%% no NaNs in clustering
 imagesc(dFclust);
+colorbar
 
 
 %%% cluster responses from selected traces
@@ -523,7 +529,10 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 m= (double(moviedata)-127)/128;
 %m(m<0)=0;
 framerange = 0:cycWindow;
-baserange=0:2;
+%baserange=0:2;
+
+
+tau
 
 for clust = 1:nclust
     clustfig = figure;
@@ -550,11 +559,12 @@ for clust = 1:nclust
         else
             m(m>0)=0;
         end
+        %m(sz_mov==255)=0; 
         
         figure;
-        range = -1:1
-        for tau = 3:18;
-            resp = nanmean(dFalign(:,tau+range),2);
+        range = -2:2
+        for taus = 3:16;
+            resp = nanmean(dFalign(:,taus+range),2);
             %resp(resp<0)=0;
             %resp = resp-mean(resp);
             sta =0;
@@ -565,27 +575,35 @@ for clust = 1:nclust
                 end
             end
             sta = sta/nansum(abs(resp(1:npts)));
-            stas(:,:,tau)=sta;
+            stas(:,:,taus)=sta;
             %sta = sta/sum(resp);
-            subplot(4,5,tau);
-            imagesc(sta',[-0.2 0.2]);colormap jet; axis equal;title(sprintf('lag %d',tau));
+            subplot(4,5,taus);
+            imagesc(sta',crange);colormap jet; axis equal;title(sprintf('lag %d',tau));
         end
         title(sprintf('clust %d rep %d',clust,rep));
-        tau = 8;
+       
+        %%% get at optimal tau
+        resp = nanmean(dFalign(:,tau+tau_range),2);
+        sta =0;
+        npts = min(length(resp),size(moviedata,3));
+        for i = 1:npts;
+            if ~isnan(resp(i))
+                sta = sta+resp(i)*m(:,:,i);
+            end
+        end
+        sta = sta/nansum(abs(resp(1:npts)));
         
-        sta = stas(:,:,tau);
-        figure(clustfig)
-        
+        figure(clustfig)        
         subplot(2,3,1+rep);
-        imagesc(sta',[-0.2 0.2]); hold on; axis equal; colormap jet;
+        imagesc(sta',crange); hold on; axis equal; colormap jet;
         xprofile = max(abs(sta),[],1); [mx xmax] = max(xprofile);
         yprofile = max(abs(sta),[],2); [mx ymax] = max(yprofile);
         xmax
         ymax
         plot(ymax,xmax,'ko');
         
-        if movienum==1            
-        sz=[2 4 8 255]; col = 'bcrg'
+        if movienum==1
+            sz=[2 4 8 255]; col = 'bcrg'
         else
             sz=[0.8 2 4 8 255]; col = 'kbcrg';
         end
@@ -602,12 +620,12 @@ for clust = 1:nclust
                 plot(dFalign(eps(j),:)','Color',cmap(j,:));
             end
             plot(nanmean(dFalign(eps,:),1),col(i),'Linewidth',2);
-            title(sprintf('%s sz %d',onoffLabel{rep},sz(i))); ylim([-0.1 0.2])
+            title(sprintf('%s sz %d',onoffLabel{rep},sz(i))); ylim([-0.1 0.1])
             
         end
         title(sprintf('cluster %d rep %d',clust,rep));
-            if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        
         %%% mean traces
         figure(clustfig)
         subplot(2,3,4+rep);
@@ -624,9 +642,9 @@ for clust = 1:nclust
             else
                 legend('1','2','4','8','full')
             end
-                
+            
         end
-        ylim([-0.05 0.2]); xlim([1 20])
+        ylim([-0.025 0.1]); xlim([1 20])
         
     end
     
@@ -640,32 +658,20 @@ for clust = 1:nclust
     
 end %end of for clust
 
-framerange = 0:20;
-baserange=2:3;  %%% importnat?
-  for i = 1:length(stimTimes)-2;
-        dFalign(i,:) = nanmean(dF(:,stimFrames(i) +framerange),1)- nanmean(mean(dF(:,stimFrames(i)+baserange),2),1);
-    end
-figure
-plot(nanmean(dFalign,1)); title('mean timecourse all cells');
 
-if movienum==1
-sz=[2 4 8 255];
-else
-    sz = [0.8 2 4 8 255];
-end
 
 clear stas
 display('calculating cell STAs')
 
 for n = 1:size(dF,1)
-    if n/100 == round(n/100)
-       sprintf('done %d / %d cells',n,size(dF,1))
+    if n/10 == round(n/10)
+        sprintf('done %d / %d cells',n,size(dF,1))
     end
     for i = 1:length(stimTimes)-2;
         dFalign(i,:) = dF(n,stimFrames(i) +framerange) - nanmean(dF(n,stimFrames(i)+baserange),2);
     end
     
-    sta=0; 
+    sta=0;
     
     for rep = 1:2
         m= (double(moviedata)-127)/128;
@@ -674,9 +680,8 @@ for n = 1:size(dF,1)
         else
             m(m>0)=0;
         end
-        range = -2:2;
-        tau = 10;
-        resp = nanmean(dFalign(:,tau+range),2);
+       % m(sz_mov==255)=0; 
+        resp = nanmean(dFalign(:,tau+tau_range),2);
         %resp(resp<0)=0;
         %resp = resp-mean(resp);
         sta =0;
@@ -707,7 +712,7 @@ plot(tcourseAll'); title('mean timecourse'); legend('on','off');
 figure
 plot(ymax,xmax,'.'); title('all rf locations'); axis equal; axis ij
 
-zthresh = 5;
+zthresh = 5.5;
 use = zscore(:,1)>zthresh | zscore(:,2)<-zthresh;
 useN= find(use);
 
@@ -716,36 +721,36 @@ useOff = find(zscore(:,2)<-zthresh);
 
 figure
 plot(ymax(useOn,1),xmax(useOn,1),'r.'); hold on;
-plot(ymax(useOff,2),xmax(useOff,2),'b.'); 
+plot(ymax(useOff,2),xmax(useOff,2),'b.');
 title('all rf locations'); axis equal; axis ij
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 
 rfx = ymax;  %%% reversed due to rows/columns of movie matrix
-rfy = xmax; 
+rfy = xmax;
 
 
-
-x0 = median(rfx(useOn,1));
-y0 = median(rfy(useOn,1));
+%%% previously used On to get center
+x0 = median(rfx(useOff,2));
+y0 = median(rfy(useOff,2));
 
 figure
 subplot(1,2,1)
 plot(xpts(useOn),rfx(useOn,1)-x0,'r.'); hold on;
-plot(xpts(useOff),rfx(useOff,1)-x0,'b.'); ylim([-30 30]); axis square
+plot(xpts(useOff),rfx(useOff,2)-x0,'b.'); ylim([-30 30]); axis square
 title('X topography'); legend('ON','OFF')
 xlabel('x location'); ylabel('x RF');
 
 subplot(1,2,2)
 plot(ypts(useOn),rfy(useOn,1)-y0,'r.');hold on;
 ylim([-30 30]); axis square
-plot(ypts(useOff),rfy(useOff,1)-y0,'b.');
+plot(ypts(useOff),rfy(useOff,2)-y0,'b.');
 title('Y topography'); legend('ON','OFF')
 xlabel('y location'); ylabel('y RF');
 
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-    
+
 useOnOff = intersect(useOn,useOff);
 
 figure
@@ -784,7 +789,7 @@ for ax = 1:2
         title(sprintf('%s %s',axLabel{ax},onoffLabel{rep}))
     end
 end
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 sz_tune = nanmean(tuning(:,:,:,8:15),4);
 figure
@@ -795,7 +800,7 @@ end
 
 notOn = find(zscore(:,1)<zthresh);
 notOff = find(zscore(:,2)>-zthresh);
-ampPos = amp; ampPos(ampPos<0)=0; 
+ampPos = amp; ampPos(ampPos<0)=0;
 onOff = (ampPos(:,1)-ampPos(:,2))./(ampPos(:,1)+ampPos(:,2));
 onOff(notOn)=-1; onOff(notOff)=1;
 
@@ -803,8 +808,8 @@ onOff(notOn)=-1; onOff(notOff)=1;
 figure
 imagesc(meanGreenImg(:,:,1),[-0.5 1]); colormap gray; axis equal
 hold on
-for i = 1:length(useN)   
-    plot(xpts(useN(i)),ypts(useN(i)),'o','Color',cmapVar(onOff(useN(i)),-0.5, 0.5, jet));  
+for i = 1:length(useN)
+    plot(xpts(useN(i)),ypts(useN(i)),'o','Color',cmapVar(onOff(useN(i)),-0.5, 0.5, jet));
 end
 title('on off ratio')
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
@@ -815,8 +820,8 @@ szPref = squeeze(sz_tune(:,:,1)+ sz_tune(:,:,2)*2 + sz_tune(:,:,3)*3)./sum(sz_tu
 figure
 imagesc(meanGreenImg(:,:,1),[-0.5 1]); colormap gray; axis equal
 hold on
-for i = 1:length(useOn)   
-    plot(xpts(useOn(i)),ypts(useOn(i)),'o','Color',cmapVar(szPref(useOn(i),1),1.5 , 2.5, jet));  
+for i = 1:length(useOn)
+    plot(xpts(useOn(i)),ypts(useOn(i)),'o','Color',cmapVar(szPref(useOn(i),1),1.5 , 2.5, jet));
 end
 title('size pref On')
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
@@ -825,8 +830,8 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 figure
 imagesc(meanGreenImg(:,:,1),[-0.5 1]); colormap gray; axis equal
 hold on
-for i = 1:length(useOff)   
-    plot(xpts(useOff(i)),ypts(useOff(i)),'o','Color',cmapVar(szPref(useOff(i),2),1.5 , 2.5, jet));  
+for i = 1:length(useOff)
+    plot(xpts(useOff(i)),ypts(useOff(i)),'o','Color',cmapVar(szPref(useOff(i),2),1.5 , 2.5, jet));
 end
 title('size pref OFF')
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
@@ -858,12 +863,12 @@ end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 % n= ceil(rand(48,1)*size(stas,3));
-% 
+%
 % figure
 % for rep = 1:2
 %     figure
 %     for i = 1:48
-%         subplot(6,8,i);  
+%         subplot(6,8,i);
 %         imagesc(stas(:,:,n(i),rep)',[-0.1 0.1]); axis off; axis equal; colormap jet; title(sprintf('%0.2f',zscore(n(i),rep)));
 %     end
 % end
@@ -878,17 +883,17 @@ n= ceil(rand(48,1)*length(useN));
 % imagesc(meanGreenImg(:,:,1),[-0.5 1]); colormap gray; axis equal; hold on
 % plot(xpts(useN(n(i))),ypts(useN(n(i))),'o'); title(sprintf('%d %0.2f',i, zscore(useN(n(i)),1)));
 % end
-% 
+%
 %Judit commented out for speed
-% 
+%
 % figure
 % for rep = 1:2
 %     figure
 %     for i = 1:48
-%         subplot(6,8,i);  
+%         subplot(6,8,i);
 %         imagesc(stas(:,:,useN(n(i)),rep)',[-0.1 0.1]); axis off; axis equal; colormap jet; title(sprintf('%0.2f',zscore(useN(n(i)),rep)));
 %     end
-%     
+%
 %      if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 % end
 
@@ -898,7 +903,7 @@ figure
 for rep = 1:2
     figure
     for i = 1:48
-        subplot(6,8,i);  
+        subplot(6,8,i);
         imagesc(stas(:,:,useN(n(i)),rep)',[-0.1 0.1]); axis off; axis equal; colormap jet; title(sprintf('%0.2f',zscore(useN(n(i)),rep)));
     end
 end

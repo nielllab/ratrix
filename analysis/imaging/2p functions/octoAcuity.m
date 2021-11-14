@@ -5,12 +5,12 @@
 close all; clear all
 
 %%% select files to analyze based on compile file
-stimname = '8 way gratings';
-[sbx_fname acq_fname mat_fname quality] = compileFilenames('For Batch File.xlsx',stimname);
+%stimname = '8 way gratings';
+stimname = 'sin gratings 7 steps 2ISI'
+[sbx_fname acq_fname mat_fname quality] = compileFilenames('Batch File.xlsx',stimname);
 
 Opt.SaveFigs = 1;
 Opt.psfile = 'C:\temp\TempFigs.ps';
-
 if Opt.SaveFigs
     psfile = Opt.psfile
     if exist(psfile,'file')==2;delete(psfile);end
@@ -18,12 +18,13 @@ end
 
 %%% select files to use based on quality
 for i = 1: length(quality);
-    usefile(i) = ~strcmp(quality{i},'N');
+    usefile(i) = strcmp(quality{i},'Y');
 end
 
-useN = find(usefile);
+useN = find(usefile); clear goodfile
 for i = 1:length(useN)
-    goodfile{i} = mat_fname{useN(i)};
+    base = mat_fname{useN(i)}(1:end-4);
+    goodfile{i} = dir([base '*']).name;
 end
 mat_fname = goodfile;
 
@@ -38,7 +39,7 @@ rLabels = {'OGL','Plex','IGL','Med'};
 nfiles = length(mat_fname);
 ncond = 17;
 cycDur=20;
-if strcmp(stimname,'sin gratings smaller 2ISI') | strcmp(stimname,'8 way gratings 2ISI');
+if strcmp(stimname,'sin gratings smaller 2ISI') | strcmp(stimname,'8 way gratings 2ISI') | strcmp(stimname,'sin gratings 7 steps 2ISI');
     cycDur = 30;
 end
 
@@ -56,6 +57,17 @@ else
     thetas = zeros(16,1);
     sfs(1:4:end) = 0.01; sfs(2:4:end) = 0.04; sfs(3:4:end) = 0.16; sfs(4:4:end) = 0.64;
     thetas(1:4) = 0; thetas(5:8) = 90; thetas(9:12) = 180; thetas(13:16) = 270;
+end
+
+if strcmp(stimname,'sin gratings 7 steps 2ISI')
+    ncond = 29;
+    nSF = 7;
+    sfs = zeros(28,1);
+    thetas = zeros(28,1);
+    for i = 1:7
+        sfs(i:7:end) = 0.01*2^(i-1);
+    end
+    thetas(1:7) = 0; thetas(8:14) = 90; thetas(15:21) = 180; thetas(22:28) = 270;
 end
 
 th = unique(thetas);
@@ -192,7 +204,7 @@ for f = 1:nfiles
     %%% pixel-level data
     nstim = min(length(stimOrder),size(weightTcourse,2));  %%% sometimes stimorder is too long
     stimOrder = stimOrder(1:nstim);
-    for c = 1:17;  %%% loop over conditions
+    for c = 1:ncond;  %%% loop over conditions
         %%% timecourse of response
         resp(c,:,f) = nanmedian(weightTcourse(:,stimOrder==c),2);
         
@@ -205,7 +217,7 @@ for f = 1:nfiles
     
     figure
     for sf = 1:nSF;
-        subplot(2,2,sf);
+        subplot(2,4,sf);
         plot(resp(sf:nSF:nOri*nSF,:,f)');
         title(['sf = ' sfLabels{sf}]);ylim([-0.025 0.1])
     end
@@ -213,8 +225,13 @@ for f = 1:nfiles
     
     
     figure
-    for c = 1:16
-        subplot(4,4,c);
+    if ncond == 17
+        xpanels = 4; ypanels = 4;
+    else
+        xpanels = 7; ypanels = 4;
+    end
+    for c = 1:ncond-1;
+        subplot(ypanels,xpanels,c);
         imagesc(respMap(:,:,c),[-0.05 0.1]);
         axis equal; axis off; title(sprintf('sf = %0.02f th = %0.0f',sfs(c), thetas(c)));
     end
@@ -252,10 +269,14 @@ for f = 1:nfiles
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
+    %%% polar plots of orientation tuning
     figure
     for r=1:4
         subplot(2,2,r);
-        polar(unique(thetas)*pi/180,regionOriTuning(:,r,f),'b'); hold on
+        %%% make values wrap around for polar plot
+        thplot = unique(thetas)*pi/180; thplot(end+1) = thplot(1);
+        tuningplot = regionOriTuning(:,r,f); tuningplot(end+1) = tuningplot(1);
+        polar(thplot, tuningplot,'b'); hold on
         xlabel('theta'); title(rLabels{r});
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
@@ -273,6 +294,7 @@ for f = 1:nfiles
         ylim([-0.025 0.1])
         legend(sfLabels);
         title(rLabels{r}); xlabel('thetas');
+        colororder(jet(nSF)*0.75)
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
@@ -297,7 +319,7 @@ for f = 1:nfiles
     title('orientation phase map');
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
-    ampMap = abs(oriMap); ampMap = ampMap/0.3; ampMap(ampMap>1)=1;orimap(isnan(oriMap))=0;
+    ampMap = abs(oriMap); ampMap = ampMap/0.1; ampMap(ampMap>1)=1;orimap(isnan(oriMap))=0;
     phMap = mat2im(angle(oriMap),hsv,[-pi pi]);
     figure
     imshow(phMap.*repmat(ampMap,[1 1 3]));
@@ -327,13 +349,14 @@ for f = 1:nfiles
     figure
     for r = 1:4
         subplot(2,2,r)
-        plot(1:cycDur,squeeze(regionSFresp(:,r,:,f))); ylim([-0.025 0.075])
-        title(rLabels{r});
+        plot(1:cycDur,squeeze(regionSFresp(:,r,:,f))); ylim([-0.025 0.1])
+        title([rLabels{r} ' SF tuning']);
+        colororder(jet(nSF+1)*0.75);
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     %
     figure
-    plot(sfResp(:,:,f)'); title(mat_fname{f}); xlabel('time'); legend({'0','0.005','0.02','0.08','0.32'})
+    plot(sfResp(:,:,f)'); title(mat_fname{f}); xlabel('time'); legend(['0', sfLabels]); colororder(jet(nSF+1)*0.75)
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% Judit added this, was hoping for the curves for only the cells over threshold, but I don't think that's what this actually does?
@@ -395,9 +418,10 @@ end
 %%% SF and orientation all cells pooled
 figure
 for sf = 1:nSF;
-    subplot(2,2,sf);
+    subplot(2,4,sf);
     plot(squeeze(mean(nanmean(regionResp(:,sf:nSF:end,:,:),4),1))');
-    title(['all cells sf = ' sfLabels{sf}]);ylim([-0.01 0.05])
+    title(['all cells sf = ' sfLabels{sf}]);ylim([-0.01 0.1])
+    colororder(jet(nSF+1))
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
@@ -406,7 +430,7 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 for r = 1:4;
     figure
     for sf = 1:nSF;
-        subplot(2,2,sf);
+        subplot(2,4,sf);
         plot(squeeze(nanmean(regionResp(r,sf:nSF:end,:,:),4))');
         title([rLabels{r} ' ' sfLabels{sf}]);ylim([-0.02 0.1])
     if sf==1
@@ -452,8 +476,8 @@ sgtitle('SF tuning over all expts')
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %%% timecourse of each SF, in each layer
-col = 'rgbcmyk';
 figure
+cmap = jet(nSF+1)*0.75;
 for r = 1:4
     subplot(2,2,r);
    % plot(1:cycDur,squeeze(nanmean(regionSFresp(:,r,:,:),4)));
@@ -461,8 +485,9 @@ for r = 1:4
     err = squeeze(nanstd(regionSFresp(:,r,:,:),[],4))/sqrt(nfiles);
     hold on
     for i = 1:size(mn,1)
-        shadedErrorBar(1:cycDur,mn(i,:),err(i,:),col(i))
+        errorbar(1:cycDur,mn(i,:),err(i,:))
     end
+    colororder(jet(nSF+1)*0.75)
     ylim([-0.02 0.1])
     title(rLabels{r})
     if r ==1
@@ -494,6 +519,7 @@ for r = 1:4
     for sf = 1:nSF
         plot(unique(thetas),nanmean(regionAmp(r,sf:nSF:nOri*nSF,:),3));
     end
+    colororder(jet(nSF+1)*0.75)
     legend(sfLabels);
     title(rLabels{r}); xlabel('thetas');
     ylim([-0.025 0.1])

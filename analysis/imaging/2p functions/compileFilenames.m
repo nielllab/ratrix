@@ -25,8 +25,10 @@ for j = 1:length(use);
     end
     
     %%% generate analysis filename
-    mat_fname{j} = [T.Date{i} '_' T.Loc{i} '_Acq' num2str(T.RecordingNumber(i)) '_' T.Stim{i} '.mat'];
- 
+    mat_fname{j} = [T.Date{i} '_' T.Loc{i} '_Acq' num2str(T.RecordingNumber(i))  '.mat'];
+    %%% some stim types have spaces in them
+    mat_fname{j} = strrep(mat_fname{j},' ','_');
+    
     %%% other fields?
     quality{j} = T.GoodQuality{i};
 end

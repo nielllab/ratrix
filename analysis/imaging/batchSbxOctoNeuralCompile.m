@@ -3,9 +3,9 @@ close all
 %% Analyze multiple files using sbxOctoNeural function.
 %% uses excel compile file to choose files, stim, etc
 
-
+stim_name = '8 way gratings 2ISI'
 %%% select files to analze
-[sbx_fname acq_fname mat_fname] = compileFilenames('For Batch File.xlsx','sparse noise');
+[sbx_fname acq_fname mat_fname] = compileFilenames('BatchFile.xlsx',stim_name);
 
 
 %% General Parameters

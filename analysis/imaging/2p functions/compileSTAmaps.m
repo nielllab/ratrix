@@ -5,8 +5,16 @@ close all
 clear all
 
 %%% select files to analyze based on compile file
-stimname = 'sparse noise';
-[sbx_fname acq_fname mat_fname quality] = compileFilenames('For Batch File.xlsx',stimname);
+stimname = 'sparse noise 2';
+xyswap = 1;  %%% swap x and y for retinotopy?
+
+if stimname == 'sparse noise 2'
+    nsz = 4;
+else
+    nsz = 3;
+end
+
+[sbx_fname acq_fname mat_fname quality] = compileFilenames('Batch File.xlsx',stimname);
 
 Opt.SaveFigs = 1;
 Opt.psfile = 'C:\temp\TempFigs.ps';
@@ -24,12 +32,19 @@ end
 
 %%% select files to use based on quality
 for i = 1: length(quality);
-    usefile(i) = strcmp(quality{i}(1),'Y');
+    usefile(i) = strcmp(quality{i},'Y');
 end
 
-useN = find(usefile);
+useN = find(usefile); clear goodfile
+n=0;
 for i = 1:length(useN)
-    goodfile{i} = mat_fname{useN(i)};
+    try
+        base = mat_fname{useN(i)}(1:end-4);
+        goodfile{n+1} = dir([base '*']).name;
+        n= n+1;
+    catch
+        sprintf('cant do %s',mat_fname{useN(i)})
+    end
 end
 mat_fname = goodfile;
 
@@ -55,7 +70,7 @@ for f = 1:nfiles
     
     %%% calculate amplitude of response based on size response tuning(cells,on/off,size, time)
     %%% average over 3 spot sizes and response time window
-    amp = nanmean(nanmean(tuning(:,:,1:3,8:15),4),3);
+    amp = nanmean(nanmean(tuning(:,:,1:end-1,8:15),4),3);
     
     %%% positive rectify amp, to calculate preference index for ON/OFF
     ampPos = amp; ampPos(ampPos<0)=0;
@@ -73,7 +88,11 @@ for f = 1:nfiles
     sz_tune = nanmean(tuning(:,:,:,8:15),4);  %%% sz_tune(cell,on/off,size)
     
     %%% calculate preferred size as weighted average
-    szPref = squeeze(sz_tune(:,:,1)+ sz_tune(:,:,2)*2 + sz_tune(:,:,3)*3)./sum(sz_tune(:,:,1:3),3);
+    if nsz==3
+        szPref = squeeze(sz_tune(:,:,1)+ sz_tune(:,:,2)*2 + sz_tune(:,:,3)*3)./sum(sz_tune(:,:,1:3),3);
+    else
+        szPref = squeeze(sz_tune(:,:,1)+ sz_tune(:,:,2)*2 + sz_tune(:,:,3)*3  + sz_tune(:,:,4)*4)./sum(sz_tune(:,:,1:4),3);
+    end
     
     %%% calculate distance correlation of on/off pref
     clear szPairs onOffPairs dist
@@ -155,10 +174,12 @@ for f = 1:nfiles
     figure
     subplot(2,2,1)
     plot(squeeze(mean(tuning(useOn,1,:,:),1))');
+    colororder(jet(nsz+1)*0.75)
     title('ON')
     
     subplot(2,2,2)
     plot(squeeze(mean(tuning(useOff,2,:,:),1))');
+    colororder(jet(nsz+1)*0.75)
     title(mat_fname{f})
     
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
@@ -168,28 +189,41 @@ for f = 1:nfiles
     szTuning(2,:,:,f) = nanmean(tuning(useOff,2,:,:),1);
     
     %%% retinotopy
+    if xyswap ==1
+        xptsnew = ypts;
+        yptsnew = xpts;
+    else
+         xptsnew = xpts;
+        yptsnew = ypts;
+    end
+    
     figure
-    plot(rfx(useOff,2),xpts(useOff),'.'); xlabel('RF location'); ylabel('cell location')
+    plot(rfx(useOff,2),xptsnew(useOff),'.'); xlabel('RFx location'); ylabel('cell x location')
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    figure
+    plot(rfx(useOff,2),yptsnew(useOff),'.'); xlabel('RF x location'); ylabel('cell y location')
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
     
     %%% mean rf centers
     mx = mean(rfx(useOn,1),1);
     my = mean(rfy(useOn,1),1);
     
     %%% calculate correlation coeffs for RF location and cell location
-    cc = corrcoef(rfx(useOn,1)-mx,xpts(useOn));
+    cc = corrcoef(rfx(useOn,1)-mx,xptsnew(useOn));
     topoCC(1,1,f) = cc(2,1);
-    cc = corrcoef(rfy(useOn,1)-my,ypts(useOn));
+    cc = corrcoef(rfy(useOn,1)-my,yptsnew(useOn));
     topoCC(2,1,f) = -cc(2,1);
-    cc = corrcoef(rfx(useOff,2)-mx,xpts(useOff));
+    cc = corrcoef(rfx(useOff,2)-mx,xptsnew(useOff));
     topoCC(1,2,f) = cc(2,1);
-    cc = corrcoef(rfy(useOff,2)-my,ypts(useOff));
+    cc = corrcoef(rfy(useOff,2)-my,yptsnew(useOff));
     topoCC(2,2,f) = -cc(2,1);
     
     %%% create values for shuffle
     n= length(rfx);
-    xshuff = xpts(ceil(n*rand(n,1)));
-    yshuff = ypts(ceil(n*rand(n,1)));
+    xshuff = xptsnew(ceil(n*rand(n,1)));
+    yshuff = yptsnew(ceil(n*rand(n,1)));
     
     cc = corrcoef(rfx(useOn,1)-mx,xshuff(useOn));
     topoCCshuff(1,1,f) = cc(2,1);
@@ -342,6 +376,7 @@ for f = 1:nfiles
             subplot(2,2,r);
             plot(squeeze(regionTuning(r,1,:,:,f))'); title([rLabels{r} ' ON']); ylim([-0.1 0.2])
         end
+        colororder(jet(nsz+1)*0.75)
         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
         
         %%% Off size tuning
@@ -350,6 +385,7 @@ for f = 1:nfiles
             subplot(2,2,r);
             plot(squeeze(regionTuning(r,2,:,:,f))'); title([rLabels{r} ' OFF']); ylim([-0.1 0.2])
         end
+        colororder(jet(nsz+1)*0.75)
         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
         
         
@@ -384,15 +420,16 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 t = 0.1*((1:21)-3);  %%% time in seconds
 labels = {'ON','OFF'};
 
-col = 'bgrk'
+col = 'bcgyr'
 for rep = 1:2  %%% on vs off
     figure
     hold on
-    for sz = 1:4;
-        shadedErrorBar(t, squeeze(mean(szTuning(rep,sz,:,:),4))',squeeze(std(szTuning(rep,sz,:,:),[],4))'/sqrt(nfiles),col(sz) );
+    for sz = 1:nsz+1;
+        errorbar(t, squeeze(mean(szTuning(rep,sz,:,:),4))',squeeze(std(szTuning(rep,sz,:,:),[],4))'/sqrt(nfiles) );
         xlabel('sec');
         ylabel('dF/F');
     end
+    colororder(jet(nsz+1)*0.75)
     xlim([-0.2 2]); ylim([-0.03 0.125])
     title(labels{rep})
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
@@ -401,7 +438,7 @@ end
 
 %%% make a legend (since shaded errorbars mess up legend
 figure
-for i = 1:4
+for i = 1:nsz+1
     hold on
     plot(1,1,col(i));
 end

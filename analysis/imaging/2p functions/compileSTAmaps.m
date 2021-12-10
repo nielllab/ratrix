@@ -68,6 +68,8 @@ for f = 1:nfiles
     useOnOff = intersect(useOn,useOff);
     notOn = find(zscore(:,1)<zthresh); notOff = find(zscore(:,2)>-zthresh);
     
+    fractionResponsive(f)=length(use)/length(zscore);
+    
     %%% calculate amplitude of response based on size response tuning(cells,on/off,size, time)
     %%% average over 3 spot sizes and response time window
     amp = nanmean(nanmean(tuning(:,:,1:end-1,8:15),4),3);
@@ -196,14 +198,30 @@ for f = 1:nfiles
          xptsnew = xpts;
         yptsnew = ypts;
     end
+        %%% center RF positions
+    x0 = nanmedian(rfx(useOn,1));
+    y0 = nanmedian(rfy(useOn,1));
     
     figure
     plot(rfx(useOff,2),xptsnew(useOff),'.'); xlabel('RFx location'); ylabel('cell x location')
+    title('off')
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     figure
     plot(rfx(useOff,2),yptsnew(useOff),'.'); xlabel('RF x location'); ylabel('cell y location')
+    title('off')
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+        figure
+    plot(rfx(useOn,2),xptsnew(useOn),'.'); xlabel('RFx location'); ylabel('cell x location')
+    title('on')
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    figure
+    plot(rfx(useOn,2),yptsnew(useOn),'.'); xlabel('RF x location'); ylabel('cell y location')
+    title('on')
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
     
     
     %%% mean rf centers
@@ -240,9 +258,26 @@ for f = 1:nfiles
     title(mat_fname{f}); set(gca,'Xtick',[1 2]); set(gca,'Xticklabel',{'x','y'})
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
-    %%% center RF positions
+        
+        %%% center RF positions
     x0 = nanmedian(rfx(useOn,1));
     y0 = nanmedian(rfy(useOn,1));
+
+    figure
+subplot(1,2,1)
+plot(xpts(useOn),rfx(useOn,1)-x0,'r.'); hold on;
+plot(xpts(useOff),rfx(useOff,2)-x0,'b.'); %ylim([-30 30]); axis square
+title('X topography'); legend('ON','OFF')
+xlabel('x location'); ylabel('x RF');
+
+subplot(1,2,2)
+plot(ypts(useOn),rfy(useOn,1)-y0,'r.');hold on;
+%ylim([-30 30]); axis square
+plot(ypts(useOff),rfy(useOff,2)-y0,'b.');
+title('Y topography'); legend('ON','OFF')
+xlabel('y location'); ylabel('y RF');
+    
+
     
     %%% do topographic maps for X and Y, for both On and Off responses
     axLabel = {'X','Y'};
@@ -266,7 +301,12 @@ for f = 1:nfiles
                     plot(xpts(data(i)),ypts(data(i)),'o','Color',cmapVar(rfy(data(i),rep)-y0,-25, 25, jet));
                 end
             end
-            title(sprintf('%s %s',axLabel{ax},onoffLabel{rep}))
+            if ax ==1 & rep==1
+                title(sprintf('x0 = %0.1f y0=%0.1f',x0,y0))
+            else
+                title(sprintf('%s %s',axLabel{ax},onoffLabel{rep}))
+            end
+        
         end
     end
     
@@ -516,6 +556,12 @@ for r = 1:4
     plot(1:21,squeeze(nanmean(regionTuning(r,2,:,:,:),5)));
     title([rLabels{r} ' Off']); ylim([-0.1 0.2])
 end
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+figure
+plot(f);
+xlabel('session #')
+ylabel('fraction of cells responsive'); ylim([0 1]);
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 display('saving pdf')

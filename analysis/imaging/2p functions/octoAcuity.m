@@ -76,13 +76,13 @@ for i = 1:length(th); oriLabels{i} = sprintf('%0.0f',th(i)); end
 sf = unique(sfs);
 for i = 1:length(sf); sfLabels{i} = sprintf('%0.02f',sf(i)); end
 
-
-for f = 1:nfiles
+f = 0; %%% counter for number of sessions included
+for nf = 1:nfiles
     
     
     %%% read in weighted timecourse (from pixelmap, weighted by baseline fluorescence
     clear xb yb stimOrder weightTcourse
-    load(mat_fname{f},'stimOrder','weightTcourse','dFrepeats','xpts','ypts','xb','yb','meanGreenImg','stdImg','trialmean','cycPolarImg')
+    load(mat_fname{nf},'stimOrder','weightTcourse','dFrepeats','xpts','ypts','xb','yb','meanGreenImg','stdImg','trialmean','cycPolarImg')
     
     figure
     subplot(1,2,1)
@@ -112,8 +112,20 @@ for f = 1:nfiles
     
     %%% get max resp for each cell. save out as histogram
     maxResp = max(cellAmp,[],2);
+    fractionResponsive = sum(maxResp>0.05)/length(maxResp);
+    if fractionResponsive>0.5
+        f = f+1;
+    else
+        break
+    end
+        
+    
     bins = -0.2:0.025:0.5;
     ampHist(:,f) = hist(maxResp,bins)/length(maxResp);
+    
+    medianResp(f) = nanmedian(maxResp);
+    fractionResponsive(f) = sum(maxResp>0.05)/length(maxResp);
+    
     figure
     plot(bins,ampHist(:,f)); xlabel('max resp'); ylabel('fraction');
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
@@ -312,14 +324,14 @@ for f = 1:nfiles
     figure
     imagesc(abs(oriMap),[0 0.1]);
     title('orientation amplitude map')
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    %if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     figure
     imagesc(angle(oriMap)); colormap(hsv);
     title('orientation phase map');
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    %if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
-    ampMap = abs(oriMap); ampMap = ampMap/0.1; ampMap(ampMap>1)=1;orimap(isnan(oriMap))=0;
+    ampMap = abs(oriMap); ampMap = ampMap/0.2; ampMap(ampMap>1)=1;orimap(isnan(oriMap))=0;
     phMap = mat2im(angle(oriMap),hsv,[-pi pi]);
     figure
     imshow(phMap.*repmat(ampMap,[1 1 3]));
@@ -360,14 +372,14 @@ for f = 1:nfiles
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% Judit added this, was hoping for the curves for only the cells over threshold, but I don't think that's what this actually does?
-    
-    figure
-    plot(regionSFresp(:,:,f)'); title(mat_fname{f}); xlabel('time')
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
+%     
+%     figure
+%     plot(regionSFresp(:,:,f)'); title(mat_fname{f}); xlabel('time')
+%     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+%     
     figure
     plot(tuning(:,f))
-    title(mat_fname{f}); ylim([0 0.05])
+    title(['population sf avg ' mat_fname{f}]); ylim([0 0.05])
     xlabel('SF'); ylabel('resp')
     
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
@@ -520,7 +532,9 @@ for r = 1:4
         plot(unique(thetas),nanmean(regionAmp(r,sf:nSF:nOri*nSF,:),3));
     end
     colororder(jet(nSF+1)*0.75)
-    legend(sfLabels);
+    if r ==1
+        legend(sfLabels);
+    end
     title(rLabels{r}); xlabel('thetas');
     ylim([-0.025 0.1])
 end
@@ -530,8 +544,17 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 
 figure
 plot(bins,ampHist); xlim([-0.1 0.5]); hold on; plot(bins,mean(ampHist,2),'g','Linewidth',2)
-xlabel('amp dF/F'); title('amplitude distribution across sessions');
+xlabel('amp dF/F'); title('amplitude distribution for all cells across sessions');
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+responsive = sum(ampHist(bins>0.05,:),1);
+figure
+plot(responsive);
+ylabel('fraction responsive');
+xlabel('session');
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+
 
 display('saving pdf')
 if Opt.SaveFigs

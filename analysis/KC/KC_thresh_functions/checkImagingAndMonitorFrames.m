@@ -13,6 +13,7 @@ function [percentSlippedImagingFrames,timeStampsStopAndRespFramesAlltrialsMinusT
     % to make sure our imaging frames are equal intervals apart
 
     diffFrameT = diff(frameT);
+    
     % plotting the difference between each successive value in frameT
     % LINE plot
     figure
@@ -21,39 +22,45 @@ function [percentSlippedImagingFrames,timeStampsStopAndRespFramesAlltrialsMinusT
     suptitle(sprintf('%s ',date,subjName,titleText));
     plot(diffFrameT)
     xlim([0 length(frameT)])
-    ylim([0 0.7])
+    ylim([0 max(diffFrameT)])
     xlabel('frame number')
-    ylabel('seconds')
+    ylabel('sec')
     clear titleText
     titleText = 'difference in time between all imaging frames, vs time';
     title(sprintf('%s ',titleText))
+    
     % HISTO - distribution of dt's
     figure
     % numBins = 10;
     histogram(diffFrameT,'normalization','probability')
-    xlabel('seconds between imaging frames')
+    xlabel('sec between imaging frames')
     ylabel('fraction of frames')
     clear titleText
     titleText = 'distribution of inter-frame time intervals: IMAGING';
     title(sprintf('%s ',titleText))
+    
     % indicies of slipped frames
     idxDiffFrameToverPt12 = find(diffFrameT>0.12);
     idxDiffFrameTunderPt08 = find(diffFrameT<0.08);
     idxUnderOrOver = [idxDiffFrameTunderPt08,idxDiffFrameToverPt12]; % concatenate
     idxUnderOrOverInOrder = sort(idxUnderOrOver); % put indicies in order
+    
     % raw numbers of frames
     numImagingFrames = length(frameT)
     numIdxDiffFrameToverPt12 = length(idxDiffFrameToverPt12);
     numIdxDiffFrameTunderPt08 = length(idxDiffFrameTunderPt08);
     numSlippedImagingFrames = length(idxUnderOrOverInOrder);
+    
     % percentanges
     percentFrameToverPt12 = (numIdxDiffFrameToverPt12/length(diffFrameT))*100;
     percentFrameTunderPt08 = (numIdxDiffFrameTunderPt08/length(diffFrameT))*100;
     percentSlippedImagingFrames = length(idxUnderOrOverInOrder)/length(diffFrameT)*100
+    
     % number of frames apart slipped frames are
     diffBetweenSlippedImagingFrames = diff(idxUnderOrOverInOrder); % number of frames apart each slipped frame is
     meanNumFramesBetweenSlippedImagingFrames = mean(diffBetweenSlippedImagingFrames,2);
     sterrMeanNumFramesBetweenSlippedImagingFrames = std(diffBetweenSlippedImagingFrames,[],2)/sqrt(length(diffBetweenSlippedImagingFrames));
+   
     % plot DIST for NUM FRAMES between SLIPped frames
     figure
     numBins = 100;
@@ -61,6 +68,7 @@ function [percentSlippedImagingFrames,timeStampsStopAndRespFramesAlltrialsMinusT
     title('distribution of the number of *frames* between SLIPPED frames')
     xlabel('number of frames between slipped frames')
     ylabel('fraction of frames')
+    
     % the actual dt values of slipped frames
     slippedDtValues = diffFrameT(idxUnderOrOverInOrder);
     meanTimeBetweenSlipppedFrames = mean(slippedDtValues,2);
@@ -72,18 +80,20 @@ function [percentSlippedImagingFrames,timeStampsStopAndRespFramesAlltrialsMinusT
     title('distribution of the amount of *time* between SLIPPED frames')
     xlabel('time in seconds')
     ylabel('fraction of frames')
+    
     % PLOT differnce in time (not frames) between slipped frames (diffFrameT), vs time/frames
     slippedDtValuesInOrderOfAcquistion = sort(slippedDtValues);
     figure
     clear x_axis
     x_axis = [1:length(slippedDtValues)]; % x axis is frames
     plot(x_axis,slippedDtValues)
+    %plot(x_axis,slippedDtValuesInOrderOfAcquistion)
     xlabel('frames/time')
     ylabel('dt')
     title('magnitude of time between SLIPPED frames, vs time/frames')
 
     
-    %%% Getting all TIME STAMPS for CURSOR MEASUREMENTS (60 hz) [prep for dt monitor calculations] %%%
+    %%% Getting all TIME STAMPS for MONITOR/CURSOR MEASUREMENTS (60 hz) [prep for dt monitor calculations] %%%
 
     % for one session, concatenate frameT time stamps from each TRIAL
     clear timeStampsStopAndRespFramesAlltrials
@@ -100,6 +110,7 @@ function [percentSlippedImagingFrames,timeStampsStopAndRespFramesAlltrialsMinusT
         % stitch together all timestamps in order of frames/trials
         timeStampsStopAndRespFramesAlltrialsMinusT0 = [timeStampsStopAndRespFramesAlltrialsMinusT0,timeStampsTthTrialAllStop,timeStampsTthTrialAllResp];
     end
+    
     % set TIMESTAMPS RELATIVE to 1ST FRAME of the 1ST TRIAL
     % put timeStampsStopAndRespFramesAlltrials in time that is relative to the first frame
     % of the trial, which is allStop.frameT(1) -
@@ -147,6 +158,7 @@ function [percentSlippedImagingFrames,timeStampsStopAndRespFramesAlltrialsMinusT
     clear titleText
     titleText = 'distribution of inter-frame time intervals: MONITOR';
     title(sprintf('%s ',titleText))
+   
     % indicies
     clear idxAllRespOverPt18
     idxAllRespOverPt18 = find(dtMonitorFrames>0.018);
@@ -156,15 +168,18 @@ function [percentSlippedImagingFrames,timeStampsStopAndRespFramesAlltrialsMinusT
     idxUnderOrOver = [idxAllRespUnderPt14,idxAllRespOverPt18]; % concatenate
     clear idxUnderOrOverInOrder
     idxUnderOrOverInOrder = sort(idxUnderOrOver); % put in order of acquisition
+   
     % raw numbers
     numMonitorFrames = length(dtMonitorFrames)
     numIdxAllRespOverPt18 = length(idxAllRespOverPt18);
     numIdxAllRespUnderPt14 = length(idxAllRespUnderPt14);
     numAllSlippedMonitorFrames = length(idxUnderOrOverInOrder);
+    
     % percentages
     percentIdxAllRespOverPt18 = (numIdxAllRespOverPt18/length(dtMonitorFrames))*100;
     percentIdxAllRespUnderPt14 = (numIdxAllRespUnderPt14/length(dtMonitorFrames))*100;
     percentSlippedMonitorFrames = length(idxUnderOrOverInOrder)/length(dtMonitorFrames)*100
+   
     % what are the mean dt values for the slipped frames?
     dtMonitorFramesOverPt18 = dtMonitorFrames(idxAllRespOverPt18);
     meanDtMonitorFramesOverPt18 = mean(dtMonitorFramesOverPt18,2);
@@ -175,12 +190,14 @@ function [percentSlippedImagingFrames,timeStampsStopAndRespFramesAlltrialsMinusT
     dtAllSlippedMonitorFramesInOrder = dtMonitorFrames(idxUnderOrOverInOrder);
     meanDtAllSlippedMonitorFrames = mean(dtAllSlippedMonitorFramesInOrder,2);
     sterrDtAllSlippedMonitorFrames = std(dtAllSlippedMonitorFramesInOrder,[],2)/sqrt(length(dtAllSlippedMonitorFramesInOrder));
+    
     % number of frames apart slipped frames are
     numFramesBetweenSlippedFramesTooLarge = diff(idxAllRespOverPt18);
     numFramesFramesBetweenSlippedFramesTooSmall = diff(idxAllRespUnderPt14);
     diffBetweenAllSlippedMonitorFrames = diff(idxUnderOrOverInOrder); % number of frames apart each slipped frame is
     meanNumFramesBetweenSlippedImagingFrames = mean(diffBetweenAllSlippedMonitorFrames,2);
     sterrMeanNumFramesBetweenSlippedImagingFrames = std(diffBetweenAllSlippedMonitorFrames,[],2)/sqrt(length(diffBetweenAllSlippedMonitorFrames));
+   
     % plot DIST for NUM FRAMES between SLIPped frames
     figure
     numBins = 100;
@@ -207,9 +224,11 @@ function [percentSlippedImagingFrames,timeStampsStopAndRespFramesAlltrialsMinusT
     clear x_axis
     x_axis = [1:length(slippedDtValues)]; % x axis is frames
     plot(x_axis,slippedDtValues)
+    %plot(x_axis,slippedDtValuesInOrderOfAcquistion)
     xlabel('frames/time')
     ylabel('seconds')
     title('time interval between SLIPPED frames, vs frames/time: MONITOR')
+    
     % relationship between imaging & monitor frame slips
     numImagingFrames;
     numSlippedImagingFrames;

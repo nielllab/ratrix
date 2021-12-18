@@ -1,4 +1,4 @@
-function [meanSpeedAllTrials,idxRunTrials,idxStatTrials] = calcMeanRunSpeedAllTrials(allStop,allResp)
+function [meanSpeedAllTrials,idxRunTrials,idxStatTrials] = calcMeanRunSpeedAllTrials(allStop,allResp,runThresh)
 % This function takes in allStop & allResp, and outputs the mean run speed(displacement)for each trial, 'meanSpeedAllTrials'. 
 % In the code, you can alter the threshold for running vs stationary (variable: 'runThresh').
 
@@ -62,14 +62,14 @@ xlabel('trial')
 ylabel('mean running speed')
 title('mean running speed vs trial, one recording session')
 xlim([0 length(meanSpeedAllTrials)])
-ylim([-5 500])
+ylim([min(meanSpeedAllTrials) max(meanSpeedAllTrials)])
 
 % BAR plot of same
 figure
 bar(meanSpeedAllTrials)
-xlabel('trial')
+xlabel('trials')
 ylabel('mean running speed')
-title('mean running speed vs trial, one recording session')
+title('mean running speed vs trials')
 xlim([0 length(meanSpeedAllTrials)])
 ylim([-5 500])
 
@@ -81,7 +81,7 @@ numBins = 10
 histogram(meanSpeedAllTrials,numBins,'normalization','probability')
 ylabel('fraction of trials')
 xlabel('mean running speed')
-title('percentage of trials with each running speed, one session')
+title('percentage of trials at differnt running speeds')
 xlim([0 round(max(meanSpeedAllTrials)+10)])
 set(gca,'xtick',0:25:round(max(meanSpeedAllTrials)+10));
 ylim([0 1])
@@ -89,8 +89,7 @@ ylim([0 1])
 % pick a threshold... what percentage of trials above & below it?
 % based on histogram, I picked 60 pix/frame threshold for running
 
-runThresh = 60
-numTrialsOverThresh = sum(meanSpeedAllTrials>=60)
+numTrialsOverThresh = sum(meanSpeedAllTrials>=runThresh)
 percentTrialsOverThresh = (numTrialsOverThresh/numTrials)*100
 % sumTrialsUnderThresh = sum(meanSpeedAllTrials<=60)
 % percentTrialsUnderThresh = (numTrialsUnderThresh/numTrials)*100
@@ -103,11 +102,11 @@ percentTrialsOverThresh = (numTrialsOverThresh/numTrials)*100
 % count for as much (divide by 6)
 
 % indicies for trials that meet our threshold
-idxRunTrials = find(meanSpeedAllTrials>=60);
+idxRunTrials = find(meanSpeedAllTrials>=runThresh);
 numRunTrials = length(idxRunTrials);
 
 % indicies for stationary trials
-idxStatTrials = find(meanSpeedAllTrials<=60);
+idxStatTrials = find(meanSpeedAllTrials<=runThresh);
 numStatTrials = length(idxStatTrials)
 
 

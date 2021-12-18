@@ -1,4 +1,4 @@
-function [meanpolar,ypts,xpts] = do_topo()
+function [meanpolar,ypts,xpts] = do_topo(subjName,dateNoSpaces)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -9,8 +9,8 @@ function [meanpolar,ypts,xpts] = do_topo()
     cd(pathname)
 
     % select the fields that you want to filter on
-    alluse = find(strcmp({files.subj},'G6H305RT')...
-          & strcmp({files.expt},'081921'));
+    alluse = find(strcmp({files.subj},subjName)...
+          & strcmp({files.expt},dateNoSpaces));
 
 
     % temp file needs to exist for some reason

@@ -7,7 +7,7 @@ function [onsetImFrames] = onsetImagingFrames(filteredStimOnsets,frameT)
     % collecting the index of the first imaging frame that follows each stim onset
     clear f
     for f = 1:length(filteredStimOnsets); % for each stim onset time/frame
-
+    %for f = 1:259 % use this if imaging session ended before stim did... 
         onsetImFrames(f) = find(diff(frameT>filteredStimOnsets(f))); % onsetImagingFrames are the frame indcies for the 
         % imaging frame that matches up with the onset of the stim (filteredOnsets(i))
 

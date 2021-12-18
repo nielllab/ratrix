@@ -1,4 +1,4 @@
-function pickVisAreaPts3figs(meanpolar,ypts,xpts,baselinedActIm,range,colorMapOrNot)
+function [tifPic] = pickVisAreaPts3figs(meanpolar,ypts,xpts,baselinedActIm,df,range)
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -26,11 +26,17 @@ function pickVisAreaPts3figs(meanpolar,ypts,xpts,baselinedActIm,range,colorMapOr
     % folder
     % CHANGE FILE NAME!
     addpath C:\Users\nlab\Desktop\KC_tif_pics
-    tifPic = imread('C:\Users\nlab\Desktop\KC_tif_pics\070421_G6H305RT_RIG2_THRESH_0001.tif');
+    tifPic = imread('F:\Kristen\Widefield2\305RT\070421_G6H305RT_RIG2\070421_G6H305RT_RIG2_THRESH');
+    tifPic = flip(tifPic,2);
     hold on
     subplot(1,3,3)
     imagesc(tifPic)
     axis equal
+    
+    sizeTopoIm = size(polarMap(meanpolar{2},95))
+    sizeDfUnCropped = size(df) 
+    sizePeakActIm = size(baselinedActIm)
+    sizeTifPic = size(tifPic)
     
 end
 

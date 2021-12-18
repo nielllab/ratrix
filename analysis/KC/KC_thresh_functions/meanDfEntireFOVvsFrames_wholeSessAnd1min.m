@@ -13,16 +13,17 @@ function meanDfEntireFOVvsFrames_wholeSessAnd1min(df,subjName,date)
     %set(t, 'FontSize', 12);
 
     clear j
-    for j = 1:2; % for 2 figures
+    %for j = 1:2; % for 2 figures
+    for j = 1; % for 1 figure
         if j == 1
             % taking the average of the entire imaging field over WHOLE TIME
             mn = mean(mean(abs(df),2),1); 
             mn = squeeze(mn);
             % plot
-            subplot(1,2,j)
+            subplot(1,length(j),j) % subplot dimensions based on value of j
             plot(squeeze(mn));  
             xlim([0 size(squeeze(mn),1)])  
-            ylim([0 0.075])
+            ylim([0 max(mn)])
             xlabel('frames')
             ylabel('mean dfof of entire FOV') 
             clear numFrames4title
@@ -43,7 +44,7 @@ function meanDfEntireFOVvsFrames_wholeSessAnd1min(df,subjName,date)
             subplot(1,2,j)
             plot(fiveStimsTrSqMn ); 
             xlim([0 length(fiveStimsTrSqMn)])
-            ylim([0 0.075])
+            ylim([0 max(mn)])
             ylabel('mean abs dfof of entire FOV') 
             xlabel('frame') 
             clear numFrames4title

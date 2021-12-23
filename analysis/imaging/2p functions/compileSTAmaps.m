@@ -5,7 +5,7 @@ close all
 clear all
 
 %%% select files to analyze based on compile file
-stimname = 'sparse noise 2';
+stimname = ['sparse noise 1'];
 xyswap = 1;  %%% swap x and y for retinotopy?
 
 if stimname == 'sparse noise 2'
@@ -14,7 +14,7 @@ else
     nsz = 3;
 end
 
-[sbx_fname acq_fname mat_fname quality] = compileFilenames('Batch File.xlsx',stimname);
+[sbx_fname acq_fname mat_fname quality] = compileFilenames('BatchFile.xlsx',stimname);
 
 Opt.SaveFigs = 1;
 Opt.psfile = 'C:\temp\TempFigs.ps';

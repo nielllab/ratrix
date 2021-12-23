@@ -1,14 +1,14 @@
-function [sbx_fname acq_fname mat_fname quality] = compileFilenames(xlsfile,stimname);
+function [sbx_fname acq_fname mat_fname quality regioned] = compileFilenames(xlsfile,stimname);
 %%% reads in excel batch file and generates standardized filenames 
 %%% for sbx file , stimrec, and analsyis .mat file
 %%% cmn 2019
 
-T = readtable(xlsfile);
+T = readtable(xlsfile,'Format','auto');
 
 %%% find entries with proper stimulus
 use = find(strcmp(T.Stim,stimname));
 
-
+length (use)
 %%% generate list of filenames
 for j = 1:length(use);
     i = use(j);
@@ -31,4 +31,9 @@ for j = 1:length(use);
     
     %%% other fields?
     quality{j} = T.GoodQuality{i};
+    
+    %%% has it been regioned?
+    regioned{j} = T.regioned{i};
+    %%% example
+    %%%myfield{j} = T.myfield{i};
 end

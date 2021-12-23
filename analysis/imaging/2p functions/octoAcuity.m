@@ -6,8 +6,8 @@ close all; clear all
 
 %%% select files to analyze based on compile file
 %stimname = '8 way gratings';
-stimname = 'sin gratings 7 steps 2ISI'
-[sbx_fname acq_fname mat_fname quality] = compileFilenames('Batch File.xlsx',stimname);
+stimname = ['sin gratings 7 steps 2ISI']
+[sbx_fname acq_fname mat_fname quality] = compileFilenames('BatchFile.xlsx',stimname);
 
 Opt.SaveFigs = 1;
 Opt.psfile = 'C:\temp\TempFigs.ps';

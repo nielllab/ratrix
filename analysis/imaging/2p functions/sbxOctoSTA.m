@@ -16,9 +16,9 @@ else
     %%% manually choose region to crop full image in selecting points
     Opt.selectCrop =1;
     %%% minimum brightness of selected points
-    % Opt.mindF = 200;
+    % Opt.mindF = 5000;
     %%% number of clusters from hierarchical analysis
-    %Opt.nclust = 5;
+    Opt.nclust = 5;
     
     %     % option to create movies of non-aligned and aligned image sequences
     %     Opt.MakeMov = 0;
@@ -132,17 +132,17 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 
 
 
-%%%
+%%% Judit took out to run through batch file without user input
 %figure
-display('which movie file?')
-if isfield(Opt,'noiseFile')
-    movienum = Opt.noiseFile;
-else
-    display('1) octo_sparse_flash_10min')
-    display('2) sparse_20min_1-8')
-    movienum = input('1 or 2 : ');
-end
-
+% display('which movie file?')
+% if isfield(Opt,'noiseFile')
+%     movienum = Opt.noiseFile;
+% else
+%     display('1) octo_sparse_flash_10min')
+%     display('2) sparse_20min_1-8')
+%     movienum = input('1 or 2 : ');
+% end
+movienum = 1;
 
 if movienum==1
     load('C:\data\octo_sparse_flash_10min.mat')

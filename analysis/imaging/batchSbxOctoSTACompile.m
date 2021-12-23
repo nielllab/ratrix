@@ -3,7 +3,7 @@ close all
 %% Analyze multiple files using sbxOctoNeural function.
 %% uses excel compile file to choose files, stim, etc
 
-stim_name = 'sin gratings 7 steps 2ISI'
+stim_name = 'sparse noise 1'
 %%% select files to analze
 [sbx_fname acq_fname mat_fname] = compileFilenames('BatchFile.xlsx',stim_name);
 
@@ -59,7 +59,7 @@ Results = struct;
         %% Run sutterOctoNeural
         Results(iFile).Input = Opt;       
 %         try
-            sbxOctoNeural(Opt);
+            sbxOctoSTA(Opt);
             Results(iFile).Output = 'success'
 %         catch
 %             fprintf('Error in sutterOctoNeural script - Continuing onto next file');

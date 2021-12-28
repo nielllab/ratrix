@@ -32,7 +32,7 @@ end
 
 %%% select files to use based on quality
 for i = 1: length(quality);
-    usefile(i) = strcmp(quality{i},'Y');
+    usefile(i) = strcmp(quality{i},'YY');
 end
 
 useN = find(usefile); clear goodfile
@@ -60,7 +60,7 @@ for f = 1:nfiles
     load(mat_fname{f},'xpts','ypts','rfx','rfy','tuning','zscore','xb','yb','meanGreenImg')
     
     %%% threshold for good RF
-    zthresh = 5.5;
+    zthresh = 5.0;
     
     %%% select RFs that have zscore(ON, OFF) greater than zthresh
     use = find(zscore(:,1)>zthresh | zscore(:,2)<-zthresh);

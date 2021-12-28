@@ -7,7 +7,7 @@ close all; clear all
 %%% select files to analyze based on compile file
 %stimname = '8 way gratings';
 stimname = ['8 way gratings 2ISI']
-[sbx_fname acq_fname mat_fname quality] = compileFilenames('BatchFile.xlsx',stimname);
+[sbx_fname acq_fname mat_fname quality] = compileFilenames('BerryiBatchFile.xlsx',stimname);
 
 Opt.SaveFigs = 1;
 Opt.psfile = 'C:\temp\TempFigs.ps';

@@ -13,7 +13,7 @@ length (use)
 for j = 1:length(use);
     i = use(j);
     %%% generate sbx filename
-    sbx_fname{j} = [T.Date{i} '_Octopus_Cal520_000_' sprintf('%03d',T.RecordingNumber(i)) '.sbx'];
+    sbx_fname{j} = [T.Date{i} '_Berryi_Cal520_000_' sprintf('%03d',T.RecordingNumber(i)) '.sbx'];
     if ~exist(sbx_fname{j},'file')
         sprintf('couldnt find %s',sbx_fname{j})
     end

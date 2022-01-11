@@ -21,6 +21,8 @@ function plotPrePostBaselineOnsetDfVsFrames(onsetDf,date,subjName,baselineIdx)
     clear titleText
     titleText = sprintf('\n dfof vs peri-onset frames, mean across trials, all conditions');
     suptitle(sprintf('%s ',date,subjName,titleText))
+    
+    yMax = 0.02;
 
     for j = 1:2 % pre & post baselined plots
 
@@ -29,7 +31,7 @@ function plotPrePostBaselineOnsetDfVsFrames(onsetDf,date,subjName,baselineIdx)
             % plot mean chunk trace
             subplot(1,2,j)
             plot(numFrames,mnOnsetChunk)
-            ylim([-0.01 0.01])
+            ylim([-0.01 yMax])
             xlim([0 length(numFrames)])
             xlabel('frame') 
             ylabel('df/f')
@@ -54,7 +56,7 @@ function plotPrePostBaselineOnsetDfVsFrames(onsetDf,date,subjName,baselineIdx)
             x_axis = 1:length(baselinedMnOnsetChunk);
             subplot(1,2,j)
             plot(x_axis,baselinedMnOnsetChunk)
-            ylim([-0.01 0.01])
+            ylim([-0.01 yMax])
             xlim([0 length(numFrames)])
             xlabel('frame') 
             ylabel('df/f')

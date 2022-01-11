@@ -8,7 +8,7 @@ function [tifPic] = pickVisAreaPts3figs(meanpolar,ypts,xpts,baselinedActIm,df,ra
     % TOPO MAP w/AREA BOUNDARIES
     % meanpolar made in do_topography
     subplot(1,3,1)
-    imshow(polarMap(meanpolar{2},95))
+    imagesc(polarMap(meanpolar{2},95))
     hold on
     plot(ypts,xpts,'w.','Markersize',2)
     axis equal
@@ -25,13 +25,20 @@ function [tifPic] = pickVisAreaPts3figs(meanpolar,ypts,xpts,baselinedActIm,df,ra
     % pick a tif pic, either matlab prompts user or manually navigate to right 
     % folder
     % CHANGE FILE NAME!
-    addpath C:\Users\nlab\Desktop\KC_tif_pics
-    tifPic = imread('F:\Kristen\Widefield2\305RT\070421_G6H305RT_RIG2\070421_G6H305RT_RIG2_THRESH');
+    
+    % select tif file
+    % addpath C:\Users\nlab\Desktop\KC_tif_pics
+    % tifPic = imread('F:\Kristen\Widefield2\305RT\070421_G6H305RT_RIG2\070421_G6H305RT_RIG2_THRESH');
+    % tifPic = flip(tifPic,2);
+    [f p] = uigetfile('*.tif','thresh tif file');
+    tifPic = imread(fullfile(p,f));
     tifPic = flip(tifPic,2);
+    
     hold on
     subplot(1,3,3)
     imagesc(tifPic)
     axis equal
+    %colormap jet
     
     sizeTopoIm = size(polarMap(meanpolar{2},95))
     sizeDfUnCropped = size(df) 

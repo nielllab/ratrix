@@ -6,6 +6,7 @@ function [idxTrials] = getTrials(conAndDurOrderedByTrialMeetCriteria,c,d,uniqueC
      % these trials might change each time thru the loop for 1 session
      clear trials
      trials = conAndDurOrderedByTrialMeetCriteria(1,:) == uniqueContrasts(c) & conAndDurOrderedByTrialMeetCriteria(2,:) == uniqueDurations(d);
+     
      clear idxTrials
      idxTrials = find(trials == 1);
 

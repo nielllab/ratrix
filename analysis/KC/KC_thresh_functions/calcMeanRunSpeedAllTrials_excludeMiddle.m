@@ -1,4 +1,4 @@
-function [meanSpeedAllTrials] = calcMeanRunSpeedAllTrials(allStop,allResp)
+function [meanSpeedAllTrials,idxHiRunTrials,idxLowRunTrials] = calcMeanRunSpeedAllTrials_excludeMiddle(allStop,allResp,lowRunThresh,hiRunThresh)
 % This function takes in allStop & allResp, and outputs the mean run speed(displacement)for each trial, 'meanSpeedAllTrials'. 
 % In the code, you can alter the threshold for running vs stationary (variable: 'runThresh').
 
@@ -52,7 +52,7 @@ end % end trials loop
 % to check if speed was calc'd for each trial
 sizeOf_meanSpeedAllTrials = size(meanSpeedAllTrials)
 
-% line PLOT of mean running speed vs trials/time for this session
+% % line PLOT of mean running speed vs trials/time for this session
 figure
 clear x_axis
 x_axis = [1:length(meanSpeedAllTrials)]; % number of trials
@@ -71,12 +71,12 @@ xlabel('trials')
 ylabel('mean running speed')
 title('mean running speed vs trials')
 xlim([0 length(meanSpeedAllTrials)])
-ylim([-5 500])
+ylim([min(meanSpeedAllTrials) max(meanSpeedAllTrials)])
 
 % HISTO showing FREQuency of different RUNning SPEEDs for FOR EVERY TRIAL
 
-numTrials = length(meanSpeedAllTrials)
-numBins = 10
+numTrials = length(meanSpeedAllTrials);
+numBins = 500;
 
 histogram(meanSpeedAllTrials,numBins,'normalization','probability')
 ylabel('fraction of trials')
@@ -86,5 +86,28 @@ xlim([0 round(max(meanSpeedAllTrials)+10)])
 set(gca,'xtick',0:25:round(max(meanSpeedAllTrials)+10));
 ylim([0 1])
 
-end
+% pick a threshold... what percentage of trials above & below it?
+% based on histogram, I picked 60 pix/frame threshold for running
 
+numTrialsOverHiThresh = sum(meanSpeedAllTrials>=hiRunThresh);
+percentTrialsOverHiThresh = (numTrialsOverHiThresh/numTrials)*100
+
+numTrialsUnderLowThresh = sum(meanSpeedAllTrials<=lowRunThresh);
+percentTrialsUnderThresh = (numTrialsUnderLowThresh/numTrials)*100
+
+% the meanSpeedAllTrials vector has 1 row, each column has
+% the mean speed for that trial (*not* onset chunk)
+% note that resolution for cursor is 6 times higher than for 
+% imaging, so the extra frames (all trials-onset chunk) don't
+% count for as much (divide by 6)
+
+% indicies for trials that meet our threshold
+idxHiRunTrials = find(meanSpeedAllTrials>=hiRunThresh);
+numHiRunTrials = length(idxHiRunTrials)
+
+% indicies for stationary trials
+idxLowRunTrials = find(meanSpeedAllTrials<=lowRunThresh);
+numLowRunTrials = length(idxLowRunTrials)
+
+
+end

@@ -1,7 +1,6 @@
 function [idxOnsetsMeetsCriteria,filteredStimOnsets] = filterOnsets_removeEarlyAndLateTrials(stimOnsets,earliestTrial,numLateTrialsSubtract)
 % This function filters out the first and last few trials, which takes care
 % of a coding error I don't feel like explaining right now...
-% You can go into the code and change the number of filtered trials (default is around +/-5).
 % There is also a block of code in here that you can uncomment if the
 % imaging session stopped before the stimulus or vice versa. 
 % earliestTrial & numLateTrialsSubtract are defined in the meta script

@@ -1,7 +1,4 @@
 function showPixWisePeakActivityPerStimCond(date,subjName,uniqueContrasts,uniqueDurations,conAndDurOrderedByTrialMeetCriteria,peakFrameIdx,onsetDf,baselineIdx)
-% UNTITLED5 Summary of this function goes here
-%   Detailed explanation goes here
-
     % SHOW IMAGES for each STIM COND (con dur combo) at PEAK response
     
     % SELECT RANGE for IMAGESC to SHOW PIX WISE IMAGES

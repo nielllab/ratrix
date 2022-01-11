@@ -1,4 +1,4 @@
-function [nGroup, nthVarsFilePaths, groupStimDetails, groupSubjData, groupSubjName, groupDate, groupTrialCond, groupNumPreStimFrames, groupNumPostStimFrames, groupIdxOnsetsMeetsCriteria, groupOnsetDf, groupPeakFrameIdx, groupStimOnsetFrame, groupBaselineIdx, groupBaselinedActIm, groupRoundXpts, groupRoundYpts, groupPTSdfof, groupMeanSpeedAllTrials, groupIdxRunTrials, groupIdxStatTrials, groupIdxSmallPupilTrials, groupIdxLargePupilTrials, groupLongAxis, groupMeanPupilDiameterAllTrials, groupRunThresh, groupPupThresh] = makeGroupStruct()
+function [nGroup, nthVarsFilePaths, groupStimDetails, groupSubjData, groupSubjName, groupDate, groupTrialCond, groupNumPreStimFrames, groupNumPostStimFrames, groupIdxOnsetsMeetsCriteria, groupOnsetDf, groupPeakFrameIdx, groupStimOnsetFrame, groupBaselineIdx, groupBaselinedActIm, groupRoundXpts, groupRoundYpts, groupPTSdfof, groupMeanSpeedAllTrials, groupIdxRunTrials, groupIdxStatTrials, groupRunThresh] = makeGroupStruct_noPup();
 % This function asks user how many experiment sessions to get individual
 % analysis variables for. This function is the first step in running group
 % analyses
@@ -46,14 +46,13 @@ function [nGroup, nthVarsFilePaths, groupStimDetails, groupSubjData, groupSubjNa
         groupMeanSpeedAllTrials{1,n} = meanSpeedAllTrials;
         groupIdxRunTrials{1,n} = idxRunTrials;
         groupIdxStatTrials{1,n} = idxStatTrials;
-        groupIdxSmallPupilTrials{1,n} = idxSmallPupilTrials;
-        groupIdxLargePupilTrials{1,n} = idxLargePupilTrials;
-        groupLongAxis{1,n} = longaxis;
-        groupMeanPupilDiameterAllTrials{1,n} = meanPupilDiameterAllTrials;
+        %groupIdxSmallPupilTrials{1,n} = idxSmallPupilTrials;
+        %groupIdxLargePupilTrials{1,n} = idxLargePupilTrials;
+        %groupLongAxis{1,n} = longaxis;
+        %groupMeanPupilDiameterAllTrials{1,n} = meanPupilDiameterAllTrials;
         groupRunThresh{1,n} = runThresh;
-        groupPupThresh{1,n} = pupThreshold;
+        %groupPupThresh{1,n} = pupThreshold;
 
     end % now I have the group analysis vars for each session
 
 end
-

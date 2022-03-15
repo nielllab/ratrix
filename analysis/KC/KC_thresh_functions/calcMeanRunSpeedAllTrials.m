@@ -66,11 +66,13 @@ ylim([min(meanSpeedAllTrials) max(meanSpeedAllTrials)])
 
 % BAR plot of same
 figure
-bar(meanSpeedAllTrials)
+xRangeMin = 800;
+xRangeMax = 1000;
+bar(meanSpeedAllTrials(1,xRangeMin:xRangeMax))
 xlabel('trials')
 ylabel('mean running speed')
 title('mean running speed vs trials')
-xlim([0 length(meanSpeedAllTrials)])
+xlim([0 length(meanSpeedAllTrials(1,xRangeMin:xRangeMax))])
 ylim([-5 500])
 
 % HISTO showing FREQuency of different RUNning SPEEDs for FOR EVERY TRIAL

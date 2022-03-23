@@ -23,7 +23,7 @@ function [mnCRF_acrossSess_AllDurAllPts_1behState] = mean_CRF_AcrossSessions(beh
 % general CRF for 1 beh state ...
 
 % our input variable has the mean CRF for each session in a group analysis
-% for one state (ex: hi runs peed state)
+% for one state (ex: hi run speed state)
 % 'behState_allSessAllPtsAllDurs_CRF' is durs x cons x pts x sess
 % 'behState_allSessAllPtsAllDurs_CRF'is already state specific - no need
 % for 'state' var input to this function

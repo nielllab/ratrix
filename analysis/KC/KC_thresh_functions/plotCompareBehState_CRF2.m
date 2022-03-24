@@ -1,4 +1,4 @@
-function [hiBehState_meanDthCRFacrossSess,loBehState_meanDthCRFacrossSess] = plotCompareBehState_CRF2(loBehState_allSessAllPtsAllDurs_CRF,hiBehState_allSessAllPtsAllDurs_CRF,durat,yMax,yMin,yLimit,x_axis,xMax,xMin,xLimit,stateLegend,uniqueContrasts,reigons,nGroup)
+function [hiBehState_meanDthCRFacrossSess] = plotCompareBehState_CRF2(loBehState_allSessAllPtsAllDurs_CRF,hiBehState_allSessAllPtsAllDurs_CRF,durat,yMax,yMin,yLimit,x_axis,xMax,xMin,xLimit,stateLegend,uniqueContrasts,reigons,nGroup)
 
 figure
 %clear titleText

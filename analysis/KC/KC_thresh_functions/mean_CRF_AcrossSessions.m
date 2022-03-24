@@ -1,4 +1,4 @@
-function [mnCRF_acrossSess_AllDurAllPts_1behState] = mean_CRF_AcrossSessions(behState_allSessAllPtsAllDurs_CRF,visArea,durat,cont)
+function [mnCRF_acrossSess_AllDurAllPts_1behState,stdErrCRF_acrossSess_1behState_allPts] = mean_CRF_AcrossSessions(behState_allSessAllPtsAllDurs_CRF,visArea,durat,cont)
 
 % this functions returns the mean CRF across all sessions for all durs & points, for 1 beh state 
 
@@ -35,19 +35,30 @@ for d = durat
             % take mean of df response to cth contrast, across sessions
             mnDF_acrossSess_dthIthCthCon_1behState = mean(squeeze(behState_allSessAllPtsAllDurs_CRF(d,c,i,:))');
             
-            % collect each mean df for each con
+            % collect each mean df for each con, gives 1 x 7 at end
             mnDthIthCRF_acrossSess_1behState(1,c)= mnDF_acrossSess_dthIthCthCon_1behState;
 
         end % end c loop 
         
         % collect each 1 x contrast vectors into a visArea x contrast grid
         mnDthAllPtsCRF_acrossSess_1behState(i,:) = mnDthIthCRF_acrossSess_1behState;
-
+        
+        % now that we have CRF across sessions for 1 point, take the std err across
+        % sessions, for that point
+        % should give 1 x 7
+        stdErr_acrossSess_1behState_1pt = std(squeeze(behState_allSessAllPtsAllDurs_CRF(d,:,i,:))')/sqrt(size(behState_allSessAllPtsAllDurs_CRF,4));
+        % collect std err across sess for each point:
+        stdErrCRF_acrossSess_1behState_allPts(i,:) = stdErr_acrossSess_1behState_1pt;
+    
     end % end points loop
     
-        % collect each visArea x contrast grid into a cube w/duration as the 3rd
-        % dim
-        mnCRF_acrossSess_AllDurAllPts_1behState(:,:,durat) = mnDthAllPtsCRF_acrossSess_1behState;
+    % collect each visArea x contrast (CRF) grid into a cube w/duration as the 3rd
+    % dim
+    % 5 x 7 (mean CRF over sessions - leaves dur out for now)
+    mnCRF_acrossSess_AllDurAllPts_1behState(:,:,durat) = mnDthAllPtsCRF_acrossSess_1behState;
+    
+    % collect std err across sess for each point:
+    %stdErrCRF_acrossSess_1behState_allPts(i,:) = stdErr_acrossSess_1behState_1pt;
 
 end % end dur loop 
 

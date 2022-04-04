@@ -1623,9 +1623,7 @@ end % end d loop (only 1 dur)
 numTrialsOneCon = size(allSessCthPeakDfEachTrial)
 
 
-
-
-figure
+% CDF only
 
 figure
 formatSpec = 'area %1.f, duration %1.f, con %1.f'

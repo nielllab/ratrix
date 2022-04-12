@@ -1,10 +1,9 @@
 
-cdfplot(df_stat)
+%cdfplot(df_stat)
 
+%% RUN VS STAT or BAR
 
-
-
-%% RUN VS STAT - BAR
+% UNCOMMENT for STAT OR RUN
 
 % one point, one dur, all cons, STATIONARY 
 
@@ -21,6 +20,10 @@ formatSpec = 'area %1.f, duration %1.f'
 titleText = sprintf(formatSpec,visArea,durat)
 suptitle(titleText)
 
+% BEH STATE
+
+%state = 'loRun'
+state = 'hiRun'
 
 % NEED this for UNIQUE CONS for C loop:
 
@@ -73,8 +76,8 @@ for d = durat % duration variable
             
     % for one POINT
     clear i 
-    %for i = 2 % v1 
-    for i = visArea
+    for i = 1 % v1 
+    %for i = visArea
 
         clear c % for each contrast
         %for c = 1:length(uniqueContrasts) 
@@ -186,7 +189,7 @@ for d = durat % duration variable
                 % I can concatenate each session's trials at a particular contrast and plot one
                 % subplot/contrast at a time
                 
-                % SAVE EACH CTH mean Df for peck frames of cth dth stat trials
+                % SAVE EACH CTH mean Df for peak frames of cth dth stat trials
                 
                 allSessCthPeakDfEachTrial = [allSessCthPeakDfEachTrial,meanPeakFramesCthDthTrialsIthPtMinusBase]; 
                 meanAllSessCthPeakDfAcrossTrials = mean(allSessCthPeakDfEachTrial);
@@ -205,33 +208,37 @@ for d = durat % duration variable
                 
             %numBins = 50;
             %h3 = histogram(allSessCthPeakDfEachTrial,numBins,'Normalization','probability')
-            ba = bar(allSessCthPeakDfEachTrial)
-            ba.FaceColor = 'b';
-            
-            hold on
-            
-            %clear x_axis
-            %x_axis = meanAllSessCthPeakDfAcrossTrials;
-            %clear y_axis
-            %y_axis = 0
-            
-            %h2 = scatter(x_axis,y_axis,'*','g')
-            
-            %formatSpec = 'c=%s, mn=%0.3f, st=%0.3f';
-            %title(sprintf(formatSpec,cons4axes{c},meanAllSessCthPeakDfAcrossTrials,stdAllSessCthPeakDfAcrossTrials));
-            title(uniqueContrasts(c))
-            
-            xlabel('trial')
-            ylabel('df')
-            %ylim([0 0.15])
-            xlim([1 length(allSessCthPeakDfEachTrial)])
-            
-            %set(gca,'XTick',-0.1:0.05:0.2)
-           % set(gca,'XTickLabel',-0.1:0.1:0.2)
-            
-            hold on  
+            if state == 'loRun'
+                ba = bar(allSessCthPeakDfEachTrial)
+                ba.FaceColor = 'b';
+
+                hold on
+
+                %clear x_axis
+                %x_axis = meanAllSessCthPeakDfAcrossTrials;
+                %clear y_axis
+                %y_axis = 0
+
+                %h2 = scatter(x_axis,y_axis,'*','g')
+
+                %formatSpec = 'c=%s, mn=%0.3f, st=%0.3f';
+                %title(sprintf(formatSpec,cons4axes{c},meanAllSessCthPeakDfAcrossTrials,stdAllSessCthPeakDfAcrossTrials));
+                title(uniqueContrasts(c))
+
+                xlabel('trial')
+                ylabel('df')
+                %ylim([0 0.15])
+                xlim([1 length(allSessCthPeakDfEachTrial)])
+
+                %set(gca,'XTick',-0.1:0.05:0.2)
+               % set(gca,'XTickLabel',-0.1:0.1:0.2)
+
+                hold on  
+                
+            end % end 'plot if'
             
             % go back into n loop, do it all again at this contrast but for
+            
             % RUN trials
             
             % this is for storing different length-ed cth trial vectors for all sessions (concatenated)
@@ -359,32 +366,36 @@ for d = durat % duration variable
                 
             %numBins = 50;
             %h3 = histogram(allSessCthPeakDfEachTrial,numBins,'Normalization','probability')
-            ba = bar(allSessCthPeakDfEachTrial)
-            ba.FaceColor = 'r';
+            if state == 'hiRun'
+                
+                ba = bar(allSessCthPeakDfEachTrial)
+                ba.FaceColor = 'r';
             
-            hold on
+                hold on
             
-            %clear x_axis
-            %x_axis = meanAllSessCthPeakDfAcrossTrials;
-            %clear y_axis
-            %y_axis = 0
+                %clear x_axis
+                %x_axis = meanAllSessCthPeakDfAcrossTrials;
+                %clear y_axis
+                %y_axis = 0
+
+                %h2 = scatter(x_axis,y_axis,'*','g')
+
+                %formatSpec = 'c=%s, mn=%0.3f, st=%0.3f';
+                %title(sprintf(formatSpec,cons4axes{c},meanAllSessCthPeakDfAcrossTrials,stdAllSessCthPeakDfAcrossTrials));
+                title(uniqueContrasts(c))
             
-            %h2 = scatter(x_axis,y_axis,'*','g')
-            
-            %formatSpec = 'c=%s, mn=%0.3f, st=%0.3f';
-            %title(sprintf(formatSpec,cons4axes{c},meanAllSessCthPeakDfAcrossTrials,stdAllSessCthPeakDfAcrossTrials));
-            title(uniqueContrasts(c))
-            
-            xlabel('trial')
-            ylabel('df')
-            %ylim([0 0.15])
-            %xlim([-0.1 0.2])
-            
-            %set(gca,'XTick',-0.1:0.05:0.2)
-           % set(gca,'XTickLabel',-0.1:0.1:0.2)
-            
-            hold on  
-                    
+                xlabel('trial')
+                ylabel('df')
+                %ylim([0 0.15])
+                %xlim([-0.1 0.2])
+
+                %set(gca,'XTick',-0.1:0.05:0.2)
+               % set(gca,'XTickLabel',-0.1:0.1:0.2)
+
+                hold on  
+                
+            end % end 'plot if'
+
         end % end c loop - move to next contrast/subplot
         
         %legendInfo = {'stat','run'};

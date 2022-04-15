@@ -1,7 +1,7 @@
 function [allSess_allConsAllPtsAllDurs_pkDfEachTrial] = Histo_byBehState_noPup(nGroup,state,groupStimDetails,groupTrialCond,groupIdxOnsetsMeetsCriteria,groupPTSdfof,groupPeakFrameIdx,groupBaselineIdx,groupIdxStatTrials,groupIdxRunTrials,visArea,durat,cont,conAndDurOrderedByTrialMeetCriteria,uniqueContrasts,uniqueDurations)
 % general CRF for 1 beh state ...
 
-clear allSess_allConsAllPtsAllDurs_pkDfEachTrial 
+%clear allSess_allConsAllPtsAllDurs_pkDfEachTrial 
 
 % for each session
 clear n

@@ -24,7 +24,7 @@ end
 % remove last 4 didgits in each name
 allOldNamesMinusLastDidgits = threeThousandOldNamesChar(:,1:27); 
 
-% re-namie each name with new end didgits
+% re-name each name with new end didgits
 clear f
 number = 0;
 fileExtension = '.tif';

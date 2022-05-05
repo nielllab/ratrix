@@ -1,3 +1,5 @@
+% just practice plotting i guess
+
 if nGroup == 1
             
             plot(x_axis,loBehState_meanDthCRFacrossSess,'-b','lineWidth',1,'MarkerSize',3) 

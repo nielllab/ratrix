@@ -1,3 +1,7 @@
+% here I was trying to plot just the lowest c that is sig diff from zero,
+% one state at a time
+% some sigline() stuff in here
+
 find(loBehState_h_p_cil_cih_AllPairs_AllPts_AllDurs(1,com,i) == 1)
 
 % make a vector starting at con = 0 and ending at the lowest con where df/f is sig

@@ -1,3 +1,5 @@
+
+
 % for each beh state,
 % for each duration (only 1 tho),
 % for each visual area, 
@@ -14,14 +16,6 @@ cont = 1; % max cont
 % for each beh state, run this function, 
 % then plot the outputs in seperate code
 
-% ,groupStimDetails,groupTrialCond,groupIdxOnsetsMeetsCriteria,groupPTSdfof,groupPeakFrameIdx,
-% groupBaselineIdx,groupIdxStatTrials,groupIdxRunTrials,
-% conAndDurOrderedByTrialMeetCriteria,uniqueContrasts,uniqueDurations
-
-%%
-function [mnCRF_acrossSess_AllDurAllPts_1behState] = mean_CRF_AcrossSessions(behState_allSessAllPtsAllDurs_CRF,visArea,durat,cont,)
-% general CRF for 1 beh state ...
-
 % our input variable has the mean CRF for each session in a group analysis
 % for one state (ex: hi run speed state)
 % 'behState_allSessAllPtsAllDurs_CRF' is durs x cons x pts x sess
@@ -29,9 +23,7 @@ function [mnCRF_acrossSess_AllDurAllPts_1behState] = mean_CRF_AcrossSessions(beh
 % for 'state' var input to this function
 % we just need the mean df's to each con across sessions for this beh state
 
-% for each duration (only 1 tho),
-% for each visual area, 
-% take the mean df at each contrast across all mice (mean of mean)
+function [mnCRF_acrossSess_AllDurAllPts_1behState] = mean_CRF_AcrossSessions(behState_allSessAllPtsAllDurs_CRF,visArea,durat,cont,)
 
 % getting the CRF across sessions for each duration and visual area
 clear mnCRF_acrossSess_AllDurAllPts_1behState

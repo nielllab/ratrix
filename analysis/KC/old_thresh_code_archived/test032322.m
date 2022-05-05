@@ -1,3 +1,5 @@
+% just plotting mean CRF with error bars
+
 std(squeeze(loBehState_allSessAllPtsAllDurs_CRF(d,:,i,:))')/sqrt(size(loBehState_allSessAllPtsAllDurs_CRF,4)); 
 
 stateLegend = {'stat','run'}

@@ -1,4 +1,4 @@
-function [nGroup, nthVarsFilePaths, groupStimDetails, groupSubjData, groupSubjName, groupDate, groupTrialCond, groupNumPreStimFrames, groupNumPostStimFrames, groupIdxOnsetsMeetsCriteria, groupOnsetDf, groupPeakFrameIdx, groupStimOnsetFrame, groupBaselineIdx, groupBaselinedActIm, groupRoundXpts, groupRoundYpts, groupPTSdfof, groupMeanSpeedAllTrials, groupIdxRunTrials, groupIdxStatTrials, groupIdxSmallPupilTrials, groupIdxLargePupilTrials, groupLongAxis, groupMeanPupilDiameterAllTrials, groupRunThresh, groupPupThresh] = makeGroupStruct()
+function [nGroup, nthVarsFilePaths, groupStimDetails, groupSubjData, groupSubjName, groupDate, groupTrialCond, groupNumPreStimFrames, groupNumPostStimFrames, groupIdxOnsetsMeetsCriteria, groupOnsetDf, groupPeakFrameIdx, groupStimOnsetFrame, groupBaselineIdx, groupBaselinedActIm, groupRoundXpts, groupRoundYpts, groupPTSdfof, groupMeanSpeedAllTrials, groupIdxRunTrials, groupIdxStatTrials, groupIdxSmallPupilTrials, groupIdxLargePupilTrials, groupLongAxis, groupMeanPupilDiameterAllTrials, groupRunThresh, groupPupThresh, groupEarliestTrial, groupNumLateTrialsSubtract] = makeGroupStruct()
 % This function asks user how many experiment sessions to get individual
 % analysis variables for. This function is the first step in running group
 % analyses
@@ -52,6 +52,8 @@ function [nGroup, nthVarsFilePaths, groupStimDetails, groupSubjData, groupSubjNa
         groupMeanPupilDiameterAllTrials{1,n} = meanPupilDiameterAllTrials;
         groupRunThresh{1,n} = runThresh;
         groupPupThresh{1,n} = pupThreshold;
+        groupEarliestTrial{1,n} = earliestTrial;
+        groupNumLateTrialsSubtract{1,n} = numLateTrialsSubtract;
 
     end % now I have the group analysis vars for each session
 

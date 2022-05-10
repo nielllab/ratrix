@@ -34,6 +34,7 @@ for d = durat
                 loBehState_mnTraceOverSess_std = std(squeeze(loRun_mnTraceAllConsDursPts(c,:,d,i,:))')/sqrt(size(squeeze(loRun_mnTraceAllConsDursPts(c,:,d,i,:))',1)); 
             
                 x_axis = [1:length(loBehState_mnTraceOverSess_dthIthCon)];
+                
                 % plot for lo beh state
                 errorbar(x_axis,loBehState_mnTraceOverSess_dthIthCon,loBehState_mnTraceOverSess_std,'-b','lineWidth',1,'MarkerSize',3) 
             

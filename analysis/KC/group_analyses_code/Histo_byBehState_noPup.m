@@ -1,4 +1,4 @@
-function [allSess_allConsAllPtsAllDurs_pkDfEachTrial] = Histo_byBehState_noPup(nGroup,state,groupStimDetails,groupTrialCond,groupIdxOnsetsMeetsCriteria,groupPTSdfof,groupPeakFrameIdx,groupBaselineIdx,groupIdxStatTrials,groupIdxRunTrials,visArea,durat,cont,conAndDurOrderedByTrialMeetCriteria,uniqueContrasts,uniqueDurations)
+function [allSess_allConsAllPtsAllDurs_pkDfEachTrial] = Histo_byBehState(nGroup,state,groupStimDetails,groupTrialCond,groupIdxOnsetsMeetsCriteria,groupPTSdfof,groupPeakFrameIdx,groupBaselineIdx,groupIdxStatTrials,groupIdxRunTrials,visArea,durat,cont,conAndDurOrderedByTrialMeetCriteria,uniqueContrasts,uniqueDurations)
 % general CRF for 1 beh state ...
 
 %clear allSess_allConsAllPtsAllDurs_pkDfEachTrial 
@@ -26,6 +26,20 @@ for n = 1:nGroup
     
         % EXTRACT hiRun TRIAL INDICIES
         nthIdxBehStateTrials = groupIdxRunTrials{1,n}; 
+        
+    end
+    
+    if state == 'loPup'
+
+        % EXTRACT hiRun TRIAL INDICIES
+        nthIdxBehStateTrials = groupSmallPupilTrials{1,n}; 
+
+    end
+    
+    if state == 'hiPup'
+    
+        % EXTRACT hiRun TRIAL INDICIES
+        nthIdxBehStateTrials = groupIdxLargePupilTrials{1,n}; 
         
     end
     

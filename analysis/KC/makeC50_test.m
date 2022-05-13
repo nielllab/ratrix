@@ -51,6 +51,7 @@ function [lo_yi_interpedConsCurve_allPtsAllSess,lo_xi_isDf_higherRes_allPtsAllSe
                 % find 1/2 max df
                 % take the range of df (max df - min df)
                 range = max(lo_nthdthith_CRF)-min(lo_nthdthith_CRF);
+                %range = max(lo_nthdthith_CRF)-0; % range from zero (c = 1) to whatever max df response is
                 % divide range by 2
                 halfOf_range = range/2;
                 % subtract 1/2 of range from max df to get the yvalue we want to query the interpolated contrast for

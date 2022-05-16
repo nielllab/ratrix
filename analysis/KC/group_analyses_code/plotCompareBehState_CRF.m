@@ -14,7 +14,7 @@ for d = durat
     
     for i = 1:size(loBehState_allSessAllPtsAllDurs_CRF,3)
         
-        subplot(2,3,i) 
+        subplot(2,2,i) 
         
         % take mean across sessions, for ith point, lo beh state
         loBehState_meanDthCRFacrossSess = mean(loBehState_allSessAllPtsAllDurs_CRF(d,:,i,:),4);
@@ -42,11 +42,13 @@ for d = durat
         if nGroup == 1
             
             plot(x_axis,hiBehState_meanDthCRFacrossSess,'-r','lineWidth',1,'MarkerSize',3) 
+            
         
         else 
             
             % plot for hi beh state
             errorbar(x_axis,hiBehState_meanDthCRFacrossSess,hiBehState_stdErrOverSess,'-r','lineWidth',1,'MarkerSize',3) 
+            
         
         end
         
@@ -57,6 +59,8 @@ for d = durat
     
         ylabel('df/f')
         xlabel('contrast (%)')
+        
+        
     
         clear xt
         xt={'0'; '3' ; '6' ; '12' ; '25' ; '50'; '100'} ; 
@@ -69,7 +73,7 @@ for d = durat
         legend(stateLegend)
 
     end 
-    
+   
 end
 
 end

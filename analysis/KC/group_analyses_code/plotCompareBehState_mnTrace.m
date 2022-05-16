@@ -13,8 +13,9 @@ for d = durat
             if nGroup == 1
                 
                 loBehState_mnTraceOverSess_dthIthCon = loRun_mnTraceAllConsDursPts(c,:,d,i,:);
-                
+               
                 x_axis = [1:length(loBehState_mnTraceOverSess_dthIthCon)];
+                
                 plot(x_axis,loBehState_mnTraceOverSess_dthIthCon,'-b','lineWidth',1,'MarkerSize',3) 
                 
                 xMin = min(x_axis);

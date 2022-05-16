@@ -1,4 +1,4 @@
-function [mnTraceAllConsDursPts] = MnTrace_byBehState(nGroup,state,groupStimDetails,groupTrialCond,groupIdxOnsetsMeetsCriteria,groupPTSdfof,groupPeakFrameIdx,groupBaselineIdx,groupIdxStatTrials,groupIdxRunTrials,groupIdxSmallPupilTrials,groupIdxLargePupilTrials,visArea,durat,cont,conAndDurOrderedByTrialMeetCriteria,uniqueContrasts,uniqueDurations)
+function [mnTraceAllConsDursPts,stdErr] = MnTrace_byBehState(nGroup,state,groupStimDetails,groupTrialCond,groupIdxOnsetsMeetsCriteria,groupPTSdfof,groupPeakFrameIdx,groupBaselineIdx,groupIdxStatTrials,groupIdxRunTrials,groupIdxSmallPupilTrials,groupIdxLargePupilTrials,visArea,durat,cont,conAndDurOrderedByTrialMeetCriteria,uniqueContrasts,uniqueDurations)
 
 clear mnTraceAllConsDursPtsSess % start new group matrix each time
 
@@ -115,7 +115,7 @@ for n = 1:nGroup
     %allSessAllPtsAllDurs_CRF_err(:,:,:,n) = allPtsAllDurs_CRF_err;
     %numTrialsEachConAllDursAllPtsAllSess_CRF(:,:,:,n) = numTrialsEachConAllDursAllPts_CRF;
     
-    %stdErr = std(squeeze(nthPTSdfof(i,:,idxTrials))')/sqrt(length(idxTrials))
+    stdErr = std(squeeze(nthPTSdfof(i,:,idxTrials))')/sqrt(length(idxTrials))
     
 end % end n loop
 

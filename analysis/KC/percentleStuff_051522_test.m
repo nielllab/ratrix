@@ -51,6 +51,7 @@ end % end n loop
 
 %% normalized group distribution of pupil diameter
 
+numCol = 5; 
 p_hi = [99.95];
 
 nbins = 50;

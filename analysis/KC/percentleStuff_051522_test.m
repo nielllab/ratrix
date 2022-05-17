@@ -56,6 +56,7 @@ p_hi = [99.95];
 
 nbins = 50;
 
+clear meanPupVal_normalized_allTrial_allSess
 clear lessThan1_meanPupVal_normalized_allTrial_allSess
 clear normalized_meanPupDiameterAllTrials_allSessAsOneVector
 normalized_meanPupDiameterAllTrials_allSessAsOneVector = [ ];
@@ -63,9 +64,7 @@ normalized_meanPupDiameterAllTrials_allSessAsOneVector = [ ];
 for n = 1:nGroup;
     
     % get hi percentile value for nth session
-    Percentile_hi = prctile(groupMeanPupilDiameterAllTrials{1,n},p_hi);
-    
-    clear meanPupVal_normalized_allTrial
+    Percentile_hi = prctile(groupMeanPupilDiameterAllTrials{1,n},p_hi); 
 
     % normalize the pupil diamter vector for nth session (already set so min value = 0)
     % 'groupMeanPupilDiameterAllTrials{1,n}' is made in group analysis script
@@ -77,8 +76,7 @@ for n = 1:nGroup;
     % then filter out any normalized values greater than 1 (outliers)
     lessThan1_percentile_idx = find(meanPupVal_normalized_allTrial_allSess{1,n}<1);
     lessThan1_meanPupVal_normalized_allTrial_allSess{1,n} = meanPupVal_normalized_allTrial_allSess{1,n}(lessThan1_percentile_idx);
-
-    % now have normalized pupil vector session ('lessThan1_meanPupVal_normalized_allTrial_allSess')
+    % now have normalized pupil vector session 
     
     % need this for setting x limit later:
     normalized_meanPupDiameterAllTrials_allSessAsOneVector = [normalized_meanPupDiameterAllTrials_allSessAsOneVector,lessThan1_meanPupVal_normalized_allTrial_allSess{1,n}];
@@ -93,10 +91,9 @@ for n = 1:nGroup;
 
 end % end n loop
 
-
 nbins = 50;
 
-fig2 = figure
+figure
 titleText = sprintf('%s \n','normalized group pupil diameter distributions');
 suptitle(titleText)
 
@@ -117,20 +114,25 @@ for n = 1:nGroup
     y_tot_Max = max(maxHvals_allSess)
     ylim([0 y_tot_Max+0.005])
     ylabel('fraction of trials')
+    xlim([min(normalized_meanPupDiameterAllTrials_allSessAsOneVector)-0.01 max(normalized_meanPupDiameterAllTrials_allSessAsOneVector)+0.01])
+    xlabel('normalized pupil diameter (a.u.)')
+    
     formatSpec = 'session %1.0d'
     titleText = sprintf(formatSpec,n)
     title(titleText)
-
-    % 'meanPupDiameterAllTrials_eachSesss' made in group analysis script,
-  
-    xlim([min(normalized_meanPupDiameterAllTrials_allSessAsOneVector)-0.01 max(normalized_meanPupDiameterAllTrials_allSessAsOneVector)+0.01])
-    xlabel('normalized pupil diameter (a.u.)')
     
     hold on
 
 end % end n loop
 
-subplot(ceil(nGroup/numCol),5,nGroup+1)
+hold on 
+
+if nGroup < 4
+    subplot(1,nGroup+1,n)  
+else
+    numCol = 5;
+    subplot(ceil(nGroup/numCol),5,nGroup+1)
+end 
 
 histogram(normalized_meanPupDiameterAllTrials_allSessAsOneVector,nbins,'normalization','probability')
 
@@ -140,74 +142,6 @@ ylabel('fraction of trials (*all* sessions)')
 xlim([min(normalized_meanPupDiameterAllTrials_allSessAsOneVector)-0.01 max(normalized_meanPupDiameterAllTrials_allSessAsOneVector)+0.01])
 xlabel('normalized pupil diameter (a.u.)')
 title('all sessions')
-
-%% pup vs run (norm or not) scatter 
-
-figure
-
-for n = 1:nGroup
-    
-    % subplot dimensions based on number of sessions (plotting each session on one fig)
-    if nGroup < 4
-        subplot(1,nGroup+1,n)  
-    else
-        numCol = 5;
-        subplot(ceil(nGroup/numCol),5,n)
-    end 
-
-    %scatter(groupMeanSpeedAllTrials{1,n},meanPupVal_normalized_allTrial_allSess{1,n})
-    scatter(meanRunVal_normalized_allTrial_allSess{1,n},meanPupVal_normalized_allTrial_allSess{1,n})
-    hold on
-    
-    clear x_thresh
-    x_thresh = [0:0.01:max(meanPupVal_normalized_allTrial_allSess{1,n})];
-    clear y_thresh
-    y_thresh(1,1:length(x_thresh)) = 0.5;
-    
-    plot(x_thresh,y_thresh,'m','lineWidth',1)
-    
-    xlabel('normalized locomotion speed')
-    ylabel('normalized pupil diameter')
-    formatSpec = 'session %1.0d'
-    titleText = sprintf(formatSpec,n)
-    title(titleText)
-    
-    ylim([0 1.2])
-    xlim([0 1.2])
-    
-    hold on
-
-end
-
-for n = 1:nGroup
-    
-    % subplot dimensions based on number of sessions (plotting each session on one fig)
-    if nGroup < 4
-        subplot(1,nGroup+1,nGroup+1)  
-    else
-        numCol = 5;
-        subplot(ceil(nGroup/numCol),5,nGroup+1)
-    end 
-    
-    %scatter(groupMeanSpeedAllTrials{1,n},meanPupVal_normalized_allTrial_allSess{1,n})
-    scatter(meanRunVal_normalized_allTrial_allSess{1,n},meanPupVal_normalized_allTrial_allSess{1,n})
-    
-    hold on
-    
-    plot(x_thresh,y_thresh,'g','lineWidth',1)
-    
-    xlabel('normalized locomotion speed')
-    ylabel('normalized pupil diameter')
-    title('all sessions')
-    
-    ylim([0 1.2])
-    xlim([0 1.2])
-    
-    hold on 
-    
-    
-end 
-
 
 %% normalized group distribution of LOCO diameter
 
@@ -299,6 +233,75 @@ ylabel('fraction of trials (*all* sessions)')
 xlim([min(normalized_meanRunSpeedAllTrials_allSessAsOneVector)-0.01 max(normalized_meanRunSpeedAllTrials_allSessAsOneVector)+0.01])
 xlabel('normalized run speed (a.u.)')
 title('all sessions')
+
+%% pup vs run (norm or not) scatter 
+
+figure
+
+for n = 1:nGroup
+    
+    % subplot dimensions based on number of sessions (plotting each session on one fig)
+    if nGroup < 4
+        subplot(1,nGroup+1,n)  
+    else
+        numCol = 5;
+        subplot(ceil(nGroup/numCol),5,n)
+    end 
+
+    %scatter(groupMeanSpeedAllTrials{1,n},meanPupVal_normalized_allTrial_allSess{1,n})
+    scatter(meanRunVal_normalized_allTrial_allSess{1,n},meanPupVal_normalized_allTrial_allSess{1,n})
+    hold on
+    
+    clear x_thresh
+    x_thresh = [0:0.01:max(meanPupVal_normalized_allTrial_allSess{1,n})];
+    clear y_thresh
+    y_thresh(1,1:length(x_thresh)) = 0.5;
+    
+    plot(x_thresh,y_thresh,'m','lineWidth',1)
+    
+    xlabel('normalized locomotion speed')
+    ylabel('normalized pupil diameter')
+    formatSpec = 'session %1.0d'
+    titleText = sprintf(formatSpec,n)
+    title(titleText)
+    
+    ylim([0 1.2])
+    xlim([0 1.2])
+    
+    hold on
+
+end
+
+for n = 1:nGroup
+    
+    % subplot dimensions based on number of sessions (plotting each session on one fig)
+    if nGroup < 4
+        subplot(1,nGroup+1,nGroup+1)  
+    else
+        numCol = 5;
+        subplot(ceil(nGroup/numCol),5,nGroup+1)
+    end 
+    
+    %scatter(groupMeanSpeedAllTrials{1,n},meanPupVal_normalized_allTrial_allSess{1,n})
+    scatter(meanRunVal_normalized_allTrial_allSess{1,n},meanPupVal_normalized_allTrial_allSess{1,n})
+    
+    hold on
+    
+    plot(x_thresh,y_thresh,'g','lineWidth',1)
+    
+    xlabel('normalized locomotion speed')
+    ylabel('normalized pupil diameter')
+    title('all sessions')
+    
+    ylim([0 1.2])
+    xlim([0 1.2])
+    
+    hold on 
+    
+    
+end 
+
+
 
 %% for each sess, run speed, pup diam, & scatter on same plot 
 

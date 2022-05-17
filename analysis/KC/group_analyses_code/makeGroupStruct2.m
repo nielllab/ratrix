@@ -15,7 +15,7 @@ function [nGroup, nthVarsFilePaths, groupStimDetails, groupSubjData, groupSubjNa
     clear n
     for n = 1:nGroup
 
-        [f p] = uigetfile('*.mat',sprintf('session # %0.00f vars4IndAndGroupAnalyses',n));
+        [f p] = uigetfile('*.mat',sprintf('session # %0.00f newVars4IndAndGroupAnalyses',n));
 
         % make cell array w/ sessions for columns
         % & file names/paths for values down the rows

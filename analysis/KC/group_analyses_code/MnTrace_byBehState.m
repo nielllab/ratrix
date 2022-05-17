@@ -3,7 +3,6 @@ function [mnTraceAllConsDursPts,stdErr] = MnTrace_byBehState(nGroup,state,groupS
 clear mnTraceAllConsDursPtsSess % start new group matrix each time
 
 % for each session
-clear n
 for n = 1:nGroup
     
     clear mnTraceAllConsDursPts % re-use pts collector
@@ -116,6 +115,7 @@ for n = 1:nGroup
     %numTrialsEachConAllDursAllPtsAllSess_CRF(:,:,:,n) = numTrialsEachConAllDursAllPts_CRF;
     
     stdErr = std(squeeze(nthPTSdfof(i,:,idxTrials))')/sqrt(length(idxTrials))
+    
     
 end % end n loop
 

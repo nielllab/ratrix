@@ -114,7 +114,7 @@ for n = 1:nGroup
     %allSessAllPtsAllDurs_CRF_err(:,:,:,n) = allPtsAllDurs_CRF_err;
     %numTrialsEachConAllDursAllPtsAllSess_CRF(:,:,:,n) = numTrialsEachConAllDursAllPts_CRF;
     
-    stdErr = std(squeeze(nthPTSdfof(i,:,idxTrials))')/sqrt(length(idxTrials))
+    stdErr = std(squeeze(nthPTSdfof(i,:,idxTrials))')/sqrt(length(idxTrials));
     
     
 end % end n loop

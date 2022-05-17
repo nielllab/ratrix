@@ -1,7 +1,6 @@
 function [meanSpeedAllTrials] = calcMeanRunSpeedAllTrials(allStop,allResp)
 % This function takes in allStop & allResp, and outputs the mean run speed(displacement)for each trial, 'meanSpeedAllTrials'. 
 
-
 % CALCULATE MEAN RUN SPEED FOR EVERY TRIAL 
 % needs ball data loaded, that's it 
 

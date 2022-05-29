@@ -35,9 +35,11 @@ for d = durat
 
                 % take mean across sessions, for ith point, lo beh state
                 loBehState_mnTraceOverSess_dthIthCon = mean(squeeze(loRun_mnTraceAllConsDursPts(c,:,d,i,:))',1);
+                %loBehState_mnTraceOverSess_dthIthCon = mean(squeeze(loRun_mnTraceAllConsDursPts(c,:,i,:))',1);
                 % get stdev across sessions
                 loBehState_mnTraceOverSess_std = std(squeeze(loRun_mnTraceAllConsDursPts(c,:,d,i,:))')/sqrt(size(squeeze(loRun_mnTraceAllConsDursPts(c,:,d,i,:))',1)); 
-
+                %loBehState_mnTraceOverSess_std = std(squeeze(loRun_mnTraceAllConsDursPts(c,:,i,:))')/sqrt(size(squeeze(loRun_mnTraceAllConsDursPts(c,:,i,:))',1)); 
+                
                 x_axis = [1:length(loBehState_mnTraceOverSess_dthIthCon)];
 
                 % plot for lo beh state

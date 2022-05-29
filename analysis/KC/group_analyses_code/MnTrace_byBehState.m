@@ -1,11 +1,13 @@
-function [mnTraceAllConsDursPts,stdErr] = MnTrace_byBehState(nGroup,state,groupStimDetails,groupTrialCond,groupIdxOnsetsMeetsCriteria,groupPTSdfof,groupPeakFrameIdx,groupBaselineIdx,groupIdxStatTrials,groupIdxRunTrials,groupIdxSmallPupilTrials,groupIdxLargePupilTrials,visArea,durat,cont,conAndDurOrderedByTrialMeetCriteria,uniqueContrasts,uniqueDurations)
+function [mnTraceAllConsDursPtsSess,MnTraceErr_AllConDursPtsSess] = MnTrace_byBehState(nGroup,state,groupStimDetails,groupTrialCond,groupIdxOnsetsMeetsCriteria,groupPTSdfof,groupPeakFrameIdx,groupBaselineIdx,groupIdxStatTrials,groupIdxRunTrials,groupIdxSmallPupilTrials,groupIdxLargePupilTrials,visArea,durat,cont,conAndDurOrderedByTrialMeetCriteria,uniqueContrasts,uniqueDurations)
 
 clear mnTraceAllConsDursPtsSess % start new group matrix each time
+clear MnTraceErr_AllConDursPtsSess
 
 % for each session
 for n = 1:nGroup
     
     clear mnTraceAllConsDursPts % re-use pts collector
+    clear MnTraceErr_AllConDursPts
 
     % EXTRACT list of stim params & stim conditions in order of trial 
     [durOrderedByTrialMeetCriteria,uniqueDurations,conOrderedByTrialMeetCriteria,uniqueContrasts,conAndDurOrderedByTrialMeetCriteria] = getStimParams4loops(n,groupStimDetails,groupTrialCond,groupIdxOnsetsMeetsCriteria);
@@ -48,12 +50,14 @@ for n = 1:nGroup
     for i = visArea % can be 1 area or length of xPts
         
         clear mnTraceAllConsDurs % reuse durs collectot
+        clear MnTraceErr_AllConDursOnePt
               
         % for each duration
         clear d
         for d = durat % at each duration
             
             clear mnTraceAllCons % reuse cons collector
+            clear MnTraceErr_AllConOnePt
             
             % for each contrast
             clear c
@@ -81,8 +85,8 @@ for n = 1:nGroup
                 % calulate the StdErr for each CRF point calulated above (one err value for each contrast)
                 % that means I want the error over trials, not over frames - that info is in the 'meanOverFramesSq5FramesOverTrialsPTSdfof' variable (1 x # trials)
                 %clear stdErr
-                %stdErr = std(squeeze(nthPTSdfof(i,:,idxTrials))')/sqrt(length(idxTrials)); % check: length or sum?
-                %%CRF_err(1,c) = stdErr; % clear outside j loop
+                stdErr = std(squeeze(nthPTSdfof(i,:,idxTrials))')/sqrt(length(idxTrials)); 
+                MnTraceErr_AllConOnePt(c,:) = stdErr; % clear outside j loop
                 
                 %numTrials = length(idxTrials);
                 %numTrialsEachCon_CRF(1,numTrials) = numTrials;
@@ -90,7 +94,7 @@ for n = 1:nGroup
             end % end c loop
             
             mnTraceAllConsDurs(:,:,d) = mnTraceAllCons;
-            
+            MnTraceErr_AllConDursOnePt(:,:,d) = MnTraceErr_AllConOnePt;
             % collect CRF & err for each duration
             %allDurs_CRF(d,:) = CRF;
             %allDurs_CRF_err(d,:) = CRF_err;
@@ -99,6 +103,7 @@ for n = 1:nGroup
         end % end d loop
         
         mnTraceAllConsDursPts(:,:,:,i) = mnTraceAllConsDurs;
+        MnTraceErr_AllConDursPts(:,:,:,i) = MnTraceErr_AllConDursOnePt;
         
        % collect all pts all durs CRFs
        %allPtsAllDurs_CRF(:,:,i) = allDurs_CRF;  
@@ -108,13 +113,15 @@ for n = 1:nGroup
     end % end i loop
     
     % con x frames x dur x points x sessions
-    mnTraceAllConsDursPts(:,:,:,:,n) = mnTraceAllConsDursPts;
+    mnTraceAllConsDursPtsSess(:,:,:,:,n) = mnTraceAllConsDursPts;
+    MnTraceErr_AllConDursPtsSess(:,:,:,:,n) = MnTraceErr_AllConDursPts;
     % save nth CRF matrix (all durs)
     %allSessAllPtsAllDurs_CRF(:,:,:,n) = allPtsAllDurs_CRF;
     %allSessAllPtsAllDurs_CRF_err(:,:,:,n) = allPtsAllDurs_CRF_err;
     %numTrialsEachConAllDursAllPtsAllSess_CRF(:,:,:,n) = numTrialsEachConAllDursAllPts_CRF;
     
-    stdErr = std(squeeze(nthPTSdfof(i,:,idxTrials))')/sqrt(length(idxTrials));
+    
+    %stdErr = std(squeeze(nthPTSdfof(i,:,idxTrials))')/sqrt(length(idxTrials));
     
     
 end % end n loop

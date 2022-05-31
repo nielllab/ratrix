@@ -48,7 +48,7 @@ function showPixWisePeakActivityPerStimCond(date,subjName,uniqueContrasts,unique
              baselinedPeakImageCthDthTrials =  meanPeakImageCthDthTrials-meanBaseImageCthDthtrials;
 
              % PLOT BASElined PEAK image
-             subplot(length(uniqueDurations),length(uniqueContrasts),subplotNum)
+             subplot(length(uniqueContrasts),length(uniqueDurations),subplotNum)
              imagesc(baselinedPeakImageCthDthTrials,range)
 
              if colorMapOrNot == 1

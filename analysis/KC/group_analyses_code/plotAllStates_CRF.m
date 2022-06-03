@@ -57,26 +57,42 @@ for d = durat
 %         end
         
         title(reigons{i})
-    
+
         ylim(yLimit) 
         xlim(xLimit)
-    
-        ylabel('df/f')
-        xlabel('contrast (%)')
-        
-        clear xt
-        xt={'0'; '3' ; '6' ; '12' ; '25' ; '50'; '100'} ; 
-        set(gca,'xtick',1:7); 
-        set(gca,'xticklabel',xt);
-        
-        yt = [-0.01 0 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.1];
-        set(gca,'YTick',yt)
-        
-        legend(durs4Legend)
 
-    end 
+        axis square
+
+        % visualization
+
+        grid on
+
+        global fntSize
+        global fntName
+        global fontMult
+
+        set(gca, 'FontSize', fntSize, 'FontName', fntName)
+
+        ylabel('df/F', 'FontSize', fntSize*fontMult, 'FontName', fntName)
+        yt = [yMin:0.01:yMax];
+        ytl = arrayfun(@num2str, yt, 'UniformOutput', 0);
+        set(gca,'YTick',yt)
+        set(gca,'YTickLabel',ytl)
+
+        xlabel('contrast (%)', 'FontSize', fntSize*fontMult, 'FontName', fntName)
+        xt=[x_axis];
+        xtl = {'0'; '3' ; '6' ; '12' ; '25' ; '50'; '100'}; 
+        set(gca,'xtick',xt); 
+        set(gca,'xticklabel',xtl);
+
+        global legendStrings
+        legend(legendStrings)
+
+        %stateLegend = {'stat','run'};
+        %lgd2 = legend([loPlot, hiPlot],'stationary','running');
+        %lgd2.FontSize = fntSize-subt4leg;
    
-end
+    end
 
 end
 

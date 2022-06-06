@@ -12,14 +12,18 @@ figure
 
 for d = durat
     
-    for i = 1:size(loBehState_allSessAllPtsAllDurs_CRF,3)
+    global visArea
+    for i = 1:4
         
         subplot(2,2,i) 
         
         % take mean across sessions, for ith point, lo beh state
         loBehState_meanDthCRFacrossSess = mean(loBehState_allSessAllPtsAllDurs_CRF(d,:,i,:),4);
         % get stdev across sessions
-        loBehState_stdErrOverSess = std(squeeze(loBehState_allSessAllPtsAllDurs_CRF(d,:,i,:))')/sqrt(size(loBehState_allSessAllPtsAllDurs_CRF,4)); 
+        %loBehState_stdErrOverSess = std(squeeze(loBehState_allSessAllPtsAllDurs_CRF(d,:,i,:))')/sqrt(size(loBehState_allSessAllPtsAllDurs_CRF,4));
+        % stderr across mice
+        global numMice
+        loBehState_stdErrOverSess = std(squeeze(loBehState_allSessAllPtsAllDurs_CRF(d,:,i,:))')/sqrt(numMice); 
         %loBehState_stdErrOverSess = std(squeeze(loBehState_allSessAllPtsAllDurs_CRF(d,:,i,:))'); 
         
         if nGroup == 1
@@ -37,8 +41,11 @@ for d = durat
         
         % take mean across sessions, for ith point, hi beh state
         hiBehState_meanDthCRFacrossSess = mean(hiBehState_allSessAllPtsAllDurs_CRF(d,:,i,:),4);
-        % get stdev across sessions
-        hiBehState_stdErrOverSess = std(squeeze(hiBehState_allSessAllPtsAllDurs_CRF(d,:,i,:))')/sqrt(size(hiBehState_allSessAllPtsAllDurs_CRF,4)); 
+        % get stderr across sessions
+        %hiBehState_stdErrOverSess = std(squeeze(hiBehState_allSessAllPtsAllDurs_CRF(d,:,i,:))')/sqrt(size(hiBehState_allSessAllPtsAllDurs_CRF,4)); 
+        % stderr across mice
+        global numMice
+        hiBehState_stdErrOverSess = std(squeeze(hiBehState_allSessAllPtsAllDurs_CRF(d,:,i,:))')/sqrt(numMice); 
         
         if nGroup == 1
             
@@ -53,6 +60,8 @@ for d = durat
         
         end
         
+        grid on
+        
         title(reigons{i})
     
         ylim(yLimit) 
@@ -60,8 +69,6 @@ for d = durat
     
         ylabel('df/f')
         xlabel('contrast (%)')
-        
-        
     
         clear xt
         xt={'0'; '3' ; '6' ; '12' ; '25' ; '50'; '100'} ; 
@@ -71,11 +78,9 @@ for d = durat
         yt = [-0.01 0 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.1];
         set(gca,'YTick',yt)
         
-        legend(stateLegend)
+        legend(stateLegend,'Location','northwest')
 
     end 
-   
-end
 
 end
 

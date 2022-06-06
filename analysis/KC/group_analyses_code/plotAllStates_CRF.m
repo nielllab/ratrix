@@ -21,7 +21,7 @@ for d = durat
         % take mean across sessions, for ith point, lo beh state
         allState_meanDthCRFacrossSess = mean(allSessAllPtsAllDurs_AllStates_CRF(d,:,i,:),4);
         % get stdev across sessions
-        allState_stdErrOverSess = std(squeeze(allSessAllPtsAllDurs_AllStates_CRF(d,:,i,:))')/sqrt(size(allSessAllPtsAllDurs_AllStates_CRF,4)); 
+        allState_stdErrOverSess = std(squeeze(allSessAllPtsAllDurs_AllStates_CRF(d,:,i,:))')/sqrt(size(allSessAllPtsAllDurs_AllStates_CRF,4)); % stderr over sessions...
         %loBehState_stdErrOverSess = std(squeeze(loBehState_allSessAllPtsAllDurs_CRF(d,:,i,:))'); 
         
         if nGroup == 1
@@ -32,7 +32,7 @@ for d = durat
         else 
             
             % plot for lo beh state
-            errorbar(x_axis,allState_meanDthCRFacrossSess,allState_stdErrOverSess,'-b','lineWidth',1,'MarkerSize',3) 
+            errorbar(x_axis,allState_meanDthCRFacrossSess,allState_stdErrOverSess,'color',C{d},'lineWidth',1,'MarkerSize',3) 
         
         end 
         
@@ -70,6 +70,7 @@ for d = durat
         global fntSize
         global fntName
         global fontMult
+        global subt4leg
 
         set(gca, 'FontSize', fntSize, 'FontName', fntName)
 
@@ -86,11 +87,11 @@ for d = durat
         set(gca,'xticklabel',xtl);
 
         global legendStrings
-        legend(legendStrings)
+        %lgd = legend(legendStrings,'Location','northwest');
 
         %stateLegend = {'stat','run'};
         %lgd2 = legend([loPlot, hiPlot],'stationary','running');
-        %lgd2.FontSize = fntSize-subt4leg;
+        %lgd.FontSize = fntSize-subt4leg;
    
     end
 

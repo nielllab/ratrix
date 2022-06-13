@@ -10,6 +10,22 @@ figure
 %date = groupDate{1};
 %suptitle(sprintf('%s',titleText,subjName)); % date, 
 
+global run_or_pup
+if run_or_pup == 'run'
+    global lighter_blue
+    loStateLineColor = lighter_blue;
+    global orange
+    hiStateLineColor = orange;
+end 
+
+global run_or_pup
+if run_or_pup == 'pup'
+    global light_red
+    loStateLineColor = light_red;
+    global pea_green
+    hiStateLineColor = pea_green;
+end 
+
 for d = durat
     
     global visArea
@@ -33,7 +49,7 @@ for d = durat
         %loBehState_stdErrOverSess = std(squeeze(loBehState_allSessAllPtsAllDurs_CRF(d,:,i,:))')/sqrt(numMice); 
         %loBehState_stdErrOverSess = std(squeeze(loBehState_allSessAllPtsAllDurs_CRF(d,:,i,:))'); 
         
-        plot(x_axis,scaled_loBehState_meanDthCRFacrossSess,'-b','lineWidth',1,'MarkerSize',3) 
+        plot(x_axis,scaled_loBehState_meanDthCRFacrossSess,'color',loStateLineColor,'lineWidth',1,'MarkerSize',3) 
         
 %         if nGroup == 1
 %             
@@ -63,7 +79,7 @@ for d = durat
 %         global numMice
 %         hiBehState_stdErrOverSess = std(squeeze(hiBehState_allSessAllPtsAllDurs_CRF(d,:,i,:))')/sqrt(numMice); 
           
-        plot(x_axis,scaled_hiBehState_meanDthCRFacrossSess,'-r','lineWidth',1,'MarkerSize',3) 
+        plot(x_axis,scaled_hiBehState_meanDthCRFacrossSess,'color',hiStateLineColor,'LineWidth',1,'MarkerSize',3) 
 %         
 %           if nGroup == 1
 %             
@@ -78,8 +94,6 @@ for d = durat
 %         
 %         end
         
-        grid on
-        
         title(reigons{i})
     
         ylim(yLimit) 
@@ -93,7 +107,7 @@ for d = durat
         set(gca,'xtick',1:7); 
         set(gca,'xticklabel',xt);
         
-%         yt = [-0.01 0 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.1];
+%         yt = [-0.01 0 0.02 0.04 0.06 0.08 0.1];
 %         set(gca,'YTick',yt)
         
         legend(stateLegend,'Location','northwest')

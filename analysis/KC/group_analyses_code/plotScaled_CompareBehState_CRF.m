@@ -49,7 +49,7 @@ for d = durat
         %loBehState_stdErrOverSess = std(squeeze(loBehState_allSessAllPtsAllDurs_CRF(d,:,i,:))')/sqrt(numMice); 
         %loBehState_stdErrOverSess = std(squeeze(loBehState_allSessAllPtsAllDurs_CRF(d,:,i,:))'); 
         
-        plot(x_axis,scaled_loBehState_meanDthCRFacrossSess,'color',loStateLineColor,'lineWidth',1,'MarkerSize',3) 
+        plot(x_axis,scaled_loBehState_meanDthCRFacrossSess,'color',loStateLineColor,'lineWidth',2,'MarkerSize',3) 
         
 %         if nGroup == 1
 %             
@@ -79,7 +79,7 @@ for d = durat
 %         global numMice
 %         hiBehState_stdErrOverSess = std(squeeze(hiBehState_allSessAllPtsAllDurs_CRF(d,:,i,:))')/sqrt(numMice); 
           
-        plot(x_axis,scaled_hiBehState_meanDthCRFacrossSess,'color',hiStateLineColor,'LineWidth',1,'MarkerSize',3) 
+        plot(x_axis,scaled_hiBehState_meanDthCRFacrossSess,'color',hiStateLineColor,'LineWidth',2,'MarkerSize',3) 
 %         
 %           if nGroup == 1
 %             
@@ -99,7 +99,7 @@ for d = durat
         ylim(yLimit) 
         xlim(xLimit)
     
-        ylabel('df/f')
+        ylabel('dF/F')
         xlabel('contrast (%)')
     
         clear xt
@@ -110,7 +110,7 @@ for d = durat
 %         yt = [-0.01 0 0.02 0.04 0.06 0.08 0.1];
 %         set(gca,'YTick',yt)
         
-        legend(stateLegend,'Location','northwest')
+        %legend(stateLegend,'Location','northwest')
 
     end 
 

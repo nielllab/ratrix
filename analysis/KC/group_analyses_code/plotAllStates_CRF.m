@@ -61,11 +61,9 @@ for d = durat
         ylim(yLimit) 
         xlim(xLimit)
 
-        axis square
+        %axis square
 
         % visualization
-
-        grid on
 
         global fntSize
         global fntName
@@ -74,8 +72,8 @@ for d = durat
 
         set(gca, 'FontSize', fntSize, 'FontName', fntName)
 
-        ylabel('df/F', 'FontSize', fntSize*fontMult, 'FontName', fntName)
-        yt = [yMin:0.01:yMax];
+        ylabel('dF/F', 'FontSize', fntSize*fontMult, 'FontName', fntName)
+        yt = [0, 0.02, 0.04, 0.06, 0.08, yMax];
         ytl = arrayfun(@num2str, yt, 'UniformOutput', 0);
         set(gca,'YTick',yt)
         set(gca,'YTickLabel',ytl)

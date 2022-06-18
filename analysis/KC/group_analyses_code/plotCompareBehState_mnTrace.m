@@ -6,13 +6,29 @@ for d = durat
         
      figure     
     
-     formatSpec = '%d \n'; 
-     titleText = sprintf(formatSpec,visArea(i));
-     suptitle(titleText)
-            
-        for c = cont
+    global run_or_pup
+    if run_or_pup == 'run'
+    global lighter_blue
+    loStateLineColor = lighter_blue;
+    global orange
+    hiStateLineColor = orange;
+    end 
 
-            subplot(2,4,c) 
+    global run_or_pup
+    if run_or_pup == 'pup'
+    global light_red
+    loStateLineColor = light_red;
+    global pea_green
+    hiStateLineColor = pea_green;
+    end 
+
+%      formatSpec = '%d \n'; 
+%      titleText = sprintf(formatSpec,visArea(i));
+%      suptitle(titleText)
+            
+        for c = cont(2:end)
+
+            subplot(2,3,c-1) 
 
             if nGroup == 1
 
@@ -20,7 +36,7 @@ for d = durat
 
                 x_axis = [1:length(loBehState_mnTraceOverSess_dthIthCon)];
 
-                plot(x_axis,loBehState_mnTraceOverSess_dthIthCon,'-b','lineWidth',1,'MarkerSize',3) 
+                plot(x_axis,loBehState_mnTraceOverSess_dthIthCon,'color',loStateLineColor,'lineWidth',1,'MarkerSize',3) 
 
                 xMin = min(x_axis);
                 xMax = max(x_axis);
@@ -29,7 +45,7 @@ for d = durat
 
                 ylim(yLimit) 
                 ylabel('df/f')
-                xlabel('frames (10 Hz)')
+                xlabel('frames')
 
             else
 
@@ -37,13 +53,16 @@ for d = durat
                 loBehState_mnTraceOverSess_dthIthCon = mean(squeeze(loRun_mnTraceAllConsDursPts(c,:,d,i,:))',1);
                 %loBehState_mnTraceOverSess_dthIthCon = mean(squeeze(loRun_mnTraceAllConsDursPts(c,:,i,:))',1);
                 % get stdev across sessions
-                loBehState_mnTraceOverSess_std = std(squeeze(loRun_mnTraceAllConsDursPts(c,:,d,i,:))')/sqrt(size(squeeze(loRun_mnTraceAllConsDursPts(c,:,d,i,:))',1)); 
+                %loBehState_mnTraceOverSess_std = std(squeeze(loRun_mnTraceAllConsDursPts(c,:,d,i,:))')/sqrt(size(squeeze(loRun_mnTraceAllConsDursPts(c,:,d,i,:))',1)); 
                 %loBehState_mnTraceOverSess_std = std(squeeze(loRun_mnTraceAllConsDursPts(c,:,i,:))')/sqrt(size(squeeze(loRun_mnTraceAllConsDursPts(c,:,i,:))',1)); 
+                % stderr over mice
+                global numMice
+                loBehState_mnTraceOverSess_std = std(squeeze(loRun_mnTraceAllConsDursPts(c,:,d,i,:))')/sqrt(numMice); 
                 
                 x_axis = [1:length(loBehState_mnTraceOverSess_dthIthCon)];
 
                 % plot for lo beh state
-                errorbar(x_axis,loBehState_mnTraceOverSess_dthIthCon,loBehState_mnTraceOverSess_std,'-b','lineWidth',1,'MarkerSize',3) 
+                errorbar(x_axis,loBehState_mnTraceOverSess_dthIthCon,loBehState_mnTraceOverSess_std,'color',loStateLineColor,'lineWidth',2,'MarkerSize',2) 
 
                 xMin = min(x_axis);
                 xMax = max(x_axis);
@@ -51,8 +70,8 @@ for d = durat
                 xlim(xLimit);
 
                 ylim(yLimit) 
-                ylabel('df/f')
-                xlabel('frames (10 Hz)')
+                ylabel('dF/F')
+                xlabel('frames')
 
             end % end if nGroup loop
 
@@ -63,7 +82,7 @@ for d = durat
                 hiBehState_mnTraceOverSess_dthIthCon = hiRun_mnTraceAllConsDursPts(c,:,d,i,:);
 
                 x_axis = [1:length(loBehState_mnTraceOverSess_dthIthCon)];
-                plot(x_axis,hiBehState_mnTraceOverSess_dthIthCon,'-r','lineWidth',1,'MarkerSize',3) 
+                plot(x_axis,hiBehState_mnTraceOverSess_dthIthCon,'color',hiStateLineColor,'lineWidth',2,'MarkerSize',3) 
 
                 xMin = min(x_axis);
                 xMax = max(x_axis);
@@ -72,18 +91,21 @@ for d = durat
 
                 ylim(yLimit) 
                 ylabel('df/f')
-                xlabel('frames (10 Hz)')
+                xlabel('frames')
 
             else
 
                 % take mean across sessions, for ith point, lo beh state
                 hiBehState_mnTraceOverSess_dthIthCon = mean(squeeze(hiRun_mnTraceAllConsDursPts(c,:,d,i,:))',1);
                 % get stdev across sessions
-                hiBehState_mnTraceOverSess_std = std(squeeze(hiRun_mnTraceAllConsDursPts(c,:,d,i,:))')/sqrt(size(squeeze(hiRun_mnTraceAllConsDursPts(c,:,d,i,:))',1)); 
+                %hiBehState_mnTraceOverSess_std = std(squeeze(hiRun_mnTraceAllConsDursPts(c,:,d,i,:))')/sqrt(size(squeeze(hiRun_mnTraceAllConsDursPts(c,:,d,i,:))',1)); 
+                % stderr over mice
+                global numMice
+                hiBehState_mnTraceOverSess_std = std(squeeze(hiRun_mnTraceAllConsDursPts(c,:,d,i,:))')/sqrt(numMice); 
 
                 x_axis = [1:length(hiBehState_mnTraceOverSess_dthIthCon)];
                 % plot for lo beh state
-                errorbar(x_axis,hiBehState_mnTraceOverSess_dthIthCon,hiBehState_mnTraceOverSess_std,'-r','lineWidth',1,'MarkerSize',3) 
+                errorbar(x_axis,hiBehState_mnTraceOverSess_dthIthCon,hiBehState_mnTraceOverSess_std,'color',hiStateLineColor,'lineWidth',2,'MarkerSize',3) 
 
                 xMin = min(x_axis);
                 xMax = max(x_axis);
@@ -95,7 +117,7 @@ for d = durat
 
                 ylim(yLimit) 
                 ylabel('df/f')
-                xlabel('frames (10 Hz)')
+                xlabel('frames')
 
             end % end of nGroup loop
 
@@ -109,9 +131,28 @@ for d = durat
 
                 ax = gca; % axes handle
                 ax.YAxis.Exponent = 0;
-
             
-            legend(stateLegend)
+        fntSize = 10;
+        fntName = 'SansSerif';
+
+        set(gca, 'FontSize', fntSize, 'FontName', fntName)
+
+        fontMult = 1.5;
+
+        %xlabel('speed (cm/sec)', 'FontSize', fntSize*fontMult, 'FontName', fntName)
+        %ylabel('frequency', 'FontSize', fntSize*fontMult, 'FontName', fntName)
+
+        yt = [yMin 0 0.02 0.04 0.06 0.08 yMax];
+        ytl = arrayfun(@num2str, yt, 'UniformOutput', 0);
+        set(gca,'YTick',yt)
+        set(gca,'YTickLabel',ytl)
+
+        xt = [0:4:length(loRun_mnTraceAllConsDursPts)];
+        xtl = arrayfun(@num2str, xt, 'UniformOutput', 0);
+        set(gca,'xtick',xt); 
+        set(gca,'xticklabel',xtl);
+        
+            %legend(stateLegend)
             
             hold on
             

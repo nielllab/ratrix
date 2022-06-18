@@ -21,8 +21,11 @@ for d = durat
         % take mean across sessions, for ith point, lo beh state
         allState_meanDthCRFacrossSess = mean(allSessAllPtsAllDurs_AllStates_CRF(d,:,i,:),4);
         % get stdev across sessions
-        allState_stdErrOverSess = std(squeeze(allSessAllPtsAllDurs_AllStates_CRF(d,:,i,:))')/sqrt(size(allSessAllPtsAllDurs_AllStates_CRF,4)); % stderr over sessions...
+        %allState_stdErrOverSess = std(squeeze(allSessAllPtsAllDurs_AllStates_CRF(d,:,i,:))')/sqrt(size(allSessAllPtsAllDurs_AllStates_CRF,4)); % stderr over sessions...
         %loBehState_stdErrOverSess = std(squeeze(loBehState_allSessAllPtsAllDurs_CRF(d,:,i,:))'); 
+        % get stderr across mice
+        global numMice
+        allState_stdErrOverSess = std(squeeze(allSessAllPtsAllDurs_AllStates_CRF(d,:,i,:))')/sqrt(numMice);
         
         if nGroup == 1
             

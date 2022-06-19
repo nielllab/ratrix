@@ -36,7 +36,7 @@ for d = durat
 
                 x_axis = [1:length(loBehState_mnTraceOverSess_dthIthCon)];
 
-                plot(x_axis,loBehState_mnTraceOverSess_dthIthCon,'color',loStateLineColor,'lineWidth',1,'MarkerSize',3) 
+                plot(x_axis,loBehState_mnTraceOverSess_dthIthCon,'color',loStateLineColor,'lineWidth',2,'MarkerSize',3) 
 
                 xMin = min(x_axis);
                 xMax = max(x_axis);

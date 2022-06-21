@@ -30,12 +30,12 @@ for d = durat
         if nGroup == 1
             
             %plot(x_axis,allState_meanDthCRFacrossSess,'-b','lineWidth',1,'MarkerSize',3) 
-            plot(x_axis,allState_meanDthCRFacrossSess,'color',C{d},'lineWidth',1,'MarkerSize',3) 
+            plot(x_axis,allState_meanDthCRFacrossSess,'color',C{d},'lineWidth',2,'MarkerSize',2) 
         
         else 
             
             % plot for lo beh state
-            errorbar(x_axis,allState_meanDthCRFacrossSess,allState_stdErrOverSess,'color',C{d},'lineWidth',1,'MarkerSize',3) 
+            errorbar(x_axis,allState_meanDthCRFacrossSess,allState_stdErrOverSess,'color',C{d},'lineWidth',2,'MarkerSize',2) 
         
         end 
         

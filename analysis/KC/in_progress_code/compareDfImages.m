@@ -1,4 +1,4 @@
-function [tifPic] = pickVisAreaPts3figs_051022test(meanpolar,ypts,xpts,baselinedActIm,df,range)
+function [tifPic] = compareDfImages(meanpolar,ypts,xpts,baselinedActIm,df,range)
 % UNTITLED2 Summary of this function goes here
 % Detailed explanation goes here
 

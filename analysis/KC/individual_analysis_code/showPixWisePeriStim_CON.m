@@ -66,8 +66,16 @@ function showPixWisePeriStim_CON(stimOnsetFrame,date,subjName,uniqueContrasts,co
             % num columns should be equal to num stim frames in frame 
             % specific subplot shoudl be equal to the newF value - 1 if
             % c is 1, 
+            
             subplot((length(uniqueContrasts)-1),length(frameRange),newF) 
             imagesc(allBaselinedStimOnsetDf(:,:,f),range)
+            
+            %[ha, pos] = tight_subplot((length(uniqueContrasts)-1),length(frameRange),[.01 .03],[.1 .01],[.01 .03]); % 
+            %axes(ha(f)); 
+            %imagesc(allBaselinedStimOnsetDf(:,:,f),range)
+            
+            %for ii = 1:6; axes(ha(ii)); plot(randn(10,ii)); end
+            %set(ha(1:4),'XTickLabel',''); set(ha,'YTickLabel','')
 
             if colorMapOrNot == 1
                 colormap jet

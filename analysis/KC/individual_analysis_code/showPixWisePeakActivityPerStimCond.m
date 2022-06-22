@@ -11,8 +11,8 @@ function showPixWisePeakActivityPerStimCond(date,subjName,uniqueContrasts,unique
     clear fig
     fig = figure; % one fig all images % need fig var to alter axes later
 
-    clear titleText
-    titleText = ': PEAK cortical response to each UNIQUE stim condition'; % making char variables for sprintf/title later
+    %clear titleText
+    %titleText = ': PEAK cortical response to each UNIQUE stim condition'; % making char variables for sprintf/title later
     %suptitle(sprintf('%s', date, subjName, titleText));
 
     % index into trials for each combo of DUR & CON @ peak frames
@@ -68,11 +68,11 @@ function showPixWisePeakActivityPerStimCond(date,subjName,uniqueContrasts,unique
      end % end c loop   
 
     % Give common xlabel & ylabel
-    han=axes(fig,'visible','off'); 
-    han.XLabel.Visible='on';
-    han.YLabel.Visible='on';
-    ylabel(han,'contrast');
-    xlabel(han,'duration');
-
+%     han=axes(fig,'visible','off'); 
+%     han.XLabel.Visible='on';
+%     han.YLabel.Visible='on';
+%     ylabel(han,'contrast');
+%     xlabel(han,'duration');
+% 
 end
 

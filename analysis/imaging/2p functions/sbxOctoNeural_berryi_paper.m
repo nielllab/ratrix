@@ -3,6 +3,8 @@ function varargout = sutterOctoNeural(varargin)
 % optimized for octopus optic lobe with cal520 label
 % if sutterOctoNeural is called as a function
 close all
+
+dbstop if error
 if ~isempty(varargin)
     Opt = varargin{1};
 else
@@ -299,7 +301,7 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 
 % some debugging to look at traces of individual pixesl
 % keyboard
-% 
+%
 % figure
 % subplot(2,1,1)
 % imagesc(greenCrop); colormap gray; axis equal; hold on
@@ -339,18 +341,6 @@ xlabel('secs');ylabel('dfof');
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 
-%%% mean fluorescence in ROI
-range= 20;
-mfluorescence = squeeze(mean(mean(dfofInterp(yp+range,xp+range,:),2),1));
-figure
-plot((1:size(dfofInterp,3))*dt,mfluorescence);
-title('full image mean'); hold on
-for i = 1:reps
-    plot([i*nstim*cycLength*dt  i*nstim*cycLength*dt], [0 0.5],'g');
-end
-xlabel('secs');ylabel('dfof');
-if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
 
 %% calculate two reference images for choosing points on ...
 %%% absolute green fluorescence, and max df/f of each pixel
@@ -360,7 +350,7 @@ stdImg = imresize(greenframe,1/cfg.spatialBin);
 stdImg= stdImg(buffer(1,1):(end-buffer(1,2)),buffer(2,1):(end-buffer(2,2)),:);
 greenCrop = double(stdImg);
 %imagesc(stdImg,[prctile(stdImg(:),1) prctile(stdImg(:),99)*1.2]); hold on; axis equal; colormap gray;
-imagesc(stdImg,[min(stdImg(:)) prctile(stdImg(:),95)*1.2]); hold on; axis equal; colormap gray;
+imagesc(stdImg,[min(stdImg(:)) prctile(stdImg(:),95)*1.25]); hold on; axis equal; colormap gray;
 meanGreenImg = mat2im(greenCrop,gray,[prctile(greenCrop(:),1) prctile(greenCrop(:),99)*1.2]);
 
 title('Mean Green Channel');
@@ -574,21 +564,153 @@ for i = 1:min(cycLength,30)
     data = cycImg(:,:,i)-mean(cycImg(:,:,1:10),3);
     datafilt = imfilter(data,fspecial('gaussian',[10 10],2));
     imagesc(datafilt,[0 0.1]); axis equal; axis off
+    activationraw(:,:,i) = datafilt;
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %%% plot weighted pixel-wise cycle average
 figure
+clear activation
 for i = 1:min(cycLength,30)
     subplot(5,6,i);
     % imagesc(cycImg(:,:,i)-min(cycImg,[],3),[0 0.1]); axis equal
     data = cycImg(:,:,i)-mean(cycImg(:,:,1:10),3);
     datafilt = imfilter(data,fspecial('gaussian',[10 10],2));
     datafilt(isnan(datafilt))=0;
-    data_im = mat2im(datafilt,jet,[0 0.05]);
+    data_im = mat2im(datafilt,jet,[0 0.15]);
     imshow(data_im.*normgreen);
+    activation(:,:,:,i) = data_im.*normgreen;
+    title(sprintf('%0.1f sec',i*0.1 - 1))
     axis equal; axis off
 end
+
+figure
+imagesc(rand(10),[0 0.15]); colormap jet
+colorbar
+
+meanfig = figure
+tracefig = figure;
+greenfig = figure;
+
+range =[prctile(greenCrop(:),1) prctile(greenCrop(:),98)*1.2];
+imagesc(greenCrop,range); colormap gray; axis equal; hold on
+
+for rep = 1:2
+    %%% get ROI
+    figure
+    imshow(activation(:,:,:,18))
+    axis equal
+    [x y] = ginput(1);
+    hold on
+    dx = 20;
+    plot([x-dx x+dx],[y-dx y-dx],'w','LineWidth',4)
+    plot([x-dx x+dx],[y+dx y+dx],'w','LineWidth',4)
+    
+    plot([x-dx x-dx],[y-dx y+dx],'w','LineWidth',4)
+    plot([x+dx x+dx],[y-dx y+dx],'w','LineWidth',4)
+    
+    figure(greenfig)
+    hold on
+    plot([x-dx x+dx],[y-dx y-dx],'b','LineWidth',2)
+    plot([x-dx x+dx],[y+dx y+dx],'b','LineWidth',2)
+    
+    plot([x-dx x-dx],[y-dx y+dx],'b','LineWidth',2)
+    plot([x+dx x+dx],[y-dx y+dx],'b','LineWidth',2)
+    
+    range = round(-dx:dx);
+    
+    %%% mean fluorescence in ROI
+    
+    mfluorescence = squeeze(mean(mean(dfofInterp(round(y+range),round(x+range),:),2),1));
+    figure(tracefig)
+    subplot(2,1,1)
+    if rep ==1
+        offset = 0.1;
+    else offset = 0.2;
+    end
+    plot((1:size(dfofInterp,3))*dt,mfluorescence-offset);
+    title('ROI mean'); hold on
+    for i = 1:length(startFrames)
+        %plot([(7+ startFrames(i))*dt  (7+ startFrames(i))*dt], [0 0.5],'g');
+        if stimOrder(i)==17
+            plot(((9:19)+ startFrames(i))*dt, zeros(11,1),'k')
+        elseif mod(stimOrder(i),2)==1
+            plot(((9:19)+ startFrames(i))*dt, zeros(11,1),'k')
+        else
+            plot(((9:19)+ startFrames(i))*dt, zeros(11,1),'k')
+        end
+    end
+    ylim([-0.05 0.5])
+    xlim([50 170])
+    xlabel('secs');ylabel('dfof');
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    trange = 9:39
+    for i= 2:length(startFrames)
+        trace(:,i) = mean(mean(dfofInterp(round(y+range),round(x+range),startFrames(i) + trange),2),1);
+        trace(:,i) = trace(:,i) - trace(1,i);
+    end
+    
+    
+    figure(meanfig)
+    errorbar((0:30)*dt,nanmean(trace,2),nanstd(trace,[],2)/sqrt(length(trace)))
+    hold on
+    plot([0 1],[-0.01 -0.01],'k','Linewidth',4)
+end
+
+figure(meanfig)
+plot([0 1],[-0.01 -0.01],'k','Linewidth',4)
+ylim([-0.02 0.1])
+xlim([0 3])
+xlabel('secs')
+ylabel('dF/F')
+
+figure(tracefig)
+set(gca,'xtick',50:20:170)
+set(gca,'xticklabel',{'0','20','40','60','80','100','120'})
+
+cmap = jet(17);
+figure
+hold on
+for i = 1:length(stimOrder)
+    if stimOrder(i) ==17
+        col = 'r';
+        freqs(i) =0;
+    elseif freq(stimOrder(i))==0.01
+        col = 'b';
+        freqs(i) = 0.01;
+    else
+        col ='g'
+        freqs(i) = 0.16;
+    end
+    plot(trace(:,i),'color',col)
+end
+
+figure
+for i = 1:16
+    subplot(4,4,i)
+    plot(trace(:,stimOrder==i));
+    colororder(jet(sum(stimOrder==i)))
+    hold on
+    plot(mean(trace(:,stimOrder==i),2),'g','Linewidth',2)
+    
+end
+
+i = 17
+figure
+plot(trace(:,stimOrder==i));
+hold on
+plot(mean(trace(:,stimOrder==i),2),'g','Linewidth',2)
+
+figure
+hold on
+plot(mean(trace(:,freqs==0),2),'r');
+plot(mean(trace(:,freqs==0.01),2),'g');
+plot(mean(trace(:,freqs==0.16),2),'b');
+
+figure
+errorbar(mean(trace,2),std(trace,[],2)/sqrt(length(trace)))
+
 
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 

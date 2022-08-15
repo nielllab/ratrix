@@ -5,16 +5,16 @@ close all
 clear all
 
 %%% select files to analyze based on compile file
-stimname = ['sparse noise 1'];
+stimname = ['sparse noise'];
 xyswap = 1;  %%% swap x and y for retinotopy?
 
-if stimname == 'sparse noise 2'
+if strcmp(stimname,'sparse noise 2')
     nsz = 4;
 else
     nsz = 3;
 end
 
-[sbx_fname acq_fname mat_fname quality] = compileFilenames('BatchFile.xlsx',stimname);
+[sbx_fname acq_fname mat_fname quality] = compileFilenames('ForBatchFileAngeliquewregioned.xlsx',stimname);
 
 Opt.SaveFigs = 1;
 Opt.psfile = 'C:\temp\TempFigs.ps';
@@ -32,7 +32,7 @@ end
 
 %%% select files to use based on quality
 for i = 1: length(quality);
-    usefile(i) = strcmp(quality{i},'YY');
+    usefile(i) = strcmp(quality{i},'Y');
 end
 
 useN = find(usefile); clear goodfile

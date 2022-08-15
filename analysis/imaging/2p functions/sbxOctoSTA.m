@@ -133,16 +133,16 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 
 
 %%% Judit took out to run through batch file without user input
-%figure
-% display('which movie file?')
-% if isfield(Opt,'noiseFile')
-%     movienum = Opt.noiseFile;
-% else
-%     display('1) octo_sparse_flash_10min')
-%     display('2) sparse_20min_1-8')
-%     movienum = input('1 or 2 : ');
-% end
-movienum = 1;
+figure
+display('which movie file?')
+if isfield(Opt,'noiseFile')
+    movienum = Opt.noiseFile;
+else
+    display('1) octo_sparse_flash_10min')
+    display('2) sparse_20min_1-8')
+    movienum = input('1 or 2 : ');
+end
+
 
 if movienum==1
     load('C:\data\octo_sparse_flash_10min.mat')
@@ -232,7 +232,7 @@ for rep =1:2 %%% 4 conditions: On, Off, fullfield On, fullfield off; currently s
     %    %
     for nx = 1:length(xrange);
         for ny = 1:length(yrange)
-            sprintf('%d %d',nx,ny)
+            % sprintf('%d %d',nx,ny)
             %  pnum=pnum+1;
             
             range = 0:(blocksize-1);
@@ -665,7 +665,7 @@ display('calculating cell STAs')
 
 for n = 1:size(dF,1)
     if n/10 == round(n/10)
-        sprintf('done %d / %d cells',n,size(dF,1))
+        %sprintf('done %d / %d cells',n,size(dF,1))
     end
     for i = 1:length(stimTimes)-2;
         dFalign(i,:) = dF(n,stimFrames(i) +framerange) - nanmean(dF(n,stimFrames(i)+baserange),2);

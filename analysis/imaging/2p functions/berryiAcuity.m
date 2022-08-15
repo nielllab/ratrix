@@ -6,7 +6,7 @@ close all; clear all
 
 %%% select files to analyze based on compile file
 %stimname = '8 way gratings';
-stimname = ['8 way gratings 2ISI']
+stimname = ['sin gratings 7 steps 2ISI']
 [sbx_fname acq_fname mat_fname quality] = compileFilenames('BerryiBatchFile.xlsx',stimname);
 
 Opt.SaveFigs = 1;
@@ -79,7 +79,7 @@ for i = 1:length(sf); sfLabels{i} = sprintf('%0.02f',sf(i)); end
 f = 0; %%% counter for number of sessions included
 for nf = 1:nfiles
     
-    
+    sprintf('running %d',nf)
     %%% read in weighted timecourse (from pixelmap, weighted by baseline fluorescence
     clear xb yb stimOrder weightTcourse
     load(mat_fname{nf},'stimOrder','weightTcourse','dFrepeats','xpts','ypts','xb','yb','meanGreenImg','stdImg','trialmean','cycPolarImg')
@@ -113,7 +113,7 @@ for nf = 1:nfiles
     %%% get max resp for each cell. save out as histogram
     maxResp = max(cellAmp,[],2);
     fractionResponsive = sum(maxResp>0.05)/length(maxResp);
-    if fractionResponsive>0.5
+    if fractionResponsive>0.05
         f = f+1;
     else
         break

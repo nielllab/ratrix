@@ -6,8 +6,8 @@ close all; clear all
 
 %%% select files to analyze based on compile file
 %stimname = '8 way gratings';
-stimname = ['sin gratings 7 steps 2ISI']
-[sbx_fname acq_fname mat_fname quality] = compileFilenames('ForBatchFileAngeliquewregioned.xlsx',stimname);
+stimname = ['8 way gratings 2ISI']
+[sbx_fname acq_fname mat_fname quality] = compileFilenames('BerryiBatchFile.xlsx',stimname);
 
 Opt.SaveFigs = 1;
 Opt.psfile = 'C:\temp\TempFigs.ps';
@@ -23,12 +23,8 @@ end
 
 useN = find(usefile); clear goodfile
 for i = 1:length(useN)
-base = mat_fname{useN(i)}(1:end-4);
+    base = mat_fname{useN(i)}(1:end-4);
     goodfile{i} = dir([base '*']).name;
-% Judit testing commenting this out and inserting above
-% base = mat_fname{useN(i)}(1:end-4);
-%     goodfile{i}     thetas(1:2) = 0; thetas(3:4) = 45; thetas(5:6) = 90; thetas(7:8) = 135; thetas(9:10) = 180; thetas(11:12) = 225; thetas(13:14)=270; thetas(15:16) = 315;
-% else= dir([base '*']).name;
 end
 mat_fname = goodfile;
 
@@ -53,7 +49,8 @@ if strcmp(stimname,'8 way gratings') || strcmp(stimname,'8 way gratings 2ISI')
     sfs = zeros(16,1);
     thetas = zeros(16,1);
     sfs(1:2:end) = 0.01; sfs(2:2:end) = 0.16;
-
+    thetas(1:2) = 0; thetas(3:4) = 45; thetas(5:6) = 90; thetas(7:8) = 135; thetas(9:10) = 180; thetas(11:12) = 225; thetas(13:14)=270; thetas(15:16) = 315;
+else
     nOri = 4;
     nSF = 4;
     sfs = zeros(16,1);
@@ -65,7 +62,6 @@ end
 if strcmp(stimname,'sin gratings 7 steps 2ISI')
     ncond = 29;
     nSF = 7;
-    nOri = 4;
     sfs = zeros(28,1);
     thetas = zeros(28,1);
     for i = 1:7
@@ -135,7 +131,7 @@ for nf = 1:nfiles
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% select responsive cells (can add more interesting criteria)
-    responsive = maxResp>0.1;
+%     responsive = maxResp>0.1;
     
     figure
     imagesc(dFmean,[-0.1 0.1]); title(['response of all cells ' mat_fname{f}])
@@ -574,4 +570,3 @@ if Opt.SaveFigs
         display('couldnt generate pdf');
     end
 end
-close all

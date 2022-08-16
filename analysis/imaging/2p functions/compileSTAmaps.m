@@ -5,7 +5,7 @@ close all
 clear all
 
 %%% select files to analyze based on compile file
-stimname = ['sparse noise'];
+stimname = ['sparse noise 2'];
 xyswap = 1;  %%% swap x and y for retinotopy?
 
 if strcmp(stimname,'sparse noise 2')

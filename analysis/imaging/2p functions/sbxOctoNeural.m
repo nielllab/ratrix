@@ -339,17 +339,17 @@ xlabel('secs');ylabel('dfof');
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 
-%%% mean fluorescence in ROI
-range= 20;
-mfluorescence = squeeze(mean(mean(dfofInterp(yp+range,xp+range,:),2),1));
-figure
-plot((1:size(dfofInterp,3))*dt,mfluorescence);
-title('full image mean'); hold on
-for i = 1:reps
-    plot([i*nstim*cycLength*dt  i*nstim*cycLength*dt], [0 0.5],'g');
-end
-xlabel('secs');ylabel('dfof');
-if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+% %%% mean fluorescence in ROI
+% range= 20;
+% mfluorescence = squeeze(mean(mean(dfofInterp(yp+range,xp+range,:),2),1));
+% figure
+% plot((1:size(dfofInterp,3))*dt,mfluorescence);
+% title('full image mean'); hold on
+% for i = 1:reps
+%     plot([i*nstim*cycLength*dt  i*nstim*cycLength*dt], [0 0.5],'g');
+% end
+% xlabel('secs');ylabel('dfof');
+% if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 
 %% calculate two reference images for choosing points on ...

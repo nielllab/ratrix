@@ -8,7 +8,6 @@ T = readtable(xlsfile,'Format','auto');
 %%% find entries with proper stimulus
 use = find(strcmp(T.Stim,stimname));
 
-length (use)
 %%% generate list of filenames
 for j = 1:length(use);
     i = use(j);

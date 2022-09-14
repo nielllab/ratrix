@@ -12,7 +12,7 @@ for i = 1:length(stimlist)
     display(sprintf('%d) %s',i,stimlist{i}))
 end
 stimnum = input('which stim : ');
-stimname = stimlist{stimnum}
+stimname = stimlist{stimnum};
 
 xyswap = 1;  %%% swap x and y for retinotopy?
 
@@ -22,13 +22,18 @@ else
     nsz = 3;
 end
 
-[sbx_fname acq_fname mat_fname quality] = compileFilenames('ForBatchFileAngeliquewregioned.xlsx',stimname);
+%batch_file = 'ForBatchFileAngeliquewregioned.xlsx';
+
+[batch_fname batch_pname] = uigetfile('*.xlsx','.xls batch file');
+batch_file = fullfile(batch_pname,batch_fname);
+
+[sbx_fname acq_fname mat_fname quality] = compileFilenames(batch_file,stimname);
 
 Opt.SaveFigs = 1;
 Opt.psfile = 'C:\temp\TempFigs.ps';
 
 if Opt.SaveFigs
-    psfile = Opt.psfile
+    psfile = Opt.psfile;
     if exist(psfile,'file')==2;delete(psfile);end
 end
 
@@ -43,8 +48,11 @@ for i = 1: length(quality);
     usefile(i) = strcmp(quality{i},'Y');
 end
 
+
 useN = find(usefile); clear goodfile
 n=0;
+display(sprintf('%d recordings, %d labeled good',length(usefile),length(useN)));
+
 %%% collect filenames and make sure the files are there
 for i = 1:length(useN)
     try
@@ -58,6 +66,7 @@ end
 mat_fname = goodfile;
 
 nfiles = length(mat_fname);
+display(sprintf('%d good files found',nfiles))
 
 rLabels = {'OGL','Plex','IGL','Med'};
 
@@ -318,6 +327,8 @@ xlabel('y location'); ylabel('y RF');
         
         end
     end
+    
+    dbstop
     
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     

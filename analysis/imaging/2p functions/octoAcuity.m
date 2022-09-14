@@ -12,8 +12,12 @@ end
 stimnum = input('which stim : ');
 stimname = stimlist{stimnum}
 
-[sbx_fname acq_fname mat_fname quality] = compileFilenames('ForBatchFileAngeliquewregioned.xlsx',stimname);
+%%% read sessions from batch file
+%batch_file = 'ForBatchFileAngeliquewregioned.xlsx';
+[batch_fname batch_pname] = uigetfile('*.xlsx','.xls batch file');
+batch_file = fullfile(batch_pname,batch_fname);
 
+[sbx_fname acq_fname mat_fname quality] = compileFilenames(batch_file,stimname);
 Opt.SaveFigs = 1;
 Opt.psfile = 'C:\temp\TempFigs.ps';
 if Opt.SaveFigs
@@ -27,6 +31,8 @@ for i = 1: length(quality);
 end
 
 useN = find(usefile); clear goodfile
+display(sprintf('%d recordings, %d labeled good',length(usefile),length(useN)));
+
 for i = 1:length(useN)
 base = mat_fname{useN(i)}(1:end-4);
     goodfile{i} = dir([base '*']).name;
@@ -46,6 +52,9 @@ mat_fname = goodfile;
 
 rLabels = {'OGL','Plex','IGL','Med'};
 nfiles = length(mat_fname);
+display(sprintf('%d good files found',nfiles))
+
+
 ncond = 17;
 cycDur=20;
 if strcmp(stimname,'sin gratings smaller 2ISI') | strcmp(stimname,'8 way gratings 2ISI') | strcmp(stimname,'sin gratings 7 steps 2ISI');

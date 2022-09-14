@@ -5,8 +5,13 @@
 close all; clear all
 
 %%% select files to analyze based on compile file
-%stimname = '8 way gratings';
-stimname = ['sin gratings 7 steps 2ISI']
+stimlist = {'8 way gratings 2ISI','sin gratings 7 steps'};  %%% add others here
+for i = 1:length(stimlist)
+    display(sprintf('%d) %s',i,stimlist{i}))
+end
+stimnum = input('which stim : ');
+stimname = stimlist{stimnum}
+
 [sbx_fname acq_fname mat_fname quality] = compileFilenames('ForBatchFileAngeliquewregioned.xlsx',stimname);
 
 Opt.SaveFigs = 1;

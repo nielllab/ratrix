@@ -76,7 +76,7 @@ if strcmp(stimname,'8 way gratings') || strcmp(stimname,'8 way gratings 2ISI')
     thetas(1:4) = 0; thetas(5:8) = 90; thetas(9:12) = 180; thetas(13:16) = 270;
 end
 
-if strcmp(stimname,'sin gratings 7 steps 2ISI')
+if strcmp(stimname,'sin gratings 7 steps 2ISI') || strcmp(stimname,'sin gratings 7 steps')
     ncond = 29;
     nSF = 7;
     nOri = 4;
@@ -97,6 +97,8 @@ for i = 1:length(sf); sfLabels{i} = sprintf('%0.02f',sf(i)); end
 f = 0; %%% counter for number of sessions included
 for nf = 1:nfiles
     
+    fname_clean = strrep(mat_fname{nf},'_',' '); %%% underscores mess up titles so this is a better filename to use
+    fname_clean = fname_clean(1:30);
     
     %%% read in weighted timecourse (from pixelmap, weighted by baseline fluorescence
     clear xb yb stimOrder weightTcourse
@@ -106,9 +108,10 @@ for nf = 1:nfiles
     subplot(1,2,1)
     imshow(cycPolarImg); title('timecourse polar img');
     subplot(1,2,2);
-    imagesc(meanGreenImg); axis equal; axis off; 
+    imagesc(meanGreenImg); axis equal; axis off; title(fname_clean);
     
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+   
     %%% load freq and orient from stimRec
     
     

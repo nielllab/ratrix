@@ -5,7 +5,15 @@ close all
 clear all
 
 %%% select files to analyze based on compile file
-stimname = ['sparse noise 2'];
+
+%%% select files to analyze based on compile file
+stimlist = {'sparse noise 1','sparse noise 2'};  %%% add others here
+for i = 1:length(stimlist)
+    display(sprintf('%d) %s',i,stimlist{i}))
+end
+stimnum = input('which stim : ');
+stimname = stimlist{stimnum}
+
 xyswap = 1;  %%% swap x and y for retinotopy?
 
 if strcmp(stimname,'sparse noise 2')
@@ -37,6 +45,7 @@ end
 
 useN = find(usefile); clear goodfile
 n=0;
+%%% collect filenames and make sure the files are there
 for i = 1:length(useN)
     try
         base = mat_fname{useN(i)}(1:end-4);
@@ -48,7 +57,7 @@ for i = 1:length(useN)
 end
 mat_fname = goodfile;
 
-nfiles = length(mat_fname)
+nfiles = length(mat_fname);
 
 rLabels = {'OGL','Plex','IGL','Med'};
 

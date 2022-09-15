@@ -328,8 +328,6 @@ xlabel('y location'); ylabel('y RF');
         end
     end
     
-    dbstop
-    
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% map of On/Off ratio

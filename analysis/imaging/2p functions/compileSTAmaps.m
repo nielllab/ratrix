@@ -88,6 +88,52 @@ for f = 1:nfiles
     
     fractionResponsive(f)=length(use)/length(zscore);
     
+       
+    %%% do topographic maps for X and Y, for both On and Off responses
+     if xyswap ==1
+        xptsnew = ypts;
+        yptsnew = xpts;
+    else
+         xptsnew = xpts;
+        yptsnew = ypts;
+    end
+    %%% center RF positions
+    x0 = nanmedian(rfx(useOn,1));
+    y0 = nanmedian(rfy(useOn,1));
+    
+    axLabel = {'X','Y'};
+    onoffLabel = {'On','Off'}
+    figure
+    for ax = 1:2
+        for rep = 1:2;
+            subplot(2,2,2*(rep-1)+ax)
+            
+            imagesc(meanGreenImg(:,:,1)); colormap gray; axis equal
+            hold on
+            if rep==1
+                data = useOn;
+            else data = useOff;
+            end
+            
+            for i = 1:length(data)
+                if ax ==1
+                    plot(xpts(data(i)),ypts(data(i)),'o','Color',cmapVar(rfx(data(i),rep)-x0,-25, 25, jet));
+                else
+                    plot(xpts(data(i)),ypts(data(i)),'o','Color',cmapVar(rfy(data(i),rep)-y0,-25, 25, jet));
+                end
+            end
+            if ax ==1 & rep==1
+                title(sprintf('x0 = %0.1f y0=%0.1f',x0,y0))
+            else
+                title(sprintf('%s %s',axLabel{ax},onoffLabel{rep}))
+            end
+        
+        end
+    end
+    
+    
+    
+    
     %%% calculate amplitude of response based on size response tuning(cells,on/off,size, time)
     %%% average over 3 spot sizes and response time window
     amp = nanmean(nanmean(tuning(:,:,1:end-1,8:15),4),3);
@@ -209,16 +255,7 @@ for f = 1:nfiles
     szTuning(2,:,:,f) = nanmean(tuning(useOff,2,:,:),1);
     
     %%% retinotopy
-    if xyswap ==1
-        xptsnew = ypts;
-        yptsnew = xpts;
-    else
-         xptsnew = xpts;
-        yptsnew = ypts;
-    end
-        %%% center RF positions
-    x0 = nanmedian(rfx(useOn,1));
-    y0 = nanmedian(rfy(useOn,1));
+   
     
     figure
     plot(rfx(useOff,2),xptsnew(useOff),'.'); xlabel('RFx location'); ylabel('cell x location')
@@ -296,6 +333,7 @@ title('Y topography'); legend('ON','OFF')
 xlabel('y location'); ylabel('y RF');
     
 
+
     
     %%% do topographic maps for X and Y, for both On and Off responses
     axLabel = {'X','Y'};
@@ -327,6 +365,10 @@ xlabel('y location'); ylabel('y RF');
         
         end
     end
+
+ 
+    dbstop
+
     
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     

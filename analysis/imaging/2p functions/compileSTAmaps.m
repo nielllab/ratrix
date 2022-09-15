@@ -131,6 +131,7 @@ for f = 1:nfiles
         end
     end
     
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     
     
@@ -333,44 +334,6 @@ title('Y topography'); legend('ON','OFF')
 xlabel('y location'); ylabel('y RF');
     
 
-
-    
-    %%% do topographic maps for X and Y, for both On and Off responses
-    axLabel = {'X','Y'};
-    onoffLabel = {'On','Off'}
-    figure
-    for ax = 1:2
-        for rep = 1:2;
-            subplot(2,2,2*(rep-1)+ax)
-            
-            imagesc(meanGreenImg(:,:,1)); colormap gray; axis equal
-            hold on
-            if rep==1
-                data = useOn;
-            else data = useOff;
-            end
-            
-            for i = 1:length(data)
-                if ax ==1
-                    plot(xpts(data(i)),ypts(data(i)),'o','Color',cmapVar(rfx(data(i),rep)-x0,-25, 25, jet));
-                else
-                    plot(xpts(data(i)),ypts(data(i)),'o','Color',cmapVar(rfy(data(i),rep)-y0,-25, 25, jet));
-                end
-            end
-            if ax ==1 & rep==1
-                title(sprintf('x0 = %0.1f y0=%0.1f',x0,y0))
-            else
-                title(sprintf('%s %s',axLabel{ax},onoffLabel{rep}))
-            end
-        
-        end
-    end
-
- 
-    dbstop
-
-    
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% map of On/Off ratio
     figure

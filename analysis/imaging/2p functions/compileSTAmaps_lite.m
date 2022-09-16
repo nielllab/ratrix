@@ -119,7 +119,7 @@ for f = 1:nfiles
   
     %%% do topographic maps for X and Y, for both On and Off responses
     axLabel = {'X','Y'};
-    onoffLabel = {'On','Off'}
+    onoffLabel = {'On','Off'};
     figure
     for ax = 1:2
         for rep = 1:2;

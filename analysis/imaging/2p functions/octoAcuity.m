@@ -67,13 +67,18 @@ if strcmp(stimname,'8 way gratings') || strcmp(stimname,'8 way gratings 2ISI')
     sfs = zeros(16,1);
     thetas = zeros(16,1);
     sfs(1:2:end) = 0.01; sfs(2:2:end) = 0.16;
-
-    nOri = 4;
-    nSF = 4;
-    sfs = zeros(16,1);
-    thetas = zeros(16,1);
-    sfs(1:4:end) = 0.01; sfs(2:4:end) = 0.04; sfs(3:4:end) = 0.16; sfs(4:4:end) = 0.64;
-    thetas(1:4) = 0; thetas(5:8) = 90; thetas(9:12) = 180; thetas(13:16) = 270;
+    for t = 1:nOri
+        thetas((t-1)*2 + (1:2)) = (t-1)*45;
+    end
+%%% as of 091622, this code was not commented out! not sure why it was
+%%% being run for 8 way. some old grating configuration? also, thetas not
+%%% assigned correctly - cmn
+%     nOri = 4;
+%     nSF = 4;
+%     sfs = zeros(16,1);
+%     thetas = zeros(16,1);
+%     sfs(1:4:end) = 0.01; sfs(2:4:end) = 0.04; sfs(3:4:end) = 0.16; sfs(4:4:end) = 0.64;
+%     thetas(1:4) = 0; thetas(5:8) = 90; thetas(9:12) = 180; thetas(13:16) = 270;
 end
 
 if strcmp(stimname,'sin gratings 7 steps 2ISI') || strcmp(stimname,'sin gratings 7 steps')
@@ -99,6 +104,7 @@ for nf = 1:nfiles
     
     fname_clean = strrep(mat_fname{nf},'_',' '); %%% underscores mess up titles so this is a better filename to use
     fname_clean = fname_clean(1:30);
+    display(fname_clean)
     
     %%% read in weighted timecourse (from pixelmap, weighted by baseline fluorescence
     clear xb yb stimOrder weightTcourse
@@ -137,11 +143,11 @@ for nf = 1:nfiles
     if fractionResponsive>0.5
         f = f+1;
     else
-        break
+        continue
     end
         
     
-    bins = -0.2:0.025:0.5;
+    bins = -0.1:0.02:0.3;
     ampHist(:,f) = hist(maxResp,bins)/length(maxResp);
     
     medianResp(f) = nanmedian(maxResp);
@@ -155,17 +161,13 @@ for nf = 1:nfiles
     responsive = maxResp>0.1;
     
     figure
-    imagesc(dFmean,[-0.1 0.1]); title(['response of all cells ' mat_fname{f}])
+    imagesc(dFmean,[-0.1 0.1]); title(['response of all cells ' mat_fname{f}]); colorbar
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
-    
-    figure
-    plot(nanmean(dFmean,1))
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
+
     %%% region-specific analysis
     if exist('xb','var');
         
+        %%% plot region-labeled points
         col = 'rgbc';
         figure
         imagesc(meanGreenImg); hold on
@@ -205,12 +207,13 @@ for nf = 1:nfiles
                 fractResponsive(r,f) = sum(inRegion & responsive)/sum(inRegion);
             end
         end
-        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+       % if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
         
         %%% show all responses sorted by region
         [val regionOrder] = sort(region);
         figure
-        imagesc(dFmean(regionOrder,:),[-0.01 0.125]); hold on
+        imagesc(dFmean(regionOrder,:),[-0.01 0.125]);colorbar
+        hold on
         borders = find(diff(val)>0);
         for i = 1:length(borders)
             plot([1 size(dFmean,2)], [borders(i) borders(i)],'r')
@@ -221,13 +224,14 @@ for nf = 1:nfiles
         [val regionOrder] = sort(region(responsive));
         responsiveList = find(responsive);
         figure
-        imagesc(dFmean(responsiveList(regionOrder),:),[-0.01 0.125]); hold on
+        imagesc(dFmean(responsiveList(regionOrder),:),[-0.01 0.125]); colorbar
+        hold on
         borders = find(diff(val)>0);
         for i = 1:length(borders)
             plot([1 size(dFmean,2)], [borders(i) borders(i)],'r')
         end
         xlabel('time and conds'); ylabel('cells'); title([mat_fname{f} ' responsive only']);
-        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        %if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     end
     
     %%% to do - determine response amp or selectivity index
@@ -247,13 +251,14 @@ for nf = 1:nfiles
         
     end
     
-    
+    %%% plot response timecourse broken out by sf, ori
     figure
     for sf = 1:nSF;
         subplot(2,4,sf);
         plot(resp(sf:nSF:nOri*nSF,:,f)');
         title(['sf = ' sfLabels{sf}]);ylim([-0.025 0.1])
     end
+    sgtitle('pixel-based response by ori');
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     
@@ -268,13 +273,13 @@ for nf = 1:nfiles
         imagesc(respMap(:,:,c),[-0.05 0.1]);
         axis equal; axis off; title(sprintf('sf = %0.02f th = %0.0f',sfs(c), thetas(c)));
     end
+    colorbar
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% average over SFs to get orientation tuning
     clear mapOriTuning
     for ori = 1:nOri
         range = (ori-1)*nSF + (1:nSF);
-        range
         oriTuning(ori,f) = nanmean(amp(range,f));
         oriResp(ori,:,f) = nanmean(resp(range,:,f),1);
         
@@ -312,7 +317,7 @@ for nf = 1:nfiles
         polar(thplot, tuningplot,'b'); hold on
         xlabel('theta'); title(rLabels{r});
     end
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    %if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     
     
@@ -325,10 +330,11 @@ for nf = 1:nfiles
             plot(unique(thetas),regionAmp(r,sf:nSF:nOri*nSF,f));
         end
         ylim([-0.025 0.1])
-        legend(sfLabels);
+
         title(rLabels{r}); xlabel('thetas');
         colororder(jet(nSF)*0.75)
     end
+    legend(sfLabels);
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     
@@ -337,9 +343,10 @@ for nf = 1:nfiles
     figure
     for ori = 1:nOri
         subplot(2,4,ori);
-        imagesc(mapOriTuning(:,:,ori),[-0.1 0.2]); title(oriLabels{ori});
+        imagesc(mapOriTuning(:,:,ori),[0 0.2]); title(oriLabels{ori}); colormap jet
         oriMap = oriMap + mapOriTuning(:,:,ori)*exp(2*pi*sqrt(-1)*ori/nOri);
     end
+    colorbar
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     figure
@@ -386,10 +393,12 @@ for nf = 1:nfiles
         title([rLabels{r} ' SF tuning']);
         colororder(jet(nSF+1)*0.75);
     end
+    legend(['0', sfLabels])
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+   
     %
     figure
-    plot(sfResp(:,:,f)'); title(mat_fname{f}); xlabel('time'); legend(['0', sfLabels]); colororder(jet(nSF+1)*0.75)
+    plot(sfResp(:,:,f)'); title(fname_clean); xlabel('time'); ylabel('mean pixelwise df'); legend(['0', sfLabels]); colororder(jet(nSF+1)*0.75)
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% Judit added this, was hoping for the curves for only the cells over threshold, but I don't think that's what this actually does?
@@ -564,7 +573,7 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 
 
 figure
-plot(bins,ampHist); xlim([-0.1 0.5]); hold on; plot(bins,mean(ampHist,2),'g','Linewidth',2)
+plot(bins,ampHist); hold on; plot(bins,mean(ampHist,2),'g','Linewidth',2)
 xlabel('amp dF/F'); title('amplitude distribution for all cells across sessions');
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 

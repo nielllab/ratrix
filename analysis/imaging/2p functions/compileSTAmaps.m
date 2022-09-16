@@ -78,7 +78,7 @@ for f = 1:nfiles
     load(mat_fname{f},'xpts','ypts','rfx','rfy','tuning','zscore','xb','yb','meanGreenImg')
     
     %%% threshold for good RF
-    zthresh = 5.0;
+    zthresh = 5.5;
     
     %%% select RFs that have zscore(ON, OFF) greater than zthresh
     use = find(zscore(:,1)>zthresh | zscore(:,2)<-zthresh);
@@ -132,6 +132,16 @@ for f = 1:nfiles
     end
     
     
+    figure
+    for rep = 1:2
+        subplot(1,2,rep);
+        plot(zscore(:,rep),rfx(:,rep),'.');
+        xlabel('zscore'); ylabel('rfx');
+        hold on
+        plot([zthresh zthresh], [min(rfx(:,rep)) max(rfx(:,rep))],'r');
+        plot(-[zthresh zthresh], [min(rfx(:,rep)) max(rfx(:,rep))],'r');
+    end
+    sgtitle('zscore check');
     
     
     %%% calculate amplitude of response based on size response tuning(cells,on/off,size, time)
@@ -333,9 +343,6 @@ title('Y topography'); legend('ON','OFF')
 xlabel('y location'); ylabel('y RF');
     
 
- 
-    dbstop
-    
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% map of On/Off ratio

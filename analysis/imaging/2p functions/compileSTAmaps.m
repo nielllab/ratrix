@@ -131,6 +131,7 @@ for f = 1:nfiles
         end
     end
     
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     figure
     for rep = 1:2
@@ -343,7 +344,9 @@ title('Y topography'); legend('ON','OFF')
 xlabel('y location'); ylabel('y RF');
     
 
+
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
     
     %%% map of On/Off ratio
     figure

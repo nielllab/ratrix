@@ -100,12 +100,16 @@ sf = unique(sfs);
 for i = 1:length(sf); sfLabels{i} = sprintf('%0.02f',sf(i)); end
 
 f = 0; %%% counter for number of sessions included
+
+
 for nf = 1:nfiles
-    
+
     fname_clean = strrep(mat_fname{nf},'_',' '); %%% underscores mess up titles so this is a better filename to use
     fname_clean = fname_clean(1:30);
+
     display(fname_clean)
     
+
     %%% read in weighted timecourse (from pixelmap, weighted by baseline fluorescence
     clear xb yb stimOrder weightTcourse
     load(mat_fname{nf},'stimOrder','weightTcourse','dFrepeats','xpts','ypts','xb','yb','meanGreenImg','stdImg','trialmean','cycPolarImg')
@@ -165,7 +169,11 @@ for nf = 1:nfiles
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
     %%% region-specific analysis
-    if exist('xb','var');
+    if ~exist('xb','var')
+        display(sprintf('%s has no regioning', fname_clean))
+    end
+
+    if exist('xb','var')
         
         %%% plot region-labeled points
         col = 'rgbc';
@@ -413,6 +421,8 @@ for nf = 1:nfiles
     xlabel('SF'); ylabel('resp')
     
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+    close all
 end
 
 %%% pixelwise analysis (obsolete)

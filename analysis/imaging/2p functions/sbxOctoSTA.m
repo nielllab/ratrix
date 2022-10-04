@@ -730,9 +730,14 @@ rfx = ymax;  %%% reversed due to rows/columns of movie matrix
 rfy = xmax;
 
 
-%%% previously used On to get center
-x0 = median(rfx(useOff,2));
-y0 = median(rfy(useOff,2));
+%%% previously used Off to get center, now use both
+% x0 = median(rfx(useOff,2));
+% y0 = median(rfy(useOff,2));
+    rfxs = [rfx(useOn,1); rfx(useOff,2)];
+    rfys = [rfy(useOn,1); rfy(useOff,2)];
+    x0 = nanmedian(rfxs);
+    y0 = nanmedian(rfys);
+
 
 figure
 subplot(1,2,1)

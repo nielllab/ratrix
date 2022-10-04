@@ -17,7 +17,7 @@ stimname = stimlist{stimnum}
 [batch_fname batch_pname] = uigetfile('*.xlsx','.xls batch file');
 batch_file = fullfile(batch_pname,batch_fname);
 
-[sbx_fname acq_fname mat_fname quality] = compileFilenames(batch_file,stimname);
+[sbx_fname acq_fname mat_fname quality regioned] = compileFilenames(batch_file,stimname);
 Opt.SaveFigs = 1;
 Opt.psfile = 'C:\temp\TempFigs.ps';
 if Opt.SaveFigs
@@ -27,7 +27,7 @@ end
 
 %%% select files to use based on quality
 for i = 1: length(quality);
-    usefile(i) = strcmp(quality{i},'Y');
+    usefile(i) = strcmp(quality{i},'Y') & strcmp(regioned{i},'Y');
 end
 
 useN = find(usefile); clear goodfile

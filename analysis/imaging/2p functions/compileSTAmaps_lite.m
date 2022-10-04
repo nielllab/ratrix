@@ -99,24 +99,22 @@ for f = 1:nfiles
     onOff = (ampPos(:,1)-ampPos(:,2))./(ampPos(:,1)+ampPos(:,2));
     onOff(notOn)=-1; onOff(notOff)=1;
     
-  
+    
     %%% retinotopy
     if xyswap ==1
         xptsnew = ypts;
         yptsnew = xpts;
     else
-         xptsnew = xpts;
+        xptsnew = xpts;
         yptsnew = ypts;
     end
-        %%% center RF positions
-    x0 = nanmedian(rfx(useOn,1));
-    y0 = nanmedian(rfy(useOn,1));
-
-    %%% mean rf centers
-    mx = mean(rfx(useOn,1),1);
-    my = mean(rfy(useOn,1),1);
+    %%% center RF positions
     
-  
+    rfxs = [rfx(useOn,1); rfx(useOff,2)];
+    rfys = [rfy(useOn,1); rfy(useOff,2)];
+    x0 = nanmedian(rfxs);
+    y0 = nanmedian(rfys);
+    
     %%% do topographic maps for X and Y, for both On and Off responses
     axLabel = {'X','Y'};
     onoffLabel = {'On','Off'};
@@ -144,7 +142,7 @@ for f = 1:nfiles
             else
                 title(sprintf('%s %s',axLabel{ax},onoffLabel{rep}))
             end
-        
+            
         end
     end
     

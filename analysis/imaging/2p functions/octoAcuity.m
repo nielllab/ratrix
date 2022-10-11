@@ -33,14 +33,17 @@ end
 useN = find(usefile); clear goodfile
 display(sprintf('%d recordings, %d labeled good',length(usefile),length(useN)));
 
+%%% collect filenames and make sure the files are there
 for i = 1:length(useN)
-base = mat_fname{useN(i)}(1:end-4);
-    goodfile{i} = dir([base '*']).name;
-% Judit testing commenting this out and inserting above
-% base = mat_fname{useN(i)}(1:end-4);
-%     goodfile{i}     thetas(1:2) = 0; thetas(3:4) = 45; thetas(5:6) = 90; thetas(7:8) = 135; thetas(9:10) = 180; thetas(11:12) = 225; thetas(13:14)=270; thetas(15:16) = 315;
-% else= dir([base '*']).name;
+    try
+        base = mat_fname{useN(i)}(1:end-4);
+        goodfile{n+1} = dir([base '*']).name;
+        n= n+1;
+    catch
+        sprintf('cant do %s',mat_fname{useN(i)})
+    end
 end
+
 mat_fname = goodfile;
 
 

@@ -398,8 +398,10 @@ for f = 1:nfiles
         figure
         imagesc(meanGreenImg); hold on
         for r = 1:length(xb)
-            inRegion = inpolygon(xpts,ypts,xb{r},yb{r});
-            plot(xpts(inRegion),ypts(inRegion),'.','Color',col(r));
+            if length(xb{r})>0
+                inRegion = inpolygon(xpts,ypts,xb{r},yb{r});
+                plot(xpts(inRegion),ypts(inRegion),'.','Color',col(r));
+            end       
         end
         axis equal
         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end

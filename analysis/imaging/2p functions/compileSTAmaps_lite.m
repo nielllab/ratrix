@@ -177,3 +177,5 @@ if Opt.SaveFigs
         display('couldnt generate pdf');
     end
 end
+
+close all

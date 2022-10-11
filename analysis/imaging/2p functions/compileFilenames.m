@@ -14,13 +14,13 @@ for j = 1:length(use);
     %%% generate sbx filename
     sbx_fname{j} = [T.Date{i} '_octo_cal520_000_' sprintf('%03d',T.RecordingNumber(i)) '.sbx'];
     if ~exist(sbx_fname{j},'file')
-        sprintf('couldnt find %s',sbx_fname{j})
+        %sprintf('couldnt find %s',sbx_fname{j})
     end
     
     %%% generate stimrec filename
     acq_fname{j}  = [T.Date{i} '_Acq' num2str(T.RecordingNumber(i)) '.mat'];
     if ~exist(acq_fname{j},'file')
-        sprintf('couldnt find %s',acq_fname{j});
+        %sprintf('couldnt find %s',acq_fname{j});
     end
     
     %%% generate analysis filename

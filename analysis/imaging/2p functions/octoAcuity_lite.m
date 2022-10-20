@@ -33,6 +33,7 @@ end
 useN = find(usefile); clear goodfile
 display(sprintf('%d recordings, %d labeled good',length(usefile),length(useN)));
 
+n=0;
 %%% collect filenames and make sure the files are there
 for i = 1:length(useN)
     try

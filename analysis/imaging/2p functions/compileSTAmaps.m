@@ -409,7 +409,7 @@ for f = 1:nfiles
         
         %%% compile data
         for r = 1:4
-            if r<=length(xb) & sum(inpolygon(xpts,ypts,xb{r},yb{r}))>0
+            if r<=length(xb) && length(xb{r})>0 && sum(inpolygon(xpts,ypts,xb{r},yb{r}))>0
                 inRegion = inpolygon(xpts,ypts,xb{r},yb{r});
                 fracUsed(r,f) = length(intersect(use, find(inRegion)))/sum(inRegion);
                 onSizeDist(r,1:5,f) = hist(szPref(intersect(useOn, find(inRegion)),1),1:0.5:3)/length(intersect(useOn, find(inRegion)));
@@ -477,6 +477,8 @@ for f = 1:nfiles
         
         
     end
+    
+    close all
 end
 
 %%% plot On/Off correlation as function of distance

@@ -167,7 +167,7 @@ if zbin
     
 end
 
-
+%%% trim out margins of image that have blank / artifact / movement wraparound
 buffer(:,1) = max(mv,[],1)/cfg.spatialBin+1; buffer(buffer<1)=1;
 buffer(:,2) = max(-mv,[],1)/cfg.spatialBin+1; buffer(buffer<0)=0;
 buffer=round(buffer)
@@ -201,7 +201,7 @@ stimTimesOld = stimTimes-stimTimes(1)+1;
 stimTimes = 1:cycLength*dt:(size(dfofInterp,3)-cycWindow - 30)*dt;  %%% make sure you have one cycle, plus 3sec padding to be safe, at end
 stimTimes = stimTimes(stimTimes<max(stimTimesOld));
 
-
+%%% timing check figure
 figure
 plot(diff(stimTimes)); hold on; plot(diff(stimTimesOld)); title(sprintf('time between stim on 2p trigs, median %0.03f',median(diff(stimTimes))));ylabel('secs');
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
@@ -556,7 +556,9 @@ for i=1:cycWindow;
     
 end
 
-%%% plot pixel-wise cycle average
+%%% berryi specific plotting
+
+%%% plot pixel-wise cycle average (response heatmaps)
 figure
 for i = 1:min(cycLength,30)
     subplot(5,6,i);
@@ -568,7 +570,7 @@ for i = 1:min(cycLength,30)
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-%%% plot weighted pixel-wise cycle average
+%%% plot weighted (by baseline fluoresscence) pixel-wise cycle average (response heatmaps)
 figure
 clear activation
 for i = 1:min(cycLength,30)
@@ -584,10 +586,12 @@ for i = 1:min(cycLength,30)
     axis equal; axis off
 end
 
+%%% generate a colorbar (useful for paper figs)
 figure
 imagesc(rand(10),[0 0.15]); colormap jet
 colorbar
 
+%%% open figures for tracing
 meanfig = figure
 tracefig = figure;
 greenfig = figure;
@@ -595,6 +599,7 @@ greenfig = figure;
 range =[prctile(greenCrop(:),1) prctile(greenCrop(:),98)*1.2];
 imagesc(greenCrop,range); colormap gray; axis equal; hold on
 
+%%% loop over two ROIs (baseline and responsive)
 for rep = 1:2
     %%% get ROI
     figure
@@ -645,19 +650,21 @@ for rep = 1:2
     xlabel('secs');ylabel('dfof');
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
+    %%% calculate trace across repeats
     trange = 9:39
     for i= 2:length(startFrames)
         trace(:,i) = mean(mean(dfofInterp(round(y+range),round(x+range),startFrames(i) + trange),2),1);
-        trace(:,i) = trace(:,i) - trace(1,i);
+        trace(:,i) = trace(:,i) - trace(1,i); %%% baseline to first timepoint
     end
     
-    
+    %%% plot trace
     figure(meanfig)
     errorbar((0:30)*dt,nanmean(trace,2),nanstd(trace,[],2)/sqrt(length(trace)))
     hold on
     plot([0 1],[-0.01 -0.01],'k','Linewidth',4)
 end
 
+%%% a little figure cleanup (axes etc)
 figure(meanfig)
 plot([0 1],[-0.01 -0.01],'k','Linewidth',4)
 ylim([-0.02 0.1])
@@ -669,6 +676,7 @@ figure(tracefig)
 set(gca,'xtick',50:20:170)
 set(gca,'xticklabel',{'0','20','40','60','80','100','120'})
 
+%%% testing whether different stim conds have different responses
 cmap = jet(17);
 figure
 hold on
@@ -686,6 +694,8 @@ for i = 1:length(stimOrder)
     plot(trace(:,i),'color',col)
 end
 
+
+%%% plotting responses broked out by condition
 figure
 for i = 1:16
     subplot(4,4,i)
@@ -696,12 +706,14 @@ for i = 1:16
     
 end
 
+%%% condition 17 = full-field
 i = 17
 figure
 plot(trace(:,stimOrder==i));
 hold on
 plot(mean(trace(:,stimOrder==i),2),'g','Linewidth',2)
 
+%%% breaking out response by SF
 figure
 hold on
 plot(mean(trace(:,freqs==0),2),'r');
@@ -714,6 +726,7 @@ errorbar(mean(trace,2),std(trace,[],2)/sqrt(length(trace)))
 
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
+%%% back to standard analysis
 
 %%% plot  mean timecourse
 cycAvgAll = cycAvgAll - repmat(cycAvgAll(:,1),[1 size(cycAvgAll,2)]);

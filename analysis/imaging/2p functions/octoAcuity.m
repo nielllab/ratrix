@@ -33,6 +33,7 @@ end
 useN = find(usefile); clear goodfile
 display(sprintf('%d recordings, %d labeled good',length(usefile),length(useN)));
 
+n=0
 %%% collect filenames and make sure the files are there
 for i = 1:length(useN)
     try
@@ -110,7 +111,7 @@ for nf = 1:nfiles
     fname_clean = strrep(mat_fname{nf},'_',' '); %%% underscores mess up titles so this is a better filename to use
     fname_clean = fname_clean(1:30);
 
-    display(fname_clean)
+    display(sprintf('%d %s',nf,fname_clean))
     
 
     %%% read in weighted timecourse (from pixelmap, weighted by baseline fluorescence
@@ -147,7 +148,7 @@ for nf = 1:nfiles
     %%% get max resp for each cell. save out as histogram
     maxResp = max(cellAmp,[],2);
     fractionResponsive = sum(maxResp>0.05)/length(maxResp);
-    if fractionResponsive>0.5
+    if fractionResponsive>0
         f = f+1;
     else
         continue

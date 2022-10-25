@@ -158,7 +158,7 @@ baserange=0:2;
 %baserange =2;
 
 %%% box size for 'cell body' points
-pts_range = -3:3;   
+pts_range = -3:3;
 
 for rep =1:2 %%% 4 conditions: On, Off, fullfield On, fullfield off; currently skipping fullfield since it's not interesting
     
@@ -173,7 +173,7 @@ for rep =1:2 %%% 4 conditions: On, Off, fullfield On, fullfield off; currently s
     end
     
     if rep==1 | rep ==2  %%% spots (remove fullfield)
-        m(sz_mov==255)=0;    %%% keeps fullfield from overwhelming, but means timecourse of fullfield is broken 
+        m(sz_mov==255)=0;    %%% keeps fullfield from overwhelming, but means timecourse of fullfield is broken
         m= imresize(m,0.5,'box');
     elseif rep ==3 | rep==4  %%% fullfield
         m(sz_mov~=255)=0; m = m(1,1,:); %%% only need one pixel
@@ -183,9 +183,11 @@ for rep =1:2 %%% 4 conditions: On, Off, fullfield On, fullfield off; currently s
     %%% calculate timecourse for entire image
     dFclip = dfofInterp;  dFclip(dFclip>1)=1;   %%% get rid of extreme dF values (mostly from outside tissue)
     dF = squeeze(mean(mean(dFclip,2),1));
-    framerange = 0:cycWindow;
+    framerange = 0:2*cycWindow;
+    clear dFalign
     baserange=0:2;
- %   baserange = 2;
+    %baserange = [0 1];
+    %   baserange = 2;
     for i = 1:length(stimTimes)-2;
         dFalign(i,:) = dF(stimFrames(i) +framerange)- nanmean(dF(stimFrames(i)+baserange));
     end
@@ -195,12 +197,14 @@ for rep =1:2 %%% 4 conditions: On, Off, fullfield On, fullfield off; currently s
     title('mean timecourse all pixels all stim')
     xlabel('frame'); ylabel('dfof')
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
+    
     
     figure; set(gcf,'Name',sprintf('rep %d timecourse',rep));
-    range = -2:2;
-
-    for taus = 3:18;
+    %range = -2:2;
+    range = 0;
+    
+    clear stas
+    for taus = 1:30;
         resp = nanmean(dFalign(:,taus+range),2);
         %resp = resp-nanmin(resp);
         %resp = resp-mean(resp);
@@ -214,14 +218,46 @@ for rep =1:2 %%% 4 conditions: On, Off, fullfield On, fullfield off; currently s
         sta = sta/nansum(abs(resp(1:npts)));
         stas(:,:,taus)=sta;
         %sta = sta/sum(resp);
-        subplot(4,5,taus);
-        imagesc(sta',crange);colormap jet; axis equal;title(sprintf('lag %d',tau));
+        subplot(5,6,taus);
+        imagesc(sta',crange);colormap jet; axis equal; axis off
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     
+    %%% svd based RF estimate
+    rf_flat = reshape(stas,size(stas,1)*size(stas,2),size(stas,3));
+%     mnrf = nanmean(rf_flat,2);
+%     for i  =1:size(rf_flat,2)
+%      rf_flat(:,i) = rf_flat(:,i)-mnrf;
+%     end
+    
+        display('doing svd')
+    tic
+    [u s v ] =svd(rf_flat,'econ');
+    toc
+    t_course = v(:,1);
+    rf_est = reshape(u(:,1),size(stas,1),size(stas,2)) *s(1,1);
+    if sum(t_course)<0
+        t_course = -t_course;
+        rf_est = -rf_est;
+    end
+    
+    figure
+    subplot(2,2,1);
+    imagesc(rf_est'*max(t_course),2*crange); colormap jet
+    title('svd rf estimate')
+    subplot(2,2,2)
+    imagesc(nanmean(stas(:,:,tau+tau_range),3)',2*crange); colormap jet
+    title('rf estimate from peak')
+    subplot(2,2,3:4);
+    plot(t_course);
+    title('timecourse')
+    xlabel('frame')
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    
     %%% calculate STA at peak time (tau) at gridpoints on 2p image
-
+    
     blocksize=25
     xrange = 1:blocksize:size(dfofInterp,1); xrange = xrange(1:end-1); %%% last one will be off the edge
     yrange = 1:blocksize:size(dfofInterp,2);  yrange = yrange(1:end-1);
@@ -239,7 +275,7 @@ for rep =1:2 %%% 4 conditions: On, Off, fullfield On, fullfield off; currently s
             dF = squeeze(mean(mean(dfofInterp(xrange(nx)+range,yrange(ny)+range,:),2),1));
             
             framerange = 0:cycWindow;
-
+            
             for i = 1:length(stimTimes)-4;
                 dFalign(i,:) = dF(stimFrames(i) +framerange)- nanmean(dF(stimFrames(i)+baserange));
             end
@@ -247,7 +283,7 @@ for rep =1:2 %%% 4 conditions: On, Off, fullfield On, fullfield off; currently s
             range = -2:2;
             resp = nanmean(dFalign(:,tau+tau_range),2);
             %resp(resp<0)=0;
-           % resp = resp-nanmin(resp);
+            % resp = resp-nanmin(resp);
             sta =zeros(size(m,1),size(m,2));
             npts = min(length(resp),size(moviedata,3));
             for i = 1:npts;
@@ -379,76 +415,76 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 
 
 
-    %%% select points based on peaks of max df/f
-    %%%calculate max df/f image
-    %img = nanmax(dfofInterp,[],3);
-    img = greenCrop;
-    img(isnan(img(:))) = 0;
-    img(isinf(img(:))) = 0;
-    filt = fspecial('gaussian',5,1);
-    stdImg = imfilter(img,filt);
-    figure
-    imagesc(stdImg); colormap gray
-    
-    %%% compare each point to the dilation of the region around it - if greater, it's a peak
-    region = ones(3,3); region(2,2)=0;
-    maxStd = stdImg > imdilate(stdImg,region);
-    maxStd(1:3,:) = 0; maxStd(end-2:end,:)=0; maxStd(:,1:3)=0; maxStd(:,end-2:end)=0; %%% no points on border
-    pts = find(maxStd);
-    fprintf('%d max points\n', length(pts));
-    
-    %%% show max points
-    [y, x] = ind2sub(size(maxStd),pts);
-    figure
-    imagesc(stdImg,[0 prctile(stdImg(:),98)]);hold on; colormap gray
-    plot(x,y,'o');
-    
-    %%% crop image to avoid points near border that may have artifact
-    if isfield(Opt,'selectCrop') && Opt.selectCrop ==1
-        disp('Select area in figure to include in the analysis');
-        [xrange, yrange] = ginput(2);
-    else
-        b = 5;
-        xrange = [b size(img,2)-b];
-        yrange = [b size(img,1)-b];
-    end
-    pts = pts(x>xrange(1) & x<xrange(2) & y>yrange(1) & y<yrange(2));
-    
-    %%% sort points based on their value (max df/f)
-    [brightness, order] = sort(img(pts),1,'descend');
-    figure
-    plot(brightness); xlabel('N'); ylabel('brightness');
-    
-    fprintf('%d points in ROI\n',length(pts))
-    
-    %%% choose points over a cutoff, to eliminate noise / nonresponsive
-    if isfield(Opt,'mindF')
-        mindF = Opt.mindF;
-    else
-        mindF= input('dF cutoff : ');
-    end
-    pts = pts(img(pts)>mindF);
-    fprintf('%d points in ROI over cutoff\n',length(pts))
-    
-    hold on
-    plot([1 length(brightness)],[mindF mindF],'b');
-    title(sprintf('%d points in ROI over cutoff\n',length(pts)))
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
-    
-    %%% plot selected points
-    [y, x] = ind2sub(size(maxStd),pts);
-    figure
-    imagesc(stdImg,[0 prctile(stdImg(:),98)]); hold on; colormap gray
-    plot(x,y,'o');
-    
-    %%% average df/f in a box around each selected point
+%%% select points based on peaks of max df/f
+%%%calculate max df/f image
+%img = nanmax(dfofInterp,[],3);
+img = greenCrop;
+img(isnan(img(:))) = 0;
+img(isinf(img(:))) = 0;
+filt = fspecial('gaussian',5,1);
+stdImg = imfilter(img,filt);
+figure
+imagesc(stdImg); colormap gray
 
-    clear dF
-    for i = 1:length(x)
-        dF(i,:) = mean(mean(dfofInterp(y(i)+pts_range,x(i)+pts_range,:),2),1);
-    end
-    xpts = x; ypts = y; %%% new names so they don't get overwritten
+%%% compare each point to the dilation of the region around it - if greater, it's a peak
+region = ones(3,3); region(2,2)=0;
+maxStd = stdImg > imdilate(stdImg,region);
+maxStd(1:3,:) = 0; maxStd(end-2:end,:)=0; maxStd(:,1:3)=0; maxStd(:,end-2:end)=0; %%% no points on border
+pts = find(maxStd);
+fprintf('%d max points\n', length(pts));
+
+%%% show max points
+[y, x] = ind2sub(size(maxStd),pts);
+figure
+imagesc(stdImg,[0 prctile(stdImg(:),98)]);hold on; colormap gray
+plot(x,y,'o');
+
+%%% crop image to avoid points near border that may have artifact
+if isfield(Opt,'selectCrop') && Opt.selectCrop ==1
+    disp('Select area in figure to include in the analysis');
+    [xrange, yrange] = ginput(2);
+else
+    b = 5;
+    xrange = [b size(img,2)-b];
+    yrange = [b size(img,1)-b];
+end
+pts = pts(x>xrange(1) & x<xrange(2) & y>yrange(1) & y<yrange(2));
+
+%%% sort points based on their value (max df/f)
+[brightness, order] = sort(img(pts),1,'descend');
+figure
+plot(brightness); xlabel('N'); ylabel('brightness');
+
+fprintf('%d points in ROI\n',length(pts))
+
+%%% choose points over a cutoff, to eliminate noise / nonresponsive
+if isfield(Opt,'mindF')
+    mindF = Opt.mindF;
+else
+    mindF= input('dF cutoff : ');
+end
+pts = pts(img(pts)>mindF);
+fprintf('%d points in ROI over cutoff\n',length(pts))
+
+hold on
+plot([1 length(brightness)],[mindF mindF],'b');
+title(sprintf('%d points in ROI over cutoff\n',length(pts)))
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+
+%%% plot selected points
+[y, x] = ind2sub(size(maxStd),pts);
+figure
+imagesc(stdImg,[0 prctile(stdImg(:),98)]); hold on; colormap gray
+plot(x,y,'o');
+
+%%% average df/f in a box around each selected point
+
+clear dF
+for i = 1:length(x)
+    dF(i,:) = mean(mean(dfofInterp(y(i)+pts_range,x(i)+pts_range,:),2),1);
+end
+xpts = x; ypts = y; %%% new names so they don't get overwritten
 
 
 
@@ -559,7 +595,7 @@ for clust = 1:nclust
         else
             m(m>0)=0;
         end
-        %m(sz_mov==255)=0; 
+        %m(sz_mov==255)=0;
         
         figure;
         range = -2:2
@@ -581,7 +617,7 @@ for clust = 1:nclust
             imagesc(sta',crange);colormap jet; axis equal;title(sprintf('lag %d',tau));
         end
         title(sprintf('clust %d rep %d',clust,rep));
-       
+        
         %%% get at optimal tau
         resp = nanmean(dFalign(:,tau+tau_range),2);
         sta =0;
@@ -593,7 +629,7 @@ for clust = 1:nclust
         end
         sta = sta/nansum(abs(resp(1:npts)));
         
-        figure(clustfig)        
+        figure(clustfig)
         subplot(2,3,1+rep);
         imagesc(sta',crange); hold on; axis equal; colormap jet;
         xprofile = max(abs(sta),[],1); [mx xmax] = max(xprofile);
@@ -680,7 +716,7 @@ for n = 1:size(dF,1)
         else
             m(m>0)=0;
         end
-       % m(sz_mov==255)=0; 
+        % m(sz_mov==255)=0;
         resp = nanmean(dFalign(:,tau+tau_range),2);
         %resp(resp<0)=0;
         %resp = resp-mean(resp);
@@ -733,10 +769,10 @@ rfy = xmax;
 %%% previously used Off to get center, now use both
 % x0 = median(rfx(useOff,2));
 % y0 = median(rfy(useOff,2));
-    rfxs = [rfx(useOn,1); rfx(useOff,2)];
-    rfys = [rfy(useOn,1); rfy(useOff,2)];
-    x0 = nanmedian(rfxs);
-    y0 = nanmedian(rfys);
+rfxs = [rfx(useOn,1); rfx(useOff,2)];
+rfys = [rfy(useOn,1); rfy(useOff,2)];
+x0 = nanmedian(rfxs);
+y0 = nanmedian(rfys);
 
 
 figure

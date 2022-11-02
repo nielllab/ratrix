@@ -142,6 +142,8 @@ for f = 1:nfiles
     sgtitle(fname_clean)
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
+    
+    %%% plot zscore check
     figure
     for rep = 1:2
         subplot(1,2,rep);
@@ -255,7 +257,7 @@ for f = 1:nfiles
     ylabel('On / Off correlation');
     xlabel('distance (um)');
     title(mat_fname{f})
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    %if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% plot mean size tuning for on and off
     figure
@@ -267,7 +269,7 @@ for f = 1:nfiles
     subplot(2,2,2)
     plot(squeeze(mean(tuning(useOff,2,:,:),1))');
     colororder(jet(nsz+1)*0.75)
-    title(mat_fname{f})
+    title('OFF')
     
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
@@ -295,7 +297,7 @@ for f = 1:nfiles
     subplot(2,2,4)
     plot(rfx(useOn,2),yptsnew(useOn),'.'); xlabel('RF x location'); ylabel('cell y location')
     title('on')
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    %if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     
     
@@ -354,7 +356,7 @@ for f = 1:nfiles
     xlabel('y location'); ylabel('y RF');
     ylim([-50 50])
 
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    %if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     
     %%% map of On/Off ratio
@@ -444,15 +446,15 @@ for f = 1:nfiles
         %%% ON size preference
         figure
         for r = 1:4
-            subplot(2,2,r)
+            subplot(2,4,r)
             bar(1:5,onSizeDist(r,:,f)); ylim([0 1]); xlabel('size'); title([rLabels{r} ' ON']);
         end
-       % if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        %if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
         
         %%% OFF size preference
-        figure
+       % figure
         for r = 1:4
-            subplot(2,2,r)
+            subplot(2,4,r+4)
             bar(1:5,offSizeDist(r,:,f)); ylim([0 1]); xlabel('size'); title([rLabels{r} ' OFF']);
         end
         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
@@ -460,16 +462,16 @@ for f = 1:nfiles
         %%% ON size tuning
         figure
         for r = 1:4
-            subplot(2,2,r);
+            subplot(2,4,r);
             plot(squeeze(regionTuning(r,1,:,:,f))'); title([rLabels{r} ' ON']); ylim([-0.1 0.2])
         end
         colororder(jet(nsz+1)*0.75)
-        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        %if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
         
         %%% Off size tuning
-        figure
+       % figure
         for r = 1:4
-            subplot(2,2,r);
+            subplot(2,4,r+4);
             plot(squeeze(regionTuning(r,2,:,:,f))'); title([rLabels{r} ' OFF']); ylim([-0.1 0.2])
         end
         colororder(jet(nsz+1)*0.75)

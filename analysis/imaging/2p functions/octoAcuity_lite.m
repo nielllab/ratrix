@@ -114,6 +114,14 @@ for nf = 1:nfiles
     imagesc(meanGreenImg); axis equal; axis off; title(fname_clean);
     
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+        dFmean = nanmean(dFrepeats,3);
+    
+    figure
+    imagesc(dFmean,[-0.1 0.1]); title(['response of all cells ' fname_clean]); colorbar
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+
 end
 
 

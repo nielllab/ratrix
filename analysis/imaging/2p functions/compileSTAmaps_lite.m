@@ -46,6 +46,7 @@ end
 %%% select files to use based on quality
 for i = 1: length(quality);
     usefile(i) = strcmp(quality{i},'Y');
+    %usefile(i) = 1;
 end
 
 
@@ -75,9 +76,16 @@ for f = 1:nfiles
     fname_clean = strrep(mat_fname{f},'_',' '); %%% underscores mess up titles so this is a better filename to use
     fname_clean = fname_clean(1:30);
     %%% load data
-    mat_fname{f}
+    %mat_fname{f}
     clear xb yb
+    
+    warning('off','MATLAB:load:variableNotFound')
     load(mat_fname{f},'xpts','ypts','rfx','rfy','tuning','zscore','xb','yb','meanGreenImg')
+    
+    warning('on','MATLAB:load:variableNotFound')
+    if ~exist('xb','var')
+        display(sprintf('%s does not appear to be regioned',mat_fname{f}))
+    end
     
     %%% threshold for good RF
     zthresh = 5.0;
@@ -153,12 +161,22 @@ for f = 1:nfiles
     
     %%% map of On/Off ratio
     figure
+    subplot(1,2,1)
     imagesc(meanGreenImg(:,:,1),[-0.5 1]); colormap gray; axis equal
     hold on
     for i = 1:length(use)
         plot(xpts(use(i)),ypts(use(i)),'o','Color',cmapVar(onOff(use(i)),-0.5, 0.5, jet));
     end
     title('on off ratio')
+    
+    subplot(1,2,2);
+    plot(rfx(useOn,1),rfy(useOn,1),'r.')
+    hold on
+    plot(rfx(useOff,2),rfy(useOff,2),'b.')
+    axis equal; axis([0 256 0 192]); 
+    title('rf locations')
+    
+    
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
 end

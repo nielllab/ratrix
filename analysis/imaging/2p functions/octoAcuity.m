@@ -89,6 +89,7 @@ if strcmp(stimname,'sin gratings 7 steps 2ISI') || strcmp(stimname,'sin gratings
     ncond = 29;
     nSF = 7;
     nOri = 4;
+    cycDur = 30;
     sfs = zeros(28,1);
     thetas = zeros(28,1);
     for i = 1:7
@@ -105,6 +106,7 @@ for i = 1:length(sf); sfLabels{i} = sprintf('%0.02f',sf(i)); end
 
 f = 0; %%% counter for number of sessions included
 
+respThresh = 0.05;
 
 for nf = 1:nfiles
 
@@ -147,7 +149,7 @@ for nf = 1:nfiles
     
     %%% get max resp for each cell. save out as histogram
     maxResp = max(cellAmp,[],2);
-    fractionResponsive = sum(maxResp>0.05)/length(maxResp);
+    fractionResponsive = sum(maxResp>respThresh)/length(maxResp);
     if fractionResponsive>0
         f = f+1;
     else
@@ -159,14 +161,14 @@ for nf = 1:nfiles
     ampHist(:,f) = hist(maxResp,bins)/length(maxResp);
     
     medianResp(f) = nanmedian(maxResp);
-    fractionResponsive(f) = sum(maxResp>0.05)/length(maxResp);
+    fractionResponsive(f) = sum(maxResp>respThresh)/length(maxResp);
     
     figure
     plot(bins,ampHist(:,f)); xlabel('max resp'); ylabel('fraction');
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% select responsive cells (can add more interesting criteria)
-    responsive = maxResp>0.1;
+    responsive = maxResp>respThresh;
     
     figure
     imagesc(dFmean,[-0.1 0.1]); title(['response of all cells ' mat_fname{f}]); colorbar
@@ -266,7 +268,11 @@ for nf = 1:nfiles
     %%% plot response timecourse broken out by sf, ori
     figure
     for sf = 1:nSF;
-        subplot(2,4,sf);
+        if nSF==2
+            subplot(1,2,sf)
+        else
+            subplot(2,4,sf);
+        end
         plot(resp(sf:nSF:nOri*nSF,:,f)');
         title(['sf = ' sfLabels{sf}]);ylim([-0.025 0.1])
     end
@@ -288,6 +294,13 @@ for nf = 1:nfiles
     colorbar
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
+    %%%% full-field image
+    figure
+    imagesc(respMap(:,:,ncond),[-0.05 0.1]);
+    title('fullfield flash')
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+        
     %%% average over SFs to get orientation tuning
     clear mapOriTuning
     for ori = 1:nOri
@@ -317,7 +330,7 @@ for nf = 1:nfiles
         
         ylim([-0.025 0.1]); xlim([-25 340]); xlabel('theta'); title(rLabels{r});
     end
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    %if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% polar plots of orientation tuning
     figure
@@ -345,8 +358,11 @@ for nf = 1:nfiles
 
         title(rLabels{r}); xlabel('thetas');
         colororder(jet(nSF)*0.75)
+        if r==1
+            legend(sfLabels);
+        end
     end
-    legend(sfLabels);
+    
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     
@@ -359,7 +375,7 @@ for nf = 1:nfiles
         oriMap = oriMap + mapOriTuning(:,:,ori)*exp(2*pi*sqrt(-1)*ori/nOri);
     end
     colorbar
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    %if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     figure
     imagesc(abs(oriMap),[0 0.1]);
@@ -376,7 +392,7 @@ for nf = 1:nfiles
     figure
     imshow(phMap.*repmat(ampMap,[1 1 3]));
     title('orientation polar map')
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+   % if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     
     
@@ -474,7 +490,11 @@ end
 %%% SF and orientation all cells pooled
 figure
 for sf = 1:nSF;
-    subplot(2,4,sf);
+        if nSF==2
+            subplot(1,2,sf)
+        else
+            subplot(2,4,sf);
+        end
     plot(squeeze(mean(nanmean(regionResp(:,sf:nSF:end,:,:),4),1))');
     title(['all cells sf = ' sfLabels{sf}]);ylim([-0.01 0.1])
     colororder(jet(nSF+1))
@@ -486,12 +506,16 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 for r = 1:4;
     figure
     for sf = 1:nSF;
-        subplot(2,4,sf);
+         if nSF==2
+            subplot(1,2,sf)
+        else
+            subplot(2,4,sf);
+        end
         plot(squeeze(nanmean(regionResp(r,sf:nSF:end,:,:),4))');
         title([rLabels{r} ' ' sfLabels{sf}]);ylim([-0.02 0.1])
-    if sf==1
-    legend(oriLabels)
-    end
+%     if sf==1
+%     legend(oriLabels)
+%     end
     end
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
@@ -512,7 +536,7 @@ for r = 1:4
     ylabel('mean dF/F');xlabel('cyc / deg'); title(rLabels{r})
     set(gca,'Xtick',1:nSF+1);
     set(gca,'XtickLabel',[{'0'} sfLabels]);
-    xlim([1 nSF+1.5]); ylim([0 0.05])
+    xlim([1 nSF+1.5]); ylim([0 0.06])
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 

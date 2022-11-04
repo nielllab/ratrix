@@ -105,7 +105,12 @@ for nf = 1:nfiles
     
     %%% read in weighted timecourse (from pixelmap, weighted by baseline fluorescence
     clear xb yb stimOrder weightTcourse
+    warning('off','MATLAB:load:variableNotFound')
     load(mat_fname{nf},'stimOrder','weightTcourse','dFrepeats','xpts','ypts','xb','yb','meanGreenImg','stdImg','trialmean','cycPolarImg')
+    warning('on','MATLAB:load:variableNotFound')
+    if ~exist('xb','var')
+        display(sprintf('%s does not appear to be regioned',mat_fname{nf}))
+    end
     
     figure
     subplot(1,2,1)
@@ -124,6 +129,7 @@ for nf = 1:nfiles
 
 end
 
+close all
 
 display('saving pdf')
 if Opt.SaveFigs
@@ -139,4 +145,4 @@ if Opt.SaveFigs
         display('couldnt generate pdf');
     end
 end
-close all
+

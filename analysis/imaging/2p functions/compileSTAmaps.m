@@ -55,6 +55,7 @@ display(sprintf('%d recordings, %d labeled good',length(usefile),length(useN)));
 
 %%% collect filenames and make sure the files are there
 for i = 1:length(useN)
+%for i = 1:3
     try
         base = mat_fname{useN(i)}(1:end-4);
         goodfile{n+1} = dir([base '*']).name;
@@ -70,27 +71,49 @@ display(sprintf('%d good files found',nfiles))
 
 rLabels = {'OGL','Plex','IGL','Med'};
 
+    %%% threshold for good RF
+    zthresh = 5.5;
+    
+    %%% threshold for # of units to include data
+    nthresh = 5;
+
 for f = 1:nfiles
     
     fname_clean = strrep(mat_fname{f},'_',' '); %%% underscores mess up titles so this is a better filename to use
     fname_clean = fname_clean(1:30);
     
     %%% load data
-    mat_fname{f}
-    clear xb yb
-    load(mat_fname{f},'xpts','ypts','rfx','rfy','tuning','zscore','xb','yb','meanGreenImg')
-    
-    %%% threshold for good RF
-    zthresh = 5.0;
+   % mat_fname{f}
+   clear xb yb
+   warning('off','MATLAB:load:variableNotFound')
+   
+   load(mat_fname{f},'xpts','ypts','rfx','rfy','tuning','zscore','xb','yb','meanGreenImg')
+   warning('on','MATLAB:load:variableNotFound')
+
+
     
     %%% select RFs that have zscore(ON, OFF) greater than zthresh
     use = find(zscore(:,1)>zthresh | zscore(:,2)<-zthresh);
     useOn = find(zscore(:,1)>zthresh); useOff = find(zscore(:,2)<-zthresh);
+    
+    %%% if there's no Off responsive (or On) just use the first three units.
+    %%% this allows subsequent code to run, and can be filtered out later
+    %%% based on nOn and nOff
+    if length(useOn)<3
+        useOn =1:3;
+    end
+    if length(useOff)<3
+        useOff = 1:3;
+    end
+    
+    
     useOnOff = intersect(useOn,useOff);
     notOn = find(zscore(:,1)<zthresh); notOff = find(zscore(:,2)>-zthresh);
     
     fractionResponsive(f)=length(use)/length(zscore);
-    
+    nOn(f) = length(useOn);
+    nOff(f) = length(useOff);
+    nTot(f) = length(zscore);
     
     %%% do topographic maps for X and Y, for both On and Off responses
     if xyswap ==1
@@ -142,6 +165,14 @@ for f = 1:nfiles
     sgtitle(fname_clean)
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
+    figure
+    plot(rfx(useOn,1),rfy(useOn,1),'r.')
+    hold on
+    plot(rfx(useOff,2),rfy(useOff,2),'b.')
+    axis equal; axis([0 256 0 192]); 
+    title('rf locations')
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
     
     %%% plot zscore check
     figure
@@ -393,7 +424,9 @@ for f = 1:nfiles
     
     
     %%% region-wise analysis
-    if exist('xb','var')
+    if ~exist('xb','var')
+        display(sprintf('no regioning for %s',mat_fname{f}))
+    else
         
         %%% show regions
         col = 'rgbc';
@@ -411,21 +444,37 @@ for f = 1:nfiles
         
         %%% compile data
         for r = 1:4
-            if r<=length(xb) && length(xb{r})>0 && sum(inpolygon(xpts,ypts,xb{r},yb{r}))>0
+            if r<=length(xb) && length(xb{r})>0 && sum(inpolygon(xpts,ypts,xb{r},yb{r}))>nthresh
                 inRegion = inpolygon(xpts,ypts,xb{r},yb{r});
                 fracUsed(r,f) = length(intersect(use, find(inRegion)))/sum(inRegion);
-                onSizeDist(r,1:5,f) = hist(szPref(intersect(useOn, find(inRegion)),1),1:0.5:3)/length(intersect(useOn, find(inRegion)));
-                offSizeDist(r,1:5,f) = hist(szPref(intersect(useOff, find(inRegion)),2),1:5)/length(intersect(useOff, find(inRegion)));
+                nUsed(r,f) = length(intersect(use, find(inRegion)));
+                fracOnOff(r,f,1) = length(intersect(useOn, find(inRegion)))/sum(inRegion);
+                fracOnOff(r,f,2) = length(intersect(useOff, find(inRegion)))/sum(inRegion);
+
                 onOffHistAll(r,:,f) = hist(onOff(intersect(use,find(inRegion))),[-1:0.1:1])/ length(intersect(use,find(inRegion)));
-                regionTuning(r,1,:,:,f) = nanmean(tuning(intersect(useOn, find(inRegion)),1,:,:),1);
-                regionTuning(r,2,:,:,f) = nanmean(tuning(intersect(useOff, find(inRegion)),2,:,:),1);
+                if length(intersect(useOn, find(inRegion)))>nthresh
+                    onSizeDist(r,1:5,f) = hist(szPref(intersect(useOn, find(inRegion)),1),1:0.5:3)/length(intersect(useOn, find(inRegion)));
+                    regionTuning(r,1,1:size(tuning,3),1:size(tuning,4),f) = nanmean(tuning(intersect(useOn, find(inRegion)),1,:,:),1);
+                else
+                    onSizeDist(r,1:5,f) = NaN;
+                    regionTuning(r,1,1:size(tuning,3),1:size(tuning,4),f) =NaN;
+                end
+                
+                if length(intersect(useOff, find(inRegion)))>nthresh                   
+                    offSizeDist(r,1:5,f) = hist(szPref(intersect(useOff, find(inRegion)),2),1:5)/length(intersect(useOff, find(inRegion)));
+                    regionTuning(r,2,1:size(tuning,3),1:size(tuning,4),f) = nanmean(tuning(intersect(useOff, find(inRegion)),2,:,:),1);
+                else
+                    offSizeDist(r,1:5,f) = NaN;
+                   regionTuning(r,2,1:size(tuning,3),1:size(tuning,4),f)  = NaN;
+                end
             else
                 fracUsed(r,f) = NaN;
+                nUsed(r,f) = NaN;
+                fracOnOff(r,f,:) = NaN;
                 onSizeDist(r,1:5,f) = NaN;
                 offSizeDist(r,1:5,f) = NaN;
                 onOffHistAll(r,:,f) =NaN;
-                regionTuning(r,1,:,:,f) = NaN;
-                regionTuning(r,2,:,:,f) = NaN;
+                regionTuning(r,1:2,1:size(tuning,3),1:size(tuning,4),f) = NaN;
                 
             end
         end
@@ -587,7 +636,7 @@ end
 figure
 for r = 1:4
     subplot(2,2,r)
-    bar(-1:0.1:1,nanmean(onOffHistAll(r,:,:),3)); ylim([0 1]); title(rLabels{r})
+    bar(-1:0.1:1,nanmean(onOffHistAll(r,:,:),3)); xlabel('Off - On ratio'); ylim([0 1]); title(rLabels{r})
 end
 
 
@@ -597,6 +646,7 @@ for r = 1:4
     subplot(2,2,r);
     plot(1:21,squeeze(nanmean(regionTuning(r,1,:,:,:),5)));
     title([rLabels{r} ' ON']); ylim([-0.1 0.2])
+            colororder(jet(nsz+1)*0.75)
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
@@ -606,11 +656,21 @@ for r = 1:4
     subplot(2,2,r);
     plot(1:21,squeeze(nanmean(regionTuning(r,2,:,:,:),5)));
     title([rLabels{r} ' Off']); ylim([-0.1 0.2])
+   colororder(jet(nsz+1)*0.75)
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 figure
-plot(f);
+plot(fracOnOff(:,:,1),'ro');
+hold on
+plot(fracOnOff(:,:,2),'bo');
+xlim([0.5 4.5]); ylim([0 1]);
+xlabel('layer'); ylabel('fraction'); 
+
+
+
+figure
+plot(fractionResponsive);
 xlabel('session #')
 ylabel('fraction of cells responsive'); ylim([0 1]);
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end

@@ -61,7 +61,40 @@ get2pSession_sbx;  %%% returns dfofInterp, and phasetimes (time in secs each sti
 global info
 mv = info.aligned.T;
 
+if ~isfield(Opt,'sub_noise');
+    Opt.sub_noise = input('subtract noise from sidebands? 0/1 ');
+end
 
+if Opt.sub_noise==1
+    display('subtracting off noise')
+    %%% subtract off noise as measured from sideband %%%
+    greensmall = double(imresize(greenframe,0.5));
+    F = (1 + dfofInterp).*repmat(greensmall,[1 1 size(dfofInterp,3)]);
+    offset = squeeze(nanmean(F(:,[1:20 end-20:end],:),2));
+    offset = offset-mean(offset(:));
+    figure
+    imagesc(offset); colorbar; title('noise measured from sidebands'); xlabel('frame'); ylabel('row');
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    figure
+    plot(nanmean(offset(:,1:500),1));
+    xlabel('frame'); ylabel('sideband value'); title('sideband noise over time');
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    
+    offset_full = repmat(offset,[1 1 size(F,2)]);
+    offset_full = permute(offset_full, [1 3 2]);
+    
+    F_fix = F-offset_full;
+    greensmall = prctile(F_fix,10,3);
+    F0 = repmat(greensmall,[1 1 size(dfofInterp,3)]);
+    
+    greenframe = imresize(greensmall,2);
+    dfofInterp = (F_fix - F0)./F0;
+    
+end
+
+%%% do zbinning (always)
 zbinCorr
 
 buffer(:,1) = max(mv,[],1)/cfg.spatialBin+1; buffer(buffer<1)=1;

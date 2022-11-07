@@ -420,8 +420,11 @@ for nf = 1:nfiles
         plot(1:cycDur,squeeze(regionSFresp(:,r,:,f))); ylim([-0.025 0.1])
         title([rLabels{r} ' SF tuning']);
         colororder(jet(nSF+1)*0.75);
+        if r==1
+            legend(['0', sfLabels])
+        end
     end
-    legend(['0', sfLabels])
+    
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
    
     %
@@ -437,7 +440,7 @@ for nf = 1:nfiles
 %     
     figure
     plot(tuning(:,f))
-    title(['population sf avg ' mat_fname{f}]); ylim([0 0.05])
+    title(['population sf avg ' mat_fname{f}]); ylim([0 max(tuning(:,f))*1.2])
     xlabel('SF'); ylabel('resp')
     
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end

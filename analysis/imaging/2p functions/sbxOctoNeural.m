@@ -68,36 +68,7 @@ if ~isfield(Opt,'sub_noise');
 end
 
 if Opt.sub_noise==1
-    display('subtracting off noise')
-    %%% subtract off noise as measured from sideband %%%
-    greensmall = double(imresize(greenframe,0.5));
-    F = (1 + dfofInterp).*repmat(greensmall,[1 1 size(dfofInterp,3)]);
-    offset = squeeze(nanmean(F(:,[1:20 end-20:end],:),2));
-    offset = offset-mean(offset(:));
-    figure
-    imagesc(offset); colorbar; title('noise measured from sidebands'); xlabel('frame'); ylabel('row');
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
-    figure
-    plot(nanmean(offset(:,1:1000),1));
-    xlabel('frame'); ylabel('sideband value'); title('sideband noise over time');
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
-            figure
-    plot(nanmean(offset,1));
-    xlabel('frame'); ylabel('sideband value'); title('sideband noise over time');
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
-    offset_full = repmat(offset,[1 1 size(F,2)]);
-    offset_full = permute(offset_full, [1 3 2]);
-    
-    F_fix = F-offset_full;
-    greensmall = prctile(F_fix,10,3);
-    F0 = repmat(greensmall,[1 1 size(dfofInterp,3)]);
-    
-    greenframe = imresize(greensmall,2);
-    dfofInterp = (F_fix - F0)./F0;
-    
+   [dfofInterp meanImg greenframe] = subtractSidebandNoise(dfofInterp,meanImg, psfile,mv);    
 end
 
 
@@ -108,99 +79,7 @@ else
 end
 
 if zbin
-    display('doing clustering')
-    %%% recreate small version of absolute fluorescence
-    greensmall = double(imresize(greenframe,0.5));
-    F = (1 + dfofInterp).*repmat(greensmall,[1 1 size(dfofInterp,3)]);
-    
-    %%% resize and reshape images into vectors, to calculate distance
-    smallDf = imresize(F(50:350,50:350,:),1/2); %%% remove edges for boundary effects
-    % smallDf = reshape(smallDf,size(smallDf,1)*size(smallDf,2),size(smallDf,3));
-    smallMean = nanmedian(smallDf,3);
-    figure
-    imagesc(smallMean);
-    
-    for i = 1:size(smallDf,3);
-        
-        im = smallDf(:,:,i);
-        cc = corrcoef(im(:),smallMean(:));
-        dist(i) = cc(2,1);
-    end
-    
-    figure
-    plot(dist), ylim([0 1]); title('correlation with median')
-    %ccthresh = 0.9;
-    if isfield(Opt,'binningThresh')
-        ccthresh = Opt.binningThresh;
-    else
-        ccthresh = input('enter correlation threshold : ')
-    end
-    
-    figure
-    plot(dist); ylim([0 1])
-    title('correlation of images with median'); xlabel('frame'); ylabel('corr coef')
-    hold on
-    plot([1 length(dist)], [ccthresh ccthresh],'r:');
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
-    useframes = dist>ccthresh;
-    figure
-    imagesc(mean(F(:,:,dist>ccthresh),3)); title(sprintf('mean of frames above thresh %0.2f used',mean(useframes)));
-    
-    
-    display('redoing dfofinterp')
-    F0 = repmat(prctile(F(:,:,useframes),10,3),[1 1 size(F,3)]);
-    dfofInterp = (F-F0)./F0;
-    
-    dfofInterp(isnan(dfofInterp))=0;
-    
-    dfofInterp(:,:,~useframes)=NaN;
-    mv(~useframes,:)=NaN;
-    greenframe = imresize(mean(F(:,:,useframes),3),2);
-    
-    for junk=1:0 %%% compress out old z-bin cluster code
-        %     %%% old cluster-based binning
-        %     D = pdist(smallDf','euclidean');
-        %
-        %     %Create hierarchical cluster tree based on D
-        %     Z = linkage(D,'ward');
-        %     %Create figure of hierarchical cluster tree for visualization purposes
-        %     figure
-        %     [h t perm] = dendrogram(Z,0,'Orientation','Left','ColorThreshold' ,3);
-        %     title('Hierarchical Cluster tree of Image Sequence');
-        %
-        %     nclust = input('How many z-plane clusters do you want?: ');
-        %     T = cluster(Z,'maxclust',nclust);
-        %
-        %     %%% compare clusters and movement
-        %     figure
-        %     plot(T*5); hold on; plot(mv)
-        %     legend('clusters','x movement','y movement')
-        %     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-        %
-        %     figure
-        %     for i = 1:nclust;
-        %         subplot(2,3,i)
-        %         imagesc(mean(F(:,:,T==i),3));
-        %         title(sprintf('clust %d n = %d',i,sum(T==i)));
-        %     end
-        %     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-        %     useBin = input('which bin to use : ');
-        %     display('redoing dfofinterp')
-        %     F0 = repmat(prctile(F(:,:,T==useBin),10,3),[1 1 size(F,3)]);
-        %     dfofInterp = (F-F0)./F0;
-        %
-        %     dfofInterp(:,:,T~=useBin)=NaN;
-        %     mv(T~=useBin,:)=NaN;
-        %     greenframe = imresize(mean(F(:,:,T==useBin),3),2);
-    end
-    
-    figure
-    range =[prctile(greenframe(:),1) prctile(greenframe(:),98)*1.2];
-    imagesc(greenframe,range); colormap gray
-    title(sprintf('mean of binned thresh = %0.2f used %0.2f',ccthresh, mean(useframes)))
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
+  [dfofInterp meanImg greenframe] = zbinCorr(dfofInterp, meanImg, greenframe, Opt,psfile);
 end
 
 
@@ -784,6 +663,7 @@ display('doing pixel plots')
 
 gratingTitle=0; %%% titles for grating figs?
 evRange = 10:20; baseRange = 1:5; %%% timepoints for evoked and baseline activity
+dfofInterp(dfofInterp>1) = 1; dfofInterp(dfofInterp<-1) = -1; 
 dfInterpsm = imresize(dfofInterp,0.25);
 dfWeight = dfInterpsm.* repmat(imresize(normgreen(:,:,1),0.25),[1 1 size(dfofInterp,3)]);
 for i = 1:length(stimOrder); %%% get pixel-wise evoked activity on each individual stim presentation

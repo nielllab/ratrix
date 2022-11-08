@@ -1,4 +1,4 @@
-function [sbx_fname acq_fname mat_fname quality regioned] = compileFilenames(xlsfile,stimname);
+function [sbx_fname acq_fname mat_fname quality regioned runBatch] = compileFilenames(xlsfile,stimname);
 %%% reads in excel batch file and generates standardized filenames 
 %%% for sbx file , stimrec, and analsyis .mat file
 %%% cmn 2019
@@ -33,6 +33,12 @@ for j = 1:length(use);
     
     %%% has it been regioned?
     regioned{j} = T.regioned{i};
+    
+    if isfield(T,'runBatch')
+        runBatch{j}=T.runBatch{i}
+    else
+        runBatch{j} = NaN;
+    end
     %%% example
     %%%myfield{j} = T.myfield{i};
 end

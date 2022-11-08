@@ -66,41 +66,11 @@ if ~isfield(Opt,'sub_noise');
 end
 
 if Opt.sub_noise==1
-    display('subtracting off noise')
-    %%% subtract off noise as measured from sideband %%%
-    greensmall = double(imresize(greenframe,0.5));
-    F = (1 + dfofInterp).*repmat(greensmall,[1 1 size(dfofInterp,3)]);
-    offset = squeeze(nanmean(F(:,[1:20 end-20:end],:),2));
-    offset = offset-mean(offset(:));
-    figure
-    imagesc(offset); colorbar; title('noise measured from sidebands'); xlabel('frame'); ylabel('row');
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
-    figure
-    plot(nanmean(offset(:,1:1000),1));
-    xlabel('frame'); ylabel('sideband value'); title('sideband noise over time');
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
-        figure
-    plot(nanmean(offset,1));
-    xlabel('frame'); ylabel('sideband value'); title('sideband noise over time');
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
-    
-    offset_full = repmat(offset,[1 1 size(F,2)]);
-    offset_full = permute(offset_full, [1 3 2]);
-    
-    F_fix = F-offset_full;
-    greensmall = prctile(F_fix,10,3);
-    F0 = repmat(greensmall,[1 1 size(dfofInterp,3)]);
-    
-    greenframe = imresize(greensmall,2);
-    dfofInterp = (F_fix - F0)./F0;
-    
+[dfofInterp meanImg greenframe] = subtractSidebandNoise(dfofInterp,meanImg, psfile,mv);    
 end
 
 %%% do zbinning (always)
-zbinCorr
+[dfofInterp meanImg greenframe] = zbinCorr(dfofInterp, meanImg, greenframe, Opt,psfile);
 
 buffer(:,1) = max(mv,[],1)/cfg.spatialBin+1; buffer(buffer<1)=1;
 buffer(:,2) = max(-mv,[],1)/cfg.spatialBin+1; buffer(buffer<0)=0;
@@ -185,7 +155,7 @@ end
 if movienum==1
     load('C:\data\octo_sparse_flash_10min.mat')
     crange = [-0.1 0.1];
-    tau = 9; tau_range = -5:5;
+    tau = 9; tau_range = -4:4;
 else
     load('C:\data\sparse_20min_1-8.mat');
     crange = [-0.05 0.05];
@@ -219,7 +189,7 @@ for rep =1:2 %%% 4 conditions: On, Off, fullfield On, fullfield off; currently s
     
     movie_mn = mean(m,3);
     %%% calculate timecourse for entire image
-    dFclip = dfofInterp;  dFclip(dFclip>1)=1;   %%% get rid of extreme dF values (mostly from outside tissue)
+    dFclip = dfofInterp;  dFclip(dFclip>0.5)=0.5;  dFclip(dFclip<-0.5)=-0.5;  %%% get rid of extreme dF values (mostly from outside tissue)
     dF = squeeze(mean(mean(dFclip,2),1));
     framerange = 0:2*cycWindow;
     clear dFalign
@@ -263,36 +233,36 @@ for rep =1:2 %%% 4 conditions: On, Off, fullfield On, fullfield off; currently s
     
     
     %%% svd based RF estimate
-    rf_flat = reshape(stas,size(stas,1)*size(stas,2),size(stas,3));
-%     mnrf = nanmean(rf_flat,2);
-%     for i  =1:size(rf_flat,2)
-%      rf_flat(:,i) = rf_flat(:,i)-mnrf;
+%     rf_flat = reshape(stas,size(stas,1)*size(stas,2),size(stas,3));
+% %     mnrf = nanmean(rf_flat,2);
+% %     for i  =1:size(rf_flat,2)
+% %      rf_flat(:,i) = rf_flat(:,i)-mnrf;
+% %     end
+%     
+%         display('doing svd')
+%     tic
+%     [u s v ] =svd(rf_flat,'econ');
+%     toc
+%     t_course = v(:,1);
+%     rf_est = reshape(u(:,1),size(stas,1),size(stas,2)) *s(1,1);
+%     if sum(t_course)<0
+%         t_course = -t_course;
+%         rf_est = -rf_est;
 %     end
-    
-        display('doing svd')
-    tic
-    [u s v ] =svd(rf_flat,'econ');
-    toc
-    t_course = v(:,1);
-    rf_est = reshape(u(:,1),size(stas,1),size(stas,2)) *s(1,1);
-    if sum(t_course)<0
-        t_course = -t_course;
-        rf_est = -rf_est;
-    end
-    
-    figure
-    subplot(2,2,1);
-    imagesc(rf_est'*max(t_course),2*crange); colormap jet
-    title('svd rf estimate')
-    subplot(2,2,2)
-    imagesc(nanmean(stas(:,:,tau+tau_range),3)',2*crange); colormap jet
-    title('rf estimate from peak')
-    subplot(2,2,3:4);
-    plot(t_course);
-    title('timecourse')
-    xlabel('frame')
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
+%     
+%     figure
+%     subplot(2,2,1);
+%     imagesc(rf_est'*max(t_course),2*crange); colormap jet
+%     title('svd rf estimate')
+%     subplot(2,2,2)
+%     imagesc(nanmean(stas(:,:,tau+tau_range),3)',2*crange); colormap jet
+%     title('rf estimate from peak')
+%     subplot(2,2,3:4);
+%     plot(t_course);
+%     title('timecourse')
+%     xlabel('frame')
+%     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+%     
     
     %%% calculate STA at peak time (tau) at gridpoints on 2p image
     
@@ -689,7 +659,7 @@ for clust = 1:nclust
             eps = find(m(ymax,xmax,:)~=0 & sz_mov(ymax,xmax,:)==sz(i));
             eps = eps(eps<=size(dFalign,1));
             subplot(2,3,i); hold on
-            cmap = jet(length(eps))
+            cmap = jet(length(eps));
             for j = 1:length(eps)
                 plot(dFalign(eps(j),:)','Color',cmap(j,:));
             end
@@ -1028,6 +998,7 @@ imagesc(corrcoef(dFclust(perm,:)'),[-1 1]); colormap jet
 title('correlation across cells after clustering')
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
+close all
 
 display('saving pdf')
 if Opt.SaveFigs

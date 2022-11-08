@@ -5,7 +5,7 @@ close all
 
 stim_name = '8 way gratings 2ISI'
 %%% select files to analze
-[sbx_fname acq_fname mat_fname] = compileFilenames('BerryiBatchFile.xlsx',stim_name);
+[sbx_fname acq_fname mat_fname runBatch] = compileFilenames('ForBatchFileAngeliquewregioned.xlsx',stim_name);
 
 
 %% General Parameters

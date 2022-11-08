@@ -1,10 +1,11 @@
+function [dfofInterp meanImg greenframe] = zbinCorr(dfofInterp, meanImg, greenframe, Opt, psfile);
+
 %%% remove frames based on correlation with mean image
 %%% new method of binning to account for z-movement
 
-display('doing clustering')
+display('doing correlation-based zbinning')
 %%% recreate small version of absolute fluorescence
-greensmall = double(imresize(greenframe,0.5));
-F = (1 + dfofInterp).*repmat(greensmall,[1 1 size(dfofInterp,3)]);
+F = (1 + dfofInterp).*repmat(meanImg,[1 1 size(dfofInterp,3)]);
 
 %%% resize and reshape images into vectors, to calculate distance
 smallDf = imresize(F(50:350,50:350,:),1/2); %%% remove edges for boundary effects
@@ -40,13 +41,14 @@ figure
 imagesc(mean(F(:,:,dist>ccthresh),3)); title(sprintf('mean of frames above thresh %0.2f used',mean(useframes)));
 
 display('redoing dfofinterp')
-F0 = repmat(prctile(F(:,:,useframes),10,3),[1 1 size(F,3)]);
+meanImg = median(F(:,:,useframes(3:3:end)),3);
+F0 = repmat(meanImg,[1 1 size(F,3)]);
 dfofInterp = (F-F0)./F0;
 dfofInterp(isnan(dfofInterp))=0;
 
 dfofInterp(:,:,~useframes)=NaN;
 mv(~useframes,:)=NaN;
-greenframe = imresize(mean(F(:,:,useframes),3),2);
+greenframe = imresize(median(F(:,:,useframes),3),2);
 
 figure
 range =[prctile(greenframe(:),1) prctile(greenframe(:),98)*1.2];

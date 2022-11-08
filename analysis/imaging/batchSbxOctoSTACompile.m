@@ -2,10 +2,11 @@ clear all
 close all
 %% Analyze multiple files using sbxOctoNeural function.
 %% uses excel compile file to choose files, stim, etc
+%% sbx and acq files need to be in the current folder
 
 stim_name = 'sparse noise'
 %%% select files to analze
-[sbx_fname acq_fname mat_fname] = compileFilenames('ForBatchFileAngeliquewregioned.xlsx',stim_name);
+[sbx_fname acq_fname mat_fname runBatch] = compileFilenames('ForBatchFileAngeliquewregioned.xlsx',stim_name);
 
 
 %% General Parameters
@@ -35,8 +36,8 @@ Results = struct;
 %for iFile = 1:length(sbx_fname);
     for iFile = 1:length(sbx_fname)
     %%% criteria as to whether to analyze this one
-    use = ~exist(mat_fname{iFile},'file');
-    
+    %use = ~exist(mat_fname{iFile},'file');
+    use = strcmp(runBatch{iFile},'Y');
     if use
         
         folder = '.';
@@ -50,7 +51,7 @@ Results = struct;
         %Name of pdf save file
         if Opt.SaveFigs == 1
             Opt.pPDF = folder;
-            Opt.fPDF = [mat_fname{iFile}(1:end-4)  'df5000.pdf'];
+            Opt.fPDF = [mat_fname{iFile}(1:end-4)  'df5000.pdf']; %%% change to update name
         end
         
         if Opt.SaveOutput
@@ -58,7 +59,7 @@ Results = struct;
             Opt.fOut = [mat_fname{iFile}(1:end-4) '.mat'];  %%% change to update name
         end
         
-        %% Run sutterOctoNeural
+        %% Run sbxOctoSTA
         Results(iFile).Input = Opt;       
 %         try
             sbxOctoSTA(Opt);

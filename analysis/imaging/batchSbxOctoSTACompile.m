@@ -4,9 +4,10 @@ close all
 %% uses excel compile file to choose files, stim, etc
 %% sbx and acq files need to be in the current folder
 
-stim_name = 'sparse noise'
+stim_name = 'sparse noise 1'
+suffix = '_SN1_denoised_zbinned_110822';  %%% appended after date_loc_acq.
 %%% select files to analze
-[sbx_fname acq_fname mat_fname runBatch] = compileFilenames('ForBatchFileAngeliquewregioned.xlsx',stim_name);
+[sbx_fname acq_fname mat_fname quality regioned runBatch] = compileFilenames('CombinedBatch_GoodOnes.xlsx',stim_name,suffix);
 
 
 %% General Parameters
@@ -37,7 +38,7 @@ Results = struct;
     for iFile = 1:length(sbx_fname)
     %%% criteria as to whether to analyze this one
     %use = ~exist(mat_fname{iFile},'file');
-    use = strcmp(runBatch{iFile},'Y');
+    use = strcmp(runBatch{iFile},'Y') & ~exist(mat_fname{iFile},'file'); %only run if runBatch and don't run if file already exist
     if use
         
         folder = '.';
@@ -51,7 +52,7 @@ Results = struct;
         %Name of pdf save file
         if Opt.SaveFigs == 1
             Opt.pPDF = folder;
-            Opt.fPDF = [mat_fname{iFile}(1:end-4)  'df5000.pdf']; %%% change to update name
+            Opt.fPDF = [mat_fname{iFile}(1:end-4)  '.pdf']; %%% change to update name
         end
         
         if Opt.SaveOutput

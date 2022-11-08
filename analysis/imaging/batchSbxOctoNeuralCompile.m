@@ -4,8 +4,9 @@ close all
 %% uses excel compile file to choose files, stim, etc
 
 stim_name = '8 way gratings 2ISI'
-%%% select files to analze
-[sbx_fname acq_fname mat_fname runBatch] = compileFilenames('ForBatchFileAngeliquewregioned.xlsx',stim_name);
+suffix = '_denoised_test';
+%%% select files to analyze
+[sbx_fname acq_fname mat_fname quality regioned runBatch] = compileFilenames('CombinedBatch_GoodOnes.xlsx',stim_name,suffix);
 
 
 %% General Parameters
@@ -34,8 +35,8 @@ Results = struct;
 %for iFile = 1:length(sbx_fname);
     for iFile = 1:length(sbx_fname)
     %%% criteria as to whether to analyze this one
-    use = ~exist(mat_fname{iFile},'file');
-    
+    %use = ~exist(mat_fname{iFile},'file');
+    use = strcmp(runBatch{iFile},'Y') & ~exist(mat_fname{iFile},'file');
     if use
         
         folder = '.';
@@ -49,7 +50,7 @@ Results = struct;
         %Name of pdf save file
         if Opt.SaveFigs == 1
             Opt.pPDF = folder;
-            Opt.fPDF = [mat_fname{iFile}(1:end-4)  'df5000.pdf'];
+            Opt.fPDF = [mat_fname{iFile}(1:end-4)  '.pdf'];
         end
         
         if Opt.SaveOutput

@@ -5,7 +5,7 @@ close all
 
 stim_name = '8 way gratings 2ISI'
 %%% select files to analze
-[sbx_fname acq_fname mat_fname runBatch] = compileFilenames('ForBatchFileAngeliquewregioned.xlsx',stim_name);
+[sbx_fname acq_fname mat_fname runBatch] = compileFilenames('CombinedBatch_GoodOnes.xlsx',stim_name);
 
 
 %% General Parameters
@@ -49,12 +49,12 @@ Results = struct;
         %Name of pdf save file
         if Opt.SaveFigs == 1
             Opt.pPDF = folder;
-            Opt.fPDF = [mat_fname{iFile}(1:end-4)  'df5000.pdf'];
+            Opt.fPDF = [mat_fname{iFile}(1:end-4)  'df5000_Zbin95.pdf'];
         end
         
         if Opt.SaveOutput
             Opt.pOut = folder;
-            Opt.fOut = [mat_fname{iFile}(1:end-4) '.mat'];  %%%% change this line to add extra terms
+            Opt.fOut = [mat_fname{iFile}(1:end-4) 'Zbin95.mat'];  %%%% change this line to add extra terms
         end
         
         %% Run sutterOctoNeural

@@ -9,6 +9,7 @@ suffix = '_denoised_test';
 [sbx_fname acq_fname mat_fname quality regioned runBatch] = compileFilenames('CombinedBatch_GoodOnes.xlsx',stim_name,suffix);
 
 
+
 %% General Parameters
 Opt.align = 1;
 Opt.NumChannels = 1;
@@ -51,6 +52,7 @@ Results = struct;
         if Opt.SaveFigs == 1
             Opt.pPDF = folder;
             Opt.fPDF = [mat_fname{iFile}(1:end-4)  '.pdf'];
+
         end
         
         if Opt.SaveOutput

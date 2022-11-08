@@ -77,7 +77,12 @@ if Opt.sub_noise==1
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     figure
-    plot(nanmean(offset(:,1:500),1));
+    plot(nanmean(offset(:,1:1000),1));
+    xlabel('frame'); ylabel('sideband value'); title('sideband noise over time');
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+        figure
+    plot(nanmean(offset,1));
     xlabel('frame'); ylabel('sideband value'); title('sideband noise over time');
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     

@@ -28,6 +28,8 @@ Opt.selectCrop = 0;         %whether to manually crop image region
 Opt.zbinning = 1;
 Opt.binningThresh = 0.95;
 
+Opt.sub_noise = 1;
+
 Results = struct;
 
 %for iFile = 1:length(sbx_fname);
@@ -53,7 +55,7 @@ Results = struct;
         
         if Opt.SaveOutput
             Opt.pOut = folder;
-            Opt.fOut = mat_fname{iFile};
+            Opt.fOut = [mat_fname{iFile}(1:end-4) '.mat'];  %%% change to update name
         end
         
         %% Run sutterOctoNeural

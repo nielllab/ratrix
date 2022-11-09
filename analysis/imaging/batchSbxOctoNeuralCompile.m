@@ -4,7 +4,8 @@ close all
 %% uses excel compile file to choose files, stim, etc
 
 stim_name = '8 way gratings 2ISI'
-suffix = '_denoised_test';
+suffix = '_denoised_Zbin95_8way_110822';
+outFolder = '8way_110822/'
 %%% select files to analyze
 [sbx_fname acq_fname mat_fname quality regioned runBatch] = compileFilenames('CombinedBatch_GoodOnes.xlsx',stim_name,suffix);
 
@@ -37,7 +38,8 @@ Results = struct;
     for iFile = 1:length(sbx_fname)
     %%% criteria as to whether to analyze this one
     %use = ~exist(mat_fname{iFile},'file');
-    use = strcmp(runBatch{iFile},'Y') & ~exist(mat_fname{iFile},'file');
+    use = strcmp(runBatch{iFile},'Y') & ~exist([outFolder mat_fname{iFile}],'file');
+    Results(iFile).name = mat_fname{iFile};
     if use
         
         folder = '.';
@@ -51,13 +53,13 @@ Results = struct;
         %Name of pdf save file
         if Opt.SaveFigs == 1
             Opt.pPDF = folder;
-            Opt.fPDF = [mat_fname{iFile}(1:end-4)  '.pdf'];
+            Opt.fPDF = [outFolder mat_fname{iFile}(1:end-4)  '.pdf'];
 
         end
         
         if Opt.SaveOutput
             Opt.pOut = folder;
-            Opt.fOut = [mat_fname{iFile}(1:end-4) '.mat'];  %%%% change this line to add extra terms
+            Opt.fOut = [outFolder mat_fname{iFile}(1:end-4) '.mat']  %%%% change this line to add extra terms
         end
         
         %% Run sutterOctoNeural
@@ -70,5 +72,9 @@ Results = struct;
 %             Results(iFile).Output = [];
 %         end
    
+    elseif ~strcmp(runBatch{iFile},'Y')
+        Results(iFile).Output = 'not in runBatch';
+    else
+        Results(iFile).Output = 'file exists';
     end
 end

@@ -31,7 +31,7 @@ Opt.zbinning = 1;
 Opt.binningThresh = 0.95;
 
 Opt.sub_noise = 1;
-
+Opt.noiseFile = 1;
 Results = struct;
 
 %for iFile = 1:length(sbx_fname);
@@ -62,13 +62,13 @@ Results = struct;
         
         %% Run sbxOctoSTA
         Results(iFile).Input = Opt;       
-%         try
+        try
             sbxOctoSTA(Opt);
             Results(iFile).Output = 'success'
-%         catch
-%             fprintf('Error in sutterOctoNeural script - Continuing onto next file');
-%             Results(iFile).Output = [];
-%         end
+        catch
+            fprintf('Error in sutterOctoNeural script - Continuing onto next file');
+            Results(iFile).Output = [];
+        end
    
     end
 end

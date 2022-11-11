@@ -4,13 +4,17 @@ close all
 %% uses excel compile file to choose files, stim, etc
 
 
-stim_name = 'sin gratings 7 steps'
-suffix = '_denoised_Zbin95_singratings_110922';
-outFolder = 'Singratings_Z95_110922/'
-%suffix = '_denoised_Zbin95_8way_110822';
-%stim_name = '8 way gratings 2ISI'
-%outFolder = '8way_110822/'
-%%% select files to analyze
+% stim_name = 'sin gratings 7 steps'
+% % suffix = '_denoised_Zbin95_singratings_110922';
+% % outFolder = 'Singratings_Z95_110922/'
+% suffix = '_denoised_Zbin95_8way_110822';
+% stim_name = '8 way gratings 2ISI'
+% outFolder = '8way_110822/'
+%% select files to analyze
+
+suffix = '_SN1_denoised_zbinned_110822';
+stim_name = 'sparse noise 1'
+outFolder = 'SN1_110922/'
 [sbx_fname acq_fname mat_fname quality regioned runBatch] = compileFilenames('CombinedBatch_GoodOnes.xlsx',stim_name,suffix);
 
 warning('off','MATLAB:load:variableNotFound')

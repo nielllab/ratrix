@@ -27,7 +27,7 @@ end
 [batch_fname batch_pname] = uigetfile('*.xlsx','.xls batch file');
 batch_file = fullfile(batch_pname,batch_fname);
 
-[sbx_fname acq_fname mat_fname quality] = compileFilenames(batch_file,stimname);
+[sbx_fname acq_fname mat_fname quality] = compileFilenames(batch_file,stimname, '');
 
 Opt.SaveFigs = 1;
 Opt.psfile = 'C:\temp\TempFigs.ps';

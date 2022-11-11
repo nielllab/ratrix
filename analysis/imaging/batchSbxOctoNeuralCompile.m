@@ -4,7 +4,7 @@ close all
 %% uses excel compile file to choose files, stim, etc
 
 stim_name = '8 way gratings 2ISI'
-suffix = '_denoised_Zbin95_8way_110822';
+suffix = '_denoised_Zbin95_8way_111122';
 outFolder = '8way_110822/'
 %%% select files to analyze
 [sbx_fname acq_fname mat_fname quality regioned runBatch] = compileFilenames('CombinedBatch_GoodOnes.xlsx',stim_name,suffix);

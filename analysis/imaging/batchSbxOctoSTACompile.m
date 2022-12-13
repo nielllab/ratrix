@@ -6,6 +6,7 @@ close all
 
 stim_name = 'sparse noise 1'
 suffix = '_SN1_denoised_zbinned_110822';  %%% appended after date_loc_acq.
+outFolder = 'SN1_110922/'
 %%% select files to analze
 [sbx_fname acq_fname mat_fname quality regioned runBatch] = compileFilenames('CombinedBatch_GoodOnes.xlsx',stim_name,suffix);
 
@@ -35,10 +36,11 @@ Opt.noiseFile = 1;
 Results = struct;
 
 %for iFile = 1:length(sbx_fname);
-    for iFile = 1:length(sbx_fname)
+for iFile = 1:length(sbx_fname)
     %%% criteria as to whether to analyze this one
     %use = ~exist(mat_fname{iFile},'file');
-    use = strcmp(runBatch{iFile},'Y') & ~exist(mat_fname{iFile},'file'); %only run if runBatch and don't run if file already exist
+    use = strcmp(runBatch{iFile},'Y') & ~exist([outFolder mat_fname{iFile}],'file'); %only run if runBatch and don't run if file already exist
+    Results(iFile).name = mat_fname{iFile};
     if use
         
         folder = '.';
@@ -52,23 +54,30 @@ Results = struct;
         %Name of pdf save file
         if Opt.SaveFigs == 1
             Opt.pPDF = folder;
-            Opt.fPDF = [mat_fname{iFile}(1:end-4)  '.pdf']; %%% change to update name
+            Opt.fPDF = [outFolder mat_fname{iFile}(1:end-4)  '.pdf']; %%% change to update name
         end
         
         if Opt.SaveOutput
             Opt.pOut = folder;
-            Opt.fOut = [mat_fname{iFile}(1:end-4) '.mat'];  %%% change to update name
+            Opt.fOut = [outFolder mat_fname{iFile}(1:end-4) '.mat'];  %%% change to update name
         end
         
         %% Run sbxOctoSTA
-        Results(iFile).Input = Opt;       
+        Results(iFile).Input = Opt;
         try
             sbxOctoSTA(Opt);
             Results(iFile).Output = 'success'
-        catch
+        catch mexc
+            mexc
             fprintf('Error in sutterOctoNeural script - Continuing onto next file');
-            Results(iFile).Output = [];
+            Results(iFile).Output = mexc;
         end
-   
+        
+    elseif ~strcmp(runBatch{iFile},'Y')
+       display(sprintf('%s not in runBatch', mat_fname{iFile}))
+        Results(iFile).Output = 'not in runBatch';
+    else
+        display(sprintf('%s file exists', mat_fname{iFile}))
+        Results(iFile).Output = 'file exists';
     end
 end

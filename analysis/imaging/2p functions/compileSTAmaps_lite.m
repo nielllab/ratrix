@@ -88,7 +88,7 @@ for f = 1:nfiles
     end
     
     %%% threshold for good RF
-    zthresh = 5.0;
+    zthresh = 5.5;
     
     %%% select RFs that have zscore(ON, OFF) greater than zthresh
     use = find(zscore(:,1)>zthresh | zscore(:,2)<-zthresh);

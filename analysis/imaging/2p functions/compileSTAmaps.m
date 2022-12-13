@@ -27,7 +27,7 @@ end
 [batch_fname batch_pname] = uigetfile('*.xlsx','.xls batch file');
 batch_file = fullfile(batch_pname,batch_fname);
 
-[sbx_fname acq_fname mat_fname quality] = compileFilenames(batch_file,stimname, '');
+[sbx_fname acq_fname mat_fname quality regioned runBatch metadata] = compileFilenames(batch_file,stimname, '');
 
 Opt.SaveFigs = 1;
 Opt.psfile = 'C:\temp\TempFigs.ps';
@@ -59,6 +59,7 @@ for i = 1:length(useN)
     try
         base = mat_fname{useN(i)}(1:end-4);
         goodfile{n+1} = dir([base '*']).name;
+        goodfileN(n+1) = useN(i);
         n= n+1;
     catch
         sprintf('cant do %s',mat_fname{useN(i)})
@@ -77,11 +78,39 @@ rLabels = {'OGL','Plex','IGL','Med'};
     %%% threshold for # of units to include data
     nthresh = 5;
 
+    figure
+    subplot(2,2,1)
+    plot(metadata.eyeSize,metadata.lobeSize,'o');
+    xlabel('eyeSize'); ylabel('lobeSize');
+    axis equal
+
+    subplot(2,2,2)
+    hist(metadata.lobeSize);
+    xlabel('lobe size mm')
+    xlim([0 1.1*max(metadata.lobeSize)]);
+    
+    subplot(2,2,3)
+    hist(metadata.screenDist);
+    xlabel('screen distance mm')
+    xlim([0 1.1*max(metadata.screenDist)]);
+    
+    
+    brainScale = metadata.lobeSize.*metadata.screenDist;
+    subplot(2,2,4)
+    hist(brainScale);
+    xlabel('screenDist * lobeSize');
+    xlim([0 1.1*max(brainScale)]);
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
 for f = 1:nfiles
-    
+    n = goodfileN(f);
     fname_clean = strrep(mat_fname{f},'_',' '); %%% underscores mess up titles so this is a better filename to use
-    fname_clean = fname_clean(1:30);
-    
+    fname_clean = fname_clean(1:20);
+    meta_label = sprintf('pupil %0.1f lobe %0.1f dist %0.0f %s %s',metadata.eyeSize(n), metadata.lobeSize(n),metadata.screenDist(n), metadata.illumination{n}, metadata.lobeOrientation{n});
+    fname_clean = [fname_clean ' ' meta_label]
+
+    eye(f) = metadata.eyeSize(n);
+    lobe(f) = metadata.lobeSize(n);
     %%% load data
    % mat_fname{f}
    clear xb yb

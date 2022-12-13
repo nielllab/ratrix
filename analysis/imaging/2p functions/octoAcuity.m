@@ -17,7 +17,7 @@ stimname = stimlist{stimnum}
 [batch_fname batch_pname] = uigetfile('*.xlsx','.xls batch file');
 batch_file = fullfile(batch_pname,batch_fname);
 
-[sbx_fname acq_fname mat_fname quality regioned] = compileFilenames(batch_file,stimname,'');
+[sbx_fname acq_fname mat_fname quality regioned runBatch metadata] = compileFilenames(batch_file,stimname,'');
 Opt.SaveFigs = 1;
 Opt.psfile = 'C:\temp\TempFigs.ps';
 if Opt.SaveFigs
@@ -39,6 +39,7 @@ for i = 1:length(useN)
     try
         base = mat_fname{useN(i)}(1:end-4);
         goodfile{n+1} = dir([base '*']).name;
+        goodfileN(n+1) = useN(i);
         n= n+1;
     catch
         sprintf('cant do %s',mat_fname{useN(i)})
@@ -108,12 +109,41 @@ f = 0; %%% counter for number of sessions included
 
 respThresh = 0.05;
 
+    figure
+    subplot(2,2,1)
+    plot(metadata.eyeSize,metadata.lobeSize,'o');
+    xlabel('eyeSize'); ylabel('lobeSize');
+    axis equal
+
+    subplot(2,2,2)
+    hist(metadata.lobeSize);
+    xlabel('lobe size mm')
+    xlim([0 1.1*max(metadata.lobeSize)]);
+    
+    subplot(2,2,3)
+    hist(metadata.screenDist);
+    xlabel('screen distance mm')
+    xlim([0 1.1*max(metadata.screenDist)]);
+    
+    
+    brainScale = metadata.lobeSize.*metadata.screenDist;
+    subplot(2,2,4)
+    hist(brainScale);
+    xlabel('screenDist * lobeSize');
+    xlim([0 1.1*max(brainScale)]);
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+
+
 for nf = 1:nfiles
-
+    n = goodfileN(nf);
     fname_clean = strrep(mat_fname{nf},'_',' '); %%% underscores mess up titles so this is a better filename to use
-    fname_clean = fname_clean(1:30);
+    fname_clean = fname_clean(1:20);
+    meta_label = sprintf('pupil %0.1f lobe %0.1f dist %0.0f %s %s',metadata.eyeSize(n), metadata.lobeSize(n),metadata.screenDist(n), metadata.illumination{n}, metadata.lobeOrientation{n});
+    fname_clean = [fname_clean ' ' meta_label]
 
-    display(sprintf('%d %s',nf,fname_clean))
+
+    %display(sprintf('%d %s',nf,fname_clean))
     
 
     %%% read in weighted timecourse (from pixelmap, weighted by baseline fluorescence

@@ -1,4 +1,4 @@
-function [sbx_fname acq_fname mat_fname quality regioned runBatch] = compileFilenames(xlsfile,stimname, suffix);
+function [sbx_fname acq_fname mat_fname quality regioned runBatch metadata] = compileFilenames(xlsfile,stimname, suffix);
 %%% reads in excel batch file and generates standardized filenames 
 %%% for sbx file , stimrec, and analsyis .mat file
 %%% cmn 2019
@@ -40,6 +40,15 @@ for j = 1:length(use);
     catch
         runBatch{j} = NaN;
     end
-    %%% example
-    %%%myfield{j} = T.myfield{i};
+
+
+    
 end
+
+metadata.illumination = {T.Illumination{use}};
+metadata.eyeSize = T.EyeSize(use);
+metadata.lobeSize = T.LobeSize(use);
+metadata.lobeOrientation = {T.LobeOrientation{use}};
+metadata.fname = {mat_fname};
+mmPerPix = (T.MirrorTypemm(use) - 5)./T.MirrorEdge_pixel(use);
+metadata.screenDist  = 5 + (T.MirrorEdge_pixel(use)+T.PupilDist_pixel(use)).*mmPerPix;

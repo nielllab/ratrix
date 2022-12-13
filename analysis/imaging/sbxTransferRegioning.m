@@ -1,7 +1,11 @@
 clear all
 close all
-%% Analyze multiple files using sbxOctoNeural function.
-%% uses excel compile file to choose files, stim, etc
+%% transfers regioning information from analysis files in a main folder
+%% onto analysis files in a subfolder.
+%% this allows a single set of regioned data to be applied to new analysis easily
+
+%% to run, set your current folder to the folder with existing regioning
+%% and set the appropriate variables below to specific the data to be transferred
 
 
 % stim_name = 'sin gratings 7 steps'

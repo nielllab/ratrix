@@ -4,6 +4,8 @@
 close all
 clear all
 
+fullfigs = 0; %%% 0 - for abbreviated figures, 1 - full figures
+
 %%% select files to analyze based on compile file
 
 %%% select files to analyze based on compile file
@@ -53,7 +55,7 @@ useN = find(usefile); clear goodfile
 n=0;
 display(sprintf('%d recordings, %d labeled good',length(usefile),length(useN)));
 
-fullfigs = 0;
+
 
 %%% collect filenames and make sure the files are there
 for i = 1:length(useN)

@@ -53,6 +53,8 @@ useN = find(usefile); clear goodfile
 n=0;
 display(sprintf('%d recordings, %d labeled good',length(usefile),length(useN)));
 
+fullfigs = 0;
+
 %%% collect filenames and make sure the files are there
 for i = 1:length(useN)
 %for i = 1:3
@@ -214,8 +216,9 @@ for f = 1:nfiles
         plot(-[zthresh zthresh], [min(rfx(:,rep)) max(rfx(:,rep))],'r');
     end
     sgtitle('zscore check');
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
+   if fullfigs
+       if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+   end 
     
     %%% calculate amplitude of response based on size response tuning(cells,on/off,size, time)
     %%% average over 3 spot sizes and response time window
@@ -231,8 +234,9 @@ for f = 1:nfiles
     figure
     bar([-1:0.1:1],onOffHist); xlabel('on off pref')
     
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
+   if fullfigs
+       if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+   end   
     %%% calculate size tuning curve, by averaging over peak response window
     sz_tune = nanmean(tuning(:,:,:,8:15),4);  %%% sz_tune(cell,on/off,size)
     
@@ -330,9 +334,9 @@ for f = 1:nfiles
     plot(squeeze(mean(tuning(useOff,2,:,:),1))');
     colororder(jet(nsz+1)*0.75)
     title('OFF')
-    
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
+   if fullfigs
+       if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+   end 
     %%% store tuning for all files
     szTuning(1,:,:,f) = nanmean(tuning(useOn,1,:,:),1);
     szTuning(2,:,:,f) = nanmean(tuning(useOff,2,:,:),1);
@@ -427,8 +431,9 @@ for f = 1:nfiles
         plot(xpts(use(i)),ypts(use(i)),'o','Color',cmapVar(onOff(use(i)),-0.5, 0.5, jet));
     end
     title('on off ratio')
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
+   if fullfigs
+       if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+   end   
     
     %     %%% size map for On
     %     figure
@@ -468,8 +473,9 @@ for f = 1:nfiles
             end       
         end
         axis equal
-        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-        
+   if fullfigs
+       if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+   end    
         
         %%% compile data
         for r = 1:4
@@ -670,31 +676,145 @@ end
 
 
 %%% region tuning
-figure
-for r = 1:4
-    subplot(2,2,r);
-    plot(1:21,squeeze(nanmean(regionTuning(r,1,:,:,:),5)));
-    title([rLabels{r} ' ON']); ylim([-0.1 0.2])
+labels = {'ON','OFF'};
+for rep = 1:2
+    figure
+    
+    for r = 1:4
+        subplot(2,2,r);
+        plot(1:21,squeeze(nanmean(regionTuning(r,rep,:,:,:),5)));
+        title([rLabels{r} ' ' labels{rep}]); ylim([-0.05 0.1])
+        colororder(jet(nsz+1)*0.75)
+    end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+end
+
+illumination = {metadata.illumination{useN}};
+types = {'Proj','LCDwOldGoo','LCDwNewGoo'};
+for i = 1:3
+    for j = 1:length(illumination)
+        include(j) = strcmp(illumination{j},types{i});
+    end
+    %%% region tuning
+    labels = {'ON','OFF'};
+    for rep = 1:2
+        figure
+        
+        for r = 1:4
+            subplot(2,2,r);
+            plot(1:21,squeeze(nanmean(regionTuning(r,rep,:,:,include),5)));
+            title([rLabels{r} ' ' labels{rep}]); ylim([-0.05 0.1])
             colororder(jet(nsz+1)*0.75)
+        end
+        sgtitle(types{i});
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    end
+    
 end
-if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-%%% Off size tuning
+
+types = {'small lobe','large lobe'};
+for i = 1:2
+    if i ==1
+        include = metadata.eyeSize(useN)<nanmedian(metadata.eyeSize(useN))
+    else
+        include = metadata.eyeSize(useN)>nanmedian(metadata.eyeSize(useN))
+    end
+    %%% region tuning
+    labels = {'ON','OFF'};
+    for rep = 1:2
+        figure
+        
+        for r = 1:4
+            subplot(2,2,r);
+            plot(1:21,squeeze(nanmean(regionTuning(r,rep,:,:,include),5)));
+            title([rLabels{r} ' ' labels{rep}]); ylim([-0.05 0.1])
+            colororder(jet(nsz+1)*0.75)
+        end
+        sgtitle(types{i});
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    end
+    
+end
+
+types = {'close screen','far screen'};
+for i = 1:2
+    if i ==1
+        include = metadata.screenDist(useN)<nanmedian(metadata.screenDist(useN))
+    else
+        include = metadata.screenDist(useN)>nanmedian(metadata.screenDist(useN))
+    end
+    %%% region tuning
+    labels = {'ON','OFF'};
+    for rep = 1:2
+        figure
+        
+        for r = 1:4
+            subplot(2,2,r);
+            plot(1:21,squeeze(nanmean(regionTuning(r,rep,:,:,include),5)));
+            title([rLabels{r} ' ' labels{rep}]); ylim([-0.05 0.1])
+            colororder(jet(nsz+1)*0.75)
+        end
+        sgtitle(types{i});
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    end
+    
+end
+
+types = {'low brainscale','high brainscale'};
+for i = 1:2
+    if i ==1
+        include = brainScale(useN)<nanmedian(brainScale(useN))
+    else
+        include = brainScale(useN)>nanmedian(brainScale(useN))
+    end
+    %%% region tuning
+    labels = {'ON','OFF'};
+    for rep = 1:2
+        figure
+        
+        for r = 1:4
+            subplot(2,2,r);
+            plot(1:21,squeeze(nanmean(regionTuning(r,rep,:,:,include),5)));
+            title([rLabels{r} ' ' labels{rep}]); ylim([-0.05 0.1])
+            colororder(jet(nsz+1)*0.75)
+        end
+        sgtitle(types{i});
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    end
+    
+end
+
+
+illumination = {metadata.illumination{useN}};
+types = {'Proj','LCDwOldGoo','LCDwNewGoo'};
 figure
-for r = 1:4
-    subplot(2,2,r);
-    plot(1:21,squeeze(nanmean(regionTuning(r,2,:,:,:),5)));
-    title([rLabels{r} ' Off']); ylim([-0.1 0.2])
-   colororder(jet(nsz+1)*0.75)
+for i = 1:3
+    subplot(2,2,i)
+    for j = 1:length(illumination)
+        include(j) = strcmp(illumination{j},types{i});
+    end
+    plot(fracOnOff(:,include,1),'ro');
+    hold on
+    plot(nanmean(fracOnOff(:,include,1),2),'r','Linewidth',2);
+    plot(fracOnOff(:,include,2),'bo');
+    plot(nanmean(fracOnOff(:,include,2),2),'b','Linewidth',2);
+    xlim([0.5 4.5]); ylim([0 1]);
+    xlabel('layer'); ylabel('fraction');
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    title(types{i});
 end
-if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
+    
 figure
 plot(fracOnOff(:,:,1),'ro');
 hold on
+plot(nanmean(fracOnOff(:,:,1),2),'r','Linewidth',2);
 plot(fracOnOff(:,:,2),'bo');
+plot(nanmean(fracOnOff(:,:,2),2),'b','Linewidth',2);
 xlim([0.5 4.5]); ylim([0 1]);
 xlabel('layer'); ylabel('fraction'); 
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 
 

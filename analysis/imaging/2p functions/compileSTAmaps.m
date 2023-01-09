@@ -120,7 +120,7 @@ for f = 1:nfiles
    clear xb yb
    warning('off','MATLAB:load:variableNotFound')
    
-   load(mat_fname{f},'xpts','ypts','rfx','rfy','tuning','zscore','xb','yb','meanGreenImg')
+   load(mat_fname{f},'xpts','ypts','rfx','rfy','tuning','zscore','xb','yb','meanGreenImg','stas')
    warning('on','MATLAB:load:variableNotFound')
 
 
@@ -129,6 +129,10 @@ for f = 1:nfiles
     use = find(zscore(:,1)>zthresh | zscore(:,2)<-zthresh);
     useOn = find(zscore(:,1)>zthresh); useOff = find(zscore(:,2)<-zthresh);
     
+%     %%% only ON or OFF (no mixed)
+%     useOn = find(zscore(:,1)>zthresh & zscore(:,2)>-zthresh);  
+%     useOff = find(zscore(:,2)<-zthresh & zscore(:,1)<zthresh);
+
     %%% if there's no Off responsive (or On) just use the first three units.
     %%% this allows subsequent code to run, and can be filtered out later
     %%% based on nOn and nOff
@@ -138,7 +142,6 @@ for f = 1:nfiles
     if length(useOff)<3
         useOff = 1:3;
     end
-    
     
     useOnOff = intersect(useOn,useOff);
     notOn = find(zscore(:,1)<zthresh); notOff = find(zscore(:,2)>-zthresh);
@@ -165,7 +168,7 @@ for f = 1:nfiles
     rfys = [rfy(useOn,1); rfy(useOff,2)];
     x0 = nanmedian(rfxs);
     y0 = nanmedian(rfys);
-
+    
     axLabel = {'X','Y'};
     onoffLabel = {'On','Off'};
     figure
@@ -204,6 +207,67 @@ for f = 1:nfiles
     plot(rfx(useOff,2),rfy(useOff,2),'b.')
     axis equal; axis([0 256 0 192]); 
     title('rf locations')
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+        pixpercm = 256/95;  %%% screen is 256 pix, 95mm wide
+    rf_az = (rfx - 128)/pixpercm;
+    rf_el = (rfy - 96)/pixpercm;
+    rf_az = atan2d(rf_az, metadata.screenDist(n));
+    rf_el = atan2d(rf_el, metadata.screenDist(n));
+    
+       figure
+    plot(rf_az(useOn,1),rf_el(useOn,1),'r.')
+    hold on
+    plot(rf_az(useOff,2),rf_el(useOff,2),'b.')
+    axis equal; axis([-90 90 -70 70]); 
+    title('rf locations deg')
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+        regionID = zeros(size(xpts));
+           for r = 1:length(xb)
+            if length(xb{r})>0
+                inRegion = inpolygon(xpts,ypts,xb{r},yb{r});
+                regionID(inRegion) = r;
+            end       
+        end
+    
+    
+    
+    zthreshRF = 5.5;
+    useOnRF = find(zscore(:,1)>zthreshRF); useOffRF = find(zscore(:,2)<-zthreshRF);
+    if f ==1
+        p_on = []; wx_on = [];wy_on = []; sess_on = []; region_on = [];z_on=[];
+        p_off = []; wx_off = [];wy_off = []; sess_off = []; region_off = []; z_off = [];
+    end
+    for rfn= 1:length(useOnRF)
+        p = fitOctorf(stas(:,:,useOnRF(rfn),1));
+        p_on = [p_on; p]; sess_on = [sess_on; f]; region_on = [region_on; regionID(useOnRF(rfn))]; z_on = [z_on; zscore(useOnRF(rfn),1)];
+    end
+    dist = metadata.screenDist(n);
+    [center_az center_el] = octoPix2Deg(p_on(:,3),p_on(:,4),dist);
+    edge_az = octoPix2Deg(p_on(:,3)+ p_on(:,5),p_on(:,4),dist);
+    wx_on = [wx_on ;edge_az- center_az];
+    [center_az edge_el] = octoPix2Deg(p_on(:,3),p_on(:,4)+ p_on(:,6),dist);
+    wy_on = [wy_on  ;edge_el - center_el];
+    
+    
+    %%% fit OFF receptive fields
+    for rfn= 1:length(useOffRF)
+        p = fitOctorf(stas(:,:,useOffRF(rfn),2));
+        p_off = [p_off; p];sess_off = [sess_off; f]; region_off = [region_off; regionID(useOffRF(rfn))]; z_off = [z_off; zscore(useOffRF(rfn),2)];
+    end
+    dist = metadata.screenDist(n);
+    [center_az center_el] = octoPix2Deg(p_off(:,3),p_off(:,4),dist);
+    edge_az = octoPix2Deg(p_off(:,3)+ p_off(:,5),p_off(:,4),dist);
+    wx_off = [wx_off; edge_az- center_az];
+    [center_az edge_el] = octoPix2Deg(p_off(:,3),p_off(:,4)+ p_off(:,6),dist);
+    wy_off = [wy_off ; edge_el - center_el];
+    
+    figure
+    plot(wx_on(sess_on ==f), wy_on(sess_on==f),'r.'); 
+    hold on
+    plot(wx_off(sess_off ==f), wy_off(sess_off==f),'b.'); axis([0 20 0 20]);
+    xlabel('rf width x deg'); ylabel('rf width y deg');
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
     
@@ -357,11 +421,11 @@ for f = 1:nfiles
     title('off')
     
     subplot(2,2,3)
-    plot(rfx(useOn,2),xptsnew(useOn),'.'); xlabel('RFx location'); ylabel('cell x location')
+    plot(rfx(useOn,1),xptsnew(useOn),'.'); xlabel('RFx location'); ylabel('cell x location')
     title('on')
     
     subplot(2,2,4)
-    plot(rfx(useOn,2),yptsnew(useOn),'.'); xlabel('RF x location'); ylabel('cell y location')
+    plot(rfx(useOn,1),yptsnew(useOn),'.'); xlabel('RF x location'); ylabel('cell y location')
     title('on')
     %if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
@@ -371,36 +435,61 @@ for f = 1:nfiles
     mx = mean(rfx(useOn,1),1);
     my = mean(rfy(useOn,1),1);
     
-    %%% calculate correlation coeffs for RF location and cell location
-    cc = corrcoef(rfx(useOn,1)-mx,xptsnew(useOn));
-    topoCC(1,1,f) = cc(2,1);
-    cc = corrcoef(rfy(useOn,1)-my,yptsnew(useOn));
-    topoCC(2,1,f) = -cc(2,1);
-    cc = corrcoef(rfx(useOff,2)-mx,xptsnew(useOff));
-    topoCC(1,2,f) = cc(2,1);
-    cc = corrcoef(rfy(useOff,2)-my,yptsnew(useOff));
-    topoCC(2,2,f) = -cc(2,1);
-    
-    %%% create values for shuffle
+        %%% create values for shuffle
     n= length(rfx);
     xshuff = xptsnew(ceil(n*rand(n,1)));
     yshuff = yptsnew(ceil(n*rand(n,1)));
     
-    cc = corrcoef(rfx(useOn,1)-mx,xshuff(useOn));
-    topoCCshuff(1,1,f) = cc(2,1);
-    cc = corrcoef(rfy(useOn,1)-my,yshuff(useOn));
-    topoCCshuff(2,1,f) = -cc(2,1);
-    cc = corrcoef(rfx(useOff,2)-mx,xshuff(useOff));
-    topoCCshuff(1,2,f) = cc(2,1);
-    cc = corrcoef(rfy(useOff,2)-my,yshuff(useOff));
-    topoCCshuff(2,2,f) = -cc(2,1);
+    ethresh = 20;
+    [beta(1,1,:,f) topoErr(1,1,f) topoCC(1,1,f) bad] = fitTopo(xptsnew(useOn),yptsnew(useOn), rf_az(useOn,1),ethresh)
+    [beta(1,2,:,f) topoErr(1,2,f) topoCC(1,2,f) bad] = fitTopo(xptsnew(useOn),yptsnew(useOn), rf_el(useOn,1),ethresh)
+    [beta(2,1,:,f) topoErr(2,1,f) topoCC(2,1,f) bad] = fitTopo(xptsnew(useOff),yptsnew(useOff), rf_az(useOff,2),ethresh)
+    [beta(2,2,:,f) topoErr(2,2,f) topoCC(2,2,f) bad] = fitTopo(xptsnew(useOff),yptsnew(useOff), rf_el(useOff,2),ethresh)
+
+    try
+        [beta_sh(1,1,:,f) topoErrshuff(1,1,f) topoCCshuff(1,1,f) bad] = fitTopo(xshuff(useOn),yshuff(useOn), rf_az(useOn,1),ethresh)
+        [beta_sh(1,2,:,f) topoErrshuff(1,2,f) topoCCshuff(1,2,f) bad] = fitTopo(xshuff(useOn),yshuff(useOn), rf_el(useOn,1),ethresh)
+        
+        [beta_sh(2,1,:,f) topoErrshuff(2,1,f) topoCCshuff(2,1,f) bad] = fitTopo(xshuff(useOff),yshuff(useOff), rf_az(useOff,2),ethresh)
+        [beta_sh(2,2,:,f) topoErrshuff(2,2,f) topoCCshuff(2,2,f) bad] = fitTopo(xshuff(useOff),yshuff(useOff), rf_el(useOff,2),ethresh)
+    catch
+        display('not enough points for shuffle topo OFF')
+        topoErrshuff(:,:,f) = NaN; topoCCshuff(:,:,f) = NaN;
+    end
     
-    %     %%% diagnostic of topography
-    %     figure
-    %     plot(topoCC(:,:,f)); hold on; plot(topoCCshuff(:,:,f),':');
-    %     title(mat_fname{f}); set(gca,'Xtick',[1 2]); set(gca,'Xticklabel',{'x','y'})
-    %     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    %
+    
+%     %%% calculate correlation coeffs for RF location and cell location
+%     cc = corrcoef(rfx(useOn,1)-mx,xptsnew(useOn));
+%     topoCC(1,1,f) = cc(2,1);
+%     cc = corrcoef(rfy(useOn,1)-my,yptsnew(useOn));
+%     topoCC(2,1,f) = -cc(2,1);
+%     cc = corrcoef(rfx(useOff,2)-mx,xptsnew(useOff));
+%     topoCC(1,2,f) = cc(2,1);
+%     cc = corrcoef(rfy(useOff,2)-my,yptsnew(useOff));
+%     topoCC(2,2,f) = -cc(2,1);
+%     
+% 
+%     
+%     cc = corrcoef(rfx(useOn,1)-mx,xshuff(useOn));
+%     topoCCshuff(1,1,f) = cc(2,1);
+%     cc = corrcoef(rfy(useOn,1)-my,yshuff(useOn));
+%     topoCCshuff(2,1,f) = -cc(2,1);
+%     cc = corrcoef(rfx(useOff,2)-mx,xshuff(useOff));
+%     topoCCshuff(1,2,f) = cc(2,1);
+%     cc = corrcoef(rfy(useOff,2)-my,yshuff(useOff));
+%     topoCCshuff(2,2,f) = -cc(2,1);
+    
+        %%% diagnostic of topography
+        figure
+        plot(topoCC(:,:,f)); hold on; plot(topoCCshuff(:,:,f),':');
+        title('topo CC'); set(gca,'Xtick',[1 2]); set(gca,'Xticklabel',{'x','y'})
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+       
+        figure
+        plot(topoErr(:,:,f)); hold on; plot(topoErrshuff(:,:,f),':');
+        title('topo err'); set(gca,'Xtick',[1 2]); set(gca,'Xticklabel',{'x','y'})
+             if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
     
     %%% center RF positions
     x0 = nanmedian(rfx(useOn,1));
@@ -623,21 +712,53 @@ legend({'3deg','6deg','12deg','full-field'});
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %%% calculate mean values for topography
-clear data
-data(:,1) = mean(topoCC(:,1,:),3);
-err(:,1) = std(topoCC(:,1,:),[],3) / sqrt(f);
+for rep = 1:2 %%% should select only recordings with adequate off sampling
+    if rep ==1
+        useTopo = nOn>100;
+    else
+        useTopo = nOff>100;
+    end
+    
+    clear data
+    data(:,1) = mean(topoCC(rep,:,useTopo),3);
+    err(:,1) = std(topoCC(rep,:,useTopo),[],3) / sqrt(f);
+    
+    data(:,2) = mean(topoCCshuff(rep,:,useTopo),3);
+    err(:,2) = std(topoCCshuff(rep,:,useTopo),[],3) / sqrt(f);
+    
+    %%% errorbar plots of topography
+    figure
+    barweb(data,err); ylim([0 1]);
+    set(gca,'Xticklabel',{'azimuth','elevation'});
+    ylabel('correlation coeff');
+    legend({'data','shuffle'})
+    title(['topography correlation ',onoffLabel{rep}])
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+end
 
-data(:,2) = mean(topoCCshuff(:,1,:),3);
-err(:,2) = std(topoCCshuff(:,1,:),[],3) / sqrt(f);
-
-%%% errorbar plots of topography
-figure
-barweb(data,err)
-set(gca,'Xticklabel',{'azimuth','elevation'});
-ylabel('correlation coeff');
-legend({'data','shuffle'})
-title('topography correlation')
-if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+%%% calculate mean values for topography
+for rep = 1:2 %%% should select only recordings with adequate off sampling
+    if rep ==1
+        useTopo = nOn>100;
+    else
+        useTopo = nOff>100;
+    end
+    clear data
+    data(:,1) = mean(topoErr(rep,:,useTopo),3);
+    err(:,1) = std(topoErr(rep,:,useTopo),[],3) / sqrt(f);
+    
+    data(:,2) = mean(topoErrshuff(rep,:,useTopo),3);
+    err(:,2) = std(topoErrshuff(rep,:,useTopo),[],3) / sqrt(f);
+    
+    %%% errorbar plots of topography
+    figure
+    barweb(data,err); 
+    set(gca,'Xticklabel',{'azimuth','elevation'});
+    ylabel('correlation coeff');
+    legend({'data','shuffle'})
+    title(['topography error (deg) ',onoffLabel{rep}])
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+end
 
 %%% trying for tuning across recordings
 %
@@ -679,11 +800,10 @@ end
 
 %%% region tuning
 labels = {'ON','OFF'};
-for rep = 1:2
-    figure
-    
+ figure
+ for rep = 1:2   
     for r = 1:4
-        subplot(2,2,r);
+        subplot(2,4,r+(rep-1)*4);
         plot(1:21,squeeze(nanmean(regionTuning(r,rep,:,:,:),5)));
         title([rLabels{r} ' ' labels{rep}]); ylim([-0.05 0.1])
         colororder(jet(nsz+1)*0.75)
@@ -692,18 +812,19 @@ for rep = 1:2
 end
 
 illumination = {metadata.illumination{useN}};
-types = {'Proj','LCDwOldGoo','LCDwNewGoo'};
-for i = 1:3
+types = {'Proj','LCDwNewGoo'};
+for i = 1:2
     for j = 1:length(illumination)
         include(j) = strcmp(illumination{j},types{i});
     end
     %%% region tuning
     labels = {'ON','OFF'};
+    figure
     for rep = 1:2
-        figure
+        
         
         for r = 1:4
-            subplot(2,2,r);
+            subplot(2,4,r+(rep-1)*4);
             plot(1:21,squeeze(nanmean(regionTuning(r,rep,:,:,include),5)));
             title([rLabels{r} ' ' labels{rep}]); ylim([-0.05 0.1])
             colororder(jet(nsz+1)*0.75)
@@ -724,11 +845,12 @@ for i = 1:2
     end
     %%% region tuning
     labels = {'ON','OFF'};
+    figure
     for rep = 1:2
-        figure
+        
         
         for r = 1:4
-            subplot(2,2,r);
+            subplot(2,4,r+(rep-1)*4);
             plot(1:21,squeeze(nanmean(regionTuning(r,rep,:,:,include),5)));
             title([rLabels{r} ' ' labels{rep}]); ylim([-0.05 0.1])
             colororder(jet(nsz+1)*0.75)
@@ -748,11 +870,12 @@ for i = 1:2
     end
     %%% region tuning
     labels = {'ON','OFF'};
+    figure
     for rep = 1:2
-        figure
+        
         
         for r = 1:4
-            subplot(2,2,r);
+            subplot(2,4,r+(rep-1)*4);
             plot(1:21,squeeze(nanmean(regionTuning(r,rep,:,:,include),5)));
             title([rLabels{r} ' ' labels{rep}]); ylim([-0.05 0.1])
             colororder(jet(nsz+1)*0.75)
@@ -807,7 +930,20 @@ for i = 1:3
     title(types{i});
 end
 
-    
+layerLabels = {'OGL', 'Plex','IGL','Med'};
+
+figure
+for r = 1:4
+    subplot(2,2,r)
+    w_on = 0.5*(wx_on + wy_on);
+    w_off = 0.5*(wx_off + wy_off);
+    h_on = hist (w_on(region_on==r)',0:1:15)/length(w_on(region_on==r));
+    h_off = hist (w_off(region_off==r)',0:1:15)/length(w_off(region_off==r));
+    plot(h_on, 'r'); hold on; plot(h_off,'b');
+    xlabel('rf radius deg'); ylabel('fraction'); legend({'ON','OFF'})
+    title(layerLabels{r})
+end
+
 figure
 plot(fracOnOff(:,:,1),'ro');
 hold on
@@ -818,6 +954,20 @@ xlim([0.5 4.5]); ylim([0 1]);
 xlabel('layer'); ylabel('fraction'); 
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
+
+figure
+%plot(fracOnOff(:,:,1),'ro');
+nrec = size(fracOnOff,2);
+hold on
+errorbar(nanmean(fracOnOff(:,:,1),2),nanstd(fracOnOff(:,:,1),[],2)/sqrt(nrec), 'r','Linewidth',2);
+%plot(fracOnOff(:,:,2),'bo');
+errorbar(nanmean(fracOnOff(:,:,2),2),nanstd(fracOnOff(:,:,2),[],2)/sqrt(nrec), 'b','Linewidth',2);
+xlim([0.5 4.5]); ylim([0 0.6]);
+xlabel('layer'); ylabel('fraction'); 
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+set(gca,'Xtick',[1 2 3 4])
+set(gca,'Xticklabel',layerLabels)
+legend({'ON','OFF'})
 
 
 figure

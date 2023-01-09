@@ -1,3 +1,6 @@
+%%% overlays data from two separate sparse noise recordings
+%%% plots On and Off responsive units for each recording
+
 clear all
 zthresh = 5.5
 

@@ -30,7 +30,7 @@ for j = 1:length(use);
     mat_fname{j} = strrep(mat_fname{j},' ','_');
     
     %%% other fields?
-    quality{j} = T.GoodQuality{i};
+    quality{j} = T.GoodQuality_Proj{i};
     
     %%% has it been regioned?
     regioned{j} = T.regioned{i};

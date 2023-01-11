@@ -38,6 +38,11 @@ else
     %     Opt.SaveOutput = 0;
 end
 
+if isfield(Opt,'cellrange')
+    pts_range = Opt.cellrange;
+else
+    pts_range = -3:3; %%% was -3:3 before 011123
+end
 
 %%% frame rate for resampling
 % dt = 0.5;
@@ -166,7 +171,7 @@ baserange=0:2;
 %baserange =2;
 
 %%% box size for 'cell body' points
-pts_range = -3:3;
+%pts_range = -3:3; now set above
 
 for rep =1:2 %%% 4 conditions: On, Off, fullfield On, fullfield off; currently skipping fullfield since it's not interesting
     

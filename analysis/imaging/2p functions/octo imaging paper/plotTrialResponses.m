@@ -134,6 +134,8 @@ for i = 1:length(x)
     traces(:,i) = traces(:,i)-nanmean(traces(:,i));
 end
 
+%traces = dF(10:20:end,:)';
+
 figure
 plot(traces);
 xlim([0 300])

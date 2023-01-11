@@ -38,7 +38,12 @@ else
     %     Opt.SaveOutput = 0;
 end
 
-
+    if isfield(Opt,'cellrange')
+        cellrange = Opt.cellrange;
+    else
+        cellrange = -2:2; %%% was -2:2 before 011123
+    end
+    
 %%% frame rate for resampling
 % dt = 0.5;
 % framerate=1/dt;
@@ -402,10 +407,10 @@ else
     plot(x,y,'o');
     
     %%% average df/f in a box around each selected point
-    range = -2:2;
+
     clear dF
     for i = 1:length(x)
-        dF(i,:) = mean(mean(dfofInterp(y(i)+range,x(i)+range,:),2),1);
+        dF(i,:) = mean(mean(dfofInterp(y(i)+cellrange,x(i)+cellrange,:),2),1);
     end
     xpts = x; ypts = y; %%% new names so they don't get overwritten
 end  %%% if/else

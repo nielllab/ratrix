@@ -371,12 +371,14 @@ else
     if isfield(Opt,'selectCrop') && Opt.selectCrop ==1
         disp('Select area in figure to include in the analysis');
         [xrange, yrange] = ginput(2);
-    else
-        b = 5;
-        xrange = [b size(img,2)-b];
-        yrange = [b size(img,1)-b];
+        pts = pts(x>xrange(1) & x<xrange(2) & y>yrange(1) & y<yrange(2));
     end
+
+    b = cellrange(end)+1;  %%% previously 5
+    xrange = [b size(img,2)-b];
+    yrange = [b size(img,1)-b];
     pts = pts(x>xrange(1) & x<xrange(2) & y>yrange(1) & y<yrange(2));
+    
     
     %%% sort points based on their value (max df/f)
     [brightness, order] = sort(img(pts),1,'descend');
@@ -404,8 +406,9 @@ else
     [y, x] = ind2sub(size(maxStd),pts);
     figure
     imagesc(stdImg,[0 prctile(stdImg(:),98)]); hold on; colormap gray
-    plot(x,y,'o');
-    
+    plot(x,y,'o');title(sprintf('df %d cellrange %d',mindf,cellrange(end)))
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
     %%% average df/f in a box around each selected point
 
     clear dF

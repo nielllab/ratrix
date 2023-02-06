@@ -46,7 +46,11 @@ for d = durat
         % now that we have CRF across sessions for 1 point, take the std err across
         % sessions, for that point
         % should give 1 x 7
-        stdErr_acrossSess_1behState_1pt = std(squeeze(behState_allSessAllPtsAllDurs_CRF(d,:,i,:))')/sqrt(size(behState_allSessAllPtsAllDurs_CRF,4));
+        %stdErr_acrossSess_1behState_1pt = std(squeeze(behState_allSessAllPtsAllDurs_CRF(d,:,i,:))')/sqrt(size(behState_allSessAllPtsAllDurs_CRF,4));
+        % div by numMice instead:
+        global numMice
+        %stdErr_acrossSess_1behState_1pt = std(squeeze(behState_allSessAllPtsAllDurs_CRF(d,:,i,:))')/sqrt(numMice);
+        stdErr_acrossSess_1behState_1pt = std(squeeze(behState_allSessAllPtsAllDurs_CRF(d,:,i,:))')/sqrt(numMice);
         % collect std err across sess for each point:
         stdErrCRF_acrossSess_1behState_allPts(i,:) = stdErr_acrossSess_1behState_1pt;
     

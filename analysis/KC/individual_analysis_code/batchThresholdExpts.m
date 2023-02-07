@@ -668,27 +668,27 @@ outpathname = 'E:\305RT\'
 
 %% 081221_G6H305LT_RIG2  
 
-% n=n+1;
-% files(n).subj = 'G6H305LT'; %animal name
-% files(n).expt = '081221'; %date of experiment
-% files(n).topox = '081221_G6H305LT_RIG2\081221_G6H305LT_RIG2_TOPOX\081221_G6H305LT_RIG2_TOPOXmaps.mat'; %where to put dfof
-% files(n).topoxdata = '081221_G6H305LT_RIG2\081221_G6H305LT_RIG2_TOPOX\081221_G6H305LT_RIG2_TOPOX'; %raw data
-% files(n).topoy = '081221_G6H305LT_RIG2\081221_G6H305LT_RIG2_TOPOY\081221_G6H305LT_RIG2_TOPOYmaps.mat';
-% files(n).topoydata = '081221_G6H305LT_RIG2\081221_G6H305LT_RIG2_TOPOY\081221_G6H305LT_RIG2_TOPOY';
-% files(n).thresh = '081221_G6H305LT_RIG2\081221_G6H305LT_RIG2_THRESH\081221_G6H305LT_RIG2_THRESHmaps.mat';
-% files(n).threshdata = '081221_G6H305LT_RIG2\081221_G6H305LT_RIG2_THRESH\081221_G6H305LT_RIG2_THRESH';
-% files(n).inject = 'none'; 
-% files(n).dose = 'none';
-% files(n).virus = 'none'
-% files(n).timing = 'none';
-% files(n).training = 'naive';
-% files(n).area = 'none';
-% files(n).rignum = 'rig2';
-% files(n).monitor = 'land';
-% files(n).genotype = 'camk2 gc6';
-% files(n).imagerate = 10;
-% files(n).moviename4x3y = 'none'; %def started using 'fix' version before this... shortly after Phil fixed it
-% files(n).notes = ' ';
+n=n+1;
+files(n).subj = 'G6H305LT'; %animal name
+files(n).expt = '081221'; %date of experiment
+files(n).topox = '081221_G6H305LT_RIG2\081221_G6H305LT_RIG2_TOPOX\081221_G6H305LT_RIG2_TOPOXmaps.mat'; %where to put dfof
+files(n).topoxdata = '081221_G6H305LT_RIG2\081221_G6H305LT_RIG2_TOPOX\081221_G6H305LT_RIG2_TOPOX'; %raw data
+files(n).topoy = '081221_G6H305LT_RIG2\081221_G6H305LT_RIG2_TOPOY\081221_G6H305LT_RIG2_TOPOYmaps.mat';
+files(n).topoydata = '081221_G6H305LT_RIG2\081221_G6H305LT_RIG2_TOPOY\081221_G6H305LT_RIG2_TOPOY';
+files(n).thresh = '081221_G6H305LT_RIG2\081221_G6H305LT_RIG2_THRESH\081221_G6H305LT_RIG2_THRESHmaps.mat';
+files(n).threshdata = '081221_G6H305LT_RIG2\081221_G6H305LT_RIG2_THRESH\081221_G6H305LT_RIG2_THRESH';
+files(n).inject = 'none'; 
+files(n).dose = 'none';
+files(n).virus = 'none'
+files(n).timing = 'none';
+files(n).training = 'naive';
+files(n).area = 'none';
+files(n).rignum = 'rig2';
+files(n).monitor = 'land';
+files(n).genotype = 'camk2 gc6';
+files(n).imagerate = 10;
+files(n).moviename4x3y = 'none'; %def started using 'fix' version before this... shortly after Phil fixed it
+files(n).notes = ' ';
 
 %% 081121_G6H305LT_RIG2  
 

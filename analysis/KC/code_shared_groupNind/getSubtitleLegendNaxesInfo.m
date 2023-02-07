@@ -2,7 +2,7 @@ function [reigons,cons4Legend,cons4axes,durs4Legend,durs4Axes] = getSubtitleLege
 % figure title, legend, & axes info. Inputs made in prev function
 
 % subplot titles
-reigons = {'V1','LP-HVA','LA-HVA','MA-HVA','control'};
+reigons = {'V1','LM','RL','AM','NV'};
 
 % legend & axes
 cons4Legend = arrayfun(@num2str, uniqueContrasts, 'UniformOutput', 0); % max contrast is '1'

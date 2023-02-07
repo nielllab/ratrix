@@ -48,8 +48,8 @@ for d = durat
         % get stdev across sessions
         %loBehState_stdErrOverSess = std(squeeze(loBehState_allSessAllPtsAllDurs_CRF(d,:,i,:))')/sqrt(size(loBehState_allSessAllPtsAllDurs_CRF,4));
         % stderr across mice
-        global numMice
-        loBehState_stdErrOverSess = std(squeeze(scaled_loBehState_meanDthCRFacrossSess(d,:,i,:))')/sqrt(numMice); 
+        %global numMice
+        %loBehState_stdErrOverSess = std(squeeze(scaled_loBehState_meanDthCRFacrossSess(d,:,i,:))')/sqrt(numMice); 
         %loBehState_stdErrOverSess = std(squeeze(loBehState_allSessAllPtsAllDurs_CRF(d,:,i,:))'); 
         
         %plot(x_axis,scaled_loBehState_meanDthCRFacrossSess,'color',loStateLineColor,'lineWidth',2,'MarkerSize',3) 

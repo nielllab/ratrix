@@ -86,7 +86,7 @@ for n = 1:nGroup
                 % calulate the StdErr for each CRF point calulated above (one err value for each contrast)
                 % that means I want the error over trials, not over frames - that info is in the 'meanOverFramesSq5FramesOverTrialsPTSdfof' variable (1 x # trials)
                 clear stdErr
-                stdErr = std(meanOverFramesSq5FramesOverTrialsPTSdfof)/sqrt(length(idxTrials)); % check: length or sum?
+                stdErr = std(meanOverFramesSq5FramesOverTrialsPTSdfof)/sqrt(sum(idxTrials)); % check: length or sum?
                 CRF_err(1,c) = stdErr; % clear outside j loop
                 
                 numTrials = length(idxTrials);

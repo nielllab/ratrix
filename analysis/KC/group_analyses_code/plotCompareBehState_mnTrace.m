@@ -34,8 +34,10 @@ for d = durat
 
                 loBehState_mnTraceOverSess_dthIthCon = loRun_mnTraceAllConsDursPts(c,:,d,i,:);
 
-                x_axis = [1:length(loBehState_mnTraceOverSess_dthIthCon)];
-
+                x_axis = [1:size(loBehState_mnTraceOverSess_dthIthCon,2)];
+                x_axis = x_axis/10; % from frames to seconds
+                x_axis = x_axis-0.4;
+                
                 plot(x_axis,loBehState_mnTraceOverSess_dthIthCon,'color',loStateLineColor,'lineWidth',2,'MarkerSize',3) 
 
                 xMin = min(x_axis);
@@ -59,7 +61,10 @@ for d = durat
                 global numMice
                 loBehState_mnTraceOverSess_std = std(squeeze(loRun_mnTraceAllConsDursPts(c,:,d,i,:))')/sqrt(numMice); 
                 
-                x_axis = [1:length(loBehState_mnTraceOverSess_dthIthCon)];
+                %x_axis = [1:length(loBehState_mnTraceOverSess_dthIthCon)];
+                x_axis = [1:size(loBehState_mnTraceOverSess_dthIthCon,2)];
+                x_axis = x_axis/10; % from frames to seconds
+                x_axis = x_axis-0.4;
 
                 % plot for lo beh state
                 errorbar(x_axis,loBehState_mnTraceOverSess_dthIthCon,loBehState_mnTraceOverSess_std,'color',loStateLineColor,'lineWidth',2,'MarkerSize',2) 
@@ -81,7 +86,10 @@ for d = durat
 
                 hiBehState_mnTraceOverSess_dthIthCon = hiRun_mnTraceAllConsDursPts(c,:,d,i,:);
 
-                x_axis = [1:length(loBehState_mnTraceOverSess_dthIthCon)];
+                x_axis = [1:length(hiBehState_mnTraceOverSess_dthIthCon)];
+                x_axis = x_axis/10;
+                x_axis = x_axis-0.4;
+                
                 plot(x_axis,hiBehState_mnTraceOverSess_dthIthCon,'color',hiStateLineColor,'lineWidth',2,'MarkerSize',3) 
 
                 xMin = min(x_axis);
@@ -103,13 +111,18 @@ for d = durat
                 global numMice
                 hiBehState_mnTraceOverSess_std = std(squeeze(hiRun_mnTraceAllConsDursPts(c,:,d,i,:))')/sqrt(numMice); 
 
-                x_axis = [1:length(hiBehState_mnTraceOverSess_dthIthCon)];
+                %x_axis = [1:length(hiBehState_mnTraceOverSess_dthIthCon)];
+                x_axis = [1:size(hiBehState_mnTraceOverSess_dthIthCon,2)];
+                x_axis = x_axis/10; % from frames to seconds
+                x_axis = x_axis-0.4;
+                
                 % plot for lo beh state
                 errorbar(x_axis,hiBehState_mnTraceOverSess_dthIthCon,hiBehState_mnTraceOverSess_std,'color',hiStateLineColor,'lineWidth',2,'MarkerSize',3) 
 
                 xMin = min(x_axis);
                 xMax = max(x_axis);
                 xLimit = [xMin xMax];
+                %xLimit = [0 2];
                 xlim(xLimit);
 
                 %tt={'0'; '3' ; '6' ; '12' ; '25' ; '50'; '100'};
@@ -117,8 +130,8 @@ for d = durat
                 title(sprintf('%s%s',cons4axes{c},'%'))
 
                 ylim(yLimit) 
-                ylabel('df/f')
-                xlabel('frames')
+                ylabel('dF/F')
+                xlabel('seconds')
 
             end % end of nGroup loop
 
@@ -148,10 +161,11 @@ for d = durat
         set(gca,'YTick',yt)
         set(gca,'YTickLabel',ytl)
 
-        xt = [0:4:length(loRun_mnTraceAllConsDursPts)];
-        xtl = arrayfun(@num2str, xt, 'UniformOutput', 0);
-        set(gca,'xtick',xt); 
-        set(gca,'xticklabel',xtl);
+%         xt = [0:4:length(loRun_mnTraceAllConsDursPts)];
+%         xt = xt/10;
+%         xtl = arrayfun(@num2str, xt, 'UniformOutput', 0);
+%         set(gca,'xtick',xt); 
+%         set(gca,'xticklabel',xtl);
         
             %legend(stateLegend)
             

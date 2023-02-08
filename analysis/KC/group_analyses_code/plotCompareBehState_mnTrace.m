@@ -113,7 +113,8 @@ for d = durat
                 xlim(xLimit);
 
                 %tt={'0'; '3' ; '6' ; '12' ; '25' ; '50'; '100'};
-                title(cons4axes{c})
+                %title(cons4axes{c})
+                title(sprintf('%s%s',cons4axes{c},'%'))
 
                 ylim(yLimit) 
                 ylabel('df/f')

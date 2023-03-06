@@ -782,6 +782,29 @@ legend({'ON','OFF'})
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 
+%%% retinotopic magnification in deg/um
+mag = squeeze(sqrt(beta(:,:,1,:).^2 + beta(:,:,2,:).^2))/2;  %divide by 2 because 1pix = 2um
+%%% retinotopic magnification in deg/um
+mag = 1./mag;
+
+useTopo = nOn>100
+clear data
+data(:,1) = mean(mag(1,:,useTopo),3);
+err(:,1) = std(mag(1,:,useTopo),[],3) / sqrt(sum(useTopo));
+
+useTopo = nOff>100
+data(:,2) = mean(mag(2,:,useTopo),3);
+err(:,2) = std(mag(2,:,useTopo),[],3) / sqrt(sum(useTopo));
+
+%%% errorbar plots of topography (error)
+figure
+barweb(data,err);
+
+set(gca,'Xticklabel',{'azimuth','elevation'});
+ylabel('retinotopic mag um/deg');
+legend({'ON','OFF'})
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
 
 %%% calculate mean values for topography
 for rep = 1:2 %%% should select only recordings with adequate off sampling
@@ -1108,6 +1131,14 @@ plot(h_on, 'r'); hold on; plot(h_off,'b');
 xlabel('rf radius deg'); ylabel('fraction'); legend({'ON','OFF'})
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
+for f = 1:6
+    rf_sess(1,f) = nanmean(w_on(z_on>6 & sess_on==f)); n_rf(1,f) = sum(z_on>6 & sess_on==f);
+    rf_sess(2,f) = nanmean(w_off(z_off<-6 & sess_off==f)); n_rf(2,f) = sum(z_off<-6 & sess_off==f);
+end
+
+rf_sess(n_rf<10)=NaN;
+nanmean(rf_sess,2)
+nanstd(rf_sess,[],2)
 rfsz(1) = nanmean(w_on(z_on>6));
 rfsz(2) = nanmean(w_off(z_off<-6));
 rferr(1) = nanstd(w_on(z_on>6))/sqrt(6);

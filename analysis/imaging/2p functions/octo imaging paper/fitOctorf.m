@@ -1,4 +1,4 @@
-function [p g] = fitOctorf(z, zthresh);
+function [p g cc] = fitOctorf(z, zthresh);
 %%% fit gaussian rf cmn 2012
 %%% peak has to be reasonably high above background for this to work
 %%%% fits to gauss2d
@@ -43,6 +43,8 @@ p = nlinfit(xy,z(:),@gauss2d,p0);
 fit= gauss2d(p,xy);
 g= reshape(fit,size(z,1),size(z,2));
 err = sqrt(mean((z(:)-fit).^2));
+cc = corrcoef(z(:),fit);
+cc = cc(1,2);
 % figure
 % subplot(1,2,1);
 % imagesc(z'); axis equal; clim = get(gca,'Clim');

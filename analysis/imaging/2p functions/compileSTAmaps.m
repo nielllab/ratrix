@@ -124,8 +124,10 @@ for f = 1:nfiles
     load(mat_fname{f},'xpts','ypts','rfx','rfy','tuning','zscore','xb','yb','meanGreenImg','stas')
     warning('on','MATLAB:load:variableNotFound')
     
-    
-    
+    [k ptsArea] = boundary(xpts,ypts);
+   ptsArea = ptsArea* 4 * 10^-6; %%%(2um/pix = 4*10^-6 um2 / pix2)
+    pts_area(f,:) = [ptsArea; 2*min(xpts(k)); 2*max(xpts(k)); 2*min(ypts(k)); 2*max(ypts(k))];
+
     %%% select RFs that have zscore(ON, OFF) greater than zthresh
     use = find(zscore(:,1)>zthresh | zscore(:,2)<-zthresh);
     useOn = find(zscore(:,1)>zthresh); useOff = find(zscore(:,2)<-zthresh);
@@ -140,6 +142,9 @@ for f = 1:nfiles
     
     useOn = find(zscore(:,1)>zthresh & ~badRFon);
     useOff= find(zscore(:,2)<-zthresh & ~badRFoff);
+    
+    rfxs = [rfx(useOn,1); rfx(useOff,2)];
+    rfys = [rfy(useOn,1); rfy(useOff,2)];
     
     
     % %     %%% only ON or OFF (no mixed)
@@ -236,6 +241,28 @@ for f = 1:nfiles
     title('rf locations deg')
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
+    dist = metadata.screenDist(n);
+    [rfs_az rfs_el] = octoPix2Deg(rfxs,rfys,dist);
+    userfs = rfs_az>prctile(rfs_az,2) & rfs_az<prctile(rfs_az,98) &rfs_el>prctile(rfs_el,2) & rfs_el<prctile(rfs_el,98);
+    
+rfs_az = rfs_az(userfs);
+rfs_el = rfs_el(userfs);
+
+figure
+plot(rfs_az,rfs_el,'.');
+[ k area]= boundary(rfs_az,rfs_el);
+hold on; plot(rfs_az(k),rfs_el(k));
+rf_area(f,:) = [area; min(rfs_az(k)); max(rfs_az(k)); min(rfs_el(k)); max(rfs_el(k))];
+
+xpts_use = xpts(union(useOn,useOff)); ypts_use = ypts(union(useOn,useOff));
+usepts = xpts_use>prctile(xpts_use,2) & xpts_use<prctile(xpts_use,98) & ypts_use>prctile(ypts_use,2) & ypts_use<prctile(ypts_use,98);
+xpts_use = xpts_use(usepts); ypts_use = ypts_use(usepts);
+[k area] =boundary(xpts_use,ypts_use);
+resp_area(f,:) = [area*4*10^-6; 2*min(xpts_use(k)); 2*max(xpts_use(k)); 2*min(ypts_use(k)); 2*max(ypts_use(k))];
+
+
+
+
     regionID = zeros(size(xpts));
     for r = 1:length(xb)
         if length(xb{r})>0
@@ -249,15 +276,25 @@ for f = 1:nfiles
     zthreshRF = 5.5;
     useOnRF = find(zscore(:,1)>zthreshRF & ~badRFon); useOffRF = find(zscore(:,2)<-zthreshRF & ~badRFoff);
     if f ==1
-        p_on = []; wx_on = [];wy_on = []; sess_on = []; region_on = [];z_on=[];
-        p_off = []; wx_off = [];wy_off = []; sess_off = []; region_off = []; z_off = [];
+        p_on = []; wx_on = [];wy_on = []; sess_on = []; region_on = [];z_on=[]; cc_on = []; profile_on = [];
+        p_off = []; wx_off = [];wy_off = []; sess_off = []; region_off = []; z_off = []; cc_off =[]; profile_off = [];
     end
     
     dist = metadata.screenDist(n);
     for rfn= 1:length(useOnRF)
-        p = fitOctorf(stas(:,:,useOnRF(rfn),1));
+        [p g cc] = fitOctorf(stas(:,:,useOnRF(rfn),1));
+        st = stas(:,:,useOnRF(rfn),1);
+        xrange = round(p(3)) + (-20:20); xrange = xrange(xrange>0 & xrange<256);
+        yrange = round(p(4)) + (-20:20); yrange = yrange(yrange>0 & yrange<192);
+        st = st(xrange,yrange); g = g(xrange,yrange);
+        corr = corrcoef(st(:),g(:));
+        cc_on = [cc_on; corr(1,2)];
         p_on = [p_on; p]; sess_on = [sess_on; f]; region_on = [region_on; regionID(useOnRF(rfn))]; z_on = [z_on; zscore(useOnRF(rfn),1)];
-        
+
+        if p(3)>20 & p(3)<236
+            profile = stas(round(p(3) + (-20:20)),round(p(4)),useOnRF(rfn),1);
+        end
+        profile_on = [profile_on; profile'];
         [center_az center_el] = octoPix2Deg(p(3),p(4),dist);
         edge_az = octoPix2Deg(p(3)+ p(5),p(4),dist);
         wx_on = [wx_on ;edge_az- center_az];
@@ -270,8 +307,21 @@ for f = 1:nfiles
     
     %%% fit OFF receptive fields
     for rfn= 1:length(useOffRF)
-        p = fitOctorf(stas(:,:,useOffRF(rfn),2));
-        p_off = [p_off; p];sess_off = [sess_off; f]; region_off = [region_off; regionID(useOffRF(rfn))]; z_off = [z_off; zscore(useOffRF(rfn),2)];
+        [p g cc]= fitOctorf(stas(:,:,useOffRF(rfn),2));
+        
+        st = stas(:,:,useOffRF(rfn),2);
+        xrange = round(p(3)) + (-20:20); xrange = xrange(xrange>0 & xrange<256);
+        yrange = round(p(4)) + (-20:20); yrange = yrange(yrange>0 & yrange<192);
+        st = st(xrange,yrange); g = g(xrange,yrange);
+        corr = corrcoef(st(:),g(:));
+        cc_off = [cc_off; corr(1,2)];
+        
+        if p(3)>20 & p(3)<236
+            profile = stas(round(p(3) + (-20:20)),round(p(4)),useOffRF(rfn),2);
+        end
+        profile_off = [profile_off; profile'];
+        
+        p_off = [p_off; p];sess_off = [sess_off; f]; region_off = [region_off; regionID(useOffRF(rfn))]; z_off = [z_off; zscore(useOffRF(rfn),2)]; 
         
         [center_az center_el] = octoPix2Deg(p(3),p(4),dist);
         edge_az = octoPix2Deg(p(3)+ p(5),p(4),dist);
@@ -901,8 +951,8 @@ end
 figure
 for rep=1:2
     for r=1:4
-        data = regionTuning(r,rep,1:3,:,:);
-        data_err = squeeze( nanstd(data,[],[3 5]))/sqrt(6);
+        data = regionTuning(r,rep,1:3,:,:);  
+        data_err = squeeze( nanstd(data,[],[3 5]))/sqrt(6); 
         data = squeeze(nanmean(data,[3 5]));
         data_err = data_err/max(data);
         data = data/max(data);
@@ -920,7 +970,47 @@ errorbar((1:21)*0.1-0.3,squeeze(size_tcourse(4,2,:)), squeeze(size_tcourse_err(4
 axis([-0.25 1.85 -0.1 1.2]); xlabel('secs'); ylabel('normalized dF/F')
 
 
-plot((1:21)*0.1-0.3,
+%%% calculate half-rise time
+clear halfmax
+for rep=1:2
+    for r=1:4
+        data = squeeze(nanmean(regionTuning(r,rep,1:3,:,:),3));
+       figure
+       plot(data)
+       for s = 1:6
+            if ~isnan(max(data(:,s)))
+                halfmax(r,rep,s) = min(find(data(:,s)>0.5*max(data(:,s))));
+              x = 1:halfmax(r,rep,s);
+            y = data(x,s)/max(data(:,s));
+            halfmax_interp(r,rep,s) = interp1(y,x,0.5);
+            else
+                halfmax(r,rep,s) = NaN;
+                halfmax_interp(r,rep,s) = NaN;
+            end
+
+        end
+    end
+end
+        
+ halfmax_mn = nanmean(halfmax_interp,3)
+halfmax_err = nanstd(halfmax_interp,[],3)./sqrt(sum(~isnan(halfmax_interp),3))
+
+data = ([halfmax_mn(2:4,1); halfmax_mn(4,2)]-3) /10;  %%% stim starts at t=3, frames are 0.1 sec
+err =  [halfmax_err(2:4,1); halfmax_err(4,2)]/10;
+
+figure
+bar(data);
+hold on
+errorbar(data,err,'o');
+ylabel('half-max rise time (sec)'); xlabel('region');
+set(gca,'Xtick',1:4);
+set(gca,'XtickLabel',{'Plex ON','IGL ON','Med ON','Med OFF'});
+
+
+
+ figure
+ plot(halfmax(:),halfmax_interp(:),'.')
+
 
 %%% calculate normalize tuning
 szTuning = zeros(4,2,4,size(regionTuning,5));
@@ -1116,7 +1206,6 @@ for r = 2:4
 end
     xlabel('rf radius deg'); ylabel('fraction'); 
     
-    rfsize
     
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
@@ -1130,6 +1219,53 @@ h_off = hist (w_off(z_off<-6)',0:1:15)/length(w_off(z_off<-6));
 plot(h_on, 'r'); hold on; plot(h_off,'b');
 xlabel('rf radius deg'); ylabel('fraction'); legend({'ON','OFF'})
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+bins = 0.05:0.1:1;
+figure
+h = hist(cc_on(z_on>6),bins)
+bar(bins,h/sum(h));
+xlabel('fit R2'); ylabel('fraction');
+axis([0 1 0 0.7]); title('ON')
+title(sprintf('ON fit R2 %0.2f +/- %0.2f',mean(cc_on(z_on>6)), std(cc_on(z_on>6))))
+
+bins = 0.05:0.1:1;
+figure
+h = hist(cc_off(z_off<-6),bins)
+bar(bins,h/sum(h));
+xlabel('fit R2'); ylabel('fraction');
+axis([0 1 0 0.7]); title('OFF')
+title(sprintf('OFF fit R2 %0.2f +/- %0.2f',mean(cc_off(z_off<-6)), std(cc_off(z_off<-6))))
+
+
+figure
+plot(profile_on(z_on>6,:)');
+
+for i = 1:size(profile_on,1);
+    p = profile_on(i,:);
+    profile_on_norm(i,:) = (p-min(p)) / (max(p) -min(p));
+end
+
+rf_bins = (1:size(profile_on,2))/2;
+goodprofile = profile_on_norm(z_on>6,:);
+figure
+plot(rf_bins,goodprofile(50:50:end,:)');
+hold on
+plot(rf_bins,mean(goodprofile,1),'g','LineWidth',2)
+xlim([0.5,20.5]); xlabel('degs'); ylabel('RF amplitude'); title('ON RFs');
+
+for i = 1:size(profile_off,1);
+    p = profile_off(i,:);
+    profile_off_norm(i,:) = (p-min(p)) / (max(p) -min(p));
+end
+
+rf_bins = (1:size(profile_off,2))/2;
+goodprofile = profile_off_norm(z_off<-6,:);
+figure
+plot(rf_bins,goodprofile(20:20:end,:)');
+hold on
+plot(rf_bins,mean(goodprofile,1),'g','LineWidth',2)
+xlim([0.5,20.5]);  xlabel('degs'); ylabel('RF amplitude'); title('OFF RFs');
+
 
 for f = 1:6
     rf_sess(1,f) = nanmean(w_on(z_on>6 & sess_on==f)); n_rf(1,f) = sum(z_on>6 & sess_on==f);
@@ -1178,6 +1314,18 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 set(gca,'Xtick',[1 2 3 4])
 set(gca,'Xticklabel',layerLabels)
 
+
+sprintf('mean RF area %0.1f +/- %0.1f',mean(rf_area(:,1)),std(rf_area(:,1)))
+w = rf_area(:,3)-rf_area(:,2);
+h = rf_area(:,5)-rf_area(:,4);
+sprintf('mean rf area width %0.1f +/- %0.1f',mean(w),std(w))
+sprintf('mean rf area hieght %0.1f +/- %0.1f',mean(h),std(h))
+
+sprintf('mean loaded area %0.3f +/- %0.3f',mean(pts_area(:,1)),std(pts_area(:,1)))
+w = pts_area(:,3)-pts_area(:,2);
+h = pts_area(:,5)-pts_area(:,4);
+sprintf('mean pts area width %0.1f +/- %0.1f',mean(w),std(w))
+sprintf('mean pts area hieght %0.1f +/- %0.1f',mean(h),std(h))
 
 
 figure

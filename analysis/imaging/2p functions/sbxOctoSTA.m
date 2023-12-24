@@ -644,12 +644,12 @@ for clust = 1:nclust
         
         figure(clustfig)
         subplot(2,3,1+rep);
-        imagesc(sta',crange); hold on; axis equal; colormap jet;
+        imagesc(sta',1.5*crange); hold on; axis equal; colormap jet; colormap(cbrewer('div','RdBu',64))
         xprofile = max(abs(sta),[],1); [mx xmax] = max(xprofile);
         yprofile = max(abs(sta),[],2); [mx ymax] = max(yprofile);
         xmax
         ymax
-        plot(ymax,xmax,'ko');
+      %  plot(ymax,xmax,'ko');
         
         if movienum==1
             sz=[2 4 8 255]; col = 'bcrg'

@@ -27,6 +27,9 @@ for c = 1:ncells
     xpix = stat{goodcells(c)}.xpix;
     ypix = stat{goodcells(c)}.ypix;
     lam = stat{goodcells(c)}.lam; 
+    xpts(c) = round(mean(xpix));
+    ypts(c) = round(mean(ypix));
+    
 
     for i = 1:length(xpix);
         img(ypix(i),xpix(i),:) = cols(mod(c,6)+1,:)*lam(i)/max(lam);
@@ -53,6 +56,11 @@ subplot(1,2,2)
 imshow(img)
 xlim(x); ylim(y)
 title('masks')
+
+figure
+imshow(1.5*double(ops.refImg)/max(double(ops.refImg(:)))); colormap gray; axis equal
+hold on
+plot(xpts,ypts,'.');
 
 %%% calculate dF/F
 for c = 1:ncells

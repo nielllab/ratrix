@@ -11,7 +11,7 @@ else
     % option to save figures to pdf file; make sure C:/temp/ folder exists
     Opt.SaveFigs = 1;
     Opt.psfile = 'C:\temp\TempFigs.ps';
-    %%% manually select points?
+    %%% manually select points? 0 = auto, 1 = manual, 2= suite2p
     Opt.selectPts=0;
     %%% manually choose region to crop full image in selecting points
     Opt.selectCrop =1;
@@ -38,12 +38,12 @@ else
     %     Opt.SaveOutput = 0;
 end
 
-    if isfield(Opt,'cellrange')
-        cellrange = Opt.cellrange;
-    else
-        cellrange = -2:2; %%% was -2:2 before 011123
-    end
-    
+if isfield(Opt,'cellrange')
+    cellrange = Opt.cellrange;
+else
+    cellrange = -2:2; %%% was -2:2 before 011123
+end
+
 %%% frame rate for resampling
 % dt = 0.5;
 % framerate=1/dt;
@@ -73,7 +73,7 @@ if ~isfield(Opt,'sub_noise');
 end
 
 if Opt.sub_noise==1
-   [dfofInterp meanImg greenframe] = subtractSidebandNoise(dfofInterp,meanImg, psfile,mv);    
+    [dfofInterp meanImg greenframe] = subtractSidebandNoise(dfofInterp,meanImg, psfile,mv);
 end
 
 
@@ -84,7 +84,7 @@ else
 end
 
 if zbin
-  [dfofInterp meanImg greenframe] = zbinCorr(dfofInterp, meanImg, greenframe, Opt,psfile);
+    [dfofInterp meanImg greenframe] = zbinCorr(dfofInterp, meanImg, greenframe, Opt,psfile);
 end
 
 
@@ -315,10 +315,10 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 if isfield(Opt,'selectPts')
     selectPts = Opt.selectPts;
 else
-    selectPts = input('select points by hand (1) or automatic (0) : ');
+    selectPts = input('select points automatically (0) by hand (1) or suite2p (2) : ');
 end
 
-if selectPts
+if selectPts==1
     chooseFig = input('select based on 1) mean image, 2) max image, 3) merge image : ');
     
     if chooseFig==1
@@ -341,7 +341,7 @@ if selectPts
         dF(i,:) = squeeze(nanmean(nanmean(dfofInterp(y(i)+range,x(i)+range,:),2),1));
     end
     
-else
+elseif selectPts==0
     
     %%% select points based on peaks of max df/f
     %%%calculate max df/f image
@@ -373,7 +373,7 @@ else
         [xrange, yrange] = ginput(2);
         pts = pts(x>xrange(1) & x<xrange(2) & y>yrange(1) & y<yrange(2));
     end
-
+    
     b = cellrange(end)+1;  %%% previously 5
     xrange = [b size(img,2)-b];
     yrange = [b size(img,1)-b];
@@ -408,15 +408,79 @@ else
     imagesc(stdImg,[0 prctile(stdImg(:),98)]); hold on; colormap gray
     plot(x,y,'o');title(sprintf('df %d cellrange %d',mindf,cellrange(end)))
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
+    
     %%% average df/f in a box around each selected point
-
+    
     clear dF
     for i = 1:length(x)
         dF(i,:) = mean(mean(dfofInterp(y(i)+cellrange,x(i)+cellrange,:),2),1);
     end
     xpts = x; ypts = y; %%% new names so they don't get overwritten
+    
+    
+elseif selectPts ==2
+    %%% suite2p
+    [s2p_file s2p_path] = uigetfile('*.mat','suite2p .mat file');
+    iscell = 0; %%% need to initialize so matlab doesn't think this is a function
+    load(fullfile(s2p_path, s2p_file));
+    %%%% select out cells
+    meanF = mean(F(find(iscell(:,1)),:),2);
+    goodcells = find(iscell(:,1) & mean(F,2)>0.5 *median(meanF));
+    ncells = length(goodcells);
+    
+    %%% compute image of masks
+    cols = [ 1 0 0; 0 1 0; 0 0 1; 1 1 0; 1 0 1; 0 1 1];
+    img = zeros(size(ops.max_proj,1),size(ops.max_proj,2),3);
+    for c = 1:ncells
+        xpix = stat{goodcells(c)}.xpix;
+        ypix = stat{goodcells(c)}.ypix;
+        lam = stat{goodcells(c)}.lam;
+        xpts(c) = round(mean(xpix))/2;  %%% since other image data is downsampled 2x
+        ypts(c) = round(mean(ypix))/2;
+        
+        
+        for i = 1:length(xpix);
+            img(ypix(i),xpix(i),:) = cols(mod(c,6)+1,:)*lam(i)/max(lam);
+        end
+    end
+    x = xpts; y = ypts;
+    %show max and masks side by side
+    figure 
+    imshow(1.5*ops.max_proj/max(ops.max_proj(:))); colormap gray; axis equal; title('max projection')
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+    figure
+    imshow(img)
+    title('masks')
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    %%% calculate dF/F
+    for c = 1:ncells
+        dF(c,:) = (F(goodcells(c),:) - mean(F(goodcells(c),:)))/mean(F(goodcells(c,:)));
+    end
+    F = F(goodcells,:);
+    
+    %%% plot dF/F traces for random subset
+    dF(dF>1)=1;
+    figure
+    hold on
+    range = 1:3000;
+    dt= 0.1;
+    np=32;
+    for i = 1:np;
+        plot(range*dt,dF(ceil(rand*ncells),range)+i);
+    end
+    ylim([0 np+2])
+    xlabel('secs');
+    ylabel('cell #');
+    title('dF/F')
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+    
 end  %%% if/else
+
+
+
 
 
 %% Plotting
@@ -671,7 +735,7 @@ display('doing pixel plots')
 
 gratingTitle=0; %%% titles for grating figs?
 evRange = 10:20; baseRange = 1:5; %%% timepoints for evoked and baseline activity
-dfofInterp(dfofInterp>1) = 1; dfofInterp(dfofInterp<-1) = -1; 
+dfofInterp(dfofInterp>1) = 1; dfofInterp(dfofInterp<-1) = -1;
 dfInterpsm = imresize(dfofInterp,0.25);
 dfWeight = dfInterpsm.* repmat(imresize(normgreen(:,:,1),0.25),[1 1 size(dfofInterp,3)]);
 for i = 1:length(stimOrder); %%% get pixel-wise evoked activity on each individual stim presentation

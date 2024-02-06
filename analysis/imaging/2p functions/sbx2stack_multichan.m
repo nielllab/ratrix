@@ -4,6 +4,8 @@ function sbx2stack_multichan(fname)
 %%% averages multiple sections per plane
 %%% example usage sbxstack_multichan('stack_000_test')
 %%% output tif can be opened in FIJI using Import -> BioFormat
+%%% for 1-channel image, output is grayscale stack
+%%% for 2-channel image, output is an RGB stack (with empty 3rd color -> a result of Matlab imwrite constraints)
 %%% cmn 02-2024
 
 %%% get info from first image

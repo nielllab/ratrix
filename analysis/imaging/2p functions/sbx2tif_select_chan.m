@@ -18,16 +18,17 @@ end
 k = 0;
 done = 0;
 while(~done && k<=N)
-    try
+k   
+%try
         q = sbxread(fname,k,1);
         q = squeeze(q(chan,:,:));
         if(k==1)
-            imwrite(q,[fname '.tif'],'tif');
+            imwrite(q,[fname '_' num2str(chan) '.tif'],'tif');
         else
-            imwrite(q,[fname '.tif'],'tif','writemode','append');
+            imwrite(q,[fname '_' num2str(chan) '.tif'],'tif','writemode','append');
         end
-    catch
-        done = 1;
-    end
+%    catch
+%        done = 1;
+%    end
     k = k+1;
 end

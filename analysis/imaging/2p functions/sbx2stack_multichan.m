@@ -31,12 +31,14 @@ for p = 1:nplane
     
     q = sbxread(fname,sched(p)+1,nsection);  %%% read in all sections at one plane
     mn = median(q,4);   %%% take median average of sections
+   
+    % old version saved two channels out as a single tif
     %     if nch==2
     %         mn(3,:,:)=0;    %%%  if two-color, need to add 3rd channel (for tif format)
     %         mn = shiftdim(mn,1);  %%% shift color to 3rd dimension
     %     end
     
-    %%% save data into tif!
+    %%% save data into tifs!
     for chan = 1:nch
         if(p==1)
             imwrite(squeeze(mn(chan,:,:)),[fname '_' num2str(chan) '.tif'],'tif');

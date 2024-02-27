@@ -644,7 +644,7 @@ for clust = 1:nclust
         yprofile = max(abs(sta),[],2); [mx ymax] = max(yprofile);
         xmax
         ymax
-        plot(ymax,xmax,'ko');
+%         plot(ymax,xmax,'ko');
         
         if movienum==1
             sz=[2 4 8 255]; col = 'bcrg'
@@ -953,10 +953,10 @@ for rep = 1:2
     figure
     for i = 1:48
         subplot(6,8,i);
-        imagesc(stas(:,:,useN(n(i)),rep)',[-0.1 0.1]); axis off; axis equal; colormap jet; title(sprintf('%0.2f',zscore(useN(n(i)),rep)));
+        imagesc(stas(:,:,useN(n(i)),rep)',[-0.1 0.1]); axis off; axis equal; colormap (cbrewer2('RdBu')); title(sprintf('%0.2f',zscore(useN(n(i)),rep)));
     end
 end
-
+%colormap was jet
 
 onoffLabel = {'ON','OFF'};
 

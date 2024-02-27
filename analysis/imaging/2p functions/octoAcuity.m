@@ -28,8 +28,8 @@ if Opt.SaveFigs
 end
 
 %%% select files to use based on quality
-for i = 1: length(Goodquality);
-    usefile(i) = strcmp(Goodquality{i},'Y') & strcmp(regioned{i},'Y');
+for i = 1: length(quality);
+    usefile(i) = strcmp(quality{i},'Y') & strcmp(regioned{i},'Y');
 end
 
 useN = find(usefile); clear goodfile
@@ -135,7 +135,7 @@ respThresh = 0.05;
     xlim([0 1.1*max(brainScale)]);
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-
+evRange = 3:18
 
 for nf = 1:nfiles
     n = goodfileN(nf);
@@ -176,7 +176,7 @@ for nf = 1:nfiles
     
     for c = 1:ncond
         cellResp(:,c,:) = dFmean(:,(c-1)*cycDur+1 : c*cycDur,:);
-        cellAmp(:,c) = nanmean(cellResp(:,c,9:20),3);
+        cellAmp(:,c) = nanmean(cellResp(:,c,evRange),3); %%% was 9:20
     end
     
     %%% get max resp for each cell. save out as histogram
@@ -292,7 +292,7 @@ for nf = 1:nfiles
         resp(c,:,f) = nanmedian(weightTcourse(:,stimOrder==c),2);
         
         %%% amplitude of response over timewindow
-        amp(c,f) = nanmean(resp(c,9:20,f),2);
+        amp(c,f) = nanmean(resp(c,evRange+5,f),2); %%% was 9:20
         respMap(:,:,c) =  nanmedian(trialmean(:,:,stimOrder==c),3);
         
     end
@@ -572,6 +572,9 @@ for r = 1:4
     set(gca,'Xtick',1:nSF+1);
     set(gca,'XtickLabel',[{'0'} sfLabels]);
     xlim([1 nSF+1.5]); ylim([0 0.06])
+    if stimnum==2
+        ylim([0 0.03]);
+    end
 end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
@@ -600,10 +603,14 @@ for r = 1:4
     err = squeeze(nanstd(regionSFresp(:,r,:,:),[],4))/sqrt(nfiles);
     hold on
     for i = 1:size(mn,1)
-        errorbar(1:cycDur,mn(i,:),err(i,:))
+        %errorbar(1:cycDur,mn(i,:),err(i,:))
+        plot(1:cycDur,mn(i,:))
     end
     colororder(jet(nSF+1)*0.75)
     ylim([-0.02 0.1])
+    if stimnum ==2
+        ylim([-0.01 0.05])
+    end
     title(rLabels{r})
     if r ==1
         legend([{'0'} sfLabels])

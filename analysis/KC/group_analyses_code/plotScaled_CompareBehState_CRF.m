@@ -35,8 +35,11 @@ for d = durat
         
         % take mean across sessions, for ith point, lo beh state
         loBehState_meanDthCRFacrossSess = mean(loBehState_allSessAllPtsAllDurs_CRF(d,:,i,:),4);
+        % Here's how to get STD of this: 
+        % std(squeeze(loBehState_allSessAllPtsAllDurs_CRF(d,:,i,:))',1)
         
         % max of dth ith CRF
+        clear maxOfCRF
         maxOfCRF = max(loBehState_meanDthCRFacrossSess);
         
         % scale the CRF to it's max
@@ -45,11 +48,12 @@ for d = durat
         % get stdev across sessions
         %loBehState_stdErrOverSess = std(squeeze(loBehState_allSessAllPtsAllDurs_CRF(d,:,i,:))')/sqrt(size(loBehState_allSessAllPtsAllDurs_CRF,4));
         % stderr across mice
-        global numMice
-        %loBehState_stdErrOverSess = std(squeeze(loBehState_allSessAllPtsAllDurs_CRF(d,:,i,:))')/sqrt(numMice); 
+        %global numMice
+        %loBehState_stdErrOverSess = std(squeeze(scaled_loBehState_meanDthCRFacrossSess(d,:,i,:))')/sqrt(numMice); 
         %loBehState_stdErrOverSess = std(squeeze(loBehState_allSessAllPtsAllDurs_CRF(d,:,i,:))'); 
         
-        plot(x_axis,scaled_loBehState_meanDthCRFacrossSess,'color',loStateLineColor,'lineWidth',2,'MarkerSize',3) 
+        %plot(x_axis,scaled_loBehState_meanDthCRFacrossSess,'color',loStateLineColor,'lineWidth',2,'MarkerSize',3) 
+        errorbar(x_axis,scaled_loBehState_meanDthCRFacrossSess,loBehState_stdErrOverSess,'color',loStateLineColor,'lineWidth',2,'MarkerSize',3) 
         
 %         if nGroup == 1
 %             
@@ -68,19 +72,22 @@ for d = durat
         hiBehState_meanDthCRFacrossSess = mean(hiBehState_allSessAllPtsAllDurs_CRF(d,:,i,:),4);
 
         % max of dth ith CRF
+        clear maxOfCRF
         maxOfCRF = max(hiBehState_meanDthCRFacrossSess);
         
         % scale the CRF to it's max
         scaled_hiBehState_meanDthCRFacrossSess = hiBehState_meanDthCRFacrossSess/maxOfCRF;
         
-%         % get stderr across sessions
-%         %hiBehState_stdErrOverSess = std(squeeze(hiBehState_allSessAllPtsAllDurs_CRF(d,:,i,:))')/sqrt(size(hiBehState_allSessAllPtsAllDurs_CRF,4)); 
-%         % stderr across mice
-%         global numMice
-%         hiBehState_stdErrOverSess = std(squeeze(hiBehState_allSessAllPtsAllDurs_CRF(d,:,i,:))')/sqrt(numMice); 
+%        % get stderr across sessions
+%        %hiBehState_stdErrOverSess = std(squeeze(hiBehState_allSessAllPtsAllDurs_CRF(d,:,i,:))')/sqrt(size(hiBehState_allSessAllPtsAllDurs_CRF,4)); 
+%        % stderr across mice
+         global numMice
+         hiBehState_stdErrOverSess = std(squeeze(scaled_hiBehState_meanDthCRFacrossSess(d,:,i,:))')/sqrt(numMice); 
           
-        plot(x_axis,scaled_hiBehState_meanDthCRFacrossSess,'color',hiStateLineColor,'LineWidth',2,'MarkerSize',3) 
-%         
+        %plot(x_axis,scaled_hiBehState_meanDthCRFacrossSess,'color',hiStateLineColor,'LineWidth',2,'MarkerSize',3) 
+        errorbar(x_axis,scaled_hiBehState_meanDthCRFacrossSess,hiBehState_stdErrOverSess,'color',hiStateLineColor,'lineWidth',2,'MarkerSize',3) 
+        %plot(x_axis,scaled_loBehState_meanDthCRFacrossSess,'color',hiStateLineColor,'lineWidth',2,'MarkerSize',3)   
+        
 %           if nGroup == 1
 %             
 %             plot(x_axis,hiBehState_meanDthCRFacrossSess,'-r','lineWidth',1,'MarkerSize',3) 

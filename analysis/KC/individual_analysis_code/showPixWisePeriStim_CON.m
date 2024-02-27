@@ -90,5 +90,9 @@ function showPixWisePeriStim_CON(stimOnsetFrame,date,subjName,uniqueContrasts,co
 
     end % end c loop
     
+%     cb = colorbar;
+%     ylabel(cb,'df/F')
+%     caxis([0 0.7]) 
+    
 end
 

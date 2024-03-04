@@ -406,7 +406,7 @@ elseif selectPts==0
     [y, x] = ind2sub(size(maxStd),pts);
     figure
     imagesc(stdImg,[0 prctile(stdImg(:),98)]); hold on; colormap gray
-    plot(x,y,'o');title(sprintf('df %d cellrange %d',mindf,cellrange(end)))
+    plot(x,y,'o');title(sprintf('df cellrange %d',cellrange(end)))
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %%% average df/f in a box around each selected point

@@ -1328,13 +1328,6 @@ sprintf('mean pts area width %0.1f +/- %0.1f',mean(w),std(w))
 sprintf('mean pts area hieght %0.1f +/- %0.1f',mean(h),std(h))
 
 
-sprintf('mean responsive area %0.3f +/- %0.3f',mean(resp_area(:,1)),std(resp_area(:,1)))
-w = resp_area(:,3)-resp_area(:,2);
-h = resp_area(:,5)-resp_area(:,4);
-sprintf('mean responsive area width %0.1f +/- %0.1f',mean(w),std(w))
-sprintf('mean responsive area hieght %0.1f +/- %0.1f',mean(h),std(h))
-
-
 figure
 plot(fractionResponsive);
 xlabel('session #')

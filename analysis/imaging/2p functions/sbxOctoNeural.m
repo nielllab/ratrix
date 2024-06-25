@@ -12,7 +12,7 @@ else
     Opt.SaveFigs = 1;
     Opt.psfile = 'C:\temp\TempFigs.ps';
     %%% manually select points? 0 = auto, 1 = manual, 2= suite2p
-    Opt.selectPts=0;
+    %Opt.selectPts=0;
     %%% manually choose region to crop full image in selecting points
     Opt.selectCrop =1;
     %%% minimum brightness of selected points
@@ -315,7 +315,7 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 if isfield(Opt,'selectPts')
     selectPts = Opt.selectPts;
 else
-    selectPts = input('select points automatically (0) by hand (1) or suite2p (2) : ');
+    selectPts = input('select points automatically (0) by hand (1) or suite2p (2) or red/green suite2p (3): ');
 end
 
 if selectPts==1
@@ -372,12 +372,13 @@ elseif selectPts==0
         disp('Select area in figure to include in the analysis');
         [xrange, yrange] = ginput(2);
         pts = pts(x>xrange(1) & x<xrange(2) & y>yrange(1) & y<yrange(2));
+    else
+        
+        b = cellrange(end)+1;  %%% previously 5
+        xrange = [b size(img,2)-b];
+        yrange = [b size(img,1)-b];
+        pts = pts(x>xrange(1) & x<xrange(2) & y>yrange(1) & y<yrange(2));
     end
-    
-    b = cellrange(end)+1;  %%% previously 5
-    xrange = [b size(img,2)-b];
-    yrange = [b size(img,1)-b];
-    pts = pts(x>xrange(1) & x<xrange(2) & y>yrange(1) & y<yrange(2));
     
     
     %%% sort points based on their value (max df/f)
@@ -418,7 +419,7 @@ elseif selectPts==0
     xpts = x; ypts = y; %%% new names so they don't get overwritten
     
     
-elseif selectPts ==2
+elseif selectPts ==2 | selectPts==3
     %%% suite2p
     [s2p_file s2p_path] = uigetfile('*.mat','suite2p .mat file');
     iscell = 0; %%% need to initialize so matlab doesn't think this is a function
@@ -445,20 +446,39 @@ elseif selectPts ==2
     end
     x = xpts; y = ypts;
     %show max and masks side by side
-    figure 
+    figure
     imshow(1.5*ops.max_proj/max(ops.max_proj(:))); colormap gray; axis equal; title('max projection')
-        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
     figure
     imshow(img)
     title('masks')
-        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    
     
     %%% calculate dF/F
-    for c = 1:ncells
-        dF(c,:) = (F(goodcells(c),:) - mean(F(goodcells(c),:)))/mean(F(goodcells(c,:)));
+    if selectPts ==2
+        
+        for c = 1:ncells
+            dF(c,:) = (F(goodcells(c),:) - mean(F(goodcells(c),:)))/mean(F(goodcells(c,:)));
+        end
+        F = F(goodcells,:);
+    
+    elseif selectPts ==3
+        [s2p_redfile s2p_path] = uigetfile('*.mat','red suite2p .mat file');
+        iscell = 0; %%% need to initialize so matlab doesn't think this is a function
+        load(fullfile(s2p_path, s2p_redfile));
+        for c = 1:ncells
+            greenred = F./F_chan2;
+            dF(c,:) = (greenred(goodcells(c),:) - mean(greenred(goodcells(c),:)))/mean(greenred(goodcells(c,:)));
+            
+        end
+        green = F(goodcells,:);
+        red = F_chan2(goodcells,:);
+        F = greenred(goodcells,:);
+        
     end
-    F = F(goodcells,:);
     
     %%% plot dF/F traces for random subset
     dF(dF>1)=1;
@@ -466,17 +486,27 @@ elseif selectPts ==2
     hold on
     range = 1:3000;
     dt= 0.1;
-    np=32;
+%     np=32;
+%     for i = 1:np;
+%         plot(range*dt,dF(ceil(rand*ncells),range)+i);
+%     end
+    np=size(dF,1);
     for i = 1:np;
-        plot(range*dt,dF(ceil(rand*ncells),range)+i);
+        plot(range*dt,dF(i,range)+i);
     end
     ylim([0 np+2])
     xlabel('secs');
     ylabel('cell #');
     title('dF/F')
-        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
+    figure
+    for i = 1:np
+        subplot(np,1,i);
+        plot(red(i,:));
+        hold on
+        plot(green(i,:))
+    end
 end  %%% if/else
 
 
@@ -546,6 +576,20 @@ end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 startFrames = round(stimTimes/dt)-10;
+% 
+% %%% misc analysis - movement relative to start times
+% for i = 3:length(startFrames)-3
+%     mv_x(i,:) = mv(startFrames(i)-5:startFrames(i)+15,1)- mv(startFrames(i),1);
+%     mv_y(i,:) = mv(startFrames(i)-5:startFrames(i)+15,2) - mv(startFrames(i),2);
+% end
+% 
+% figure
+% imagesc(mv_x)
+% title('x movements')
+% figure
+% plot(mean(abs(mv_x),1))
+% title('mean x movements')
+
 %%% calculate cycle averages (timecourse for each individual stim)
 clear cycAvgAll cycAvg cycImg
 for i=1:cycWindow;

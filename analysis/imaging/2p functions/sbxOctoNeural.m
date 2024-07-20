@@ -49,7 +49,7 @@ end
 % framerate=1/dt;
 
 if Opt.SaveFigs
-    psfile = Opt.psfile
+    psfile = Opt.psfile;
     if exist(psfile,'file')==2;delete(psfile);end
 end
 dt = Opt.Resample_dt;
@@ -920,6 +920,56 @@ if nstim==17 %%% gratings 1 tf; either 4sfx4orient, or 2sf x 8 orient
     pixPlot;
     pixPlotWeight;
     
+end
+if nstim==17 && length(unique(freq))==2  %%%% tuning maps for gratings, 2sfs
+   sfs = unique(freq);
+   freqs = [freq 0]; %%% add the flicker
+   orients = [orient NaN];
+   %%% calculate mean for each sf
+   for i = 1:2
+       meanimg(:,:,i) = nanmedian(trialmean(:,:,freqs(stimOrder)==sfs(i)),3);
+       figure
+       imagesc(meanimg(:,:,i),[-0.05 0.1]); colormap jet;
+       title(sprintf('sf = %0.02f',sfs(i)));
+   end
+   
+   %%% calculate sf preference index and map
+   mn = mean(meanimg,3);
+   sfpref = (meanimg(:,:,2) - meanimg(:,:,1))./(meanimg(:,:,2) + meanimg(:,:,1));
+%    figure
+%    imagesc(sfpref,[-1 1]); colormap jet
+   im = mat2im(sfpref,parula,[-0.5 0.5]);
+   amp = mn/0.05; amp(amp<0) = 0; amp(amp>1) = 1;
+   sf_img = im.*repmat(amp,[1 1 3]);
+   
+   %%% sf pref map
+   figure
+   imshow(sf_img);
+   title('sf pref: blue = 0.01 yellow = 0.16')
+   if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+   
+   
+   %%% calculate orientation preference map
+   vert = nanmedian(trialmean(:,:,orients(stimOrder)==0 | orients(stimOrder)==180),3);
+   horiz = nanmedian(trialmean(:,:,orients(stimOrder)==90 | orients(stimOrder)==270),3);
+   figure
+   imagesc(vert,[-0.05 0.1]); colormap jet; title('vert'); colorbar
+   if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+   
+   figure
+   imagesc(horiz,[-0.05 0.1]); colormap jet; title('horiz'); colorbar
+   if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+   
+   mn = 0.5*(vert+horiz);
+   orientpref = (vert-horiz)./(vert+horiz);
+   %    figure
+   %    imagesc(sfpref,[-1 1]); colormap jet
+   im = mat2im(orientpref,parula,[-0.5 0.5]);
+   amp = mn/0.05; amp(amp<0) = 0; amp(amp>1) = 1;
+   orient_img = im.*repmat(amp,[1 1 3]);
+   figure
+   imshow(orient_img); title('orientation pref; blue = horiz, yellow = vert');
+   if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 end
 
 for i = 1:nstim;

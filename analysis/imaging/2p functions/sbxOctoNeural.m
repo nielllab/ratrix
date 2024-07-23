@@ -426,10 +426,35 @@ elseif selectPts ==2 | selectPts==3
     load(fullfile(s2p_path, s2p_file));
     %%%% select out cells
     meanF = mean(F(find(iscell(:,1)),:),2);
+    
+    figure
+    hist(iscell(:,2)); xlabel('iscell'); ylabel('n')
+    title(sprintf('n = %d good = %d',length(iscell), sum(iscell(:,1))));
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+     stdImg =  imresize( ops.max_proj,0.5);
+     
+        %%% all masks, color coded by iscell
+img = zeros(size(ops.max_proj,1),size(ops.max_proj,2),3);
+cols = jet(100);
+    for c = 1:length(iscell)
+        xpix = stat{c}.xpix;
+        ypix = stat{c}.ypix;
+        lam = stat{c}.lam;
+ 
+        for i = 1:length(xpix);
+            img(ypix(i),xpix(i),:) = cols(ceil(iscell(c,2)*100),:)*lam(i)/max(lam);
+        end
+    end
+        
+    figure
+    imshow(img);
+    title('masks coded by iscell'); colormap jet; colorbar
+    
     goodcells = find(iscell(:,1) & mean(F,2)>0.5 *median(meanF));
     ncells = length(goodcells);
     
-    %%% compute image of masks
+    %%% compute image of good cell masks
     cols = [ 1 0 0; 0 1 0; 0 0 1; 1 1 0; 1 0 1; 0 1 1];
     img = zeros(size(ops.max_proj,1),size(ops.max_proj,2),3);
     for c = 1:ncells
@@ -452,7 +477,7 @@ elseif selectPts ==2 | selectPts==3
     
     figure
     imshow(img)
-    title('masks')
+    title(sprintf('masks %d good cells',ncells))
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     
@@ -464,7 +489,7 @@ elseif selectPts ==2 | selectPts==3
             dF(c,:) = (F(goodcells(c),:) - mean(F(goodcells(c),:)))/mean(F(goodcells(c,:)));
         end
         F = F(goodcells,:);
-    
+        
     elseif selectPts ==3
         [s2p_redfile s2p_path] = uigetfile('*.mat','red suite2p .mat file');
         iscell = 0; %%% need to initialize so matlab doesn't think this is a function
@@ -484,16 +509,16 @@ elseif selectPts ==2 | selectPts==3
     dF(dF>1)=1;
     figure
     hold on
-    range = 1:3000;
+    range = 1:min(3000,length(dF));
     dt= 0.1;
-%     np=32;
+        np=32;
+        for i = 1:np;
+            plot(range*dt,2*dF(ceil(rand*ncells),range)+i);
+        end
+%     np=size(dF,1);
 %     for i = 1:np;
-%         plot(range*dt,dF(ceil(rand*ncells),range)+i);
+%         plot(range*dt,dF(i,range)+i);
 %     end
-    np=size(dF,1);
-    for i = 1:np;
-        plot(range*dt,dF(i,range)+i);
-    end
     ylim([0 np+2])
     xlabel('secs');
     ylabel('cell #');
@@ -576,13 +601,14 @@ end
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 startFrames = round(stimTimes/dt)-10;
-% 
+%%%startFrames = round(stimTimes/dt)-5;  % tried shortening 10-frame buffer on 072324
+%
 % %%% misc analysis - movement relative to start times
 % for i = 3:length(startFrames)-3
 %     mv_x(i,:) = mv(startFrames(i)-5:startFrames(i)+15,1)- mv(startFrames(i),1);
 %     mv_y(i,:) = mv(startFrames(i)-5:startFrames(i)+15,2) - mv(startFrames(i),2);
 % end
-% 
+%
 % figure
 % imagesc(mv_x)
 % title('x movements')
@@ -604,10 +630,11 @@ figure
 for i = 1:min(cycLength,30)
     subplot(5,6,i);
     % imagesc(cycImg(:,:,i)-min(cycImg,[],3),[0 0.1]); axis equal
-    data = cycImg(:,:,i)-mean(cycImg(:,:,1:10),3);
+    data = cycImg(:,:,i)-mean(cycImg(:,:,1),3);
     datafilt = imfilter(data,fspecial('gaussian',[10 10],2));
     imagesc(datafilt,[0 0.1]); axis equal; axis off
 end
+colorbar
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 %%% plot weighted pixel-wise cycle average
@@ -615,7 +642,7 @@ figure
 for i = 1:min(cycLength,30)
     subplot(5,6,i);
     % imagesc(cycImg(:,:,i)-min(cycImg,[],3),[0 0.1]); axis equal
-    data = cycImg(:,:,i)-mean(cycImg(:,:,1:10),3);
+    data = cycImg(:,:,i)-mean(cycImg(:,:,1),3);
     datafilt = imfilter(data,fspecial('gaussian',[10 10],2));
     datafilt(isnan(datafilt))=0;
     data_im = mat2im(datafilt,jet,[0 0.05]);
@@ -768,7 +795,7 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 %%% correlation map (shows how good the clustering is
 figure
 imagesc(corrcoef(dFclust(perm,:)'),[-1 1]); colormap jet
-title('correlation across cells after clustering')
+title('correlation across cells after clustering'); colorbar
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 figure
@@ -922,54 +949,80 @@ if nstim==17 %%% gratings 1 tf; either 4sfx4orient, or 2sf x 8 orient
     
 end
 if nstim==17 && length(unique(freq))==2  %%%% tuning maps for gratings, 2sfs
-   sfs = unique(freq);
-   freqs = [freq 0]; %%% add the flicker
-   orients = [orient NaN];
-   %%% calculate mean for each sf
-   for i = 1:2
-       meanimg(:,:,i) = nanmedian(trialmean(:,:,freqs(stimOrder)==sfs(i)),3);
-       figure
-       imagesc(meanimg(:,:,i),[-0.05 0.1]); colormap jet;
-       title(sprintf('sf = %0.02f',sfs(i)));
-   end
-   
-   %%% calculate sf preference index and map
-   mn = mean(meanimg,3);
-   sfpref = (meanimg(:,:,2) - meanimg(:,:,1))./(meanimg(:,:,2) + meanimg(:,:,1));
-%    figure
-%    imagesc(sfpref,[-1 1]); colormap jet
-   im = mat2im(sfpref,parula,[-0.5 0.5]);
-   amp = mn/0.05; amp(amp<0) = 0; amp(amp>1) = 1;
-   sf_img = im.*repmat(amp,[1 1 3]);
-   
-   %%% sf pref map
-   figure
-   imshow(sf_img);
-   title('sf pref: blue = 0.01 yellow = 0.16')
-   if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-   
-   
-   %%% calculate orientation preference map
-   vert = nanmedian(trialmean(:,:,orients(stimOrder)==0 | orients(stimOrder)==180),3);
-   horiz = nanmedian(trialmean(:,:,orients(stimOrder)==90 | orients(stimOrder)==270),3);
-   figure
-   imagesc(vert,[-0.05 0.1]); colormap jet; title('vert'); colorbar
-   if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-   
-   figure
-   imagesc(horiz,[-0.05 0.1]); colormap jet; title('horiz'); colorbar
-   if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-   
-   mn = 0.5*(vert+horiz);
-   orientpref = (vert-horiz)./(vert+horiz);
-   %    figure
-   %    imagesc(sfpref,[-1 1]); colormap jet
-   im = mat2im(orientpref,parula,[-0.5 0.5]);
-   amp = mn/0.05; amp(amp<0) = 0; amp(amp>1) = 1;
-   orient_img = im.*repmat(amp,[1 1 3]);
-   figure
-   imshow(orient_img); title('orientation pref; blue = horiz, yellow = vert');
-   if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    sfs = unique(freq);
+    freqs = [freq 0]; %%% add the flicker
+    orients = [orient NaN];
+    %%% calculate mean for each sf
+    for i = 1:2
+        meanimg(:,:,i) = nanmedian(trialmean(:,:,freqs(stimOrder)==sfs(i)),3);
+        figure
+        imagesc(meanimg(:,:,i),[-0.05 0.1]); colormap jet;
+        title(sprintf('sf = %0.02f',sfs(i)));
+    end
+    
+    %%% calculate sf preference index and map
+    mn = mean(meanimg,3);
+    sfpref = (meanimg(:,:,2) - meanimg(:,:,1))./(meanimg(:,:,2) + meanimg(:,:,1));
+    %    figure
+    %    imagesc(sfpref,[-1 1]); colormap jet
+    im = mat2im(sfpref,parula,[-0.5 0.5]);
+    amp = mn/0.1; amp(amp<0) = 0; amp(amp>1) = 1;
+    sf_img = im.*repmat(amp,[1 1 3]);
+    sf_mean = meanimg;
+    sf_amp = sf_mean/0.1; sf_mean(sf_mean<0)=0; sf_mean(sf_mean>1)=1;
+    %%% sf pref map
+    figure
+    imshow(sf_img);
+    title('sf pref: blue = 0.01 yellow = 0.16')
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    maxamp = 0.1;
+    flicker = nanmedian(trialmean(:,:,stimOrder==17),3);
+    flicker_amp = flicker/maxamp; flicker_amp(flicker_amp<0)=0; flicker_amp(flicker_amp>1)=1;
+    figure
+    imagesc(flicker)
+    im = mat2im(flicker,parula,[0 0.2]);
+    flicker_img = im.*repmat(flicker_amp,[1 1 3]);
+    figure
+    imshow(flicker_img); colorbar; title('full-field flicker')
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    
+    %%% merge 2sf and flicker
+    sf_flick = zeros(size(flicker_img));
+    sf_flick(:,:,1) = flicker_amp;
+    sf_mean_amp = sf_mean/maxamp; sf_mean_amp(sf_mean_amp<0)=0; sf_mean_amp(sf_mean_amp>1)=1;
+    sf_flick(:,:,2:3) = sf_mean_amp;
+    figure
+    imshow(sf_flick); title(sprintf('red=full-field; green = 0.01cpd; blue=0.16; amp = %0.1f',maxamp));
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    
+    %%% calculate orientation preference map
+    vert = nanmedian(trialmean(:,:,orients(stimOrder)==0 | orients(stimOrder)==180),3);
+    horiz = nanmedian(trialmean(:,:,orients(stimOrder)==90 | orients(stimOrder)==270),3);
+    figure
+    imagesc(vert,[-0.05 0.1]); colormap jet; title('vert'); colorbar
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    
+    
+    
+    
+    figure
+    imagesc(horiz,[-0.05 0.1]); colormap jet; title('horiz'); colorbar
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    mn = 0.5*(vert+horiz);
+    orientpref = (vert-horiz)./(vert+horiz);
+    %    figure
+    %    imagesc(sfpref,[-1 1]); colormap jet
+    im = mat2im(orientpref,parula,[-0.5 0.5]);
+    amp = mn/0.05; amp(amp<0) = 0; amp(amp>1) = 1;
+    orient_img = im.*repmat(amp,[1 1 3]);
+    figure
+    imshow(orient_img); title('orientation pref; blue = horiz, yellow = vert');
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 end
 
 for i = 1:nstim;

@@ -9,6 +9,9 @@ for i = (1:npanel)+offset
     if gratingTitle & exist('freq','var')
         title(sprintf('theta %0.0f sf %0.2f',orient(i),freq(i)),'Fontsize',8);
     end
+    if exist('titles','var')
+        title(titles{i})
+    end
     figure(traceFig); subplot(nrow,ncol,loc(i-offset));
     set(gcf,'defaultAxesColorOrder',jet(sum(stimOrder==i)));
     plot(1:tl, trialTcourse(:,stimOrder==i)); hold on; plot(nanmedian(trialTcourse(:,stimOrder==i),2),'g','Linewidth',2); xlim([1 tl]);ylim(range/2)

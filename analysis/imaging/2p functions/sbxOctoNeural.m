@@ -113,6 +113,7 @@ cycWindow = round(max(2/dt,cycLength));
 
 stimTimes = phasetimes;   %%% we call them phasetimes in behavior, but better to call it stimTimes here
 startFrame = round((stimTimes(1)-1)/dt);
+startTrim = startFrame;  %%% need this to trim suite2p data
 dfofInterp = dfofInterp(:,:,startFrame:end);   %%% movie starts 1 sec before first stim
 stimTimesOld = stimTimes-stimTimes(1)+1;
 % stimTimesOld = stimTimesOld(1:end-3);
@@ -136,7 +137,7 @@ if ~isfield(Opt,'fStim')
 end
 
 %%% need to figure out whether to trim off beginning
-load(fullfile(Opt.pStim,Opt.fStim),'stimRec','freq','orient');
+load(fullfile(Opt.pStim,Opt.fStim),'stimRec','freq','orient', 'contrast','StimulusStr','StimulusNum');
 alignRecs =1;
 %nCycles = floor(size(dfofInterp,3)/cycLength)-ceil((cycWindow-cycLength)/cycLength)-2;  %%% trim off last stims to allow window for previous stim
 nCycles  = length(stimTimes);
@@ -425,33 +426,48 @@ elseif selectPts ==2 | selectPts==3
     iscell = 0; %%% need to initialize so matlab doesn't think this is a function
     load(fullfile(s2p_path, s2p_file));
     %%%% select out cells
+    
+    F = F(:,startTrim:end);  %%% removes times before initial stim,same as done for dfofInterp
     meanF = mean(F(find(iscell(:,1)),:),2);
     
     figure
     hist(iscell(:,2)); xlabel('iscell'); ylabel('n')
     title(sprintf('n = %d good = %d',length(iscell), sum(iscell(:,1))));
-        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
-     stdImg =  imresize( ops.max_proj,0.5);
-     
-        %%% all masks, color coded by iscell
-img = zeros(size(ops.max_proj,1),size(ops.max_proj,2),3);
-cols = jet(100);
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    stdImg =  imresize( ops.max_proj,0.5);
+    
+    %%% all masks, color coded by iscell
+    img = zeros(size(ops.max_proj,1),size(ops.max_proj,2),3);
+    cols = jet(100);
     for c = 1:length(iscell)
         xpix = stat{c}.xpix;
         ypix = stat{c}.ypix;
         lam = stat{c}.lam;
- 
+        
         for i = 1:length(xpix);
             img(ypix(i),xpix(i),:) = cols(ceil(iscell(c,2)*100),:)*lam(i)/max(lam);
         end
     end
-        
+    
     figure
     imshow(img);
     title('masks coded by iscell'); colormap jet; colorbar
     
     goodcells = find(iscell(:,1) & mean(F,2)>0.5 *median(meanF));
+    
+    figure
+    plot(iscell(:,2),mean(F,2),'.')
+    hold on; plot([0 1],[ 0.5 *median(meanF) 0.5 *median(meanF)])
+    
+    figure
+    plot(iscell(:,2),std(diff(F,[],2),[],2)./mean(F,2),'.')
+    
+    figure
+    plot(iscell(:,2),std(F,[],2)./mean(F,2),'.')
+    
+    % hold on; plot([0 1],[ 0.5 *median(meanF) 0.5 *median(meanF)])
+    
     ncells = length(goodcells);
     
     %%% compute image of good cell masks
@@ -510,28 +526,28 @@ cols = jet(100);
     figure
     hold on
     range = 1:min(3000,length(dF));
-    dt= 0.1;
-        np=32;
-        for i = 1:np;
-            plot(range*dt,2*dF(ceil(rand*ncells),range)+i);
-        end
-%     np=size(dF,1);
-%     for i = 1:np;
-%         plot(range*dt,dF(i,range)+i);
-%     end
+    dtr= 0.1;
+    np=32;
+    for i = 1:np;
+        plot(range*dtr,2*dF(ceil(rand*ncells),range)+i);
+    end
+    %     np=size(dF,1);
+    %     for i = 1:np;
+    %         plot(range*dt,dF(i,range)+i);
+    %     end
     ylim([0 np+2])
     xlabel('secs');
     ylabel('cell #');
     title('dF/F')
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
-    figure
-    for i = 1:np
-        subplot(np,1,i);
-        plot(red(i,:));
-        hold on
-        plot(green(i,:))
-    end
+    %     figure
+    %     for i = 1:np
+    %         subplot(np,1,i);
+    %         plot(red(i,:));
+    %         hold on
+    %         plot(green(i,:))
+    %     end
 end  %%% if/else
 
 
@@ -575,17 +591,21 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 %%% sort data into repeats - dFrepeats(cell, time, rep #);
 
 dFrepeats=zeros(size(dF,1),cycWindow*nstim,max(nStimRep))+NaN;
+dFrepsAll = zeros(size(dF,1),cycWindow,nstim,max(nStimRep))+NaN;
 for i = 1:nstim
     repList = find(stimOrder==i);
     for r = 1:nStimRep(i)
         startFrame = stimTimes(repList(r))/dt;
         dFrepeats(:,(i-1)*cycWindow + (1:cycWindow),r) = dF(:,round(startFrame+(1:cycWindow))) - repmat(dF(:,round(startFrame+1)),[1 floor(cycWindow)]);
+        dFrepsAll(:,:,i,r) =  dF(:,round(startFrame+(1:cycWindow))) - repmat(dF(:,round(startFrame+1)),[1 floor(cycWindow)]); %% update to average over baseline
         %dFrepeats(:,(i-1)*cycWindow + (1:cycWindow),r) = dF(:,round((repList(r)-1)*cycLength)+(1:cycWindow)) - repmat(dF(:,round((repList(r)-1)*cycLength)+1),[1 floor(cycWindow)]);
         
     end
 end
 dFrepeats(dFrepeats>1) =1; %%% clip major outliers
 dFrepeats(dFrepeats<-1) = -1;
+dFrepsAll(dFrepsAll>1) = 1;
+dFrepsAll(dFrepsAll<-1) = -1;
 
 %%% mean response of whole population, for each repetition
 figure
@@ -627,8 +647,12 @@ end
 
 %%% plot pixel-wise cycle average
 figure
-for i = 1:min(cycLength,30)
-    subplot(5,6,i);
+for i = 1:min(cycLength,60)
+    if cycLength<=30
+        subplot(5,6,i);
+    else
+        subplot(8,8,i)
+    end
     % imagesc(cycImg(:,:,i)-min(cycImg,[],3),[0 0.1]); axis equal
     data = cycImg(:,:,i)-mean(cycImg(:,:,1),3);
     datafilt = imfilter(data,fspecial('gaussian',[10 10],2));
@@ -639,8 +663,12 @@ if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',p
 
 %%% plot weighted pixel-wise cycle average
 figure
-for i = 1:min(cycLength,30)
-    subplot(5,6,i);
+for i = 1:min(cycLength,60)
+    if cycLength<=30
+        subplot(5,6,i);
+    else
+        subplot(8,8,i)
+    end
     % imagesc(cycImg(:,:,i)-min(cycImg,[],3),[0 0.1]); axis equal
     data = cycImg(:,:,i)-mean(cycImg(:,:,1),3);
     datafilt = imfilter(data,fspecial('gaussian',[10 10],2));
@@ -769,6 +797,40 @@ for clust = 1:nclust
     %     xlim([1 size(dF,2)*dt]); xlabel('secs'); ylim([-0.2 2.1])
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
+    if nstim==16
+        loc = [2 3 6 9 8 7 4 1]
+        for rep = 1:-1:0
+            figure
+            set(gcf,'defaultAxesColorOrder',jet(size(dFrepsAll,4)));
+            for cond=1:8
+                subplot(3,3,loc(cond))
+                plot(squeeze(nanmean(dFrepsAll(c==clust,:,cond*2-rep,:),1)));
+                ylim([-0.05 0.2]); title(sprintf('c %0.2f th %d',contrast(cond*2-rep),orient(cond*2-rep)))
+            end
+            subplot(3,3,5);  title(sprintf('clust %d',clust))
+            if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        end
+    end
+    
+    if nstim ==17
+        %plot timecourse by cluster with orientation
+        loc = [2 3 6 9 8 7 4 1]
+        for rep = 1:-1:0
+            figure
+            set(gcf,'defaultAxesColorOrder',jet(size(dFrepsAll,4)));
+            for cond=1:8
+                subplot(3,3,loc(cond))
+                plot(squeeze(nanmean(dFrepsAll(c==clust,:,cond*2-rep,:),1)));
+                ylim([-0.05 0.25]); title(sprintf('sf %0.2f th %d',freq(cond*2-rep),orient(cond*2-rep)))
+            end
+            subplot(3,3,5)
+            plot(squeeze(nanmean(dFrepsAll(c==clust,:,17,:),1)));
+            ylim([-0.05 0.25]); title('flicker')
+            if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        end
+        
+    end  % end of nstim == 17
+    
 end %end of for clust
 
 %%% cycle average timecourse for each cluster
@@ -806,14 +868,20 @@ display('doing pixel plots')
 
 gratingTitle=0; %%% titles for grating figs?
 evRange = 10:20; baseRange = 1:5; %%% timepoints for evoked and baseline activity
+tcRange = 30; %original value
+if cycWindow>50
+    evRange = 10:50;
+    tcRange = cycWindow+10;
+end
+
 dfofInterp(dfofInterp>1) = 1; dfofInterp(dfofInterp<-1) = -1;
 dfInterpsm = imresize(dfofInterp,0.25);
 dfWeight = dfInterpsm.* repmat(imresize(normgreen(:,:,1),0.25),[1 1 size(dfofInterp,3)]);
 for i = 1:length(stimOrder); %%% get pixel-wise evoked activity on each individual stim presentation
     startFrame = (stimTimes(i)-0.5)/dt;
     trialmean(:,:,i) = nanmean(dfofInterp(:,:,round(startFrame + evRange)),3)- nanmean(dfofInterp(:,:,round(startFrame + baseRange)),3);
-    trialTcourse(:,i) = squeeze(mean(mean(dfofInterp(:,:,round(startFrame + (1:30))),2),1)) - mean(mean(dfofInterp(:,:,round(startFrame + 1)),2),1) ;
-    weightTcourse(:,i) = (squeeze(mean(mean(dfWeight(:,:,round(startFrame + (1:30))),2),1)) - mean(mean(mean(dfWeight(:,:,round(startFrame + baseRange)),3),2),1))/mean(normgreen(:)) ;
+    trialTcourse(:,i) = squeeze(mean(mean(dfofInterp(:,:,round(startFrame + (1:tcRange))),2),1)) - mean(mean(dfofInterp(:,:,round(startFrame + 1)),2),1) ;
+    weightTcourse(:,i) = (squeeze(mean(mean(dfWeight(:,:,round(startFrame + (1:tcRange))),2),1)) - mean(mean(mean(dfWeight(:,:,round(startFrame + baseRange)),3),2),1))/mean(normgreen(:)) ;
 end
 filt = fspecial('gaussian',5,1.5);
 trialmean = imfilter(trialmean,filt);
@@ -932,6 +1000,69 @@ if nstim==13 %%% gratings 1 tf
 end
 
 
+if nstim==16 & StimulusNum ==2  %%% 16 cond bars (2 contrast 8 directions)
+    range = [-0.05 0.2]; %%% colormap range
+    %   loc = [2 3 6 9 8 7 4 1]; %%% map stim order onto subplot
+    %     figLabel = 'OFF bars';
+    %     npanel = 8; nrow = 3; ncol = 3; offset = 0;
+    %     gratingTitle = 1;
+    %     pixPlot;
+    %     pixPlotWeight;
+    %
+    %     figLabel = 'ON bars';
+    %     npanel = 8; nrow = 3; ncol = 3; offset = 8;
+    %     gratingTitle=0;
+    %     pixPlot;
+    %     pixPlotWeight;
+    figLabel = 'bars'
+    loc = [1 9 2 10 3 11 4 12 5 13 6 14 7 15 8 16];
+    npanel = 16; nrow = 4; ncol = 4; offset = 0;
+    gratingTitle=0;
+    for i = 1:16; titles{i} = sprintf('c %0.1f th %d',contrast(i),orient(i)); end
+    pixPlot;
+    pixPlotWeight;
+    
+    off_mn = nanmean(trialmean(:,:,contrast(stimOrder)==-1),3);
+    figure
+    imagesc(off_mn,[-0.01 0.1]); title('OFF mean'); colormap jet; colorbar
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    on_mn = nanmean(trialmean(:,:,contrast(stimOrder)==1),3);
+    figure
+    imagesc(on_mn,[-0.01 0.1]); title('ON mean'); colormap jet; colorbar
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    vert_mn = nanmean(trialmean(:,:,(orient(stimOrder)==0 | orient(stimOrder)==180) &contrast(stimOrder)==1),3);
+    figure
+    imagesc(vert_mn,[-0.01 0.1]); title('vertical mean'); colormap jet; colorbar
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    horiz_mn = nanmean(trialmean(:,:,orient(stimOrder)==90 | orient(stimOrder)==270 &contrast(stimOrder)==1),3);
+    figure
+    imagesc(horiz_mn,[-0.01 0.1]); title('horizontal mean'); colormap jet; colorbar
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    figure
+    imagesc(horiz_mn - vert_mn,[-0.1 0.1]);title('horizontal minus vertical'); colormap jet; colorbar
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+            %tuning curves
+    for cl = 1:nclust
+        tuning(cl,:) = nanmean(dFrepsAll(c==cl,10:50,:,:),[1 2 4]); %%% use max over time range, median over trials
+    end
+    
+    figure
+    subplot(2,1,1)
+    plot(0:45:315,tuning(:,1:2:16)); ylim([-0.05 0.2])
+    title('off tuning by clusters'); xlabel('theta'); 
+    subplot(2,1,2)
+    plot(0:45:315,tuning(:,2:2:16)); ylim([-0.05 0.2])
+    title('on tuning'); xlabel('theta')
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end   
+  
+    
+end
+
 if nstim==17 %%% gratings 1 tf; either 4sfx4orient, or 2sf x 8 orient
     range = [-0.05 0.2]; %%% colormap range
     loc = [1 5 9 13 2 6 10 14 3 7 11 15 4 8 12 16]; %%% map stim order onto subplot
@@ -965,7 +1096,8 @@ if nstim==17 && length(unique(freq))==2  %%%% tuning maps for gratings, 2sfs
     sfpref = (meanimg(:,:,2) - meanimg(:,:,1))./(meanimg(:,:,2) + meanimg(:,:,1));
     %    figure
     %    imagesc(sfpref,[-1 1]); colormap jet
-    im = mat2im(sfpref,parula,[-0.5 0.5]);
+    sfpref(isnan(sfpref))=0;
+    im = mat2im(sfpref,jet,[-0.5 0.5]);
     amp = mn/0.1; amp(amp<0) = 0; amp(amp>1) = 1;
     sf_img = im.*repmat(amp,[1 1 3]);
     sf_mean = meanimg;
@@ -1005,24 +1137,44 @@ if nstim==17 && length(unique(freq))==2  %%%% tuning maps for gratings, 2sfs
     imagesc(vert,[-0.05 0.1]); colormap jet; title('vert'); colorbar
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
-    
-    
-    
-    
     figure
     imagesc(horiz,[-0.05 0.1]); colormap jet; title('horiz'); colorbar
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     mn = 0.5*(vert+horiz);
     orientpref = (vert-horiz)./(vert+horiz);
+    orientpref(isnan(orientpref))=0;
     %    figure
     %    imagesc(sfpref,[-1 1]); colormap jet
-    im = mat2im(orientpref,parula,[-0.5 0.5]);
-    amp = mn/0.05; amp(amp<0) = 0; amp(amp>1) = 1;
+    im = mat2im(orientpref,jet,[-0.5 0.5]);
+    amp = mn/0.1; amp(amp<0) = 0; amp(amp>1) = 1;
     orient_img = im.*repmat(amp,[1 1 3]);
     figure
     imshow(orient_img); title('orientation pref; blue = horiz, yellow = vert');
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+    for cl = 1:nclust
+        figure
+        for cond = 1:16
+            subplot(4,4,cond);
+            imagesc(squeeze(mean(dFrepsAll(c==cl,:,cond,:),1))',[-0.05 0.2]);
+        end
+    end
+    
+    %tuning curves
+    for cl = 1:nclust
+        tuning(cl,:) = nanmean(dFrepsAll(c==cl,10:20,:,:),[1 2 4]);  %%% use median over trials
+    end
+    
+    figure
+    subplot(2,1,1)
+    plot(0:45:315,tuning(:,1:2:16)); ylim([-0.05 0.2])
+    title('low sf tuning by clusters'); xlabel('theta');
+    subplot(2,1,2)
+    plot(0:45:315,tuning(:,2:2:16)); ylim([-0.05 0.2])
+    title('high sf tuning'); xlabel('theta')
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
 end
 
 for i = 1:nstim;

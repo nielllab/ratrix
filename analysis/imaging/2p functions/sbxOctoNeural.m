@@ -137,7 +137,7 @@ if ~isfield(Opt,'fStim')
 end
 
 %%% need to figure out whether to trim off beginning
-load(fullfile(Opt.pStim,Opt.fStim),'stimRec','freq','orient', 'contrast','StimulusStr','StimulusNum');
+load(fullfile(Opt.pStim,Opt.fStim),'stimRec','freq','orient', 'contrast','positionX','StimulusStr','StimulusNum');
 alignRecs =1;
 %nCycles = floor(size(dfofInterp,3)/cycLength)-ceil((cycWindow-cycLength)/cycLength)-2;  %%% trim off last stims to allow window for previous stim
 nCycles  = length(stimTimes);
@@ -831,6 +831,23 @@ for clust = 1:nclust
         
     end  % end of nstim == 17
     
+    if nstim ==32 && StimulusNum ==2
+        %plot timecourse by cluster with orientation
+        loc = [1 9 8 16 2 10 7 15 3 11 6 14 4 12 5 13]
+        for rep = 1:-1:0
+            figure
+            set(gcf,'defaultAxesColorOrder',jet(size(dFrepsAll,4)));
+            for cond=1:16
+                subplot(4,4,loc(cond))
+                plot(squeeze(nanmean(dFrepsAll(c==clust,:,cond*2-rep,:),1)));
+                title(sprintf('c %0.1f loc %i dir %i',contrast(cond*2-rep),positionX(cond*2-rep),orient(cond*2-rep)));
+                ylim([-0.05 0.25]);
+            end
+            if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        end
+        
+    end  % end of nstim == 32
+    
 end %end of for clust
 
 %%% cycle average timecourse for each cluster
@@ -1215,6 +1232,20 @@ if nstim==29 %%% gratings 1 tf; either 4sfx4orient, or 2sf x 8 orient
     
     
     
+end
+
+if nstim ==32 & StimulusNum==2  %%% moving spots at 4 directions 4 locations
+    range =[-0.05 0.2];
+    loc = 1:32;
+    loc(1:2:end) = 1:16; loc(2:2:end) = 17:32;
+    figLabel = 'spots'; offset = 0;
+    npanel = 32; ncol = 8; nrow = 4;
+    pixPlot;
+    pixPlotWeight;
+    for i= 1:32;
+        subplot(4,8,i);
+        title(sprintf('c %0.1f loc %i dir %i',contrast(i),positionX(i),orient(i)));
+    end
 end
 
 if nstim==48 %%% 4x6 spots

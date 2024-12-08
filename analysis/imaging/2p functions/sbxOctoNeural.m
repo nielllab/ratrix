@@ -68,7 +68,7 @@ get2pSession_sbx;  %%% returns dfofInterp, and phasetimes (time in secs each sti
 global info
 mv = info.aligned.T;
 
-if ~isfield(Opt,'sub_noise');
+if ~isfield(Opt,'sub_noise')
     Opt.sub_noise = input('subtract noise from sidebands? 0/1 ');
 end
 
@@ -77,7 +77,7 @@ if Opt.sub_noise==1
 end
 
 
-if isfield(Opt,'zbinning');
+if isfield(Opt,'zbinning')
     zbin = Opt.zbinning
 else
     zbin = input('do zbinning? 0/1 : ');
@@ -505,7 +505,7 @@ elseif selectPts ==2 | selectPts==3
             dF(c,:) = (F(goodcells(c),:) - mean(F(goodcells(c),:)))/mean(F(goodcells(c,:)));
         end
         F = F(goodcells,:);
-        
+        stat = stat(goodcells);
     elseif selectPts ==3
         [s2p_redfile s2p_path] = uigetfile('*.mat','red suite2p .mat file');
         iscell = 0; %%% need to initialize so matlab doesn't think this is a function
@@ -536,9 +536,7 @@ elseif selectPts ==2 | selectPts==3
     %         plot(range*dt,dF(i,range)+i);
     %     end
     ylim([0 np+2])
-    xlabel('secs');
-    ylabel('cell #');
-    title('dF/F')
+    xlabel('secs'); ylabel('cell #');  title('dF/F')
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     %     figure
@@ -597,7 +595,7 @@ for i = 1:nstim
     for r = 1:nStimRep(i)
         startFrame = stimTimes(repList(r))/dt;
         dFrepeats(:,(i-1)*cycWindow + (1:cycWindow),r) = dF(:,round(startFrame+(1:cycWindow))) - repmat(dF(:,round(startFrame+1)),[1 floor(cycWindow)]);
-        dFrepsAll(:,:,i,r) =  dF(:,round(startFrame+(1:cycWindow))) - repmat(dF(:,round(startFrame+1)),[1 floor(cycWindow)]); %% update to average over baseline
+        dFrepsAll(:,:,i,r) =  dF(:,round(startFrame+(1:cycWindow))) - repmat(nanmedian(dF(:,round(startFrame+(1:5))),2),[1 floor(cycWindow)]); %% update to average over baseline
         %dFrepeats(:,(i-1)*cycWindow + (1:cycWindow),r) = dF(:,round((repList(r)-1)*cycLength)+(1:cycWindow)) - repmat(dF(:,round((repList(r)-1)*cycLength)+1),[1 floor(cycWindow)]);
         
     end
@@ -755,6 +753,84 @@ end
 title(sprintf('%u Clusters',nclust));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
+if selectPts==2;
+  cols = hsv(nclust);
+   % img = zeros(size(ops.max_proj,1),size(ops.max_proj,2),3);
+    img = imresize(meanGreenImg,2);
+    for j = 1:length(c)
+        xpix = stat{j}.xpix;
+        ypix = stat{j}.ypix;
+        lam = stat{j}.lam;            
+        for i = 1:length(xpix);
+            img(ypix(i),xpix(i),:) = cols(c(j),:)*lam(i)/max(lam);
+        end
+    end
+    figure
+    imshow(img); title('cluster')
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+end
+
+    %%% plot dF/F traces for random subset
+   np = 5;
+   for clust = 1:nclust
+        cells = find(c== clust);
+        cell_list((1:np) + (clust-1)*np) = cells(ceil(rand(np,1)*length(cells)));
+        color_list((1:np) + (clust-1)*np,:)= repmat(cols(clust,:),[np 1]);
+   end
+   
+    figure
+    hold on
+    range = 1:min(3000,length(dF));
+    dtr= 0.1;
+    for i = 1:length(cell_list);
+        plot(range*dtr - 50,medfilt1(3*dF(cell_list(i),range),5)+31 - i,'Color',0.9*color_list(i,:));
+    end
+    %     np=size(dF,1);
+    %     for i = 1:np;
+    %         plot(range*dt,dF(i,range)+i);
+    %     end
+    ylim([0 np*clust+2]); xlim([0 180]); xticks(0:60:180);
+    xlabel('secs'); ylabel('cell #');  title('dF/F')
+    
+   
+
+if selectPts==2 & nstim ==17;  % some grating analysis
+    
+    dFrepsMn = nanmedian(dFrepsAll,4);
+dFrepsTuning = squeeze(nanmean(dFrepsMn(:,10:20,:),2));
+vert = nanmean(dFrepsTuning(:,[5 7 9]),2);
+horiz = nanmean(dFrepsTuning(:,[13 15]),2);
+ds = (horiz - vert)./(horiz + vert);
+ds(ds<-1)=NaN;
+ds(ds>1) = NaN;
+figure
+hist(ds(c==2),-1:0.1:1);
+    img = zeros(size(ops.max_proj,1),size(ops.max_proj,2),3);
+    for j = 1:length(c)
+        xpix = stat{j}.xpix;
+        ypix = stat{j}.ypix;
+        lam = stat{j}.lam;    
+        onresp = dFrepsTuning(j,1:2:15);
+        amp(j) = max(onresp);
+        onresp = onresp - min([0 onresp]);
+        cv(j) = sum(onresp.*exp((1:8)*pi/4 * sqrt(-1)))/sum(onresp);
+        mag(j) = (abs(cv(j))-0.3)*3;  mag(mag>1) = 1;mag(mag<0) = 0;
+        ph(j) = angle(cv(j))/(2*pi);
+        %cm = interp1(-1:0.01:0.99,cbrewer('div','PiYG',200),ds(j));
+        cm = interp1(0:0.01:0.99,jet(100),mag(j));
+        cm = interp1(-0.5:0.01:0.49,hsv(100),ph(j));
+        cm = cm *mag(j) + [1 1 1]*(1-mag(j));
+        for i = 1:length(xpix);
+            img(ypix(i),xpix(i),:) = cm*lam(i)/max(lam);
+        end
+    end
+    figure
+    imshow(img); title('cluster')
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+end
+
 %%% summary plots for each cluster
 for clust = 1:nclust
     
@@ -814,18 +890,27 @@ for clust = 1:nclust
     
     if nstim ==17
         %plot timecourse by cluster with orientation
-        loc = [2 3 6 9 8 7 4 1]
+               tuning(clust,:) = median(nanmean(dFrepsAll(c==clust,5:15,:,:),[2 4]),1);  %%% use median over trials
+
+              % loc = [1 2 3 6 9 8 7 4]; %%% offsets by 4deg
+              loc = [ 3 2 1 4 7 8 9 6]
+              r = 2:30
         for rep = 1:-1:0
             figure
-            set(gcf,'defaultAxesColorOrder',jet(size(dFrepsAll,4)));
+           % set(gcf,'defaultAxesColorOrder',jet(size(dFrepsAll,4)));
             for cond=1:8
                 subplot(3,3,loc(cond))
-                plot(squeeze(nanmean(dFrepsAll(c==clust,:,cond*2-rep,:),1)));
-                ylim([-0.05 0.25]); title(sprintf('sf %0.2f th %d',freq(cond*2-rep),orient(cond*2-rep)))
+                plot((0:(length(r)-1))*dt, squeeze(nanmean(dFrepsAll(c==clust,r,cond*2-rep,:),1)),'Color',0.9*cols(clust,:));
+                ylim([-0.05 0.25]);%title(sprintf('sf %0.2f th %d',freq(cond*2-rep),orient(cond*2-rep)))
+          % xlabel('secs'); ylabel('dF/F')
             end
+            subplot(3,3,8); xlabel('secs'); subplot(3,3,4); ylabel('dF/F');
             subplot(3,3,5)
-            plot(squeeze(nanmean(dFrepsAll(c==clust,:,17,:),1)));
-            ylim([-0.05 0.25]); title('flicker')
+            %plot(squeeze(nanmean(dFrepsAll(c==clust,:,17,:),1)));
+            %ylim([-0.05 0.25]); title('flicker')
+            ths = (45:45:405)*pi/180;
+            polarplot(ths,tuning(clust,([2:2:16 2]) - rep),'Color',0.9*cols(clust,:) );% axis off
+            ax = gca; ax.RLim = [0 0.12]; ax.ThetaTick = 0:45:315; ax.RTick = []; %ax.TightInset = 1;%ax.ThetaTickLabel = {}; %ax.RTickLabel = {};
             if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
         end
         
@@ -1180,7 +1265,7 @@ if nstim==17 && length(unique(freq))==2  %%%% tuning maps for gratings, 2sfs
     
     %tuning curves
     for cl = 1:nclust
-        tuning(cl,:) = nanmean(dFrepsAll(c==cl,10:20,:,:),[1 2 4]);  %%% use median over trials
+        tuning(cl,:) = median(nanmean(dFrepsAll(c==cl,10:20,:,:),[2 4]),1);  %%% use median over trials
     end
     
     figure

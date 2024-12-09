@@ -753,8 +753,10 @@ end
 title(sprintf('%u Clusters',nclust));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-if selectPts==2;
     cols = hsv(nclust);
+    
+if selectPts==2;
+
     % img = zeros(size(ops.max_proj,1),size(ops.max_proj,2),3);
     img = imresize(meanGreenImg,2);
     for j = 1:length(c)

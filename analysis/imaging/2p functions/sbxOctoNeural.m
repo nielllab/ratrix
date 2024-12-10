@@ -78,7 +78,7 @@ end
 
 
 if isfield(Opt,'zbinning')
-    zbin = Opt.zbinning
+    zbin = Opt.zbinning;
 else
     zbin = input('do zbinning? 0/1 : ');
 end

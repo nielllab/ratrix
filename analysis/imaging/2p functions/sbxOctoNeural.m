@@ -741,7 +741,33 @@ else
     nclust =input('# of clusters : ');
 end
 
-c = cluster(Z,'maxclust',nclust);
+done = 0;ncAll = nclust;
+while ~done
+  c = cluster(Z,'maxclust',ncAll);
+   clear nc
+   for i = 1:ncAll;
+      nc(i) = sum(c==i);
+   end
+  nc
+  newc = c;
+  if sum(nc>5)>=nclust | ncAll>20
+      done=1;
+      goodclust=find(nc>5);
+      for i = 1:length(goodclust)
+          newc(c==goodclust(i))=i;
+      end
+      badclust = find(nc<=5);
+      for i = 1:length(badclust)
+          newc(c==badclust(i))=nclust+1;
+      end
+      c = newc; nclust = nclust+1;
+  else
+      ncAll=ncAll+1
+  end
+end
+
+
+%c = cluster(Z,'maxclust',nclust);
 colors = hsv(nclust+1); %%% color code for each cluster
 
 %%% plot spatial location of cells in each cluster
@@ -753,10 +779,9 @@ end
 title(sprintf('%u Clusters',nclust));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-    cols = hsv(nclust);
+cols = hsv(nclust);
     
 if selectPts==2;
-
     % img = zeros(size(ops.max_proj,1),size(ops.max_proj,2),3);
     img = imresize(meanGreenImg,2);
     for j = 1:length(c)
@@ -786,13 +811,13 @@ hold on
 range = 1:min(3000,length(dF));
 dtr= 0.1;
 for i = 1:length(cell_list);
-    plot(range*dtr - 50,medfilt1(3*dF(cell_list(i),range),5)+31 - i,'Color',0.9*color_list(i,:));
+    plot(range*dtr - 50,medfilt1(3*dF(cell_list(i),range),5)+(length(cell_list)+1) - i,'Color',0.9*color_list(i,:));
 end
 %     np=size(dF,1);
 %     for i = 1:np;
 %         plot(range*dt,dF(i,range)+i);
 %     end
-ylim([0 np*clust+2]); xlim([0 180]); xticks(0:60:180);
+ylim([0 np*nclust+2]); xlim([0 180]); xticks(0:60:180);
 xlabel('secs'); ylabel('cell #');  title('dF/F')
 
 
@@ -842,7 +867,7 @@ for clust = 1:nclust
     subplot(2,2,1);
     imagesc(stdImg,[0 prctile(stdImg(:),99)*1.2]); axis equal; hold on;colormap gray;freezeColors;
     title(sprintf('cluster %d',clust));
-    plot(x(c==clust),y(c==clust),'go')%%'Color',colors(c));
+    plot(x(c==clust),y(c==clust),'o','Color',cols(clust,:))%%'Color',colors(c));
     
     %%% heatmap average timecourse
     subplot(2,2,2);
@@ -899,7 +924,7 @@ for clust = 1:nclust
         r = 1:size(dFrepsAll,2);
         for rep = 1:-1:0
             figure
-            % set(gcf,'defaultAxesColorOrder',jet(size(dFrepsAll,4)));
+             set(gcf,'defaultAxesColorOrder',jet(size(dFrepsAll,4)));
             for cond=1:8
                 subplot(3,3,loc(cond))
                 plot((0:(length(r)-1))*dt, squeeze(nanmean(dFrepsAll(c==clust,r,cond*2-rep,:),1)),'Color',0.9*cols(clust,:));
@@ -934,6 +959,24 @@ for clust = 1:nclust
         end
         
     end  % end of nstim == 32
+    
+        if nstim ==48
+        %plot timecourse by cluster with orientation
+        loc = [1 7 13 19 2 8 14 20 3 9 15 21 4 10 16 22 5 11 17 23 6 12 18 24];
+        for rep = 0:1
+            figure
+            set(gcf,'defaultAxesColorOrder',jet(size(dFrepsAll,4)));
+            for cond=1:24
+                subplot(4,6,loc(cond))
+                plot(squeeze(nanmean(dFrepsAll(c==clust,:,cond + rep*24,:),1)));
+               % title(sprintf('c %0.1f loc %i dir %i',contrast(cond*2-rep),positionX(cond*2-rep),orient(cond*2-rep)));
+                ylim([-0.05 0.25]);
+            end
+            if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        end
+        
+    end  
+    
     
 end %end of for clust
 

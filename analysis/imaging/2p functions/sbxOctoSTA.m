@@ -13,13 +13,13 @@ else
     Opt.SaveFigs = 1;
     Opt.psfile = 'C:\temp\TempFigs.ps';
     %%% manually select points?
-    Opt.selectPts=0;
+    %Opt.selectPts=0;
     %%% manually choose region to crop full image in selecting points
     Opt.selectCrop =1;
     %%% minimum brightness of selected points
     % Opt.mindF = 5000;
     %%% number of clusters from hierarchical analysis
-    Opt.nclust = 5;
+    %Opt.nclust = 5;
     
     %     % option to create movies of non-aligned and aligned image sequences
     %     Opt.MakeMov = 0;
@@ -93,6 +93,7 @@ cycWindow = round(max(2/dt,cycLength));
 
 stimTimes = vidframetimes;   %%% we call them phasetimes in behavior, but better to call it stimTimes here
 startFrame = round((stimTimes(1)-1)/dt);
+startTrim = startFrame;
 dfofInterp = dfofInterp(:,:,startFrame:end);   %%% movie starts 1 sec before first stim
 stimTimes = stimTimes-stimTimes(1)+1;
 
@@ -427,79 +428,80 @@ end
 
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-
-
-%%% select points based on peaks of max df/f
-%%%calculate max df/f image
-%img = nanmax(dfofInterp,[],3);
-img = greenCrop;
-img(isnan(img(:))) = 0;
-img(isinf(img(:))) = 0;
-filt = fspecial('gaussian',5,1);
-stdImg = imfilter(img,filt);
-figure
-imagesc(stdImg); colormap gray
-
-%%% compare each point to the dilation of the region around it - if greater, it's a peak
-region = ones(3,3); region(2,2)=0;
-maxStd = stdImg > imdilate(stdImg,region);
-maxStd(1:3,:) = 0; maxStd(end-2:end,:)=0; maxStd(:,1:3)=0; maxStd(:,end-2:end)=0; %%% no points on border
-pts = find(maxStd);
-fprintf('%d max points\n', length(pts));
-
-%%% show max points
-[y, x] = ind2sub(size(maxStd),pts);
-figure
-imagesc(stdImg,[0 prctile(stdImg(:),98)]);hold on; colormap gray
-plot(x,y,'o');
-
-%%% crop image to avoid points near border that may have artifact
-if isfield(Opt,'selectCrop') && Opt.selectCrop ==1
-    disp('Select area in figure to include in the analysis');
-    [xrange, yrange] = ginput(2);
-else
-    b = 5;
-    xrange = [b size(img,2)-b];
-    yrange = [b size(img,1)-b];
-end
-pts = pts(x>xrange(1) & x<xrange(2) & y>yrange(1) & y<yrange(2));
-
-%%% sort points based on their value (max df/f)
-[brightness, order] = sort(img(pts),1,'descend');
-figure
-plot(brightness); xlabel('N'); ylabel('brightness');
-
-fprintf('%d points in ROI\n',length(pts))
-
-%%% choose points over a cutoff, to eliminate noise / nonresponsive
-if isfield(Opt,'mindF')
-    mindF = Opt.mindF;
-else
-    mindF= input('dF cutoff : ');
-end
-pts = pts(img(pts)>mindF);
-fprintf('%d points in ROI over cutoff\n',length(pts))
-
-hold on
-plot([1 length(brightness)],[mindF mindF],'b');
-title(sprintf('%d points in ROI over cutoff\n',length(pts)))
-if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
-
-%%% plot selected points
-[y, x] = ind2sub(size(maxStd),pts);
-figure
-imagesc(stdImg,[0 prctile(stdImg(:),98)]); hold on; colormap gray
-plot(x,y,'o');
-
-%%% average df/f in a box around each selected point
-
-clear dF
-for i = 1:length(x)
-    dF(i,:) = mean(mean(dfofInterp(y(i)+pts_range,x(i)+pts_range,:),2),1);
-end
-xpts = x; ypts = y; %%% new names so they don't get overwritten
-
+%%% select points
+getOctoCells
+% 
+% %%% select points based on peaks of max df/f
+% %%%calculate max df/f image
+% %img = nanmax(dfofInterp,[],3);
+% img = greenCrop;
+% img(isnan(img(:))) = 0;
+% img(isinf(img(:))) = 0;
+% filt = fspecial('gaussian',5,1);
+% stdImg = imfilter(img,filt);
+% figure
+% imagesc(stdImg); colormap gray
+% 
+% %%% compare each point to the dilation of the region around it - if greater, it's a peak
+% region = ones(3,3); region(2,2)=0;
+% maxStd = stdImg > imdilate(stdImg,region);
+% maxStd(1:3,:) = 0; maxStd(end-2:end,:)=0; maxStd(:,1:3)=0; maxStd(:,end-2:end)=0; %%% no points on border
+% pts = find(maxStd);
+% fprintf('%d max points\n', length(pts));
+% 
+% %%% show max points
+% [y, x] = ind2sub(size(maxStd),pts);
+% figure
+% imagesc(stdImg,[0 prctile(stdImg(:),98)]);hold on; colormap gray
+% plot(x,y,'o');
+% 
+% %%% crop image to avoid points near border that may have artifact
+% if isfield(Opt,'selectCrop') && Opt.selectCrop ==1
+%     disp('Select area in figure to include in the analysis');
+%     [xrange, yrange] = ginput(2);
+% else
+%     b = 5;
+%     xrange = [b size(img,2)-b];
+%     yrange = [b size(img,1)-b];
+% end
+% pts = pts(x>xrange(1) & x<xrange(2) & y>yrange(1) & y<yrange(2));
+% 
+% %%% sort points based on their value (max df/f)
+% [brightness, order] = sort(img(pts),1,'descend');
+% figure
+% plot(brightness); xlabel('N'); ylabel('brightness');
+% 
+% fprintf('%d points in ROI\n',length(pts))
+% 
+% %%% choose points over a cutoff, to eliminate noise / nonresponsive
+% if isfield(Opt,'mindF')
+%     mindF = Opt.mindF;
+% else
+%     mindF= input('dF cutoff : ');
+% end
+% pts = pts(img(pts)>mindF);
+% fprintf('%d points in ROI over cutoff\n',length(pts))
+% 
+% hold on
+% plot([1 length(brightness)],[mindF mindF],'b');
+% title(sprintf('%d points in ROI over cutoff\n',length(pts)))
+% if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+% 
+% 
+% %%% plot selected points
+% [y, x] = ind2sub(size(maxStd),pts);
+% figure
+% imagesc(stdImg,[0 prctile(stdImg(:),98)]); hold on; colormap gray
+% plot(x,y,'o');
+% 
+% %%% average df/f in a box around each selected point
+% 
+% clear dF
+% for i = 1:length(x)
+%     dF(i,:) = mean(mean(dfofInterp(y(i)+pts_range,x(i)+pts_range,:),2),1);
+% end
+% xpts = x; ypts = y; %%% new names so they don't get overwritten
+% 
 
 
 %% Plotting
@@ -563,8 +565,55 @@ else
     nclust =input('# of clusters : ');
 end
 
-c = cluster(Z,'maxclust',nclust);
+%c = cluster(Z,'maxclust',nclust);
+
+%%% select clusters
+done = 0;ncAll = nclust;
+while ~done
+  c = cluster(Z,'maxclust',ncAll);
+   clear nc
+   for i = 1:ncAll;
+      nc(i) = sum(c==i);
+   end
+  nc
+  newc = c;
+  if sum(nc>5)>=nclust | ncAll>20
+      done=1;
+      goodclust=find(nc>5);
+      for i = 1:length(goodclust)
+          newc(c==goodclust(i))=i;
+      end
+      badclust = find(nc<=5);
+      if ~isempty(badclust)         
+          for i = 1:length(badclust)
+              newc(c==badclust(i))=nclust+1;
+          end
+          nclust = nclust+1;
+      end
+      c = newc; 
+  else
+      ncAll=ncAll+1
+  end
+end
+
 colors = hsv(nclust+1); %%% color code for each cluster
+cols = hsv(nclust);
+
+if selectPts==2;
+    % img = zeros(size(ops.max_proj,1),size(ops.max_proj,2),3);
+    img = imresize(meanGreenImg,2);
+    for j = 1:length(c)
+        xpix = stat{j}.xpix;
+        ypix = stat{j}.ypix;
+        lam = stat{j}.lam;
+        for i = 1:length(xpix);
+            img(ypix(i),xpix(i),:) = cols(c(j),:)*lam(i)/max(lam);
+        end
+    end
+    figure
+    imshow(img); title('cluster')
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end  
+end
 
 %%% plot spatial location of cells in each cluster
 figure
@@ -574,6 +623,28 @@ for clust=1:nclust
 end
 title(sprintf('%u Clusters',nclust));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+
+%%% plot dF/F traces for random subset
+np = 5;
+for clust = 1:nclust
+    cells = find(c== clust);
+    cell_list((1:np) + (clust-1)*np) = cells(ceil(rand(np,1)*length(cells)));
+    color_list((1:np) + (clust-1)*np,:)= repmat(cols(clust,:),[np 1]);
+end
+
+figure
+hold on
+range = 1:min(3000,length(dF));
+dtr= 0.1;
+for i = 1:length(cell_list);
+    plot(range*dtr - 50,medfilt1(3*dF(cell_list(i),range),5)+(length(cell_list)+1) - i,'Color',0.9*color_list(i,:));
+end
+ylim([0 np*nclust+2]); xlim([0 180]); xticks(0:60:180);
+xlabel('secs'); ylabel('cell #');  title('dF/F')
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+
 
 %%% summary plots for each cluster
 m= (double(moviedata)-127)/128;
@@ -593,7 +664,7 @@ for clust = 1:nclust
     subplot(2,3,1);
     imagesc(stdImg,[0 prctile(stdImg(:),99)*1.2]); axis equal; hold on;colormap gray;freezeColors;
     title(sprintf('cluster %d',clust));
-    plot(x(c==clust),y(c==clust),'go')%%'Color',colors(c));
+    plot(x(c==clust),y(c==clust),'o','Color',cols(clust,:))%%'Color',colors(c));
     
     for i = 1:length(stimTimes)-2;
         dFalign(i,:) = nanmean(dF(c==clust,stimFrames(i) +framerange),1)- nanmean(mean(dF(c==clust,stimFrames(i)+baserange),2),1);
@@ -716,8 +787,8 @@ clear stas
 display('calculating cell STAs')
 
 for n = 1:size(dF,1)
-    if n/10 == round(n/10)
-        %sprintf('done %d / %d cells',n,size(dF,1))
+    if n/100 == round(n/100)
+        sprintf('done %d / %d cells',n,size(dF,1))
     end
     for i = 1:length(stimTimes)-2;
         dFalign(i,:) = dF(n,stimFrames(i) +framerange) - nanmean(dF(n,stimFrames(i)+baserange),2);

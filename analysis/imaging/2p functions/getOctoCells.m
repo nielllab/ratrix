@@ -95,7 +95,7 @@ elseif selectPts==0
     imagesc(stdImg,[0 prctile(stdImg(:),98)]); hold on; colormap gray
     plot(x,y,'o');title(sprintf('df pts_range %d',pts_range(end)))
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
+
     %%% average df/f in a box around each selected point
     
     clear dF
@@ -120,10 +120,11 @@ elseif selectPts ==2 | selectPts==3
     title(sprintf('n = %d good = %d',length(iscell), sum(iscell(:,1))));
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
-    stdImg =  imresize( ops.max_proj,0.5);
+   % stdImg =  imresize( ops.max_proj,0.5);
+    stdImg =  imresize( ops.meanImg,0.5);  % changed on 121224 from max project
     
     %%% all masks, color coded by iscell
-    img = zeros(size(ops.max_proj,1),size(ops.max_proj,2),3);
+    img = zeros(size(ops.meanImg,1),size(ops.meanImg,2),3);
     cols = jet(100);
     for c = 1:length(iscell)
         xpix = stat{c}.xpix;
@@ -157,7 +158,7 @@ elseif selectPts ==2 | selectPts==3
     
     %%% compute image of good cell masks
     cols = [ 1 0 0; 0 1 0; 0 0 1; 1 1 0; 1 0 1; 0 1 1];
-    img = zeros(size(ops.max_proj,1),size(ops.max_proj,2),3);
+    img = zeros(size(stdImg,1),size(stdImg,2),3);
     for c = 1:ncells
         xpix = stat{goodcells(c)}.xpix;
         ypix = stat{goodcells(c)}.ypix;
@@ -181,6 +182,10 @@ elseif selectPts ==2 | selectPts==3
     title(sprintf('masks %d good cells',ncells))
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
+    maxProj = zeros(size(ops.meanImg));
+    maxProj(ops.yrange(1):ops.yrange(2)-1, ops.xrange(1):ops.xrange(2)-1)= ops.max_proj;
+    figure
+    imagesc(maxProj); colormap gray; axis equal
     
     
     %%% calculate dF/F

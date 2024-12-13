@@ -617,12 +617,22 @@ end
 
 %%% plot spatial location of cells in each cluster
 figure
-imagesc(stdImg,[0 prctile(stdImg(:),95)]); colormap gray; axis equal;hold on
+imagesc(stdImg,[0 prctile(stdImg(:),99)]); colormap gray; axis equal;hold on
 for clust=1:nclust
-    plot(x(c==clust),y(c==clust),'o','Color',colors(clust,:));
+    plot(x(c==clust),y(c==clust),'o','Color',cols(clust,:));
 end
 title(sprintf('%u Clusters',nclust));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+figure
+imagesc(maxProj,[0 prctile(maxProj(:),99)]); colormap gray; axis equal;hold on
+for clust=1:nclust
+    plot(x(c==clust)*2,y(c==clust)*2,'o','Color',colors(clust,:));
+end
+title(sprintf('%u Clusters',nclust));
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+
 
 
 %%% plot dF/F traces for random subset
@@ -716,7 +726,7 @@ for clust = 1:nclust
         
         figure(clustfig)
         subplot(2,3,1+rep);
-        imagesc(sta',1.5*crange); hold on; axis equal; colormap jet; colormap(cbrewer('div','RdBu',64))
+        imagesc(sta',1.5*crange); hold on; axis equal; colormap jet; colormap(flipud(cbrewer('div','RdBu',64)))
         xprofile = max(abs(sta),[],1); [mx xmax] = max(xprofile);
         yprofile = max(abs(sta),[],2); [mx ymax] = max(yprofile);
         xmax

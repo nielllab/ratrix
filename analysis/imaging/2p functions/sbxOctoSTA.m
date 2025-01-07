@@ -580,7 +580,8 @@ while ~done
   if sum(nc>5)>=nclust | ncAll>20
       done=1;
       goodclust=find(nc>5);
-      for i = 1:length(goodclust)
+      nclust = length(goodclust)
+      for i = 1:length(goodclust);
           newc(c==goodclust(i))=i;
       end
       badclust = find(nc<=5);
@@ -600,7 +601,7 @@ colors = hsv(nclust+1); %%% color code for each cluster
 cols = hsv(nclust);
 
 if selectPts==2;
-    % img = zeros(size(ops.max_proj,1),size(ops.max_proj,2),3);
+     %img = zeros(size(ops.max_proj,1),size(ops.max_proj,2),3);
     img = imresize(meanGreenImg,2);
     for j = 1:length(c)
         xpix = stat{j}.xpix;

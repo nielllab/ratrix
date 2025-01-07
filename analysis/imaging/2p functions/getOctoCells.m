@@ -107,9 +107,13 @@ elseif selectPts==0
     
 elseif selectPts ==2 | selectPts==3
     %%% suite2p
-    [s2p_file s2p_path] = uigetfile('*.mat','suite2p .mat file');
-    iscell = 0; %%% need to initialize so matlab doesn't think this is a function
-    load(fullfile(s2p_path, s2p_file));
+    if isfield(Opt,'s2p_fname')
+        load(Opt.s2p_fname)
+    else
+        [s2p_file s2p_path] = uigetfile('*.mat','suite2p .mat file');
+        iscell = 0; %%% need to initialize so matlab doesn't think this is a function
+        load(fullfile(s2p_path, s2p_file));
+    end
     %%%% select out cells
     
     F = F(:,startTrim:end);  %%% removes times before initial stim,same as done for dfofInterp

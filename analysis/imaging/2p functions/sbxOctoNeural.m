@@ -1169,6 +1169,18 @@ if nstim==48 %%% 4x6 spots
     
 end
 
+if nstim==24 %%% 4x6 spots, on only
+    range = [-0.05 0.2];
+    loc = [1 7 13 19 2 8 14 20 3 9 15 21 4 10 16 22 5 11 17 23 6 12 18 24]; %%% map stim order onto subplot
+    
+    figLabel = 'spots';
+    npanel = 24; nrow = 4; ncol = 6; offset = 0;
+    pixPlot;
+    pixPlotWeight;
+    
+end
+
+
 if nstim==50 %%% 5x5 spots
     range = [-0.02 0.1];
     loc = [1 6 11 16 21 2 7 12 17 22 3 8 13 18 23 4 9 14 19 24 5 10 15 20 25]; %%% map stim order onto subplot

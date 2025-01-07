@@ -10,7 +10,6 @@ outFolder = '8way_110822/'
 [sbx_fname acq_fname mat_fname quality regioned runBatch] = compileFilenames('CombinedBatch_GoodOnes.xlsx',stim_name,suffix);
 
 
-
 %% General Parameters
 Opt.align = 1;
 Opt.NumChannels = 1;
@@ -23,13 +22,13 @@ Opt.Resample_dt = 0.1;
 Opt.SaveOutput = 1;
 
 %Options for finding cells
-Opt.selectPts = 0;          %Select points automatically (0) rather than manually
+Opt.selectPts = 2;          %Select points automatically (0) rather than manually
 Opt.mindF = 5000;            %Minimum delta-f value
 Opt.nclust = 5;             %Number of cell population clusters
 Opt.selectCrop = 0;         %whether to manually crop image region
-
+Opt.s2p_fname = [sbx_fname(1:end-4) '_Fall.mat']
 Opt.zbinning = 1;
-Opt.binningThresh = 0.95;
+Opt.binningThresh = 0.96;
 
 Opt.sub_noise = 1;
 Results = struct;

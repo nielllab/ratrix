@@ -11,9 +11,13 @@ function sbx2stack_multichan(fname)
 %%% for 1-channel image, output is grayscale stack
 %%% for 2-channel image, output is an RGB stack (with empty 3rd color -> a result of Matlab imwrite constraints)
 
-
+clear global
 %%% get info from first image
+if ~exist([fname '.sbx'],'file')
+    sprintf('%s does not exist!',fname)
+end
 z = sbxread(fname,1,1);
+
 global info;
 
 %%% get some parameters

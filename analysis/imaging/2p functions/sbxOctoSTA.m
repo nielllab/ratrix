@@ -625,15 +625,15 @@ end
 title(sprintf('%u Clusters',nclust));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
-figure
-imagesc(maxProj,[0 prctile(maxProj(:),99)]); colormap gray; axis equal;hold on
-for clust=1:nclust
-    plot(x(c==clust)*2,y(c==clust)*2,'o','Color',colors(clust,:));
+if selectPts ==2
+    figure
+    imagesc(maxProj,[0 prctile(maxProj(:),99)]); colormap gray; axis equal;hold on
+    for clust=1:nclust
+        plot(x(c==clust)*2,y(c==clust)*2,'o','Color',colors(clust,:));
+    end
+    title(sprintf('%u Clusters',nclust));
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 end
-title(sprintf('%u Clusters',nclust));
-if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
-
 
 
 %%% plot dF/F traces for random subset

@@ -690,7 +690,8 @@ for clust = 1:nclust
              set(gcf,'defaultAxesColorOrder',jet(size(dFrepsAll,4)));
             for cond=1:8
                 subplot(3,3,loc(cond))
-                plot((0:(length(r)-1))*dt, squeeze(nanmean(dFrepsAll(c==clust,r,cond*2-rep,:),1)),'Color',0.9*cols(clust,:));
+               % plot((0:(length(r)-1))*dt,squeeze(nanmean(dFrepsAll(c==clust,r,cond*2-rep,:),1)),'Color',0.9*cols(clust,:));
+                plot((0:(length(r)-1))*dt, squeeze(nanmean(dFrepsAll(c==clust,r,cond*2-rep,:),1))); %% heatmap temporal order
                 ylim([-0.05 0.25]);%title(sprintf('sf %0.2f th %d',freq(cond*2-rep),orient(cond*2-rep)))
                 % xlabel('secs'); ylabel('dF/F')
             end

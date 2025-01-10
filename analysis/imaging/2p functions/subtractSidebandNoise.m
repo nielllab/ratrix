@@ -12,7 +12,7 @@ function [dfofInterp meanImg greenframe] = subtractSidebandNoise(dfofInterp,mean
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
     figure
-    plot(nanmean(offset(:,1:1000),1));
+    plot(nanmean(offset(:,1:(min(1000,size(offset,2)))),1));
     xlabel('frame'); ylabel('sideband value'); title('sideband noise over time');
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     

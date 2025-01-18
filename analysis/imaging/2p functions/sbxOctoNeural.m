@@ -137,7 +137,7 @@ if ~isfield(Opt,'fStim')
 end
 
 %%% need to figure out whether to trim off beginning
-load(fullfile(Opt.pStim,Opt.fStim),'stimRec','freq','orient', 'contrast','positionX','StimulusStr','StimulusNum');
+load(fullfile(Opt.pStim,Opt.fStim),'stimRec','freq','orient', 'contrast','positionX','StimulusStr','StimulusNum','TempFreq');
 alignRecs =1;
 %nCycles = floor(size(dfofInterp,3)/cycLength)-ceil((cycWindow-cycLength)/cycLength)-2;  %%% trim off last stims to allow window for previous stim
 nCycles  = length(stimTimes);
@@ -724,6 +724,34 @@ for clust = 1:nclust
         
     end  % end of nstim == 32
     
+    if nstim ==24 & StimulusNum==1% 4ori 2sf 3tf
+        %plot timecourse by cluster per condition
+        
+        
+        figure
+        set(gcf,'defaultAxesColorOrder',jet(size(dFrepsAll,4)));
+        for cond=1:24
+            subplot(4,6,cond)
+            plot(squeeze(nanmean(dFrepsAll(c==clust,:,cond,:),1)));
+            % title(sprintf('c %0.1f loc %i dir %i',contrast(cond*2-rep),positionX(cond*2-rep),orient(cond*2-rep)));
+            ylim([-0.025 0.1]);
+            title(sprintf('%d %0.2f %d', orient(cond),freq(cond),TempFreq(cond)))
+        end
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+           figure
+        
+        for cond=1:24
+            subplot(4,6,cond)
+            plot(squeeze(nanmean(dFrepsAll(c==clust,:,cond,:),[1 4])));
+            % title(sprintf('c %0.1f loc %i dir %i',contrast(cond*2-rep),positionX(cond*2-rep),orient(cond*2-rep)));
+            ylim([-0.025 0.1]);
+            title(sprintf('%d %0.2f %d', orient(cond),freq(cond),TempFreq(cond)))
+        end
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+   
+    
+    end
+    
         if nstim ==48
         %plot timecourse by cluster with orientation
         loc = [1 7 13 19 2 8 14 20 3 9 15 21 4 10 16 22 5 11 17 23 6 12 18 24];
@@ -1092,7 +1120,20 @@ for i = 1:nstim;
     meanResp(i) = nanmean(nanmedian(weightTcourse(8:25,stimOrder==i),2),1);
 end
 
-
+if nstim==24 & StimulusNum==1
+    loc = 1:24; figLabel = 'gratings';
+    npanel = 24; nrow=4; ncol=6; offset =0;
+    gratingTitle = 1;
+    pixPlot;
+    pixPlotWeight;
+    for i= 1:24;
+        subplot(4,6,i);
+        title(sprintf('%d %0.2f %d',orient(i),freq(i),TempFreq(i)));
+    end
+    
+end
+    
+    
 if nstim==29 %%% gratings 1 tf; either 4sfx4orient, or 2sf x 8 orient
     range = [-0.05 0.2]; %%% colormap range
     loc = [1 5 9 13 17 21 25 2 6 10 14 18 22 26 3 7 11 15 19 23 27 4 8 12 16 20 24 28]; %%% map stim order onto subplot
@@ -1169,7 +1210,7 @@ if nstim==48 %%% 4x6 spots
     
 end
 
-if nstim==24 %%% 4x6 spots, on only
+if nstim==24 & StimulusNum==7 %%% 4x6 spots, on only
     range = [-0.05 0.2];
     loc = [1 7 13 19 2 8 14 20 3 9 15 21 4 10 16 22 5 11 17 23 6 12 18 24]; %%% map stim order onto subplot
     

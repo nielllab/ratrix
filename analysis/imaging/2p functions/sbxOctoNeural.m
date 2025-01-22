@@ -808,6 +808,11 @@ display('doing pixel plots')
 gratingTitle=0; %%% titles for grating figs?
 evRange = 10:20; baseRange = 1:5; %%% timepoints for evoked and baseline activity
 tcRange = 30; %original value
+tcRange = cycWindow+5; %updated 012224
+tcRange = max(30,tcRange);
+evRange = 6:tcRange; baseRange = 1:5; %%% timepoints for evoked and baseline activity
+
+
 if cycWindow>50
     evRange = 10:50;
     tcRange = cycWindow+10;
@@ -987,15 +992,15 @@ if nstim==16 & StimulusNum ==2  %%% 16 cond bars (2 contrast 8 directions)
     
     %tuning curves
     for cl = 1:nclust
-        tuning(cl,:) = nanmean(dFrepsAll(c==cl,10:50,:,:),[1 2 4]); %%% use max over time range, median over trials
+        tuning(cl,:) = nanmean(dFrepsAll(c==cl,10:end,:,:),[1 2 4]); %%% use max over time range, median over trials
     end
     
     figure
     subplot(2,1,1)
-    plot(0:45:315,tuning(:,1:2:16)); ylim([-0.05 0.2])
+    plot(0:45:315,tuning(:,1:2:16)); ylim([-0.025 0.1])
     title('off tuning by clusters'); xlabel('theta');
     subplot(2,1,2)
-    plot(0:45:315,tuning(:,2:2:16)); ylim([-0.05 0.2])
+    plot(0:45:315,tuning(:,2:2:16)); ylim([-0.025 0.1])
     title('on tuning'); xlabel('theta')
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     

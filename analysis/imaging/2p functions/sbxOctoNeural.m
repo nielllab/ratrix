@@ -724,6 +724,8 @@ for clust = 1:nclust
         
     end  % end of nstim == 32
     
+    
+    
     if nstim ==24 & StimulusNum==1% 4ori 2sf 3tf
         %plot timecourse by cluster per condition
         
@@ -1000,7 +1002,7 @@ if nstim==16 & StimulusNum ==2  %%% 16 cond bars (2 contrast 8 directions)
     plot(0:45:315,tuning(:,1:2:16)); ylim([-0.025 0.1])
     title('off tuning by clusters'); xlabel('theta');
     subplot(2,1,2)
-    plot(0:45:315,tuning(:,2:2:16)); ylim([-0.025 0.1])
+    plot(0:45:315,tuning(:,2:2:16)); ylim([-0.05 0.2])
     title('on tuning'); xlabel('theta')
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
     
@@ -1224,6 +1226,20 @@ if nstim==24 & StimulusNum==7 %%% 4x6 spots, on only
     pixPlot;
     pixPlotWeight;
     
+end
+
+if nstim==10 %%% contrast gratings, one-time mistake
+    range = [-0.05 0.2];
+    loc = 1:10; %%% map stim order onto subplot
+    
+    figLabel = 'bars';
+    npanel = 10; nrow =2; ncol = 5; offset = 0;
+    pixPlot;
+    pixPlotWeight;
+    for i = 1:10;
+        subplot(2,5,i);
+        title(sprintf('c %0.2f ori %d',contrast(i), orient(i)))
+    end 
 end
 
 

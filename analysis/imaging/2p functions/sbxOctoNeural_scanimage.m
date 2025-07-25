@@ -66,6 +66,10 @@ end
 %%% this will be the key point to check for compatibility!
 getSutterData
 
+global info
+mv = info.aligned.T;
+
+
 if ~isfield(Opt,'sub_noise')
     Opt.sub_noise = input('subtract noise from sidebands? 0/1 ');
 end

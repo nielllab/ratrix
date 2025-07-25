@@ -61,12 +61,10 @@ if isfield(Opt,'fSbx')
     fileName = fullfile(Opt.pSbx,Opt.fSbx);
 end
 
-
-get2pSession_sbx;  %%% returns dfofInterp, and phasetimes (time in secs each stim started)
-
-
-global info
-mv = info.aligned.T;
+%%% script extracted from old Sutter analysis that should read in scanimage
+%%% tiffs and ttl data
+%%% this will be the key point to check for compatibility!
+getSutterData
 
 if ~isfield(Opt,'sub_noise')
     Opt.sub_noise = input('subtract noise from sidebands? 0/1 ');

@@ -38,7 +38,7 @@ for j = 1:length(use);
     try
         runBatch{j}=T.runBatch{i};
     catch
-        runBatch{j} = NaN;
+        runBatch{j} = 'Y';
     end
 
 

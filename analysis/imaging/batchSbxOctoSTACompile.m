@@ -4,11 +4,11 @@ close all
 %% uses excel compile file to choose files, stim, etc
 %% sbx and acq files need to be in the current folder
 
-stim_name = 'sparse noise 1'
-suffix = '_SN1_denoised_zbinned_110822';  %%% appended after date_loc_acq.
-outFolder = 'SN1_110922/'
+stim_name = 'sparse noise'
+suffix = '_5Cl';  %%% appended after date_loc_acq.
+outFolder = '042125Analyzed/'
 %%% select files to analze
-[sbx_fname acq_fname mat_fname quality regioned runBatch] = compileFilenames('CombinedBatch_GoodOnes.xlsx',stim_name,suffix);
+[sbx_fname acq_fname mat_fname quality regioned runBatch] = compileFilenames('2024_2025_data_batch.xlsx',stim_name,suffix);
 
 
 %% General Parameters

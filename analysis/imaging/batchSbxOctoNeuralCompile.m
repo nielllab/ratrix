@@ -4,10 +4,10 @@ close all
 %% uses excel compile file to choose files, stim, etc
 
 stim_name = '8 way gratings 2ISI'
-suffix = '_denoised_Zbin95_8way_111122';
-outFolder = '8way_110822/'
+suffix = '_5Cl';
+outFolder = '042125Analyzed/'
 %%% select files to analyze
-[sbx_fname acq_fname mat_fname quality regioned runBatch] = compileFilenames('CombinedBatch_GoodOnes.xlsx',stim_name,suffix);
+[sbx_fname acq_fname mat_fname quality regioned runBatch] = compileFilenames('2024_2025_data_batch.xlsx',stim_name,suffix);
 
 
 %% General Parameters
@@ -22,7 +22,7 @@ Opt.Resample_dt = 0.1;
 Opt.SaveOutput = 1;
 
 %Options for finding cells
-Opt.selectPts = 2;          %Select points automatically (0) rather than manually
+Opt.selectPts = 0;          %Select points automatically (0) rather than manually
 Opt.mindF = 5000;            %Minimum delta-f value
 Opt.nclust = 5;             %Number of cell population clusters
 Opt.selectCrop = 0;         %whether to manually crop image region
@@ -64,7 +64,8 @@ Results = struct;
         %% Run sutterOctoNeural
         Results(iFile).Input = Opt;       
 %         try
-            sbxOctoNeural(Opt);
+
+sbxOctoNeural(Opt);
             Results(iFile).Output = 'success'
 %         catch
 %             fprintf('Error in sutterOctoNeural script - Continuing onto next file');

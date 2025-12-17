@@ -662,7 +662,7 @@ for clust = 1:nclust
     %     plot((1:size(dF,2))*dt,dF(c==clust,:)'); hold on;
     %     xlim([1 size(dF,2)*dt]); xlabel('secs'); ylim([-0.2 2.1])
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-    
+
     if nstim==16
         loc = [2 3 6 9 8 7 4 1]
         for rep = 1:-1:0
@@ -703,8 +703,20 @@ for clust = 1:nclust
             polarplot(ths,tuning(clust,([2:2:16 2]) - rep),'Color',0.9*cols(clust,:) );% axis off
             ax = gca; ax.RLim = [0 0.12]; ax.ThetaTick = 0:45:315; ax.RTick = []; %ax.TightInset = 1;%ax.ThetaTickLabel = {}; %ax.RTickLabel = {};
             if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+            
+            % Plot tuning curve for the current cluster (clust)
+            subplot(2,2,3); % You can adjust this position as needed
+            orient2= [0, 45, 90, 135, 180, 225, 270, 315, 360]
+            plot(orient2,tuning(clust,([2:2:16 2]) - rep), 'o-', 'Color', 0.9*cols(clust,:), 'LineWidth', 2, 'MarkerSize', 6);
+            xlabel('Orientation (degrees)');  % Adjust the x-axis label if needed (e.g., "Stimulus")
+            ylabel('Tuning Strength (dF/F)');  % Adjust the y-axis label to match your data
+            title(sprintf('Tuning Curve for Cluster %d', clust));
+            xlim([0 360]); % If orientations go from 0 to 360 degrees
+            ylim([-0.01 0.15]); % Adjust the y-axis limits based on your data
+            grid on;
+            if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
         end
-        
     end  % end of nstim == 17
     
     if nstim ==32 && StimulusNum ==2

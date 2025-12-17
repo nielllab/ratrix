@@ -59,7 +59,7 @@ display(sprintf('%d recordings, %d labeled good',length(usefile),length(useN)));
 
 %%% collect filenames and make sure the files are there
 %for i = 1:length(useN)
-for i = 1:6
+for i = 1:15
     try
         base = mat_fname{useN(i)}(1:end-4);
         goodfile{n+1} = dir([base '*']).name;

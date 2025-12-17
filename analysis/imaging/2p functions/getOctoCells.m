@@ -145,7 +145,8 @@ elseif selectPts ==2 | selectPts==3
     title('masks coded by iscell'); colormap jet; colorbar
     
     goodcells = find(iscell(:,1) & mean(F,2)>0.5 *median(meanF));
-    
+      goodcells = find(iscell(:,2)>0.2 & mean(F,2)>0.5 *median(meanF));
+  
     figure
     plot(iscell(:,2),mean(F,2),'.')
     hold on; plot([0 1],[ 0.5 *median(meanF) 0.5 *median(meanF)])
@@ -225,13 +226,47 @@ elseif selectPts ==2 | selectPts==3
     for i = 1:np;
         plot(range*dtr,2*dF(ceil(rand*ncells),range)+i);
     end
-    %     np=size(dF,1);
-    %     for i = 1:np;
-    %         plot(range*dt,dF(i,range)+i);
-    %     end
+
+
+
+    dFmed = medfilt1(dF,5);
+    figure
+    hold on
+    range = 1:min(3000,length(dF));
+    dtr= 0.1;
+    np=64;
+%     for i = 1:np;
+%         plot(range*dtr,2*dFmed(ceil(rand*ncells),range)+i);
+%     end;
+    for i = 1:np;
+        plot(range*dt,dF(i,range)+i);
+    end
+    
+    nk=5;
+    k = kmeans(dFmed,nk);
+   figure
+   for i = 1:nk
+        dFk(i,:) = nanmean(dFmed(k==i,:),1);
+        subplot(nk,1,i);
+        plot(dFmed(k==i,:)');
+        hold on
+        plot(dFk(i,:),'g','Linewidth',2);
+    end
+    figure
+    plot(dFk')
+    
+    figure
+    hist(k)
+    
+
     ylim([0 np+2])
     xlabel('secs'); ylabel('cell #');  title('dF/F')
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+    
+        figure
+    imagesc(maxProj); colormap gray; axis equal
+    hold on
+    plot(x*2,y*2,'.')
     
     %     figure
     %     for i = 1:np

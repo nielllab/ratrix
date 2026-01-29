@@ -65,7 +65,7 @@ for i = 1:info.max_idx;
     if align
         img(:,:,i)  = circshift(squeeze(im(chan,:,:)),info.aligned.T(i,:));
     else
-        img(:,:,i)=im;
+        img(:,:,i)=squeeze(im(chan,:,:));
     end
 end
 

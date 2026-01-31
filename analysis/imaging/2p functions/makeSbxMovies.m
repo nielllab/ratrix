@@ -8,6 +8,7 @@ temporalBin = input('temporal binning factor: ');
 fullMovie = input('make full movie? (0/1) :');
 cycMovie = input('make cycle avg movie? (0/1) :');
 chan = input('pmt channel (1/2) : ');
+alignData=input('avi align data? 0/1 :');
 compress = input('compression? (0/1)');
 
 if cycMovie
@@ -21,7 +22,7 @@ avifname = fullfile(avip,avif)
 %%% read in sbx data and perform motion correction (if not already done)
 display('reading data')
 tic
-alignData=1; showImages=1;
+showImages=1;
 
 [img framerate] = readAlign2p_sbx(fname(1:end-4),alignData,showImages,chan);
 if isnan(img)

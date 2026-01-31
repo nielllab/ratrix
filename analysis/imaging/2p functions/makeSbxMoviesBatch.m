@@ -70,7 +70,7 @@ for i=1:length(d)
         end
         
     catch
-        sprintf('couldnt make movie')
+        sprintf('couldnt make movie')        
         dbstop
     end
     

@@ -11,7 +11,15 @@
 % This script is called as a script (not a function), so it reads and writes
 % directly from the calling workspace.
 %
-% REQUIRED WORKSPACE VARIABLES (must be set before calling pixPlot):
+% REQUIRED WORKSPACE VARIABLES (must be set before calling pixPlot_DR):
+%   figNum       - integer figure counter managed by the calling script.
+%                  On entry: figNum already holds the number for the pixel map figure.
+%                  This script reads figNum (for pixFig) and figNum+1 (for traceFig).
+%                  The caller is responsible for all figNum increments:
+%                    figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
+%                  The trailing caller increment advances figNum to the traceFig slot
+%                  AFTER this script has already run, so this script uses figNum+1
+%                  (computed at run time) to label traceFig.
 %   trialmean    - [Y x X x nTrials] pixel-wise mean dF/F per trial (spatially smoothed)
 %   trialTcourse - [T x nTrials] spatially-averaged dF/F timecourse per trial
 %   stimOrder    - [1 x nTrials] stimulus condition index for each trial
@@ -31,17 +39,28 @@
 %   titles       - cell array of custom title strings per condition
 %
 % OUTPUTS (figures printed to psfile):
-%   pixFig   - figure handle: grid of pixel-wise mean response images
-%   traceFig - figure handle: grid of individual trial timecourses
+%   pixFig   - figure handle: grid of pixel-wise mean response images       (Fig N)
+%   traceFig - figure handle: grid of individual trial timecourses           (Fig N+1)
+%
+% figNum SCHEME (this script does NOT modify figNum):
+%   Caller pattern:  figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
+%   On entry:  figNum = N  → used for pixFig label
+%   At export: figNum+1   → used for traceFig label  (caller's trailing increment
+%                            runs after this script returns, so we compute N+1 here)
 %
 % FIGURE NAMES:
-%   Both figures are named with figLabel (set in calling script).
-%   The pixel map figure is titled "figLabel: Pixel Map"
-%   The timecourse figure is titled "figLabel: Trial Timecourses"
+%   pixFig   window Name: 'Fig N   - <figLabel>: Pixel Map'
+%   traceFig window Name: 'Fig N+1 - <figLabel>: Trial Timecourses'
 
-% Create the two output figures and assign names for identification
-pixFig   = figure; set(gcf, 'Name', figLabel);   % pixel-wise response map figure
-traceFig = figure; set(gcf, 'Name', figLabel);   % trial timecourse figure
+% ---- Figure 1 of 2: Pixel Map (Fig N) ----
+% figNum was pre-incremented by the caller. Use it directly for the pixel map figure.
+pixFig = figure('Name', sprintf('Fig %d - %s: Pixel Map', figNum, figLabel));
+
+% ---- Figure 2 of 2: Trial Timecourses (Fig N+1) ----
+% The caller will do 'figNum = figNum + 1' AFTER this script returns (trailing increment).
+% Pre-compute that label now so traceFig gets the correct Fig number on both the
+% window Name and the sgtitle, keeping them in sync with the PDF page order.
+traceFig = figure('Name', sprintf('Fig %d - %s: Trial Timecourses', figNum + 1, figLabel));
 
 % Get the number of frames in each trial timecourse
 tl = size(trialTcourse, 1);
@@ -84,17 +103,19 @@ for i = (1:npanel) + offset
 
 end
 
-% ---- FIGURE (figLabel): Pixel Map ----
+% ---- FIGURE (Fig N): Pixel Map ----
 % Grid of pixel-wise mean dF/F response images, one per stimulus condition.
 % Colormap: jet; scale: range. Subplots arranged spatially per stim layout.
 figure(pixFig);
 % colorbar;   % (commented out - uncomment to add shared colorbar)
-sgtitle([figLabel ': Pixel Map'], 'Interpreter', 'none');
+sgtitle(sprintf('Fig %d: %s: Pixel Map', figNum, figLabel), 'Interpreter', 'none');
 if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
-% ---- FIGURE (figLabel): Trial Timecourses ----
+% ---- FIGURE (Fig N+1): Trial Timecourses ----
 % Grid of individual trial timecourses, one subplot per stimulus condition.
 % Each colored line = one trial. Green line = median timecourse.
+% figNum+1 here matches the caller's trailing increment that runs after this script
+% returns — so PDF page N+1 and window Name 'Fig N+1' will agree.
 figure(traceFig);
-sgtitle([figLabel ': Trial Timecourses'], 'Interpreter', 'none');
+sgtitle(sprintf('Fig %d: %s: Trial Timecourses', figNum + 1, figLabel), 'Interpreter', 'none');
 if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end

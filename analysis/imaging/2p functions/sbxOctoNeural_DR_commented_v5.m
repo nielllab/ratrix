@@ -66,8 +66,32 @@
 %   Figures are numbered by approximate page order in the output PDF.
 %   Per-cluster figures shift in page number depending on nclust (determined at runtime).
 %   Stimulus-specific figures appear after the cluster loop.
+%
+%   figNum counter: every figure exported to PDF is preceded by 'figNum = figNum + 1'
+%   and uses figure('Name', sprintf('Fig %d - Description', figNum)) plus an updated
+%   title/sgtitle. Non-printed figures use a descriptive Name with '(not printed)'.
+%
+%   Sub-scripts (pixPlot_DR, pixPlotWeight_DR):
+%     Each pixPlot_DR call exports 2 figures (pixel map + timecourses).
+%     Each pixPlotWeight_DR call exports 1 figure (weighted timecourses).
+%     figNum is advanced with bracketing increments:
+%       figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
+%     To add figure numbers inside pixPlot_DR/pixPlotWeight_DR themselves,
+%     add sgtitle(sprintf('Fig %d: ...', figNum), 'Interpreter', 'none') inside
+%     those scripts at their exportgraphics calls.
+%
+%   getOctoCells_DR: produces 2 figures (auto/manual) or 4 figures (suite2p).
+%     figNum is advanced in a batch after the call.
 
 close all
+
+% Figure numbering counter.
+% Incremented once for each figure that is exported to the output PDF.
+% Figures that are displayed but NOT printed use a descriptive Name but no number.
+% This counter is used throughout the script to set figure window names and
+% PDF page labels via the figure 'Name' property, making each PDF page
+% directly referenceable (e.g. "see Fig 3" in the experimental summary).
+figNum = 0;
 
 %% =========================================================================
 %% SECTION 1: INITIALIZE OPTIONS
@@ -225,7 +249,7 @@ dfofInterp(repmat(greenCrop, [1 1 size(dfofInterp,3)]) < thresh) = 0;
 % ---- FIGURE (not printed): Threshold Mask ----
 % Shows which pixels pass the brightness threshold (white = included).
 % Used for visual inspection only; not saved to PDF.
-figure
+figure('Name', 'Threshold Mask (not printed)');
 imagesc(greenCrop > thresh);
 
 
@@ -261,9 +285,10 @@ stimTimes = stimTimes(stimTimes < max(stimTimesOld));
 % ---- FIGURE Pg 1: Stimulus Timing Check ----
 % Shows the time between consecutive stimulus triggers (both regularized and
 % original), to verify consistent stimulus delivery. Title shows median ISI.
-figure
+figNum = figNum + 1;
+figure('Name', sprintf('Fig %d - Stimulus Timing Check', figNum));
 plot(diff(stimTimes)); hold on; plot(diff(stimTimesOld));
-title(sprintf('time between stim on 2p trigs, median %0.03f', median(diff(stimTimes))));
+title(sprintf('Fig %d: Time Between Stim Triggers, median %0.03f s', figNum, median(diff(stimTimes))));
 ylabel('secs');
 if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
@@ -312,7 +337,7 @@ end
 % ---- FIGURE (not printed): Stimulus Order Overlap Check ----
 % Plots the derivative of stimRec.cond alongside the 2-photon trigger times
 % to verify that stimulus transitions align with trigger pulses.
-figure
+figure('Name', 'Stimulus Order Overlap Check (not printed)');
 plot(stimT(1:end-1), diff(stimRec.cond));
 hold on
 plot(cycLength*dt*(1:nCycles), 0, '*');
@@ -320,9 +345,10 @@ plot(cycLength*dt*(1:nCycles), 0, '*');
 % ---- FIGURE Pg 2: Difference of PsychStim Frames ----
 % Shows the inter-frame intervals from the stimulus computer's timestamps.
 % Used to detect dropped frames or timing irregularities in the stimulus software.
-figure
+figNum = figNum + 1;
+figure('Name', sprintf('Fig %d - Diff of PsychStim Frames', figNum));
 plot(diff(stimT(stimT > 0)));
-title('differencee of psychstim frames'); ylabel('secs')
+title(sprintf('Fig %d: Diff of PsychStim Frames', figNum)); ylabel('secs')
 if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
 
@@ -339,7 +365,7 @@ end
 % ---- FIGURE (not printed): Stimulus Order vs stimRec.cond Overlap ----
 % Plots stimOrder (derived above) against every-other-frame stimRec.cond.
 % They should overlap for most cycles; divergence at the end is expected.
-figure
+figure('Name', 'Stimulus Order vs stimRec.cond Overlap (not printed)');
 hold on
 plot(stimOrder)
 plot(stimRec.cond(1:2:end));
@@ -411,10 +437,11 @@ cycPolarImg = img;
 % Hue = which part of the stimulus cycle the pixel responds to.
 % Saturation/value weighted by response amplitude (dim = weak response).
 % Title shows cycle length and normalization amplitude.
-figure
+figNum = figNum + 1;
+figure('Name', sprintf('Fig %d - Cyclic Phase/Amplitude Polar Map', figNum));
 imshow(imresize(img, 2))
 colormap(hsv); colorbar
-title(sprintf('%.03f frame cycle %0.3f amp', cycLength, maxAmp));
+title(sprintf('Fig %d: Cyclic Phase/Amplitude Polar Map  (%.03f frame cycle, %0.3f amp)', figNum, cycLength, maxAmp));
 if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
 
@@ -429,9 +456,10 @@ mfluorescence = squeeze(mean(mean(dfofInterp, 2), 1));
 % ---- FIGURE Pg 4: Full Image Mean Fluorescence Over Time ----
 % Line plot of spatially-averaged dF/F vs. time.
 % Green vertical lines mark the end of each complete stimulus repetition set.
-figure
+figNum = figNum + 1;
+figure('Name', sprintf('Fig %d - Full Image Mean Fluorescence Over Time', figNum));
 plot((1:size(dfofInterp,3))*dt, mfluorescence);
-title('full image mean'); hold on
+title(sprintf('Fig %d: Full Image Mean Fluorescence Over Time', figNum)); hold on
 for i = 1:reps
     plot([i*nstim*cycLength*dt  i*nstim*cycLength*dt], [0 0.5], 'g');
 end
@@ -447,7 +475,8 @@ if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 % Absolute fluorescence image of the preparation. Shows anatomy.
 % Scaled between 1st and 95th percentiles of brightness.
 % Also creates greenFig handle (used in manual ROI selection mode).
-greenFig = figure;
+figNum = figNum + 1;
+greenFig = figure('Name', sprintf('Fig %d - Mean Green Channel', figNum));
 
 stdImg = imresize(greenframe, 1/cfg.spatialBin);
 stdImg = stdImg(buffer(1,1):(end-buffer(1,2)), buffer(2,1):(end-buffer(2,2)), :);
@@ -459,7 +488,7 @@ hold on; axis equal; colormap gray;
 % Create normalized RGB version of green image for overlays
 meanGreenImg = mat2im(greenCrop, gray, [prctile(greenCrop(:),1) prctile(greenCrop(:),99)*1.2]);
 
-title('Mean Green Channel');
+title(sprintf('Fig %d: Mean Green Channel', figNum));
 if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
 % Build a normalized green weighting image for green-weighted overlays.
@@ -476,11 +505,12 @@ normgreen = repmat(normgreen, [1 1 3]);   % expand to 3 channels for RGB operati
 % ---- FIGURE Pg 6: Max dF/F Image ----
 % Pixel-wise maximum dF/F across all time points, median-filtered for noise reduction.
 % Highlights the most responsive pixels. Also creates maxFig handle.
-maxFig = figure;
+figNum = figNum + 1;
+maxFig = figure('Name', sprintf('Fig %d - Max dF/F Image', figNum));
 stdImg = max(dfofInterp, [], 3);
 stdImg = medfilt2(stdImg);
 imagesc(stdImg, [prctile(stdImg(:),1) prctile(stdImg(:),99)]);
-hold on; axis equal; colormap gray; title('max df/f')
+hold on; axis equal; colormap gray; title(sprintf('Fig %d: Max dF/F Image', figNum))
 normMax = (stdImg - prctile(stdImg(:),1)) / (prctile(stdImg(~isinf(stdImg(:))),98) - prctile(stdImg(:),1));
 if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
@@ -488,11 +518,12 @@ if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 % RGB overlay combining anatomy (green channel, G) and max response (red channel, R).
 % Red = high dF/F pixels, Green = bright anatomy pixels.
 % Also creates mergeFig handle (used in manual ROI selection mode).
+figNum = figNum + 1;
 merge = zeros(size(stdImg,1), size(stdImg,2), 3);
 merge(:,:,1) = normMax;        % Red channel = normalized max dF/F
 merge(:,:,2) = normgreenraw;   % Green channel = anatomy
-mergeFig = figure;
-imshow(merge); title('Mean/Max Green Channel Merge')
+mergeFig = figure('Name', sprintf('Fig %d - Mean/Max Green Channel Merge', figNum));
+imshow(merge); title(sprintf('Fig %d: Mean/Max Green Channel Merge', figNum))
 if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
 
@@ -523,6 +554,16 @@ if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 %     Pg 8d  - Suite2p k-means Cluster Histogram: histogram of k-means cluster assignments
 getOctoCells_DR
 
+% Account for figures produced inside getOctoCells_DR.
+% selectPts==0 or 1: 2 figures printed (8a, 8b).
+% selectPts==2 or 3: 4 figures printed (8a-8d).
+% figNum is advanced here so subsequent figures have correct page numbers.
+if selectPts == 2 || selectPts == 3
+    figNum = figNum + 4;   % suite2p: 4 diagnostic figures
+else
+    figNum = figNum + 2;   % auto/manual: 2 diagnostic figures
+end
+
 
 %% =========================================================================
 %% SECTION 14: BASIC dF/F VISUALIZATION
@@ -535,7 +576,7 @@ dF(dF > 2) = 2;
 % All individual ROI dF/F traces overlaid in color.
 % Green trace = population mean. X-axis in seconds.
 % NOTE: print call is commented out in original - this may not appear in PDF.
-figure
+figure('Name', 'Fluorescence Traces (not printed)')
 plot((1:size(dF,2))*dt, dF');
 hold on
 plot((1:size(dF,2))*dt, mean(dF, 1, 'omitnan'), 'g', 'Linewidth', 2);
@@ -547,9 +588,10 @@ xlim([0 size(dF,2)*dt]);
 % X and Y displacement traces from the rigid motion correction algorithm.
 % Large values indicate periods of significant animal movement.
 if exist('mv','var')
-    figure
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - Rigid Alignment Values', figNum));
     plot(mv);
-    title('Rigid Alignment Values')
+    title(sprintf('Fig %d: Rigid Alignment Values', figNum))
     xlabel('x displacement'); ylabel('y displacement');
 end
 if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
@@ -594,10 +636,11 @@ dFrepsAll(dFrepsAll < -1) = -1;
 % Population mean dF/F timecourse for each individual repetition (colored lines).
 % Green line = median across repetitions. Vertical dashed lines separate stimuli.
 % X-axis units = stimulus number.
-figure
+figNum = figNum + 1;
+figure('Name', sprintf('Fig %d - Mean Trace for Each Repeat', figNum));
 plot((0:size(dFrepeats,2)-1)/cycWindow, squeeze(mean(dFrepeats,1)))
 xlabel('stim #'); xlim([1 nstim+1]); ylim([-0.05 0.15])
-title('mean trace for each repeat');
+title(sprintf('Fig %d: Mean Trace for Each Repeat', figNum));
 hold on;
 plot((0:size(dFrepeats,2)-1)/cycWindow, squeeze(mean(median(dFrepeats, 3, 'omitnan'),1)), 'g', 'Linewidth', 2)
 for i = 1:nstim
@@ -629,7 +672,8 @@ end
 % Grid of up to 60 frames showing the pixel-wise mean dF/F timecourse.
 % Each subplot is one frame of the average cycle. Baseline-subtracted.
 % Layout: 5x6 grid (cycLength<=30) or 8x8 grid (cycLength>30).
-figure
+figNum = figNum + 1;
+figure('Name', sprintf('Fig %d - Pixel-wise Cycle Average (Unweighted)', figNum));
 for i = 1:min(cycLength, 60)
     if cycLength <= 30
         subplot(5,6,i);
@@ -641,13 +685,14 @@ for i = 1:min(cycLength, 60)
     imagesc(datafilt, [0 0.1]); axis equal; axis off
 end
 colorbar
-sgtitle('Pixel-wise Cycle Average (Unweighted)', 'Interpreter', 'none');
+sgtitle(sprintf('Fig %d: Pixel-wise Cycle Average (Unweighted)', figNum), 'Interpreter', 'none');
 if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
 % ---- FIGURE Pg 12: Pixel-wise Cycle Average (Green-weighted) ----
 % Same as Pg 11 but each frame is multiplied by the normalized green anatomy image.
 % This suppresses responses in non-tissue regions, highlighting tissue-specific signals.
-figure
+figNum = figNum + 1;
+figure('Name', sprintf('Fig %d - Pixel-wise Cycle Average (Green-weighted)', figNum));
 for i = 1:min(cycLength, 60)
     if cycLength <= 30
         subplot(5,6,i);
@@ -661,16 +706,17 @@ for i = 1:min(cycLength, 60)
     imshow(data_im .* normgreen);
     axis equal; axis off
 end
-sgtitle('Pixel-wise Cycle Average (Green-weighted)', 'Interpreter', 'none');
+sgtitle(sprintf('Fig %d: Pixel-wise Cycle Average (Green-weighted)', figNum), 'Interpreter', 'none');
 if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
 % ---- FIGURE Pg 13: Cycle Average All Cells ----
 % Single line plot of the population-mean cycle average timecourse.
 % Shows the average temporal profile of dF/F across all cells and stims.
 cycAvgAll = cycAvgAll - repmat(cycAvgAll(:,1), [1 size(cycAvgAll,2)]);  % baseline subtract
-figure
+figNum = figNum + 1;
+figure('Name', sprintf('Fig %d - Cycle Average All Cells', figNum));
 plot((1:length(cycAvg))*dt, cycAvg);
-title('cycle average all cells'); xlabel('time'); ylabel('dF')
+title(sprintf('Fig %d: Cycle Average All Cells', figNum)); xlabel('time'); ylabel('dF')
 if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
 
@@ -700,7 +746,7 @@ dFclust(dFclust < 0) = 0;                            % clip to [0, 0.2]
 
 % ---- FIGURE (not printed): dFclust Heatmap ----
 % Raw heatmap of the clustering input matrix (cells x time). Used for inspection.
-figure
+figure('Name', 'dFclust Heatmap (not printed)');
 imagesc(dFclust, [-0.05 0.2])
 
 
@@ -719,7 +765,8 @@ tic; Z = linkage(dist, 'ward'); toc   % Ward linkage minimizes within-cluster va
 % Right panel (3/4 width): dFmean heatmap with cells sorted by dendrogram leaf order.
 %   Rows = cells (sorted), columns = time, color = dF/F magnitude.
 %   Black vertical lines separate stimulus conditions.
-figure
+figNum = figNum + 1;
+figure('Name', sprintf('Fig %d - Sorted Cell Heatmap with Dendrogram', figNum));
 subplot(3,4,[1 5 9])
 display('doing dendrogram')
 [h, t, perm] = dendrogram(Z, 0, 'Orientation','Left', 'ColorThreshold', 1);
@@ -730,6 +777,7 @@ hold on;
 for i = 1:nstim
     plot([i*cycWindow i*cycWindow]+0.5, [1 length(perm)], 'k');
 end
+sgtitle(sprintf('Fig %d: Sorted Cell Heatmap with Dendrogram', figNum), 'Interpreter', 'none');
 if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
 
@@ -737,9 +785,13 @@ if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 %% SECTION 19: CLUSTER ASSIGNMENT
 %% =========================================================================
 
-% Get number of clusters from Opt or prompt user
-if isfield(Opt,'nclust')
+% Get number of clusters from Opt or prompt user.
+% Opt.nclust is consumed (removed) after use so it cannot silently carry over
+% from a previous run in the same workspace and bypass the input prompt.
+if isfield(Opt, 'nclust') && ~isempty(Opt.nclust)
     nclust = Opt.nclust;
+    fprintf('Using Opt.nclust = %d (set before this run)\n', nclust);
+    Opt = rmfield(Opt, 'nclust');   % consume so next run always prompts
 else
     nclust = input('# of clusters : ');
 end
@@ -796,12 +848,13 @@ colors = hsv(nclust + 1);
 % ---- FIGURE Pg 15: Cluster Spatial Map ----
 % Anatomy image (gray) with each cell's position marked by a colored circle.
 % Color indicates cluster membership. Title shows total number of clusters.
-figure
+figNum = figNum + 1;
+figure('Name', sprintf('Fig %d - Cluster Spatial Map', figNum));
 imagesc(stdImg, [0 prctile(stdImg(:),95)]); colormap gray; axis equal; hold on
 for clust = 1:nclust
     plot(x(c==clust), y(c==clust), 'o', 'Color', colors(clust,:));
 end
-title(sprintf('%u Clusters', nclust));
+title(sprintf('Fig %d: Cluster Spatial Map  (%u Clusters)', figNum, nclust));
 if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
 % Define cluster colors (re-using HSV but without the extra noise cluster)
@@ -820,8 +873,9 @@ if selectPts == 2
             img(ypix(i), xpix(i), :) = cols(c(j),:) * lam(i)/max(lam);
         end
     end
-    figure
-    imshow(img); title('Suite2p Cluster Map')
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - Suite2p Cluster ROI Overlay', figNum));
+    imshow(img); title(sprintf('Fig %d: Suite2p Cluster ROI Overlay', figNum))
     if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 end
 
@@ -843,7 +897,8 @@ end
 % Stack of median-filtered dF/F traces, one per selected cell.
 % Each trace is color-coded by its cluster. Traces are vertically offset.
 % First 3000 frames shown; x-axis in seconds.
-figure
+figNum = figNum + 1;
+figure('Name', sprintf('Fig %d - dF/F Traces for Random Subset of Cells', figNum));
 hold on
 range = 1:min(3000, length(dF));
 dtr = 0.1;
@@ -852,7 +907,7 @@ for i = 1:length(cell_list)
          'Color', 0.9*color_list(i,:));
 end
 ylim([0 np*nclust+2]); xlim([0 180]); xticks(0:60:180);
-xlabel('secs'); ylabel('cell #'); title('dF/F')
+xlabel('secs'); ylabel('cell #'); title(sprintf('Fig %d: dF/F Traces (Random Subset)', figNum))
 if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
 
@@ -875,7 +930,7 @@ if selectPts == 2 && nstim == 17
     ds(ds > 1)  = NaN;
 
     % Histogram of DS index for cluster 2 (no print)
-    figure
+    figure('Name', 'DS Index Histogram Cluster 2 (not printed)');
     hist(ds(c==2), -1:0.1:1);
 
     % Build spatial map of orientation preference on ROI masks.
@@ -900,8 +955,9 @@ if selectPts == 2 && nstim == 17
 
     % ---- FIGURE (suite2p + nstim==17): Orientation Selectivity Map ----
     % ROI masks colored by orientation preference (HSV hue) and selectivity (saturation).
-    figure
-    imshow(img); title('Orientation Selectivity Map')
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - Orientation Selectivity Map', figNum));
+    imshow(img); title(sprintf('Fig %d: Orientation Selectivity Map', figNum))
     if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
 end
@@ -922,14 +978,15 @@ if nstim == 48
         % Each subplot shows population-mean timecourse across all repetitions.
         % Color-coded by repetition number (jet colormap).
         if rep == 0; repLabel = 'OFF'; else; repLabel = 'ON'; end
-        figure
+        figNum = figNum + 1;
+        figure('Name', sprintf('Fig %d - All Units %s Spot Timecourses (nstim=48)', figNum, repLabel));
         set(gcf, 'defaultAxesColorOrder', jet(size(dFrepsAll,4)));
         for cond = 1:24
             subplot(4,6,loc(cond))
             plot(squeeze(mean(dFrepsAll(:,:,cond + rep*24,:), 1, 'omitnan')));
             ylim([-0.05 0.25]);
         end
-        sgtitle(sprintf('All Units: %s Spot Timecourses', repLabel), 'Interpreter', 'none');
+        sgtitle(sprintf('Fig %d: All Units  -  %s Spot Timecourses', figNum, repLabel), 'Interpreter', 'none');
         if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
     end
 end
@@ -954,16 +1011,17 @@ for clust = 1:nclust
     %                         median across reps (green). Vertical dotted lines = stim boundaries.
     %   Bottom-left (2,2,3): Individual cell cycle average timecourses (colored),
     %                         plus population mean (green).
-    figure
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - Cluster %d Summary', figNum, clust));
 
     subplot(2,2,1);
     imagesc(stdImg, [0 prctile(stdImg(:),99)*1.2]); axis equal; hold on; colormap gray; freezeColors;
-    title(sprintf('cluster %d', clust));
+    title(sprintf('Fig %d: Cluster %d  -  Anatomy', figNum, clust));
     plot(x(c==clust), y(c==clust), 'o', 'Color', cols(clust,:))
 
     subplot(2,2,2);
     imagesc(dFmean(c==clust,:), [-0.1 0.4]); axis xy
-    title(sprintf('clust %d', clust)); hold on
+    title(sprintf('Cluster %d  -  dF/F Heatmap', clust)); hold on
     for i = 1:nstim
         plot([i*cycWindow i*cycWindow]+0.5, [1 sum(clust==c)], 'k');
     end
@@ -973,7 +1031,7 @@ for clust = 1:nclust
     plot((0:size(dFrepeats,2)-1)/cycWindow + 1, squeeze(mean(dFrepeats(c==clust,:,:), 1))); hold on
     plot((0:size(dFrepeats,2)-1)/cycWindow + 1, squeeze(mean(median(dFrepeats(c==clust,:,:), 3, 'omitnan'),1)), 'g','LineWidth',2)
     xlabel('stim #'); xlim([1 nstim+1]); ylim([-0.05 0.2])
-    title('mean of cluster, multiple repeats');
+    title(sprintf('Cluster %d  -  Mean by Repeat', clust));
     for i = 1:nstim
         plot([i i], [0 0.5], 'k:');
     end
@@ -983,7 +1041,7 @@ for clust = 1:nclust
     plot(cycAvgAll(c==clust,:)');
     hold on
     plot(mean(cycAvgAll(c==clust,:), 1, 'omitnan'), 'g', 'Linewidth', 2);
-    title('Cycle Average Timecourse');
+    title(sprintf('Cluster %d  -  Cycle Average', clust));
     if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
 
@@ -997,7 +1055,8 @@ for clust = 1:nclust
         loc = [2 3 6 9 8 7 4 1];
         for rep = 1:-1:0
             if rep == 1; repLabel = 'High Contrast'; else; repLabel = 'Low Contrast'; end
-            figure
+            figNum = figNum + 1;
+            figure('Name', sprintf('Fig %d - Cluster %d Direction Tuning %s', figNum, clust, repLabel));
             set(gcf, 'defaultAxesColorOrder', jet(size(dFrepsAll,4)));
             for cond = 1:8
                 subplot(3,3,loc(cond))
@@ -1006,7 +1065,7 @@ for clust = 1:nclust
                 title(sprintf('c %0.2f th %d', contrast(cond*2-rep), orient(cond*2-rep)))
             end
             subplot(3,3,5); title(sprintf('clust %d', clust))
-            sgtitle(sprintf('Cluster %d: Direction Tuning (%s)', clust, repLabel), 'Interpreter', 'none');
+            sgtitle(sprintf('Fig %d: Cluster %d  -  Direction Tuning (%s)', figNum, clust, repLabel), 'Interpreter', 'none');
             if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
         end
     end
@@ -1023,7 +1082,8 @@ for clust = 1:nclust
         r = 1:size(dFrepsAll,2);
         for rep = 1:-1:0
             if rep == 1; sfLabel = 'SF 1'; else; sfLabel = 'SF 2'; end
-            figure
+            figNum = figNum + 1;
+            figure('Name', sprintf('Fig %d - Cluster %d Orientation Tuning %s', figNum, clust, sfLabel));
             set(gcf, 'defaultAxesColorOrder', jet(size(dFrepsAll,4)));
             for cond = 1:8
                 subplot(3,3,loc(cond))
@@ -1036,18 +1096,20 @@ for clust = 1:nclust
             ths = (45:45:405)*pi/180;
             polarplot(ths, tuning(clust,([2:2:16 2]) - rep), 'Color', 0.9*cols(clust,:));
             ax = gca; ax.RLim = [0 0.12]; ax.ThetaTick = 0:45:315; ax.RTick = [];
-            sgtitle(sprintf('Cluster %d: Orientation Tuning (%s)', clust, sfLabel), 'Interpreter', 'none');
+            sgtitle(sprintf('Fig %d: Cluster %d  -  Orientation Tuning (%s)', figNum, clust, sfLabel), 'Interpreter', 'none');
             if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
             % ---- FIGURE Cluster N (nstim==17): Orientation Tuning Curve ----
             % Line plot of mean dF/F vs. orientation angle (0-360 deg).
+            figNum = figNum + 1;
+            figure('Name', sprintf('Fig %d - Cluster %d Orientation Tuning Curve %s', figNum, clust, sfLabel));
             subplot(2,2,3);
             orient2 = [0, 45, 90, 135, 180, 225, 270, 315, 360];
             plot(orient2, tuning(clust,([2:2:16 2]) - rep), 'o-', 'Color', 0.9*cols(clust,:), ...
                  'LineWidth', 2, 'MarkerSize', 6);
             xlabel('Orientation (degrees)');
             ylabel('Tuning Strength (dF/F)');
-            title(sprintf('Tuning Curve for Cluster %d', clust));
+            title(sprintf('Fig %d: Cluster %d  -  Tuning Curve (%s)', figNum, clust, sfLabel));
             xlim([0 360]); ylim([-0.01 0.15]); grid on;
             if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
         end
@@ -1062,7 +1124,8 @@ for clust = 1:nclust
         loc = [1 9 8 16 2 10 7 15 3 11 6 14 4 12 5 13];
         for rep = 1:-1:0
             if rep == 1; repLabel = 'Size 1'; else; repLabel = 'Size 2'; end
-            figure
+            figNum = figNum + 1;
+            figure('Name', sprintf('Fig %d - Cluster %d Direction x Position %s', figNum, clust, repLabel));
             set(gcf, 'defaultAxesColorOrder', jet(size(dFrepsAll,4)));
             for cond = 1:16
                 subplot(4,4,loc(cond))
@@ -1070,7 +1133,7 @@ for clust = 1:nclust
                 title(sprintf('c %0.1f loc %i dir %i', contrast(cond*2-rep), positionX(cond*2-rep), orient(cond*2-rep)));
                 ylim([-0.05 0.25]);
             end
-            sgtitle(sprintf('Cluster %d: Direction x Position (%s)', clust, repLabel), 'Interpreter', 'none');
+            sgtitle(sprintf('Fig %d: Cluster %d  -  Direction x Position (%s)', figNum, clust, repLabel), 'Interpreter', 'none');
             if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
         end
     end  % end nstim==32
@@ -1080,7 +1143,8 @@ for clust = 1:nclust
         % 4x6 grid of subplots; one per grating condition (orientation x SF x TF).
         % Each subplot: per-cell mean timecourse for cells in this cluster.
         % Title per subplot shows orientation, SF, temporal frequency.
-        figure
+        figNum = figNum + 1;
+        figure('Name', sprintf('Fig %d - Cluster %d Grating Timecourses Cell Mean', figNum, clust));
         set(gcf, 'defaultAxesColorOrder', jet(size(dFrepsAll,4)));
         for cond = 1:24
             subplot(4,6,cond)
@@ -1088,19 +1152,20 @@ for clust = 1:nclust
             ylim([-0.025 0.1]);
             title(sprintf('%d %0.2f %d', orient(cond), freq(cond), TempFreq(cond)))
         end
-        sgtitle(sprintf('Cluster %d: Grating Timecourses (Cell Mean)', clust), 'Interpreter', 'none');
+        sgtitle(sprintf('Fig %d: Cluster %d  -  Grating Timecourses (Cell Mean)', figNum, clust), 'Interpreter', 'none');
         if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
         % ---- FIGURE Cluster N (nstim==24, SNum=1): 4x6 Condition Grid (pixel mean) ----
         % Same layout as above but averages over both cells and repetitions together.
-        figure
+        figNum = figNum + 1;
+        figure('Name', sprintf('Fig %d - Cluster %d Grating Timecourses Pixel Mean', figNum, clust));
         for cond = 1:24
             subplot(4,6,cond)
             plot(squeeze(mean(dFrepsAll(c==clust,:,cond,:), [1 4], 'omitnan')));
             ylim([-0.025 0.1]);
             title(sprintf('%d %0.2f %d', orient(cond), freq(cond), TempFreq(cond)))
         end
-        sgtitle(sprintf('Cluster %d: Grating Timecourses (Pixel Mean)', clust), 'Interpreter', 'none');
+        sgtitle(sprintf('Fig %d: Cluster %d  -  Grating Timecourses (Pixel Mean)', figNum, clust), 'Interpreter', 'none');
         if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
     end
 
@@ -1112,14 +1177,15 @@ for clust = 1:nclust
         loc = [1 7 13 19 2 8 14 20 3 9 15 21 4 10 16 22 5 11 17 23 6 12 18 24];
         for rep = 0:1
             if rep == 0; repLabel = 'OFF'; else; repLabel = 'ON'; end
-            figure
+            figNum = figNum + 1;
+            figure('Name', sprintf('Fig %d - Cluster %d %s Spot Timecourses', figNum, clust, repLabel));
             set(gcf, 'defaultAxesColorOrder', jet(size(dFrepsAll,4)));
             for cond = 1:24
                 subplot(4,6,loc(cond))
                 plot(squeeze(mean(dFrepsAll(c==clust,:,cond + rep*24,:), 1, 'omitnan')));
                 ylim([-0.05 0.25]);
             end
-            sgtitle(sprintf('Cluster %d: %s Spot Timecourses', clust, repLabel), 'Interpreter', 'none');
+            sgtitle(sprintf('Fig %d: Cluster %d  -  %s Spot Timecourses', figNum, clust, repLabel), 'Interpreter', 'none');
             if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
         end
     end
@@ -1134,19 +1200,21 @@ end  % end of for clust loop
 % ---- FIGURE: Cycle Average Timecourse for All Clusters ----
 % Overlaid line plots of the mean cycle-average timecourse for each cluster.
 % Each cluster drawn in its HSV color. Shows differences in response timing.
-figure
+figNum = figNum + 1;
+figure('Name', sprintf('Fig %d - Cycle Average All Clusters', figNum));
 hold on
 for clust = 1:nclust
     plot(mean(cycAvgAll(c==clust,:), 1, 'omitnan'), 'Color', colors(clust,:));
 end
-title('mean cyc avg for each cluster)')
+title(sprintf('Fig %d: Cycle Average Timecourse  -  All Clusters', figNum))
 if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
 % ---- FIGURE: Mean Response for Each Cluster Across All Stimuli ----
 % Overlaid line plots of mean dF/F vs. stimulus number for each cluster.
 % Vertical dotted lines separate stimulus conditions.
 % Reveals which clusters respond to which stimuli.
-figure
+figNum = figNum + 1;
+figure('Name', sprintf('Fig %d - Mean Response Per Cluster All Stimuli', figNum));
 hold on
 for clust = 1:nclust
     plot((0:size(dFrepeats,2)-1)/cycWindow + 1, mean(dFmean(c==clust,:,:), 1), 'Color', colors(clust,:));
@@ -1154,21 +1222,22 @@ end
 for i = 1:nstim
     plot([i i], [0 0.2], 'k:');
 end
-title('mean resp for each cluster'); xlabel('stim #'); xlim([1 nstim+1])
+title(sprintf('Fig %d: Mean Response Per Cluster  -  All Stimuli', figNum)); xlabel('stim #'); xlim([1 nstim+1])
 if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
 % ---- FIGURE: Correlation Matrix Across Cells After Clustering ----
 % Pairwise correlation matrix of dFclust, with cells sorted by dendrogram order.
 % Reveals the block structure introduced by clustering (similar cells group together).
-figure
+figNum = figNum + 1;
+figure('Name', sprintf('Fig %d - Correlation Matrix After Clustering', figNum));
 imagesc(corrcoef(dFclust(perm,:)'), [-1 1]); colormap jet
-title('correlation across cells after clustering'); colorbar
+title(sprintf('Fig %d: Correlation Matrix Across Cells After Clustering', figNum)); colorbar
 if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
 % ---- FIGURE (not printed): Max dF/F Histogram ----
 % Distribution of each cell's maximum dF/F value across the clustering window.
 % Used to inspect the range of response amplitudes across the population.
-figure
+figure('Name', 'Max dF/F Histogram (not printed)');
 hist(max(dFclust,[],2))
 
 
@@ -1229,24 +1298,28 @@ if nstim == 12
     % ---- FIGURE (nstim==12): OFF Spots Grid ----
     % 2x3 grid of pixel-wise mean dF/F maps for the 6 OFF spot positions.
     % Subplot positions arranged to correspond to spatial screen layout.
-    figure; set(gcf, 'Name','OFF spots');
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - OFF Spots Pixel Map (nstim=12)', figNum));
     for i = 1:6
         meanimg = median(trialmean(:,:,stimOrder==i), 3);
         subplot(2,3,loc(i));
         imagesc(meanimg, range); axis equal
         stimImg(:,:,i) = meanimg;
     end
+    sgtitle(sprintf('Fig %d: OFF Spots Pixel Map', figNum), 'Interpreter', 'none');
     if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
     % ---- FIGURE (nstim==12): ON Spots Grid ----
     % Same layout as above for the 6 ON spot positions (conditions 7-12).
-    figure; set(gcf, 'Name','ON spots');
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - ON Spots Pixel Map (nstim=12)', figNum));
     for i = 7:12
         meanimg = median(trialmean(:,:,stimOrder==i), 3);
         subplot(2,3,loc(i-6));
         imagesc(meanimg, range); axis equal
         stimImg(:,:,i) = meanimg;
     end
+    sgtitle(sprintf('Fig %d: ON Spots Pixel Map', figNum), 'Interpreter', 'none');
     if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 end
 
@@ -1260,19 +1333,19 @@ if nstim == 14
     loc = 1:6;
     figLabel = 'vert gratings';
     npanel = 6; nrow = 2; ncol = 3; offset = 0;
-    pixPlot_DR;
+    figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;   % pixPlot_DR prints 2 figs
 
     % ---- FIGURE (nstim==14): Horizontal Gratings Pixel Map + Timecourses ----
     loc = 1:6;
     figLabel = 'horiz gratings';
     npanel = 6; nrow = 2; ncol = 3; offset = 6;
-    pixPlot_DR;
+    figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==14): Flicker Pixel Map + Timecourses ----
     loc = 1:2;
     figLabel = 'flicker';
     npanel = 2; nrow = 1; ncol = 2; offset = 12;
-    pixPlot_DR;
+    figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==14, not printed): RGB Overlay (Vert / Horiz / Flicker) ----
     % RGB image where R=vert1, G=horiz1, B=flicker response. Shows which pixels
@@ -1281,12 +1354,12 @@ if nstim == 14
     overlay(:,:,2) = median(trialmean(:,:,stimOrder==7), 3, 'omitnan');
     overlay(:,:,3) = median(trialmean(:,:,stimOrder==13), 3, 'omitnan');
     overlay(overlay < 0) = 0; overlay = overlay / range(2);
-    figure
+    figure('Name', 'RGB Overlay Vert/Horiz/Flicker (not printed)');
     imshow(imresize(overlay, 2));
 
     % ---- FIGURE (nstim==14, not printed): RGB Overlay (Vert / Horiz only) ----
     % Same as above but blue channel set to zero (R=vert, G=horiz only).
-    figure
+    figure('Name', 'RGB Overlay Vert/Horiz only (not printed)');
     overlay(:,:,3) = 0;
     imshow(imresize(overlay, 2));
 end
@@ -1298,27 +1371,27 @@ if nstim == 26
     % ---- FIGURE (nstim==26): Vertical 1 Gratings Pixel Map + Timecourses ----
     loc = 1:6; figLabel = 'vert1 gratings';
     npanel = 6; nrow = 2; ncol = 3; offset = 0;
-    pixPlot_DR;
+    figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==26): Horizontal 1 Gratings Pixel Map + Timecourses ----
     loc = 1:6; figLabel = 'horiz1 gratings';
     npanel = 6; nrow = 2; ncol = 3; offset = 6;
-    pixPlot_DR;
+    figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==26): Vertical 2 Gratings Pixel Map + Timecourses ----
     loc = 1:6; figLabel = 'vert2 gratings';
     npanel = 6; nrow = 2; ncol = 3; offset = 12;
-    pixPlot_DR;
+    figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==26): Horizontal 2 Gratings Pixel Map + Timecourses ----
     loc = 1:6; figLabel = 'horiz2 gratings';
     npanel = 6; nrow = 2; ncol = 3; offset = 18;
-    pixPlot_DR;
+    figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==26): Flicker Pixel Map + Timecourses ----
     loc = 1:2; figLabel = 'flicker';
     npanel = 2; nrow = 1; ncol = 2; offset = 24;
-    pixPlot_DR;
+    figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 end
 
 
@@ -1333,21 +1406,21 @@ if nstim == 13
     % pixPlot: 3x4 grid of individual trial timecourses per grating condition.
     figLabel = 'gratings'; npanel = 12; nrow = 3; ncol = 4; offset = 0;
     gratingTitle = 1;
-    pixPlot_DR;
+    figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==13): Gratings Weighted Timecourses ----
     % pixPlotWeight: 3x4 grid of green-weighted timecourses per grating condition.
     % (Weighted pixel map is NOT printed - that line is commented out in pixPlotWeight.)
-    pixPlotWeight_DR;
+    figNum = figNum + 1; pixPlotWeight_DR;
 
     % ---- FIGURE (nstim==13): Flicker Pixel Map ----
     % ---- FIGURE (nstim==13): Flicker Trial Timecourses ----
     figLabel = 'flicker'; npanel = 1; nrow = 1; ncol = 1; offset = 12;
     gratingTitle = 0;
-    pixPlot_DR;
+    figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==13): Flicker Weighted Timecourses ----
-    pixPlotWeight_DR;
+    figNum = figNum + 1; pixPlotWeight_DR;
 
     % Run the grating preference overlay analysis
     mapGratingsOcto_DR;
@@ -1358,11 +1431,13 @@ if nstim == 13
     %   Top-right    : Phase/green channel overlay (from mapGratingsOcto: overlayImg)
     %   Bottom-left  : Cyclic phase polar map (cycPolarImg)
     %   Bottom-right : Horizontal vs. vertical grating preference color map (hvImg)
-    figure
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - Grating Preference Summary Panel (nstim=13)', figNum));
     subplot(2,2,1); imshow(meanGreenImg);
     subplot(2,2,2); imshow(overlayImg);
-    subplot(2,2,3); imshow(cycPolarImg); title('timecourse')
-    subplot(2,2,4); imshow(hvImg); title('h vs v')
+    subplot(2,2,3); imshow(cycPolarImg); title('Cyclic Phase Polar Map')
+    subplot(2,2,4); imshow(hvImg); title('Horiz vs Vert Preference')
+    sgtitle(sprintf('Fig %d: Grating Preference Summary', figNum), 'Interpreter', 'none');
     if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 end
 
@@ -1380,45 +1455,50 @@ if nstim == 16 && StimulusNum == 2
     % pixPlot: 4x4 grid of pixel-wise mean response maps for each bar condition.
     % ---- FIGURE (nstim==16): Bars Trial Timecourses ----
     % pixPlot: 4x4 grid of trial timecourses for each bar condition.
-    pixPlot_DR;
+    figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==16): Bars Weighted Timecourses ----
     % pixPlotWeight: 4x4 grid of green-weighted timecourses.
-    pixPlotWeight_DR;
+    figNum = figNum + 1; pixPlotWeight_DR;
 
     % ---- FIGURE (nstim==16): OFF Mean Response Map ----
     % Mean pixel response across all OFF (contrast=-1) bar conditions.
     off_mn = mean(trialmean(:,:,contrast(stimOrder)==-1), 3, 'omitnan');
-    figure
-    imagesc(off_mn, [-0.01 0.1]); title('OFF mean'); colormap jet; colorbar
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - OFF Mean Response Map (nstim=16)', figNum));
+    imagesc(off_mn, [-0.01 0.1]); title(sprintf('Fig %d: OFF Mean Response Map', figNum)); colormap jet; colorbar
     if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
     % ---- FIGURE (nstim==16): ON Mean Response Map ----
     % Mean pixel response across all ON (contrast=+1) bar conditions.
     on_mn = mean(trialmean(:,:,contrast(stimOrder)==1), 3, 'omitnan');
-    figure
-    imagesc(on_mn, [-0.01 0.1]); title('ON mean'); colormap jet; colorbar
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - ON Mean Response Map (nstim=16)', figNum));
+    imagesc(on_mn, [-0.01 0.1]); title(sprintf('Fig %d: ON Mean Response Map', figNum)); colormap jet; colorbar
     if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
     % ---- FIGURE (nstim==16): Vertical Mean Response Map ----
     % Mean pixel response for vertical bars (0 or 180 deg), ON contrast only.
     vert_mn = mean(trialmean(:,:,(orient(stimOrder)==0 | orient(stimOrder)==180) & contrast(stimOrder)==1), 3, 'omitnan');
-    figure
-    imagesc(vert_mn, [-0.01 0.1]); title('vertical mean'); colormap jet; colorbar
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - Vertical Mean Response Map (nstim=16)', figNum));
+    imagesc(vert_mn, [-0.01 0.1]); title(sprintf('Fig %d: Vertical Mean Response Map', figNum)); colormap jet; colorbar
     if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
     % ---- FIGURE (nstim==16): Horizontal Mean Response Map ----
     % Mean pixel response for horizontal bars (90 or 270 deg), ON contrast only.
     horiz_mn = mean(trialmean(:,:,orient(stimOrder)==90 | orient(stimOrder)==270 & contrast(stimOrder)==1), 3, 'omitnan');
-    figure
-    imagesc(horiz_mn, [-0.01 0.1]); title('horizontal mean'); colormap jet; colorbar
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - Horizontal Mean Response Map (nstim=16)', figNum));
+    imagesc(horiz_mn, [-0.01 0.1]); title(sprintf('Fig %d: Horizontal Mean Response Map', figNum)); colormap jet; colorbar
     if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
     % ---- FIGURE (nstim==16): Horizontal Minus Vertical Difference Map ----
     % Pixel-wise difference of horizontal and vertical mean responses.
     % Positive = horizontal preference, negative = vertical preference.
-    figure
-    imagesc(horiz_mn - vert_mn, [-0.1 0.1]); title('horizontal minus vertical'); colormap jet; colorbar
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - Horiz Minus Vert Difference Map (nstim=16)', figNum));
+    imagesc(horiz_mn - vert_mn, [-0.1 0.1]); title(sprintf('Fig %d: Horizontal Minus Vertical Response', figNum)); colormap jet; colorbar
     if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
     % Compute mean tuning per cluster (used for tuning curves below)
@@ -1429,13 +1509,15 @@ if nstim == 16 && StimulusNum == 2
     % ---- FIGURE (nstim==16): OFF/ON Tuning Curves by Cluster ----
     % Two subplots: (top) OFF tuning curves per cluster vs. direction;
     %               (bottom) ON tuning curves per cluster vs. direction.
-    figure
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - OFF/ON Tuning Curves by Cluster (nstim=16)', figNum));
     subplot(2,1,1)
     plot(0:45:315, tuning(:,1:2:16)); ylim([-0.025 0.1])
-    title('off tuning by clusters'); xlabel('theta');
+    title('OFF Tuning by Cluster'); xlabel('theta');
     subplot(2,1,2)
     plot(0:45:315, tuning(:,2:2:16)); ylim([-0.05 0.2])
-    title('on tuning'); xlabel('theta')
+    title('ON Tuning by Cluster'); xlabel('theta')
+    sgtitle(sprintf('Fig %d: OFF/ON Tuning Curves by Cluster', figNum), 'Interpreter', 'none');
     if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 end
 
@@ -1451,19 +1533,19 @@ if nstim == 17
     % pixPlot: 4x4 grid of individual trial timecourses.
     figLabel = 'gratings'; npanel = 16; nrow = 4; ncol = 4; offset = 0;
     gratingTitle = 1;
-    pixPlot_DR;
+    figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==17): Gratings Weighted Timecourses ----
-    pixPlotWeight_DR;
+    figNum = figNum + 1; pixPlotWeight_DR;
 
     % ---- FIGURE (nstim==17): Flicker Pixel Map ----
     % ---- FIGURE (nstim==17): Flicker Trial Timecourses ----
     figLabel = 'flicker'; npanel = 1; nrow = 1; ncol = 1; offset = 16;
     gratingTitle = 0;
-    pixPlot_DR;
+    figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==17): Flicker Weighted Timecourses ----
-    pixPlotWeight_DR;
+    figNum = figNum + 1; pixPlotWeight_DR;
 end
 
 % Additional 2-SF tuning maps (only when nstim==17 AND exactly 2 unique SFs)
@@ -1478,9 +1560,11 @@ if nstim == 17 && length(unique(freq)) == 2
     % Same for the second (higher) SF.
     for i = 1:2
         meanimg(:,:,i) = median(trialmean(:,:,freqs(stimOrder)==sfs(i)), 3, 'omitnan');
-        figure
+        figNum = figNum + 1;
+        figure('Name', sprintf('Fig %d - SF %d Mean Response Map (nstim=17)', figNum, i));
         imagesc(meanimg(:,:,i), [-0.05 0.1]); colormap jet;
-        title(sprintf('sf = %0.02f', sfs(i)));
+        title(sprintf('Fig %d: SF %d Mean Response Map  (sf = %0.02f)', figNum, i, sfs(i)));
+        if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
     end
 
     % Compute SF preference index: (highSF - lowSF) / (highSF + lowSF)
@@ -1496,8 +1580,9 @@ if nstim == 17 && length(unique(freq)) == 2
     % ---- FIGURE (nstim==17, 2SF): SF Preference Map ----
     % Color image of SF preference index weighted by mean response amplitude.
     % Blue = low SF preference, yellow = high SF preference.
-    figure
-    imshow(sf_img); title('sf pref: blue = 0.01 yellow = 0.16')
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - SF Preference Map (nstim=17)', figNum));
+    imshow(sf_img); title(sprintf('Fig %d: SF Preference Map  (blue=low SF, yellow=high SF)', figNum))
     if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
     % Compute flicker response map
@@ -1506,15 +1591,16 @@ if nstim == 17 && length(unique(freq)) == 2
     flicker_amp = flicker/maxamp; flicker_amp(flicker_amp<0)=0; flicker_amp(flicker_amp>1)=1;
 
     % ---- FIGURE (nstim==17, 2SF): Flicker Response Map (imagesc, not printed) ----
-    figure
+    figure('Name', 'Flicker Response Map raw (not printed)');
     imagesc(flicker)   % raw flicker response - not printed
 
     % ---- FIGURE (nstim==17, 2SF): Full-field Flicker Response Map ----
     % Color image of flicker response amplitude, parula colormap weighted by amplitude.
     im = mat2im(flicker, parula, [0 0.2]);
     flicker_img = im .* repmat(flicker_amp, [1 1 3]);
-    figure
-    imshow(flicker_img); colorbar; title('full-field flicker')
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - Full-field Flicker Response Map (nstim=17)', figNum));
+    imshow(flicker_img); colorbar; title(sprintf('Fig %d: Full-field Flicker Response Map', figNum))
     if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
     % ---- FIGURE (nstim==17, 2SF): SF + Flicker Merge Map ----
@@ -1524,21 +1610,24 @@ if nstim == 17 && length(unique(freq)) == 2
     sf_flick(:,:,1) = flicker_amp;
     sf_mean_amp = sf_mean/maxamp; sf_mean_amp(sf_mean_amp<0)=0; sf_mean_amp(sf_mean_amp>1)=1;
     sf_flick(:,:,2:3) = sf_mean_amp;
-    figure
-    imshow(sf_flick); title(sprintf('red=full-field; green = 0.01cpd; blue=0.16; amp = %0.1f', maxamp));
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - SF + Flicker Merge Map (nstim=17)', figNum));
+    imshow(sf_flick); title(sprintf('Fig %d: SF + Flicker Merge  (red=full-field; green=low SF; blue=high SF; amp=%0.1f)', figNum, maxamp));
     if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
     % ---- FIGURE (nstim==17, 2SF): Orientation Preference Vertical Map ----
     % Pixel-wise mean response for vertical gratings (0 or 180 deg), both SFs.
     vert  = median(trialmean(:,:,orients(stimOrder)==0  | orients(stimOrder)==180), 3, 'omitnan');
     horiz = median(trialmean(:,:,orients(stimOrder)==90 | orients(stimOrder)==270), 3, 'omitnan');
-    figure
-    imagesc(vert, [-0.05 0.1]); colormap jet; title('vert'); colorbar
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - Vertical Grating Mean Response (nstim=17)', figNum));
+    imagesc(vert, [-0.05 0.1]); colormap jet; title(sprintf('Fig %d: Vertical Grating Mean Response', figNum)); colorbar
     if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
     % ---- FIGURE (nstim==17, 2SF): Orientation Preference Horizontal Map ----
-    figure
-    imagesc(horiz, [-0.05 0.1]); colormap jet; title('horiz'); colorbar
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - Horizontal Grating Mean Response (nstim=17)', figNum));
+    imagesc(horiz, [-0.05 0.1]); colormap jet; title(sprintf('Fig %d: Horizontal Grating Mean Response', figNum)); colorbar
     if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
     % ---- FIGURE (nstim==17, 2SF): Orientation Preference Map ----
@@ -1550,19 +1639,22 @@ if nstim == 17 && length(unique(freq)) == 2
     im = mat2im(orientpref, jet, [-0.5 0.5]);
     amp = mn/0.1; amp(amp<0)=0; amp(amp>1)=1;
     orient_img = im .* repmat(amp,[1 1 3]);
-    figure
-    imshow(orient_img); title('orientation pref; blue = horiz, yellow = vert');
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - Orientation Preference Map (nstim=17)', figNum));
+    imshow(orient_img); title(sprintf('Fig %d: Orientation Preference Map  (blue=horiz, yellow=vert)', figNum));
     if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
     % ---- FIGURE Cluster N (nstim==17, 2SF): 4x4 Condition Grid (per cluster) ----
     % One figure per cluster. 4x4 grid showing heatmap of mean response
     % (cells x time) for each of the 16 grating conditions.
     for cl = 1:nclust
-        figure
+        figNum = figNum + 1;
+        figure('Name', sprintf('Fig %d - Cluster %d 4x4 Grating Heatmaps (nstim=17)', figNum, cl));
         for cond = 1:16
             subplot(4,4,cond);
             imagesc(squeeze(mean(dFrepsAll(c==cl,:,cond,:), 1))', [-0.05 0.2]);
         end
+        sgtitle(sprintf('Fig %d: Cluster %d  -  Grating Condition Heatmaps', figNum, cl), 'Interpreter', 'none');
     end
 
     % Compute per-cluster tuning
@@ -1573,13 +1665,15 @@ if nstim == 17 && length(unique(freq)) == 2
     % ---- FIGURE (nstim==17, 2SF): Low/High SF Tuning Curves by Cluster ----
     % Two subplots: (top) tuning curves at low SF per cluster;
     %               (bottom) tuning curves at high SF per cluster.
-    figure
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - Low/High SF Tuning Curves by Cluster (nstim=17)', figNum));
     subplot(2,1,1)
     plot(0:45:315, tuning(:,1:2:16)); ylim([-0.05 0.2])
-    title('low sf tuning by clusters'); xlabel('theta');
+    title('Low SF Tuning by Cluster'); xlabel('theta');
     subplot(2,1,2)
     plot(0:45:315, tuning(:,2:2:16)); ylim([-0.05 0.2])
-    title('high sf tuning'); xlabel('theta')
+    title('High SF Tuning by Cluster'); xlabel('theta')
+    sgtitle(sprintf('Fig %d: Low/High SF Tuning Curves by Cluster', figNum), 'Interpreter', 'none');
     if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 end
 
@@ -1600,10 +1694,10 @@ if nstim == 24 && StimulusNum == 1
     % pixPlot: 4x6 grid of pixel-wise mean response maps.
     % ---- FIGURE (nstim==24, SNum=1): Gratings Trial Timecourses ----
     % pixPlot: 4x6 grid of trial timecourses.
-    pixPlot_DR;
+    figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==24, SNum=1): Gratings Weighted Timecourses ----
-    pixPlotWeight_DR;
+    figNum = figNum + 1; pixPlotWeight_DR;
 
     % Add orientation/SF/TF labels to the weighted timecourse subplots
     for i = 1:24
@@ -1623,19 +1717,19 @@ if nstim == 29
     % ---- FIGURE (nstim==29): Gratings Trial Timecourses ----
     figLabel = 'gratings'; npanel = 28; nrow = 7; ncol = 4; offset = 0;
     gratingTitle = 1;
-    pixPlot_DR;
+    figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==29): Gratings Weighted Timecourses ----
-    pixPlotWeight_DR;
+    figNum = figNum + 1; pixPlotWeight_DR;
 
     % ---- FIGURE (nstim==29): Flicker Pixel Map ----
     % ---- FIGURE (nstim==29): Flicker Trial Timecourses ----
     figLabel = 'flicker'; npanel = 1; nrow = 1; ncol = 1; offset = 28;
     gratingTitle = 0;
-    pixPlot_DR;
+    figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==29): Flicker Weighted Timecourses ----
-    pixPlotWeight_DR;
+    figNum = figNum + 1; pixPlotWeight_DR;
 
     % ---- FIGURE (nstim==29): SF Tuning Curve ----
     % Population mean weighted response vs. spatial frequency (log scale).
@@ -1644,10 +1738,11 @@ if nstim == 29
         tuning(i+1) = mean(meanResp(i+0:7:21), 'omitnan');
     end
     tuning(1) = meanResp(29);
-    figure
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - SF Tuning Curve (nstim=29)', figNum));
     plot(tuning);
     xlabel('SF'); ylabel('mean dF/F'); ylim([0 0.05])
-    title('weighted mean response');
+    title(sprintf('Fig %d: SF Tuning Curve  -  Weighted Mean Response', figNum));
     set(gca,'Xtick',1:8);
     set(gca,'Xticklabel',{'0','0.01','0.02','0.04','0.08','0.16','0.32','0.64'})
     if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
@@ -1665,10 +1760,10 @@ if nstim == 32 && StimulusNum == 2
     % ---- FIGURE (nstim==32): Spots Pixel Map ----
     % pixPlot: 4x8 grid of pixel-wise mean response maps.
     % ---- FIGURE (nstim==32): Spots Trial Timecourses ----
-    pixPlot_DR;
+    figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==32): Spots Weighted Timecourses ----
-    pixPlotWeight_DR;
+    figNum = figNum + 1; pixPlotWeight_DR;
 
     % Add contrast/position/direction labels to weighted timecourse subplots
     for i = 1:32
@@ -1687,18 +1782,18 @@ if nstim == 48
     % pixPlot: 4x6 grid of pixel-wise mean response maps for OFF spot locations.
     % ---- FIGURE (nstim==48): OFF Spots Trial Timecourses ----
     figLabel = 'OFF spots'; npanel = 24; nrow = 4; ncol = 6; offset = 0;
-    pixPlot_DR;
+    figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==48): OFF Spots Weighted Timecourses ----
-    pixPlotWeight_DR;
+    figNum = figNum + 1; pixPlotWeight_DR;
 
     % ---- FIGURE (nstim==48): ON Spots Pixel Map ----
     % ---- FIGURE (nstim==48): ON Spots Trial Timecourses ----
     figLabel = 'ON spots'; npanel = 24; nrow = 4; ncol = 6; offset = 24;
-    pixPlot_DR;
+    figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==48): ON Spots Weighted Timecourses ----
-    pixPlotWeight_DR;
+    figNum = figNum + 1; pixPlotWeight_DR;
 
     % Compute retinotopic maps from spot responses
     % octoRetinotopy produces 4 figures (2 per rep):
@@ -1715,12 +1810,15 @@ if nstim == 48
     %   Top-right    : Retinotopy overlay on anatomy (topoOverlayImg)
     %   Bottom-left  : X (azimuth) retinotopy map (xpolarImg)
     %   Bottom-right : Y (elevation) retinotopy map (ypolarImg)
+    repLabels48 = {'OFF', 'ON'};
     for rep = 1:2
-        figure
-        subplot(2,2,1); imshow(meanGreenImg);
-        subplot(2,2,2); imshow(topoOverlayImg{rep});
-        subplot(2,2,3); imshow(xpolarImg{rep});
-        subplot(2,2,4); imshow(ypolarImg{rep});
+        figNum = figNum + 1;
+        figure('Name', sprintf('Fig %d - Retinotopy Summary %s (nstim=48)', figNum, repLabels48{rep}));
+        subplot(2,2,1); imshow(meanGreenImg); title('Mean Green Anatomy');
+        subplot(2,2,2); imshow(topoOverlayImg{rep}); title('Retinotopy Overlay');
+        subplot(2,2,3); imshow(xpolarImg{rep}); title('X (Azimuth) Map');
+        subplot(2,2,4); imshow(ypolarImg{rep}); title('Y (Elevation) Map');
+        sgtitle(sprintf('Fig %d: Retinotopy Summary  -  %s', figNum, repLabels48{rep}), 'Interpreter', 'none');
         if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
     end
 end
@@ -1734,10 +1832,10 @@ if nstim == 24 && StimulusNum == 7
     % ---- FIGURE (nstim==24, SNum=7): Spots Pixel Map ----
     % ---- FIGURE (nstim==24, SNum=7): Spots Trial Timecourses ----
     figLabel = 'spots'; npanel = 24; nrow = 4; ncol = 6; offset = 0;
-    pixPlot_DR;
+    figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==24, SNum=7): Spots Weighted Timecourses ----
-    pixPlotWeight_DR;
+    figNum = figNum + 1; pixPlotWeight_DR;
 end
 
 
@@ -1750,10 +1848,10 @@ if nstim == 10
     % pixPlot: 2x5 grid of pixel-wise mean response maps.
     % ---- FIGURE (nstim==10): Bars Trial Timecourses ----
     figLabel = 'bars'; npanel = 10; nrow = 2; ncol = 5; offset = 0;
-    pixPlot_DR;
+    figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==10): Bars Weighted Timecourses ----
-    pixPlotWeight_DR;
+    figNum = figNum + 1; pixPlotWeight_DR;
 
     % Add contrast/orientation labels to weighted timecourse subplots
     for i = 1:10
@@ -1772,12 +1870,12 @@ if nstim == 50
     % pixPlot: 5x5 grid of pixel-wise mean response maps for OFF spot locations.
     % ---- FIGURE (nstim==50): OFF Spots Trial Timecourses ----
     figLabel = 'OFF spots'; npanel = 25; nrow = 5; ncol = 5; offset = 0;
-    pixPlot_DR;
+    figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==50): ON Spots Pixel Map ----
     % ---- FIGURE (nstim==50): ON Spots Trial Timecourses ----
     figLabel = 'ON spots'; npanel = 25; nrow = 5; ncol = 5; offset = 25;
-    pixPlot_DR;
+    figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % Compute retinotopic maps
     % octoRetinotopy produces 4 figures (X and Y maps for OFF and ON)
@@ -1785,12 +1883,15 @@ if nstim == 50
 
     % ---- FIGURE (nstim==50): Retinotopy Summary Panel (rep 1 = OFF) ----
     % ---- FIGURE (nstim==50): Retinotopy Summary Panel (rep 2 = ON) ----
+    repLabels50 = {'OFF', 'ON'};
     for rep = 1:2
-        figure
-        subplot(2,2,1); imshow(meanGreenImg);
-        subplot(2,2,2); imshow(topoOverlayImg{rep});
-        subplot(2,2,3); imshow(xpolarImg{rep});
-        subplot(2,2,4); imshow(ypolarImg{rep});
+        figNum = figNum + 1;
+        figure('Name', sprintf('Fig %d - Retinotopy Summary %s (nstim=50)', figNum, repLabels50{rep}));
+        subplot(2,2,1); imshow(meanGreenImg); title('Mean Green Anatomy');
+        subplot(2,2,2); imshow(topoOverlayImg{rep}); title('Retinotopy Overlay');
+        subplot(2,2,3); imshow(xpolarImg{rep}); title('X (Azimuth) Map');
+        subplot(2,2,4); imshow(ypolarImg{rep}); title('Y (Elevation) Map');
+        sgtitle(sprintf('Fig %d: Retinotopy Summary  -  %s', figNum, repLabels50{rep}), 'Interpreter', 'none');
         if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
     end
 end
@@ -1884,6 +1985,7 @@ infoLines{end+1} = sprintf('Resample_dt : %.3f s', Opt.Resample_dt);
 infoLines{end+1} = '';
 infoLines{end+1} = '--- Cell Counts ---';
 infoLines{end+1} = sprintf('nCells      : %d', size(dF, 1));
+infoLines{end+1} = sprintf('nFigures    : %d (printed to PDF)', figNum);
 
 text(0.05, 0.95, strjoin(infoLines, '\n'), ...
     'Units', 'normalized', 'VerticalAlignment', 'top', ...

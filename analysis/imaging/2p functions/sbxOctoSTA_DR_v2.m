@@ -159,7 +159,7 @@ end
 
 % NOTE: Unlike sutterOctoNeural, zbinCorr is called unconditionally here
 % (no user prompt). It always applies the z-plane binning correction.
-[dfofInterp, meanImg, greenframe, mv] = zbinCorr_DR(dfofInterp, meanImg, greenframe, Opt, psfile, mv);
+[dfofInterp, meanImg, greenframe, mv, figNum] = zbinCorr_DR(dfofInterp, meanImg, greenframe, Opt, psfile, mv, figNum);
 
 
 %% =========================================================================
@@ -635,15 +635,11 @@ if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 % Returns: dF [nCells x T], x, y, xpts, ypts
 % NOTE: calls the non-commented version of getOctoCells_DR
 getOctoCells_DR
-
-% Account for figures produced inside getOctoCells_DR.
-% selectPts==0 or 1: 2 figures printed (brightness cutoff + selected points).
-% selectPts==2 or 3: 4 figures printed (classifier scores, max projection, cell masks, cluster histogram).
-if selectPts == 2 || selectPts == 3
-    figNum = figNum + 4;
-else
-    figNum = figNum + 2;
-end
+% NOTE: getOctoCells_DR is a script and owns its own figNum increments
+% (same pattern as get2pSession_sbx_DR). No manual bump needed here --
+% adding one would double-count and create phantom gaps (the v0.8 bug
+% that caused Figs 22-23 to be skipped between "Selected ROIs" and
+% "Rigid Alignment Values").
 
 
 %% =========================================================================
@@ -672,8 +668,8 @@ if exist('mv','var')
     plot(mv);
     title(sprintf('Fig %d: Rigid Alignment Values', figNum))
     xlabel('x displacement'); ylabel('y displacement');
+    if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 end
-if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
 
 %% =========================================================================
@@ -861,9 +857,13 @@ framerange = 0:cycWindow;
 display(tau)   % print current tau value for reference
 
 for clust = 1:nclust
-    figNum = figNum + 1;
-    clustFigNum = figNum;   % remember this figure's number for the sgtitle at the end
-    clustfig = figure('Name', sprintf('Fig %d - Cluster %d STA Summary', figNum, clust));
+    % Create the cluster summary figure now so subplots can be drawn into it
+    % during the rep loop, but defer figNum assignment until after the rep
+    % loop so PDF page order matches figure numbers:
+    %   Fig N   = Cluster size-tuning ON
+    %   Fig N+1 = Cluster size-tuning OFF
+    %   Fig N+2 = Cluster STA summary
+    clustfig = figure('Name', sprintf('Cluster %d STA Summary (pending figNum)', clust));
 
     %% --- Cluster anatomy map ---
     figure(clustfig)
@@ -874,7 +874,7 @@ for clust = 1:nclust
     % It freezes the current colormap so subsequent subplots can use different colormaps.
     % If not installed, this will error -- install from MATLAB File Exchange.
     freezeColors;
-    title(sprintf('Fig %d: Cluster %d  -  Anatomy', figNum, clust));
+    title(sprintf('Cluster %d  -  Anatomy', clust));   % figNum assigned after rep loop
     plot(x(c==clust), y(c==clust), 'o', 'Color', cols(clust,:))
 
     % Align cluster mean dF/F to each stimulus onset
@@ -997,8 +997,13 @@ for clust = 1:nclust
     %   [4] dFclust heatmap for cluster
     %   [5] ON size-tuning timecourses
     %   [6] OFF size-tuning timecourses
-    figure(clustfig)
-    sgtitle(sprintf('Fig %d: Cluster %d  -  STA Summary', clustFigNum, clust), 'Interpreter', 'none');
+    % figNum assigned here (after size-tuning figs) so PDF page order = Fig N labels.
+    figNum = figNum + 1;
+    figure(clustfig);
+    set(clustfig, 'Name', sprintf('Fig %d - Cluster %d STA Summary', figNum, clust));
+    % Update anatomy subplot title now that figNum is known
+    subplot(2,3,1); title(sprintf('Fig %d: Cluster %d  -  Anatomy', figNum, clust));
+    sgtitle(sprintf('Fig %d: Cluster %d  -  STA Summary', figNum, clust), 'Interpreter', 'none');
     if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
 end  % end for clust
@@ -1124,15 +1129,15 @@ y0 = median(rfys, 'omitnan');
 figNum = figNum + 1;
 figure('Name', sprintf('Fig %d - X and Y Topography', figNum));
 subplot(1,2,1)
-plot(xpts(useOn), rfx(useOn,1)-x0, 'r.'); hold on;
-plot(xpts(useOff), rfx(useOff,2)-x0, 'b.'); ylim([-30 30]); axis square
-title(sprintf('Fig %d: X Topography', figNum)); legend('ON','OFF')
+plot(xpts(useOn), rfx(useOn,1)-x0, 'r.', 'DisplayName', 'ON'); hold on;
+plot(xpts(useOff), rfx(useOff,2)-x0, 'b.', 'DisplayName', 'OFF'); ylim([-30 30]); axis square
+title(sprintf('Fig %d: X Topography', figNum)); legend('show')
 xlabel('x location'); ylabel('x RF');
 
 subplot(1,2,2)
-plot(ypts(useOn), rfy(useOn,1)-y0, 'r.'); hold on;
-plot(ypts(useOff), rfy(useOff,2)-y0, 'b.'); ylim([-30 30]); axis square
-title('Y Topography'); legend('ON','OFF')
+plot(ypts(useOn), rfy(useOn,1)-y0, 'r.', 'DisplayName', 'ON'); hold on;
+plot(ypts(useOff), rfy(useOff,2)-y0, 'b.', 'DisplayName', 'OFF'); ylim([-30 30]); axis square
+title('Y Topography'); legend('show')
 xlabel('y location'); ylabel('y RF');
 if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 

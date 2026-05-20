@@ -1,4 +1,4 @@
-%% getOctoCells.m
+%% getOctoCells_DR.m  v1.3 — 2026-05-19
 % Selects ROI (region of interest) points from a 2-photon imaging dataset.
 %
 % PURPOSE:
@@ -17,6 +17,9 @@
 % calling workspace directly.
 %
 % REQUIRED WORKSPACE VARIABLES:
+%   figNum       - integer figure counter. On entry, figNum is already set to the
+%                  value for this script's first exported figure (caller pre-increments).
+%                  This script increments figNum for each export.
 %   Opt          - options struct (may contain selectPts, s2p_fname, mindF, selectCrop)
 %   dfofInterp   - [Y x X x T] dF/F movie (temporally resampled)
 %   greenCrop    - [Y x X] mean green fluorescence image (cropped, double)
@@ -25,25 +28,39 @@
 %   mergeFig     - figure handle to merge image (for manual mode)
 %   pts_range    - range of pixel offsets for averaging around each ROI center
 %   startTrim    - frame index used to align suite2p fluorescence with dfofInterp
-%   psfile       - (optional) path to PostScript output file
+%   psfile       - (optional) path to output PDF file for appending
 %
 % OUTPUTS (returned to calling workspace):
 %   dF      - [nCells x T] dF/F traces for selected ROIs
 %   x, y    - pixel x/y coordinates of each ROI center
 %   xpts, ypts - copies of x, y (renamed for downstream compatibility)
+%   figNum  - updated figure counter
 %
 % ADDITIONAL OUTPUTS (suite2p modes only):
-%   F       - [nCells x T] raw fluorescence traces (good cells only)
-%   stat    - cell array of suite2p ROI stat structs (good cells only)
-%   ncells  - number of accepted cells
-%   goodcells - indices of accepted cells in original suite2p ordering
+%   F, stat, ncells, goodcells
+%
+% FIGURES EXPORTED:
+%   Mode 0/1: 2 figures
+%     Fig N  : ROI Brightness Cutoff (mode 0); ROI Points on anatomy (mode 1, first view)
+%     Fig N+1: Selected ROI Points (mode 0 and 1)
+%   Mode 2/3: 4 figures
+%     Fig N  : Suite2p Cell Classifier Scores
+%     Fig N+1: Suite2p Max Projection
+%     Fig N+2: Suite2p Good Cell Masks
+%     Fig N+3: Suite2p k-means Cluster Histogram
+%
+% figNum SCHEME:
+%   This script increments figNum for each export. On entry, figNum should be
+%   at the last exported figure from the calling script. This script does NOT
+%   expect the caller to pre-increment — it owns all its own increments.
+%   On return, figNum reflects the last figure exported. The caller does NOT
+%   advance figNum after this call.
 
 
 %% =========================================================================
 %% MODE SELECTION
 %% =========================================================================
 
-% Read selection mode from Opt struct, or prompt user if not specified
 if isfield(Opt,'selectPts')
     selectPts = Opt.selectPts;
 else
@@ -57,34 +74,45 @@ end
 
 if selectPts == 1
 
-    % Ask which reference image to use for clicking
     chooseFig = input('select based on 1) mean image, 2) max image, 3) merge image : ');
-
-    if chooseFig == 1
-        selectFig = greenFig;    % mean green fluorescence
-    elseif chooseFig == 2
-        selectFig = maxFig;      % max dF/F
-    else
-        selectFig = mergeFig;    % red/green merge
+    if     chooseFig == 1; selectFig = greenFig;
+    elseif chooseFig == 2; selectFig = maxFig;
+    else;                  selectFig = mergeFig;
     end
 
-    % Range of pixels around each clicked point for averaging
-    range = -2:2;
-    clear x y npts
+    range      = -2:2;
     rightclick = 0;
-
-    fprintf('Select points on image. Rightclick to exit interactive ginput');
+    clear x y
+    fprintf('Select points on image. Rightclick to exit.\n');
     i = 0;
     while rightclick ~= 3
         i = i + 1;
         figure(selectFig); hold on
-        [x(i), y(i), rightclick] = ginput(1);    % get one click at a time
+        [x(i), y(i), rightclick] = ginput(1);
         x = round(x); y = round(y);
-        plot(x(i), y(i), 'b*');                   % mark the selected point
-
-        % Extract dF/F trace for this point as mean over a 5x5 pixel box
+        plot(x(i), y(i), 'b*');
         dF(i,:) = squeeze(mean(mean(dfofInterp(y(i)+range, x(i)+range, :), 2, 'omitnan'), 1, 'omitnan'));
     end
+
+    % ---- FIGURE: ROI Brightness Cutoff placeholder (Fig N) ----
+    % Mode 1 has no brightness cutoff step. Consume slot N with a labeled figure
+    % so the page numbering stays consistent with mode 0 (which always exports 2 figs).
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - ROI Selection (Manual Mode)', figNum));
+    imagesc(greenCrop, [0 prctile(greenCrop(:),98)]); colormap gray; hold on;
+    plot(x, y, 'b*');
+    title(sprintf('Fig %d: Selected ROI Points  (%d cells, manual)', figNum, length(x)));
+    if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
+
+    % ---- FIGURE: Selected ROI Points (Fig N+1) ----
+    % Second export slot matching mode 0's two-figure layout.
+    % Shows the smoothed green image with ROI markers (same content, separate page).
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - Selected ROI Points (Manual)', figNum));
+    imagesc(greenCrop, [0 prctile(greenCrop(:),98)]); colormap gray; hold on;
+    plot(x, y, 'b*', 'MarkerSize', 8);
+    title(sprintf('Fig %d: Selected ROI Points  (%d cells, manual) — overlay', figNum, length(x)));
+    if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
 
 %% =========================================================================
@@ -93,111 +121,79 @@ if selectPts == 1
 
 elseif selectPts == 0
 
-    %% --- Find local fluorescence peaks ---
-
-    % Use the mean green channel image (anatomy) as the source image for peak detection
     img = greenCrop;
-    img(isnan(img(:))) = 0;
-    img(isinf(img(:))) = 0;
+    img(isnan(img)) = 0;
+    img(isinf(img)) = 0;
 
-    % Smooth image to reduce pixel-level noise before peak detection
-    filt  = fspecial('gaussian', 5, 1);
+    filt   = fspecial('gaussian', 5, 1);
     stdImg = imfilter(img, filt);
 
-    % Show smoothed image for visual reference (not printed)
-    figure
-    imagesc(stdImg); colormap gray
-
-    % Local maximum detection: a pixel is a peak if it is greater than all
-    % pixels in its 3x3 neighborhood (excluding itself), using morphological dilation.
-    region = ones(3,3); region(2,2) = 0;   % 3x3 neighborhood mask, center excluded
+    % Local maximum detection
+    region = ones(3,3); region(2,2) = 0;
     maxStd = stdImg > imdilate(stdImg, region);
-
-    % Remove peaks within 3 pixels of any edge (these may be artifacts)
     maxStd(1:3,:) = 0; maxStd(end-2:end,:) = 0;
     maxStd(:,1:3) = 0; maxStd(:,end-2:end) = 0;
 
-    pts = find(maxStd);   % linear indices of all detected peaks
+    pts = find(maxStd);
     fprintf('%d max points\n', length(pts));
-
-    % Show all detected peaks overlaid on the smoothed image (not printed)
     [y, x] = ind2sub(size(maxStd), pts);
-    figure
-    imagesc(stdImg, [0 prctile(stdImg(:),98)]); hold on; colormap gray
-    plot(x, y, 'o');
 
-
-    %% --- Crop to region of interest ---
-
-    % Optionally restrict analysis to a user-selected crop region
+    % Crop to region of interest
     if isfield(Opt,'selectCrop') && Opt.selectCrop == 1
         disp('Select area in figure to include in the analysis');
-        [xrange, yrange] = ginput(2);   % user draws a rectangle
-        pts = pts(x>xrange(1) & x<xrange(2) & y>yrange(1) & y<yrange(2));
+        figure('Name', 'ROI Crop Selection (not printed)');
+        imagesc(stdImg, [0 prctile(stdImg(:),98)]); colormap gray; hold on; plot(x, y, 'o');
+        [xrange, yrange] = ginput(2);
     else
-        % Default: exclude border pixels based on pts_range
-        b = pts_range(end) + 1;
+        b      = pts_range(end) + 1;
         xrange = [b size(img,2)-b];
         yrange = [b size(img,1)-b];
-        pts = pts(x>xrange(1) & x<xrange(2) & y>yrange(1) & y<yrange(2));
     end
+    pts = pts(x>xrange(1) & x<xrange(2) & y>yrange(1) & y<yrange(2));
 
+    % Rank by brightness
+    [brightness, ~] = sort(img(pts), 1, 'descend');
+    fprintf('%d points in ROI\n', length(pts));
 
-    %% --- Rank by brightness and apply threshold ---
-
-    % Sort remaining peaks by their brightness in the green image (descending)
-    [brightness, order] = sort(img(pts), 1, 'descend');
-
-    % ---- FIGURE: ROI Point Brightness Cutoff ----
-    % Line plot of brightness vs. rank order for all detected peaks.
-    % A horizontal blue line marks the user-defined cutoff threshold (mindF).
-    % Title shows how many points remain above the cutoff.
-    % Used to choose a cutoff that includes bright (likely responsive) pixels
-    % while excluding dim background pixels.
-    figure
-    plot(brightness); xlabel('N'); ylabel('brightness');
-
-    fprintf('%d points in ROI\n', length(pts))
-
-    % Get brightness threshold from Opt or prompt user
+    % Get brightness threshold
     if isfield(Opt,'mindF')
         mindF = Opt.mindF;
     else
+        % Show unlabeled preview to help user choose cutoff (not exported)
+        figure('Name', 'Brightness cutoff preview (not printed)');
+        plot(brightness); xlabel('N'); ylabel('brightness');
+        title('Brightness by rank — choose cutoff');
         mindF = input('dF cutoff : ');
     end
 
-    % Apply threshold: keep only peaks brighter than mindF
     pts = pts(img(pts) > mindF);
-    fprintf('%d points in ROI over cutoff\n', length(pts))
-
-    % Add cutoff line to brightness plot and print
-    hold on
-    plot([1 length(brightness)], [mindF mindF], 'b');
-    title(sprintf('%d points in ROI over cutoff\n', length(pts)))
-    if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
-
-
-    %% --- Show selected points and extract dF/F traces ---
-
+    fprintf('%d points in ROI over cutoff\n', length(pts));
     [y, x] = ind2sub(size(maxStd), pts);
 
-    % ---- FIGURE: Selected ROI Points ----
-    % Smoothed green image with circles marking all selected ROI centers.
-    % Title shows the pts_range used. Useful for verifying that ROIs are
-    % distributed across the tissue as expected.
-    figure
-    imagesc(stdImg, [0 prctile(stdImg(:),98)]); hold on; colormap gray
-    plot(x, y, 'o'); title(sprintf('df pts_range %d', pts_range(end)))
+    % ---- FIGURE: ROI Point Brightness Cutoff (Fig N) ----
+    % Brightness vs. rank for all detected peaks; blue line = cutoff.
+    % Title shows how many points are above the cutoff.
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - ROI Brightness Cutoff', figNum));
+    plot(brightness); xlabel('N'); ylabel('brightness');
+    hold on; plot([1 length(brightness)], [mindF mindF], 'b');
+    title(sprintf('Fig %d: ROI Brightness Cutoff  (%d points above threshold)', figNum, length(pts)));
     if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
-    % Extract dF/F trace for each selected point:
-    % average dfofInterp over a small box (pts_range x pts_range) around each center
+    % ---- FIGURE: Selected ROI Points (Fig N+1) ----
+    % Smoothed green image with selected ROI centers marked.
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - Selected ROI Points', figNum));
+    imagesc(stdImg, [0 prctile(stdImg(:),98)]); hold on; colormap gray;
+    plot(x, y, 'o');
+    title(sprintf('Fig %d: Selected ROI Points  (%d pts, range %d)', figNum, length(pts), pts_range(end)));
+    if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
+
+    % Extract dF/F traces
     clear dF
     for i = 1:length(x)
-        dF(i,:) = mean(mean(dfofInterp(y(i)+pts_range, x(i)+pts_range, :), 2), 1);
+        dF(i,:) = mean(mean(dfofInterp(y(i)+pts_range, x(i)+pts_range, :), 2, 'omitnan'), 1, 'omitnan');
     end
-
-    % Rename x/y so they don't get overwritten by subsequent ginput calls
     xpts = x; ypts = y;
 
 
@@ -207,232 +203,102 @@ elseif selectPts == 0
 
 elseif selectPts == 2 || selectPts == 3
 
-    %% --- Load suite2p output ---
-
-    % Load suite2p .mat file (contains F, F_chan2, iscell, stat, ops)
+    % Load suite2p output
     if isfield(Opt,'s2p_fname')
         load(Opt.s2p_fname)
     else
         [s2p_file, s2p_path] = uigetfile('*.mat', 'suite2p .mat file');
-        iscell = 0;   % initialize iscell to avoid MATLAB treating it as a function
+        iscell = 0;
         load(fullfile(s2p_path, s2p_file));
     end
 
-    % Trim fluorescence matrix to start from the same frame as dfofInterp
-    % (removes pre-stimulus frames)
-    F = F(:, startTrim:end);
+    F      = F(:, startTrim:end);
+    meanF  = mean(F(logical(iscell(:,1)),:), 2);
 
-    % Compute mean fluorescence for all cells classified as good (iscell(:,1)==1)
-    meanF = mean(F(find(iscell(:,1)),:), 2);
-
-    % ---- FIGURE: Suite2p Cell Classifier Scores ----
+    % ---- FIGURE: Suite2p Cell Classifier Scores (Fig N) ----
     % Histogram of iscell(:,2) confidence scores for all detected ROIs.
-    % Title shows total ROI count and number classified as good cells.
-    % Use this to verify the classifier is separating cells from non-cells.
-    figure
-    hist(iscell(:,2)); xlabel('iscell'); ylabel('n')
-    title(sprintf('n = %d good = %d', length(iscell), sum(iscell(:,1))));
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - Suite2p Cell Classifier Scores', figNum));
+    histogram(iscell(:,2)); xlabel('iscell score'); ylabel('n');
+    title(sprintf('Fig %d: Suite2p Cell Classifier Scores  (n=%d, good=%d)', ...
+        figNum, length(iscell), sum(iscell(:,1))));
     if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
-    % Downsample the mean image by 2x (to match the spatial resolution of dfofInterp)
-    stdImg = imresize(ops.meanImg, 0.5);   % changed from max_proj on 121224
+    stdImg = imresize(ops.meanImg, 0.5);
 
-    %% --- Visualize all masks colored by iscell score (not printed) ---
+    % Accept cells with iscell score > 0.2 AND mean fluorescence > 50% of median
+    goodcells = find(iscell(:,2) > 0.2 & mean(F,2) > 0.5 * median(meanF));
+    ncells    = length(goodcells);
 
-    % Build an RGB image where each pixel's color reflects its ROI's iscell confidence.
-    % (Not printed - for interactive inspection only.)
-    img = zeros(size(ops.meanImg,1), size(ops.meanImg,2), 3);
-    cols = jet(100);
-    for c = 1:length(iscell)
-        xpix = stat{c}.xpix;
-        ypix = stat{c}.ypix;
-        lam  = stat{c}.lam;     % pixel weights from suite2p (lambda)
-        for i = 1:length(xpix)
-            img(ypix(i), xpix(i), :) = cols(ceil(iscell(c,2)*100), :) * lam(i)/max(lam);
-        end
-    end
-    figure
-    imshow(img);
-    title('masks coded by iscell'); colormap jet; colorbar
-
-
-    %% --- Select good cells ---
-
-    % Accept cells where iscell score > 0.2 AND mean fluorescence > 50% of median.
-    % This two-criterion filter catches cells that suite2p is reasonably confident
-    % about AND that have sufficient fluorescence signal.
-    % Note: the first goodcells line (using iscell(:,1)) is overwritten by the second.
-    goodcells = find(iscell(:,1) & mean(F,2) > 0.5 * median(meanF));         % initial (overwritten)
-    goodcells = find(iscell(:,2) > 0.2 & mean(F,2) > 0.5 * median(meanF));   % final criterion
-
-    ncells = length(goodcells);   % number of accepted cells
-
-
-    %% --- Diagnostic scatter plots (not printed) ---
-
-    % iscell score vs. mean fluorescence (to inspect threshold placement)
-    figure
-    plot(iscell(:,2), mean(F,2), '.')
-    hold on; plot([0 1], [0.5*median(meanF) 0.5*median(meanF)])
-
-    % iscell score vs. noise (std of first-difference / mean fluorescence)
-    figure
-    plot(iscell(:,2), std(diff(F,[],2),[],2) ./ mean(F,2), '.')
-
-    % iscell score vs. variability (std / mean fluorescence)
-    figure
-    plot(iscell(:,2), std(F,[],2) ./ mean(F,2), '.')
-
-
-    %% --- Build good cell mask image ---
-
-    % Create an RGB image with each good cell's mask colored by a cycling 6-color palette.
-    % Also extract the centroid x/y coordinates for each good cell (downsampled by 2x
-    % to match dfofInterp spatial resolution).
-    cols = [1 0 0; 0 1 0; 0 0 1; 1 1 0; 1 0 1; 0 1 1];   % 6-color cycling palette
+    % Build good cell mask image (6-color cycling palette)
+    cols = [1 0 0; 0 1 0; 0 0 1; 1 1 0; 1 0 1; 0 1 1];
     img  = zeros(size(stdImg,1), size(stdImg,2), 3);
-
     for c = 1:ncells
-        xpix = stat{goodcells(c)}.xpix;
-        ypix = stat{goodcells(c)}.ypix;
+        xpix = stat{goodcells(c)}.xpix + 1;   % suite2p uses 0-based pixel coords; +1 for MATLAB
+        ypix = stat{goodcells(c)}.ypix + 1;
         lam  = stat{goodcells(c)}.lam;
-
-        % Store centroid (downsampled by 2x to match dfofInterp resolution)
-        xpts(c) = round(mean(xpix)) / 2;
-        ypts(c) = round(mean(ypix)) / 2;
-
-        % Paint each pixel of this cell's mask with a cycling color
+        xpts(c) = round(mean(xpix - 1)) / 2;  % centre in original (0-based) space, then scale
+        ypts(c) = round(mean(ypix - 1)) / 2;
         for i = 1:length(xpix)
             img(ypix(i), xpix(i), :) = cols(mod(c,6)+1, :) * lam(i)/max(lam);
         end
     end
-    x = xpts; y = ypts;   % rename for consistency with auto/manual modes
+    x = xpts; y = ypts;
 
-    % ---- FIGURE: Suite2p Max Projection ----
-    % Max projection image from suite2p (ops.max_proj), normalized to [0, 1.5].
-    % Used as a reference for ROI location. Printed at original (not downsampled) resolution.
-    figure
-    imshow(1.5 * ops.max_proj / max(ops.max_proj(:)));
-    colormap gray; axis equal; title('max projection')
+    % ---- FIGURE: Suite2p Max Projection (Fig N+1) ----
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - Suite2p Max Projection', figNum));
+    imshow(1.5 * ops.max_proj / max(ops.max_proj(:))); colormap gray; axis equal;
+    title(sprintf('Fig %d: Suite2p Max Projection', figNum));
     if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
-    % ---- FIGURE: Suite2p Good Cell Masks ----
-    % RGB image of accepted cell masks, each colored by a 6-color cycling palette.
-    % Title shows the number of accepted cells. Used to verify ROI coverage.
-    figure
-    imshow(img)
-    title(sprintf('masks %d good cells', ncells))
+    % ---- FIGURE: Suite2p Good Cell Masks (Fig N+2) ----
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - Suite2p Good Cell Masks', figNum));
+    imshow(img);
+    title(sprintf('Fig %d: Suite2p Good Cell Masks  (%d cells)', figNum, ncells));
     if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
-    % Build a full-frame max projection image (padded to full ops.meanImg size)
-    % using ops.yrange and ops.xrange to place the valid region correctly.
-    maxProj = zeros(size(ops.meanImg));
-    maxProj(ops.yrange(1):ops.yrange(2)-1, ops.xrange(1):ops.xrange(2)-1) = ops.max_proj;
-
-    % Show full-frame max projection (not printed)
-    figure
-    imagesc(maxProj); colormap gray; axis equal
-
-
-    %% --- Compute dF/F traces ---
-
+    % Compute dF/F traces
     if selectPts == 2
-        % Mode 2: standard dF/F = (F - mean(F)) / mean(F) for each good cell
         clear dF
         for c = 1:ncells
-            dF(c,:) = (F(goodcells(c),:) - mean(F(goodcells(c),:))) / mean(F(goodcells(c,:)));
+            dF(c,:) = (F(goodcells(c),:) - mean(F(goodcells(c),:))) / mean(F(goodcells(c),:));
         end
-        % Trim F and stat to good cells only
         F    = F(goodcells,:);
         stat = stat(goodcells);
-
     elseif selectPts == 3
-        % Mode 3: red/green ratio dF/F = (F/F_chan2 - mean(ratio)) / mean(ratio)
-        % Useful for ratiometric imaging where F_chan2 is a structural/reference channel.
         [s2p_redfile, s2p_path] = uigetfile('*.mat', 'red suite2p .mat file');
-        iscell = 0;   % re-initialize
+        iscell = 0;
         load(fullfile(s2p_path, s2p_redfile));
-
         for c = 1:ncells
-            greenred = F ./ F_chan2;   % green/red ratio per cell per frame
+            greenred = F ./ F_chan2;
             dF(c,:) = (greenred(goodcells(c),:) - mean(greenred(goodcells(c),:))) / ...
-                       mean(greenred(goodcells(c,:)));
+                       mean(greenred(goodcells(c),:));
         end
-        % Store separated channel traces
         green = F(goodcells,:);
         red   = F_chan2(goodcells,:);
         F     = greenred(goodcells,:);
     end
 
-
-    %% --- dF/F trace visualization ---
-
-    % Clip extreme dF/F values
     dF(dF > 1) = 1;
 
-    % Plot raw dF/F traces for a random subset of cells (not printed)
-    % Each trace offset vertically by cell index for readability.
-    figure
-    hold on
-    range = 1:min(3000, length(dF));
-    dtr = 0.1;    % time resolution (sec/frame)
-    np  = 32;     % number of cells to display
-    for i = 1:np
-        plot(range*dtr, 2*dF(ceil(rand*ncells), range) + i);
-    end
-
-    % Apply 5-frame median filter to smooth traces for k-means clustering
+    % k-means clustering on median-filtered traces (for diagnostic use)
     dFmed = medfilt1(dF, 5);
-
-    % Plot median-filtered traces for a larger subset (not printed)
-    % Note: the loop below has a bug (uses dt instead of dtr), preserved from original.
-    figure
-    hold on
-    range = 1:min(3000, length(dF));
-    dtr = 0.1;
-    np  = 64;
-    for i = 1:np
-        plot(range*dt, dF(i,range) + i);   % note: dt used here (may be from calling workspace)
-    end
-
-    % k-means clustering on median-filtered traces (for internal diagnostic use)
-    nk = 5;
-    k  = kmeans(dFmed, nk);
-
-    % Plot k-means cluster mean timecourses with all member traces (not printed)
-    figure
+    nk    = 5;
+    k     = kmeans(dFmed, nk);
     for i = 1:nk
         dFk(i,:) = mean(dFmed(k==i,:), 1, 'omitnan');
-        subplot(nk,1,i);
-        plot(dFmed(k==i,:)');
-        hold on
-        plot(dFk(i,:), 'g', 'Linewidth', 2);
     end
 
-    % Plot all cluster means overlaid (not printed)
-    figure
-    plot(dFk')
-
-    % ---- FIGURE: Suite2p k-means Cluster Histogram ----
+    % ---- FIGURE: Suite2p k-means Cluster Histogram (Fig N+3) ----
     % Histogram of k-means cluster assignments across all good cells.
-    % The ylim/xlabel/ylabel/title printed here actually belongs to the hist(k) figure
-    % (due to the ylim call that follows closing the dFmed loop above).
-    % Printed because it is the last figure when psfile exists.
-    figure
-    hist(k)
-
-    ylim([0 np+2])
-    xlabel('secs'); ylabel('cell #'); title('dF/F')
+    figNum = figNum + 1;
+    figure('Name', sprintf('Fig %d - Suite2p k-means Cluster Histogram', figNum));
+    histogram(k);
+    xlabel('cluster'); ylabel('cell count');
+    title(sprintf('Fig %d: Suite2p k-means Cluster Histogram  (%d cells, %d clusters)', ...
+        figNum, ncells, nk));
     if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
-
-
-    %% --- Show selected ROI centers on max projection (not printed) ---
-
-    % Visualize the centroid locations of all accepted cells overlaid on the
-    % full-frame max projection. Points are plotted at 2x coordinates (full resolution).
-    figure
-    imagesc(maxProj); colormap gray; axis equal
-    hold on
-    plot(x*2, y*2, '.')
 
 end  % end if/elseif selectPts

@@ -1,4 +1,4 @@
-%% pixPlot.m
+%% pixPlot_DR.m  v1.1 — 2026-05-19
 % Pixel-wise mean response maps and individual trial timecourses per stimulus condition.
 %
 % PURPOSE:

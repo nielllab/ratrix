@@ -1,6 +1,29 @@
 % Original function signature (converted to script — call as a script, not a function):
 % function varargout = sutterOctoNeural(varargin)
 %% sutterOctoNeural - Main analysis function for octopus optic lobe 2-photon imaging data
+% sbxOctoNeural_DR_commented_v6 — 2026-05-19
+%
+% CHANGELOG:
+%   v6 (2026-05-19): figNum correctness fixes.
+%     - getOctoCells_DR call site: removed erroneous caller pre-increment. The
+%       caller was doing figNum+1 before the call AND getOctoCells_DR was doing
+%       figNum+1 again internally before its first export, wasting one slot (was
+%       Fig 11 in a typical nstim==50 run).
+%     - octoRetinotopy_DR call sites (nstim==48 and nstim==50): same pre-increment
+%       bug — removed both. octoRetinotopy_DR owns all its own increments.
+%     - get2pSession_sbx_DR: all 3 exported figures (baseline image, mean
+%       timecourse, cycle average) now use figNum and carry Fig N labels.
+%       These were the first 3 PDF pages but had no numbers, causing every
+%       subsequent page to be off by 3.
+%     - getOctoCells_DR mode 1: was exporting only 1 figure but consuming 1 figNum
+%       slot, causing all subsequent figures to be mis-numbered by 1. Now exports
+%       2 figures (anatomy + overlay) to match mode 0's 2-slot footprint.
+%     - Rigid Alignment Values exportgraphics: was outside the if exist('mv') block,
+%       causing a wrong figure to be appended when mv exists, or a stale-gcf append
+%       when mv is absent. Moved inside the if block.
+%     - subtractSidebandNoise: file renamed subtractSidebandNoise_DR.m to match call
+%       site (was silently failing to call the function).
+%     - All Pg N comments in main script updated (+3) to reflect correct page numbers.
 %
 % PURPOSE:
 %   Reads in .sbx (Sutter 2-photon) imaging data, extracts fluorescence traces
@@ -54,7 +77,7 @@
 %
 % DEPENDENCIES (scripts called, must be on MATLAB path):
 %   get2pSession_sbx_DR   - loads .sbx file, returns dfofInterp, phasetimes
-%   subtractSidebandNoise - removes sideband noise from dF/F data (optional)
+%   subtractSidebandNoise_DR - removes sideband noise from dF/F data (optional)
 %   zbinCorr              - z-plane binning correction (optional)
 %   getOctoCells          - selects ROI points, returns dF, x, y, xpts, ypts
 %   pixPlot               - pixel-wise mean response maps + trial timecourses
@@ -73,15 +96,18 @@
 %
 %   Sub-scripts (pixPlot_DR, pixPlotWeight_DR):
 %     Each pixPlot_DR call exports 2 figures (pixel map + timecourses).
-%     Each pixPlotWeight_DR call exports 1 figure (weighted timecourses).
-%     figNum is advanced with bracketing increments:
-%       figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
+%     Each pixPlotWeight_DR call exports 2 figures (weighted pixel map + weighted timecourses).
+%     figNum is advanced with bracketing increments in both cases:
+%       figNum = figNum + 1; pixPlot_DR;       figNum = figNum + 1;
+%       figNum = figNum + 1; pixPlotWeight_DR; figNum = figNum + 1;
 %     To add figure numbers inside pixPlot_DR/pixPlotWeight_DR themselves,
 %     add sgtitle(sprintf('Fig %d: ...', figNum), 'Interpreter', 'none') inside
 %     those scripts at their exportgraphics calls.
 %
 %   getOctoCells_DR: produces 2 figures (auto/manual) or 4 figures (suite2p).
-%     figNum is advanced in a batch after the call.
+%     Manages figNum entirely internally. Do NOT pre-increment before calling.
+%   octoRetinotopy_DR: produces 4 figures (X/Y map × OFF/ON).
+%     Manages figNum entirely internally. Do NOT pre-increment before calling.
 
 close all
 
@@ -101,7 +127,7 @@ figNum = 0;
 % To customise a run, set Opt fields before calling this script, e.g.:
 %   Opt.psfile = 'C:\mydata\output.pdf';
 %   Opt.selectPts = 2;   % use suite2p ROIs
-%   sbxOctoNeural_DR_commented_v5
+%   sbxOctoNeural_DR_commented_v6
 if ~exist('Opt', 'var')
     % Save all figures to a temporary PDF file which is later copied to the output location
     Opt.SaveFigs = 1;
@@ -193,14 +219,14 @@ mv = info.aligned.T;   % [T x 2] matrix of x/y displacements per frame
 %% =========================================================================
 
 % Sideband noise arises from out-of-focus fluorescence in adjacent z-planes.
-% subtractSidebandNoise removes this by computing and subtracting a scaled
+% subtractSidebandNoise_DR removes this by computing and subtracting a scaled
 % version of the sideband signal from dfofInterp.
 if ~isfield(Opt,'sub_noise')
     Opt.sub_noise = input('subtract noise from sidebands? 0/1 ');
 end
 
 if Opt.sub_noise == 1
-    [dfofInterp, meanImg, greenframe] = subtractSidebandNoise(dfofInterp, meanImg, psfile, mv);
+    [dfofInterp, meanImg, greenframe, figNum] = subtractSidebandNoise_DR(dfofInterp, meanImg, psfile, mv, figNum);
 end
 
 
@@ -217,7 +243,7 @@ else
 end
 
 if zbin
-    [dfofInterp, meanImg, greenframe] = zbinCorr(dfofInterp, meanImg, greenframe, Opt, psfile);
+    [dfofInterp, meanImg, greenframe, mv, figNum] = zbinCorr_DR(dfofInterp, meanImg, greenframe, Opt, psfile, mv, figNum);
 end
 
 
@@ -282,7 +308,7 @@ stimTimesOld = stimTimes - stimTimes(1) + 1;
 stimTimes = 1:cycLength*dt:(size(dfofInterp,3) - cycWindow - 30) * dt;
 stimTimes = stimTimes(stimTimes < max(stimTimesOld));
 
-% ---- FIGURE Pg 1: Stimulus Timing Check ----
+% ---- FIGURE Pg 4: Stimulus Timing Check ----
 % Shows the time between consecutive stimulus triggers (both regularized and
 % original), to verify consistent stimulus delivery. Title shows median ISI.
 figNum = figNum + 1;
@@ -342,7 +368,7 @@ plot(stimT(1:end-1), diff(stimRec.cond));
 hold on
 plot(cycLength*dt*(1:nCycles), 0, '*');
 
-% ---- FIGURE Pg 2: Difference of PsychStim Frames ----
+% ---- FIGURE Pg 5: Difference of PsychStim Frames ----
 % Shows the inter-frame intervals from the stimulus computer's timestamps.
 % Used to detect dropped frames or timing irregularities in the stimulus software.
 figNum = figNum + 1;
@@ -432,7 +458,7 @@ img = img .* repmat(amp, [1 1 3]);         % weight color by amplitude
 cycAmp = amp;
 cycPolarImg = img;
 
-% ---- FIGURE Pg 3: Cyclic Phase/Amplitude Polar Map ----
+% ---- FIGURE Pg 6: Cyclic Phase/Amplitude Polar Map ----
 % HSV color image showing the phase of periodic response at each pixel.
 % Hue = which part of the stimulus cycle the pixel responds to.
 % Saturation/value weighted by response amplitude (dim = weak response).
@@ -453,7 +479,7 @@ if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 % This gives a population-level view of overall activity throughout the recording.
 mfluorescence = squeeze(mean(mean(dfofInterp, 2), 1));
 
-% ---- FIGURE Pg 4: Full Image Mean Fluorescence Over Time ----
+% ---- FIGURE Pg 7: Full Image Mean Fluorescence Over Time ----
 % Line plot of spatially-averaged dF/F vs. time.
 % Green vertical lines mark the end of each complete stimulus repetition set.
 figNum = figNum + 1;
@@ -471,7 +497,7 @@ if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 %% SECTION 12: REFERENCE IMAGES (Green, Max dF/F, Merge)
 %% =========================================================================
 
-% ---- FIGURE Pg 5: Mean Green Channel ----
+% ---- FIGURE Pg 8: Mean Green Channel ----
 % Absolute fluorescence image of the preparation. Shows anatomy.
 % Scaled between 1st and 95th percentiles of brightness.
 % Also creates greenFig handle (used in manual ROI selection mode).
@@ -502,7 +528,7 @@ normgreen(normgreen < 0) = 0;
 normgreen(normgreen > 1) = 1;
 normgreen = repmat(normgreen, [1 1 3]);   % expand to 3 channels for RGB operations
 
-% ---- FIGURE Pg 6: Max dF/F Image ----
+% ---- FIGURE Pg 9: Max dF/F Image ----
 % Pixel-wise maximum dF/F across all time points, median-filtered for noise reduction.
 % Highlights the most responsive pixels. Also creates maxFig handle.
 figNum = figNum + 1;
@@ -514,7 +540,7 @@ hold on; axis equal; colormap gray; title(sprintf('Fig %d: Max dF/F Image', figN
 normMax = (stdImg - prctile(stdImg(:),1)) / (prctile(stdImg(~isinf(stdImg(:))),98) - prctile(stdImg(:),1));
 if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
-% ---- FIGURE Pg 7: Mean/Max Green Channel Merge ----
+% ---- FIGURE Pg 10: Mean/Max Green Channel Merge ----
 % RGB overlay combining anatomy (green channel, G) and max response (red channel, R).
 % Red = high dF/F pixels, Green = bright anatomy pixels.
 % Also creates mergeFig handle (used in manual ROI selection mode).
@@ -544,25 +570,10 @@ if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 %   xpts, ypts - same as x, y (renamed copies)
 %
 % Figures produced by getOctoCells (page numbers continue from above):
-%   selectPts==0:
-%     Pg 8a  - ROI Point Brightness Cutoff: brightness vs. rank plot with cutoff line
-%     Pg 8b  - Selected ROI Points: green image with selected point locations overlaid
-%   selectPts==2 or 3:
-%     Pg 8a  - Suite2p Cell Classifier Scores: histogram of iscell confidence scores
-%     Pg 8b  - Suite2p Max Projection: max projection image from suite2p ops
-%     Pg 8c  - Suite2p Good Cell Masks: color-coded masks for accepted cells
-%     Pg 8d  - Suite2p k-means Cluster Histogram: histogram of k-means cluster assignments
+%   selectPts==0/1: 2 figures — ROI Brightness Cutoff, Selected ROI Points
+%   selectPts==2/3: 4 figures — Cell Classifier Scores, Max Projection, Good Cell Masks, k-means Histogram
+% getOctoCells_DR manages figNum entirely internally — do NOT pre-increment here.
 getOctoCells_DR
-
-% Account for figures produced inside getOctoCells_DR.
-% selectPts==0 or 1: 2 figures printed (8a, 8b).
-% selectPts==2 or 3: 4 figures printed (8a-8d).
-% figNum is advanced here so subsequent figures have correct page numbers.
-if selectPts == 2 || selectPts == 3
-    figNum = figNum + 4;   % suite2p: 4 diagnostic figures
-else
-    figNum = figNum + 2;   % auto/manual: 2 diagnostic figures
-end
 
 
 %% =========================================================================
@@ -572,7 +583,7 @@ end
 % Clip abnormally large dF/F values (can arise from movement artifacts)
 dF(dF > 2) = 2;
 
-% ---- FIGURE Pg 8 (selectPts==0 or 1): Fluorescence Traces ----
+% ---- FIGURE Pg 11 (selectPts==0 or 1): Fluorescence Traces ----
 % All individual ROI dF/F traces overlaid in color.
 % Green trace = population mean. X-axis in seconds.
 % NOTE: print call is commented out in original - this may not appear in PDF.
@@ -584,7 +595,7 @@ xlabel('secs'); ylabel('df/f'); title('Fluorescence Traces');
 xlim([0 size(dF,2)*dt]);
 %if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
-% ---- FIGURE Pg 9: Rigid Alignment Values ----
+% ---- FIGURE Pg 12: Rigid Alignment Values ----
 % X and Y displacement traces from the rigid motion correction algorithm.
 % Large values indicate periods of significant animal movement.
 if exist('mv','var')
@@ -593,8 +604,8 @@ if exist('mv','var')
     plot(mv);
     title(sprintf('Fig %d: Rigid Alignment Values', figNum))
     xlabel('x displacement'); ylabel('y displacement');
+    if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 end
-if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
 
 %% =========================================================================
@@ -632,7 +643,7 @@ dFrepeats(dFrepeats < -1) = -1;
 dFrepsAll(dFrepsAll > 1)  =  1;
 dFrepsAll(dFrepsAll < -1) = -1;
 
-% ---- FIGURE Pg 10: Mean Trace for Each Repeat ----
+% ---- FIGURE Pg 13: Mean Trace for Each Repeat ----
 % Population mean dF/F timecourse for each individual repetition (colored lines).
 % Green line = median across repetitions. Vertical dashed lines separate stimuli.
 % X-axis units = stimulus number.
@@ -668,7 +679,7 @@ for i = 1:cycWindow
     cycImg(:,:,i) = mean(dfofInterp(:,:,startFrames+i), 3, 'omitnan'); % pixel-wise mean
 end
 
-% ---- FIGURE Pg 11: Pixel-wise Cycle Average (Unweighted) ----
+% ---- FIGURE Pg 14: Pixel-wise Cycle Average (Unweighted) ----
 % Grid of up to 60 frames showing the pixel-wise mean dF/F timecourse.
 % Each subplot is one frame of the average cycle. Baseline-subtracted.
 % Layout: 5x6 grid (cycLength<=30) or 8x8 grid (cycLength>30).
@@ -688,7 +699,7 @@ colorbar
 sgtitle(sprintf('Fig %d: Pixel-wise Cycle Average (Unweighted)', figNum), 'Interpreter', 'none');
 if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
-% ---- FIGURE Pg 12: Pixel-wise Cycle Average (Green-weighted) ----
+% ---- FIGURE Pg 15: Pixel-wise Cycle Average (Green-weighted) ----
 % Same as Pg 11 but each frame is multiplied by the normalized green anatomy image.
 % This suppresses responses in non-tissue regions, highlighting tissue-specific signals.
 figNum = figNum + 1;
@@ -709,7 +720,7 @@ end
 sgtitle(sprintf('Fig %d: Pixel-wise Cycle Average (Green-weighted)', figNum), 'Interpreter', 'none');
 if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 
-% ---- FIGURE Pg 13: Cycle Average All Cells ----
+% ---- FIGURE Pg 16: Cycle Average All Cells ----
 % Single line plot of the population-mean cycle average timecourse.
 % Shows the average temporal profile of dF/F across all cells and stims.
 cycAvgAll = cycAvgAll - repmat(cycAvgAll(:,1), [1 size(cycAvgAll,2)]);  % baseline subtract
@@ -760,7 +771,7 @@ dist = pdist(dFclust, 'euclidean');
 display('doing cluster')
 tic; Z = linkage(dist, 'ward'); toc   % Ward linkage minimizes within-cluster variance
 
-% ---- FIGURE Pg 14: Sorted Cell Heatmap with Dendrogram ----
+% ---- FIGURE Pg 17: Sorted Cell Heatmap with Dendrogram ----
 % Left panel (1/4 width): dendrogram showing hierarchical cluster structure.
 % Right panel (3/4 width): dFmean heatmap with cells sorted by dendrogram leaf order.
 %   Rows = cells (sorted), columns = time, color = dF/F magnitude.
@@ -845,7 +856,7 @@ end
 % Define a distinct color for each cluster using HSV colormap
 colors = hsv(nclust + 1);
 
-% ---- FIGURE Pg 15: Cluster Spatial Map ----
+% ---- FIGURE Pg 18: Cluster Spatial Map ----
 % Anatomy image (gray) with each cell's position marked by a colored circle.
 % Color indicates cluster membership. Title shows total number of clusters.
 figNum = figNum + 1;
@@ -893,7 +904,7 @@ for clust = 1:nclust
     color_list((1:np) + (clust-1)*np, :) = repmat(cols(clust,:), [np 1]);
 end
 
-% ---- FIGURE Pg 16: dF/F Traces for Random Subset of Cells ----
+% ---- FIGURE Pg 19: dF/F Traces for Random Subset of Cells ----
 % Stack of median-filtered dF/F traces, one per selected cell.
 % Each trace is color-coded by its cluster. Traces are vertically offset.
 % First 3000 frames shown; x-axis in seconds.
@@ -931,7 +942,7 @@ if selectPts == 2 && nstim == 17
 
     % Histogram of DS index for cluster 2 (no print)
     figure('Name', 'DS Index Histogram Cluster 2 (not printed)');
-    hist(ds(c==2), -1:0.1:1);
+    histogram(ds(c==2), -1:0.1:1);
 
     % Build spatial map of orientation preference on ROI masks.
     % Each cell's mask is colored by its preferred orientation (circular vector sum).
@@ -1238,7 +1249,7 @@ if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
 % Distribution of each cell's maximum dF/F value across the clustering window.
 % Used to inspect the range of response amplitudes across the population.
 figure('Name', 'Max dF/F Histogram (not printed)');
-hist(max(dFclust,[],2))
+histogram(max(dFclust,[],2))
 
 
 %% =========================================================================
@@ -1409,9 +1420,8 @@ if nstim == 13
     figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==13): Gratings Weighted Timecourses ----
-    % pixPlotWeight: 3x4 grid of green-weighted timecourses per grating condition.
-    % (Weighted pixel map is NOT printed - that line is commented out in pixPlotWeight.)
-    figNum = figNum + 1; pixPlotWeight_DR;
+    % pixPlotWeight: 3x4 grid of green-weighted pixel maps + timecourses per grating condition.
+    figNum = figNum + 1; pixPlotWeight_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==13): Flicker Pixel Map ----
     % ---- FIGURE (nstim==13): Flicker Trial Timecourses ----
@@ -1420,7 +1430,7 @@ if nstim == 13
     figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==13): Flicker Weighted Timecourses ----
-    figNum = figNum + 1; pixPlotWeight_DR;
+    figNum = figNum + 1; pixPlotWeight_DR; figNum = figNum + 1;
 
     % Run the grating preference overlay analysis
     mapGratingsOcto_DR;
@@ -1459,7 +1469,7 @@ if nstim == 16 && StimulusNum == 2
 
     % ---- FIGURE (nstim==16): Bars Weighted Timecourses ----
     % pixPlotWeight: 4x4 grid of green-weighted timecourses.
-    figNum = figNum + 1; pixPlotWeight_DR;
+    figNum = figNum + 1; pixPlotWeight_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==16): OFF Mean Response Map ----
     % Mean pixel response across all OFF (contrast=-1) bar conditions.
@@ -1536,7 +1546,7 @@ if nstim == 17
     figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==17): Gratings Weighted Timecourses ----
-    figNum = figNum + 1; pixPlotWeight_DR;
+    figNum = figNum + 1; pixPlotWeight_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==17): Flicker Pixel Map ----
     % ---- FIGURE (nstim==17): Flicker Trial Timecourses ----
@@ -1545,7 +1555,7 @@ if nstim == 17
     figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==17): Flicker Weighted Timecourses ----
-    figNum = figNum + 1; pixPlotWeight_DR;
+    figNum = figNum + 1; pixPlotWeight_DR; figNum = figNum + 1;
 end
 
 % Additional 2-SF tuning maps (only when nstim==17 AND exactly 2 unique SFs)
@@ -1697,7 +1707,7 @@ if nstim == 24 && StimulusNum == 1
     figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==24, SNum=1): Gratings Weighted Timecourses ----
-    figNum = figNum + 1; pixPlotWeight_DR;
+    figNum = figNum + 1; pixPlotWeight_DR; figNum = figNum + 1;
 
     % Add orientation/SF/TF labels to the weighted timecourse subplots
     for i = 1:24
@@ -1720,7 +1730,7 @@ if nstim == 29
     figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==29): Gratings Weighted Timecourses ----
-    figNum = figNum + 1; pixPlotWeight_DR;
+    figNum = figNum + 1; pixPlotWeight_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==29): Flicker Pixel Map ----
     % ---- FIGURE (nstim==29): Flicker Trial Timecourses ----
@@ -1729,7 +1739,7 @@ if nstim == 29
     figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==29): Flicker Weighted Timecourses ----
-    figNum = figNum + 1; pixPlotWeight_DR;
+    figNum = figNum + 1; pixPlotWeight_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==29): SF Tuning Curve ----
     % Population mean weighted response vs. spatial frequency (log scale).
@@ -1763,7 +1773,7 @@ if nstim == 32 && StimulusNum == 2
     figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==32): Spots Weighted Timecourses ----
-    figNum = figNum + 1; pixPlotWeight_DR;
+    figNum = figNum + 1; pixPlotWeight_DR; figNum = figNum + 1;
 
     % Add contrast/position/direction labels to weighted timecourse subplots
     for i = 1:32
@@ -1785,7 +1795,7 @@ if nstim == 48
     figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==48): OFF Spots Weighted Timecourses ----
-    figNum = figNum + 1; pixPlotWeight_DR;
+    figNum = figNum + 1; pixPlotWeight_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==48): ON Spots Pixel Map ----
     % ---- FIGURE (nstim==48): ON Spots Trial Timecourses ----
@@ -1793,33 +1803,61 @@ if nstim == 48
     figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==48): ON Spots Weighted Timecourses ----
-    figNum = figNum + 1; pixPlotWeight_DR;
+    figNum = figNum + 1; pixPlotWeight_DR; figNum = figNum + 1;
 
-    % Compute retinotopic maps from spot responses
-    % octoRetinotopy produces 4 figures (2 per rep):
-    %   Retinotopy X Map (OFF): HSV color image of azimuth (x-position) preference, OFF response
-    %   Retinotopy Y Map (OFF): HSV color image of elevation (y-position) preference, OFF response
-    %   Retinotopy X Map (ON):  Same for ON response
-    %   Retinotopy Y Map (ON):  Same for ON response
+    % octoRetinotopy_DR exports 4 figures (X/Y map x OFF/ON) and manages
+    % figNum entirely internally — do NOT pre-increment here.
     octoRetinotopy_DR;
 
     % ---- FIGURE (nstim==48): Retinotopy Summary Panel (rep 1 = OFF) ----
     % ---- FIGURE (nstim==48): Retinotopy Summary Panel (rep 2 = ON) ----
-    % Each: 2x2 panel combining:
-    %   Top-left     : Mean green anatomy (meanGreenImg)
-    %   Top-right    : Retinotopy overlay on anatomy (topoOverlayImg)
-    %   Bottom-left  : X (azimuth) retinotopy map (xpolarImg)
-    %   Bottom-right : Y (elevation) retinotopy map (ypolarImg)
+    % Each: 2x2 panel combining anatomy, retinotopy overlay, X map, Y map.
+    % Manual axes positioning for tight inter-column spacing.
     repLabels48 = {'OFF', 'ON'};
+    retinoImgs48 = { {meanGreenImg, topoOverlayImg{1}, xpolarImg{1}, ypolarImg{1}}, ...
+                     {meanGreenImg, topoOverlayImg{2}, xpolarImg{2}, ypolarImg{2}} };
+    retinoSubTitles = {'Mean Green Anatomy', 'Retinotopy Overlay', ...
+                       'X (Azimuth) Map', 'Y (Elevation) Map'};
     for rep = 1:2
         figNum = figNum + 1;
-        figure('Name', sprintf('Fig %d - Retinotopy Summary %s (nstim=48)', figNum, repLabels48{rep}));
-        subplot(2,2,1); imshow(meanGreenImg); title('Mean Green Anatomy');
-        subplot(2,2,2); imshow(topoOverlayImg{rep}); title('Retinotopy Overlay');
-        subplot(2,2,3); imshow(xpolarImg{rep}); title('X (Azimuth) Map');
-        subplot(2,2,4); imshow(ypolarImg{rep}); title('Y (Elevation) Map');
+        fRet = figure('Name', sprintf('Fig %d - Retinotopy Summary %s (nstim=48)', figNum, repLabels48{rep}));
+
+        % Layout constants (normalised figure coordinates)
+        marg    = 0.03;   % outer margin
+        colgap  = 0.01;   % gap between columns
+        rowgap  = 0.04;   % gap between rows
+        titH    = 0.06;   % height for sgtitle
+
+        % Image aspect ratio (rows/cols) and figure pixel aspect ratio
+        imgSz  = size(meanGreenImg);   % [rows cols channels]
+        imgAR  = imgSz(1) / imgSz(2);  % image height/width ratio
+        figPos = get(fRet, 'Position'); % [x y w h] in pixels
+        figAR  = figPos(4) / figPos(3); % figure height/width ratio
+
+        % Width available for both panels
+        totalW = 1 - 2*marg - colgap;
+        panW   = totalW / 2;
+        % Make panH match the image aspect ratio exactly, corrected for figure shape
+        panH   = panW * imgAR / figAR;
+
+        % Total height used by both rows; pack from top (just below sgtitle margin)
+        totalH = 2*panH + rowgap;
+        topY   = 1 - marg - titH;   % top of upper row
+        xL     = [marg,  marg + panW + colgap];
+        yB     = [topY - totalH,  topY - panH];   % row2 bottom, row1 bottom
+
+        imgs48 = retinoImgs48{rep};
+        pos48  = { [xL(1) yB(2) panW panH], [xL(2) yB(2) panW panH], ...
+                   [xL(1) yB(1) panW panH], [xL(2) yB(1) panW panH] };
+        for pi = 1:4
+            ax = axes('Position', pos48{pi}, 'Parent', fRet); %#ok<LAXES>
+            image(ax, imgs48{pi});
+            axis(ax, 'image');
+            set(ax, 'XTick', [], 'YTick', []);
+            title(ax, retinoSubTitles{pi}, 'FontSize', 9, 'Interpreter', 'none');
+        end
         sgtitle(sprintf('Fig %d: Retinotopy Summary  -  %s', figNum, repLabels48{rep}), 'Interpreter', 'none');
-        if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
+        if exist('psfile','var'); exportgraphics(fRet, psfile, 'Append', true); end
     end
 end
 
@@ -1835,7 +1873,7 @@ if nstim == 24 && StimulusNum == 7
     figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==24, SNum=7): Spots Weighted Timecourses ----
-    figNum = figNum + 1; pixPlotWeight_DR;
+    figNum = figNum + 1; pixPlotWeight_DR; figNum = figNum + 1;
 end
 
 
@@ -1851,7 +1889,7 @@ if nstim == 10
     figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
     % ---- FIGURE (nstim==10): Bars Weighted Timecourses ----
-    figNum = figNum + 1; pixPlotWeight_DR;
+    figNum = figNum + 1; pixPlotWeight_DR; figNum = figNum + 1;
 
     % Add contrast/orientation labels to weighted timecourse subplots
     for i = 1:10
@@ -1877,22 +1915,53 @@ if nstim == 50
     figLabel = 'ON spots'; npanel = 25; nrow = 5; ncol = 5; offset = 25;
     figNum = figNum + 1; pixPlot_DR; figNum = figNum + 1;
 
-    % Compute retinotopic maps
-    % octoRetinotopy produces 4 figures (X and Y maps for OFF and ON)
+    % octoRetinotopy_DR exports 4 figures (X/Y map x OFF/ON) and manages
+    % figNum entirely internally — do NOT pre-increment here.
     octoRetinotopy_DR;
 
     % ---- FIGURE (nstim==50): Retinotopy Summary Panel (rep 1 = OFF) ----
     % ---- FIGURE (nstim==50): Retinotopy Summary Panel (rep 2 = ON) ----
+    % Manual axes positioning for tight inter-column spacing (matches nstim==48 layout).
     repLabels50 = {'OFF', 'ON'};
+    retinoImgs50 = { {meanGreenImg, topoOverlayImg{1}, xpolarImg{1}, ypolarImg{1}}, ...
+                     {meanGreenImg, topoOverlayImg{2}, xpolarImg{2}, ypolarImg{2}} };
+    retinoSubTitles50 = {'Mean Green Anatomy', 'Retinotopy Overlay', ...
+                         'X (Azimuth) Map', 'Y (Elevation) Map'};
     for rep = 1:2
         figNum = figNum + 1;
-        figure('Name', sprintf('Fig %d - Retinotopy Summary %s (nstim=50)', figNum, repLabels50{rep}));
-        subplot(2,2,1); imshow(meanGreenImg); title('Mean Green Anatomy');
-        subplot(2,2,2); imshow(topoOverlayImg{rep}); title('Retinotopy Overlay');
-        subplot(2,2,3); imshow(xpolarImg{rep}); title('X (Azimuth) Map');
-        subplot(2,2,4); imshow(ypolarImg{rep}); title('Y (Elevation) Map');
+        fRet = figure('Name', sprintf('Fig %d - Retinotopy Summary %s (nstim=50)', figNum, repLabels50{rep}));
+
+        marg    = 0.03;
+        colgap  = 0.01;
+        rowgap  = 0.04;
+        titH    = 0.06;
+
+        imgSz  = size(meanGreenImg);
+        imgAR  = imgSz(1) / imgSz(2);
+        figPos = get(fRet, 'Position');
+        figAR  = figPos(4) / figPos(3);
+
+        totalW = 1 - 2*marg - colgap;
+        panW   = totalW / 2;
+        panH   = panW * imgAR / figAR;
+
+        totalH = 2*panH + rowgap;
+        topY   = 1 - marg - titH;
+        xL     = [marg,  marg + panW + colgap];
+        yB     = [topY - totalH,  topY - panH];
+
+        imgs50 = retinoImgs50{rep};
+        pos50  = { [xL(1) yB(2) panW panH], [xL(2) yB(2) panW panH], ...
+                   [xL(1) yB(1) panW panH], [xL(2) yB(1) panW panH] };
+        for pi = 1:4
+            ax = axes('Position', pos50{pi}, 'Parent', fRet); %#ok<LAXES>
+            image(ax, imgs50{pi});
+            axis(ax, 'image');
+            set(ax, 'XTick', [], 'YTick', []);
+            title(ax, retinoSubTitles50{pi}, 'FontSize', 9, 'Interpreter', 'none');
+        end
         sgtitle(sprintf('Fig %d: Retinotopy Summary  -  %s', figNum, repLabels50{rep}), 'Interpreter', 'none');
-        if exist('psfile','var'); exportgraphics(gcf, psfile, 'Append', true); end
+        if exist('psfile','var'); exportgraphics(fRet, psfile, 'Append', true); end
     end
 end
 
@@ -1934,13 +2003,13 @@ save(outfile, 'trialmean', 'trialTcourse', 'stimOrder', 'c', 'dFrepeats', ...
 
 % Append optional variables if they exist
 if exist('freq','var')
-    save(outfile, 'freq', 'orient', '-append', '-v7.3');
+    save(outfile, 'freq', 'orient', '-append');   % no -v7.3: format is set by the base save above
 end
 if nstim == 48 || nstim == 50   % spots with retinotopy
-    save(outfile, 'topoOverlayImg', 'xpolarImg', 'ypolarImg', 'xphase', 'yphase', '-append', '-v7.3');
+    save(outfile, 'topoOverlayImg', 'xpolarImg', 'ypolarImg', 'xphase', 'yphase', '-append');
 end
 if nstim == 13   % gratings with preference maps
-    save(outfile, 'overlayImg', 'hvImg', '-append', '-v7.3');
+    save(outfile, 'overlayImg', 'hvImg', '-append');   % no -v7.3: format set by base save
 end
 
 % -------------------------------------------------------------------------
@@ -1949,13 +2018,27 @@ end
 % and key user-selected parameters. Replaces the former _info.txt sidecar file.
 % -------------------------------------------------------------------------
 infoFig = figure('Color', 'white', 'Name', 'Acquisition Info');
-axis off;
+infoAx = axes('Parent', infoFig, 'Position', [0 0 1 1], ...
+              'XLim', [0 1], 'YLim', [0 1], 'Visible', 'off');
 
 selectPtsLabels = {'0=auto ROI', '1=manual', '2=suite2p', '3=red/green suite2p'};
 spLabel = '';
-if Opt.selectPts >= 0 && Opt.selectPts <= 3
-    spLabel = sprintf('  (%s)', selectPtsLabels{Opt.selectPts + 1});
+% selectPts is set as a bare workspace variable by getOctoCells_DR.
+% Opt.selectPts may not exist if the caller left it commented out.
+spVal = NaN;
+if exist('selectPts','var')
+    spVal = selectPts;
+elseif isfield(Opt,'selectPts')
+    spVal = Opt.selectPts;
 end
+if ~isnan(spVal) && spVal >= 0 && spVal <= 3
+    spLabel = sprintf('  (%s)', selectPtsLabels{spVal + 1});
+end
+
+% Normalise StimulusStr / StimulusNum: older .mat files may have saved these as
+% cell arrays (e.g. {'octoSpots'}) rather than plain char/double.
+if iscell(StimulusStr);  StimulusStr = StimulusStr{1}; end
+if iscell(StimulusNum);  StimulusNum = StimulusNum{1}; end
 
 infoLines = {};
 infoLines{end+1} = '=== Acquisition Info ===';
@@ -1969,7 +2052,11 @@ infoLines{end+1} = sprintf('StimulusNum : %d', StimulusNum);
 infoLines{end+1} = sprintf('nstim       : %d', nstim);
 infoLines{end+1} = '';
 infoLines{end+1} = '--- User-Selected Parameters ---';
-infoLines{end+1} = sprintf('selectPts   : %d%s', Opt.selectPts, spLabel);
+if ~isnan(spVal)
+    infoLines{end+1} = sprintf('selectPts   : %d%s', spVal, spLabel);
+else
+    infoLines{end+1} = 'selectPts   : (unknown)';
+end
 infoLines{end+1} = sprintf('nclust      : %d', nclust);
 infoLines{end+1} = sprintf('sub_noise   : %d', Opt.sub_noise);
 if isfield(Opt, 'zbinning')
@@ -1987,9 +2074,9 @@ infoLines{end+1} = '--- Cell Counts ---';
 infoLines{end+1} = sprintf('nCells      : %d', size(dF, 1));
 infoLines{end+1} = sprintf('nFigures    : %d (printed to PDF)', figNum);
 
-text(0.05, 0.95, strjoin(infoLines, '\n'), ...
+text(infoAx, 0.05, 0.95, strjoin(infoLines, '\n'), ...
     'Units', 'normalized', 'VerticalAlignment', 'top', ...
-    'FontName', 'Courier', 'FontSize', 10, 'Interpreter', 'none');
+    'FontName', 'Courier', 'FontSize', 10, 'Interpreter', 'none', 'Color', 'k');
 
 if exist('psfile','var'); exportgraphics(infoFig, psfile, 'Append', true); end
 

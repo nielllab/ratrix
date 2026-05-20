@@ -32,10 +32,13 @@ function octoExptSummary(exptDir, outFile, Opt)
 %   GIF files auto-generated alongside each AVI (if not already present)
 %
 % DEPENDENCIES:
-%   Analysis .mat files produced by sbxOctoNeural_DR_commented_v5.m and/or
-%   sbxOctoSTA_commented_v1.m (must contain nstim, StimulusStr, StimulusNum,
-%   weightTcourse, trialmean, c, xpts, ypts, meanGreenImg, dFrepeats, stas,
-%   tuning, rfx, rfy as applicable).
+%   Analysis .mat files produced by sbxOctoNeural_DR_commented_v6.m and/or
+%   sbxOctoSTA_DR_v2.m (must contain nstim, StimulusStr, StimulusNum,
+%   weightTcourse, trialmean, stimOrder, stdImg, c, xpts, ypts,
+%   cycPolarImg, xpolarImg, ypolarImg, lagStas, zscore,
+%   rfx, rfy, meanGreenImg as applicable).
+%   No Image Processing Toolbox required (imresize replaced with interp2).
+%   GIF files auto-generated from AVI files and shown in col 3 of each page.
 
 %% =========================================================================
 %% SECTION 1: SETUP  -  DIRECTORIES AND OUTPUT FILE
@@ -401,6 +404,17 @@ for i = 1:length(acqs)
                'Interpreter', 'none', 'VerticalAlignment', 'middle', ...
                'Color', 'k');
 
+    % ---- Derive GIF path and auto-generate if needed ----
+    if ~isempty(acq.aviFile) && exist(acq.aviFile, 'file')
+        [aviDir, aviBase] = fileparts(acq.aviFile);
+        gifFile = fullfile(aviDir, [aviBase '.gif']);
+        if ~exist(gifFile, 'file')
+            try; generateGif(acq.aviFile, gifFile); catch; gifFile = ''; end
+        end
+    else
+        gifFile = '';
+    end
+
     % ---- Stimulus-specific panels (full page below title bar) ----
     if isSpontaneous
         annotation(fig, 'textbox', [mX 0.40 1-2*mX 0.18], ...
@@ -418,13 +432,13 @@ for i = 1:length(acqs)
                    'BackgroundColor', [1.0 0.97 0.87], 'Interpreter', 'none', 'Color', 'k');
 
     elseif is6x4
-        panelSpotsPage(acq.analysisFile, fig, acq.nstim);
+        panelSpotsPage(acq.analysisFile, fig, acq.nstim, acq.aviFile, gifFile);
 
     elseif is8way
-        panelGratingsPage(acq.analysisFile, fig, acq.nstim);
+        panelGratingsPage(acq.analysisFile, fig, acq.nstim, acq.aviFile, gifFile);
 
     elseif isSparseNoise
-        panelSTAPage(acq.analysisFile, fig);
+        panelSTAPage(acq.analysisFile, fig, acq.aviFile, gifFile);
 
     elseif isUnknownNstim
         annotation(fig, 'textbox', [mX 0.40 1-2*mX 0.18], ...
@@ -608,9 +622,11 @@ end
 %%
 %%   Col 1 (x=0.010-0.333): OFF pixel maps (4x6) + OFF weighted timecourses (4x6)
 %%   Col 2 (x=0.343-0.666): ON  pixel maps (4x6) + ON  weighted timecourses (4x6)
-%%   Col 3 (x=0.676-0.990): Retinotopy 2x2 subpanel grid
-%%                              top-left:  Retino X OFF  | top-right:  Retino Y OFF
-%%                              bot-left:  Retino X ON   | bot-right:  Retino Y ON
+%%   Col 3 (x=0.676-0.990): GIF placeholder (top 18%) +
+%%                          Retinotopy Summary OFF 2x2 grid (38%) +
+%%                          Retinotopy Summary ON  2x2 grid (38%)
+%%                          (~6% used by gaps between blocks)
+%%                          Each 2x2: anatomy | overlay // X map | Y map
 %%
 %% Within each data column (bottom to top):
 %%   TC grid   : 4 rows x panH_tc each
@@ -619,20 +635,22 @@ end
 %%   Pix label : labelH strip at top
 %%
 %% Key variable shapes (from sbxOctoNeural_DR_commented_v5.m):
-%%   trialmean    : [nY x nX x nPresentations]   -  smoothed pixel response per trial
-%%   stimOrder    : [1 x nPresentations]          -  condition index (1:nstim) per trial
-%%   weightTcourse: [tcRange x nPresentations]    -  anatomy-weighted timecourse per trial
-%%   xpolarImg    : cell{1=OFF, 2=ON}             -  HSV azimuth retinotopy map
-%%   ypolarImg    : cell{1=OFF, 2=ON}             -  HSV elevation retinotopy map
+%%   trialmean      : [nY x nX x nPresentations]   -  smoothed pixel response per trial
+%%   stimOrder      : [1 x nPresentations]          -  condition index (1:nstim) per trial
+%%   weightTcourse  : [tcRange x nPresentations]    -  anatomy-weighted timecourse per trial
+%%   xpolarImg      : cell{1=OFF, 2=ON}             -  HSV X (azimuth) retinotopy map
+%%   ypolarImg      : cell{1=OFF, 2=ON}             -  HSV Y (elevation) retinotopy map
+%%   topoOverlayImg : cell{1=OFF, 2=ON}             -  retinotopy overlay on anatomy (RGB)
+%%   meanGreenImg   : [nY x nX x nCh]              -  mean green anatomy image (uint8 RGB)
 %%
 %% loc maps condition index (1:nHalf) to 4x6 subplot position to preserve
 %% the spatial arrangement of the spot grid on screen (matches pixPlot_DR /
 %% pixPlotWeight_DR used in the full analysis PDF).
 %% =========================================================================
-function panelSpotsPage(analysisFile, fig, nstim)
+function panelSpotsPage(analysisFile, fig, nstim, aviFile, gifFile)
     try
         D = load(analysisFile, 'weightTcourse', 'trialmean', 'stdImg', ...
-                 'stimOrder', 'xpolarImg', 'ypolarImg');
+                 'stimOrder', 'xpolarImg', 'ypolarImg', 'topoOverlayImg', 'meanGreenImg');
     catch ME
         annotation(fig, 'textbox', [0.02 0.05 0.96 0.85], ...
                    'String', ['Could not load analysis data: ' ME.message], ...
@@ -698,22 +716,8 @@ function panelSpotsPage(analysisFile, fig, nstim)
     yTCLabel  = yPixGrid - labelH;
     yTCGrid   = yTCLabel - nrow * panH;   % bottom of TC grid
 
-    % ---- Retino column geometry ----
-    % Subpanel titles are annotation textboxes below each image.
-    % small_h is capped so images don't grow -- excess space stays at bottom.
-    ret_hgap  = mX / 4;             % narrow horizontal gap between subpanels
-    ret_vgap  = 0.008;              % tight vertical gap between rows
-    ret_tlH   = 0.018;             % title strip height below each image
-    small_w   = (colW - ret_hgap) / 2;
-
-    % Cap image height: use same height as pixel map panels (panH*nrow/2),
-    % so retino images are similar in size to the other panels and don't grow.
-    small_h   = min(panH * 2, (yPixLabel - bottom - ret_vgap - 2*ret_tlH) / 2);
-
-    % Pack from the top: row 1 sits just below the retino header label,
-    % row 2 sits ret_vgap + ret_tlH below row 1.
-    row1_bot  = yPixLabel - small_h;
-    row2_bot  = row1_bot - ret_vgap - ret_tlH - small_h;
+    % ---- Retino column geometry (used for side-by-side X/Y images in col 3) ----
+    ret_hgap  = mX / 4;             % narrow horizontal gap between X and Y subpanels
 
     % =====================================================================
     % COLS 1 and 2: Weighted pixel maps + weighted timecourses (OFF and ON)
@@ -762,7 +766,12 @@ function panelSpotsPage(analysisFile, fig, nstim)
                 rgbImg = reshape(jmap(idx(:), :), [size(meanimg,1) size(meanimg,2) 3]);
                 ngRes  = normgreen;
                 if ~isequal(size(ngRes,1), size(rgbImg,1)) || ~isequal(size(ngRes,2), size(rgbImg,2))
-                    ngRes = imresize(ngRes, [size(rgbImg,1) size(rgbImg,2)]);
+                    [xi,yi] = meshgrid(linspace(1,size(ngRes,2),size(rgbImg,2)), ...
+                                       linspace(1,size(ngRes,1),size(rgbImg,1)));
+                    [xi0,yi0] = meshgrid(1:size(ngRes,2), 1:size(ngRes,1));
+                    ngRes = cat(3, interp2(xi0,yi0,ngRes(:,:,1),xi,yi,'linear',0), ...
+                                   interp2(xi0,yi0,ngRes(:,:,2),xi,yi,'linear',0), ...
+                                   interp2(xi0,yi0,ngRes(:,:,3),xi,yi,'linear',0));
                 end
                 image(ax, rgbImg .* ngRes);
             else
@@ -803,53 +812,73 @@ function panelSpotsPage(analysisFile, fig, nstim)
     end
 
     % =====================================================================
-    % COL 3: Retinotopy 2x2 grid
-    % Header aligned with pixel map label. Subpanel titles as annotation
-    % textboxes directly below each image so spacing is fully controlled.
-    %   Row 1: X OFF (left) | Y OFF (right)
-    %   Row 2: X ON  (left) | Y ON  (right)
+    % COL 3: GIF placeholder (top) + Retinotopy Summary OFF + ON (below)
+    %
+    % Each Retinotopy Summary is a 2x2 grid matching the sbxOctoNeural figure:
+    %   top-left:  meanGreenImg          ("Mean Green Anatomy")
+    %   top-right: topoOverlayImg{rep}   ("Retinotopy Overlay")
+    %   bot-left:  xpolarImg{rep}        ("X (Azimuth) Map")
+    %   bot-right: ypolarImg{rep}        ("Y (Elevation) Map")
+    % rep=1 = OFF, rep=2 = ON  (matching sbxOctoNeural repLabels order)
     % =====================================================================
-    hasRetino = isfield(D, 'xpolarImg') && iscell(D.xpolarImg) && ...
-                isfield(D, 'ypolarImg') && iscell(D.ypolarImg) && ...
-                length(D.xpolarImg) >= 2;
+    hasRetino = isfield(D, 'xpolarImg')      && iscell(D.xpolarImg)      && length(D.xpolarImg)      >= 2 && ...
+                isfield(D, 'ypolarImg')      && iscell(D.ypolarImg)      && length(D.ypolarImg)      >= 2 && ...
+                isfield(D, 'topoOverlayImg') && iscell(D.topoOverlayImg) && length(D.topoOverlayImg) >= 2 && ...
+                isfield(D, 'meanGreenImg')   && ~isempty(D.meanGreenImg);
 
-    annotation(fig, 'textbox', [col3_left yPixLabel colW labelH], ...
-               'String', 'Retinotopy', 'FontSize', 8, 'FontWeight', 'bold', ...
-               'EdgeColor', 'none', 'HorizontalAlignment', 'center', ...
-               'Interpreter', 'none', 'VerticalAlignment', 'middle', 'Color', 'k');
+    contentH  = top - bottom;
+    gifH      = contentH * 0.18;   % GIF placeholder: 18% of column height
+    retinoH   = contentH * 0.38;   % each Retinotopy Summary block: 38% (2x mY gaps fill remaining ~6%)
+    retLabelH = 0.022;
 
-    % Image positions: row 1 just below header, row 2 just below row 1
-    retinoImgPos = { ...
-        [col3_left,                    row1_bot, small_w, small_h], ...
-        [col3_left + small_w + ret_hgap, row1_bot, small_w, small_h], ...
-        [col3_left,                    row2_bot, small_w, small_h], ...
-        [col3_left + small_w + ret_hgap, row2_bot, small_w, small_h]};
-    % Title strips sit directly below each image
-    retinoTitlePos = { ...
-        [col3_left,                    row1_bot - ret_tlH, small_w, ret_tlH], ...
-        [col3_left + small_w + ret_hgap, row1_bot - ret_tlH, small_w, ret_tlH], ...
-        [col3_left,                    row2_bot - ret_tlH, small_w, ret_tlH], ...
-        [col3_left + small_w + ret_hgap, row2_bot - ret_tlH, small_w, ret_tlH]};
-    retinoLabels = {'Retino X  (OFF)', 'Retino Y  (OFF)', ...
-                    'Retino X  (ON)',  'Retino Y  (ON)'};
+    % GIF placeholder (top of col 3)
+    gifTop = top;
+    gifBot = gifTop - gifH;
+    axGif = axes('Position', [col3_left, gifBot, colW, gifH], 'Parent', fig); %#ok<LAXES>
+    showGifFrame(axGif, gifFile, aviFile);
+    title(axGif, 'Activity (GIF)', 'FontSize', 8, 'Color', 'k', 'Interpreter', 'none');
 
-    if hasRetino
-        retinoImgs = {D.xpolarImg{1}, D.ypolarImg{1}, D.xpolarImg{2}, D.ypolarImg{2}};
-        for m = 1:4
-            ax = axes('Position', retinoImgPos{m}, 'Parent', fig); %#ok<LAXES>
-            showFrame(ax, retinoImgs{m});
-            set(ax, 'XTick', [], 'YTick', [], 'XColor', 'k', 'YColor', 'k');
-            annotation(fig, 'textbox', retinoTitlePos{m}, ...
-                       'String', retinoLabels{m}, 'FontSize', 7, ...
-                       'EdgeColor', 'none', 'HorizontalAlignment', 'center', ...
-                       'VerticalAlignment', 'middle', 'Interpreter', 'none', 'Color', 'k');
+    % Two Retinotopy Summary blocks: rep=1 (OFF) then rep=2 (ON)
+    retinoLabels = {'Retinotopy Summary  -  OFF', 'Retinotopy Summary  -  ON'};
+    retinoTops   = [gifBot - mY,  gifBot - mY - retinoH - mY];
+
+    subTitles = {{'Mean Green Anatomy', 'Retinotopy Overlay'}, ...
+                 {'X (Azimuth) Map',    'Y (Elevation) Map'}};
+
+    for rep = 1:2
+        blkTop = retinoTops(rep);
+        blkBot = blkTop - retinoH;
+        imgH   = retinoH - retLabelH - 0.004;
+        imgW   = (colW - ret_hgap) / 2;   % left and right panels equal width
+
+        annotation(fig, 'textbox', [col3_left, blkTop - retLabelH, colW, retLabelH], ...
+                   'String', retinoLabels{rep}, 'FontSize', 8, 'FontWeight', 'bold', ...
+                   'EdgeColor', 'none', 'HorizontalAlignment', 'center', ...
+                   'Interpreter', 'none', 'VerticalAlignment', 'middle', 'Color', 'k');
+
+        if hasRetino
+            % 2x2 grid: top row (anatomy | overlay), bottom row (X map | Y map)
+            rowH   = imgH / 2;
+            panelImgs = {D.meanGreenImg,        D.topoOverlayImg{rep}; ...
+                         D.xpolarImg{rep},       D.ypolarImg{rep}};
+            panelTitles = {subTitles{1}{1}, subTitles{1}{2}; ...
+                           subTitles{2}{1}, subTitles{2}{2}};
+            for pr = 1:2
+                for pc = 1:2
+                    xPos = col3_left + (pc - 1) * (imgW + ret_hgap);
+                    yPos = blkTop - retLabelH - pr * rowH;
+                    ax = axes('Position', [xPos+0.001, yPos+0.001, imgW*0.98, rowH*0.96], ...
+                              'Parent', fig); %#ok<LAXES>
+                    showFrame(ax, panelImgs{pr, pc});
+                    set(ax, 'XTick', [], 'YTick', []);
+                    title(ax, panelTitles{pr, pc}, 'FontSize', 6, 'Color', 'k', ...
+                          'Interpreter', 'none');
+                end
+            end
+        else
+            axPh = axes('Position', [col3_left, blkBot, colW, imgH], 'Parent', fig); %#ok<LAXES>
+            placeholderAxes(axPh, sprintf('Retinotopy Summary %s not available', retinoLabels{rep}(end-2:end)));
         end
-    else
-        annotation(fig, 'textbox', [col3_left bottom colW (yPixLabel - bottom)], ...
-                   'String', 'Retinotopy maps not available', ...
-                   'FontSize', 9, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle', ...
-                   'EdgeColor', [0.75 0.75 0.75], 'BackgroundColor', [0.96 0.96 0.96], ...
-                   'Interpreter', 'none', 'Color', 'k');
     end
 end
 
@@ -870,7 +899,7 @@ end
 %%   stdImg       : for normgreen reconstruction
 %%   xpts, ypts, c : for mean pixel map + cluster overlay
 %% =========================================================================
-function panelGratingsPage(analysisFile, fig, nstim)
+function panelGratingsPage(analysisFile, fig, nstim, aviFile, gifFile)
     try
         D = load(analysisFile, 'cycPolarImg', 'trialmean', 'weightTcourse', ...
                  'stimOrder', 'stdImg', 'xpts', 'ypts', 'c', 'meanGreenImg');
@@ -889,7 +918,6 @@ function panelGratingsPage(analysisFile, fig, nstim)
     left   = mX;
     right  = 1 - mX;
     top    = titleY - mY;
-    totW   = right - left;
     bottom = mY;
 
     % ---- Reconstruct normgreen from stdImg ----
@@ -903,73 +931,66 @@ function panelGratingsPage(analysisFile, fig, nstim)
         hasNormgreen = false;
     end
 
-    % ---- Layout constants ----
-    topH   = 0.25;
+    % ---- Three equal columns ----
+    usableW   = right - left;
+    gap       = mX / 2;
+    colW      = (usableW - 2*gap) / 3;
+    col1_left = left;
+    col2_left = col1_left + colW + gap;
+    col3_left = col2_left + colW + gap;
+
     labelH = 0.025;
-    gapH   = mY / 2;
+    range  = [-0.05 0.20];
 
-    yTopRow = top - topH;
-
-    nCond  = nstim - 1;   % exclude blank
+    nCond  = nstim - 1;   % exclude blank condition
     nCol   = 8;
     nRow   = ceil(nCond / nCol);
-    panW   = totW / nCol;
-    panH   = panW * (17 / 11);
 
-    yPixLabel = yTopRow - gapH - labelH;
-    yPixGrid  = yPixLabel - nRow * panH;
-    yTCLabel  = yPixGrid - labelH;
+    % Panel size within col 2 (8-wide grid)
+    panW   = colW / nCol;
+    panH   = panW * (17 / 11);
 
     tcRange = size(D.weightTcourse, 1);
     t       = 1:tcRange;
-    range   = [-0.05 0.20];
 
-    % ---- TOP ROW: Polar map + Mean pixel map ----
-    panW_top = totW * 0.35;
-
-    ax = axes('Position', [left yTopRow panW_top topH], 'Parent', fig); %#ok<LAXES>
+    % =====================================================================
+    % COL 1: Polar map (cycPolarImg / frame cycle + amplitude)
+    % =====================================================================
+    ax = axes('Position', [col1_left, top - (top - bottom), colW, top - bottom], ...
+              'Parent', fig); %#ok<LAXES>
     if isfield(D, 'cycPolarImg') && ~isempty(D.cycPolarImg)
         showFrame(ax, D.cycPolarImg);
     else
         set(ax, 'Color', [0.85 0.85 0.85]);
     end
     axis(ax, 'off');
-    title(ax, 'Polar Map (frame cycle)', 'FontSize', 9, 'Color', 'k', 'Interpreter', 'none');
+    title(ax, 'Polar Map (frame cycle + amp)', 'FontSize', 9, 'Color', 'k', 'Interpreter', 'none');
 
-    ax2 = axes('Position', [left + panW_top + mX, yTopRow, panW_top, topH], 'Parent', fig); %#ok<LAXES>
-    mapMean  = mean(D.trialmean, 3, 'omitnan');
-    mapRange = prctile(mapMean(:), [2 98]);
-    if mapRange(2) <= mapRange(1); mapRange(2) = mapRange(1) + 0.01; end
-    imagesc(ax2, mapMean, mapRange);
-    colormap(ax2, 'gray');
-    axis(ax2, 'image'); axis(ax2, 'off');
-    hold(ax2, 'on');
-    if isfield(D, 'c') && isfield(D, 'xpts') && isfield(D, 'ypts')
-        nclust = max(D.c);
-        colors = lines(nclust);
-        for k = 1:nclust
-            idx = D.c == k;
-            plot(ax2, D.xpts(idx), D.ypts(idx), '.', 'Color', colors(k,:), 'MarkerSize', 3);
-        end
-    end
-    title(ax2, 'Mean pixel map + clusters', 'FontSize', 9, 'Color', 'k', 'Interpreter', 'none');
+    % =====================================================================
+    % COL 2: Weighted Pixel Maps (top) + Weighted Trial Timecourses (bottom)
+    % Grid: nRow rows x 8 cols
+    % =====================================================================
+    yPixLabel = top - labelH;
+    yPixGrid  = yPixLabel - nRow * panH;
+    yTCLabel  = yPixGrid - labelH;
+    yTCGrid   = yTCLabel - nRow * panH;
 
-    % ---- WEIGHTED PIXEL MAPS ----
-    annotation(fig, 'textbox', [left yPixLabel totW labelH], ...
-               'String', 'Weighted Pixel Maps (8-way gratings)', 'FontSize', 8, ...
+    annotation(fig, 'textbox', [col2_left, yPixLabel, colW, labelH], ...
+               'String', 'Gratings: Weighted Pixel Map', 'FontSize', 8, ...
                'FontWeight', 'bold', 'EdgeColor', 'none', 'HorizontalAlignment', 'center', ...
                'Interpreter', 'none', 'VerticalAlignment', 'middle', 'Color', 'k');
 
-    annotation(fig, 'textbox', [left yTCLabel totW labelH], ...
-               'String', 'Weighted Trial Timecourses (8-way gratings)', 'FontSize', 8, ...
+    annotation(fig, 'textbox', [col2_left, yTCLabel, colW, labelH], ...
+               'String', 'Gratings: Weighted Trial Timecourses', 'FontSize', 8, ...
                'FontWeight', 'bold', 'EdgeColor', 'none', 'HorizontalAlignment', 'center', ...
                'Interpreter', 'none', 'VerticalAlignment', 'middle', 'Color', 'k');
 
     for cond = 1:nCond
         col = mod(cond - 1, nCol) + 1;
         row = ceil(cond / nCol);
-        xPos = left + (col - 1) * panW;
+        xPos = col2_left + (col - 1) * panW;
 
+        % Weighted pixel map
         yPosPix = yPixLabel - row * panH;
         ax = axes('Position', [xPos+0.0005 yPosPix+0.0005 panW*0.98 panH*0.97], ...
                   'Parent', fig); %#ok<LAXES>
@@ -982,7 +1003,12 @@ function panelGratingsPage(analysisFile, fig, nstim)
             rgbImg = reshape(jmap(idx(:),:), [size(meanimg,1) size(meanimg,2) 3]);
             ngRes  = normgreen;
             if ~isequal(size(ngRes,1), size(rgbImg,1)) || ~isequal(size(ngRes,2), size(rgbImg,2))
-                ngRes = imresize(ngRes, [size(rgbImg,1) size(rgbImg,2)]);
+                [xi,yi] = meshgrid(linspace(1,size(ngRes,2),size(rgbImg,2)), ...
+                                   linspace(1,size(ngRes,1),size(rgbImg,1)));
+                [xi0,yi0] = meshgrid(1:size(ngRes,2), 1:size(ngRes,1));
+                ngRes = cat(3, interp2(xi0,yi0,ngRes(:,:,1),xi,yi,'linear',0), ...
+                               interp2(xi0,yi0,ngRes(:,:,2),xi,yi,'linear',0), ...
+                               interp2(xi0,yi0,ngRes(:,:,3),xi,yi,'linear',0));
             end
             image(ax, rgbImg .* ngRes);
         else
@@ -991,6 +1017,7 @@ function panelGratingsPage(analysisFile, fig, nstim)
         end
         axis(ax, 'off');
 
+        % Weighted timecourse
         yPosTC = yTCLabel - row * panH;
         ax = axes('Position', [xPos+0.0005 yPosTC+0.0005 panW*0.98 panH*0.97], ...
                   'Parent', fig); %#ok<LAXES>
@@ -1017,30 +1044,44 @@ function panelGratingsPage(analysisFile, fig, nstim)
             set(ax, 'YTick', []);
         end
     end
+
+    % =====================================================================
+    % COL 3: GIF placeholder (full column height)
+    % =====================================================================
+    axGif = axes('Position', [col3_left, bottom, colW, top - bottom], 'Parent', fig); %#ok<LAXES>
+    showGifFrame(axGif, gifFile, aviFile);
+    title(axGif, 'Activity (GIF)', 'FontSize', 8, 'Color', 'k', 'Interpreter', 'none');
 end
 
 
 %% =========================================================================
 %% LOCAL HELPER: panelSTAPage  (sparse noise / STA)
 %%
-%% Layout (top to bottom):
-%%   Row 1: Lag maps ON  -- taus 3,5,7,9,11,13,15,17 (8 maps, every other lag)
-%%   Row 2: Lag maps OFF -- same taus
-%%   Row 3: Block STA ON | Block STA OFF | RF scatter (ON=red, OFF=blue)
-%%   Row 4: X topo ON/OFF | Y topo ON/OFF
+%% Layout: 3 columns
+%%   Col 1: Lag maps ON (top half) + Lag maps OFF (bottom half)
+%%          Each half: 4-col x 2-row square grid of lag images at taus 3,5,...,17
+%%   Col 2: RF Position Map on Anatomy (recreated from saved variables)
+%%          2x2 grid: top=ON (X|Y), bot=OFF (X|Y); anatomy overlaid with RF-pos colour
+%%   Col 3: GIF / AVI placeholder (full column height)
 %%
-%% Variables loaded from mat file (requires sbxOctoSTA_commented_v1.m v2+):
-%%   lagStas  : [nY x nX x 18 x 2]          -- per-lag STA (taus 3:18, rep1=ON, rep2=OFF)
-%%   staAll   : [nY x nX x nXblk x nYblk x 2] -- block STA maps at peak lag
-%%   stas     : [nY x nX x nCells x 2]      -- cell-level STA (fallback for mean map)
-%%   zscore   : [nCells x 2]                -- ON/OFF z-scores
-%%   rfx, rfy : [nCells x 2]                -- RF centre positions
-%%   xpts, ypts : [nCells x 1]              -- cell anatomy positions
+%% Variables loaded from mat file (requires sbxOctoSTA_DR_v2.m):
+%%   lagStas    : [nY x nX x 18 x 2]    -- per-lag STA (taus 1:18, rep1=ON, rep2=OFF)
+%%   zscore     : [nCells x 2]           -- ON/OFF z-scores
+%%   rfx, rfy   : [nCells x 2]           -- RF centre positions
+%%   xpts, ypts : [nCells x 1]           -- cell anatomy positions
+%%   meanGreenImg : [nY x nX x nCh]      -- anatomy image for RF overlay
 %% =========================================================================
-function panelSTAPage(analysisFile, fig)
+function panelSTAPage(analysisFile, fig, aviFile, gifFile)
+%% panelSTAPage  (sparse noise / STA) -- 3-column layout
+%%
+%%   Col 1: Lag maps ON (top half) + Lag maps OFF (bottom half)
+%%          Each half: 2-row x 4-col grid of lag images (4x4 square formation)
+%%   Col 2: RF Position Map on Anatomy (recreated from saved variables)
+%%          2x2 grid: X/Y x ON/OFF, anatomy image with cells coloured by RF pos
+%%   Col 3: GIF placeholder (full column height)
     try
-        D = load(analysisFile, 'lagStas', 'staAll', 'stas', 'zscore', ...
-                 'rfx', 'rfy', 'xpts', 'ypts');
+        D = load(analysisFile, 'lagStas', 'stas', 'zscore', ...
+                 'rfx', 'rfy', 'xpts', 'ypts', 'meanGreenImg');
     catch ME
         annotation(fig, 'textbox', [0.02 0.05 0.96 0.90], ...
                    'String', ['Could not load STA data: ' ME.message], ...
@@ -1057,51 +1098,58 @@ function panelSTAPage(analysisFile, fig)
     right  = 1 - mX;
     top    = titleY - mY;
     bottom = mY;
-    totW   = right - left;
-    totH   = top - bottom;
 
-    % ---- Vertical strip heights ----
-    lagH   = 0.14;    % each lag row (ON and OFF)
-    blkH   = 0.28;    % block STA + RF scatter row
-    topoH  = 0.22;    % topo row
-    % gaps between strips
-    gapH   = mY / 2;
-    % lag rows sit at top; remaining space goes to block+topo
-    yLagON  = top - lagH;
-    yLagOFF = yLagON - gapH - lagH;
-    yBlk    = yLagOFF - gapH - blkH;
-    yTopo   = yBlk - gapH - topoH;
+    % ---- Three equal columns ----
+    usableW   = right - left;
+    gap       = mX / 2;
+    colW      = (usableW - 2*gap) / 3;
+    col1_left = left;
+    col2_left = col1_left + colW + gap;
+    col3_left = col2_left + colW + gap;
 
-    taus_show = 3:2:18;   % every other lag: 3,5,7,9,11,13,15,17
-    nTaus     = length(taus_show);
-    lagW      = totW / nTaus;
-    labelH    = 0.018;
-    crange    = [-0.05 0.05];   % default; overridden per-image if possible
+    contentH = top - bottom;
+    labelH   = 0.022;
 
-    repLabels = {'ON', 'OFF'};
-    yLagRow   = [yLagON, yLagOFF];
+    taus_show  = 3:2:18;   % every other lag: 3,5,7,9,11,13,15,17
+    nTaus      = length(taus_show);   % 8 lags
 
     % =====================================================================
-    % ROWS 1-2: Lag maps (ON top, OFF bottom), every other lag
-    % lagStas: [nY x nX x 18 x 2]
+    % COL 1: Lag maps ON (top half) + Lag maps OFF (bottom half)
+    % Each block arranged in a 4-col x 2-row square formation.
+    % lagStas: [nY x nX x 18 x 2], rep1=ON, rep2=OFF
     % =====================================================================
     hasLagStas = isfield(D, 'lagStas') && ~isempty(D.lagStas);
 
+    % Divide col1 height into two equal halves (ON and OFF)
+    lagH      = (contentH - mY - 2*labelH) / 2;   % image area per block
+    lagOnTop  = top;
+    lagOffTop = lagOnTop - lagH - labelH - mY/2;
+
+    repLabels = {'ON', 'OFF'};
+    yLagTop   = [lagOnTop, lagOffTop];
+
+    nLagCols = 4;
+    nLagRows = ceil(nTaus / nLagCols);
+
     for rep = 1:2
-        % Row label on left
-        annotation(fig, 'textbox', [left, yLagRow(rep), totW, labelH], ...
+        rowTop = yLagTop(rep);
+        annotation(fig, 'textbox', [col1_left, rowTop - labelH, colW, labelH], ...
                    'String', sprintf('STA Lag Maps  -  %s', repLabels{rep}), ...
                    'FontSize', 7, 'FontWeight', 'bold', 'EdgeColor', 'none', ...
                    'HorizontalAlignment', 'left', 'VerticalAlignment', 'middle', ...
                    'Interpreter', 'none', 'Color', 'k');
 
-        for ti = 1:nTaus
-            tau = taus_show(ti);
-            xPos = left + (ti - 1) * lagW;
-            yPos = yLagRow(rep) + labelH;
-            imH  = lagH - labelH;
+        lagImgW = colW / nLagCols;
+        lagImgH = lagH / nLagRows;
 
-            ax = axes('Position', [xPos+0.001 yPos+0.001 lagW*0.98 imH*0.97], ...
+        for ti = 1:nTaus
+            tau    = taus_show(ti);
+            lagCol = mod(ti - 1, nLagCols) + 1;
+            lagRow = ceil(ti / nLagCols);
+            xPos   = col1_left + (lagCol - 1) * lagImgW;
+            yPos   = rowTop - labelH - lagRow * lagImgH;
+
+            ax = axes('Position', [xPos+0.001 yPos+0.001 lagImgW*0.97 lagImgH*0.96], ...
                       'Parent', fig); %#ok<LAXES>
             if hasLagStas && size(D.lagStas, 3) >= tau
                 img = D.lagStas(:,:,tau,rep);
@@ -1119,138 +1167,90 @@ function panelSTAPage(analysisFile, fig)
     end
 
     % =====================================================================
-    % ROW 3: Block STA ON | Block STA OFF | RF scatter
-    % staAll: [nY x nX x nXblk x nYblk x 2]
+    % COL 2: RF Position Map on Anatomy (Fig 43 equivalent)
+    % 2x2 grid: top row = ON (X | Y), bottom row = OFF (X | Y)
+    % Anatomy image with cells coloured by RF position using jet colormap.
+    % Falls back to scatter plot if meanGreenImg is absent.
     % =====================================================================
-    hasStaAll = isfield(D, 'staAll') && ~isempty(D.staAll);
-    hasStas   = isfield(D, 'stas')   && ~isempty(D.stas);
-    hasRF     = isfield(D, 'rfx') && isfield(D, 'rfy') && isfield(D, 'zscore');
+    hasRF  = isfield(D,'rfx') && isfield(D,'rfy') && isfield(D,'zscore') && ...
+              isfield(D,'xpts') && isfield(D,'ypts');
+    hasGrn = isfield(D,'meanGreenImg') && ~isempty(D.meanGreenImg);
 
-    blkPanW = totW * 0.30;
-    rfPanW  = totW - 2*blkPanW - 2*mX;
+    annotation(fig, 'textbox', [col2_left, top - labelH, colW, labelH], ...
+               'String', 'RF Position Map on Anatomy', 'FontSize', 8, 'FontWeight', 'bold', ...
+               'EdgeColor', 'none', 'HorizontalAlignment', 'center', ...
+               'Interpreter', 'none', 'VerticalAlignment', 'middle', 'Color', 'k');
 
-    for rep = 1:2
-        xPos = left + (rep - 1) * (blkPanW + mX);
-        ax = axes('Position', [xPos yBlk blkPanW blkH], 'Parent', fig); %#ok<LAXES>
-        if hasStaAll
-            % Assemble block STA mosaic by tiling blocks
-            nXblk = size(D.staAll, 3);
-            nYblk = size(D.staAll, 4);
-            blkSz = size(D.staAll, 1);
-            mosaic = zeros(blkSz * nXblk, blkSz * nYblk);
-            for bx = 1:nXblk
-                for by = 1:nYblk
-                    mosaic((bx-1)*blkSz+1:bx*blkSz, (by-1)*blkSz+1:by*blkSz) = ...
-                        D.staAll(:,:,bx,by,rep);
-                end
-            end
-            cr = max(abs(prctile(mosaic(:), [2 98])));
-            if cr == 0; cr = 0.01; end
-            imagesc(ax, mosaic', [-cr cr]);
-            colormap(ax, 'jet');
-        elseif hasStas
-            % Fallback: mean cell STA across significant cells
-            zthresh = 4;
-            if rep == 1
-                useMask = D.zscore(:,1) > zthresh;
-            else
-                useMask = D.zscore(:,2) < -zthresh;
-            end
-            if ~any(useMask); useMask = true(size(D.zscore,1),1); end
-            meanSTA = mean(D.stas(:,:,useMask,rep), 3, 'omitnan');
-            cr = max(abs(prctile(meanSTA(:), [2 98])));
-            if cr == 0; cr = 0.01; end
-            imagesc(ax, meanSTA', [-cr cr]);
-            colormap(ax, 'jet');
-        else
-            set(ax, 'Color', [0.85 0.85 0.85]);
-        end
-        axis(ax, 'image'); axis(ax, 'off');
-        title(ax, sprintf('Block STA  -  %s', repLabels{rep}), ...
-              'FontSize', 8, 'Color', 'k', 'Interpreter', 'none');
-    end
+    rfPanW = (colW - mX/4) / 2;
+    rfPanH = (contentH - labelH - mY/2) / 2;
 
-    % RF scatter: ON (red) and OFF (blue)
-    xRF = left + 2*(blkPanW + mX);
-    ax = axes('Position', [xRF yBlk rfPanW blkH], 'Parent', fig); %#ok<LAXES>
+    % Grid order: [1=X ON, 2=Y ON, 3=X OFF, 4=Y OFF]
+    rfTitles = {'X RF Map  (ON)', 'Y RF Map  (ON)', 'X RF Map  (OFF)', 'Y RF Map  (OFF)'};
+    zthresh  = 5.5;
+
+    useOn = []; useOff = []; x0 = 0; y0 = 0;
     if hasRF
-        zthresh = 5.5;
         nRef    = size(D.zscore, 1);
-        useOn   = D.zscore(1:nRef, 1) >  zthresh;
-        useOff  = D.zscore(1:nRef, 2) < -zthresh;
-        hold(ax, 'on');
-        if any(useOn)
-            plot(ax, D.rfx(useOn,  1), D.rfy(useOn,  1), 'r.', 'MarkerSize', 5);
-        end
-        if any(useOff)
-            plot(ax, D.rfx(useOff, 2), D.rfy(useOff, 2), 'b.', 'MarkerSize', 5);
-        end
-        legend(ax, {'ON','OFF'}, 'FontSize', 7, 'Location', 'best');
-        set(ax, 'YDir', 'reverse', 'Box', 'on', 'FontSize', 7, ...
-            'XColor', 'k', 'YColor', 'k');
-        axis(ax, 'equal');
-        title(ax, 'RF Centres  (ON=red, OFF=blue)', 'FontSize', 8, ...
-              'Color', 'k', 'Interpreter', 'none');
-        xlabel(ax, 'RF X', 'FontSize', 7, 'Color', 'k');
-        ylabel(ax, 'RF Y', 'FontSize', 7, 'Color', 'k');
-    else
-        set(ax, 'Color', [0.85 0.85 0.85]);
-        text(0.5, 0.5, 'RF data not available', 'Units', 'normalized', ...
-             'HorizontalAlignment', 'center', 'FontSize', 8, 'Parent', ax, 'Color', 'k');
-        axis(ax, 'off');
+        useOn   = find(D.zscore(1:nRef, 1) >  zthresh);
+        useOff  = find(D.zscore(1:nRef, 2) < -zthresh);
+        rfxs    = [D.rfx(useOn,1); D.rfx(useOff,2)];
+        rfys    = [D.rfy(useOn,1); D.rfy(useOff,2)];
+        x0 = median(rfxs, 'omitnan');
+        y0 = median(rfys, 'omitnan');
     end
 
-    % =====================================================================
-    % ROW 4: X topo ON/OFF | Y topo ON/OFF
-    % Scatter: anatomy position (xpts/ypts) vs RF position (rfx/rfy - median)
-    % =====================================================================
-    hasXY = hasRF && isfield(D, 'xpts') && isfield(D, 'ypts');
-    topoPanW = (totW - mX) / 2;
+    for ri = 1:4
+        rfCol = mod(ri - 1, 2) + 1;
+        rfRow = ceil(ri / 2);
+        xPos  = col2_left + (rfCol - 1) * (rfPanW + mX/4);
+        yPos  = top - labelH - mY/4 - rfRow * rfPanH;
 
-    topoTitles = {'X Topography', 'Y Topography'};
-    topoXlabels = {'Cell X position', 'Cell Y position'};
-    topoYlabels = {'RF X (centred)', 'RF Y (centred)'};
+        ax = axes('Position', [xPos, yPos, rfPanW, rfPanH*0.93], 'Parent', fig); %#ok<LAXES>
 
-    for tp = 1:2
-        xPos = left + (tp-1) * (topoPanW + mX);
-        ax = axes('Position', [xPos yTopo topoPanW topoH], 'Parent', fig); %#ok<LAXES>
+        isX  = (ri == 1 || ri == 3);
+        isOn = (ri <= 2);
+        cells = useOn; if ~isOn; cells = useOff; end
+        rep   = 1;     if ~isOn; rep   = 2;      end
 
-        if hasXY
-            zthresh = 5.5;
-            nRef    = size(D.zscore, 1);
-            useOn   = D.zscore(1:nRef, 1) >  zthresh;
-            useOff  = D.zscore(1:nRef, 2) < -zthresh;
-            rfxs    = [D.rfx(useOn,1);  D.rfx(useOff,2)];
-            rfys    = [D.rfy(useOn,1);  D.rfy(useOff,2)];
-            x0      = median(rfxs, 'omitnan');
-            y0      = median(rfys, 'omitnan');
+        if hasRF && hasGrn
+            gImg   = D.meanGreenImg(:,:,1);
+            gRange = prctile(gImg(:), [1 99]);
+            if gRange(2) <= gRange(1); gRange(2) = gRange(1) + 0.01; end
+            imagesc(ax, gImg, gRange);
+            colormap(ax, 'gray');
             hold(ax, 'on');
-            if tp == 1
-                if any(useOn)
-                    plot(ax, D.xpts(useOn),  D.rfx(useOn,1)  - x0, 'r.', 'MarkerSize', 4);
-                end
-                if any(useOff)
-                    plot(ax, D.xpts(useOff), D.rfx(useOff,2) - x0, 'b.', 'MarkerSize', 4);
-                end
-            else
-                if any(useOn)
-                    plot(ax, D.ypts(useOn),  D.rfy(useOn,1)  - y0, 'r.', 'MarkerSize', 4);
-                end
-                if any(useOff)
-                    plot(ax, D.ypts(useOff), D.rfy(useOff,2) - y0, 'b.', 'MarkerSize', 4);
+            if ~isempty(cells)
+                if isX; rfVals = D.rfx(cells, rep) - x0;
+                else;   rfVals = D.rfy(cells, rep) - y0; end
+                cmap64 = jet(64);
+                rfMin  = -25; rfMax = 25;
+                for ci = 1:length(cells)
+                    cv   = max(0, min(1, (rfVals(ci) - rfMin) / (rfMax - rfMin)));
+                    cidx = max(1, min(64, round(cv * 63) + 1));
+                    plot(ax, D.xpts(cells(ci)), D.ypts(cells(ci)), 'o', ...
+                         'Color', cmap64(cidx,:), 'MarkerSize', 4, 'LineWidth', 0.5);
                 end
             end
-            ylim(ax, [-30 30]);
-            legend(ax, {'ON','OFF'}, 'FontSize', 7, 'Location', 'best');
-            set(ax, 'Box', 'on', 'FontSize', 7, 'XColor', 'k', 'YColor', 'k');
-            title(ax, topoTitles{tp},   'FontSize', 8, 'Color', 'k', 'Interpreter', 'none');
-            xlabel(ax, topoXlabels{tp}, 'FontSize', 7, 'Color', 'k');
-            ylabel(ax, topoYlabels{tp}, 'FontSize', 7, 'Color', 'k');
+            axis(ax, 'equal'); axis(ax, 'off');
+        elseif hasRF
+            hold(ax, 'on');
+            if ~isempty(cells)
+                if isX; rfVals = D.rfx(cells, rep) - x0;
+                else;   rfVals = D.rfy(cells, rep) - y0; end
+                scatter(ax, D.xpts(cells), D.ypts(cells), 10, rfVals, 'filled');
+                colormap(ax, 'jet'); caxis(ax, [-25 25]);
+            end
+            set(ax, 'YDir', 'reverse'); axis(ax, 'equal'); axis(ax, 'off');
         else
-            set(ax, 'Color', [0.85 0.85 0.85]);
-            text(0.5, 0.5, 'Topo data not available', 'Units', 'normalized', ...
-                 'HorizontalAlignment', 'center', 'FontSize', 8, 'Parent', ax, 'Color', 'k');
-            axis(ax, 'off');
+            placeholderAxes(ax, rfTitles{ri});
         end
+        title(ax, rfTitles{ri}, 'FontSize', 7, 'Color', 'k', 'Interpreter', 'none');
     end
+
+    % =====================================================================
+    % COL 3: GIF placeholder (full column height)
+    % =====================================================================
+    axGif = axes('Position', [col3_left, bottom, colW, top - bottom], 'Parent', fig); %#ok<LAXES>
+    showGifFrame(axGif, gifFile, aviFile);
+    title(axGif, 'Activity (GIF)', 'FontSize', 8, 'Color', 'k', 'Interpreter', 'none');
 end

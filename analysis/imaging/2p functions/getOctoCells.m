@@ -145,18 +145,21 @@ elseif selectPts ==2 | selectPts==3
     title('masks coded by iscell'); colormap jet; colorbar
     
     goodcells = find(iscell(:,1) & mean(F,2)>0.5 *median(meanF));
-      goodcells = find(iscell(:,2)>0.2 & mean(F,2)>0.5 *median(meanF));
+      goodcells = find(iscell(:,2)>0.2 & mean(F,2)>0.5 *median(meanF)); %%% key point - selects cells that meet likelihood and at least 50% of mean intensity
   
     figure
     plot(iscell(:,2),mean(F,2),'.')
     hold on; plot([0 1],[ 0.5 *median(meanF) 0.5 *median(meanF)])
-    
+    xlabel('iscell'); ylabel('mean F')
+
     figure
     plot(iscell(:,2),std(diff(F,[],2),[],2)./mean(F,2),'.')
-    
+    xlabel('iscell'); ylabel('std F')
+
     figure
     plot(iscell(:,2),std(F,[],2)./mean(F,2),'.')
-    
+    xlabel('iscell'); ylabel('std F / mean F')
+
     % hold on; plot([0 1],[ 0.5 *median(meanF) 0.5 *median(meanF)])
     
     ncells = length(goodcells);
@@ -226,6 +229,7 @@ elseif selectPts ==2 | selectPts==3
     for i = 1:np;
         plot(range*dtr,2*dF(ceil(rand*ncells),range)+i);
     end
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end  
 
 
 
@@ -235,6 +239,7 @@ elseif selectPts ==2 | selectPts==3
     range = 1:min(3000,length(dF));
     dtr= 0.1;
     np=64;
+    np = min(np,size(dFmed,1));
 %     for i = 1:np;
 %         plot(range*dtr,2*dFmed(ceil(rand*ncells),range)+i);
 %     end;

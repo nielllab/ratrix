@@ -504,24 +504,25 @@ else
     nclust =input('# of clusters : ');
 end
 
-%%% select clusters
+
 done = 0;ncAll = nclust;
-while ~done
+while ~done    %%% this section deals with tiny clusters, lumping them together. also splits up large clusters by reclustering with greater max clust
   c = cluster(Z,'maxclust',ncAll);
-   clear nc
+
+    clear nc
    for i = 1:ncAll;
-      nc(i) = sum(c==i);
+      nc(i) = sum(c==i);  %% calculate # of cells in each cluster
    end
-  nc
+  nc;
   newc = c;
-  if sum(nc>5)>=nclust | ncAll>20
+  if sum(nc>=5)>=nclust | ncAll>=length(c)  %% go until you have at least nclust with 5 points, or stop when you've divided into # of clusters = # of cells
       done=1;
       goodclust=find(nc>5);
-      for i = 1:length(goodclust)
+      for i = 1:length(goodclust)   %keep clusters with n>=5
           newc(c==goodclust(i))=i;
       end
       badclust = find(nc<=5);
-      if ~isempty(badclust)         
+      if ~isempty(badclust)             %lump all bad clusters together      
           for i = 1:length(badclust)
               newc(c==badclust(i))=nclust+1;
           end
@@ -529,10 +530,14 @@ while ~done
       end
       c = newc; 
   else
-      ncAll=ncAll+1
+      ncAll=ncAll+1;
   end
 end
 
+figure
+hist(c,1:nclust)
+xlabel('cluster'); ylabel('# of units')
+if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end  
 
 %c = cluster(Z,'maxclust',nclust);
 colors = hsv(nclust+1); %%% color code for each cluster

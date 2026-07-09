@@ -32,13 +32,10 @@ function octoExptSummary(exptDir, outFile, Opt)
 %   GIF files auto-generated alongside each AVI (if not already present)
 %
 % DEPENDENCIES:
-%   Analysis .mat files produced by sbxOctoNeural_DR_commented_v6.m and/or
-%   sbxOctoSTA_DR_v2.m (must contain nstim, StimulusStr, StimulusNum,
-%   weightTcourse, trialmean, stimOrder, stdImg, c, xpts, ypts,
-%   cycPolarImg, xpolarImg, ypolarImg, lagStas, zscore,
-%   rfx, rfy, meanGreenImg as applicable).
-%   No Image Processing Toolbox required (imresize replaced with interp2).
-%   GIF files auto-generated from AVI files and shown in col 3 of each page.
+%   Analysis .mat files produced by sbxOctoNeural_DR_commented_v5.m and/or
+%   sbxOctoSTA_commented_v1.m (must contain nstim, StimulusStr, StimulusNum,
+%   weightTcourse, trialmean, c, xpts, ypts, meanGreenImg, dFrepeats, stas,
+%   tuning, rfx, rfy as applicable).
 
 %% =========================================================================
 %% SECTION 1: SETUP  -  DIRECTORIES AND OUTPUT FILE
@@ -85,65 +82,118 @@ display(['Generating experiment summary: ' exptName]);
 %
 % Stimulus records : filename matches /Acq\d+\.mat$/ (e.g. 021621_Acq2.mat)
 % Analysis outputs : filename matches /Acq\d+.+\.mat$/ (longer, same Acq#)
-% Raw imaging      : *.sbx; trailing digits give acquisition number
+% Raw imaging      : *.sbx
+% Sbx sidecars     : *_000_NNN.mat (same base name as .sbx, contain only 'info')
+% Analysis outputs : any other .mat containing StimulusStr/stimOrder/nstim
 % AVI movies       : same base name as .sbx
 
-allMats  = dir(fullfile(exptDir, '*Acq*.mat'));
 sbxFiles = dir(fullfile(exptDir, '*.sbx'));
 if isempty(sbxFiles)
     error('No .sbx files found in: %s', exptDir);
 end
 
-% ---- Identify stimulus records (end exactly with Acq{N}.mat) ----
-isStimRec = ~cellfun(@isempty, regexp({allMats.name}, 'Acq\d+\.mat$'));
-stimRecs  = allMats(isStimRec);
-analysisMats = allMats(~isStimRec);   % longer names = analysis outputs
-
-% Build a map: acqNum -> stimulus record filename
-stimMap = containers.Map('KeyType','int32','ValueType','char');
-for i = 1:length(stimRecs)
-    tok = regexp(stimRecs(i).name, 'Acq(\d+)\.mat$', 'tokens');
-    if ~isempty(tok)
-        stimMap(int32(str2double(tok{1}{1}))) = fullfile(exptDir, stimRecs(i).name);
-    end
-end
-
-% Build a map: acqNum -> analysis output filename (most recent if >1)
-analysisMap = containers.Map('KeyType','int32','ValueType','char');
-for i = 1:length(analysisMats)
-    tok = regexp(analysisMats(i).name, 'Acq(\d+)', 'tokens');
-    if ~isempty(tok)
-        n = int32(str2double(tok{1}{1}));
-        if ~isKey(analysisMap, n) || analysisMats(i).datenum > ...
-                dir(analysisMap(n)).datenum
-            analysisMap(n) = fullfile(exptDir, analysisMats(i).name);
-        end
-    end
-end
-
-% Collect all unique acquisition numbers (from sbx files + stimulus records)
+% ---- Build sbxMap: acqNum -> sbx path ----
+% SBX files named like: ExptName_000_NNN.sbx  (NNN = acq number, zero-padded)
+% or: ExptName_acqN.sbx  (fallback pattern)
 sbxNums = zeros(1, length(sbxFiles));
 sbxMap  = containers.Map('KeyType','int32','ValueType','char');
 for i = 1:length(sbxFiles)
-    tok = regexp(sbxFiles(i).name, '(\d+)\.sbx$', 'tokens');
+    % Try _000_NNN or _NNN pattern (last underscore-separated number block)
+    tok = regexp(sbxFiles(i).name, '_0*?(\d+)\.sbx$', 'tokens');
+    if isempty(tok)
+        tok = regexp(sbxFiles(i).name, 'acq(\d+)', 'tokens', 'ignorecase');
+    end
     if ~isempty(tok)
         n = int32(str2double(tok{1}{1}));
         sbxNums(i) = n;
         sbxMap(n)  = fullfile(exptDir, sbxFiles(i).name);
     end
 end
-if stimMap.Count > 0
-    stimKeys = double(cell2mat(stimMap.keys));
-else
-    stimKeys = [];
+
+% ---- Build stimRecMap and analysisMap from all .mat files ----
+% Three types of mat files in directory:
+%   Stimulus records : ExptName_Acq{N}.mat  -- StimulusStr/StimulusNum, no nstim
+%   Sbx sidecars    : ExptName_000_{NNN}.mat -- 'info' struct only, skip these
+%   Analysis outputs : longer names with 'acq' -- nstim/stimOrder/weightTcourse etc.
+allMats     = dir(fullfile(exptDir, '*.mat'));
+stimRecMap  = containers.Map('KeyType','int32','ValueType','char');
+analysisMap = containers.Map('KeyType','int32','ValueType','char');
+stimMap     = stimRecMap;   % alias kept for any legacy references
+
+for i = 1:length(allMats)
+    fname = allMats(i).name;
+    fpath = fullfile(exptDir, fname);
+
+    % Skip sbx sidecar files: _000_NNN.mat pattern (two underscore-digit groups at end)
+    if ~isempty(regexp(fname, '_\d+_\d+\.mat$', 'once'))
+        continue;
+    end
+
+    % Stimulus record: ends exactly with Acq{N}.mat (case-insensitive)
+    tok = regexp(fname, 'Acq(\d+)\.mat$', 'tokens', 'ignorecase');
+    if ~isempty(tok)
+        n = int32(str2double(tok{1}{1}));
+        stimRecMap(n) = fpath;
+        continue;
+    end
+
+    % Analysis output: new naming convention is *_acq{N}_*_analysis.mat
+    % Also accept older files that contain 'acq{N}' and pass a StimulusStr check.
+    isNewStyle = ~isempty(regexp(fname, '_acq\d+_.*_analysis\.mat$', 'once', 'ignorecase'));
+    tok = regexp(fname, 'acq(\d+)', 'tokens', 'ignorecase');
+    if isempty(tok)
+        continue;
+    end
+    n = int32(str2double(tok{1}{1}));
+
+    if ~isNewStyle
+        % Old-style: confirm it's an analysis file by checking for StimulusStr.
+        % Check last 2MB (HDF5 heap) and first 512KB.
+        try
+            fInfo  = dir(fpath);
+            fsize  = fInfo.bytes;
+            fid    = fopen(fpath, 'rb');
+            probe  = fread(fid, 512*1024, '*uint8');
+            hasStr = ~isempty(strfind(char(probe'), 'StimulusStr'));  %#ok<STREMP>
+            if ~hasStr && fsize > 512*1024
+                tailBytes = min(2*1024*1024, fsize - 512*1024);
+                fseek(fid, -tailBytes, 'eof');
+                tail   = fread(fid, tailBytes, '*uint8');
+                hasStr = ~isempty(strfind(char(tail'), 'StimulusStr'));  %#ok<STREMP>
+            end
+            fclose(fid);
+            if ~hasStr; continue; end
+        catch
+            continue;
+        end
+    end
+
+    if ~isKey(analysisMap, n) || allMats(i).datenum > dir(analysisMap(n)).datenum
+        analysisMap(n) = fpath;
+    end
 end
-allNums = unique([double(sbxNums) stimKeys]);
+
+if analysisMap.Count > 0
+    analysisKeys = double(cell2mat(analysisMap.keys));
+else
+    analysisKeys = [];
+end
+if stimRecMap.Count > 0
+    stimRecKeys = double(cell2mat(stimRecMap.keys));
+else
+    stimRecKeys = [];
+end
+allNums = unique([double(sbxNums(sbxNums > 0)) analysisKeys stimRecKeys]);
 
 % Build a map: acqNum -> AVI file (searches directory independently of .sbx names)
 aviFiles = dir(fullfile(exptDir, '*.avi'));
 aviMap   = containers.Map('KeyType','int32','ValueType','char');
 for i = 1:length(aviFiles)
-    tok = regexp(aviFiles(i).name, '(\d+)\.avi$', 'tokens');
+    % Prefer acq{N} pattern; fall back to last number before extension
+    tok = regexp(aviFiles(i).name, 'acq(\d+)', 'tokens', 'ignorecase');
+    if isempty(tok)
+        tok = regexp(aviFiles(i).name, '(\d+)\.avi$', 'tokens');
+    end
     if ~isempty(tok)
         n = int32(str2double(tok{1}{1}));
         % Keep most recently modified if multiple match same number
@@ -186,42 +236,53 @@ for i = 1:length(allNums)
         acqs(idx).aviFile = '';
     end
 
-    % Stimulus record
-    if isKey(stimMap, n)
-        acqs(idx).stimFile = stimMap(n);
+    % Load StimulusStr/StimulusNum from stimulus record (ground truth).
+    % Load nstim/stimOrder from analysis file.
+    % Both may be absent if acquisition was spontaneous or not yet analysed.
+    acqs(idx).stimFile     = '';
+    acqs(idx).analysisFile = '';
+    acqs(idx).StimulusStr  = 'spontaneous';
+    acqs(idx).StimulusNum  = 0;
+    acqs(idx).nstim        = NaN;
+
+    % Stimulus record -> StimulusStr, StimulusNum
+    if isKey(stimRecMap, n)
+        acqs(idx).stimFile = stimRecMap(n);
         try
-            tmp = load(acqs(idx).stimFile, 'StimulusStr', 'StimulusNum');
-            ss = tmp.StimulusStr;
-            if iscell(ss); ss = ss{1}; end
-            acqs(idx).StimulusStr  = char(ss);
-            acqs(idx).StimulusNum  = double(tmp.StimulusNum);
-        catch
-            acqs(idx).StimulusStr  = 'unknown';
-            acqs(idx).StimulusNum  = -1;
-        end
-    else
-        acqs(idx).stimFile    = '';
-        acqs(idx).StimulusStr = 'spontaneous';
-        acqs(idx).StimulusNum = 0;
+            tmp = load(stimRecMap(n), 'StimulusStr', 'StimulusNum');
+            if isfield(tmp, 'StimulusStr')
+                ss = tmp.StimulusStr;
+                if iscell(ss); ss = ss{1}; end
+                acqs(idx).StimulusStr = char(ss);
+            end
+            if isfield(tmp, 'StimulusNum')
+                acqs(idx).StimulusNum = double(tmp.StimulusNum);
+            end
+        catch; end
     end
 
-    % Analysis output + nstim
-    acqs(idx).analysisFile = '';
-    acqs(idx).nstim        = NaN;
+    % Analysis file -> nstim (and StimulusStr fallback if no stimulus record)
     if isKey(analysisMap, n)
         acqs(idx).analysisFile = analysisMap(n);
-        % Try loading nstim; fall back to deriving from stimOrder
+        warnTmp = warning('off', 'MATLAB:load:variableNotFound');
         try
-            tmp2 = load(acqs(idx).analysisFile, 'nstim');
-            acqs(idx).nstim = double(tmp2.nstim);
-        catch
-            try
-                tmp3 = load(acqs(idx).analysisFile, 'stimOrder');
-                acqs(idx).nstim = double(max(tmp3.stimOrder));
-            catch
-                % Leave as NaN  -  will fall through to 'unknown' page type
+            tmp = load(analysisMap(n), 'StimulusStr', 'StimulusNum', 'nstim', 'stimOrder');
+            % Only use StimulusStr from analysis file if stimulus record absent
+            if ~isKey(stimRecMap, n) && isfield(tmp, 'StimulusStr')
+                ss = tmp.StimulusStr;
+                if iscell(ss); ss = ss{1}; end
+                acqs(idx).StimulusStr = char(ss);
             end
-        end
+            if ~isKey(stimRecMap, n) && isfield(tmp, 'StimulusNum')
+                acqs(idx).StimulusNum = double(tmp.StimulusNum);
+            end
+            if isfield(tmp, 'nstim')
+                acqs(idx).nstim = double(tmp.nstim);
+            elseif isfield(tmp, 'stimOrder') && ~isempty(tmp.stimOrder)
+                acqs(idx).nstim = double(max(tmp.stimOrder(:)));
+            end
+        catch; end
+        warning(warnTmp);
     end
 end
 
@@ -340,27 +401,39 @@ for i = 1:length(acqs)
     % Classify stimulus type
     isSpontaneous = isempty(acq.stimFile) || contains(stimStr, 'spontaneous');
 
-    % Detect sparse noise (STA script output) by variable content, not StimulusStr.
-    % STA outputs contain 'stas' and 'rfx'; the neural script never produces these.
-    % Fall back to StimulusStr keyword check if no analysis file is present.
-    isSparseNoise = false;
-    if ~isempty(acq.analysisFile) && exist(acq.analysisFile, 'file')
+    % Detect sparse noise (STA script output) by file content.
+    % STA outputs contain 'lagStas' and 'rfx'; the neural script never saves these.
+    % whos('-file') silently returns empty for v7.3 HDF5 files, so we use a raw
+    % byte search instead -- fast and reliable regardless of mat format version.
+    % Detect sparse noise.
+    % New-style files: *_sparsenoise_analysis.mat -- unambiguous from filename alone.
+    % Old-style files: byte-search for 'lagStas', or keyword match on filename/StimulusStr.
+    [~, afName] = fileparts(acq.analysisFile);
+    isNewStyleSparse = ~isempty(regexp(afName, '_sparsenoise_analysis$', 'once', 'ignorecase'));
+    isSparseNoise = isNewStyleSparse;
+    if ~isSparseNoise && ~isempty(acq.analysisFile) && exist(acq.analysisFile, 'file')
         try
-            fileVars = {whos('-file', acq.analysisFile).name};
-            if any(strcmp(fileVars, 'stas')) || any(strcmp(fileVars, 'rfx'))
-                isSparseNoise = true;
-            end
+            fid = fopen(acq.analysisFile, 'rb');
+            rawBytes = fread(fid, 2*1024*1024, '*uint8');
+            fclose(fid);
+            isSparseNoise = ~isempty(strfind(char(rawBytes'), 'lagStas'));  %#ok<STREMP>
         catch
-            % whos failed  -  fall back to name check
-            isSparseNoise = contains(stimStr, 'sparse') || contains(stimStr, 'noise');
         end
     end
     if ~isSparseNoise
-        isSparseNoise = contains(stimStr, 'sparse') || contains(stimStr, 'noise');
+        isSparseNoise = contains(stimStr,  'sparse', 'IgnoreCase', true) || ...
+                        contains(stimStr,  'noise',  'IgnoreCase', true) || ...
+                        contains(afName,   'sparse', 'IgnoreCase', true) || ...
+                        contains(afName,   'noise',  'IgnoreCase', true);
     end
 
-    is6x4  = ~isempty(acq.analysisFile) && ~isSparseNoise && ismember(acq.nstim, [48 50]);
-    is8way = ~isempty(acq.analysisFile) && ~isSparseNoise && acq.nstim == 17;
+    % New-style filenames make type detection unambiguous even if nstim load failed
+    isNewStyle6x4  = ~isempty(regexp(afName, '_6x4_analysis$',  'once', 'ignorecase'));
+    isNewStyle8way = ~isempty(regexp(afName, '_8way_analysis$', 'once', 'ignorecase'));
+    is6x4  = ~isempty(acq.analysisFile) && ~isSparseNoise && ...
+              (isNewStyle6x4  || ismember(acq.nstim, [48 50]));
+    is8way = ~isempty(acq.analysisFile) && ~isSparseNoise && ...
+              (isNewStyle8way || acq.nstim == 17);
     % Aborted: has stimulus record but no analysis file
     isAborted = ~isSpontaneous && ~isSparseNoise && ~is6x4 && ~is8way && ...
                 ~isempty(acq.stimFile) && isempty(acq.analysisFile);
@@ -384,6 +457,22 @@ for i = 1:length(acqs)
         stimTypeLabel = sprintf('%s  (nstim = %g)', acq.StimulusStr, acq.nstim);
     end
 
+    % ---- Derive GIF path from AVI; auto-generate if needed ----
+    aviFile = acq.aviFile;
+    if ~isempty(aviFile) && exist(aviFile, 'file')
+        [aviDir, aviBase] = fileparts(aviFile);
+        gifFile = fullfile(aviDir, [aviBase '.gif']);
+        if ~exist(gifFile, 'file')
+            try
+                generateGif(aviFile, gifFile);
+            catch
+                gifFile = '';
+            end
+        end
+    else
+        gifFile = '';
+    end
+
     % ---- Create figure (landscape, A3-ish for density) ----
     fig = figure('Units', 'inches', 'Position', [0 0 17 11], ...
                  'Color', 'w', 'PaperOrientation', 'landscape', ...
@@ -394,26 +483,15 @@ for i = 1:length(acqs)
     mX = 1 / (2.54 * 17);   % 0.02315  horizontal
     mY = 1 / (2.54 * 11);   % 0.03584  vertical
 
-    % Title bar: 1cm margin on all sides, sits at top of page
-    titleH = 0.05;
+    % Title bar: compact strip at top of page
+    titleH = 0.032;
     titleY = 1 - mY - titleH;
     annotation(fig, 'textbox', [mX, titleY, 1 - 2*mX, titleH], ...
                'String', sprintf('Acq %d  -  %s  |  %s', acq.acqNum, stimTypeLabel, exptName), ...
-               'FontSize', 14, 'FontWeight', 'bold', ...
+               'FontSize', 11, 'FontWeight', 'bold', ...
                'EdgeColor', 'none', 'HorizontalAlignment', 'center', ...
                'Interpreter', 'none', 'VerticalAlignment', 'middle', ...
                'Color', 'k');
-
-    % ---- Derive GIF path and auto-generate if needed ----
-    if ~isempty(acq.aviFile) && exist(acq.aviFile, 'file')
-        [aviDir, aviBase] = fileparts(acq.aviFile);
-        gifFile = fullfile(aviDir, [aviBase '.gif']);
-        if ~exist(gifFile, 'file')
-            try; generateGif(acq.aviFile, gifFile); catch; gifFile = ''; end
-        end
-    else
-        gifFile = '';
-    end
 
     % ---- Stimulus-specific panels (full page below title bar) ----
     if isSpontaneous
@@ -432,13 +510,13 @@ for i = 1:length(acqs)
                    'BackgroundColor', [1.0 0.97 0.87], 'Interpreter', 'none', 'Color', 'k');
 
     elseif is6x4
-        panelSpotsPage(acq.analysisFile, fig, acq.nstim, acq.aviFile, gifFile);
+        panelSpotsPage(acq.analysisFile, fig, acq.nstim, gifFile, aviFile);
 
     elseif is8way
-        panelGratingsPage(acq.analysisFile, fig, acq.nstim, acq.aviFile, gifFile);
+        panelGratingsPage(acq.analysisFile, fig, acq.nstim, gifFile, aviFile);
 
     elseif isSparseNoise
-        panelSTAPage(acq.analysisFile, fig, acq.aviFile, gifFile);
+        panelSTAPage(acq.analysisFile, fig, gifFile, aviFile);
 
     elseif isUnknownNstim
         annotation(fig, 'textbox', [mX 0.40 1-2*mX 0.18], ...
@@ -622,11 +700,9 @@ end
 %%
 %%   Col 1 (x=0.010-0.333): OFF pixel maps (4x6) + OFF weighted timecourses (4x6)
 %%   Col 2 (x=0.343-0.666): ON  pixel maps (4x6) + ON  weighted timecourses (4x6)
-%%   Col 3 (x=0.676-0.990): GIF placeholder (top 18%) +
-%%                          Retinotopy Summary OFF 2x2 grid (38%) +
-%%                          Retinotopy Summary ON  2x2 grid (38%)
-%%                          (~6% used by gaps between blocks)
-%%                          Each 2x2: anatomy | overlay // X map | Y map
+%%   Col 3 (x=0.676-0.990): Retinotopy 2x2 subpanel grid
+%%                              top-left:  Retino X OFF  | top-right:  Retino Y OFF
+%%                              bot-left:  Retino X ON   | bot-right:  Retino Y ON
 %%
 %% Within each data column (bottom to top):
 %%   TC grid   : 4 rows x panH_tc each
@@ -635,22 +711,21 @@ end
 %%   Pix label : labelH strip at top
 %%
 %% Key variable shapes (from sbxOctoNeural_DR_commented_v5.m):
-%%   trialmean      : [nY x nX x nPresentations]   -  smoothed pixel response per trial
-%%   stimOrder      : [1 x nPresentations]          -  condition index (1:nstim) per trial
-%%   weightTcourse  : [tcRange x nPresentations]    -  anatomy-weighted timecourse per trial
-%%   xpolarImg      : cell{1=OFF, 2=ON}             -  HSV X (azimuth) retinotopy map
-%%   ypolarImg      : cell{1=OFF, 2=ON}             -  HSV Y (elevation) retinotopy map
-%%   topoOverlayImg : cell{1=OFF, 2=ON}             -  retinotopy overlay on anatomy (RGB)
-%%   meanGreenImg   : [nY x nX x nCh]              -  mean green anatomy image (uint8 RGB)
+%%   trialmean    : [nY x nX x nPresentations]   -  smoothed pixel response per trial
+%%   stimOrder    : [1 x nPresentations]          -  condition index (1:nstim) per trial
+%%   weightTcourse: [tcRange x nPresentations]    -  anatomy-weighted timecourse per trial
+%%   xpolarImg    : cell{1=OFF, 2=ON}             -  HSV azimuth retinotopy map
+%%   ypolarImg    : cell{1=OFF, 2=ON}             -  HSV elevation retinotopy map
 %%
 %% loc maps condition index (1:nHalf) to 4x6 subplot position to preserve
 %% the spatial arrangement of the spot grid on screen (matches pixPlot_DR /
 %% pixPlotWeight_DR used in the full analysis PDF).
 %% =========================================================================
-function panelSpotsPage(analysisFile, fig, nstim, aviFile, gifFile)
+function panelSpotsPage(analysisFile, fig, nstim, gifFile, aviFile)
     try
         D = load(analysisFile, 'weightTcourse', 'trialmean', 'stdImg', ...
-                 'stimOrder', 'xpolarImg', 'ypolarImg', 'topoOverlayImg', 'meanGreenImg');
+                 'stimOrder', 'xpolarImg', 'ypolarImg', ...
+                 'topoOverlayImg', 'meanGreenImg');
     catch ME
         annotation(fig, 'textbox', [0.02 0.05 0.96 0.85], ...
                    'String', ['Could not load analysis data: ' ME.message], ...
@@ -687,7 +762,7 @@ function panelSpotsPage(analysisFile, fig, nstim, aviFile, gifFile)
     % ---- Layout constants ----
     mX      = 1 / (2.54 * 17);    % 1 cm horizontal margin
     mY      = 1 / (2.54 * 11);    % 1 cm vertical margin
-    titleH  = 0.05;
+    titleH  = 0.032;
     titleY  = 1 - mY - titleH;    % bottom of title bar
 
     top     = titleY - mY;         % top of content area (1 cm below title)
@@ -715,9 +790,6 @@ function panelSpotsPage(analysisFile, fig, nstim, aviFile, gifFile)
     yPixGrid  = yPixLabel - nrow * panH;
     yTCLabel  = yPixGrid - labelH;
     yTCGrid   = yTCLabel - nrow * panH;   % bottom of TC grid
-
-    % ---- Retino column geometry (used for side-by-side X/Y images in col 3) ----
-    ret_hgap  = mX / 4;             % narrow horizontal gap between X and Y subpanels
 
     % =====================================================================
     % COLS 1 and 2: Weighted pixel maps + weighted timecourses (OFF and ON)
@@ -766,12 +838,7 @@ function panelSpotsPage(analysisFile, fig, nstim, aviFile, gifFile)
                 rgbImg = reshape(jmap(idx(:), :), [size(meanimg,1) size(meanimg,2) 3]);
                 ngRes  = normgreen;
                 if ~isequal(size(ngRes,1), size(rgbImg,1)) || ~isequal(size(ngRes,2), size(rgbImg,2))
-                    [xi,yi] = meshgrid(linspace(1,size(ngRes,2),size(rgbImg,2)), ...
-                                       linspace(1,size(ngRes,1),size(rgbImg,1)));
-                    [xi0,yi0] = meshgrid(1:size(ngRes,2), 1:size(ngRes,1));
-                    ngRes = cat(3, interp2(xi0,yi0,ngRes(:,:,1),xi,yi,'linear',0), ...
-                                   interp2(xi0,yi0,ngRes(:,:,2),xi,yi,'linear',0), ...
-                                   interp2(xi0,yi0,ngRes(:,:,3),xi,yi,'linear',0));
+                    ngRes = imresize(ngRes, [size(rgbImg,1) size(rgbImg,2)]);
                 end
                 image(ax, rgbImg .* ngRes);
             else
@@ -812,97 +879,131 @@ function panelSpotsPage(analysisFile, fig, nstim, aviFile, gifFile)
     end
 
     % =====================================================================
-    % COL 3: GIF placeholder (top) + Retinotopy Summary OFF + ON (below)
-    %
-    % Each Retinotopy Summary is a 2x2 grid matching the sbxOctoNeural figure:
-    %   top-left:  meanGreenImg          ("Mean Green Anatomy")
-    %   top-right: topoOverlayImg{rep}   ("Retinotopy Overlay")
-    %   bot-left:  xpolarImg{rep}        ("X (Azimuth) Map")
-    %   bot-right: ypolarImg{rep}        ("Y (Elevation) Map")
-    % rep=1 = OFF, rep=2 = ON  (matching sbxOctoNeural repLabels order)
+    % COL 3: GIF (top 20%) + Retinotopy Summary OFF (middle) + ON (bottom)
+    % Each retino panel is a 2x2 grid matching the neural script figures:
+    %   {meanGreenImg, topoOverlayImg, xpolarImg, ypolarImg}
+    % Sub-image labels: 'Mean Green', 'Retino Overlay', 'X Map', 'Y Map'
     % =====================================================================
-    hasRetino = isfield(D, 'xpolarImg')      && iscell(D.xpolarImg)      && length(D.xpolarImg)      >= 2 && ...
-                isfield(D, 'ypolarImg')      && iscell(D.ypolarImg)      && length(D.ypolarImg)      >= 2 && ...
-                isfield(D, 'topoOverlayImg') && iscell(D.topoOverlayImg) && length(D.topoOverlayImg) >= 2 && ...
-                isfield(D, 'meanGreenImg')   && ~isempty(D.meanGreenImg);
+    hasRetino = isfield(D, 'topoOverlayImg') && iscell(D.topoOverlayImg) && ...
+                isfield(D, 'xpolarImg')      && iscell(D.xpolarImg) && ...
+                isfield(D, 'ypolarImg')      && iscell(D.ypolarImg) && ...
+                isfield(D, 'meanGreenImg')   && ...
+                length(D.topoOverlayImg) >= 2;
 
-    contentH  = top - bottom;
-    gifH      = contentH * 0.18;   % GIF placeholder: 18% of column height
-    retinoH   = contentH * 0.38;   % each Retinotopy Summary block: 38% (2x mY gaps fill remaining ~6%)
-    retLabelH = 0.022;
+    % Total col3 height from top of content to bottom margin
+    col3_h    = yPixLabel - bottom;
 
-    % GIF placeholder (top of col 3)
-    gifTop = top;
-    gifBot = gifTop - gifH;
-    axGif = axes('Position', [col3_left, gifBot, colW, gifH], 'Parent', fig); %#ok<LAXES>
+    % GIF panel: top 20% of col3 height
+    gifFrac   = 0.20;
+    gifH      = col3_h * gifFrac;
+    gifY      = yPixLabel - gifH;        % bottom of GIF axes
+
+    annotation(fig, 'textbox', [col3_left yPixLabel colW labelH], ...
+               'String', 'Activity', 'FontSize', 8, 'FontWeight', 'bold', ...
+               'EdgeColor', 'none', 'HorizontalAlignment', 'center', ...
+               'Interpreter', 'none', 'VerticalAlignment', 'middle', 'Color', 'k');
+    axGif = axes('Position', [col3_left gifY colW gifH], 'Parent', fig); %#ok<LAXES>
     showGifFrame(axGif, gifFile, aviFile);
-    title(axGif, 'Activity (GIF)', 'FontSize', 8, 'Color', 'k', 'Interpreter', 'none');
 
-    % Two Retinotopy Summary blocks: rep=1 (OFF) then rep=2 (ON)
-    retinoLabels = {'Retinotopy Summary  -  OFF', 'Retinotopy Summary  -  ON'};
-    retinoTops   = [gifBot - mY,  gifBot - mY - retinoH - mY];
+    % Remaining height split equally between OFF and ON summary panels
+    remainH    = gifY - bottom;          % height available below GIF
+    panelGap   = labelH;                 % gap between OFF and ON blocks
+    blockH     = (remainH - panelGap) / 2;  % height per retino block (label + 2x2 grid)
+    ret_hgap   = mX / 4;                % horizontal gap between the two sub-images
+    subLblH    = labelH * 0.75;         % label strip above each sub-image
+    imgRowGap  = 0.004;                 % vertical gap between the two image rows
+    gridH      = blockH - labelH - subLblH - imgRowGap;  % total height for 2 image rows
+    imgH       = gridH / 2;             % height per image row
+    imgW       = (colW - ret_hgap) / 2; % width per image
 
-    subTitles = {{'Mean Green Anatomy', 'Retinotopy Overlay'}, ...
-                 {'X (Azimuth) Map',    'Y (Elevation) Map'}};
+    % Block y positions (OFF on top, ON below)
+    offBlockTop = gifY - labelH;         % bottom of OFF header label
+    onBlockTop  = offBlockTop - blockH - panelGap;  % bottom of ON header label
 
-    for rep = 1:2
-        blkTop = retinoTops(rep);
-        blkBot = blkTop - retinoH;
-        imgH   = retinoH - retLabelH - 0.004;
-        imgW   = (colW - ret_hgap) / 2;   % left and right panels equal width
+    retinoSubLabels = {'Mean Green', 'Retino Overlay', 'X Map', 'Y Map'};
+    repLabels       = {'OFF', 'ON'};
+    blockTops       = [offBlockTop, onBlockTop];
 
-        annotation(fig, 'textbox', [col3_left, blkTop - retLabelH, colW, retLabelH], ...
-                   'String', retinoLabels{rep}, 'FontSize', 8, 'FontWeight', 'bold', ...
-                   'EdgeColor', 'none', 'HorizontalAlignment', 'center', ...
-                   'Interpreter', 'none', 'VerticalAlignment', 'middle', 'Color', 'k');
+    if hasRetino
+        retinoSets = { ...
+            {D.meanGreenImg, D.topoOverlayImg{1}, D.xpolarImg{1}, D.ypolarImg{1}}, ...
+            {D.meanGreenImg, D.topoOverlayImg{2}, D.xpolarImg{2}, D.ypolarImg{2}} };
+    end
 
-        if hasRetino
-            % 2x2 grid: top row (anatomy | overlay), bottom row (X map | Y map)
-            rowH   = imgH / 2;
-            panelImgs = {D.meanGreenImg,        D.topoOverlayImg{rep}; ...
-                         D.xpolarImg{rep},       D.ypolarImg{rep}};
-            panelTitles = {subTitles{1}{1}, subTitles{1}{2}; ...
-                           subTitles{2}{1}, subTitles{2}{2}};
-            for pr = 1:2
-                for pc = 1:2
-                    xPos = col3_left + (pc - 1) * (imgW + ret_hgap);
-                    yPos = blkTop - retLabelH - pr * rowH;
-                    ax = axes('Position', [xPos+0.001, yPos+0.001, imgW*0.98, rowH*0.96], ...
-                              'Parent', fig); %#ok<LAXES>
-                    showFrame(ax, panelImgs{pr, pc});
-                    set(ax, 'XTick', [], 'YTick', []);
-                    title(ax, panelTitles{pr, pc}, 'FontSize', 6, 'Color', 'k', ...
-                          'Interpreter', 'none');
-                end
-            end
-        else
-            axPh = axes('Position', [col3_left, blkBot, colW, imgH], 'Parent', fig); %#ok<LAXES>
-            placeholderAxes(axPh, sprintf('Retinotopy Summary %s not available', retinoLabels{rep}(end-2:end)));
+    for rr = 1:2
+        blkTop = blockTops(rr);  % bottom of this block's header label
+
+        % Block header
+        annotation(fig, 'textbox', [col3_left blkTop colW labelH], ...
+                   'String', sprintf('Retinotopy Summary  %s', repLabels{rr}), ...
+                   'FontSize', 8, 'FontWeight', 'bold', 'EdgeColor', 'none', ...
+                   'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle', ...
+                   'Interpreter', 'none', 'Color', 'k');
+
+        if ~hasRetino
+            annotation(fig, 'textbox', [col3_left blkTop-blockH colW blockH], ...
+                       'String', 'Retinotopy data not available', ...
+                       'FontSize', 8, 'HorizontalAlignment', 'center', ...
+                       'VerticalAlignment', 'middle', ...
+                       'EdgeColor', [0.75 0.75 0.75], 'BackgroundColor', [0.96 0.96 0.96], ...
+                       'Interpreter', 'none', 'Color', 'k');
+            continue;
+        end
+
+        imgs = retinoSets{rr};
+        % Row 1: sub-images 1 and 2; Row 2: sub-images 3 and 4
+        % Layout top-to-bottom within the block:
+        %   subLblH  (row1 label)
+        %   imgH     (row1 images)
+        %   imgRowGap
+        %   subLblH  (row2 label)
+        %   imgH     (row2 images)
+        row1LblBot = blkTop - subLblH;
+        row1ImgBot = row1LblBot - imgH;
+        row2LblBot = row1ImgBot - imgRowGap - subLblH;
+        row2ImgBot = row2LblBot - imgH;
+
+        rowBots = [row1ImgBot, row2ImgBot];
+        lblBots = [row1LblBot, row2LblBot];
+        xLefts  = [col3_left, col3_left + imgW + ret_hgap];
+
+        for si = 1:4
+            row = ceil(si / 2);  col = mod(si-1, 2) + 1;
+            ax = axes('Position', [xLefts(col) rowBots(row) imgW imgH], ...
+                      'Parent', fig); %#ok<LAXES>
+            showFrame(ax, imgs{si});
+            set(ax, 'XTick', [], 'YTick', [], 'XColor', 'k', 'YColor', 'k');
+            annotation(fig, 'textbox', [xLefts(col) lblBots(row) imgW subLblH], ...
+                       'String', retinoSubLabels{si}, 'FontSize', 6, ...
+                       'EdgeColor', 'none', 'HorizontalAlignment', 'center', ...
+                       'VerticalAlignment', 'bottom', 'Interpreter', 'none', 'Color', 'k');
         end
     end
 end
 
 
+
 %% =========================================================================
 %% LOCAL HELPER: panelGratingsPage  (nstim == 17)
 %%
-%% Layout (top to bottom):
-%%   Top row:    Polar map (cycPolarImg) | Mean pixel map with cluster overlay
-%%   Middle row: Weighted pixel maps (8 cols x nRow grid)
-%%   Bottom row: Weighted trial timecourses (same grid)
+%% Layout -- 3 columns, col2 ~25% wider (ratio 2:5:2):
+%%   Col 1: Polar map (cycPolarImg), full column height
+%%   Col 2: Weighted pixel maps (8-col x 2-row, top) +
+%%          Weighted trial timecourses (8-col x 2-row, bottom)
+%%          Identical panel style to panelSpotsPage (panH = panW*(17/11))
+%%   Col 3: GIF/AVI activity frame
 %%
-%% Variables from sbxOctoNeural_DR_commented_v5.m:
+%% Variables from sbxOctoNeural_DR_commented_v6.m:
 %%   cycPolarImg  : HSV polar map image
 %%   trialmean    : [nY x nX x nPresentations]
 %%   weightTcourse: [tcRange x nPresentations]
 %%   stimOrder    : [1 x nPresentations]
 %%   stdImg       : for normgreen reconstruction
-%%   xpts, ypts, c : for mean pixel map + cluster overlay
 %% =========================================================================
-function panelGratingsPage(analysisFile, fig, nstim, aviFile, gifFile)
+function panelGratingsPage(analysisFile, fig, nstim, gifFile, aviFile)
     try
         D = load(analysisFile, 'cycPolarImg', 'trialmean', 'weightTcourse', ...
-                 'stimOrder', 'stdImg', 'xpts', 'ypts', 'c', 'meanGreenImg');
+                 'stimOrder', 'stdImg');
     catch ME
         annotation(fig, 'textbox', [0.02 0.05 0.96 0.64], ...
                    'String', ['Could not load analysis data: ' ME.message], ...
@@ -912,15 +1013,42 @@ function panelGratingsPage(analysisFile, fig, nstim, aviFile, gifFile)
 
     % ---- Page margins ----
     mX     = 1 / (2.54 * 17);
-    mY     = 1 / (2.54 * 11);
-    titleH = 0.05;
+    mY     = 1 / (2.54 * 11);  %#ok<NASGU>
+    titleH = 0.032;
     titleY = 1 - mY - titleH;
-    left   = mX;
-    right  = 1 - mX;
-    top    = titleY - mY;
     bottom = mY;
+    top    = titleY - mY;
+    colH   = top - bottom;
 
-    % ---- Reconstruct normgreen from stdImg ----
+    % ---- 3-column layout: col2 25% wider, ratio 2:5:2 ----
+    gap      = mX / 2;
+    fullW    = 1 - 2*mX;
+    unit     = (fullW - 2*gap) / 9;   % 9 units total (2+5+2)
+    col1W    = 2 * unit;
+    col2W    = 5 * unit;
+    col3W    = 2 * unit;
+    col1_left = mX;
+    col2_left = col1_left + col1W + gap;
+    col3_left = col2_left + col2W + gap;
+
+    % =====================================================================
+    % COL 1: Polar map -- full column height
+    % =====================================================================
+    ax = axes('Position', [col1_left bottom col1W colH], 'Parent', fig); %#ok<LAXES>
+    if isfield(D, 'cycPolarImg') && ~isempty(D.cycPolarImg)
+        showFrame(ax, D.cycPolarImg);
+    else
+        placeholderAxes(ax, 'Polar Map');
+    end
+    axis(ax, 'image'); axis(ax, 'off');
+    title(ax, 'Polar Map (frame cycle)', 'FontSize', 9, 'Color', 'k', 'Interpreter', 'none');
+
+    % =====================================================================
+    % COL 2: Weighted pixel maps (top) + timecourse panels (bottom)
+    % 16 conditions in 8-col x 2-row, same style as panelSpotsPage.
+    % =====================================================================
+
+    % Reconstruct normgreen from stdImg
     if isfield(D, 'stdImg')
         ng = (D.stdImg - prctile(D.stdImg(:), 1)) / ...
              (prctile(D.stdImg(:), 99) * 1.5 - prctile(D.stdImg(:), 1));
@@ -931,94 +1059,59 @@ function panelGratingsPage(analysisFile, fig, nstim, aviFile, gifFile)
         hasNormgreen = false;
     end
 
-    % ---- Three equal columns ----
-    usableW   = right - left;
-    gap       = mX / 2;
-    colW      = (usableW - 2*gap) / 3;
-    col1_left = left;
-    col2_left = col1_left + colW + gap;
-    col3_left = col2_left + colW + gap;
+    nCond   = nstim - 1;   % 16 conditions (exclude blank)
+    nCol    = 8;
+    nRow    = ceil(nCond / nCol);   % 2 rows
+    panW    = col2W / nCol;
+    panH    = panW * (17 / 11);    % square pixels on 17x11 paper
 
-    labelH = 0.025;
-    range  = [-0.05 0.20];
-
-    nCond  = nstim - 1;   % exclude blank condition
-    nCol   = 8;
-    nRow   = ceil(nCond / nCol);
-
-    % Panel size within col 2 (8-wide grid)
-    panW   = colW / nCol;
-    panH   = panW * (17 / 11);
-
+    labelH  = 0.030;
+    dRange  = [-0.05 0.20];
     tcRange = size(D.weightTcourse, 1);
     t       = 1:tcRange;
 
-    % =====================================================================
-    % COL 1: Polar map (cycPolarImg / frame cycle + amplitude)
-    % =====================================================================
-    ax = axes('Position', [col1_left, top - (top - bottom), colW, top - bottom], ...
-              'Parent', fig); %#ok<LAXES>
-    if isfield(D, 'cycPolarImg') && ~isempty(D.cycPolarImg)
-        showFrame(ax, D.cycPolarImg);
-    else
-        set(ax, 'Color', [0.85 0.85 0.85]);
-    end
-    axis(ax, 'off');
-    title(ax, 'Polar Map (frame cycle + amp)', 'FontSize', 9, 'Color', 'k', 'Interpreter', 'none');
-
-    % =====================================================================
-    % COL 2: Weighted Pixel Maps (top) + Weighted Trial Timecourses (bottom)
-    % Grid: nRow rows x 8 cols
-    % =====================================================================
     yPixLabel = top - labelH;
-    yPixGrid  = yPixLabel - nRow * panH;
-    yTCLabel  = yPixGrid - labelH;
-    yTCGrid   = yTCLabel - nRow * panH;
+    yTCLabel  = yPixLabel - nRow * panH - labelH;
 
-    annotation(fig, 'textbox', [col2_left, yPixLabel, colW, labelH], ...
-               'String', 'Gratings: Weighted Pixel Map', 'FontSize', 8, ...
+    annotation(fig, 'textbox', [col2_left yPixLabel col2W labelH], ...
+               'String', 'Weighted Pixel Maps (8-way gratings)', 'FontSize', 8, ...
                'FontWeight', 'bold', 'EdgeColor', 'none', 'HorizontalAlignment', 'center', ...
                'Interpreter', 'none', 'VerticalAlignment', 'middle', 'Color', 'k');
 
-    annotation(fig, 'textbox', [col2_left, yTCLabel, colW, labelH], ...
-               'String', 'Gratings: Weighted Trial Timecourses', 'FontSize', 8, ...
+    annotation(fig, 'textbox', [col2_left yTCLabel col2W labelH], ...
+               'String', 'Weighted Trial Timecourses (8-way gratings)', 'FontSize', 8, ...
                'FontWeight', 'bold', 'EdgeColor', 'none', 'HorizontalAlignment', 'center', ...
                'Interpreter', 'none', 'VerticalAlignment', 'middle', 'Color', 'k');
 
     for cond = 1:nCond
-        col = mod(cond - 1, nCol) + 1;
-        row = ceil(cond / nCol);
-        xPos = col2_left + (col - 1) * panW;
+        subCol = mod(cond - 1, nCol) + 1;
+        subRow = ceil(cond / nCol);
+        xPos   = col2_left + (subCol - 1) * panW;
 
-        % Weighted pixel map
-        yPosPix = yPixLabel - row * panH;
+        % ---- Weighted pixel map ----
+        yPosPix = yPixLabel - subRow * panH;
         ax = axes('Position', [xPos+0.0005 yPosPix+0.0005 panW*0.98 panH*0.97], ...
                   'Parent', fig); %#ok<LAXES>
         meanimg = median(D.trialmean(:,:, D.stimOrder == cond), 3, 'omitnan');
         if hasNormgreen && ~isempty(meanimg)
-            scaled = (meanimg - range(1)) / (range(2) - range(1));
+            scaled = (meanimg - dRange(1)) / (dRange(2) - dRange(1));
             scaled = max(0, min(1, scaled));
             jmap   = jet(256);
-            idx    = round(scaled * 255) + 1;
-            rgbImg = reshape(jmap(idx(:),:), [size(meanimg,1) size(meanimg,2) 3]);
+            cidx   = round(scaled * 255) + 1;
+            rgbImg = reshape(jmap(cidx(:),:), [size(meanimg,1) size(meanimg,2) 3]);
             ngRes  = normgreen;
             if ~isequal(size(ngRes,1), size(rgbImg,1)) || ~isequal(size(ngRes,2), size(rgbImg,2))
-                [xi,yi] = meshgrid(linspace(1,size(ngRes,2),size(rgbImg,2)), ...
-                                   linspace(1,size(ngRes,1),size(rgbImg,1)));
-                [xi0,yi0] = meshgrid(1:size(ngRes,2), 1:size(ngRes,1));
-                ngRes = cat(3, interp2(xi0,yi0,ngRes(:,:,1),xi,yi,'linear',0), ...
-                               interp2(xi0,yi0,ngRes(:,:,2),xi,yi,'linear',0), ...
-                               interp2(xi0,yi0,ngRes(:,:,3),xi,yi,'linear',0));
+                ngRes = imresize(ngRes, [size(rgbImg,1) size(rgbImg,2)]);
             end
             image(ax, rgbImg .* ngRes);
         else
-            imagesc(ax, meanimg, range);
+            imagesc(ax, meanimg, dRange);
             colormap(ax, 'jet');
         end
-        axis(ax, 'off');
+        axis(ax, 'image'); axis(ax, 'off');
 
-        % Weighted timecourse
-        yPosTC = yTCLabel - row * panH;
+        % ---- Timecourse panel -- axes matching analysis output ----
+        yPosTC = yTCLabel - subRow * panH;
         ax = axes('Position', [xPos+0.0005 yPosTC+0.0005 panW*0.98 panH*0.97], ...
                   'Parent', fig); %#ok<LAXES>
         set(ax, 'Color', 'w', 'Box', 'on', 'XTick', [], ...
@@ -1034,9 +1127,9 @@ function panelGratingsPage(analysisFile, fig, nstim, aviFile, gifFile)
             plot(ax, t, median(traceData, 2, 'omitnan'), 'g', 'LineWidth', 1.5);
         end
         xlim(ax, [1 tcRange]);
-        ylim(ax, range / 2);
-        if col == 1
-            yLims = range / 2;
+        ylim(ax, dRange / 2);
+        if subCol == 1
+            yLims = dRange / 2;
             set(ax, 'YTick', [yLims(1) 0 yLims(2)], ...
                 'YTickLabel', {sprintf('%.2f',yLims(1)), '0', sprintf('%.2f',yLims(2))}, ...
                 'FontSize', 5, 'TickLength', [0.03 0.03], 'TickDir', 'out');
@@ -1046,211 +1139,243 @@ function panelGratingsPage(analysisFile, fig, nstim, aviFile, gifFile)
     end
 
     % =====================================================================
-    % COL 3: GIF placeholder (full column height)
+    % COL 3: GIF/AVI activity frame -- full column height
     % =====================================================================
-    axGif = axes('Position', [col3_left, bottom, colW, top - bottom], 'Parent', fig); %#ok<LAXES>
+    annotation(fig, 'textbox', [col3_left top col3W titleH*0.6], ...
+               'String', 'Activity', 'FontSize', 8, 'FontWeight', 'bold', ...
+               'EdgeColor', 'none', 'HorizontalAlignment', 'center', ...
+               'Interpreter', 'none', 'VerticalAlignment', 'middle', 'Color', 'k');
+    axGif = axes('Position', [col3_left bottom col3W colH], 'Parent', fig); %#ok<LAXES>
     showGifFrame(axGif, gifFile, aviFile);
-    title(axGif, 'Activity (GIF)', 'FontSize', 8, 'Color', 'k', 'Interpreter', 'none');
 end
 
 
 %% =========================================================================
 %% LOCAL HELPER: panelSTAPage  (sparse noise / STA)
 %%
-%% Layout: 3 columns
-%%   Col 1: Lag maps ON (top half) + Lag maps OFF (bottom half)
-%%          Each half: 4-col x 2-row square grid of lag images at taus 3,5,...,17
-%%   Col 2: RF Position Map on Anatomy (recreated from saved variables)
-%%          2x2 grid: top=ON (X|Y), bot=OFF (X|Y); anatomy overlaid with RF-pos colour
-%%   Col 3: GIF / AVI placeholder (full column height)
+%% Layout (top to bottom):
+%%   Row 1: Lag maps ON  -- taus 3,5,7,9,11,13,15,17 (8 maps, every other lag)
+%%   Row 2: Lag maps OFF -- same taus
+%%   Row 3: Block STA ON | Block STA OFF | RF scatter (ON=red, OFF=blue)
+%%   Row 4: X topo ON/OFF | Y topo ON/OFF
 %%
-%% Variables loaded from mat file (requires sbxOctoSTA_DR_v2.m):
-%%   lagStas    : [nY x nX x 18 x 2]    -- per-lag STA (taus 1:18, rep1=ON, rep2=OFF)
-%%   zscore     : [nCells x 2]           -- ON/OFF z-scores
-%%   rfx, rfy   : [nCells x 2]           -- RF centre positions
-%%   xpts, ypts : [nCells x 1]           -- cell anatomy positions
-%%   meanGreenImg : [nY x nX x nCh]      -- anatomy image for RF overlay
+%% Variables loaded from mat file (requires sbxOctoSTA_commented_v1.m v2+):
+%%   lagStas  : [nY x nX x 18 x 2]          -- per-lag STA (taus 3:18, rep1=ON, rep2=OFF)
+%%   staAll   : [nY x nX x nXblk x nYblk x 2] -- block STA maps at peak lag
+%%   stas     : [nY x nX x nCells x 2]      -- cell-level STA (fallback for mean map)
+%%   zscore   : [nCells x 2]                -- ON/OFF z-scores
+%%   rfx, rfy : [nCells x 2]                -- RF centre positions
+%%   xpts, ypts : [nCells x 1]              -- cell anatomy positions
 %% =========================================================================
-function panelSTAPage(analysisFile, fig, aviFile, gifFile)
-%% panelSTAPage  (sparse noise / STA) -- 3-column layout
-%%
-%%   Col 1: Lag maps ON (top half) + Lag maps OFF (bottom half)
-%%          Each half: 2-row x 4-col grid of lag images (4x4 square formation)
-%%   Col 2: RF Position Map on Anatomy (recreated from saved variables)
-%%          2x2 grid: X/Y x ON/OFF, anatomy image with cells coloured by RF pos
-%%   Col 3: GIF placeholder (full column height)
+function panelSTAPage(analysisFile, fig, gifFile, aviFile)
+    % Suppress "Variable not found" warnings for older mat files lacking lagStas/staAll.
+    % whos('-file') cannot enumerate v7.3 variables, so we suppress instead.
+    % Load small variables first, then attempt the large lagStas separately.
+    % Splitting prevents a single bad variable from blocking everything else.
+    warnState = warning('off', 'MATLAB:load:variableNotFound');
     try
-        D = load(analysisFile, 'lagStas', 'stas', 'zscore', ...
-                 'rfx', 'rfy', 'xpts', 'ypts', 'meanGreenImg');
+        D = load(analysisFile, 'stas', 'zscore', 'rfx', 'rfy', 'xpts', 'ypts', 'meanGreenImg');
     catch ME
-        annotation(fig, 'textbox', [0.02 0.05 0.96 0.90], ...
+        warning(warnState);
+        annotation(fig, 'textbox', [0.05 0.40 0.90 0.18], ...
                    'String', ['Could not load STA data: ' ME.message], ...
-                   'FontSize', 10, 'EdgeColor', 'r', 'Interpreter', 'none', 'Color', 'k');
+                   'FontSize', 10, 'EdgeColor', 'r', 'BackgroundColor', [1 0.9 0.9], ...
+                   'Interpreter', 'none', 'Color', 'k', ...
+                   'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle');
+        display(['panelSTAPage load error: ' ME.message]);
         return;
     end
+    % Load lagStas separately -- it is large and may fail independently
+    try
+        tmp = load(analysisFile, 'lagStas');
+        if isfield(tmp, 'lagStas')
+            D.lagStas = tmp.lagStas;
+        end
+    catch ME2
+        display(['panelSTAPage: lagStas load failed: ' ME2.message]);
+        % D.lagStas simply won't be set; hasLagStas will be false
+    end
+    warning(warnState);
 
     % ---- Page margins ----
     mX     = 1 / (2.54 * 17);
     mY     = 1 / (2.54 * 11);
-    titleH = 0.05;
+    titleH = 0.032;
     titleY = 1 - mY - titleH;
-    left   = mX;
-    right  = 1 - mX;
-    top    = titleY - mY;
     bottom = mY;
+    top    = titleY - mY;
 
-    % ---- Three equal columns ----
-    usableW   = right - left;
+    % ---- Equal 3-column layout ----
     gap       = mX / 2;
-    colW      = (usableW - 2*gap) / 3;
-    col1_left = left;
+    fullW     = 1 - 2*mX;
+    colW      = (fullW - 2*gap) / 3;
+    col1_left = mX;
     col2_left = col1_left + colW + gap;
     col3_left = col2_left + colW + gap;
-
-    contentH = top - bottom;
-    labelH   = 0.022;
-
-    taus_show  = 3:2:18;   % every other lag: 3,5,7,9,11,13,15,17
-    nTaus      = length(taus_show);   % 8 lags
+    colH      = top - bottom;
 
     % =====================================================================
-    % COL 1: Lag maps ON (top half) + Lag maps OFF (bottom half)
-    % Each block arranged in a 4-col x 2-row square formation.
-    % lagStas: [nY x nX x 18 x 2], rep1=ON, rep2=OFF
+    % COL 1: ON lag block (top half) + OFF lag block (bottom half)
+    % Each block: label strip + 8 near-square images across colW
+    % lagStas: [nY x nX x 18 x 2], taus 3:2:18 (indices 3,5,7,9,11,13,15,17)
     % =====================================================================
-    hasLagStas = isfield(D, 'lagStas') && ~isempty(D.lagStas);
+    % Extract lagStas to a plain double array; isnumeric guards against the
+    % rare case where a MATLAB version returns it as a non-numeric type.
+    hasLagStas  = false;
+    lagStasData = [];
+    if isfield(D, 'lagStas') && isnumeric(D.lagStas) && ~isempty(D.lagStas)
+        lagStasData = double(D.lagStas);
+        hasLagStas  = size(lagStasData, 3) >= 17;
+    end
 
-    % Divide col1 height into two equal halves (ON and OFF)
-    lagH      = (contentH - mY - 2*labelH) / 2;   % image area per block
-    lagOnTop  = top;
-    lagOffTop = lagOnTop - lagH - labelH - mY/2;
+    taus_show  = 3:2:18;    % 8 lags: 3,5,7,9,11,13,15,17
+    nTaus      = length(taus_show);   % 8
+    nGridCols  = 4;                   % 2x4 square grid per polarity
+    nGridRows  = 2;
+    lagW       = colW / nGridCols;
+    % Near-square: height = width * page_aspect so image pixels are square on 17x11 paper
+    lagImgH    = lagW * (17 / 11);
+    labelH     = 0.022;
+    innerGap   = mY / 4;              % vertical gap between the 2 tile rows within a block
+    blockH     = labelH + nGridRows * lagImgH + (nGridRows - 1) * innerGap;  %#ok<NASGU>
+    blockGap   = mY / 2;             % gap between ON block and OFF block
 
-    repLabels = {'ON', 'OFF'};
-    yLagTop   = [lagOnTop, lagOffTop];
+    % Shared color range: match the analysis script's fixed crange behaviour.
+    % The analysis script uses crange = [-0.05 0.05] (movie 2) or [-0.1 0.1]
+    % (movie 1) -- a fixed wide range where most of the image sits near zero,
+    % giving the characteristic light-blue background with a single hotspot.
+    % We approximate this by taking the 99.9th percentile of |lagStas| across
+    % ALL lags (3:18) and both reps, then applying a minimum floor of 0.05 so
+    % the scale is never tighter than the analysis script's narrower crange.
+    % This reproduces the "mostly blue, one red hotspot" appearance.
+    lagCR = 0.05;   % minimum floor matching analysis script narrow crange
+    if hasLagStas
+        allPix = lagStasData(:, :, 3:min(18, size(lagStasData,3)), :);
+        lagCR  = max(lagCR, max(abs(prctile(allPix(:), 99.9))));
+    end
 
-    nLagCols = 4;
-    nLagRows = ceil(nTaus / nLagCols);
+    % Pack two blocks from the top of the column
+    onLabelBot   = top - labelH;
+    onBlockBot   = onLabelBot - nGridRows * lagImgH - (nGridRows - 1) * innerGap;
+    offLabelBot  = onBlockBot - blockGap - labelH;
+    offBlockBot  = offLabelBot - nGridRows * lagImgH - (nGridRows - 1) * innerGap;
+
+    repLabels  = {'ON', 'OFF'};
+    labelBots  = [onLabelBot,  offLabelBot];
+    blockBots  = [onBlockBot,  offBlockBot];
 
     for rep = 1:2
-        rowTop = yLagTop(rep);
-        annotation(fig, 'textbox', [col1_left, rowTop - labelH, colW, labelH], ...
+        annotation(fig, 'textbox', [col1_left labelBots(rep) colW labelH], ...
                    'String', sprintf('STA Lag Maps  -  %s', repLabels{rep}), ...
                    'FontSize', 7, 'FontWeight', 'bold', 'EdgeColor', 'none', ...
                    'HorizontalAlignment', 'left', 'VerticalAlignment', 'middle', ...
                    'Interpreter', 'none', 'Color', 'k');
 
-        lagImgW = colW / nLagCols;
-        lagImgH = lagH / nLagRows;
-
         for ti = 1:nTaus
-            tau    = taus_show(ti);
-            lagCol = mod(ti - 1, nLagCols) + 1;
-            lagRow = ceil(ti / nLagCols);
-            xPos   = col1_left + (lagCol - 1) * lagImgW;
-            yPos   = rowTop - labelH - lagRow * lagImgH;
-
-            ax = axes('Position', [xPos+0.001 yPos+0.001 lagImgW*0.97 lagImgH*0.96], ...
-                      'Parent', fig); %#ok<LAXES>
-            if hasLagStas && size(D.lagStas, 3) >= tau
-                img = D.lagStas(:,:,tau,rep);
-                cr  = max(abs(prctile(img(:), [2 98])));
-                if cr == 0; cr = 0.01; end
-                imagesc(ax, img', [-cr cr]);
+            tau     = taus_show(ti);
+            gridCol = mod(ti - 1, nGridCols);          % 0-based column index (0..3)
+            gridRow = floor((ti - 1) / nGridCols);     % 0-based row index (0..1), row 0 = top
+            xPos    = col1_left + gridCol * lagW;
+            % Row 0 sits at the top of the block; row 1 sits one step below
+            yPos    = blockBots(rep) + (nGridRows - 1 - gridRow) * (lagImgH + innerGap);
+            ax      = axes('Position', [xPos+0.001 yPos+0.001 lagW*0.98 lagImgH*0.97], ...
+                           'Parent', fig); %#ok<LAXES>
+            if hasLagStas && size(lagStasData, 3) >= tau
+                img = lagStasData(:,:,tau,rep);
+                imagesc(ax, img', [-lagCR lagCR]);
                 colormap(ax, 'jet');
+                axis(ax, 'image');
+                axis(ax, 'off');
             else
-                set(ax, 'Color', [0.85 0.85 0.85]);
+                placeholderAxes(ax, sprintf('lag %d', tau));
             end
-            axis(ax, 'off');
             title(ax, sprintf('lag %d', tau), 'FontSize', 6, 'Color', 'k', ...
                   'Interpreter', 'none');
         end
     end
 
     % =====================================================================
-    % COL 2: RF Position Map on Anatomy (Fig 43 equivalent)
-    % 2x2 grid: top row = ON (X | Y), bottom row = OFF (X | Y)
-    % Anatomy image with cells coloured by RF position using jet colormap.
-    % Falls back to scatter plot if meanGreenImg is absent.
+    % COL 2: RF Position Map on Anatomy -- 2x2 grid
+    %   (1,1) X RF Map  ON  | (1,2) Y RF Map  ON
+    %   (2,1) X RF Map  OFF | (2,2) Y RF Map  OFF
+    % Anatomy (meanGreenImg) as grayscale background; cells coloured by RF
+    % position using a jet colourmap scaled to [-25 25] pixels.
     % =====================================================================
-    hasRF  = isfield(D,'rfx') && isfield(D,'rfy') && isfield(D,'zscore') && ...
-              isfield(D,'xpts') && isfield(D,'ypts');
-    hasGrn = isfield(D,'meanGreenImg') && ~isempty(D.meanGreenImg);
+    hasRFmap = isfield(D, 'rfx') && isfield(D, 'rfy') && ...
+               isfield(D, 'zscore') && isfield(D, 'xpts') && isfield(D, 'ypts') && ...
+               isfield(D, 'meanGreenImg');
 
-    annotation(fig, 'textbox', [col2_left, top - labelH, colW, labelH], ...
-               'String', 'RF Position Map on Anatomy', 'FontSize', 8, 'FontWeight', 'bold', ...
+    rfmapH    = colH;               % full column height
+    rfmapGap  = mX / 4;            % gap between the 2 sub-columns
+    rfmapImgW = (colW - rfmapGap) / 2;
+    rfmapRowGap = mY / 4;
+    rfmapImgH = (rfmapH - rfmapRowGap) / 2;
+
+    axTitles = {'X RF Map  ON', 'Y RF Map  ON'; ...
+                'X RF Map  OFF', 'Y RF Map  OFF'};
+    % row 1 = ON (top), row 2 = OFF (bottom)
+    rowBots = [bottom + rfmapImgH + rfmapRowGap, bottom];
+    colLefts = [col2_left, col2_left + rfmapImgW + rfmapGap];
+
+    zthresh = 5.5;
+    if hasRFmap
+        useOn  = find(D.zscore(:,1) >  zthresh);
+        useOff = find(D.zscore(:,2) < -zthresh);
+        rfxs   = [D.rfx(useOn,1); D.rfx(useOff,2)];
+        rfys   = [D.rfy(useOn,1); D.rfy(useOff,2)];
+        x0     = median(rfxs, 'omitnan');
+        y0     = median(rfys, 'omitnan');
+        rfRange = 25;   % colour axis half-range in pixels
+        cmap64  = jet(64);
+        useIdx  = {useOn, useOff};
+        rfCol   = [1, 2];   % rfx/rfy column index (ON=1, OFF=2)
+    end
+
+    for row = 1:2   % row 1 = ON, row 2 = OFF
+        for col = 1:2   % col 1 = X, col 2 = Y
+            ax = axes('Position', [colLefts(col) rowBots(row) rfmapImgW rfmapImgH], ...
+                      'Parent', fig); %#ok<LAXES>
+            if hasRFmap
+                % Anatomy background: green channel of meanGreenImg
+                anatImg = D.meanGreenImg(:,:,1);
+                imagesc(ax, anatImg);
+                colormap(ax, gray(256));
+                hold(ax, 'on');
+                % Overlay cells coloured by RF position
+                cellIdx = useIdx{row};
+                for ci = 1:length(cellIdx)
+                    n = cellIdx(ci);
+                    if col == 1
+                        val = D.rfx(n, rfCol(row)) - x0;
+                    else
+                        val = D.rfy(n, rfCol(row)) - y0;
+                    end
+                    % Map val in [-rfRange rfRange] to colourmap index 1:64
+                    cmapIdx = round((val + rfRange) / (2*rfRange) * 63) + 1;
+                    cmapIdx = max(1, min(64, cmapIdx));
+                    plot(ax, D.xpts(n), D.ypts(n), 'o', ...
+                         'Color', cmap64(cmapIdx,:), 'MarkerSize', 3, ...
+                         'MarkerFaceColor', cmap64(cmapIdx,:));
+                end
+                axis(ax, 'image'); axis(ax, 'off');
+            else
+                placeholderAxes(ax, axTitles{row, col});
+            end
+            title(ax, axTitles{row, col}, 'FontSize', 7, 'Color', 'k', ...
+                  'Interpreter', 'none');
+        end
+    end
+
+    % =====================================================================
+    % COL 3: GIF/AVI frame (top 20%), remainder blank
+    % =====================================================================
+    gifH  = colH * 0.20;
+    gifY  = top - gifH;
+
+    annotation(fig, 'textbox', [col3_left top colW labelH], ...
+               'String', 'Activity', 'FontSize', 8, 'FontWeight', 'bold', ...
                'EdgeColor', 'none', 'HorizontalAlignment', 'center', ...
                'Interpreter', 'none', 'VerticalAlignment', 'middle', 'Color', 'k');
-
-    rfPanW = (colW - mX/4) / 2;
-    rfPanH = (contentH - labelH - mY/2) / 2;
-
-    % Grid order: [1=X ON, 2=Y ON, 3=X OFF, 4=Y OFF]
-    rfTitles = {'X RF Map  (ON)', 'Y RF Map  (ON)', 'X RF Map  (OFF)', 'Y RF Map  (OFF)'};
-    zthresh  = 5.5;
-
-    useOn = []; useOff = []; x0 = 0; y0 = 0;
-    if hasRF
-        nRef    = size(D.zscore, 1);
-        useOn   = find(D.zscore(1:nRef, 1) >  zthresh);
-        useOff  = find(D.zscore(1:nRef, 2) < -zthresh);
-        rfxs    = [D.rfx(useOn,1); D.rfx(useOff,2)];
-        rfys    = [D.rfy(useOn,1); D.rfy(useOff,2)];
-        x0 = median(rfxs, 'omitnan');
-        y0 = median(rfys, 'omitnan');
-    end
-
-    for ri = 1:4
-        rfCol = mod(ri - 1, 2) + 1;
-        rfRow = ceil(ri / 2);
-        xPos  = col2_left + (rfCol - 1) * (rfPanW + mX/4);
-        yPos  = top - labelH - mY/4 - rfRow * rfPanH;
-
-        ax = axes('Position', [xPos, yPos, rfPanW, rfPanH*0.93], 'Parent', fig); %#ok<LAXES>
-
-        isX  = (ri == 1 || ri == 3);
-        isOn = (ri <= 2);
-        cells = useOn; if ~isOn; cells = useOff; end
-        rep   = 1;     if ~isOn; rep   = 2;      end
-
-        if hasRF && hasGrn
-            gImg   = D.meanGreenImg(:,:,1);
-            gRange = prctile(gImg(:), [1 99]);
-            if gRange(2) <= gRange(1); gRange(2) = gRange(1) + 0.01; end
-            imagesc(ax, gImg, gRange);
-            colormap(ax, 'gray');
-            hold(ax, 'on');
-            if ~isempty(cells)
-                if isX; rfVals = D.rfx(cells, rep) - x0;
-                else;   rfVals = D.rfy(cells, rep) - y0; end
-                cmap64 = jet(64);
-                rfMin  = -25; rfMax = 25;
-                for ci = 1:length(cells)
-                    cv   = max(0, min(1, (rfVals(ci) - rfMin) / (rfMax - rfMin)));
-                    cidx = max(1, min(64, round(cv * 63) + 1));
-                    plot(ax, D.xpts(cells(ci)), D.ypts(cells(ci)), 'o', ...
-                         'Color', cmap64(cidx,:), 'MarkerSize', 4, 'LineWidth', 0.5);
-                end
-            end
-            axis(ax, 'equal'); axis(ax, 'off');
-        elseif hasRF
-            hold(ax, 'on');
-            if ~isempty(cells)
-                if isX; rfVals = D.rfx(cells, rep) - x0;
-                else;   rfVals = D.rfy(cells, rep) - y0; end
-                scatter(ax, D.xpts(cells), D.ypts(cells), 10, rfVals, 'filled');
-                colormap(ax, 'jet'); caxis(ax, [-25 25]);
-            end
-            set(ax, 'YDir', 'reverse'); axis(ax, 'equal'); axis(ax, 'off');
-        else
-            placeholderAxes(ax, rfTitles{ri});
-        end
-        title(ax, rfTitles{ri}, 'FontSize', 7, 'Color', 'k', 'Interpreter', 'none');
-    end
-
-    % =====================================================================
-    % COL 3: GIF placeholder (full column height)
-    % =====================================================================
-    axGif = axes('Position', [col3_left, bottom, colW, top - bottom], 'Parent', fig); %#ok<LAXES>
+    axGif = axes('Position', [col3_left gifY colW gifH], 'Parent', fig); %#ok<LAXES>
     showGifFrame(axGif, gifFile, aviFile);
-    title(axGif, 'Activity (GIF)', 'FontSize', 8, 'Color', 'k', 'Interpreter', 'none');
 end

@@ -1813,6 +1813,16 @@ if nstim == 48
     % ---- FIGURE (nstim==48): Retinotopy Summary Panel (rep 2 = ON) ----
     % Each: 2x2 panel combining anatomy, retinotopy overlay, X map, Y map.
     % Manual axes positioning for tight inter-column spacing.
+    %
+    % Design notes:
+    %   - axis(ax,'image') is NOT used: it re-insets the axes box internally,
+    %     overriding the Position we set and cropping/hiding panels (especially
+    %     the X and Y maps in rows 2).  Instead we lock XLim/YLim to pixel
+    %     extents and set DataAspectRatio=[1 1 1] so pixels are square without
+    %     the axes resizing itself.
+    %   - title() steals space from inside the axes box when the box is small.
+    %     Labels are placed as annotation textboxes ABOVE each panel so they
+    %     sit in the gap between the panel top and the row above.
     repLabels48 = {'OFF', 'ON'};
     retinoImgs48 = { {meanGreenImg, topoOverlayImg{1}, xpolarImg{1}, ypolarImg{1}}, ...
                      {meanGreenImg, topoOverlayImg{2}, xpolarImg{2}, ypolarImg{2}} };
@@ -1823,38 +1833,63 @@ if nstim == 48
         fRet = figure('Name', sprintf('Fig %d - Retinotopy Summary %s (nstim=48)', figNum, repLabels48{rep}));
 
         % Layout constants (normalised figure coordinates)
-        marg    = 0.03;   % outer margin
-        colgap  = 0.01;   % gap between columns
-        rowgap  = 0.04;   % gap between rows
-        titH    = 0.06;   % height for sgtitle
+        marg    = 0.03;   % outer margin on all sides
+        colgap  = 0.01;   % horizontal gap between the two columns
+        lblH    = 0.045;  % height reserved above each panel row for the label
+        rowgap  = 0.01;   % vertical gap between bottom of label and top of row below
+        titH    = 0.06;   % height consumed by sgtitle at top
 
-        % Image aspect ratio (rows/cols) and figure pixel aspect ratio
-        imgSz  = size(meanGreenImg);   % [rows cols channels]
-        imgAR  = imgSz(1) / imgSz(2);  % image height/width ratio
-        figPos = get(fRet, 'Position'); % [x y w h] in pixels
+        % Image aspect ratio (rows/cols) and figure pixel aspect ratio.
+        % Use meanGreenImg because all four images share the same pixel grid.
+        imgSz  = size(meanGreenImg);    % [nRows nCols (nChan)]
+        imgAR  = imgSz(1) / imgSz(2);  % height/width in image pixels
+        figPos = get(fRet, 'Position'); % [x y w h] in screen pixels
         figAR  = figPos(4) / figPos(3); % figure height/width ratio
 
-        % Width available for both panels
+        % Panel width: split usable width evenly across two columns
         totalW = 1 - 2*marg - colgap;
         panW   = totalW / 2;
-        % Make panH match the image aspect ratio exactly, corrected for figure shape
-        panH   = panW * imgAR / figAR;
 
-        % Total height used by both rows; pack from top (just below sgtitle margin)
-        totalH = 2*panH + rowgap;
-        topY   = 1 - marg - titH;   % top of upper row
-        xL     = [marg,  marg + panW + colgap];
-        yB     = [topY - totalH,  topY - panH];   % row2 bottom, row1 bottom
+        % Vertical layout (top to bottom):
+        %   sgtitle occupies titH below the top margin
+        %   Row 1: label strip (lblH) then image (panH)
+        %   rowgap between rows
+        %   Row 2: label strip (lblH) then image (panH)
+        topY     = 1 - marg - titH;          % top of usable content area
+
+        % Panel height: preserve pixel aspect ratio, but cap so both rows fit.
+        panH_ideal = panW * imgAR / figAR;
+        usableH    = topY - marg - 2*lblH - rowgap;
+        panH       = min(panH_ideal, usableH / 2);
+        row1LblY = topY - lblH;              % bottom of row-1 label strip
+        row1ImgY = row1LblY - panH;          % bottom of row-1 image
+        row2LblY = row1ImgY - rowgap - lblH; % bottom of row-2 label strip
+        row2ImgY = row2LblY - panH;          % bottom of row-2 image
+
+        xL = [marg,  marg + panW + colgap];  % left edges of col 1 and col 2
+
+        % Label positions (annotation textbox above each panel)
+        lblPos = { [xL(1) row1LblY panW lblH], [xL(2) row1LblY panW lblH], ...
+                   [xL(1) row2LblY panW lblH], [xL(2) row2LblY panW lblH] };
+        % Image axes positions
+        imgPos = { [xL(1) row1ImgY panW panH], [xL(2) row1ImgY panW panH], ...
+                   [xL(1) row2ImgY panW panH], [xL(2) row2ImgY panW panH] };
 
         imgs48 = retinoImgs48{rep};
-        pos48  = { [xL(1) yB(2) panW panH], [xL(2) yB(2) panW panH], ...
-                   [xL(1) yB(1) panW panH], [xL(2) yB(1) panW panH] };
         for pi = 1:4
-            ax = axes('Position', pos48{pi}, 'Parent', fRet); %#ok<LAXES>
+            % Label as annotation so it does not consume axes space
+            annotation(fRet, 'textbox', lblPos{pi}, ...
+                       'String', retinoSubTitles{pi}, 'FontSize', 9, ...
+                       'EdgeColor', 'none', 'HorizontalAlignment', 'center', ...
+                       'VerticalAlignment', 'bottom', 'Interpreter', 'none', 'Color', 'k');
+
+            ax = axes('Position', imgPos{pi}, 'Parent', fRet); %#ok<LAXES>
             image(ax, imgs48{pi});
-            axis(ax, 'image');
-            set(ax, 'XTick', [], 'YTick', []);
-            title(ax, retinoSubTitles{pi}, 'FontSize', 9, 'Interpreter', 'none');
+            % Lock pixel extents so DataAspectRatio=[1 1 1] keeps pixels square
+            % without axis('image') resizing the axes box.
+            nR = size(imgs48{pi}, 1);  nC = size(imgs48{pi}, 2);
+            set(ax, 'XLim', [0.5 nC+0.5], 'YLim', [0.5 nR+0.5], ...
+                'DataAspectRatio', [1 1 1], 'XTick', [], 'YTick', []);
         end
         sgtitle(sprintf('Fig %d: Retinotopy Summary  -  %s', figNum, repLabels48{rep}), 'Interpreter', 'none');
         if exist('psfile','var'); exportgraphics(fRet, psfile, 'Append', true); end
@@ -1921,7 +1956,11 @@ if nstim == 50
 
     % ---- FIGURE (nstim==50): Retinotopy Summary Panel (rep 1 = OFF) ----
     % ---- FIGURE (nstim==50): Retinotopy Summary Panel (rep 2 = ON) ----
-    % Manual axes positioning for tight inter-column spacing (matches nstim==48 layout).
+    % Manual axes positioning for tight inter-column spacing (identical logic to nstim==48).
+    %
+    % Design notes: see nstim==48 block above for full rationale.
+    %   axis('image') is replaced by explicit XLim/YLim + DataAspectRatio=[1 1 1].
+    %   Labels are annotation textboxes above each panel rather than title().
     repLabels50 = {'OFF', 'ON'};
     retinoImgs50 = { {meanGreenImg, topoOverlayImg{1}, xpolarImg{1}, ypolarImg{1}}, ...
                      {meanGreenImg, topoOverlayImg{2}, xpolarImg{2}, ypolarImg{2}} };
@@ -1933,7 +1972,8 @@ if nstim == 50
 
         marg    = 0.03;
         colgap  = 0.01;
-        rowgap  = 0.04;
+        lblH    = 0.045;
+        rowgap  = 0.01;
         titH    = 0.06;
 
         imgSz  = size(meanGreenImg);
@@ -1941,24 +1981,36 @@ if nstim == 50
         figPos = get(fRet, 'Position');
         figAR  = figPos(4) / figPos(3);
 
-        totalW = 1 - 2*marg - colgap;
-        panW   = totalW / 2;
-        panH   = panW * imgAR / figAR;
+        totalW   = 1 - 2*marg - colgap;
+        panW     = totalW / 2;
+        topY     = 1 - marg - titH;
+        panH_ideal = panW * imgAR / figAR;
+        usableH    = topY - marg - 2*lblH - rowgap;
+        panH       = min(panH_ideal, usableH / 2);
+        row1LblY = topY - lblH;
+        row1ImgY = row1LblY - panH;
+        row2LblY = row1ImgY - rowgap - lblH;
+        row2ImgY = row2LblY - panH;
 
-        totalH = 2*panH + rowgap;
-        topY   = 1 - marg - titH;
-        xL     = [marg,  marg + panW + colgap];
-        yB     = [topY - totalH,  topY - panH];
+        xL = [marg,  marg + panW + colgap];
+
+        lblPos50 = { [xL(1) row1LblY panW lblH], [xL(2) row1LblY panW lblH], ...
+                     [xL(1) row2LblY panW lblH], [xL(2) row2LblY panW lblH] };
+        imgPos50 = { [xL(1) row1ImgY panW panH], [xL(2) row1ImgY panW panH], ...
+                     [xL(1) row2ImgY panW panH], [xL(2) row2ImgY panW panH] };
 
         imgs50 = retinoImgs50{rep};
-        pos50  = { [xL(1) yB(2) panW panH], [xL(2) yB(2) panW panH], ...
-                   [xL(1) yB(1) panW panH], [xL(2) yB(1) panW panH] };
         for pi = 1:4
-            ax = axes('Position', pos50{pi}, 'Parent', fRet); %#ok<LAXES>
+            annotation(fRet, 'textbox', lblPos50{pi}, ...
+                       'String', retinoSubTitles50{pi}, 'FontSize', 9, ...
+                       'EdgeColor', 'none', 'HorizontalAlignment', 'center', ...
+                       'VerticalAlignment', 'bottom', 'Interpreter', 'none', 'Color', 'k');
+
+            ax = axes('Position', imgPos50{pi}, 'Parent', fRet); %#ok<LAXES>
             image(ax, imgs50{pi});
-            axis(ax, 'image');
-            set(ax, 'XTick', [], 'YTick', []);
-            title(ax, retinoSubTitles50{pi}, 'FontSize', 9, 'Interpreter', 'none');
+            nR = size(imgs50{pi}, 1);  nC = size(imgs50{pi}, 2);
+            set(ax, 'XLim', [0.5 nC+0.5], 'YLim', [0.5 nR+0.5], ...
+                'DataAspectRatio', [1 1 1], 'XTick', [], 'YTick', []);
         end
         sgtitle(sprintf('Fig %d: Retinotopy Summary  -  %s', figNum, repLabels50{rep}), 'Interpreter', 'none');
         if exist('psfile','var'); exportgraphics(fRet, psfile, 'Append', true); end
@@ -1971,51 +2023,61 @@ end
 %% =========================================================================
 
 display('saving pdf')
-if Opt.SaveFigs
-    % Auto-set PDF output path to match the input .sbx file location and name
-    % e.g. input: C:\data\session_000.sbx -> output: C:\data\session_000.pdf
-    if ~isfield(Opt,'pPDF') || ~isfield(Opt,'fPDF')
-        if isfield(Opt,'fSbx') && isfield(Opt,'pSbx')
-            Opt.pPDF = Opt.pSbx;
-            Opt.fPDF = [Opt.fSbx(1:end-4) '.pdf'];
-        else
-            % Fall back to dialog if sbx path info is not available
-            [Opt.fPDF, Opt.pPDF] = uiputfile('*.pdf', 'save pdf file');
-        end
+
+% Build informative output filename: {ExptBase}_acq{N}_{type}_analysis
+% Derive from fileName (always set) rather than Opt.fSbx/pSbx which may not be.
+% ExptBase = sbx filename up to the _LOC_NNN separator
+% N        = acquisition number from _000_NNN pattern
+% Resolve sbx file path -> outDir and sbxBase.
+% Priority: Opt.fSbx/pSbx (explicit) > fileName (set by get2pSession_sbx_DR) > pwd.
+if isfield(Opt,'fSbx') && isfield(Opt,'pSbx') && ~isempty(Opt.pSbx)
+    outDir  = Opt.pSbx;
+    sbxBase = Opt.fSbx(1:end-4);
+elseif exist('fileName','var') && ~isempty(fileName)
+    [outDir, sbxBase] = fileparts(fileName);
+    if isempty(outDir)   % fileName was just a bare name with no path
+        outDir = pwd;
     end
-    newpdfFile = fullfile(Opt.pPDF, Opt.fPDF);
-    try
-        % Copy the accumulated PDF to the final output location
-        % (Direct PDF printing via -dpdf no longer requires Ghostscript conversion)
-        copyfile(psfile, newpdfFile);
-    catch
-        display('couldnt copy pdf to output location');
-    end
+else
+    outDir  = pwd;
+    sbxBase = 'expt_000_000';
 end
 
-% Save analysis results to .mat file alongside the PDF
-display('saving data')
-outfile = newpdfFile(1:end-4);   % strip .pdf extension for .mat filename
-% Use v7.3 (HDF5) format to support variables larger than 2GB (e.g. cycImg)
-save(outfile, 'trialmean', 'trialTcourse', 'stimOrder', 'c', 'dFrepeats', ...
-     'xpts', 'ypts', 'stdImg', 'cycPolarImg', 'cycImg', 'meanGreenImg', 'weightTcourse', ...
-     'nstim', 'StimulusStr', 'StimulusNum', '-v7.3');
+% Extract expt base name and acq number from _LOC_NNN suffix pattern
+% e.g. 021621_Octopus_Cal520_000_002 -> base=021621_Octopus_Cal520, acqNum=2
+sepTok = regexp(sbxBase, '^(.*?)_(\d+)_(\d+)$', 'tokens');
+if ~isempty(sepTok)
+    exptBase = sepTok{1}{1};
+    acqNum   = str2double(sepTok{1}{3});
+else
+    acqTok = regexp(sbxBase, 'acq(\d+)', 'tokens', 'ignorecase');
+    if ~isempty(acqTok)
+        acqNum = str2double(acqTok{1}{1});
+    else
+        acqNum = 0;
+    end
+    exptBase = sbxBase;
+end
 
-% Append optional variables if they exist
-if exist('freq','var')
-    save(outfile, 'freq', 'orient', '-append');   % no -v7.3: format is set by the base save above
+% Map nstim to stimulus type string (used in filename and info page)
+if ismember(nstim, [48, 50])
+    stimType     = '6x4';
+    stimTypeDesc = sprintf('6x4 Spots  (nstim=%d)', nstim);
+elseif ismember(nstim, [17, 13])
+    stimType     = '8way';
+    stimTypeDesc = sprintf('8-Way Gratings  (nstim=%d)', nstim);
+else
+    stimType     = sprintf('stim%d', nstim);
+    stimTypeDesc = sprintf('%s  (nstim=%d)', StimulusStr, nstim);
 end
-if nstim == 48 || nstim == 50   % spots with retinotopy
-    save(outfile, 'topoOverlayImg', 'xpolarImg', 'ypolarImg', 'xphase', 'yphase', '-append');
-end
-if nstim == 13   % gratings with preference maps
-    save(outfile, 'overlayImg', 'hvImg', '-append');   % no -v7.3: format set by base save
-end
+
+outBase    = sprintf('%s_acq%d_%s_analysis', exptBase, acqNum, stimType);
+newpdfFile = fullfile(outDir, [outBase '.pdf']);
+outfile    = fullfile(outDir, outBase);
 
 % -------------------------------------------------------------------------
-% Acquisition info page (PDF)
-% Appends a plain-text summary page to the PDF recording stimulus identity
-% and key user-selected parameters. Replaces the former _info.txt sidecar file.
+% Acquisition info page -- build and append to psfile BEFORE copyfile
+% so the page is included in the final PDF.
 % -------------------------------------------------------------------------
 infoFig = figure('Color', 'white', 'Name', 'Acquisition Info');
 infoAx = axes('Parent', infoFig, 'Position', [0 0 1 1], ...
@@ -2023,8 +2085,6 @@ infoAx = axes('Parent', infoFig, 'Position', [0 0 1 1], ...
 
 selectPtsLabels = {'0=auto ROI', '1=manual', '2=suite2p', '3=red/green suite2p'};
 spLabel = '';
-% selectPts is set as a bare workspace variable by getOctoCells_DR.
-% Opt.selectPts may not exist if the caller left it commented out.
 spVal = NaN;
 if exist('selectPts','var')
     spVal = selectPts;
@@ -2035,8 +2095,6 @@ if ~isnan(spVal) && spVal >= 0 && spVal <= 3
     spLabel = sprintf('  (%s)', selectPtsLabels{spVal + 1});
 end
 
-% Normalise StimulusStr / StimulusNum: older .mat files may have saved these as
-% cell arrays (e.g. {'octoSpots'}) rather than plain char/double.
 if iscell(StimulusStr);  StimulusStr = StimulusStr{1}; end
 if iscell(StimulusNum);  StimulusNum = StimulusNum{1}; end
 
@@ -2047,6 +2105,7 @@ infoLines{end+1} = sprintf('File        : %s', outfile);
 infoLines{end+1} = sprintf('Date        : %s', datestr(now, 'yyyy-mm-dd HH:MM:SS'));
 infoLines{end+1} = '';
 infoLines{end+1} = '--- Stimulus ---';
+infoLines{end+1} = sprintf('Stimulus    : %s', stimTypeDesc);
 infoLines{end+1} = sprintf('StimulusStr : %s', StimulusStr);
 infoLines{end+1} = sprintf('StimulusNum : %d', StimulusNum);
 infoLines{end+1} = sprintf('nstim       : %d', nstim);
@@ -2079,6 +2138,31 @@ text(infoAx, 0.05, 0.95, strjoin(infoLines, '\n'), ...
     'FontName', 'Courier', 'FontSize', 10, 'Interpreter', 'none', 'Color', 'k');
 
 if exist('psfile','var'); exportgraphics(infoFig, psfile, 'Append', true); end
+
+% Now copy the complete psfile (including info page) to the final output location
+if Opt.SaveFigs
+    try
+        copyfile(psfile, newpdfFile);
+    catch
+        display('couldnt copy pdf to output location');
+    end
+end
+
+% Save analysis results to .mat file
+display('saving data')
+save(outfile, 'trialmean', 'trialTcourse', 'stimOrder', 'c', 'dFrepeats', ...
+     'xpts', 'ypts', 'stdImg', 'cycPolarImg', 'cycImg', 'meanGreenImg', 'weightTcourse', ...
+     'nstim', 'StimulusStr', 'StimulusNum', '-v7.3');
+
+if exist('freq','var')
+    save(outfile, 'freq', 'orient', '-append');
+end
+if nstim == 48 || nstim == 50
+    save(outfile, 'topoOverlayImg', 'xpolarImg', 'ypolarImg', 'xphase', 'yphase', '-append');
+end
+if nstim == 13
+    save(outfile, 'overlayImg', 'hvImg', '-append');
+end
 
 % Display path to temporary PostScript file for debugging
 psfile

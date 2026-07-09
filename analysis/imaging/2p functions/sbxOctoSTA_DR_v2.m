@@ -1377,53 +1377,53 @@ close all
 %% =========================================================================
 
 display('saving pdf')
-if Opt.SaveFigs
-    if ~isfield(Opt,'pPDF') || ~isfield(Opt,'fPDF')
-        if isfield(Opt,'fSbx') && isfield(Opt,'pSbx')
-            Opt.pPDF = Opt.pSbx;
-            Opt.fPDF = [Opt.fSbx(1:end-4) '.pdf'];
-        else
-            [Opt.fPDF, Opt.pPDF] = uiputfile('*.pdf', 'save pdf file');
-        end
+
+% Build informative output filename: {ExptBase}_acq{N}_sparsenoise_analysis
+% Priority: Opt.fSbx/pSbx (explicit) > fileName (set by get2pSession_sbx_DR) > pwd.
+if isfield(Opt,'fSbx') && isfield(Opt,'pSbx') && ~isempty(Opt.pSbx)
+    outDir  = Opt.pSbx;
+    sbxBase = Opt.fSbx(1:end-4);
+elseif exist('fileName','var') && ~isempty(fileName)
+    [outDir, sbxBase] = fileparts(fileName);
+    if isempty(outDir)   % fileName was a bare name with no path
+        outDir = pwd;
     end
-    newpdfFile = fullfile(Opt.pPDF, Opt.fPDF);
-    try
-        % Copy the accumulated PDF to the final output location
-        copyfile(psfile, newpdfFile);
-    catch
-        display('couldnt copy pdf to output location');
-    end
+else
+    outDir  = pwd;
+    sbxBase = 'expt_000_000';
 end
 
-display('saving data')
-outfile = newpdfFile(1:end-4);   % strip .pdf extension for .mat filename
+% Extract expt base name and acq number from _LOC_NNN suffix pattern
+sepTok = regexp(sbxBase, '^(.*?)_(\d+)_(\d+)$', 'tokens');
+if ~isempty(sepTok)
+    exptBase = sepTok{1}{1};
+    acqNum   = str2double(sepTok{1}{3});
+else
+    acqTok = regexp(sbxBase, 'acq(\d+)', 'tokens', 'ignorecase');
+    if ~isempty(acqTok)
+        acqNum = str2double(acqTok{1}{1});
+    else
+        acqNum = 0;
+    end
+    exptBase = sbxBase;
+end
 
-% Stimulus identity fields -- hardcoded for sparse noise (STA script always runs sparse noise)
+outBase    = sprintf('%s_acq%d_sparsenoise_analysis', exptBase, acqNum);
+newpdfFile = fullfile(outDir, [outBase '.pdf']);
+outfile    = fullfile(outDir, outBase);
+
+% Stimulus identity fields -- hardcoded for sparse noise
 StimulusStr = 'sparse noise';
-StimulusNum = 0;    % sentinel value (no StimulusNum for sparse noise)
-nstim       = NaN;  % not applicable for STA analysis
+StimulusNum = 0;
+nstim       = NaN;
 
-% Use v7.3 (HDF5) format to support variables larger than 2GB
-% lagStas: [nY x nX x 18 x 2] -- per-lag STA maps (taus 3:18, rep1=ON rep2=OFF)
-% staAll:  [nY x nX x nXblocks x nYblocks x 2] -- block STA maps at peak lag
-save(outfile, 'moviedata', 'sz_mov', 'c', 'xpts', 'ypts', 'stdImg', 'meanGreenImg', ...
-     'dF', 'stimTimes', 'stimFrames', 'tuning', 'zscore', 'rfx', 'rfy', 'stas', ...
-     'lagStas', 'staAll', ...
-     'StimulusStr', 'StimulusNum', 'nstim', '-v7.3');
-
-
-%% =========================================================================
-%% SECTION 29: ACQUISITION INFO PAGE (PDF)
-%% =========================================================================
-
-% Append a plain-text summary page to the PDF recording stimulus identity
-% and key user-selected parameters. Replaces the former _info.txt sidecar file.
-% This keeps all analysis outputs in a single PDF document.
-
+% -------------------------------------------------------------------------
+% Acquisition info page -- build and export to psfile BEFORE copyfile
+% -------------------------------------------------------------------------
 infoFig = figure('Color', 'white', 'Name', 'Acquisition Info');
-axis off;
+infoAx = axes('Parent', infoFig, 'Position', [0 0 1 1], ...
+              'XLim', [0 1], 'YLim', [0 1], 'Visible', 'off');
 
-% Build the info string line by line
 infoLines = {};
 infoLines{end+1} = '=== Acquisition Info ===';
 infoLines{end+1} = '';
@@ -1431,9 +1431,8 @@ infoLines{end+1} = sprintf('File        : %s', outfile);
 infoLines{end+1} = sprintf('Date        : %s', datestr(now, 'yyyy-mm-dd HH:MM:SS'));
 infoLines{end+1} = '';
 infoLines{end+1} = '--- Stimulus ---';
+infoLines{end+1} = 'Stimulus    : Sparse Noise (STA)';
 infoLines{end+1} = sprintf('StimulusStr : %s', StimulusStr);
-infoLines{end+1} = sprintf('StimulusNum : %d', StimulusNum);
-infoLines{end+1} = 'nstim       : N/A (STA script)';
 if isfield(Opt, 'noiseFile')
     infoLines{end+1} = sprintf('noiseFile   : %d', Opt.noiseFile);
 end
@@ -1468,9 +1467,24 @@ infoLines{end+1} = sprintf('nSig (ON)   : %d', sum(zscore(:,1) > zthresh));
 infoLines{end+1} = sprintf('nSig (OFF)  : %d', sum(zscore(:,2) < -zthresh));
 infoLines{end+1} = sprintf('nFigures    : %d (printed to PDF)', figNum);
 
-text(0.05, 0.95, strjoin(infoLines, '\n'), ...
+text(infoAx, 0.05, 0.95, strjoin(infoLines, '\n'), ...
     'Units', 'normalized', 'VerticalAlignment', 'top', ...
-    'FontName', 'Courier', 'FontSize', 10, 'Interpreter', 'none');
+    'FontName', 'Courier', 'FontSize', 10, 'Interpreter', 'none', 'Color', 'k');
 
 if exist('psfile','var'); exportgraphics(infoFig, psfile, 'Append', true); end
-     
+
+% Copy complete psfile (including info page) to final output location
+if Opt.SaveFigs
+    try
+        copyfile(psfile, newpdfFile);
+    catch
+        display('couldnt copy pdf to output location');
+    end
+end
+
+% Save analysis results to .mat file
+display('saving data')
+save(outfile, 'moviedata', 'sz_mov', 'c', 'xpts', 'ypts', 'stdImg', 'meanGreenImg', ...
+     'dF', 'stimTimes', 'stimFrames', 'tuning', 'zscore', 'rfx', 'rfy', 'stas', ...
+     'lagStas', 'staAll', ...
+     'StimulusStr', 'StimulusNum', 'nstim', '-v7.3');

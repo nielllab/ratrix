@@ -1,9 +1,17 @@
 % Original function signature (converted to script — call as a script, not a function):
 % function varargout = sutterOctoNeural(varargin)
 %% sutterOctoNeural - Main analysis function for octopus optic lobe 2-photon imaging data
-% sbxOctoNeural_DR_commented_v6 — 2026-05-19
+% sbxOctoNeural_DR_commented_v7 — 2026-07-10
 %
 % CHANGELOG:
+%   v7 (2026-07-10): No more manual 'clear all' required between runs.
+%     - Added a self-clean block right at the top of the script (before
+%       'close all'): if Opt exists in the workspace it is stashed, everything
+%       else is cleared with clearvars, then Opt is restored. If Opt does not
+%       exist, clearvars runs unconditionally. This prevents stale variables
+%       from a previous run (figNum, dF, nstim, xpts, mv, etc.) from ever
+%       leaking into this run's exist()/isfield() checks, which was the whole
+%       reason 'clear all' used to be necessary before every call.
 %   v6 (2026-05-19): figNum correctness fixes.
 %     - getOctoCells_DR call site: removed erroneous caller pre-increment. The
 %       caller was doing figNum+1 before the call AND getOctoCells_DR was doing
@@ -108,6 +116,21 @@
 %     Manages figNum entirely internally. Do NOT pre-increment before calling.
 %   octoRetinotopy_DR: produces 4 figures (X/Y map × OFF/ON).
 %     Manages figNum entirely internally. Do NOT pre-increment before calling.
+
+% Self-clean the workspace at the top of every run so stale variables from a
+% previous run (figNum, dF, nstim, xpts, mv, etc.) can never leak into this
+% run's exist()/isfield() checks. This removes the need to manually run
+% 'clear all' before each call.
+% Opt is preserved if the user set it before calling the script (per the
+% documented usage pattern above); everything else set by a prior run is wiped.
+if exist('Opt', 'var')
+    OptTemp_ = Opt;
+    clearvars -except OptTemp_
+    Opt = OptTemp_;
+    clear OptTemp_
+else
+    clearvars
+end
 
 close all
 

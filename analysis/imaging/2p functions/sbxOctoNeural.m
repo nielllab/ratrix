@@ -87,11 +87,13 @@ if zbin
     [dfofInterp meanImg greenframe] = zbinCorr(dfofInterp, meanImg, greenframe, Opt,psfile);
 end
 
+goodzframe = find(~isnan(squeeze(dfofInterp(1,1,:)))); %%% find the frames to keep
 
-buffer(:,1) = max(mv,[],1)/cfg.spatialBin+1; buffer(buffer<1)=1;
-buffer(:,2) = max(-mv,[],1)/cfg.spatialBin+1; buffer(buffer<0)=0;
+buffer(:,1) = max(mv(goodzframe,:),[],1)/cfg.spatialBin+1; buffer(buffer<1)=1;
+buffer(:,2) = max(-mv(goodzframe,:),[],1)/cfg.spatialBin+1; buffer(buffer<0)=0;
 buffer=round(buffer)
 buffer(2,:) = buffer(2,:)+32 %%% to account for deadbands;
+buffer(buffer>100) = 100;  %%% don't trim more than 100 pixels; this is mostly a safety to keep from too large a trim
 
 dfofInterp= dfofInterp(buffer(1,1):(end-buffer(1,2)),buffer(2,1):(end-buffer(2,2)),:);
 

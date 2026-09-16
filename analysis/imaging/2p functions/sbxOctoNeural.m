@@ -87,11 +87,13 @@ if zbin
     [dfofInterp meanImg greenframe] = zbinCorr(dfofInterp, meanImg, greenframe, Opt,psfile);
 end
 
+goodzframe = find(~isnan(squeeze(dfofInterp(1,1,:)))); %%% find the frames to keep
 
-buffer(:,1) = max(mv,[],1)/cfg.spatialBin+1; buffer(buffer<1)=1;
-buffer(:,2) = max(-mv,[],1)/cfg.spatialBin+1; buffer(buffer<0)=0;
+buffer(:,1) = max(mv(goodzframe,:),[],1)/cfg.spatialBin+1; buffer(buffer<1)=1;
+buffer(:,2) = max(-mv(goodzframe,:),[],1)/cfg.spatialBin+1; buffer(buffer<0)=0;
 buffer=round(buffer)
 buffer(2,:) = buffer(2,:)+32 %%% to account for deadbands;
+buffer(buffer>100) = 100;  %%% don't trim more than 100 pixels; this is mostly a safety to keep from too large a trim
 
 dfofInterp= dfofInterp(buffer(1,1):(end-buffer(1,2)),buffer(2,1):(end-buffer(2,2)),:);
 
@@ -532,6 +534,7 @@ while ~done    %%% this section deals with tiny clusters, lumping them together.
   else
       ncAll=ncAll+1;
   end
+
 end
 
 figure
@@ -552,7 +555,7 @@ title(sprintf('%u Clusters',nclust));
 if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 
 cols = hsv(nclust);
-    
+
 if selectPts==2;
     % img = zeros(size(ops.max_proj,1),size(ops.max_proj,2),3);
     img = imresize(meanGreenImg,2);
@@ -566,7 +569,7 @@ if selectPts==2;
     end
     figure
     imshow(img); title('cluster')
-    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end  
+    if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 end
 
 %%% plot dF/F traces for random subediset
@@ -643,8 +646,8 @@ if nstim ==48
     end
 end
 
-    
-    
+
+
 
 %%% summary plots for each cluster
 for clust = 1:nclust
@@ -687,7 +690,7 @@ for clust = 1:nclust
     %     plot((1:size(dF,2))*dt,dF(c==clust,:)'); hold on;
     %     xlim([1 size(dF,2)*dt]); xlabel('secs'); ylim([-0.2 2.1])
     if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
+    
     if nstim==16
         loc = [2 3 6 9 8 7 4 1]
         for rep = 1:-1:0
@@ -712,10 +715,10 @@ for clust = 1:nclust
         r = 1:size(dFrepsAll,2);
         for rep = 1:-1:0
             figure
-             set(gcf,'defaultAxesColorOrder',jet(size(dFrepsAll,4)));
+            set(gcf,'defaultAxesColorOrder',jet(size(dFrepsAll,4)));
             for cond=1:8
                 subplot(3,3,loc(cond))
-               % plot((0:(length(r)-1))*dt,squeeze(nanmean(dFrepsAll(c==clust,r,cond*2-rep,:),1)),'Color',0.9*cols(clust,:));
+                % plot((0:(length(r)-1))*dt,squeeze(nanmean(dFrepsAll(c==clust,r,cond*2-rep,:),1)),'Color',0.9*cols(clust,:));
                 plot((0:(length(r)-1))*dt, squeeze(nanmean(dFrepsAll(c==clust,r,cond*2-rep,:),1))); %% heatmap temporal order
                 ylim([-0.05 0.25]);%title(sprintf('sf %0.2f th %d',freq(cond*2-rep),orient(cond*2-rep)))
                 % xlabel('secs'); ylabel('dF/F')
@@ -740,7 +743,7 @@ for clust = 1:nclust
             ylim([-0.01 0.15]); % Adjust the y-axis limits based on your data
             grid on;
             if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-
+            
         end
     end  % end of nstim == 17
     
@@ -761,7 +764,21 @@ for clust = 1:nclust
         
     end  % end of nstim == 32
     
-    
+    if nstim ==24 & StimulusNum==7% 6x4 dark mode
+        
+        figure
+        set(gcf,'defaultAxesColorOrder',jet(size(dFrepsAll,4)));
+        for cond=1:24
+            loc = [1 7 13 19 2 8 14 20 3 9 15 21 4 10 16 22 5 11 17 23 6 12 18 24]; %%% map stim order onto subplot
+            
+            subplot(4,6,loc(cond))
+            plot(squeeze(nanmean(dFrepsAll(c==clust,:,cond,:),1)));
+            % title(sprintf('c %0.1f loc %i dir %i',contrast(cond*2-rep),positionX(cond*2-rep),orient(cond*2-rep)));
+            ylim([-0.05 0.25]);
+        end
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        figure
+    end
     
     if nstim ==24 & StimulusNum==1% 4ori 2sf 3tf
         %plot timecourse by cluster per condition
@@ -777,7 +794,7 @@ for clust = 1:nclust
             title(sprintf('%d %0.2f %d', orient(cond),freq(cond),TempFreq(cond)))
         end
         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-           figure
+        figure
         
         for cond=1:24
             subplot(4,6,cond)
@@ -787,11 +804,11 @@ for clust = 1:nclust
             title(sprintf('%d %0.2f %d', orient(cond),freq(cond),TempFreq(cond)))
         end
         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
-   
-    
+        
+        
     end
     
-        if nstim ==48
+    if nstim ==48
         %plot timecourse by cluster with orientation
         loc = [1 7 13 19 2 8 14 20 3 9 15 21 4 10 16 22 5 11 17 23 6 12 18 24];
         for rep = 0:1
@@ -800,13 +817,13 @@ for clust = 1:nclust
             for cond=1:24
                 subplot(4,6,loc(cond))
                 plot(squeeze(nanmean(dFrepsAll(c==clust,:,cond + rep*24,:),1)));
-               % title(sprintf('c %0.1f loc %i dir %i',contrast(cond*2-rep),positionX(cond*2-rep),orient(cond*2-rep)));
+                % title(sprintf('c %0.1f loc %i dir %i',contrast(cond*2-rep),positionX(cond*2-rep),orient(cond*2-rep)));
                 ylim([-0.05 0.25]);
             end
             if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
         end
         
-    end  
+    end
     
     
 end %end of for clust
@@ -869,6 +886,8 @@ end
 filt = fspecial('gaussian',5,1.5);
 trialmean = imfilter(trialmean,filt);
 
+
+showAll = input('show each panel in its own figure? 0/1 :');
 
 %%% plot mean for each stim condition, with layout corresponding to the stim
 range = [-0.02 0.1];
@@ -1176,8 +1195,8 @@ if nstim==24 & StimulusNum==1
     end
     
 end
-    
-    
+
+
 if nstim==29 %%% gratings 1 tf; either 4sfx4orient, or 2sf x 8 orient
     range = [-0.05 0.2]; %%% colormap range
     loc = [1 5 9 13 17 21 25 2 6 10 14 18 22 26 3 7 11 15 19 23 27 4 8 12 16 20 24 28]; %%% map stim order onto subplot
@@ -1276,7 +1295,7 @@ if nstim==10 %%% contrast gratings, one-time mistake
     for i = 1:10;
         subplot(2,5,i);
         title(sprintf('c %0.2f ori %d',contrast(i), orient(i)))
-    end 
+    end
 end
 
 
@@ -1303,8 +1322,7 @@ if nstim==50 %%% 5x5 spots
         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
         
     end
-    
-    
+
 end
 
 display('saving pdf')

@@ -14,6 +14,24 @@ for i = (1:npanel)+offset
 end
 
 figure(pixFig);
-%colorbar; 
+%colorbar;
 % if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
 figure(traceFig); if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+
+if showAll
+    for i = (1:npanel)+offset
+        meanimg = nanmedian(trialmean(:,:,stimOrder==i),3);
+        figure
+        data_im = mat2im(meanimg,jet,range);
+        imshow(imresize(data_im.*normgreen,0.5)); axis equal; axis off; colormap jet
+        if gratingTitle & exist('freq','var')
+            title(sprintf('theta %0.0f sf %0.2f',orient(i),freq(i)),'Fontsize',8);
+        end
+        if exist('titles','var')
+            title(titles{i})
+        end
+        if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
+        
+    end
+end
+

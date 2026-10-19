@@ -145,6 +145,7 @@ elseif selectPts ==2 | selectPts==3
     title('masks coded by iscell'); colormap jet; colorbar
     
     goodcells = find(iscell(:,1) & mean(F,2)>0.5 *median(meanF));
+
     goodcells = find(iscell(:,2)>0.2 & mean(F,2)>0.5 *median(meanF)); %%% key point - selects cells that meet likelihood and at least 50% of mean intensity
     
     selectTop = input('use claude criteria to select top units? 0/1 ');
@@ -208,6 +209,7 @@ elseif selectPts ==2 | selectPts==3
     end
     
     %%
+
     figure
     plot(iscell(:,2),mean(F,2),'.')
     hold on; plot([0 1],[ 0.5 *median(meanF) 0.5 *median(meanF)])

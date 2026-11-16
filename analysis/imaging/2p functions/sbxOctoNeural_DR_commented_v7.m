@@ -1,3 +1,4 @@
+1
 % Original function signature (converted to script — call as a script, not a function):
 % function varargout = sutterOctoNeural(varargin)
 %% sutterOctoNeural - Main analysis function for octopus optic lobe 2-photon imaging data
@@ -230,6 +231,7 @@ end
 %   meanImg     - mean fluorescence image
 %   greenframe  - raw green channel reference frame
 %   info        - global struct with metadata including alignment values (info.aligned.T)
+
 get2pSession_sbx_DR;
 
 % Retrieve rigid alignment (motion correction) displacement values

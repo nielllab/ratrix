@@ -1,4 +1,4 @@
-drfunction [osi preftheta]= calcOSI2p(R,dsi);
+function [osi preftheta]= calcOSI2p(R,dsi);
 theta = 0:(2*pi/length(R)):(2*pi);
 if dsi
      theta=theta(1:end-1);

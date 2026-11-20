@@ -13,8 +13,32 @@ function compileAcqSummaries(pdfFolder, outFile)
 %     - a top row of images
 %     - a bottom row of images (optionally split into labeled quadrants)
 %
-% The pages pulled depend on the stimulus type, which is found from a phrase
-% in the PDF file name. See "stimConfig" below.
+% The stimulus type (used only for the header text) is found from a phrase in
+% the PDF file name. See "stimConfig" below.
+%
+% Which PDF pages are pulled is NOT hard-coded. The summary PDFs have a
+% different number of pages for every acquisition (extra pages per cluster,
+% one page per cell image, ...), so fixed page numbers only worked for some
+% files. Instead every page's text is read and the pages are found by what
+% they contain:
+%     top row    : first page ("baseline (median) img"), the page titled
+%                  "mean trace for each repeat", and the page titled
+%                  "selected traces based on dF"
+%     bottom row : after the "correlation across cells after clustering"
+%                  page, each page of small trace plots ("10 20 30" x-axis)
+%                  together with the page of image tiles directly before it
+%                  (image tiles, traces, image tiles, traces)
+%
+% 6x4 normal: the bottom row is split into two labeled quadrants. The first
+% four (image tiles, traces) pairs found after the correlation page are used:
+% the first two pairs go in the left quadrant (OFF), the next two in the right
+% quadrant (ON), each pair stacked with the image tiles above the traces.
+%
+% Exception: a stimulus type can be given fixed page numbers in stimConfig
+% (fixedTop / fixedBottom). "8waygratings" does this: top row = pages 1, 15, 19
+% and bottom row = pages 40-43. Fixed pages are not used for PDFs with
+% "sidebandsub" in the name (their pages are shifted), which keep using the
+% content-based search above.
 %
 % Usage:
 %     compileAcqSummaries                      % asks for the folder
@@ -31,40 +55,38 @@ dpi     = 200;    % resolution used to rasterize the PDF pages
 cropPad = 6;      % pixels of white margin kept around each cropped image
 maxNoteChars = 700;   % usernotes longer than this are cut off with "..."
 
-% PDFs with "sidebandsub" in the name have 3 extra pages after the first one,
-% so every page number except page 1 is pushed back by this amount
-% (top row 1, 15, 19 becomes 1, 18, 22; the bottom row shifts the same way).
-sidebandShift = 3;
+% Text that identifies the pages to pull (compared after collapsing white space)
+topMarkers = {'baseline (median) img', ...          % top row, left
+              'mean trace for each repeat', ...     % top row, middle
+              'selected traces based on dF'};       % top row, right
+anchorMarker = 'correlation across cells after clustering';  % bottom row starts after this page
+traceMarker  = '10 20 30';    % x-axis labels of the small trace-plot pages
+nBottomPairs = 2;             % how many (image tiles + traces) pairs to pull
 
-% Layout description. A "group" is  grp(label, columns):
-%   label   : text shown above the group ('' = no label)
-%   columns : cell array, one entry per column, left to right; each entry is a
-%             vector of PDF page numbers stacked top to bottom in that column.
-grp = @(label, cols) struct('label', label, 'cols', {cols});
-
-% Each stimulus type lists the phrases that identify it in the PDF file name.
-% Types are checked in order, and the first one with a matching phrase wins.
-stimConfig = struct('patterns', {}, 'label', {}, 'top', {}, 'bottom', {});
+% Each stimulus type lists the phrases that identify it in the PDF file name
+% (only used for the page header). Types are checked in order, and the first
+% one with a matching phrase wins.
+% Optional fixedTop / fixedBottom = PDF page numbers to use instead of the
+% content-based search (leave empty to search by content).
+% Optional quadrants = labels for a bottom row split into labeled quadrants,
+% left to right; each quadrant takes two (image tiles + traces) pairs, stacked.
+stimConfig = struct('patterns', {}, 'label', {}, 'fixedTop', {}, 'fixedBottom', {}, 'quadrants', {});
 
 stimConfig(1).patterns = {'6x4darkmode'};
 stimConfig(1).label    = '6x4 dark mode';
-stimConfig(1).top      = grp('', {1, 15, 19});
-stimConfig(1).bottom   = grp('', {30, 31, 32, 33});
 
 % "6x4normal", or just "6x4" followed by an underscore ("6x4_")
 stimConfig(2).patterns = {'6x4normal', '6x4_'};
 stimConfig(2).label    = '6x4 normal';
-stimConfig(2).top      = grp('', {1, 15, 19});
 % left quadrant = OFF, right quadrant = ON (the order the figures are
 % generated in sutterOctoNeural: OFF spots first, then ON spots).
 % Swap the labels here if that ever changes.
-stimConfig(2).bottom   = [grp('OFF', {[40 41], [42 43]}), ...
-                          grp('ON',  {[44 45], [46 47]})];
+stimConfig(2).quadrants = {'OFF', 'ON'};
 
-stimConfig(3).patterns = {'8waygratings'};
-stimConfig(3).label    = '8 way gratings';
-stimConfig(3).top      = grp('', {1, 15, 19});
-stimConfig(3).bottom   = grp('', {40, 41, 42, 43});
+stimConfig(3).patterns    = {'8waygratings'};
+stimConfig(3).label       = '8 way gratings';
+stimConfig(3).fixedTop    = [1 15 19];        % top row, left to right
+stimConfig(3).fixedBottom = [40 41 42 43];    % bottom row, left to right
 %% -----------------------------------------
 
 if nargin < 1 || isempty(pdfFolder)
@@ -119,23 +141,44 @@ for f = 1:numel(files)
         continue
     end
     cfg = stimConfig(row);
-    isSideband = contains(lower(name), 'sidebandsub');
-    if isSideband
-        cfg.top    = shiftPages(cfg.top,    sidebandShift);
-        cfg.bottom = shiftPages(cfg.bottom, sidebandShift);
-    end
     if isinf(acqNums(f)), acqStr = '?'; else, acqStr = sprintf('%d', acqNums(f)); end
 
-    fprintf('Processing %s  (Acq %s, %s%s)\n', name, acqStr, cfg.label, ...
-        repmat(', sidebandsub pages', 1, isSideband));
+    fprintf('Processing %s  (Acq %s, %s)\n', name, acqStr, cfg.label);
     fig = [];
     try
         % ---- user notes from the matching .mat file ----
         [noteLines, noteFound] = getUserNotes(pdfFolder, acqNums(f), maxNoteChars);
 
+        % ---- find the pages to use from their content ----
+        pageTexts = getPageTexts(gs, pdfFile, tmpDir);
+        isSideband = contains(lower(name), 'sidebandsub');
+        useFixed = ~isempty(cfg.fixedTop) && ~isempty(cfg.fixedBottom) && ~isSideband;
+        if useFixed
+            topPages    = cfg.fixedTop;
+            bottomPages = cfg.fixedBottom;
+            checkFixedPages(pageTexts, topPages, topMarkers);
+            how = 'fixed pages';
+        else
+            nPairs = nBottomPairs;
+            if ~isempty(cfg.quadrants), nPairs = 2 * numel(cfg.quadrants); end
+            [topPages, bottomPages] = resolvePages(pageTexts, topMarkers, ...
+                anchorMarker, traceMarker, nPairs);
+            how = 'found by content';
+        end
+        fprintf('  top pages: %s | bottom pages: %s  (%s)\n', ...
+            mat2str(topPages), mat2str(bottomPages), how);
+        cfg.top = struct('label', '', 'cols', {num2cell(topPages)});
+        if ~isempty(cfg.quadrants) && ~useFixed
+            cfg.bottom = buildQuadrants(bottomPages, cfg.quadrants);
+        else
+            cfg.bottom = struct('label', '', 'cols', {num2cell(bottomPages)});
+        end
+
         % ---- rasterize every page this layout needs ----
         imgs = containers.Map('KeyType', 'double', 'ValueType', 'any');
+        imgs(0) = [];                                   % 0 = page not found
         allPages = unique([layoutPages(cfg.top), layoutPages(cfg.bottom)]);
+        allPages = allPages(allPages > 0);
         for p = allPages
             imgs(p) = getPageImage(gs, pdfFile, p, dpi, cropPad, tmpDir);
         end
@@ -272,14 +315,82 @@ end
 end
 
 
-function groups = shiftPages(groups, shift)
-% push every page number above 1 back by "shift" (page 1 stays page 1)
-for g = 1:numel(groups)
-    for c = 1:numel(groups(g).cols)
-        pg = groups(g).cols{c};
-        pg(pg > 1) = pg(pg > 1) + shift;
-        groups(g).cols{c} = pg;
+function texts = getPageTexts(gs, pdfFile, tmpDir)
+% Text of every page of pdfFile (cell array, one entry per page, white space
+% collapsed) using Ghostscript's txtwrite device.
+txtDir = fullfile(tmpDir, 'txt');
+if exist(txtDir, 'dir') == 7, rmdir(txtDir, 's'); end
+mkdir(txtDir);
+cmd = sprintf(['%s -dNOPAUSE -dBATCH -dQUIET -sDEVICE=txtwrite ' ...
+    '-sOutputFile="%s" "%s"'], gs, fullfile(txtDir, 'pg_%05d.txt'), pdfFile);
+[~, ~] = system(cmd);
+d = dir(fullfile(txtDir, 'pg_*.txt'));
+[~, o] = sort({d.name});  d = d(o);
+texts = cell(1, numel(d));
+for k = 1:numel(d)
+    fid = fopen(fullfile(txtDir, d(k).name), 'r');
+    t = fread(fid, '*char')';
+    fclose(fid);
+    texts{k} = strtrim(regexprep(t, '\s+', ' '));
+end
+rmdir(txtDir, 's');
+end
+
+
+function checkFixedPages(texts, topPages, topMarkers)
+% Warn (but still go ahead) if the fixed top-row pages do not contain the
+% titles they should, e.g. because this PDF has a different page order.
+nPg = numel(texts);
+for i = 1:numel(topPages)
+    p = topPages(i);
+    if p > nPg
+        fprintf('  WARNING: fixed page %d is past the end of this PDF (%d pages)\n', p, nPg);
+    elseif ~contains(texts{p}, topMarkers{i})
+        fprintf('  WARNING: fixed page %d does not contain "%s"; this PDF may have a different page order\n', ...
+            p, topMarkers{i});
     end
+end
+end
+
+
+function groups = buildQuadrants(bottomPages, labels)
+% Split bottomPages (image tiles, traces, image tiles, traces, ...) into one
+% labeled group per label: 4 pages each, as two columns of (tiles over traces).
+groups = struct('label', {}, 'cols', {});
+for q = 1:numel(labels)
+    b = bottomPages(4*(q-1) + (1:4));
+    groups(q).label = labels{q};
+    groups(q).cols  = {b(1:2), b(3:4)};
+end
+end
+
+
+function [topPages, bottomPages] = resolvePages(texts, topMarkers, anchorMarker, traceMarker, nPairs)
+% Work out which PDF pages to use from what is printed on them.
+% 0 in the result means "not found".
+nPg = numel(texts);
+
+% ---- top row: first page containing each marker ----
+topPages = zeros(1, numel(topMarkers));
+for i = 1:numel(topMarkers)
+    k = find(contains(texts, topMarkers{i}), 1, 'first');
+    if ~isempty(k), topPages(i) = k; end
+end
+if topPages(1) == 0 && nPg >= 1, topPages(1) = 1; end   % baseline image is always page 1
+
+% ---- bottom row: (image tiles, traces) pairs after the correlation page ----
+anchor = find(contains(texts, anchorMarker), 1, 'first');
+if isempty(anchor), anchor = 0; end
+isTrace = contains(texts, traceMarker) & (1:nPg) > anchor;
+tracePages = find(isTrace, nPairs, 'first');
+bottomPages = zeros(1, 2*nPairs);
+for j = 1:numel(tracePages)
+    bottomPages(2*j-1) = tracePages(j) - 1;   % image tiles are the page right before
+    bottomPages(2*j)   = tracePages(j);
+end
+if numel(tracePages) < nPairs
+    fprintf('  WARNING: found only %d of %d trace page(s) after "%s"\n', ...
+        numel(tracePages), nPairs, anchorMarker);
 end
 end
 
@@ -368,8 +479,8 @@ end
 function placeImage(fig, img, pageNum, cellBox, figW, figH)
 % Put img inside cellBox (normalized), scaled to fit without distortion.
 if isempty(img)
-    addText(fig, cellBox, sprintf('page %d not found', pageNum), ...
-        9, 'normal', [0 0 0], 'middle');
+    if pageNum == 0, msg = 'page not found'; else, msg = sprintf('page %d not found', pageNum); end
+    addText(fig, cellBox, msg, 9, 'normal', [0 0 0], 'middle');
     return
 end
 imgAR  = size(img, 2) / size(img, 1);                    % width / height

@@ -30,6 +30,22 @@ if showAll
         if exist('titles','var')
             title(titles{i})
         end
+        %%% label the large panel with its position in the nrow x ncol grid
+        gp = loc(i-offset); gr = ceil(gp/ncol); gc = mod(gp-1,ncol)+1;   %%% subplot index -> grid row/col
+        posStr = sprintf('row %d, col %d',gr,gc);
+        if nrow==4 && ncol==6   %%% 6x4 stim sets: edge / interior / center-4 flags
+            if gr>=2 && gr<=3 && gc>=3 && gc<=4
+                posStr = [posStr ' - not on edge! centered!'];
+            elseif gr>=2 && gr<=3 && gc>=2 && gc<=5
+                posStr = [posStr ' - not on edge!'];
+            end
+        end
+        oldT = get(get(gca,'Title'),'String');
+        if isempty(oldT)
+            title(posStr,'Fontsize',10);
+        else
+            title({oldT; posStr},'Fontsize',8);
+        end
         if exist('psfile','var'); set(gcf, 'PaperPositionMode', 'auto'); print('-dpsc',psfile,'-append'); end
         
     end

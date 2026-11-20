@@ -4,9 +4,17 @@ function export_mat_notes(folder, includeRawNote)
 % MatFileInfoNotes_<session>.xlsx (same name, one PDF and one Excel file per session).
 %
 % Usage:
-%   export_mat_notes                       % pops up a folder picker
-%   export_mat_notes('D:\data\111326')     % use a specific folder
+%   export_mat_notes                       % folder picker, then asks if you want a 2nd folder
+%   export_mat_notes('D:\data\111326')     % use one specific folder
+%   export_mat_notes({'D:\a', 'D:\b'})     % use two folders (files from both are combined)
 %   export_mat_notes(folder, true)         % also print the raw note under each entry
+%
+% With two folders, the .mat files from both are read together, so a session
+% whose files are split between them (e.g. the main folder and its zstacks
+% folder) still gets one PDF and one Excel file. The outputs are saved in the
+% FIRST folder. The matching .sbx file for the Acq date is looked for in the
+% .mat file's own folder first, then in the other folder. If the same acq
+% appears in both folders, the copy from the first folder is used.
 %
 % File names must look like  [date_]session_000_NNN.mat, for example
 %   111326_ASW172E3_000_028.mat   ->  session ASW172E3, acq 028
@@ -26,9 +34,16 @@ function export_mat_notes(folder, includeRawNote)
 %   Acq # | Notes | Test | Stimulus | Location number | Location coordinates |
 %   Response | Laser % | Green pmt | Red pmt | Temp | Type | Acq date |
 %   Raw note
-% Test, Stimulus, Location number, Response, Type and Acq date are left blank
-% for you to fill in by hand. Temp is filled in when the note mentions one.
+% Location number and Response are left blank for you to fill in by hand.
+% Temp is filled in when the note mentions one. Acq date comes from the date
+% modified of the matching .sbx file (blank if none).
 % Wavelength has no column of its own; it stays in the Raw note.
+% The Stimulus column (one option) is filled from keywords in the note, and that
+% stimulus wording is then left out of the Notes column (it stays in the Raw
+% note). Test
+% follows the Stimulus (Visual stimuli, Spontaneous activity, preKCL zstack,
+% postKCl zstack, Zstack), and Type follows the Test (Structural for the
+% z-stack tests, Functional for the rest).
 % Every cell has text wrapping turned on (needs Windows + Excel; otherwise a
 % warning is shown and the sheet is saved unwrapped).
 % Acq numbers missing between the first and last file get their own row with
@@ -38,51 +53,80 @@ function export_mat_notes(folder, includeRawNote)
 % Typos in the notes are NOT corrected; set includeRawNote = true to compare.
 
 if nargin < 1 || isempty(folder)
-    folder = uigetdir(pwd, 'Select the folder containing the .mat files');
-    if isequal(folder, 0), return; end
+    folder = {uigetdir(pwd, 'Select the folder containing the .mat files')};
+    if isequal(folder{1}, 0), return; end
+    choice = questdlg('Add a second folder?', 'export_mat_notes', 'Yes', 'No', 'No');
+    if strcmp(choice, 'Yes')
+        f2 = uigetdir(folder{1}, 'Select the second folder');
+        if ~isequal(f2, 0), folder{end+1} = f2; end
+    end
 end
+folders = cellstr(folder);
 if nargin < 2, includeRawNote = false; end
-
-files = dir(fullfile(folder, '*.mat'));
-if isempty(files), error('No .mat files found in %s', folder); end
+outFolder = folders{1};                 % PDF and Excel files are saved here
 
 % [date_]session_scan_acq.mat
 pat = '^(?:\d{6,7}_)?(.+?)_(\d{3})_(\d{3})\.mat$';
 
-rows = struct('prefix', {}, 'session', {}, 'acqStr', {}, 'acqNum', {}, ...
-              'scanNum', {}, 'note', {});
+rows = struct('prefix', {}, 'base', {}, 'folder', {}, 'session', {}, ...
+              'acqStr', {}, 'acqNum', {}, 'scanNum', {}, 'note', {});
 skipped = {};
+nFiles = 0;
 
-for k = 1:numel(files)
-    fn  = files(k).name;
-    tok = regexp(fn, pat, 'tokens', 'once');
-    if isempty(tok)
-        skipped{end+1} = sprintf('%s (name is not session_000_NNN.mat)', fn); %#ok<AGROW>
-        continue
+for fi = 1:numel(folders)
+    files = dir(fullfile(folders{fi}, '*.mat'));
+    nFiles = nFiles + numel(files);
+    for k = 1:numel(files)
+        fn    = files(k).name;
+        label = fn;
+        if numel(folders) > 1, label = fullfile(folders{fi}, fn); end
+        tok = regexp(fn, pat, 'tokens', 'once');
+        if isempty(tok)
+            skipped{end+1} = sprintf('%s (name is not session_000_NNN.mat)', label); %#ok<AGROW>
+            continue
+        end
+        full = fullfile(folders{fi}, fn);
+        w = whos('-file', full);
+        if ~any(strcmp({w.name}, 'info'))
+            skipped{end+1} = sprintf('%s (no "info" variable)', label); %#ok<AGROW>
+            continue
+        end
+        S = load(full, 'info');
+        if ~isstruct(S.info) || ~isfield(S.info, 'usernotes')
+            skipped{end+1} = sprintf('%s (no usernotes field)', label); %#ok<AGROW>
+            continue
+        end
+        r = struct('prefix',  regexprep(fn, '_\d{3}_\d{3}\.mat$', ''), ...
+                   'base',    regexprep(fn, '\.mat$', ''), ...
+                   'folder',  folders{fi}, ...
+                   'session', tok{1}, ...
+                   'acqStr',  tok{3}, ...
+                   'acqNum',  str2double(tok{3}), ...
+                   'scanNum', str2double(tok{2}), ...
+                   'note',    noteToString(S.info.usernotes));
+        rows(end+1) = r; %#ok<AGROW>
     end
-    full = fullfile(folder, fn);
-    w = whos('-file', full);
-    if ~any(strcmp({w.name}, 'info'))
-        skipped{end+1} = sprintf('%s (no "info" variable)', fn); %#ok<AGROW>
-        continue
-    end
-    S = load(full, 'info');
-    if ~isstruct(S.info) || ~isfield(S.info, 'usernotes')
-        skipped{end+1} = sprintf('%s (no usernotes field)', fn); %#ok<AGROW>
-        continue
-    end
-    r = struct('prefix',  regexprep(fn, '_\d{3}_\d{3}\.mat$', ''), ...
-               'session', tok{1}, ...
-               'acqStr',  tok{3}, ...
-               'acqNum',  str2double(tok{3}), ...
-               'scanNum', str2double(tok{2}), ...
-               'note',    noteToString(S.info.usernotes));
-    rows(end+1) = r; %#ok<AGROW>
 end
 
-if isempty(rows), error('No files with user notes were found in %s', folder); end
+if nFiles == 0
+    error('No .mat files found in %s', strjoin(folders, ' or '));
+end
+if isempty(rows)
+    error('No files with user notes were found in %s', strjoin(folders, ' or '));
+end
 
-% one PDF per session
+% the same acq in both folders: keep the first copy
+keys = arrayfun(@(q) sprintf('%s|%d|%d', q.prefix, q.scanNum, q.acqNum), ...
+                rows, 'UniformOutput', false);
+[~, keepIdx] = unique(keys, 'stable');
+if numel(keepIdx) < numel(rows)
+    warning('export_mat_notes:duplicates', ...
+            '%d duplicate acq file(s) found in both folders; using the first copy.', ...
+            numel(rows) - numel(keepIdx));
+    rows = rows(keepIdx);
+end
+
+% one PDF and one Excel file per session
 prefixes = unique({rows.prefix}, 'stable');
 sess = cellfun(@(p) rows(find(strcmp({rows.prefix}, p), 1)).session, ...
                prefixes, 'UniformOutput', false);
@@ -96,11 +140,11 @@ for g = 1:numel(prefixes)
     name = sess{g};
     if useFull, name = prefixes{g}; end
     name = regexprep(name, '[^\w\-]', '_');
-    pdfFile = fullfile(folder, ['MatFileInfoNotes_' name '.pdf']);
+    pdfFile  = fullfile(outFolder, ['MatFileInfoNotes_' name '.pdf']);
+    xlsxFile = fullfile(outFolder, ['MatFileInfoNotes_' name '.xlsx']);
 
-    writeNotesPdf(pdfFile, sess{g}, folder, sel, includeRawNote);
-    xlsxFile = fullfile(folder, ['MatFileInfoNotes_' name '.xlsx']);
-    writeNotesXlsx(xlsxFile, sel);
+    writeNotesPdf(pdfFile, sess{g}, strjoin(folders, '; '), sel, includeRawNote);
+    writeNotesXlsx(xlsxFile, sel, folders);
     fprintf('Wrote %d acquisitions to %s and %s\n', numel(sel), pdfFile, xlsxFile);
 end
 
@@ -223,7 +267,7 @@ end
 
 
 %% ------------------------------------------------------------------------
-function writeNotesXlsx(xlsxFile, rows)
+function writeNotesXlsx(xlsxFile, rows, folders)
 % One row per acquisition. Columns follow the Notion table so it can be
 % imported there. Test, Stimulus, Location number, Response, Type and Acq date
 % are left blank for you to fill in by hand.
@@ -241,7 +285,7 @@ for sc = unique([rows.scanNum])
             row{1} = a;
             row{2} = 'no .mat file found in folder';
         else
-            row = buildRow(sub(idx));
+            row = buildRow(sub(idx), folders);
         end
         data(end+1, :) = row; %#ok<AGROW>
     end
@@ -283,21 +327,152 @@ catch err
 end
 end
 
-function row = buildRow(r)
+function row = buildRow(r, folders)
 % One Excel row for one acquisition (blank cells are filled in by hand).
 p = parseNote(r.note);
 row = cell(1, 14);
 row{1}  = r.acqNum;
-row{2}  = strjoin([p.pre, p.post], '; ');
-row(3:5) = {''};                              % Test, Stimulus, Location number
+stim    = classifyStimulus(r.note);
+frags   = [p.pre, p.post];                    % Notes = note minus the stimulus wording
+keep    = {};
+for i = 1:numel(frags)
+    f = stripStimulus(frags{i}, stim);
+    if ~isempty(f), keep{end+1} = f; end %#ok<AGROW>
+end
+row{2}  = strjoin(keep, '; ');
+test    = classifyTest(stim, r.note);
+row{3}  = test;                               % Test (follows the Stimulus)
+row{4}  = stim;                               % Stimulus
+row{5}  = '';                                 % Location number (manual)
 row{6}  = p.coords;
 row{7}  = '';                                 % Response
 row{8}  = numOrBlank(p.laser);
 row{9}  = numOrBlank(p.g);
 row{10} = numOrBlank(p.r);
 row{11} = numOrBlank(extractTemp(r.note));
-row(12:13) = {''};                            % Type, Acq date
+row{12} = testToType(test);                   % Type (follows the Test)
+row{13} = sbxDate(folders, r);                 % Acq date
 row{14} = r.note;
+end
+
+function d = sbxDate(folders, r)
+% Acq date from the "date modified" of the matching .sbx file, written as
+% "November 13, 2026" (the format Notion reads as a date). The .mat file's own
+% folder is searched first, then the other folder. Blank if no .sbx is found.
+d = '';
+f = [];
+search = [{r.folder}, folders(:)'];
+for i = 1:numel(search)
+    f = dir(fullfile(search{i}, [r.base '.sbx']));
+    if ~isempty(f), break; end
+end
+if isempty(f), return; end
+months = {'January','February','March','April','May','June','July', ...
+          'August','September','October','November','December'};
+v = datevec(f(1).datenum);
+d = sprintf('%s %d, %d', months{v(2)}, v(3), v(1));
+end
+
+function s = stripStimulus(s, stim)
+% Remove the wording that the Stimulus (and Test) column already says, so the
+% Notes column only keeps the extra information. The Raw note is not changed.
+switch stim
+    case 'zstack'
+        expr = '(?:(?:pre|post)\s*-?\s*kcl\s*)?z\s*-?\s*stack|(?:pre|post)\s*-?\s*kcl';
+    case {'6x4 darkmode', '6x4 dark mode contrast 50%'}
+        expr = ['6[xz]4|dark\s*mode|dark|contrast\s*0?\.5|0?\.5\s*contrast|' ...
+                'contrast\s*50\s*%?'];
+    case '6x4'
+        expr = '6[xz]4(?:\s*norm(?:al)?(?:\s*mode)?)?';
+    case '8-way gratings'
+        expr = '8\s*-?\s*way(?:\s*gratings?)?|gratings?';
+    case 'Sparse noise'
+        expr = 'sparse\s*-?\s*noise|(?<![A-Za-z0-9])SN1(?![A-Za-z0-9])';
+    case 'no stim spont'
+        expr = 'no\s*stim\w*|spon\w*(?:\s+for)?';
+    case 'abort'
+        expr = 'abort';
+    case 'big white flashing square for searching'
+        expr = 'big\s+white\s+(?:flashing\s+)?square|flash\w*\s+square|white\s+square';
+    otherwise
+        return
+end
+s = regexprep(s, expr, ' ', 'ignorecase');
+s = regexprep(s, '\s+', ' ');
+s = regexprep(s, '^[\s.,;:]+|[\s.,;:\-]+$', '');
+end
+
+function t = classifyStimulus(note)
+% Fill the Notion "Stimulus" select with ONE option, picking the first rule
+% that matches (most specific first). Option names must match Notion exactly.
+% Blank when nothing matches.
+has = @(expr) ~isempty(regexpi(note, expr, 'once'));
+has6x4 = has('6[xz]4');
+if has('abort')
+    t = 'abort';
+elseif has('sparse\s*-?\s*noise|(?<![A-Za-z0-9])SN1(?![A-Za-z0-9])')
+    t = 'Sparse noise';
+elseif has('8\s*-?\s*way|grating')
+    t = '8-way gratings';
+elseif has6x4 && has('contrast\s*0?\.5|0?\.5\s*contrast|contrast\s*50|50\s*%')
+    t = '6x4 dark mode contrast 50%';
+elseif has6x4 && has('dark')
+    t = '6x4 darkmode';
+elseif has6x4
+    t = '6x4';
+elseif has('big\s+white|flash\w*\s+square|white\s+square')
+    t = 'big white flashing square for searching';
+elseif has('no\s*stim|spon')
+    t = 'no stim spont';
+elseif has('z\s*-?\s*stack')
+    t = 'zstack';
+else
+    t = '';
+end
+end
+
+function t = classifyTest(stim, note)
+% Fill the Notion "Test" from the Stimulus that was chosen:
+%   Sparse noise, 6x4 darkmode, 6x4, 8-way gratings, 6x4 dark mode contrast 50%
+%                          -> Visual stimuli
+%   no stim spont          -> Spontaneous activity
+%   zstack                 -> preKCL zstack / postKCl zstack if the note says
+%                             pre or post, otherwise Zstack
+%   anything else (abort, big white flashing square, blank) -> blank
+% The option names must match Notion exactly.
+switch stim
+    case {'Sparse noise', '6x4 darkmode', '6x4', '8-way gratings', ...
+          '6x4 dark mode contrast 50%'}
+        t = 'Visual stimuli';
+    case 'no stim spont'
+        t = 'Spontaneous activity';
+    case 'zstack'
+        hasPost = ~isempty(regexpi(note, ...
+            'post\s*-?\s*kcl|(?<![A-Za-z])post(?![A-Za-z])', 'once'));
+        hasPre  = ~isempty(regexpi(note, ...
+            'pre\s*-?\s*kcl|(?<![A-Za-z])pre(?![A-Za-z])', 'once'));
+        if hasPost
+            t = 'postKCl zstack';
+        elseif hasPre
+            t = 'preKCL zstack';
+        else
+            t = 'Zstack';
+        end
+    otherwise
+        t = '';
+end
+end
+
+function t = testToType(test)
+% Type is "Structural" for any z-stack Test (Zstack, preKCL zstack, postKCl
+% zstack) and "Functional" for every other Test. Blank when Test is blank.
+if isempty(test)
+    t = '';
+elseif ~isempty(regexpi(test, 'zstack', 'once'))
+    t = 'Structural';
+else
+    t = 'Functional';
+end
 end
 
 function t = extractTemp(note)
@@ -307,7 +482,7 @@ t = '';
 tok = regexp(note, 'temp\w*\s*(?:is\s+|was\s+|=|:)?\s*(\d+(?:\.\d+)?)', ...
              'tokens', 'once', 'ignorecase');
 if isempty(tok)
-    tok = regexp(note, '(\d+(?:\.\d+)?)\s*C\b', 'tokens', 'once');
+    tok = regexp(note, '(\d+(?:\.\d+)?)\s*C(?![A-Za-z])', 'tokens', 'once');
 end
 if ~isempty(tok), t = tok{1}; end
 end
